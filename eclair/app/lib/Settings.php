@@ -1,0 +1,159 @@
+<?php
+declare(strict_types=1);
+
+namespace Eclair;
+
+defined('ECLAIR') || exit;
+
+/** Réglages du site (data/site.php), fusionnés avec des valeurs par défaut sûres. */
+final class Settings
+{
+    public const DEFAULTS = [
+        'name' => 'Mon site',
+        'tagline' => '',
+        'description' => '',
+        'url' => '',
+        'lang' => 'fr',
+        'timezone' => 'Europe/Paris',
+        'admin_path' => 'admin',
+        'home' => '',
+        'blog' => [
+            'enabled' => true,
+            'base' => 'blog',
+            'title' => 'Blog',
+            'description' => '',
+            'per_page' => 9,
+        ],
+        'search' => true,
+        'appearance' => [
+            'accent' => '#5b4cf0',
+            'font_head' => 'system',
+            'font_body' => 'system',
+            'logo' => '',
+            'favicon' => '',
+            'dark' => 'auto',
+            'footer' => '',
+            'credit' => true,
+        ],
+        'seo' => [
+            'title_format' => '{title} · {site}',
+            'index' => true,
+            'image' => '',
+            'twitter' => '',
+            'google' => '',
+            'bing' => '',
+            'entity' => 'Organization',
+            'entity_name' => '',
+            'phone' => '',
+            'email' => '',
+            'street' => '',
+            'city' => '',
+            'zip' => '',
+            'region' => '',
+            'country' => '',
+            'hours' => '',
+            'price_range' => '',
+        ],
+        'social' => [
+            'linkedin' => '', 'x' => '', 'facebook' => '', 'instagram' => '',
+            'youtube' => '', 'tiktok' => '', 'github' => '', 'other' => '',
+        ],
+        'geo' => [
+            'ai' => 'open',
+            'llms' => true,
+            'llms_full' => true,
+            'markdown' => true,
+            'signal' => false,
+            'about' => '',
+        ],
+        'indexnow' => false,
+        'contact' => [
+            'email' => '',
+            'store' => true,
+            'thanks' => '',
+        ],
+        'security' => [
+            'https' => false,
+            'canonical' => true,
+            'hsts' => false,
+            'idle' => 240,
+            'proxy' => '',
+        ],
+        'cache' => true,
+        'onboarding' => ['done' => false],
+        'installed' => 0,
+        'version' => '',
+    ];
+
+    private static ?array $data = null;
+
+    public static function installed(): bool
+    {
+        return Store::exists('site');
+    }
+
+    public static function all(): array
+    {
+        if (self::$data === null) {
+            $stored = Store::read('site', []);
+            self::$data = array_replace_recursive(self::DEFAULTS, is_array($stored) ? $stored : []);
+        }
+        return self::$data;
+    }
+
+    /** Lecture avec notation pointée : Settings::get('seo.index'). */
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        $value = self::all();
+        foreach (explode('.', $key) as $part) {
+            if (!is_array($value) || !array_key_exists($part, $value)) {
+                return $default;
+            }
+            $value = $value[$part];
+        }
+        return $value;
+    }
+
+    /** Fusionne des changements, enregistre et vide le cache du site. */
+    public static function save(array $patch): void
+    {
+        Store::locked(function () use ($patch): void {
+            $stored = Store::read('site', []);
+            $merged = self::merge(is_array($stored) ? $stored : [], $patch);
+            Store::write('site', $merged);
+        });
+        self::$data = null;
+        Cache::purge();
+    }
+
+    /** Fusion récursive où les listes sont remplacées (et non fusionnées index par index). */
+    private static function merge(array $base, array $patch): array
+    {
+        foreach ($patch as $k => $v) {
+            if (is_array($v) && !array_is_list($v) && isset($base[$k]) && is_array($base[$k])) {
+                $base[$k] = self::merge($base[$k], $v);
+            } else {
+                $base[$k] = $v;
+            }
+        }
+        return $base;
+    }
+
+    public static function forget(): void
+    {
+        self::$data = null;
+    }
+
+    /** Chemins réservés par le routeur (non utilisables comme slug racine). */
+    public static function reserved(): array
+    {
+        $words = Theme::words();
+        return array_values(array_filter([
+            'app', 'data', 'cache', 'assets', 'media', 'index', 'admin', '_eclair', '__eclair',
+            'sitemap', 'robots', 'feed', 'llms', 'llms-full', 'favicon', 'wp-admin', 'wp-login',
+            (string) self::get('admin_path'),
+            (string) self::get('blog.base'),
+            $words['search'],
+        ]));
+    }
+}

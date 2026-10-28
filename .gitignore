@@ -1,0 +1,14 @@
+# Données d'une installation locale (jamais versionnées)
+eclair/data/*
+!eclair/data/.htaccess
+!eclair/data/index.html
+eclair/cache/*
+!eclair/cache/.htaccess
+!eclair/cache/index.html
+!eclair/cache/pages/
+eclair/cache/pages/*
+!eclair/cache/pages/index.html
+eclair/media/*
+!eclair/media/.htaccess
+!eclair/media/index.html
+eclair/eclair-config.php

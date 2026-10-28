@@ -1,0 +1,46 @@
+# ⚡ Éclair CMS — configuration Apache / LiteSpeed
+# Fonctionne à la racine d'un domaine comme dans un sous-dossier.
+# Uniquement des directives autorisées sur les hébergements mutualisés (pas d'Options, pas de php_flag).
+
+# ── Réécriture d'URL : tout passe par index.php ──────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Décommente et adapte si ton hébergeur l'exige (rare) :
+    # RewriteBase /
+
+    # Dossiers internes jamais accessibles depuis le web
+    RewriteRule ^(app|data|cache)(/|$) - [R=404,L]
+    # Fichiers cachés (.git, .env…) sauf .well-known
+    RewriteRule (^|/)\.(?!well-known/) - [R=404,L]
+    # Aucun script PHP exécutable en dehors d'index.php
+    RewriteRule ^(?!index\.php$).*\.(php\d?|phtml|phar|inc)$ - [R=404,NC,L]
+    # Contrôleur frontal (les dossiers aussi : jamais de listing)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# ── Compression ───────────────────────────────────────────────────────────────
+<IfModule mod_filter.c>
+    <IfModule mod_brotli.c>
+        AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml text/markdown application/javascript application/json application/xml application/rss+xml image/svg+xml
+    </IfModule>
+    <IfModule mod_deflate.c>
+        AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/markdown application/javascript application/json application/xml application/rss+xml image/svg+xml
+    </IfModule>
+</IfModule>
+
+# ── Cache navigateur des fichiers statiques (noms versionnés) ───────────────
+<IfModule mod_headers.c>
+    <FilesMatch "\.(webp|avif|jpe?g|png|gif|ico|css|js|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header set X-Content-Type-Options "nosniff"
+    </FilesMatch>
+</IfModule>
+
+# ── Types MIME utiles ─────────────────────────────────────────────────────────
+<IfModule mod_mime.c>
+    AddType image/webp .webp
+    AddType image/avif .avif
+    AddType application/javascript .js
+    AddCharset utf-8 .css .js
+</IfModule>

@@ -1,0 +1,9 @@
+# Médias : uniquement des images, jamais de scripts ni de pages.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule \.(php\d?|phtml|phar|inc|pl|py|cgi|sh|asp|aspx|jsp|s?html?|xht(ml)?|svgz?|xml)$ - [R=404,NC,L]
+</IfModule>
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set Content-Security-Policy "default-src 'none'; img-src 'self'; sandbox"
+</IfModule>
