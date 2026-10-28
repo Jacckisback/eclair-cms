@@ -48,7 +48,6 @@ final class IndexNow
                 ]);
                 curl_exec($ch);
                 $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-                curl_close($ch);
                 $ok = $code >= 200 && $code < 300;
             } elseif (ini_get('allow_url_fopen')) {
                 $ctx = stream_context_create(['http' => [
@@ -59,7 +58,8 @@ final class IndexNow
                     'ignore_errors' => true,
                 ]]);
                 @file_get_contents('https://api.indexnow.org/indexnow', false, $ctx);
-                $ok = isset($http_response_header[0]) && preg_match('~\s2\d\d\s~', $http_response_header[0] . ' ') === 1;
+                $status = function_exists('http_get_last_response_headers') ? (http_get_last_response_headers()[0] ?? '') : ($http_response_header[0] ?? '');
+                $ok = preg_match('~\s2\d\d\s~', $status . ' ') === 1;
             }
         } catch (\Throwable $e) {
             Log::error($e);

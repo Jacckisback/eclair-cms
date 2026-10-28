@@ -45,6 +45,8 @@ final class AdminContent
             'seo' => ['title' => '', 'description' => '', 'keyword' => '', 'canonical' => '', 'noindex' => false],
             'options' => ['hide_title' => false, 'toc' => 'auto', 'wide' => false],
         ];
+        // Dates affichées dans le fuseau du site (et non celui du navigateur).
+        $item['date_local'] = $item['date'] ? date('Y-m-d\TH:i', (int) $item['date']) : '';
         $mediaIds = array_merge([$item['image']], Blocks::media($item['blocks']));
         $media = [];
         foreach (array_filter($mediaIds) as $id) {
@@ -111,7 +113,7 @@ final class AdminContent
         }
         Http::json([
             'ok' => true,
-            'item' => $item,
+            'item' => $item + ['date_local' => date('Y-m-d\TH:i', (int) $item['date'])],
             'path' => $path,
             'url' => path_to($path),
             'visible' => Content::visible($entry),

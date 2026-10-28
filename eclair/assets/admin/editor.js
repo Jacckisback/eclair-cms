@@ -716,7 +716,7 @@
     titleEl.value = it.title || '';
     summaryEl.value = it.summary || '';
     f('f-status').value = it.status;
-    f('f-date').value = it.status === 'published' || it.date > Date.now() / 1000 ? toLocal(it.date) : '';
+    f('f-date').value = it.status === 'published' || it.date > Date.now() / 1000 ? (it.date_local || toLocal(it.date)) : '';
     f('f-slug').value = it.slug || '';
     f('f-seo-title').value = it.seo.title || '';
     f('f-seo-desc').value = it.seo.description || '';
@@ -897,6 +897,7 @@
     cfg.path = res.path;
     cfg.visible = res.visible;
     f('f-slug').value = item.slug;
+    if (item.status === 'published') f('f-date').value = item.date_local || '';
     f('f-translation').value = '';
     slugTouched = true;
     saved = JSON.stringify(serialize());

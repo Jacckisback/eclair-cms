@@ -52,7 +52,7 @@ $isPost = $item['type'] === 'post';
           <select id="f-status"><option value="draft"><?= e(t('Brouillon')) ?></option><option value="published"><?= e(t('Publié')) ?></option></select></label>
         <label class="field"><span class="label"><?= e(t('Date de publication')) ?></span>
           <input type="datetime-local" id="f-date">
-          <span class="hint"><?= e(t('Laisse vide pour « maintenant ». Une date future programme la publication.')) ?></span></label>
+          <span class="hint"><?= e(t('Laisse vide pour « maintenant ». Une date future programme la publication.')) ?> <?= e(t('Heure du site : {tz}.', ['tz' => date_default_timezone_get()])) ?></span></label>
       </div>
       <div class="side-section">
         <h3><?= e(t('Adresse (URL)')) ?></h3>

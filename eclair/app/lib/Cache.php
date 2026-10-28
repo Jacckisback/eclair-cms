@@ -46,6 +46,12 @@ final class Cache
                 @unlink($file);
             }
         }
+        // Sauvegardes ZIP interrompues (le téléchargement les supprime normalement).
+        foreach (glob(ECLAIR_ROOT . '/cache/backup-*.zip') ?: [] as $file) {
+            if (filemtime($file) < time() - 3600) {
+                @unlink($file);
+            }
+        }
         self::runtime();
     }
 

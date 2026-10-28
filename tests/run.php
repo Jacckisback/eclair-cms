@@ -184,7 +184,6 @@ if (!in_array('--unit', $argv, true)) {
         $raw = (string) curl_exec($ch);
         $size = (int) curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        curl_close($ch);
         $head = [];
         foreach (explode("\r\n", substr($raw, 0, $size)) as $line) {
             if (str_contains($line, ':')) {

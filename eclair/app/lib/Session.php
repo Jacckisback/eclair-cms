@@ -21,13 +21,10 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
         }
         $lifetime = 86400 * 2;
         ini_set('session.use_strict_mode', '1');
-        ini_set('session.use_only_cookies', '1');
-        ini_set('session.use_trans_sid', '0');
         ini_set('session.cache_limiter', '');
         ini_set('session.gc_maxlifetime', (string) $lifetime);
         ini_set('session.gc_probability', '1');
         ini_set('session.gc_divisor', '50');
-        ini_set('session.sid_bits_per_character', '6');
         session_name(self::NAME);
         session_set_save_handler(new self(), true);
         session_set_cookie_params([
