@@ -14,6 +14,8 @@ final class AiTools
 {
     private const MAX_DRAFTS = 4;
     private const MAX_IMAGES = 3;
+    private const MAX_UPDATES = 8;
+    private const KEEP_DAYS = 14; // annulations et propositions en attente
 
     /** Définitions envoyées au modèle (schémas JSON). */
     public static function definitions(): array
@@ -307,24 +309,41 @@ final class AiTools
 
     private static function update(array $in, array &$ctx): array
     {
+        if (++$ctx['turn']['updates'] > self::MAX_UPDATES) {
+            return self::fail('Limit reached: at most ' . self::MAX_UPDATES . ' changes per request. Tell the user and stop.');
+        }
         $id = preg_replace('/[^a-z0-9]/', '', (string) ($in['id'] ?? '')) ?? '';
         $editing = ($ctx['editing']['id'] ?? null) === $id ? $ctx['editing']['item'] : null;
-        $item = $editing ?? Content::get($id);
+        // Contenu publié déjà modifié dans ce tour : la nouvelle modification complète la même proposition.
+        $pid = (string) ($ctx['turn']['proposals'][$id] ?? '');
+        $proposal = $pid !== '' ? Store::read('ai/proposals/' . $pid) : null;
+        $item = $editing ?? (is_array($proposal) ? $proposal['data'] : Content::get($id));
         if (!$item) {
             return self::fail('No content with id "' . $id . '". Use search_content to find ids.');
         }
         [$changed, $labels, $missing] = self::apply($item, $in);
         if (!$labels) {
-            return self::fail($missing ? 'Nothing changed: these passages were not found word for word: "' . implode('", "', $missing) . '". Copy the exact text from get_content.'
+            return self::fail($missing ? 'Nothing changed: these passages were not found word for word in the visible text, or they cover only part of a link or of a formatted phrase: "'
+                . implode('", "', $missing) . '". Copy the exact text from get_content, including whole links and whole bold or italic phrases.'
                 : 'Nothing to change: send at least one field to modify.');
         }
         $note = Sanitize::text($in['note'] ?? '', 120);
         $warn = $missing ? ['not_found' => $missing] : [];
         $built = Content::build($changed, $ctx['user'], $item['id'] !== '' ? Content::get($item['id']) : null);
         $scores = ['seo_score' => $built['score']['seo'], 'geo_score' => $built['score']['geo']];
+        // Plusieurs modifications du même contenu dans un tour : une seule carte, qui les récapitule toutes.
+        $merge = static function (string $key) use (&$ctx, $labels, $note): array {
+            $prev = $ctx['turn']['cards'][$key] ?? ['changes' => [], 'notes' => []];
+            $merged = ['changes' => array_values(array_unique(array_merge($prev['changes'], $labels))),
+                'notes' => array_values(array_unique(array_filter(array_merge($prev['notes'], [$note]))))];
+            $ctx['turn']['cards'][$key] = $merged;
+            return ['changes' => $merged['changes'], 'note' => implode(' · ', $merged['notes'])];
+        };
 
         // Contenu ouvert dans l'éditeur : la modification s'applique dans l'éditeur (la personne enregistre).
         if ($editing !== null) {
+            // Les modifications suivantes du tour (et get_content) partent de cette version.
+            $ctx['editing']['item'] = ['id' => $item['id']] + $built;
             $media = [];
             foreach (array_filter(array_merge([$built['image']], Blocks::media($built['blocks']))) as $mid) {
                 if ($m = Media::get($mid)) {
@@ -338,34 +357,69 @@ final class AiTools
         }
         $entry = Content::index()[$id] ?? null;
         if ($entry && $entry['status'] === 'draft') {
-            $undo = self::snapshot($item, $ctx['user']['id']);
             $saved = Content::save($changed, $ctx['user']);
+            // Une seule annulation par brouillon et par tour : elle rétablit la version d'avant la demande.
+            $token = (string) ($ctx['turn']['undo'][$id] ?? '');
+            $undo = $token !== '' ? Store::read('ai/undo/' . $token) : null;
+            if (is_array($undo)) {
+                Store::write('ai/undo/' . $token, ['after' => self::fingerprint($saved)] + $undo);
+            } else {
+                $token = self::snapshot($item, $saved, $ctx['user']['id']);
+            }
+            $ctx['turn']['undo'][$id] = $token;
             return ['result' => ['done' => 'Draft updated (the user can undo).'] + $scores + $warn,
-                'card' => ['kind' => 'updated', 'id' => $id, 'title' => $saved['title'], 'note' => $note, 'changes' => $labels, 'undo' => $undo,
-                    'edit' => admin_url('edit/' . $id), 'preview' => admin_url('preview/' . $id)],
+                'card' => ['kind' => 'updated', 'key' => 'u-' . $id, 'id' => $id, 'title' => $saved['title'], 'undo' => $token,
+                    'edit' => admin_url('edit/' . $id), 'preview' => admin_url('preview/' . $id)] + $merge('u-' . $id),
                 'error' => false];
         }
-        $pid = random_id();
+        if ($pid === '') {
+            self::prune('ai/proposals');
+            $pid = random_id();
+        }
+        $ctx['turn']['proposals'][$id] = $pid;
+        $card = ['kind' => 'proposal', 'key' => 'p-' . $pid, 'pid' => $pid, 'id' => $id, 'title' => (string) ($entry['title'] ?? $item['title'])] + $merge('p-' . $pid);
         Store::write('ai/proposals/' . $pid, [
-            'id' => $pid, 'user' => $ctx['user']['id'], 'content' => $id, 'base' => (int) $item['updated'],
-            'data' => $changed, 'note' => $note, 'changes' => $labels, 'created' => time(),
+            'id' => $pid, 'user' => $ctx['user']['id'], 'content' => $id, 'base' => is_array($proposal) ? (int) $proposal['base'] : (int) $item['updated'],
+            'data' => $changed, 'note' => $card['note'], 'changes' => $card['changes'], 'created' => time(),
         ]);
         return ['result' => ['done' => 'Proposal ready: the user previews and applies it with one click (not applied yet).'] + $scores + $warn,
-            'card' => ['kind' => 'proposal', 'pid' => $pid, 'id' => $id, 'title' => $item['title'], 'note' => $note, 'changes' => $labels],
+            'card' => $card,
             'error' => false];
     }
 
-    /** Copie d'un contenu avant modification par l'IA (pour « Annuler »), gardée 14 jours. */
-    public static function snapshot(array $item, string $userId): string
+    /** Copie d'un contenu avant modification par l'IA (pour « Annuler »), valable tant que le contenu n'a pas changé depuis. */
+    public static function snapshot(array $before, array $after, string $userId): string
     {
-        foreach (Store::names('ai/undo') as $name) {
-            if (@filemtime(Store::file($name)) < time() - 14 * 86400) {
+        self::prune('ai/undo');
+        $token = random_id();
+        Store::write('ai/undo/' . $token, ['user' => $userId, 'item' => $before, 'after' => self::fingerprint($after), 'created' => time()]);
+        return $token;
+    }
+
+    /** L'annulation est-elle encore possible (version gardée, et contenu inchangé depuis la modification) ? */
+    public static function undoable(string $token): bool
+    {
+        $u = preg_match('/^[a-z0-9]{1,32}$/', $token) ? Store::read('ai/undo/' . $token) : null;
+        $current = is_array($u) ? Content::get((string) ($u['item']['id'] ?? '')) : null;
+        return $current !== null && self::fingerprint($current) === ($u['after'] ?? '');
+    }
+
+    /** Empreinte d'un contenu, hors date de mise à jour : elle change dès que quelqu'un modifie quoi que ce soit. */
+    private static function fingerprint(array $item): string
+    {
+        unset($item['updated'], $item['score']);
+        ksort($item);
+        return md5((string) json_encode($item, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    /** Supprime les annulations et propositions de plus de 14 jours. */
+    private static function prune(string $dir): void
+    {
+        foreach (Store::names($dir) as $name) {
+            if (@filemtime(Store::file($name)) < time() - self::KEEP_DAYS * 86400) {
                 Store::delete($name);
             }
         }
-        $token = random_id();
-        Store::write('ai/undo/' . $token, ['user' => $userId, 'item' => $item, 'created' => time()]);
-        return $token;
     }
 
     /**
@@ -468,24 +522,28 @@ final class AiTools
         return [$item, $labels, $missing];
     }
 
-    /** Remplace un passage dans le texte enrichi des blocs (première occurrence). */
+    /**
+     * Remplace un passage dans le texte enrichi des blocs (première occurrence). La recherche porte sur le texte
+     * visible, jamais sur les balises ni sur les adresses des liens, et la mise en forme autour du passage est conservée.
+     */
     private static function replace(array &$blocks, string $find, string $with): bool
     {
-        $html = Markdown::inline($with);
-        $swap = static function (string &$field) use ($find, $with, $html): bool {
-            $escaped = e($find);
-            if (str_contains($field, $escaped)) {
-                $field = (string) preg_replace('/' . preg_quote($escaped, '/') . '/u', str_replace(['\\', '$'], ['\\\\', '\\$'], $html), $field, 1);
-                return true;
-            }
-            // Passage qui chevauche une mise en forme : on repart du Markdown du bloc pour la conserver ailleurs.
-            $md = Blocks::md($field);
-            if (str_contains($md, $find) || str_contains(plain($field), $find)) {
-                $field = Markdown::inline(str_contains($md, $find) ? (string) preg_replace('/' . preg_quote($find, '/') . '/u', str_replace(['\\', '$'], ['\\\\', '\\$'], $with), $md, 1)
-                    : str_replace($find, $with, plain($field)));
-                return true;
-            }
+        // Le modèle copie le passage depuis le Markdown de get_content : seul son texte visible est cherché.
+        // S'il a repris la mise en forme (**gras**, [lien](…)), les éléments qu'il couvre entièrement sont remplacés avec.
+        $found = Markdown::inline($find);
+        $needle = trim(html_entity_decode(strip_tags($found), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if ($needle === '') {
             return false;
+        }
+        $formatted = str_contains($found, '<');
+        $html = Markdown::inline($with);
+        $swap = static function (string &$field) use ($needle, $html, $formatted): bool {
+            $new = self::swapText($field, $needle, $html, $formatted);
+            if ($new === null) {
+                return false;
+            }
+            $field = $new;
+            return true;
         };
         foreach ($blocks as &$b) {
             if (in_array($b['type'], ['paragraph', 'heading', 'quote', 'callout'], true) && $swap($b['text'])) {
@@ -519,6 +577,156 @@ final class AiTools
         }
         unset($b);
         return false;
+    }
+
+    /**
+     * Remplace $needle (texte visible, espaces souples) par le HTML $replacement dans un champ de texte enrichi.
+     * Un passage qui couvre des éléments entiers (lien, gras…) les remplace ; un passage qui n'en couvre
+     * qu'une partie n'est pas touché, pour ne pas abîmer la mise en forme. Un passage qui correspond exactement
+     * au texte d'un élément reste dans l'élément, sauf si le modèle a repris sa mise en forme ($formatted).
+     * Renvoie null si rien n'est remplacé.
+     */
+    private static function swapText(string $field, string $needle, string $replacement, bool $formatted = false): ?string
+    {
+        if ($field === '') {
+            return null;
+        }
+        $doc = new \DOMDocument();
+        $previous = libxml_use_internal_errors(true);
+        $doc->loadHTML('<?xml encoding="UTF-8"?><!DOCTYPE html><html><body><div id="eclair-old">' . $field . '</div><div id="eclair-new">' . $replacement . '</div></body></html>', LIBXML_NONET);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+        $root = $doc->getElementById('eclair-old');
+        $new = $doc->getElementById('eclair-new');
+        if (!$root || !$new) {
+            return null;
+        }
+        // Texte visible et position de chacun de ses morceaux (un <br> compte comme un saut de ligne).
+        $parts = [];
+        $text = '';
+        $walk = static function (\DOMNode $node) use (&$walk, &$parts, &$text): void {
+            foreach ($node->childNodes as $child) {
+                if ($child instanceof \DOMText || ($child instanceof \DOMElement && strtolower($child->nodeName) === 'br')) {
+                    $t = $child instanceof \DOMText ? $child->data : "\n";
+                    $parts[] = [$child, strlen($text), strlen($text) + strlen($t)];
+                    $text .= $t;
+                } elseif ($child instanceof \DOMElement) {
+                    $walk($child);
+                }
+            }
+        };
+        $walk($root);
+        $space = '[\s\x{00A0}\x{202F}]+';
+        $words = preg_split('/' . $space . '/u', $needle) ?: [];
+        $pattern = implode($space, array_map(static fn (string $w): string => strtr(preg_quote($w, '/'), ["'" => "['’]", '’' => "['’]"]), $words));
+        if (!preg_match('/' . $pattern . '/u', $text, $m, PREG_OFFSET_CAPTURE)) {
+            return null;
+        }
+        $s = (int) $m[0][1];
+        $e = $s + strlen($m[0][0]);
+        $first = $last = null;
+        foreach ($parts as $i => $part) {
+            if ($first === null && $s < $part[2]) {
+                $first = $i;
+            }
+            if ($e <= $part[2]) {
+                $last = $i;
+                break;
+            }
+        }
+        if ($first === null || $last === null) {
+            return null;
+        }
+        [$startNode, $startAt] = $parts[$first];
+        [$endNode, $endAt] = $parts[$last];
+        $ancestors = static function (\DOMNode $n) use ($root): array {
+            $out = [];
+            for ($p = $n->parentNode; $p !== null && !$p->isSameNode($root); $p = $p->parentNode) {
+                $out[] = $p;
+            }
+            return $out;
+        };
+        $within = static fn (\DOMNode $x, array $list): bool => array_filter($list, fn (\DOMNode $y): bool => $y->isSameNode($x)) !== [];
+        // Début ou fin du texte visible d'un élément.
+        $edge = static function (\DOMNode $x, bool $end) use ($parts): int {
+            $at = -1;
+            foreach ($parts as [$node, $a, $b]) {
+                for ($p = $node; $p !== null; $p = $p->parentNode) {
+                    if ($p->isSameNode($x)) {
+                        if (!$end) {
+                            return $a;
+                        }
+                        $at = $b;
+                        break;
+                    }
+                }
+            }
+            return $at;
+        };
+        $up = $ancestors($startNode);
+        $down = $ancestors($endNode);
+        foreach ($up as $x) {
+            if (!$within($x, $down) && $edge($x, false) !== $s) {
+                return null; // le passage commence au milieu d'un lien ou d'un texte en gras
+            }
+        }
+        foreach ($down as $x) {
+            if (!$within($x, $up) && $edge($x, true) !== $e) {
+                return null; // … ou s'y termine
+            }
+        }
+        $common = $root;
+        foreach ($up as $x) {
+            if ($within($x, $down)) {
+                $common = $x;
+                break;
+            }
+        }
+        while ($formatted && !$common->isSameNode($root) && $edge($common, false) === $s && $edge($common, true) === $e) {
+            $common = $common->parentNode;
+        }
+        $top = static function (\DOMNode $n) use ($common): \DOMNode {
+            while (!$n->parentNode->isSameNode($common)) {
+                $n = $n->parentNode;
+            }
+            return $n;
+        };
+        $from = $top($startNode);
+        $to = $top($endNode);
+        $before = $from instanceof \DOMText ? substr($from->data, 0, $s - $startAt) : '';
+        $after = $to instanceof \DOMText ? substr($to->data, $e - $endAt) : '';
+        // Pas de lien dans un lien : dans un <a>, les liens du texte de remplacement deviennent du texte simple.
+        for ($p = $common; $p !== null && !$p->isSameNode($root); $p = $p->parentNode) {
+            if (strtolower($p->nodeName) === 'a') {
+                foreach (iterator_to_array($new->getElementsByTagName('a')) as $a) {
+                    while ($a->firstChild) {
+                        $a->parentNode->insertBefore($a->firstChild, $a);
+                    }
+                    $a->parentNode->removeChild($a);
+                }
+                break;
+            }
+        }
+        $gone = [];
+        for ($n = $from; $n !== null; $n = $n->nextSibling) {
+            $gone[] = $n;
+            if ($n->isSameNode($to)) {
+                break;
+            }
+        }
+        if ($before !== '') {
+            $common->insertBefore($doc->createTextNode($before), $from);
+        }
+        while ($new->firstChild) {
+            $common->insertBefore($new->firstChild, $from);
+        }
+        if ($after !== '') {
+            $common->insertBefore($doc->createTextNode($after), $from);
+        }
+        foreach ($gone as $n) {
+            $common->removeChild($n);
+        }
+        return Sanitize::inline((string) $doc->saveHTML($root));
     }
 
     /** Position d'insertion : après la section d'un intertitre donné, sinon en fin (avant formulaire et derniers articles). */

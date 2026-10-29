@@ -9,7 +9,7 @@
  *
  * Scénarios (mot-clé dans le dernier message de la personne) : ARTICLE (image puis brouillon), EQUIPE (recherche
  * puis ajout d'un membre), MODIFIE <id> (retouche d'un brouillon), EDITEUR (modification du contenu ouvert),
- * PIEGE (texte malveillant), REFUS (refus de sécurité) ; sinon une simple réponse texte.
+ * DOUBLE <id> (deux modifications de suite), PIEGE (texte malveillant), REFUS (refus de sécurité) ; sinon une simple réponse texte.
  */
 declare(strict_types=1);
 
@@ -146,6 +146,15 @@ if ($path === '/v1/messages' && $method === 'POST') {
             break;
         }
     }
+    // Étapes déjà faites dans ce tour (résultats d'outils reçus depuis le dernier message de la personne).
+    $steps = 0;
+    foreach (array_reverse($messages) as $msg) {
+        $parts = is_array($msg['content']) ? $msg['content'] : [];
+        if ($msg['role'] === 'user' && array_filter($parts, fn ($b) => ($b['type'] ?? '') === 'text')) {
+            break;
+        }
+        $steps += $msg['role'] === 'user' ? 1 : 0;
+    }
     $index = count($messages);
     $usage = ['input_tokens' => 1000, 'cache_creation_input_tokens' => 2000, 'cache_read_input_tokens' => 500, 'output_tokens' => 1];
     $events = [['type' => 'message_start', 'message' => ['id' => 'msg_' . $index, 'type' => 'message', 'role' => 'assistant', 'model' => $body['model'], 'content' => [], 'usage' => $usage]]];
@@ -208,6 +217,12 @@ if ($path === '/v1/messages' && $method === 'POST') {
     } elseif (str_contains($userText, 'EDITEUR') && !$results) {
         $tool('update_content', ['id' => 'current', 'note' => 'FAQ ajoutée', 'faq' => [['question' => 'Est-ce difficile ?', 'answer' => 'Non, avec un bon accompagnement.']], 'summary' => 'Un résumé neuf et clair pour ce contenu en cours de rédaction.']);
         $stop = 'tool_use';
+    } elseif (preg_match('/DOUBLE ([a-z0-9]+)/', $userText, $id) && $steps < 2) {
+        // Deux modifications successives du même contenu dans un tour : la seconde doit partir de la première.
+        $tool('update_content', $steps === 0 ? ['id' => $id[1], 'note' => 'Titre revu', 'title' => 'Titre revu par l’IA']
+            : ['id' => $id[1], 'note' => 'Résumé ajouté', 'summary' => 'Un résumé ajouté par la seconde modification de l’IA.',
+                'replace' => [['find' => 'sommes une', 'replace' => 'x'], ['find' => 'promo', 'replace' => 'soldes']]]);
+        $stop = 'tool_use';
     } elseif ($results) {
         $text('C’est fait ! ' . (isset($first['error']) ? 'Erreur outil : ' . $first['error'] : 'Relis le brouillon avant de le publier.'));
     } else {
@@ -249,8 +264,9 @@ if ($path === '/v1/responses' && $method === 'POST') {
     if ($calls) {
         $errors[] = 'missing function_call_output for ' . implode(', ', array_keys($calls));
     }
+    // Comme l'API réelle : sans stockage, un raisonnement renvoyé sans son contenu chiffré est introuvable.
     if ($reasoning >= 100) {
-        $errors[] = 'reasoning item not echoed unchanged';
+        fail("Item with id 'rs_1' not found. Items are not persisted when `store` is set to false.", 404);
     }
     if ($errors) {
         fail(implode('; ', $errors));
@@ -265,7 +281,7 @@ if ($path === '/v1/responses' && $method === 'POST') {
             break;
         }
     }
-    $out = [['type' => 'reasoning', 'id' => 'rs_1', 'summary' => [], 'encrypted_content' => 'enc-1']];
+    $out = [['type' => 'reasoning', 'id' => 'rs_1', 'summary' => []] + (in_array('reasoning.encrypted_content', (array) ($body['include'] ?? []), true) ? ['encrypted_content' => 'enc-1'] : [])];
     $events = [['type' => 'response.created', 'response' => ['id' => 'resp_1', 'status' => 'in_progress']]];
     $structured = $body['text']['format']['schema'] ?? null;
     if ($structured) {

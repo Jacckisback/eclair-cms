@@ -29,20 +29,25 @@ final class AiImage
             throw new \RuntimeException('The image prompt is too short: describe the subject, setting, light and style.');
         }
         [, $model, $price] = Ai::IMAGES[$provider];
-        $budget = (float) Ai::config()['budget'];
-        if ($budget > 0 && Ai::usage()['cost'] + $price > $budget) {
-            throw new \RuntimeException(t('Budget IA du mois atteint ({spent} sur {budget}). Un administrateur peut l’augmenter dans Réglages › Assistant IA.', [
-                'spent' => Ai::money(Ai::usage()['cost']), 'budget' => Ai::money($budget),
-            ]));
+        if (($error = Ai::overBudget($price)) !== null) {
+            throw new \RuntimeException($error);
         }
         $size = self::FORMATS[$format] ?? self::FORMATS['landscape'];
         $key = Ai::imageKey($provider);
         @set_time_limit(300);
-        [$bytes, $cost] = match ($provider) {
-            'openai' => self::openai($key, $model, $prompt, $size[0]),
-            'bfl' => self::bfl($key, $model, $prompt, $size[1]),
-            default => self::ideogram($key, $model, $prompt, $size[2]),
-        };
+        try {
+            [$bytes, $cost] = match ($provider) {
+                'openai' => self::openai($key, $model, $prompt, $size[0]),
+                'bfl' => self::bfl($key, $model, $prompt, $size[1]),
+                default => self::ideogram($key, $model, $prompt, $size[2]),
+            };
+        } catch (\RuntimeException $e) {
+            // Fenêtre fermée pendant la création : le fournisseur a sans doute déjà facturé l'image.
+            if (connection_aborted()) {
+                Ai::charge($user['id'], $price);
+            }
+            throw $e;
+        }
         Ai::charge($user['id'], $cost ?? $price, 1);
         $ext = str_starts_with($bytes, "\x89PNG") ? 'png' : (substr($bytes, 8, 4) === 'WEBP' ? 'webp' : 'jpg');
         $base = slugify($name !== '' ? $name : $alt, (string) Settings::get('lang'), 50) ?: 'image-ia';
@@ -75,14 +80,19 @@ final class AiImage
         ], ['prompt' => $prompt, 'aspect_ratio' => $ratio, 'resolution' => '1k'], 60);
         $job = json_decode($res['body'], true);
         $poll = is_array($job) ? (string) ($job['polling_url'] ?? '') : '';
-        if ($res['status'] >= 300 || $poll === '' || !self::safe($poll)) {
+        // La clé ne part que vers Black Forest Labs (ou l'adresse configurée), à une adresse IP vérifiée.
+        $pin = $poll !== '' && self::official($poll, 'bfl', 'bfl.ai') ? self::pin($poll) : null;
+        if ($res['status'] >= 300 || $pin === null) {
             throw new \RuntimeException(Ai::failure('bfl', $res));
         }
         $cost = is_numeric($job['cost'] ?? null) ? (float) $job['cost'] / 100 : null;
         $until = time() + 180;
         do {
             usleep(1_500_000);
-            $state = Ai::request('GET', $poll, ['x-key: ' . $key, 'Accept: application/json'], null, 30);
+            if (!Ai::tick()) {
+                throw new \RuntimeException(t('Demande interrompue.'));
+            }
+            $state = Ai::request('GET', $poll, ['x-key: ' . $key, 'Accept: application/json'], null, 30, false, $pin);
             $data = json_decode($state['body'], true);
             $status = is_array($data) ? (string) ($data['status'] ?? '') : '';
             if ($status === 'Ready') {
@@ -115,42 +125,58 @@ final class AiImage
         return [self::download((string) $image['url']), null];
     }
 
-    /** Téléchargement d'une image livrée par le fournisseur (https public, 25 Mo maximum, sans redirection). */
+    /** Téléchargement d'une image livrée par le fournisseur (https public, 25 Mo maximum, sans redirection ni clé). */
     private static function download(string $url): string
     {
-        if (!self::safe($url)) {
+        $pin = self::pin($url);
+        if ($pin === null) {
             throw new \RuntimeException(t('Adresse d’image refusée.'));
         }
-        $res = Ai::request('GET', $url, ['Accept: image/*'], null, 90);
+        $res = Ai::request('GET', $url, ['Accept: image/*'], null, 90, false, $pin);
         if ($res['status'] !== 200 || strlen($res['body']) < 100) {
-            throw new \RuntimeException(t('Téléchargement de l’image impossible : réessaie.'));
+            throw new \RuntimeException($res['error'] === 'aborted' ? t('Demande interrompue.') : t('Téléchargement de l’image impossible : réessaie.'));
         }
         return $res['body'];
     }
 
+    /** L'adresse appartient-elle au fournisseur : son domaine officiel, ou l'adresse configurée dans ECLAIR_AI_ENDPOINTS ? */
+    private static function official(string $url, string $service, string $domain): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        return $host !== '' && ($host === $domain || str_ends_with($host, '.' . $domain)
+            || $host === strtolower((string) parse_url(Ai::endpoint($service), PHP_URL_HOST)));
+    }
+
     /**
-     * Adresse sûre à appeler : https et hôte public (aucune adresse interne du serveur).
-     * Avec ECLAIR_AI_ENDPOINTS (passerelle ou tests), les adresses configurées sont acceptées.
+     * Options cURL pour appeler une adresse renvoyée par un fournisseur : https et hôte public, dont l'adresse IP
+     * vérifiée est imposée à cURL (aucune seconde résolution DNS ne peut viser le serveur lui-même). Null si refusée.
+     * Avec ECLAIR_AI_ENDPOINTS (passerelle ou tests), seuls les hôtes configurés sont acceptés tels quels.
      */
-    private static function safe(string $url): bool
+    private static function pin(string $url): ?array
     {
         $p = parse_url($url);
-        $host = (string) ($p['host'] ?? '');
-        if ($host === '' || isset($p['user'])) {
-            return false;
+        $host = strtolower((string) ($p['host'] ?? ''));
+        if ($host === '' || isset($p['user']) || isset($p['pass'])) {
+            return null;
         }
-        if (defined('ECLAIR_AI_ENDPOINTS')) {
-            return in_array($p['scheme'] ?? '', ['http', 'https'], true);
+        foreach (defined('ECLAIR_AI_ENDPOINTS') ? (array) constant('ECLAIR_AI_ENDPOINTS') : [] as $endpoint) {
+            if (strtolower((string) parse_url((string) $endpoint, PHP_URL_HOST)) === $host) {
+                return [];
+            }
         }
         if (($p['scheme'] ?? '') !== 'https') {
-            return false;
+            return null;
         }
         $ips = filter_var($host, FILTER_VALIDATE_IP) ? [$host] : (gethostbynamel($host) ?: []);
         foreach ($ips as $ip) {
-            if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                return false;
+            if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return null;
             }
         }
-        return $ips !== [];
+        return $ips === [] ? null : [
+            CURLOPT_RESOLVE => [$host . ':' . (int) ($p['port'] ?? 443) . ':' . $ips[0]],
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+        ];
     }
 }

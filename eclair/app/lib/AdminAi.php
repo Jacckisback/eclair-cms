@@ -30,6 +30,23 @@ final class AdminAi
         }
     }
 
+    /**
+     * Place pour une demande qui coûte (deux à la fois au plus par personne) puis réservation sur le budget et le quota.
+     *
+     * @return resource verrou à garder jusqu'à la fin de la demande
+     */
+    private static function start(array $user)
+    {
+        $slot = Ai::slot($user['id']);
+        if ($slot === null) {
+            Http::json(['ok' => false, 'error' => t('Une demande à l’assistant est déjà en cours : attends qu’elle se termine.')], 429);
+        }
+        if (($error = Ai::reserve($user)) !== null) {
+            Http::json(['ok' => false, 'error' => $error], 429);
+        }
+        return $slot;
+    }
+
     /* ───────────────────────────── Conversation ───────────────────────────── */
 
     public static function chat(array $user): never
@@ -40,9 +57,7 @@ final class AdminAi
         if ($message === '') {
             Http::json(['ok' => false, 'error' => t('Écris ta demande.')], 422);
         }
-        if (($error = Ai::reserve($user)) !== null) {
-            Http::json(['ok' => false, 'error' => $error], 429);
-        }
+        $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         $editing = self::editing($data['context'] ?? null, $user);
         self::stream();
         $emit = static function (array $event): void {
@@ -136,8 +151,8 @@ final class AdminAi
         if ((int) $current['updated'] !== (int) $p['base']) {
             Http::json(['ok' => false, 'error' => t('Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.')], 409);
         }
-        $undo = AiTools::snapshot($current, $user['id']);
         $saved = Content::save($p['data'], $user);
+        $undo = AiTools::snapshot($current, $saved, $user['id']);
         Store::delete('ai/proposals/' . $pid);
         AiChat::markProposal((string) $p['user'], $pid, ['applied' => true, 'undo' => $undo]);
         self::ping($saved);
@@ -167,7 +182,10 @@ final class AdminAi
         Http::json(['ok' => true]);
     }
 
-    /** Rétablit la version d'avant une modification faite par l'IA. */
+    /**
+     * Rétablit la version d'avant une modification faite par l'IA, si personne n'a touché au contenu depuis.
+     * La publication (état et date) n'est jamais changée par une annulation.
+     */
     public static function undo(array $user): never
     {
         $token = preg_replace('/[^a-z0-9]/', '', (string) (Req::json()['token'] ?? '')) ?? '';
@@ -176,10 +194,15 @@ final class AdminAi
             Http::json(['ok' => false, 'error' => t('Annulation impossible : cette version n’est plus disponible.')], 404);
         }
         $item = $u['item'];
-        if (!Content::get((string) $item['id'])) {
+        $current = Content::get((string) $item['id']);
+        if (!$current) {
             Http::json(['ok' => false, 'error' => t('Ce contenu n’existe plus.')], 404);
         }
-        $item['date'] = '@' . (int) $item['date'];
+        if (!AiTools::undoable($token)) {
+            Http::json(['ok' => false, 'error' => t('Ce contenu a été modifié depuis : l’annulation n’est plus possible. Ses versions précédentes restent dans l’historique des versions de l’éditeur.')], 409);
+        }
+        $item['status'] = $current['status'];
+        $item['date'] = '@' . (int) $current['date'];
         $saved = Content::save($item, $user);
         Store::delete('ai/undo/' . $token);
         self::ping($saved);
@@ -226,9 +249,7 @@ final class AdminAi
         self::guard($user);
         $data = Req::json();
         $task = (string) ($data['task'] ?? '');
-        if (($error = Ai::reserve($user)) !== null) {
-            Http::json(['ok' => false, 'error' => $error], 429);
-        }
+        $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
         @set_time_limit(300);
         $str = ['type' => 'string'];
@@ -364,9 +385,7 @@ final class AdminAi
         if (!Ai::enabled()) {
             Http::json(['ok' => false, 'error' => t('Enregistre d’abord un fournisseur d’IA et sa clé.')], 422);
         }
-        if (($error = Ai::reserve($user)) !== null) {
-            Http::json(['ok' => false, 'error' => $error], 429);
-        }
+        $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
         @set_time_limit(300);
         $s = Settings::all();

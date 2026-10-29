@@ -24,8 +24,9 @@ final class Markdown
             if ($para) {
                 $html = '';
                 foreach ($para as $i => $line) {
-                    $hard = str_ends_with($line, '  ') || str_ends_with($line, '\\');
-                    $html .= self::inline(rtrim($line, " \\")) . ($i < count($para) - 1 ? ($hard ? '<br>' : ' ') : '');
+                    // Retour à la ligne forcé : deux espaces ou une barre oblique inverse en fin de ligne.
+                    $hard = (bool) preg_match('/(?:[ \t]{2,}|\\\\)$/', $line);
+                    $html .= self::inline(trim((string) preg_replace('/\\\\$/', '', $line))) . ($i < count($para) - 1 ? ($hard ? '<br>' : ' ') : '');
                 }
                 $blocks[] = ['type' => 'paragraph', 'text' => $html];
                 $para = [];
@@ -118,13 +119,16 @@ final class Markdown
                 $blocks[] = ['type' => 'table', 'head' => true, 'caption' => '', 'rows' => $rows];
                 continue;
             }
-            $para[] = $trim;
+            $para[] = ltrim($line);
         }
         $flush();
         return Blocks::normalize($blocks);
     }
 
-    /** Markdown en ligne → HTML en ligne assaini (gras, italique, code, liens, barré, surligné). */
+    /**
+     * Markdown en ligne → HTML en ligne assaini (gras, italique, code, liens, barré, surligné, retours à la ligne).
+     * Les entités (« &lt; ») sont lues comme en Markdown ; un lien vers le site lui-même redevient un chemin (« /contact »).
+     */
     public static function inline(string $md): string
     {
         $keep = [];
@@ -132,14 +136,20 @@ final class Markdown
             $keep[] = $html;
             return "\x01" . (count($keep) - 1) . "\x02";
         };
-        $s = str_replace(["\x01", "\x02"], '', $md);
+        $s = str_replace(["\x01", "\x02", "\r"], '', $md);
         $s = (string) preg_replace_callback('/`([^`\n]+)`/', static fn (array $m): string => $hold('<code>' . e($m[1]) . '</code>'), $s);
         // Adresse : parenthèses équilibrées acceptées (liens Wikipédia…), « javascript:alert(1) » compris en entier pour être rejeté.
-        $s = (string) preg_replace_callback('/\[([^\]\n]+)\]\(\s*((?:[^()\s]|\([^()\s]*\))+)(?:\s+"[^"]*")?\s*\)/', static function (array $m) use ($hold): string {
+        $site = rtrim((string) Settings::get('url'), '/');
+        $s = (string) preg_replace_callback('/\[([^\]\n]+)\]\(\s*((?:[^()\s]|\([^()\s]*\))+)(?:\s+"[^"]*")?\s*\)/', static function (array $m) use ($hold, $site): string {
             $url = Sanitize::url($m[2]);
+            if ($site !== '' && ($url === $site || str_starts_with($url, $site . '/'))) {
+                $url = substr($url, strlen($site)) ?: '/';
+            }
             return $url === '' ? $m[1] : $hold('<a href="' . e($url) . '">') . $m[1] . $hold('</a>');
         }, $s);
-        $s = e($s);
+        // Paragraphes séparés et retours à la ligne forcés ; un simple retour à la ligne vaut une espace.
+        $s = (string) preg_replace_callback('/[ \t]*\n[ \t]*\n\s*|(?:[ \t]{2,}|\\\\)\n[ \t]*/', static fn (array $m): string => $hold(substr_count($m[0], "\n") > 1 ? '<br><br>' : '<br>'), trim($s));
+        $s = e(html_entity_decode(str_replace("\n", ' ', $s), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
         $s = (string) preg_replace('/\*\*(?=\S)(.+?)(?<=\S)\*\*|__(?=\S)(.+?)(?<=\S)__/u', '<strong>$1$2</strong>', $s);
         $s = (string) preg_replace('/(?<![*\w])\*(?=\S)(.+?)(?<=\S)\*(?![*\w])|(?<![_\w])_(?=\S)(.+?)(?<=\S)_(?![_\w])/u', '<em>$1$2</em>', $s);
         $s = (string) preg_replace('/~~(?=\S)(.+?)(?<=\S)~~/u', '<s>$1</s>', $s);

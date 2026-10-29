@@ -228,7 +228,14 @@
       setText(v) { text = v; draw(); },
       append(d) { text += d; status.hidden = true; if (!frame) frame = requestAnimationFrame(draw); },
       status(label) { status.hidden = false; status.replaceChildren(h('span', { class: 'ai-dots', 'aria-hidden': 'true' }), h('span', { text: label })); scroll(); },
-      card(c) { status.hidden = true; cards.append(renderCard(c)); scroll(); },
+      card(c) {
+        status.hidden = true;
+        // Même brouillon ou même proposition modifiés une seconde fois : la carte récapitulative remplace l'ancienne.
+        const el = renderCard(c);
+        const old = c.key && [...cards.children].find((x) => x.dataset.key === c.key);
+        old ? old.replaceWith(el) : cards.append(el);
+        scroll();
+      },
       error(msg) { status.hidden = true; el.append(h('p', { class: 'ai-error', role: 'alert', text: '⚠️ ' + msg })); scroll(); },
       end() { status.hidden = true; el.removeAttribute('aria-busy'); if (frame) { cancelAnimationFrame(frame); draw(); } if (!text.trim() && !cards.childElementCount && !el.querySelector('.ai-error')) body.append(h('p', { class: 'muted', text: '…' })); },
     };
@@ -245,11 +252,12 @@
     e.target.disabled = true;
     const res = await api('api/ai/undo', { token });
     if (res.ok) { card.classList.add('done'); card.querySelector('.ai-card-actions')?.replaceChildren(h('span', { class: 'small muted', text: t('Modification annulée.') })); }
+    else if (res.error) e.target.replaceWith(h('small', { class: 'muted', text: res.error }));
     else e.target.disabled = false;
   });
 
   function renderCard(c) {
-    const card = h('div', { class: 'ai-card ai-card-' + c.kind });
+    const card = h('div', { class: 'ai-card ai-card-' + c.kind, 'data-key': c.key || null });
     const actions = h('div', { class: 'ai-card-actions' });
     if (c.gone) {
       card.append(h('p', { class: 'small muted', text: '🗑️ ' + t('Supprimé depuis.') + ' ' + (c.title || '') }));

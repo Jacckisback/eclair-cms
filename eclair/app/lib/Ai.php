@@ -122,21 +122,32 @@ final class Ai
         return ($u['months'][$month] ?? []) + ['cost' => 0.0, 'calls' => 0, 'images' => 0, 'users' => []];
     }
 
+    /** Message si le budget du mois ne permet pas une dépense de $next de plus (null si elle peut partir). */
+    public static function overBudget(float $next = 0.0): ?string
+    {
+        $budget = (float) self::config()['budget'];
+        $spent = (float) self::usage()['cost'];
+        if ($budget <= 0 || ($spent < $budget && $spent + $next <= $budget)) {
+            return null;
+        }
+        return t('Budget IA du mois atteint ({spent} sur {budget}). Un administrateur peut l’augmenter dans Réglages › Assistant IA.', [
+            'spent' => self::money($spent), 'budget' => self::money($budget),
+        ]);
+    }
+
     /**
      * Réserve une demande : refuse (message) si le budget du mois est atteint ou si la personne
      * a épuisé son quota du jour. Renvoie null quand la demande peut partir.
+     * La dépense est comptée après chaque étape et le budget revérifié avant la suivante :
+     * une demande en cours peut le dépasser d'une étape au plus.
      */
     public static function reserve(array $user): ?string
     {
-        $c = self::config();
-        $budget = (float) $c['budget'];
-        if ($budget > 0 && self::usage()['cost'] >= $budget) {
-            return t('Budget IA du mois atteint ({spent} sur {budget}). Un administrateur peut l’augmenter dans Réglages › Assistant IA.', [
-                'spent' => self::money(self::usage()['cost']), 'budget' => self::money($budget),
-            ]);
-        }
-        $daily = (int) $c['daily'];
+        $daily = (int) self::config()['daily'];
         return Store::locked(function () use ($user, $daily): ?string {
+            if (($error = self::overBudget()) !== null) {
+                return $error;
+            }
             $u = Store::read('ai/usage', []);
             $u = is_array($u) ? $u : [];
             $day = date('Y-m-d');
@@ -146,9 +157,35 @@ final class Ai
                 return t('Tu as atteint ta limite de {n} demandes à l’assistant pour aujourd’hui.', ['n' => $daily]);
             }
             $u['days'][$user['id']] = ['d' => $day, 'n' => $n + 1];
+            $month = date('Y-m');
+            $u['months'][$month] = ($u['months'][$month] ?? []) + ['cost' => 0.0, 'calls' => 0, 'images' => 0, 'users' => []];
+            $u['months'][$month]['calls']++;
             Store::write('ai/usage', $u);
             return null;
         });
+    }
+
+    /**
+     * Place pour une demande de la personne : deux à la fois au plus (une conversation et une retouche),
+     * pour que des demandes lancées en parallèle ne contournent pas le budget ni n'occupent tout le serveur.
+     * Renvoie le verrou à garder jusqu'à la fin de la demande, ou null si les deux places sont prises.
+     *
+     * @return resource|null
+     */
+    public static function slot(string $userId)
+    {
+        $dir = ECLAIR_DATA . '/ai';
+        Store::ensureDir($dir);
+        for ($i = 0; $i < 2; $i++) {
+            $h = @fopen($dir . '/busy-' . preg_replace('/[^a-z0-9]/', '', $userId) . '-' . $i . '.lock', 'c');
+            if ($h !== false && flock($h, LOCK_EX | LOCK_NB)) {
+                return $h;
+            }
+            if ($h !== false) {
+                fclose($h);
+            }
+        }
+        return null;
     }
 
     /** Ajoute une dépense au compteur du mois (les 12 derniers mois sont gardés). */
@@ -163,7 +200,6 @@ final class Ai
             $month = date('Y-m');
             $m = ($u['months'][$month] ?? []) + ['cost' => 0.0, 'calls' => 0, 'images' => 0, 'users' => []];
             $m['cost'] = round((float) $m['cost'] + $cost, 6);
-            $m['calls'] += $images > 0 ? 0 : 1;
             $m['images'] += $images;
             $m['users'][$userId] = round((float) ($m['users'][$userId] ?? 0) + $cost, 6);
             $u['months'][$month] = $m;
@@ -171,6 +207,23 @@ final class Ai
             $u['months'] = array_slice($u['months'], 0, 12, true);
             Store::write('ai/usage', $u);
         });
+    }
+
+    /** Fonction appelée pendant les longues attentes (images) pour garder la connexion et repérer une fenêtre fermée. */
+    private static ?\Closure $tick = null;
+
+    public static function onTick(?callable $tick): void
+    {
+        self::$tick = $tick !== null ? \Closure::fromCallable($tick) : null;
+    }
+
+    /** Signale que le travail continue ; renvoie false si la personne a fermé la fenêtre ou arrêté la demande. */
+    public static function tick(): bool
+    {
+        if (self::$tick !== null) {
+            (self::$tick)();
+        }
+        return !connection_aborted();
     }
 
     /** Coût d'un appel à partir des jetons consommés. */
@@ -252,6 +305,7 @@ final class Ai
         $usage = ['in' => 0, 'out' => 0, 'cache_read' => 0, 'cache_write' => 0];
         $stop = '';
         $error = '';
+        $bytes = 0;
         $readUsage = static function (array $u) use (&$usage): void {
             if (isset($u['iterations']) && is_array($u['iterations'])) {
                 $usage = ['in' => 0, 'out' => 0, 'cache_read' => 0, 'cache_write' => 0];
@@ -269,7 +323,7 @@ final class Ai
                 }
             }
         };
-        $onData = static function (array $e) use (&$blocks, &$stop, &$error, $readUsage, $onText): void {
+        $onData = static function (array $e) use (&$blocks, &$stop, &$error, &$bytes, $readUsage, $onText): void {
             switch ($e['type'] ?? '') {
                 case 'message_start':
                     $readUsage((array) ($e['message']['usage'] ?? []));
@@ -280,6 +334,7 @@ final class Ai
                 case 'content_block_delta':
                     $i = (int) $e['index'];
                     $d = (array) $e['delta'];
+                    $bytes += strlen((string) ($d['text'] ?? $d['thinking'] ?? $d['partial_json'] ?? ''));
                     match ($d['type'] ?? '') {
                         'text_delta' => $blocks[$i]['text'] = ($blocks[$i]['text'] ?? '') . $d['text'],
                         'thinking_delta' => $blocks[$i]['thinking'] = ($blocks[$i]['thinking'] ?? '') . $d['thinking'],
@@ -302,6 +357,10 @@ final class Ai
         };
         $http = self::stream(self::endpoint('anthropic') . '/v1/messages', $headers, $body, $onData, $onTick);
         if ($http['error'] !== '' || $http['status'] >= 400 || $error !== '') {
+            // Flux interrompu : les jetons d'entrée sont connus dès le début, ceux de sortie sont estimés.
+            if ($stop === '') {
+                $usage['out'] = max($usage['out'], intdiv($bytes, 3));
+            }
             return ['ok' => false, 'error' => self::failure('anthropic', $http, $error), 'usage' => $usage];
         }
         ksort($blocks);
@@ -361,6 +420,8 @@ final class Ai
             'max_output_tokens' => (int) ($req['max'] ?? 16000),
             'reasoning' => ['effort' => (string) ($req['effort'] ?? 'medium')],
             'store' => false,
+            // Sans stockage chez OpenAI, le raisonnement doit revenir chiffré pour être renvoyé à l'étape suivante.
+            'include' => ['reasoning.encrypted_content'],
             'stream' => true,
             'stream_options' => ['include_obfuscation' => false],
         ];
@@ -377,7 +438,11 @@ final class Ai
         $items = [];
         $error = '';
         $refusal = false;
-        $onData = static function (array $e) use (&$final, &$items, &$error, &$refusal, $onText): void {
+        $bytes = 0;
+        $onData = static function (array $e) use (&$final, &$items, &$error, &$refusal, &$bytes, $onText): void {
+            if (str_ends_with((string) ($e['type'] ?? ''), '.delta')) {
+                $bytes += strlen(is_string($e['delta'] ?? null) ? $e['delta'] : '');
+            }
             switch ($e['type'] ?? '') {
                 case 'response.output_item.done':
                     $items[(int) ($e['output_index'] ?? count($items))] = (array) ($e['item'] ?? []);
@@ -396,6 +461,7 @@ final class Ai
                     break;
                 case 'response.failed':
                     $error = (string) ($e['response']['error']['message'] ?? 'failed');
+                    $final = (array) ($e['response'] ?? []);
                     break;
                 case 'error':
                     $error = (string) ($e['message'] ?? $e['error']['message'] ?? 'error');
@@ -408,6 +474,13 @@ final class Ai
         $written = (int) ($u['input_tokens_details']['cache_write_tokens'] ?? 0);
         $usage = ['in' => max(0, (int) ($u['input_tokens'] ?? 0) - $cached - $written), 'out' => (int) ($u['output_tokens'] ?? 0),
             'cache_read' => $cached, 'cache_write' => $written];
+        if ($final === null && $http['status'] === 200) {
+            // Flux interrompu avant le décompte final : estimation (environ 4 caractères par jeton, une image ≈ 1 000 jetons).
+            $json = (string) json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $images = 0;
+            $json = (string) preg_replace('~data:image/[a-z]+;base64,[A-Za-z0-9+/=]+~', '', $json, -1, $images);
+            $usage = ['in' => intdiv(strlen($json), 4) + 1000 * $images, 'out' => intdiv($bytes, 3), 'cache_read' => 0, 'cache_write' => 0];
+        }
         if ($http['error'] !== '' || $http['status'] >= 400 || $error !== '' || $final === null) {
             return ['ok' => false, 'error' => self::failure('openai', $http, $error), 'usage' => $usage];
         }
@@ -533,13 +606,18 @@ final class Ai
         return ['status' => $status, 'error' => $error, 'body' => $raw];
     }
 
-    /** Requête HTTP simple (corps JSON, ou formulaire multipart si $form), pour les images et les tests de connexion. */
-    public static function request(string $method, string $url, array $headers = [], ?array $body = null, int $timeout = 60, bool $form = false): array
+    /**
+     * Requête HTTP simple (corps JSON, ou formulaire multipart si $form), pour les images et les tests de connexion.
+     * $curl : options cURL en plus (adresse IP imposée…). Pendant l'attente, la connexion avec le navigateur
+     * est entretenue (tick) et la requête s'arrête si la personne a fermé la fenêtre.
+     */
+    public static function request(string $method, string $url, array $headers = [], ?array $body = null, int $timeout = 60, bool $form = false, array $curl = []): array
     {
         $maxBytes = 25_000_000;
         $out = '';
+        $lastTick = microtime(true);
         $ch = curl_init($url);
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, array_replace([
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_CONNECTTIMEOUT => 15,
@@ -554,7 +632,15 @@ final class Ai
                 $out .= $chunk;
                 return strlen($chunk);
             },
-        ]);
+            CURLOPT_NOPROGRESS => self::$tick === null,
+            CURLOPT_XFERINFOFUNCTION => static function () use (&$lastTick): int {
+                if (microtime(true) - $lastTick < 5) {
+                    return 0;
+                }
+                $lastTick = microtime(true);
+                return self::tick() ? 0 : 1;
+            },
+        ], $curl));
         if ($body !== null) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $form ? $body : json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
@@ -564,7 +650,7 @@ final class Ai
             'status' => (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE),
             'type' => (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE),
             'body' => $out,
-            'error' => $errno !== 0 ? curl_error($ch) : '',
+            'error' => $errno === 0 ? '' : (connection_aborted() ? 'aborted' : curl_error($ch)),
         ];
     }
 

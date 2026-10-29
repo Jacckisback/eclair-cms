@@ -31,6 +31,9 @@ check('Markdown : liens javascript retirés', $b[12]['text'] === 'x et y', $b[12
 check('Markdown : retour fidèle pour le modèle', str_contains(Markdown::fromBlocks($b), '![Bol](media:abc123)') && str_contains(Markdown::fromBlocks($b), '> [!WARNING] Attention'));
 check('Markdown : bloc équipe validé', Blocks::normalize([['type' => 'team', 'title' => 'Nous', 'items' => [['name' => 'Léa', 'role' => 'CEO', 'bio' => '<b>Hi</b><img src=x onerror=alert(1)>', 'media' => 'abc123', 'link' => 'javascript:alert(1)'], ['name' => '']]]])
     === [['type' => 'team', 'title' => 'Nous', 'items' => [['name' => 'Léa', 'role' => 'CEO', 'bio' => '<strong>Hi</strong>', 'media' => 'abc123', 'link' => '']]]]);
+$hb = Markdown::toBlocks("Ligne un  \nLigne deux\\\nLigne trois\nsuite");
+check('Markdown : retours à la ligne forcés', ($hb[0]['text'] ?? '') === 'Ligne un<br>Ligne deux<br>Ligne trois suite', $hb[0]['text'] ?? '');
+check('Markdown : entités lues une seule fois', Markdown::inline('3 &lt; 5 &amp; AT&T') === '3 &lt; 5 &amp; AT&amp;T', Markdown::inline('3 &lt; 5 &amp; AT&T'));
 $teamHtml = Blocks::html(Blocks::normalize([['type' => 'team', 'title' => '', 'items' => [['name' => 'Jean Dupont', 'role' => 'Gérant', 'bio' => 'Fondateur.', 'link' => 'https://www.linkedin.com/in/jd']]]]));
 check('bloc équipe : initiales sans photo, lien de profil', str_contains($teamHtml, '>JD</span>') && str_contains($teamHtml, 'linkedin.com ↗'), $teamHtml);
 
@@ -76,7 +79,30 @@ check('modif : date d’origine conservée', $changed['date'] === '' && count($l
 [$again] = AiTools::apply($changed, ['team_member' => ['name' => 'léa martin', 'role' => 'Directrice artistique']]);
 $team2 = $again['blocks'][array_search('team', array_column($again['blocks'], 'type'), true)];
 check('modif : membre existant mis à jour (sans doublon)', count($team2['items']) === 1 && $team2['items'][0]['role'] === 'Directrice artistique' && $team2['items'][0]['media'] === 'abc123');
+$fx = $item;
+$fx['blocks'] = Blocks::normalize([['type' => 'paragraph', 'text' => 'Profitez de nos <a href="https://shop.example/promo">offres promo</a> : 3 &lt; 5.<br>Voir <a href="/contact">la page contact</a>.']]);
+Eclair\Settings::save(['url' => 'https://atelier.example']);
+$site = 'https://atelier.example';
+[$f1] = AiTools::apply($fx, ['replace' => [['find' => 'promo', 'replace' => 'soldes'], ['find' => '3 &lt; 5', 'replace' => '3 &lt; 6']]]);
+check('remplacement : texte visible seulement, adresse du lien intacte', $f1['blocks'][0]['text'] === 'Profitez de nos <a href="https://shop.example/promo">offres soldes</a> : 3 &lt; 6.<br>Voir <a href="/contact">la page contact</a>.', $f1['blocks'][0]['text']);
+[$f2] = AiTools::apply($fx, ['replace' => [['find' => 'Voir [la page contact](' . $site . '/contact)', 'replace' => 'Écris-nous depuis [la page contact](' . $site . '/contact)']]]);
+check('remplacement : lien interne gardé relatif, retour à la ligne conservé', $f2['blocks'][0]['text'] === 'Profitez de nos <a href="https://shop.example/promo">offres promo</a> : 3 &lt; 5.<br>Écris-nous depuis <a href="/contact">la page contact</a>.', $f2['blocks'][0]['text']);
+Eclair\Settings::save(['url' => '']);
+[$f3, $l3, $m3] = AiTools::apply($fx, ['replace' => [['find' => 'nos offres', 'replace' => 'x']]]);
+check('remplacement : passage à cheval sur un lien refusé (rien d’abîmé)', $m3 === ['nos offres'] && $l3 === [] && $f3['blocks'] === $fx['blocks'], json_encode([$m3, $f3['blocks'][0]['text']]));
+[$f4] = AiTools::apply($fx, ['replace' => [['find' => '[offres promo](https://shop.example/promo)', 'replace' => '[offres soldes](https://shop.example/soldes)']]]);
+check('remplacement : lien entier remplacé quand le modèle le reprend', str_contains($f4['blocks'][0]['text'], 'nos <a href="https://shop.example/soldes">offres soldes</a> :') && !str_contains($f4['blocks'][0]['text'], '/promo'), $f4['blocks'][0]['text']);
+[$f5] = AiTools::apply($fx, ['replace' => [['find' => 'offres promo : 3 < 5. Voir', 'replace' => 'Fin']]]);
+check('remplacement : espaces souples, éléments entiers couverts', $f5['blocks'][0]['text'] === 'Profitez de nos Fin <a href="/contact">la page contact</a>.', $f5['blocks'][0]['text']);
 Store::delete('media');
+
+section('Assistant IA : demandes simultanées');
+$slots = [Ai::slot('u1'), Ai::slot('u1'), Ai::slot('u1'), Ai::slot('u2')];
+check('deux demandes à la fois par personne, pas trois', $slots[0] !== null && $slots[1] !== null && $slots[2] === null && $slots[3] !== null);
+fclose($slots[0]);
+$slots[0] = Ai::slot('u1');
+check('place libérée à la fin d’une demande', $slots[0] !== null);
+array_map(fn ($h) => $h && fclose($h), $slots);
 
 /* ─────────────────────────── Intégration HTTP ─────────────────────────── */
 if (in_array('--unit', $argv, true)) {
@@ -183,6 +209,13 @@ try {
     check('proposition à usage unique', ($api('POST', 'api/ai/apply', ['pid' => $prop['pid'] ?? ''])['json']['ok'] ?? true) === false);
     $undone = $api('POST', 'api/ai/undo', ['token' => $applied['json']['undo'] ?? '']);
     check('annulation : version d’avant rétablie', ($undone['json']['ok'] ?? false) && !str_contains((string) file_get_contents($copy . '/data/content/' . $teamId . '.php'), 'Léa'));
+    $r = $chat('DOUBLE ' . $teamId);
+    $pids = array_values(array_unique(array_column($r['cards'], 'pid')));
+    $applied2 = $api('POST', 'api/ai/apply', ['pid' => $pids[0] ?? '']);
+    $tp = json_decode(substr((string) file_get_contents($copy . '/data/content/' . $teamId . '.php'), strlen(Store::GUARD)), true);
+    check('contenu publié : une seule proposition qui cumule les deux changements', count($pids) === 1 && ($applied2['json']['ok'] ?? false) && $tp['title'] === 'Titre revu par l’IA'
+        && str_starts_with($tp['summary'], 'Un résumé ajouté') && $tp['status'] === 'published', json_encode([$pids, $applied2['json']]));
+    $api('POST', 'api/ai/undo', ['token' => $applied2['json']['undo'] ?? '']);
 
     // Retouche d'un brouillon : appliquée directement, annulable.
     $r = $chat('MODIFIE ' . $draftId . ' pour améliorer l’introduction');
@@ -196,6 +229,28 @@ try {
     $restored = json_decode(substr((string) file_get_contents($copy . '/data/content/' . $draftId . '.php'), strlen(Store::GUARD)), true);
     check('retouche annulée', $restored['title'] === 'Comment débuter la céramique en 5 étapes' && $restored['status'] === 'draft');
 
+    // Annulation périmée : une personne a modifié le brouillon depuis, « Annuler » est refusé et retiré de l'historique.
+    $read = static fn (string $id): array => json_decode(substr((string) file_get_contents($copy . '/data/content/' . $id . '.php'), strlen(Store::GUARD)), true);
+    $r = $chat('MODIFIE ' . $draftId . ' à nouveau');
+    $upd2 = array_values(array_filter($r['cards'], fn ($x) => $x['kind'] === 'updated'))[0] ?? [];
+    $api('POST', 'api/save', ['title' => 'Titre choisi par Camille'] + $read($draftId));
+    $late = $api('POST', 'api/ai/undo', ['token' => $upd2['undo'] ?? '']);
+    check('annulation refusée après une modification humaine', $late['status'] === 409 && $read($draftId)['title'] === 'Titre choisi par Camille', $late['body']);
+    $msgs = $api('GET', 'api/ai/chat/' . ($r['events'][0]['chat'] ?? 'x'))['json']['chat']['messages'] ?? [];
+    check('historique : « Annuler » retiré quand il n’est plus possible', ($msgs[1]['cards'][0]['kind'] ?? '') === 'updated' && !isset($msgs[1]['cards'][0]['undo']), json_encode($msgs[1]['cards'] ?? []));
+    $api('POST', 'api/save', $restored);
+
+    // Deux modifications du même brouillon dans une demande : cumulées, une carte récapitulative, une seule annulation.
+    $r = $chat('DOUBLE ' . $draftId);
+    $two = $read($draftId);
+    check('deux retouches de suite : cumulées', $two['title'] === 'Titre revu par l’IA' && str_starts_with($two['summary'], 'Un résumé ajouté') && count(array_unique(array_column($r['cards'], 'key'))) === 1, json_encode($r['cards']));
+    $msgs = $api('GET', 'api/ai/chat/' . ($r['events'][0]['chat'] ?? 'x'))['json']['chat']['messages'] ?? [];
+    $stored = $msgs[1]['cards'] ?? [];
+    check('deux retouches de suite : une carte récapitulative', count($stored) === 1 && count($stored[0]['changes'] ?? []) === 2 && ($stored[0]['undo'] ?? '') === ($r['cards'][0]['undo'] ?? '-'), json_encode($stored));
+    $api('POST', 'api/ai/undo', ['token' => $r['cards'][1]['undo'] ?? '']);
+    $back = $read($draftId);
+    check('deux retouches de suite : une annulation rétablit l’avant-demande', $back['title'] === $restored['title'] && $back['summary'] === $restored['summary'] && $back['status'] === 'draft');
+
     // Contenu ouvert dans l'éditeur : rien n'est enregistré côté serveur.
     $before = count(glob($copy . '/data/content/*.php'));
     $r = $chat('EDITEUR : ajoute une FAQ', ['context' => ['item' => ['id' => '', 'type' => 'post', 'title' => 'Brouillon local', 'status' => 'draft',
@@ -205,6 +260,15 @@ try {
     check('éditeur : aucun contenu enregistré', count(glob($copy . '/data/content/*.php')) === $before);
     $sys = array_values(array_filter($fakeLog(), fn ($l) => $l['p'] === '/v1/messages'));
     check('éditeur : texte non enregistré transmis au modèle', str_contains(end($sys)['b']['system'][1]['text'] ?? '', 'Texte non enregistré.'));
+    $r = $chat('DOUBLE current', ['context' => ['item' => ['id' => '', 'type' => 'post', 'title' => 'Brouillon local', 'status' => 'draft', 'seo' => ['title' => '', 'description' => '', 'keyword' => ''], 'options' => [],
+        'blocks' => [['type' => 'paragraph', 'text' => 'Nous sommes <strong>une équipe</strong> soudée. Profitez de nos <a href="https://shop.example/promo">offres promo</a>.']]]]]);
+    $eds = array_values(array_filter($r['cards'], fn ($x) => $x['kind'] === 'editor'));
+    $p2 = $eds[1]['patch'] ?? [];
+    check('éditeur : la seconde modification part de la première', ($p2['title'] ?? '') === 'Titre revu par l’IA' && str_starts_with($p2['summary'] ?? '', 'Un résumé ajouté'), json_encode($p2));
+    check('éditeur : remplacement dans le texte visible, lien et gras intacts', ($p2['blocks'][0]['text'] ?? '') === 'Nous sommes <strong>une équipe</strong> soudée. Profitez de nos <a href="https://shop.example/promo">offres soldes</a>.', $p2['blocks'][0]['text'] ?? '');
+    $sys = array_values(array_filter($fakeLog(), fn ($l) => $l['p'] === '/v1/messages'));
+    $toolResult = json_encode(end(end($sys)['b']['messages'])['content'] ?? [], JSON_UNESCAPED_UNICODE);
+    check('éditeur : passage à cheval sur le gras signalé au modèle', str_contains($toolResult, 'not_found') && str_contains($toolResult, 'sommes une'), $toolResult);
 
     // Refus de sécurité et erreurs.
     $r = $chat('REFUS');
@@ -249,8 +313,12 @@ try {
     $ideo = $api('POST', 'api/ai/assist', ['task' => 'cover', 'item' => $doc])['json'];
     check('Ideogram : image créée (formulaire multipart)', ($ideo['ok'] ?? false) && ($ideo['media']['w'] ?? 0) === 1344, json_encode($ideo));
 
-    // Budget et quotas.
+    // Budget et quotas : vérifié à l'entrée, puis avant chaque étape (la dépense est comptée étape par étape).
     $settingsAi(['provider' => 'anthropic', 'image' => '']);
+    $usage = json_decode(substr((string) file_get_contents($copy . '/data/ai/usage.php'), strlen(Store::GUARD)), true);
+    settings($copy, ['ai' => ['budget' => (float) ($usage['months'][date('Y-m')]['cost'] ?? 0) + 0.01]]);
+    $r = $chat('Écris un ARTICLE malgré le budget');
+    check('budget atteint pendant une demande : arrêt avant l’étape suivante', $r['tools'] === ['generate_image'] && str_contains($r['errors'][0] ?? '', 'Budget'), json_encode([$r['tools'], $r['errors']]));
     settings($copy, ['ai' => ['budget' => 0.001]]);
     $over = $api('POST', 'api/ai/chat', ['message' => 'Bonjour']);
     check('budget du mois atteint : demande refusée', $over['status'] === 429 && str_contains((string) ($over['json']['error'] ?? ''), 'Budget'), $over['body']);
