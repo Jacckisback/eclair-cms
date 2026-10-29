@@ -1,3 +1,7 @@
+<p align="center">
+  <b>Français</b> · <a href="GUIDE.en.md">English</a> · <a href="GUIDE.es.md">Español</a> · <a href="GUIDE.de.md">Deutsch</a> · <a href="GUIDE.it.md">Italiano</a> · <a href="GUIDE.pt-BR.md">Português</a> · <a href="GUIDE.zh-CN.md">简体中文</a>
+</p>
+
 # Guide d'Éclair CMS
 
 Tout ce qu'il faut savoir pour installer, utiliser, sécuriser et maintenir Éclair. Pour la présentation, retourne au [README](../README.md).

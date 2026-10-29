@@ -24,7 +24,7 @@
   <a href="#warum-éclair"><b>Warum Éclair</b></a> ·
   <a href="#vorschau"><b>Vorschau</b></a> ·
   <a href="#sicherheit"><b>Sicherheit</b></a> ·
-  <a href="docs/GUIDE.md"><b>Vollständiges Handbuch (Französisch)</b></a>
+  <a href="docs/GUIDE.de.md"><b>Vollständiges Handbuch</b></a>
 </p>
 
 <br>
@@ -171,7 +171,7 @@ Auf echtem Shared Hosting kommen die Netzwerklatenz und der PHP-Start deines Hos
 > [!NOTE]
 > **Offensives Sicherheitsaudit.** Race Conditions, Brute Force, Weiterleitungen, Injections, präparierte Dateien: 17 Schwachstellen wurden gefunden (2 schwere, 7 mittlere, 8 geringe) und alle behoben. Anschließend wurden die 13 Angriffsszenarien gegen die korrigierte Version wiederholt: alle abgewehrt. Die automatischen Tests (`php tests/run.php`) decken einen großen Teil davon ab.
 
-Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.md#sécurité) (auf Französisch).
+Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
 
 ## Installation in 3 Minuten
 
@@ -183,20 +183,20 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.md#sécurité) (auf 
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 
-**Voraussetzungen**: PHP 8.1 oder neuer (8.3 empfohlen), Apache oder LiteSpeed (praktisch jedes Shared Hosting: Hostinger, IONOS, OVHcloud …) und ein HTTPS-Zertifikat. Der Assistent prüft alles und erklärt, was zu tun ist. Nginx funktioniert ebenfalls ([Konfiguration](docs/GUIDE.md#nginx)).
+**Voraussetzungen**: PHP 8.1 oder neuer (8.3 empfohlen), Apache oder LiteSpeed (praktisch jedes Shared Hosting: Hostinger, IONOS, OVHcloud …) und ein HTTPS-Zertifikat. Der Assistent prüft alles und erklärt, was zu tun ist. Nginx funktioniert ebenfalls ([Konfiguration](docs/GUIDE.de.md#nginx)).
 
 > [!TIP]
 > Aus Sicherheitsgründen muss die Installation innerhalb von **2 Stunden** nach dem ersten Aufruf abgeschlossen werden. Danach lösche `data/install-window.php` per FTP und lade die Seite neu.
 
 ## Dokumentation
 
-Das [vollständige Handbuch](docs/GUIDE.md) gibt es derzeit auf Französisch. Es behandelt:
+Das [vollständige Handbuch](docs/GUIDE.de.md) erklärt alles Weitere:
 
-- [Installation](docs/GUIDE.md#installation): Voraussetzungen, Website-Typen, erste Schritte
-- [Funktionen im Detail](docs/GUIDE.md#fonctionnalités-en-détail): Geschwindigkeit, SEO, GEO, Block-Editor
-- [Éclair im Alltag](docs/GUIDE.md#utiliser-éclair-au-quotidien)
-- [Aktualisieren, sichern, umziehen](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager)
-- [Fehlerbehebung](docs/GUIDE.md#dépannage): Passwort vergessen, Fehler 404 oder 500, Nginx …
+- [Installation](docs/GUIDE.de.md#installation): Voraussetzungen, Website-Typen, erste Schritte
+- [Funktionen im Detail](docs/GUIDE.de.md#funktionen-im-detail): Geschwindigkeit, SEO, GEO, Block-Editor
+- [Éclair im Alltag](docs/GUIDE.de.md#éclair-im-alltag)
+- [Aktualisieren, sichern, umziehen](docs/GUIDE.de.md#aktualisieren-sichern-umziehen)
+- [Fehlerbehebung](docs/GUIDE.de.md#fehlerbehebung): Passwort vergessen, Fehler 404 oder 500, Nginx …
 
 ## Für Entwickler
 
@@ -208,7 +208,7 @@ php tests/run.php                                                           # 17
 php tools/build.php                                                         # Archiv zum Verteilen
 ```
 
-Projektstruktur und Anpassung des Themes: siehe [Pour les développeurs](docs/GUIDE.md#pour-les-développeurs) (auf Französisch).
+Projektstruktur und Anpassung des Themes: siehe [Für Entwickler](docs/GUIDE.de.md#für-entwickler).
 
 ## Lizenz
 

@@ -24,7 +24,7 @@
   <a href="#why-éclair"><b>Why Éclair</b></a> ·
   <a href="#preview"><b>Preview</b></a> ·
   <a href="#security"><b>Security</b></a> ·
-  <a href="docs/GUIDE.md"><b>Full guide (French)</b></a>
+  <a href="docs/GUIDE.en.md"><b>Full guide</b></a>
 </p>
 
 <br>
@@ -171,7 +171,7 @@ On real shared hosting, add your host's network latency and PHP startup time.
 > [!NOTE]
 > **Offensive security review.** Race conditions, brute force, redirects, injections, booby-trapped files: 17 vulnerabilities were found (2 high, 7 medium, 8 low) and all of them fixed. The 13 attack scenarios were then replayed against the fixed version: all neutralized. The automated tests (`php tests/run.php`) cover a large part of them.
 
-Full details in the [guide, Security section](docs/GUIDE.md#sécurité) (in French).
+Full details in the [guide, Security section](docs/GUIDE.en.md#security).
 
 ## Install in 3 minutes
 
@@ -183,20 +183,20 @@ Full details in the [guide, Security section](docs/GUIDE.md#sécurité) (in Fren
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
-**Requirements**: PHP 8.1 or later (8.3 recommended), Apache or LiteSpeed (virtually every shared host: Hostinger, IONOS, OVHcloud…), an HTTPS certificate. The wizard checks everything and explains what to fix. Nginx works too ([configuration](docs/GUIDE.md#nginx)).
+**Requirements**: PHP 8.1 or later (8.3 recommended), Apache or LiteSpeed (virtually every shared host: Hostinger, IONOS, OVHcloud…), an HTTPS certificate. The wizard checks everything and explains what to fix. Nginx works too ([configuration](docs/GUIDE.en.md#nginx)).
 
 > [!TIP]
 > For security, the installation must be completed within **2 hours** of the first visit. After that, delete `data/install-window.php` via FTP and reload the page.
 
 ## Documentation
 
-The [full guide](docs/GUIDE.md) is currently available in French. It covers:
+The [full guide](docs/GUIDE.en.md) covers everything else:
 
-- [Installation](docs/GUIDE.md#installation): requirements, site types, first steps
-- [Features in detail](docs/GUIDE.md#fonctionnalités-en-détail): speed, SEO, GEO, block editor
-- [Everyday use](docs/GUIDE.md#utiliser-éclair-au-quotidien)
-- [Updating, backing up, moving](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager)
-- [Troubleshooting](docs/GUIDE.md#dépannage): forgotten password, 404 or 500 errors, Nginx…
+- [Installation](docs/GUIDE.en.md#installation): requirements, site types, first steps
+- [Features in detail](docs/GUIDE.en.md#features-in-detail): speed, SEO, GEO, block editor
+- [Everyday use](docs/GUIDE.en.md#everyday-use)
+- [Updating, backing up, moving](docs/GUIDE.en.md#updating-backing-up-moving)
+- [Troubleshooting](docs/GUIDE.en.md#troubleshooting): forgotten password, 404 or 500 errors, Nginx…
 
 ## For developers
 
@@ -208,7 +208,7 @@ php tests/run.php                                                           # 17
 php tools/build.php                                                         # ready-to-ship archive
 ```
 
-Project structure and theme customization: see [For developers](docs/GUIDE.md#pour-les-développeurs) (in French).
+Project structure and theme customization: see [For developers](docs/GUIDE.en.md#for-developers).
 
 ## License
 

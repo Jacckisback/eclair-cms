@@ -24,7 +24,7 @@
   <a href="#perché-éclair"><b>Perché Éclair</b></a> ·
   <a href="#anteprima"><b>Anteprima</b></a> ·
   <a href="#sicurezza"><b>Sicurezza</b></a> ·
-  <a href="docs/GUIDE.md"><b>Guida completa (in francese)</b></a>
+  <a href="docs/GUIDE.it.md"><b>Guida completa</b></a>
 </p>
 
 <br>
@@ -171,7 +171,7 @@ Su un vero hosting condiviso, aggiungi la latenza di rete e l’avvio di PHP del
 > [!NOTE]
 > **Audit di sicurezza offensivo.** Race condition, brute force, reindirizzamenti, injection, file trappola: sono state trovate 17 vulnerabilità (2 gravi, 7 medie, 8 lievi), tutte corrette. I 13 scenari di attacco sono poi stati ripetuti sulla versione corretta: tutti neutralizzati. I test automatici (`php tests/run.php`) ne coprono gran parte.
 
-Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.md#sécurité) (in francese).
+Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.it.md#sicurezza).
 
 ## Installazione in 3 minuti
 
@@ -183,20 +183,20 @@ Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.md#sécurité) (in 
 2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
 3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
 
-**Requisiti**: PHP 8.1 o successivo (consigliato 8.3), Apache o LiteSpeed (praticamente tutti gli hosting condivisi: Hostinger, IONOS, OVHcloud…) e un certificato HTTPS. La procedura guidata controlla tutto e spiega cosa correggere. Funziona anche con Nginx ([configurazione](docs/GUIDE.md#nginx)).
+**Requisiti**: PHP 8.1 o successivo (consigliato 8.3), Apache o LiteSpeed (praticamente tutti gli hosting condivisi: Hostinger, IONOS, OVHcloud…) e un certificato HTTPS. La procedura guidata controlla tutto e spiega cosa correggere. Funziona anche con Nginx ([configurazione](docs/GUIDE.it.md#nginx)).
 
 > [!TIP]
 > Per sicurezza, l’installazione va completata entro **2 ore** dalla prima visita. Scaduto il tempo, elimina `data/install-window.php` via FTP e ricarica la pagina.
 
 ## Documentazione
 
-La [guida completa](docs/GUIDE.md) è per ora disponibile in francese. Comprende:
+La [guida completa](docs/GUIDE.it.md) spiega tutto il resto:
 
-- [Installazione](docs/GUIDE.md#installation): requisiti, tipi di sito, primi passi
-- [Funzionalità in dettaglio](docs/GUIDE.md#fonctionnalités-en-détail): velocità, SEO, GEO, editor a blocchi
-- [Uso quotidiano](docs/GUIDE.md#utiliser-éclair-au-quotidien)
-- [Aggiornare, fare backup, traslocare](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager)
-- [Risoluzione dei problemi](docs/GUIDE.md#dépannage): password dimenticata, errori 404 o 500, Nginx…
+- [Installazione](docs/GUIDE.it.md#installazione): requisiti, tipi di sito, primi passi
+- [Funzionalità in dettaglio](docs/GUIDE.it.md#funzionalità-in-dettaglio): velocità, SEO, GEO, editor a blocchi
+- [Uso quotidiano](docs/GUIDE.it.md#uso-quotidiano)
+- [Aggiornare, fare backup, traslocare](docs/GUIDE.it.md#aggiornare-fare-backup-traslocare)
+- [Risoluzione dei problemi](docs/GUIDE.it.md#risoluzione-dei-problemi): password dimenticata, errori 404 o 500, Nginx…
 
 ## Per sviluppatori
 
@@ -208,7 +208,7 @@ php tests/run.php                                                           # 17
 php tools/build.php                                                         # archivio pronto da distribuire
 ```
 
-Struttura del progetto e personalizzazione del tema: vedi [Pour les développeurs](docs/GUIDE.md#pour-les-développeurs) (in francese).
+Struttura del progetto e personalizzazione del tema: vedi [Per sviluppatori](docs/GUIDE.it.md#per-sviluppatori).
 
 ## Licenza
 

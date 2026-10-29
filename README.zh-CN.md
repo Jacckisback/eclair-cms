@@ -24,7 +24,7 @@
   <a href="#为什么选择-éclair"><b>为什么选择 Éclair</b></a> ·
   <a href="#界面预览"><b>界面预览</b></a> ·
   <a href="#安全"><b>安全</b></a> ·
-  <a href="docs/GUIDE.md"><b>完整指南（法语）</b></a>
+  <a href="docs/GUIDE.zh-CN.md"><b>完整指南</b></a>
 </p>
 
 <br>
@@ -171,7 +171,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 > [!NOTE]
 > **攻击性安全审计。** 竞态条件、暴力破解、重定向、注入、恶意文件：共发现 17 个漏洞（2 个高危、7 个中危、8 个低危），已全部修复。随后在修复后的版本上重放了 13 个攻击场景：全部被成功拦截。自动化测试（`php tests/run.php`）覆盖了其中的大部分。
 
-详情请见[指南中的安全章节](docs/GUIDE.md#sécurité)（法语）。
+详情请见[指南中的安全章节](docs/GUIDE.zh-CN.md#安全)。
 
 ## 3 分钟完成安装
 
@@ -183,20 +183,20 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
-**环境要求**：PHP 8.1 及以上（推荐 8.3），Apache 或 LiteSpeed（几乎所有虚拟主机都满足：Hostinger、IONOS、OVHcloud……），以及 HTTPS 证书。安装向导会检查所有条件并告诉你如何修正。也支持 Nginx（[配置方法](docs/GUIDE.md#nginx)）。
+**环境要求**：PHP 8.1 及以上（推荐 8.3），Apache 或 LiteSpeed（几乎所有虚拟主机都满足：Hostinger、IONOS、OVHcloud……），以及 HTTPS 证书。安装向导会检查所有条件并告诉你如何修正。也支持 Nginx（[配置方法](docs/GUIDE.zh-CN.md#nginx)）。
 
 > [!TIP]
 > 出于安全考虑，必须在首次访问后的 **2 小时**内完成安装。超时后，请通过 FTP 删除 `data/install-window.php` 并刷新页面。
 
 ## 文档
 
-[完整指南](docs/GUIDE.md)目前只有法语版，内容包括：
+[完整指南](docs/GUIDE.zh-CN.md)详细介绍了其余内容：
 
-- [安装](docs/GUIDE.md#installation)：环境要求、网站类型、入门步骤
-- [功能详解](docs/GUIDE.md#fonctionnalités-en-détail)：速度、SEO、GEO、区块编辑器
-- [日常使用](docs/GUIDE.md#utiliser-éclair-au-quotidien)
-- [更新、备份、迁移](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager)
-- [故障排除](docs/GUIDE.md#dépannage)：忘记密码、404 或 500 错误、Nginx……
+- [安装](docs/GUIDE.zh-CN.md#安装)：环境要求、网站类型、入门步骤
+- [功能详解](docs/GUIDE.zh-CN.md#功能详解)：速度、SEO、GEO、区块编辑器
+- [日常使用](docs/GUIDE.zh-CN.md#日常使用)
+- [更新、备份、迁移](docs/GUIDE.zh-CN.md#更新备份迁移)
+- [故障排除](docs/GUIDE.zh-CN.md#故障排除)：忘记密码、404 或 500 错误、Nginx……
 
 ## 开发者
 
@@ -208,7 +208,7 @@ php tests/run.php                                                           # 17
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 
-项目结构和主题定制：请参阅 [Pour les développeurs](docs/GUIDE.md#pour-les-développeurs)（法语）。
+项目结构和主题定制：请参阅[开发者指南](docs/GUIDE.zh-CN.md#开发者指南)。
 
 ## 许可证
 
