@@ -57,7 +57,7 @@ final class Ai
     public static function provider(): string
     {
         $p = (string) self::config()['provider'];
-        return isset(self::PROVIDERS[$p]) && Vault::has('ai.' . $p) ? $p : '';
+        return isset(self::PROVIDERS[$p]) && function_exists('curl_init') && Vault::has('ai.' . $p) ? $p : '';
     }
 
     public static function enabled(): bool
@@ -131,7 +131,7 @@ final class Ai
         $c = self::config();
         $budget = (float) $c['budget'];
         if ($budget > 0 && self::usage()['cost'] >= $budget) {
-            return t('Budget IA du mois atteint ({spent} sur {budget}). Un administrateur peut l’augmenter dans Réglages › IA.', [
+            return t('Budget IA du mois atteint ({spent} sur {budget}). Un administrateur peut l’augmenter dans Réglages › Assistant IA.', [
                 'spent' => self::money(self::usage()['cost']), 'budget' => self::money($budget),
             ]);
         }
@@ -203,7 +203,7 @@ final class Ai
         $model = (string) ($req['model'] ?? self::model($provider));
         $key = Vault::get('ai.' . $provider);
         if ($key === '') {
-            return ['ok' => false, 'error' => t('Assistant IA non configuré : ajoute une clé d’API dans Réglages › IA.'), 'cost' => 0.0];
+            return ['ok' => false, 'error' => t('Assistant IA non configuré : ajoute une clé d’API dans Réglages › Assistant IA.'), 'cost' => 0.0];
         }
         $result = $provider === 'openai'
             ? self::openai($key, $model, $req, $onText, $onTick)
@@ -587,10 +587,10 @@ final class Ai
         $low = strtolower($detail);
         return match (true) {
             ($http['error'] ?? '') !== '' && $status === 0 => t('Impossible de joindre {name} : vérifie la connexion internet du serveur, puis réessaie.', ['name' => $name]),
-            $status === 401 || $status === 403 && str_contains($low, 'key') => t('Clé d’API refusée par {name} : vérifie-la dans Réglages › IA.', ['name' => $name]),
+            $status === 401 || $status === 403 && str_contains($low, 'key') => t('Clé d’API refusée par {name} : vérifie-la dans Réglages › Assistant IA.', ['name' => $name]),
             str_contains($low, 'credit') || str_contains($low, 'quota') || str_contains($low, 'billing') || $status === 402
                 => t('Crédit épuisé chez {name} : recharge ton compte chez le fournisseur, puis réessaie.', ['name' => $name]),
-            $status === 404 || str_contains($low, 'model') && $status === 400 => t('Modèle indisponible avec cette clé : choisis-en un autre dans Réglages › IA.'),
+            $status === 404 || str_contains($low, 'model') && $status === 400 => t('Modèle indisponible avec cette clé : choisis-en un autre dans Réglages › Assistant IA.'),
             $status === 429 => t('Trop de demandes envoyées à {name} : réessaie dans une minute.', ['name' => $name]),
             $status >= 500 || str_contains($low, 'overloaded') => t('{name} est momentanément surchargé : réessaie dans un instant.', ['name' => $name]),
             default => t('{name} a renvoyé une erreur : {detail}', ['name' => $name, 'detail' => $detail !== '' ? $detail : 'HTTP ' . $status]),

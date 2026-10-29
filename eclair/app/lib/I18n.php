@@ -7,8 +7,9 @@ defined('ECLAIR') || exit;
 
 /**
  * Traductions de l'administration. Le texte français sert de référence : les sources lisibles
- * i18n/<langue>.php du dépôt sont compilées par tools/i18n.php en app/lang/<langue>.php,
- * indexées par l'empreinte CRC32 du texte français.
+ * i18n/<langue>.php du dépôt sont compilées par tools/i18n.php en app/lang/<langue>.json.gz
+ * (JSON compressé), indexées par l'empreinte CRC32 du texte français. Sans l'extension zlib
+ * (très rare), l'administration reste en français.
  */
 final class I18n
 {
@@ -35,8 +36,9 @@ final class I18n
     {
         if (self::$lang !== 'fr') {
             if (self::$dict === null) {
-                $file = ECLAIR_ROOT . '/app/lang/' . self::$lang . '.php';
-                $dict = is_file($file) ? include $file : [];
+                $raw = @file_get_contents(ECLAIR_ROOT . '/app/lang/' . self::$lang . '.json.gz');
+                $json = is_string($raw) && function_exists('gzdecode') ? @gzdecode($raw) : false;
+                $dict = is_string($json) ? json_decode($json, true) : null;
                 self::$dict = is_array($dict) ? $dict : [];
             }
             $text = self::$dict[hash('crc32b', $text)] ?? $text;

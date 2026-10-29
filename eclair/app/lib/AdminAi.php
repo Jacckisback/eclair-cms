@@ -310,7 +310,7 @@ final class AdminAi
 
             case 'cover':
                 if (Ai::imager() === '') {
-                    Http::json(['ok' => false, 'error' => t('Aucun générateur d’images n’est configuré (Réglages › IA).')], 422);
+                    Http::json(['ok' => false, 'error' => t('Aucun générateur d’images n’est configuré (Réglages › Assistant IA).')], 422);
                 }
                 if (!$item || ($item['title'] === t('Sans titre') && $item['blocks'] === [])) {
                     Http::json(['ok' => false, 'error' => t('Écris d’abord un peu de contenu : l’IA s’appuie sur ton texte.')], 422);

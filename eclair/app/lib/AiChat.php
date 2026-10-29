@@ -262,7 +262,7 @@ final class AiChat
     {
         $images = Ai::imager() !== ''
             ? "- Create illustrations with the image AI (generate_image).\n"
-            : "- Image generation is not set up: suggest images from the media library (find_media) or ask the user to attach a photo. An administrator can enable an image AI in Settings › AI.\n";
+            : "- Image generation is not set up: suggest images from the media library (find_media) or ask the user to attach a photo. An administrator can enable an image AI in Settings › AI assistant.\n";
         $name = (string) Settings::get('name');
         $profile = self::profile();
         return <<<PROMPT
@@ -341,7 +341,7 @@ PROMPT;
             array_unshift($out, "## Who we are and what we offer\n" . $about);
         }
         return $out ? implode("\n\n", $out)
-            : 'No editorial profile has been written yet. Infer the tone and audience from the site itself (its home page and recent articles, with get_content) and stay warm, clear and professional. After your first piece of content, suggest filling in the editorial profile (Settings › AI, where one click drafts it from the site).';
+            : 'No editorial profile has been written yet. Infer the tone and audience from the site itself (its home page and recent articles, with get_content) and stay warm, clear and professional. After your first piece of content, suggest filling in the editorial profile (Settings › AI assistant, where one click drafts it from the site).';
     }
 
     /** Contexte variable (non mis en cache) : date, personne, inventaire du site, contenu ouvert dans l'éditeur. */

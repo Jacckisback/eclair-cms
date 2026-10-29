@@ -22,7 +22,7 @@ final class AiImage
     {
         $provider = Ai::imager();
         if ($provider === '') {
-            throw new \RuntimeException(t('Aucun générateur d’images n’est configuré (Réglages › IA).'));
+            throw new \RuntimeException(t('Aucun générateur d’images n’est configuré (Réglages › Assistant IA).'));
         }
         $prompt = trim(mb_substr($prompt, 0, 3500));
         if (mb_strlen($prompt) < 10) {
@@ -31,7 +31,7 @@ final class AiImage
         [, $model, $price] = Ai::IMAGES[$provider];
         $budget = (float) Ai::config()['budget'];
         if ($budget > 0 && Ai::usage()['cost'] + $price > $budget) {
-            throw new \RuntimeException(t('Budget IA du mois atteint ({spent} sur {budget}). Un administrateur peut l’augmenter dans Réglages › IA.', [
+            throw new \RuntimeException(t('Budget IA du mois atteint ({spent} sur {budget}). Un administrateur peut l’augmenter dans Réglages › Assistant IA.', [
                 'spent' => Ai::money(Ai::usage()['cost']), 'budget' => Ai::money($budget),
             ]));
         }

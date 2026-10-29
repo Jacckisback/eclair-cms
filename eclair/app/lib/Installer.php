@@ -90,6 +90,9 @@ final class Installer
         $add(t('Connexion sécurisée (HTTPS)'), Req::isHttps() ? 'ok' : 'warn', Req::isHttps() ? '' : t('Active le certificat SSL gratuit (Let’s Encrypt) de ton hébergeur, puis recharge en https://.'));
         $add(t('Chiffrement des mots de passe'), defined('PASSWORD_ARGON2ID') ? 'ok' : 'ok', defined('PASSWORD_ARGON2ID') ? 'Argon2id' : 'Bcrypt');
         $add(t('Sauvegardes en un clic (ZIP)'), class_exists('ZipArchive') ? 'ok' : 'warn', class_exists('ZipArchive') ? '' : t('Extension zip absente : la sauvegarde se fera par FTP.'));
+        $add(t('Administration en plusieurs langues (zlib)'), function_exists('gzdecode') ? 'ok' : 'warn', function_exists('gzdecode') ? '' : t('Extension zlib absente : l’administration restera en français.'));
+        $ai = function_exists('curl_init') && Vault::available();
+        $add(t('Assistant IA (cURL et chiffrement)'), $ai ? 'ok' : 'warn', $ai ? '' : t('Extension curl, sodium ou openssl absente : l’assistant IA ne pourra pas être activé.'));
         return $checks;
     }
 

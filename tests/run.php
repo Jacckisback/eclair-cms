@@ -192,11 +192,14 @@ foreach (array_keys(Eclair\I18n::LANGS) as $lang) {
     check("$lang : tous les textes traduits", $gaps === [], implode(' | ', array_slice($gaps, 0, 3)));
     $broken = array_filter(array_keys($dict), static fn ($fr) => trim((string) $dict[$fr]) === '' || $marks((string) $fr) != $marks((string) $dict[$fr]));
     check("$lang : variables, balises et retours à la ligne conservés", $broken === [], implode(' | ', array_slice($broken, 0, 3)));
-    check("$lang : fichier livré à jour (php tools/i18n.php)", is_file($source) && (string) @file_get_contents(ECLAIR_ROOT . "/app/lang/$lang.php") === eclair_i18n_compile($source));
+    check("$lang : fichier livré à jour (php tools/i18n.php)", is_file($source) && (string) @file_get_contents(ECLAIR_ROOT . "/app/lang/$lang.json.gz") === eclair_i18n_compile($source));
     Eclair\I18n::setLang($lang);
     check("$lang : interface traduite", t('Réglages') !== 'Réglages' && t('il y a {n} min', ['n' => 5]) !== 'il y a 5 min');
 }
 Eclair\I18n::setLang('fr');
+$untranslated = array_values(array_diff(eclair_i18n_texts(), array_keys($reference)));
+check('chaque texte de l’interface a sa traduction (i18n/*.php)', $untranslated === [], implode(' | ', array_slice($untranslated, 0, 4)));
+check('compilation stable (même fichier à chaque fois)', eclair_i18n_compile(dirname(__DIR__) . '/i18n/de.php') === eclair_i18n_compile(dirname(__DIR__) . '/i18n/de.php'));
 
 /* ─────────────────────────── Sécurité (unitaire) ─────────────────────────── */
 section('Limites, journaux, comptes, médias');
