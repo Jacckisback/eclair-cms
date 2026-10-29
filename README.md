@@ -70,7 +70,7 @@ WordPress sait tout faire, mais il lui faut une base de données, des extensions
 |---|---|---|
 | **Installation** | Créer une base MySQL, puis lancer l'assistant | ✅ Envoyer le dossier, répondre à 4 questions |
 | **Base de données** | MySQL obligatoire | ✅ Aucune (fichiers protégés) |
-| **Archive à télécharger** | ≈ 25 Mo[^wp] | ✅ 257 Ko |
+| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 257 Ko |
 | **SEO, sitemap, données structurées** | Extension à installer et à maintenir | ✅ Intégré |
 | **GEO : llms.txt, Markdown, robots IA** | Extensions, rarement complet | ✅ Intégré |
 | **Pages publiques** | Générées à chaque visite, sauf extension de cache | ✅ Servies depuis un cache statique |
@@ -214,4 +214,4 @@ Structure du projet et personnalisation du thème : voir [Pour les développeurs
 
 <p align="center"><sub>⚡ Éclair, pour les indépendants et les petites entreprises qui veulent un site rapide, bien référencé et tranquille.</sub></p>
 
-[^wp]: Archive de WordPress 6.9 : 24,8 Mo, d'après le [ticket Trac 64734](https://core.trac.wordpress.org/ticket/64734).
+[^wp]: Archive officielle de WordPress 7.1.4 : 37 239 942 octets, soit 35,5 Mo ([lien de téléchargement](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), vérifié le 29 octobre 2026).
