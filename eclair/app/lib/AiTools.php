@@ -315,8 +315,10 @@ final class AiTools
         $id = preg_replace('/[^a-z0-9]/', '', (string) ($in['id'] ?? '')) ?? '';
         $editing = ($ctx['editing']['id'] ?? null) === $id ? $ctx['editing']['item'] : null;
         // Contenu publié déjà modifié dans ce tour : la nouvelle modification complète la même proposition.
+        // Si la personne l'a déjà appliquée ou ignorée entre-temps, une nouvelle proposition repart du contenu actuel.
         $pid = (string) ($ctx['turn']['proposals'][$id] ?? '');
         $proposal = $pid !== '' ? Store::read('ai/proposals/' . $pid) : null;
+        $pid = is_array($proposal) ? $pid : '';
         $item = $editing ?? (is_array($proposal) ? $proposal['data'] : Content::get($id));
         if (!$item) {
             return self::fail('No content with id "' . $id . '". Use search_content to find ids.');
@@ -365,6 +367,7 @@ final class AiTools
                 Store::write('ai/undo/' . $token, ['after' => self::fingerprint($saved)] + $undo);
             } else {
                 $token = self::snapshot($item, $saved, $ctx['user']['id']);
+                unset($ctx['turn']['cards']['u-' . $id]); // modification précédente annulée entre-temps : nouveau récapitulatif
             }
             $ctx['turn']['undo'][$id] = $token;
             return ['result' => ['done' => 'Draft updated (the user can undo).'] + $scores + $warn,

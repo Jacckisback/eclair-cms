@@ -1,7 +1,7 @@
 <?php exit; ?>
 {
     "version": "1.2.0",
-    "generated": "2026-10-29T19:26:03+00:00",
+    "generated": "2026-10-29T19:27:48+00:00",
     "files": {
         ".htaccess": "3c7ec6140820ba41a357d63a9f96aa4c3469f13abca8d735e844896c3a9784cd",
         "app/.htaccess": "c591e29d6749697612e0932106a1820ff05705e63910dfa19d7b2e5c7ff39253",
@@ -48,7 +48,7 @@
         "app/lib/Ai.php": "d3376122a1ad017ceb24f8327000cb2abc52d37bba4d5817498762ccffe75e2c",
         "app/lib/AiChat.php": "f63d7e837360e3417e07c74fe6ca21ada0c71563ed3d23f1ff26d0d59be6b504",
         "app/lib/AiImage.php": "a991f663d4835c8b9b0eaffb349204a34383b277d444f3279fca6f3a84da70ba",
-        "app/lib/AiTools.php": "24383f198a0b296ec712c55b02d4fbc6dab9fdf6311373ed6627a67a5f19cb99",
+        "app/lib/AiTools.php": "7305c9c3e4879785befe4369c4f5d0a297c431c7e89c6db21f7180ae3ce470c4",
         "app/lib/Analyzer.php": "7f8c99272db269fb42e2cc80f2483ef026c79f29e6cbce314a83a99dd2fca2ea",
         "app/lib/App.php": "300b6498f9ecdf57a1d9c20976c2f2f195f0702aab19fc2e72584a62fe9ef60a",
         "app/lib/Auth.php": "df2669f38735327e1e663727e977da00c46afb1910bf7d8619ee5b499023677e",
