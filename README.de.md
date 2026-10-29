@@ -22,6 +22,7 @@
 <p align="center">
   <a href="#installation-in-3-minuten"><b>Installieren</b></a> ·
   <a href="#warum-éclair"><b>Warum Éclair</b></a> ·
+  <a href="#ki-assistent-bitten-prüfen-veröffentlichen"><b>KI-Assistent</b></a> ·
   <a href="#vorschau"><b>Vorschau</b></a> ·
   <a href="#sicherheit"><b>Sicherheit</b></a> ·
   <a href="docs/GUIDE.de.md"><b>Vollständiges Handbuch</b></a>
@@ -68,6 +69,52 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
   </tr>
 </table>
 
+## KI-Assistent: bitten, prüfen, veröffentlichen
+
+<p align="center">
+  <img src="docs/images/de/frame-ai.webp" alt="Der KI-Assistent von Éclair: Auf die Anfrage „Schreib einen Artikel über die Wahl der Markenfarben, mit einem Bild“ erstellt er das Bild und einen vollständigen Entwurf mit SEO-Score 91 und GEO-Score 100" width="100%">
+</p>
+
+Beschreib einfach, was du brauchst, wie im Gespräch mit einem Kollegen: *„Schreib einen Artikel über die Wahl der Markenfarben, mit einem Bild.“* Der Assistent prüft, ob es zum Thema schon einen Artikel gibt, erstellt das Bild, schreibt den vollständigen Entwurf (Titel, „Das Wichtigste“, Zwischenüberschriften, Tabelle, FAQ, Meta-Beschreibung, interne Links) **im Ton deiner Website** und legt ihn dir dann mit seinen SEO- und GEO-Scores vor. **Nichts wird ohne deinen Klick veröffentlicht.**
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>✍️ Schreibt wie du</h3>
+      Ein <b>Redaktionsprofil</b>, mit einem Klick aus deiner Website entworfen: Zielgruppe, Ton, Werte, Regeln, Bildstil. Jeder Text folgt außerdem den Analyseregeln von Éclair: Die Entwürfe zielen von Anfang an auf einen hohen Score.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🖼️ Bilder inklusive</h3>
+      <b>GPT Image 2.5</b>, <b>FLUX 3</b> oder <b>Ideogram 3</b>: Das Beitragsbild wird passend zum Artikel gestaltet, als WebP optimiert und beschrieben (Alternativtext). Oder du hängst deine eigenen Fotos an.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>👥 Arbeitet direkt an deiner Website</h3>
+      „Füge Léa Martin mit dem angehängten Foto zur Teamseite hinzu“: Die Änderung ist vorbereitet, du siehst sie dir in der Vorschau an und übernimmst sie mit einem Klick. Rückgängig geht ebenfalls mit einem Klick.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🛡️ Du behältst die Kontrolle</h3>
+      Die KI veröffentlicht und löscht nie etwas. Verschlüsselte API-Schlüssel, Monatsbudget, Tageslimit. <b>Claude oder ChatGPT</b> mit deinem eigenen Schlüssel: kein Abo, etwa <b>0,24 $ pro Artikel</b> mit Claude Opus 5.5.
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/de/frame-ai-team.webp" alt="Der Assistent bereitet vor, Léa Martin mit ihrem Foto zur Seite „À propos“ hinzuzufügen: Vorschau, Übernehmen oder Verwerfen">
+      <p align="center"><b>Vorschläge zur Freigabe</b><br><sub>Auf einer veröffentlichten Seite ändert sich nichts ohne deine Zustimmung.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/de/frame-ai-editor.webp" alt="Im Editor eine markierte Textstelle und das KI-Menü: Verbessern, Fehler korrigieren, Kürzen, Ausbauen, Vereinfachen, Übersetzen">
+      <p align="center"><b>Feinschliff mit einem Klick</b><br><sub>Verbessern, korrigieren, kürzen, übersetzen, FAQ oder Alternativtexte schreiben.</sub></p>
+    </td>
+  </tr>
+</table>
+
+Aktivierung in 5 Minuten und Preise im Detail: siehe [Handbuch, Abschnitt KI-Assistent](docs/GUIDE.de.md#ki-assistent).
+
 ## Éclair im Vergleich zu WordPress
 
 | | Klassisches WordPress | ⚡ Éclair |
@@ -81,6 +128,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
 | **Cookies auf der öffentlichen Website** | Oft viele | ✅ Keine |
 | **Zwei-Faktor-Authentifizierung, Brute-Force-Schutz** | Plugins | ✅ Integriert |
 | **Plugin-Updates** | Ständig, die häufigste Ursache für Sicherheitslücken | ✅ Keine Plugins zu aktualisieren |
+| **KI-Assistent (Texte, Bilder)** | Plugins, oft mit Abo | ✅ Integriert: Claude oder ChatGPT, mit deinem Schlüssel |
 
 ## Performance
 
@@ -195,6 +243,7 @@ Das [vollständige Handbuch](docs/GUIDE.de.md) erklärt alles Weitere:
 - [Installation](docs/GUIDE.de.md#installation): Voraussetzungen, Website-Typen, erste Schritte
 - [Funktionen im Detail](docs/GUIDE.de.md#funktionen-im-detail): Geschwindigkeit, SEO, GEO, Block-Editor
 - [Éclair im Alltag](docs/GUIDE.de.md#éclair-im-alltag)
+- [KI-Assistent](docs/GUIDE.de.md#ki-assistent): Aktivierung, Redaktionsprofil, Kosten, Sicherheit
 - [Aktualisieren, sichern, umziehen](docs/GUIDE.de.md#aktualisieren-sichern-umziehen)
 - [Fehlerbehebung](docs/GUIDE.de.md#fehlerbehebung): Passwort vergessen, Fehler 404 oder 500, Nginx …
 

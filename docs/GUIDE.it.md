@@ -11,10 +11,11 @@ Tutto quello che c’è da sapere per installare, usare, proteggere e mantenere 
 1. [Installazione](#installazione)
 2. [Funzionalità in dettaglio](#funzionalità-in-dettaglio)
 3. [Uso quotidiano](#uso-quotidiano)
-4. [Sicurezza](#sicurezza)
-5. [Aggiornare, fare backup, traslocare](#aggiornare-fare-backup-traslocare)
-6. [Risoluzione dei problemi](#risoluzione-dei-problemi) (compreso [Nginx](#nginx))
-7. [Per sviluppatori](#per-sviluppatori)
+4. [Assistente IA](#assistente-ia)
+5. [Sicurezza](#sicurezza)
+6. [Aggiornare, fare backup, traslocare](#aggiornare-fare-backup-traslocare)
+7. [Risoluzione dei problemi](#risoluzione-dei-problemi) (compreso [Nginx](#nginx))
+8. [Per sviluppatori](#per-sviluppatori)
 
 ---
 
@@ -91,7 +92,7 @@ La bacheca mostra una checklist «Primi passi»: logo e colore, home page, primo
 
 ### ✍️ Editor a blocchi
 
-- 16 blocchi: testo, sottotitolo (H2-H4), elenco, citazione, immagine, riquadro, FAQ, tabella, pulsante, video YouTube/Vimeo (senza cookie prima del clic), codice, separatore, banner, punti di forza, ultimi articoli, modulo di contatto.
+- 17 blocchi: testo, sottotitolo (H2-H4), elenco, citazione, immagine, riquadro, FAQ, tabella, pulsante, video YouTube/Vimeo (senza cookie prima del clic), codice, separatore, banner, punti di forza, team (ritratti, ruoli, presentazioni), ultimi articoli, modulo di contatto.
 - Digita **`/`** su una riga vuota per scegliere un blocco, trascina e rilascia, barra di formattazione (grassetto, corsivo, link, codice, evidenziatore).
 - **Link interni assistiti**: mentre scrivi un link, l’editor ti propone le tue pagine e i tuoi articoli (link interni in 2 secondi).
 - **Incolla intelligente** da Word, Google Docs o una pagina web: titoli, elenchi, tabelle e grassetti diventano blocchi puliti.
@@ -108,17 +109,105 @@ Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagi
 | Voglio… | Dove |
 |---|---|
 | Scrivere un articolo | Bacheca › **Scrivi un articolo** |
+| Chiedere all’IA un articolo, una pagina, un’immagine | Campo **«Cosa vuoi creare oggi?»** della bacheca, oppure **✨ Assistente IA** (`Ctrl+J`) |
 | Modificare una pagina dal sito | Pulsante **✏️ Modifica** (visibile solo quando hai effettuato l’accesso) |
 | Cambiare logo, colore, font | Impostazioni › Aspetto |
 | Scegliere la home page | Impostazioni › Generali |
 | Consentire o bloccare le IA | Impostazioni › IA & GEO |
+| Attivare l’assistente IA | Impostazioni › Assistente IA |
 | Collegare Google Search Console | Impostazioni › SEO |
 | Aggiungere un link al menu | Menu |
 | Reindirizzare un vecchio URL | Reindirizzamenti |
 | Attivare l’autenticazione a due fattori | Il mio profilo › Autenticazione a due fattori |
 | Scaricare un backup | Sicurezza › Backup |
 
-Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K` link · `Ctrl+B` grassetto · `Ctrl+I` corsivo · `Invio` nuovo paragrafo · `Maiusc+Invio` a capo.
+Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K` link · `Ctrl+B` grassetto · `Ctrl+I` corsivo · `Invio` nuovo paragrafo · `Maiusc+Invio` a capo · `Ctrl+J` assistente IA.
+
+---
+
+## Assistente IA
+
+L’assistente scrive bozze, migliora i tuoi testi e crea immagini **con il tono del tuo sito**. Gli parli in linguaggio naturale, come a un collega: «Scrivi un articolo sulla scelta dei colori di un brand, con un’immagine.» Prima controlla se l’argomento è già stato trattato, poi crea l’immagine, scrive la bozza completa (titolo, L’essenziale, sottotitoli, elenchi o tabelle, FAQ, meta description, link interni) e te la presenta con i punteggi SEO e GEO. **Nulla viene pubblicato senza il tuo clic.**
+
+Funziona con **Claude** (Anthropic) o **ChatGPT** (OpenAI), con la tua chiave API: nessun abbonamento a Éclair, paghi direttamente il fornitore, in base al consumo effettivo.
+
+### Attivare l’assistente (5 minuti)
+
+1. Crea una chiave API presso il fornitore che hai scelto: [console.anthropic.com](https://console.anthropic.com/settings/keys) per Claude, [platform.openai.com](https://platform.openai.com/api-keys) per ChatGPT, e aggiungi qualche dollaro di credito.
+2. In **Impostazioni › Assistente IA**, scegli il fornitore, incolla la chiave, scegli il modello, poi clicca su **Prova la connessione** (è gratis: non viene generato alcun testo).
+3. Per le immagini, scegli un generatore: **GPT Image 2.5** (stessa chiave di ChatGPT), **FLUX 3** ([dashboard.bfl.ai](https://dashboard.bfl.ai)) o **Ideogram 3** ([ideogram.ai](https://ideogram.ai/manage-api), ideale per le immagini con scritte). Senza generatore, l’assistente usa la tua libreria media e le foto che gli alleghi.
+4. Clicca su **Scrivi il mio profilo a partire dal mio sito**, rileggi, ritocca, salva.
+
+A quel punto l’assistente compare nel menu (**✨ Assistente IA**, `Ctrl+J`), nell’editor e nella bacheca. I redattori possono usarlo se lo consenti.
+
+### Il profilo editoriale
+
+È ciò che fa scrivere l’IA **come te**: chi sei e cosa offri, per chi scrivi, tono e stile (dare del tu o del Lei, lunghezza delle frasi, umorismo), valori, regole da rispettare («sempre un link alla pagina contatti», «mai indicare i prezzi») e stile delle immagini. Basta un clic e l’IA lo scrive a partire dalle tue pagine e dai tuoi articoli; l’ultima parola spetta a te. A ogni richiesta, l’assistente segue anche i criteri di analisi di Éclair: le sue bozze puntano a un punteggio SEO e GEO alto fin dall’inizio.
+
+### Cosa puoi chiedere
+
+- «Scrivi un articolo sulla manutenzione di una bici elettrica in primavera, con un’immagine.»
+- «Aggiungi Léa Martin, direttrice artistica, alla pagina del team con la foto allegata.» (allega la foto con 📎, trascinandola o incollandola)
+- «Crea una pagina “I nostri servizi” che presenti le nostre tre formule.»
+- «Proponimi 5 idee di articoli per attirare nuovi clienti.»
+- «Rileggi la mia home page e proponi dei miglioramenti.»
+- Nell’editor: «Aggiungi delle FAQ a questo articolo», «Rendi l’introduzione più incisiva».
+
+Ogni azione produce una **card** sotto la risposta:
+
+| Card | Cosa è successo | I tuoi pulsanti |
+|---|---|---|
+| 📝 Bozza | Nuovo articolo o nuova pagina, mai pubblicati in automatico | Apri · Anteprima · Pubblica ora o programma |
+| ✏️ Modifica proposta | Per un contenuto **pubblicato**: non cambia nulla senza il tuo via libera | Anteprima · Applica · Ignora, poi Annulla se serve |
+| ✅ Aggiornato | Una **bozza** modificata direttamente | Apri · Anteprima · Annulla |
+| ✅ Nell’editor | Il contenuto aperto viene modificato nell’editor | Annulla (poi salvi tu) |
+| 🖼️ Immagine | Immagine creata, ottimizzata (WebP) e aggiunta alla libreria media | Immagine in evidenza (nell’editor) |
+
+Puoi usare «Annulla» finché nessuno ha ritoccato il contenuto nel frattempo; altrimenti, le sue versioni precedenti restano nella **cronologia delle versioni** dell’editor. La cronologia dell’assistente conserva le tue ultime 30 conversazioni. L’assistente non inventa mai fatti sulla tua attività (prezzi, orari, cifre, testimonianze): quando manca un’informazione, lascia un segnaposto ben visibile come **[prezzo da confermare]** e te lo segnala.
+
+### Ritocchi nell’editor
+
+- **Seleziona un passaggio**, poi ✨ nella barra di formattazione: migliora, correggi gli errori, accorcia, sviluppa, semplifica, più caloroso, più professionale, traduci. Un clic su «Annulla» ripristina il testo.
+- **L’essenziale**: pulsante «Scrivi».
+- **Scheda SEO**: titolo SEO e descrizione, frase chiave, idee per il titolo.
+- **Scheda Analisi**: aggiungi delle FAQ, testi alternativi mancanti, «Migliora con l’assistente».
+- **Immagine in evidenza**: «Crea con l’IA» (articoli).
+- **Libreria media**: «Descrivi con l’IA» scrive il testo alternativo di un’immagine osservandola.
+
+### Quanto costa?
+
+Paghi il fornitore in base al consumo effettivo. Éclair calcola ogni spesa a partire dai token fatturati e la mostra in Impostazioni › Assistente IA. Stima per un articolo completo (circa 25.000 token letti e 7.000 scritti, ricerche e verifiche comprese):
+
+| Modello | Prezzo per 1 milione di token (letti / scritti) | Articolo completo |
+|---|---|---|
+| Claude Opus 5.5 (il più capace) | 4 $ / 20 $ | ≈ 0,24 $ |
+| Claude Sonnet 5.5 | 2 $ / 10 $ | ≈ 0,12 $ |
+| Claude Haiku 5.5 | 0,10 $ / 0,50 $ | < 0,01 $ |
+| GPT-6 Astra | 10 $ / 50 $ | ≈ 0,60 $ |
+| GPT-6.1 Sol | 2 $ / 10 $ | ≈ 0,12 $ |
+| GPT-6.1 Terra | 1 $ / 5 $ | ≈ 0,06 $ |
+| GPT-6 Luna | 0,10 $ / 0,50 $ | < 0,01 $ |
+
+Un’immagine costa circa 0,05 $ (FLUX 3 a 1 megapixel: 0,048 $). Prezzi pubblici rilevati il 29 ottobre 2026 sulle pagine ufficiali di [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing), [OpenAI](https://developers.openai.com/api/docs/pricing) e [Black Forest Labs](https://docs.bfl.ml/release-notes); possono cambiare. Le istruzioni fisse dell’assistente vengono messe in cache dal fornitore, e questo riduce il costo delle richieste successive.
+
+**Limiti di sicurezza**: budget mensile massimo (10 $ di default), verificato prima di ogni fase di una richiesta: una volta raggiunto, l’assistente si ferma fino al mese successivo. A questo si aggiungono un limite di richieste per persona al giorno (60 di default) e un massimo di due richieste contemporanee per persona. Budget e limite giornaliero si regolano in Impostazioni › Assistente IA.
+
+### Sicurezza e privacy
+
+- **L’IA prepara, tu decidi**: può cercare e leggere i tuoi contenuti, creare bozze, modificare una bozza (con possibilità di annullare), proporre una modifica a un contenuto pubblicato e creare immagini. Non può **né pubblicare, né eliminare, né toccare impostazioni, menu o account**. Per pubblicare serve sempre il clic di una persona.
+- **Chiavi cifrate** sul tuo server (libsodium, oppure AES-256-GCM), mai inviate al browser, mai mostrate (se ne vede solo un estratto, come «sk-ant…ab12»), **escluse dai backup**, come la cronologia delle conversazioni. Per una protezione ancora maggiore, aggiungi `define('ECLAIR_SECRET', 'una-lunga-frase-segreta');` in `eclair-config.php` (da fare prima di salvare le chiavi).
+- **Cosa viene inviato al fornitore**: la tua richiesta, le immagini che alleghi, il profilo editoriale e il contesto utile (elenco delle tue pagine e dei tuoi articoli, contenuto aperto nell’editor). Non includere dati sensibili. Secondo le rispettive condizioni (verificate il 29 ottobre 2026), [Anthropic](https://www.anthropic.com/legal/commercial-terms) non addestra i suoi modelli sui dati inviati tramite API, e di default non lo fa nemmeno [OpenAI](https://help.openai.com/en/articles/5722486-api-data-usage-policies).
+- **Contenuti sanificati**: tutto ciò che l’IA scrive passa per la stessa lista bianca dell’editor, e i suoi ritocchi riguardano solo il testo visibile (mai l’indirizzo di un link). Le immagini generate vengono scaricate in HTTPS da un indirizzo pubblico verificato, poi ricodificate come un normale caricamento.
+- **Prompt injection**: i contenuti letti dall’IA vengono trattati come dati, mai come ordini; e anche se una pagina trappola cercasse di manipolarla, l’IA potrebbe solo preparare una bozza o una proposta, che vedresti prima che produca qualsiasi effetto.
+
+### Se l’assistente non risponde
+
+- **«Chiave API rifiutata»**: la chiave è stata copiata in modo incompleto oppure è stata revocata. Incollala di nuovo e prova la connessione.
+- **«Credito esaurito»**: ricarica il tuo account presso il fornitore.
+- **«Budget IA del mese esaurito»**: aumenta il budget in Impostazioni › Assistente IA, oppure aspetta il mese successivo.
+- **La risposta arriva tutta in una volta invece di comparire man mano**: un buffer del tuo provider trattiene il flusso. Tutto funziona, ma senza l’effetto «in diretta». Con Nginx, aggiungi `fastcgi_buffering off;` nel blocco PHP.
+- **«Impossibile raggiungere…»**: il tuo provider blocca le connessioni in uscita. Chiedigli di autorizzare `api.anthropic.com` o `api.openai.com` (e il generatore di immagini scelto).
+- **L’assistente non compare**: servono l’estensione PHP cURL e la cifratura (sodium o openssl), presenti presso quasi tutti i provider; la procedura guidata di installazione le verifica.
 
 ---
 
@@ -149,6 +238,7 @@ Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K`
 
 **Pannello**
 - **Indirizzo del pannello personalizzabile** (meno bot), ruoli amministratore / redattore; il pulsante «Modifica» del sito non rivela questo indirizzo.
+- **Assistente IA con limiti precisi**: solo bozze e proposte, chiavi API cifrate ed escluse dai backup, budget mensile e limite giornaliero (dettagli in [Assistente IA](#sicurezza-e-privacy)).
 - **Registri limitati** (campi troncati, massimo 1 MB): impossibile gonfiarli.
 - **Controllo di integrità**: confronta ogni file con la sua impronta originale e individua i file sospetti, compreso un `.php` senza riga di protezione in `data/` o `cache/`.
 - **Test di protezione in tempo reale**: la pagina Sicurezza verifica dal tuo browser che i file interni siano davvero inaccessibili e che l’indirizzo del sito sia verificato.
@@ -161,7 +251,7 @@ Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K`
 
 **Aggiornare Éclair**:
 1. Fai un backup.
-2. Sostituisci via FTP `index.php`, `.htaccess` e le cartelle `app/` e `assets/` con quelli della nuova versione.
+2. Via FTP, **elimina** le cartelle `app/` e `assets/`, poi carica quelle della nuova versione insieme a `index.php` e `.htaccess` (eliminarle prima evita di lasciare vecchi file, che il controllo di integrità segnalerebbe).
 3. **Non toccare** `data/` (contenuti, impostazioni, account) né `media/` (immagini).
 4. Nel pannello: Impostazioni › Avanzate › Svuota la cache.
 
@@ -229,13 +319,15 @@ eclair/                  ← da caricare sull’hosting
 ├── app/lib/             codice (classi Eclair\…): Content, Blocks, Seo, Analyzer, Media, Auth…
 ├── app/admin/views/     schermate del pannello
 ├── app/theme/           template del sito pubblico + theme.css (inserito in ogni pagina)
-├── app/lang/            traduzioni del pannello (en, es); il testo francese fa da chiave
+├── app/lang/            traduzioni del pannello (6 lingue, JSON compresso); il testo francese fa da chiave
 ├── assets/admin/        CSS e JavaScript del pannello (nessuna dipendenza)
 ├── assets/site/site.js  l’unico script pubblico (2,4 KB, 1,2 KB compresso)
 ├── data/                contenuti, impostazioni, account (creato all’installazione, mai pubblico)
 ├── cache/               pagine generate
 └── media/               immagini caricate
+i18n/                    sorgenti leggibili delle traduzioni (compilate da tools/i18n.php)
 tests/run.php            test unitari + integrazione HTTP (compresi gli attacchi dell’audit di sicurezza)
+tests/fake-ai.php        finti fornitori di IA (Claude, ChatGPT, immagini): l’assistente viene testato senza chiavi né spese
 tools/router.php         router per il server integrato di PHP (sviluppo)
 tools/build.php          impronte di integrità + archivio dist/eclair-cms-<versione>.zip
 ```

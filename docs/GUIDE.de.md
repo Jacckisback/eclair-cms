@@ -11,10 +11,11 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 1. [Installation](#installation)
 2. [Funktionen im Detail](#funktionen-im-detail)
 3. [Éclair im Alltag](#éclair-im-alltag)
-4. [Sicherheit](#sicherheit)
-5. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
-6. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
-7. [Für Entwickler](#für-entwickler)
+4. [KI-Assistent](#ki-assistent)
+5. [Sicherheit](#sicherheit)
+6. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
+7. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
+8. [Für Entwickler](#für-entwickler)
 
 ---
 
@@ -91,7 +92,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 
 ### ✍️ Block-Editor
 
-- 16 Blöcke: Text, Zwischenüberschrift (H2–H4), Liste, Zitat, Bild, Hinweisbox, FAQ, Tabelle, Button, YouTube-/Vimeo-Video (ohne Cookies vor dem Klick), Code, Trennlinie, Hero, Vorteile, neueste Artikel, Kontaktformular.
+- 17 Blöcke: Text, Zwischenüberschrift (H2–H4), Liste, Zitat, Bild, Hinweisbox, FAQ, Tabelle, Button, YouTube-/Vimeo-Video (ohne Cookies vor dem Klick), Code, Trennlinie, Hero, Vorteile, Team (Porträts, Funktionen, Kurzvorstellungen), neueste Artikel, Kontaktformular.
 - Tippe **`/`** in eine leere Zeile, um einen Block auszuwählen, Drag-and-drop, Formatierungsleiste (fett, kursiv, Link, Code, Hervorhebung).
 - **Unterstützte interne Links**: Während du einen Link eingibst, schlägt der Editor deine Seiten und Artikel vor (interne Verlinkung in 2 Sekunden).
 - **Intelligentes Einfügen** aus Word, Google Docs oder einer Webseite: Überschriften, Listen, Tabellen und Fettdruck werden zu sauberen Blöcken.
@@ -108,17 +109,105 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Ich möchte … | Wo |
 |---|---|
 | Einen Beitrag schreiben | Dashboard › **Beitrag schreiben** |
+| Die KI um einen Beitrag, eine Seite oder ein Bild bitten | Feld **„Was möchtest du heute erstellen?“** im Dashboard oder **✨ KI-Assistent** (`Strg+J`) |
 | Eine Seite direkt auf der Website bearbeiten | Schaltfläche **✏️ Bearbeiten** (nur sichtbar, wenn du angemeldet bist) |
 | Logo, Farbe, Schriften ändern | Einstellungen › Design |
 | Die Startseite festlegen | Einstellungen › Allgemein |
 | KI zulassen oder sperren | Einstellungen › KI & GEO |
+| Den KI-Assistenten aktivieren | Einstellungen › KI-Assistent |
 | Google Search Console verbinden | Einstellungen › SEO |
 | Einen Link zum Menü hinzufügen | Menüs |
 | Eine alte URL weiterleiten | Weiterleitungen |
 | Zwei-Faktor-Authentifizierung aktivieren | Mein Profil › Zwei-Faktor-Authentifizierung |
 | Ein Backup herunterladen | Sicherheit › Backup |
 
-Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` Link · `Strg+B` fett · `Strg+I` kursiv · `Enter` neuer Absatz · `Umschalt+Enter` Zeilenumbruch.
+Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` Link · `Strg+B` fett · `Strg+I` kursiv · `Enter` neuer Absatz · `Umschalt+Enter` Zeilenumbruch · `Strg+J` KI-Assistent.
+
+---
+
+## KI-Assistent
+
+Der Assistent schreibt Entwürfe, verbessert deine Texte und erstellt Bilder **im Ton deiner Website**. Du sprichst mit ihm in natürlicher Sprache, wie mit einem Kollegen: „Schreib einen Artikel über die Wahl der Markenfarben, mit einem Bild.“ Er prüft zuerst, ob es zum Thema schon einen Artikel gibt, erstellt das Bild, schreibt den vollständigen Entwurf (Titel, „Das Wichtigste“, Zwischenüberschriften, Listen oder Tabellen, FAQ, Meta-Beschreibung, interne Links) und legt ihn dir dann mit seinen SEO- und GEO-Scores vor. **Nichts wird ohne deinen Klick veröffentlicht.**
+
+Er funktioniert mit **Claude** (Anthropic) oder **ChatGPT** (OpenAI) und deinem eigenen API-Schlüssel: kein Éclair-Abo, du bezahlst direkt beim Anbieter, und zwar nur deinen tatsächlichen Verbrauch.
+
+### Den Assistenten aktivieren (5 Minuten)
+
+1. Erstelle beim gewählten Anbieter einen API-Schlüssel: [console.anthropic.com](https://console.anthropic.com/settings/keys) für Claude, [platform.openai.com](https://platform.openai.com/api-keys) für ChatGPT, und lade ein paar Dollar Guthaben auf.
+2. Wähle unter **Einstellungen › KI-Assistent** den Anbieter, füge den Schlüssel ein, wähle das Modell und klicke dann auf **Verbindung testen** (kostenlos: Es wird kein Text erzeugt).
+3. Wähle für Bilder einen Bildgenerator: **GPT Image 2.5** (derselbe Schlüssel wie für ChatGPT), **FLUX 3** ([dashboard.bfl.ai](https://dashboard.bfl.ai)) oder **Ideogram 3** ([ideogram.ai](https://ideogram.ai/manage-api), ideal für Grafiken mit Text). Ohne Bildgenerator nutzt der Assistent deine Mediathek und die Fotos, die du ihm anhängst.
+4. Klicke auf **Mein Profil aus meiner Website entwerfen**, lies den Entwurf durch, passe ihn an und speichere.
+
+Danach erscheint der Assistent im Menü (**✨ KI-Assistent**, `Strg+J`), im Editor und im Dashboard. Redakteure können ihn nutzen, wenn du es erlaubst.
+
+### Das Redaktionsprofil
+
+Damit schreibt die KI **wie du**: wer du bist und was du anbietest, für wen du schreibst, Ton und Stil (duzen oder siezen, Satzlänge, Humor), Werte, Regeln, an die sie sich halten soll („immer ein Link zur Kontaktseite“, „nie Preise nennen“), und der Bildstil. Ein Klick entwirft das Profil aus deinen Seiten und Artikeln; das letzte Wort hast du. Bei jeder Anfrage folgt der Assistent außerdem den Analyseregeln von Éclair: Seine Entwürfe zielen von Anfang an auf hohe SEO- und GEO-Scores.
+
+### Worum du ihn bitten kannst
+
+- „Schreib einen Artikel über die Wartung eines E-Bikes im Frühling, mit einem Bild.“
+- „Füge Léa Martin, Art Director, mit dem angehängten Foto zur Teamseite hinzu.“ (das Foto hängst du mit 📎, per Drag-and-drop oder durch Einfügen an)
+- „Erstelle eine Seite ‚Unsere Leistungen‘, die unsere drei Pakete vorstellt.“
+- „Schlag mir 5 Artikelideen vor, mit denen ich neue Kunden gewinne.“
+- „Lies meine Startseite durch und schlag Verbesserungen vor.“
+- Im Editor: „Füge diesem Artikel eine FAQ hinzu“, „Mach die Einleitung packender“.
+
+Jede Aktion erzeugt unter der Antwort eine **Karte**:
+
+| Karte | Was passiert ist | Deine Schaltflächen |
+|---|---|---|
+| 📝 Entwurf | Neuer Beitrag oder neue Seite, nicht veröffentlicht | Öffnen · Vorschau · Jetzt veröffentlichen oder planen |
+| ✏️ Vorgeschlagene Änderung | Bei einem **veröffentlichten** Inhalt: Nichts ändert sich ohne deine Zustimmung | Vorschau · Übernehmen · Verwerfen, danach bei Bedarf Abbrechen |
+| ✅ Aktualisiert | Ein **Entwurf** wurde direkt geändert | Öffnen · Vorschau · Abbrechen |
+| ✅ Im Editor geändert | Der geöffnete Inhalt wurde im Editor geändert | Abbrechen (danach speicherst du) |
+| 🖼️ Bild | Bild erstellt, optimiert (WebP) und in der Mediathek abgelegt | Beitragsbild (im Editor) |
+
+„Abbrechen“ macht eine Änderung rückgängig, solange niemand den Inhalt seitdem bearbeitet hat; andernfalls findest du frühere Versionen im **Versionsverlauf** des Editors. Der Assistent bewahrt deine letzten 30 Unterhaltungen auf. Er erfindet nie Fakten über dein Unternehmen (Preise, Öffnungszeiten, Zahlen, Kundenstimmen): Fehlt eine Information, setzt er einen sichtbaren Platzhalter wie **[Preis zu bestätigen]** und weist dich darauf hin.
+
+### Feinschliff im Editor
+
+- **Markiere eine Textstelle** und klicke dann in der Formatierungsleiste auf ✨: Verbessern, Fehler korrigieren, Kürzen, Ausbauen, Vereinfachen, Herzlicher, Professioneller, Übersetzen. Ein Klick auf „Abbrechen“ stellt den vorherigen Text wieder her.
+- **Das Wichtigste**: Schaltfläche „Schreiben“.
+- **Tab „SEO“**: SEO-Titel und Beschreibung, Fokus-Keyphrase, Titelideen.
+- **Tab „Analyse“**: FAQ hinzufügen, fehlende Alternativtexte, „Mit dem Assistenten verbessern“.
+- **Beitragsbild**: „Mit KI erstellen“ (bei Beiträgen).
+- **Mediathek**: „Mit KI beschreiben“ sieht sich ein Bild an und schreibt seinen Alternativtext.
+
+### Was kostet das?
+
+Du bezahlst den Anbieter nach tatsächlicher Nutzung. Éclair berechnet jede Ausgabe anhand der abgerechneten Tokens und zeigt sie unter Einstellungen › KI-Assistent an. Schätzung für einen vollständigen Artikel (etwa 25.000 gelesene und 7.000 geschriebene Tokens, Recherchen und Prüfungen inklusive):
+
+| Modell | Preis pro 1 Million Tokens (gelesen / geschrieben) | Vollständiger Artikel |
+|---|---|---|
+| Claude Opus 5.5 (das leistungsstärkste) | 4 $ / 20 $ | ≈ 0,24 $ |
+| Claude Sonnet 5.5 | 2 $ / 10 $ | ≈ 0,12 $ |
+| Claude Haiku 5.5 | 0,10 $ / 0,50 $ | < 0,01 $ |
+| GPT-6 Astra | 10 $ / 50 $ | ≈ 0,60 $ |
+| GPT-6.1 Sol | 2 $ / 10 $ | ≈ 0,12 $ |
+| GPT-6.1 Terra | 1 $ / 5 $ | ≈ 0,06 $ |
+| GPT-6 Luna | 0,10 $ / 0,50 $ | < 0,01 $ |
+
+Ein Bild kostet etwa 0,05 $ (FLUX 3 mit 1 Megapixel: 0,048 $). Öffentliche Preise laut den offiziellen Seiten von [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing), [OpenAI](https://developers.openai.com/api/docs/pricing) und [Black Forest Labs](https://docs.bfl.ml/release-notes), Stand: 29. Oktober 2026; sie können sich ändern. Die festen Anweisungen des Assistenten werden beim Anbieter zwischengespeichert, was die Kosten der folgenden Anfragen senkt.
+
+**Leitplanken**: ein maximales Monatsbudget (standardmäßig 10 $), das vor jedem Schritt einer Anfrage geprüft wird: Ist es erreicht, pausiert der Assistent bis zum nächsten Monat. Dazu kommen ein Limit für Anfragen pro Person und Tag (standardmäßig 60) und höchstens zwei gleichzeitige Anfragen pro Person. Budget und Tageslimit stellst du unter Einstellungen › KI-Assistent ein.
+
+### Sicherheit und Datenschutz
+
+- **Die KI bereitet vor, du entscheidest**: Sie kann deine Inhalte durchsuchen und lesen, Entwürfe erstellen, einen Entwurf ändern (lässt sich rückgängig machen), eine Änderung an einem veröffentlichten Inhalt vorschlagen und Bilder erstellen. Sie kann **weder veröffentlichen noch löschen noch Einstellungen, Menüs oder Konten ändern**. Veröffentlichen bleibt der Klick eines Menschen.
+- **Verschlüsselte API-Schlüssel** auf deinem Server (libsodium oder AES-256-GCM), nie an den Browser gesendet, nie angezeigt (nur ein Hinweis wie „sk-ant…ab12“), und wie der Unterhaltungsverlauf **von Backups ausgeschlossen**. Für stärkeren Schutz füge `define('ECLAIR_SECRET', 'ein-langer-geheimer-satz');` in `eclair-config.php` ein (und zwar bevor du deine Schlüssel speicherst).
+- **Was an den Anbieter geht**: deine Anfrage, die Bilder, die du anhängst, das Redaktionsprofil und der nötige Kontext (Liste deiner Seiten und Artikel, der im Editor geöffnete Inhalt). Gib deshalb keine sensiblen Daten ein. Laut ihren Bedingungen (geprüft am 29. Oktober 2026) trainiert [Anthropic](https://www.anthropic.com/legal/commercial-terms) seine Modelle nicht mit Daten, die per API gesendet werden, und [OpenAI](https://help.openai.com/en/articles/5722486-api-data-usage-policies) standardmäßig ebenfalls nicht.
+- **Bereinigte Inhalte**: Alles, was die KI schreibt, durchläuft dieselbe Allowlist wie der Editor, und ihre Überarbeitungen betreffen nur den sichtbaren Text (nie die Adresse eines Links). Erzeugte Bilder werden per HTTPS von einer geprüften öffentlichen Adresse heruntergeladen und dann wie ein Upload neu kodiert.
+- **Prompt-Injections**: Inhalte, die die KI liest, werden als Daten behandelt, nie als Befehle; und selbst wenn eine präparierte Seite versuchen würde, sie umzulenken, könnte sie nur einen Entwurf oder einen Vorschlag vorbereiten, den du siehst, bevor irgendetwas passiert.
+
+### Wenn der Assistent nicht antwortet
+
+- **„API-Schlüssel von … abgelehnt“**: Der Schlüssel wurde unvollständig kopiert oder widerrufen. Füge ihn erneut ein und teste die Verbindung.
+- **„Guthaben bei … aufgebraucht“**: Lade dein Konto beim Anbieter auf.
+- **„KI-Budget für diesen Monat aufgebraucht“**: Erhöhe das Budget unter Einstellungen › KI-Assistent oder warte bis zum nächsten Monat.
+- **Die Antwort erscheint auf einmal statt nach und nach**: Ein Puffer deines Hosters hält den Datenstrom zurück. Alles funktioniert, nur ohne den „Live“-Effekt. Füge unter Nginx `fastcgi_buffering off;` in den PHP-Block ein.
+- **„… ist nicht erreichbar“**: Dein Hoster blockiert ausgehende Verbindungen. Bitte ihn, `api.anthropic.com` bzw. `api.openai.com` (und den gewählten Bildgenerator) freizugeben.
+- **Der Assistent wird nicht angezeigt**: Er braucht die PHP-Erweiterung cURL und Verschlüsselung (sodium oder openssl), die fast alle Hoster bereitstellen; der Installationsassistent prüft das.
 
 ---
 
@@ -149,6 +238,7 @@ Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` L
 
 **Verwaltung**
 - **Anpassbare Adresse der Verwaltung** (weniger Bots), Rollen Administrator / Redakteur; die Schaltfläche „Bearbeiten“ der Website verrät diese Adresse nicht.
+- **KI-Assistent mit festen Grenzen**: nur Entwürfe und Vorschläge, verschlüsselte API-Schlüssel, die von Backups ausgeschlossen sind, Monatsbudget und Tageslimit (Details im Abschnitt [KI-Assistent](#sicherheit-und-datenschutz)).
 - **Begrenzte Protokolle** (gekürzte Felder, maximal 1 MB): Sie lassen sich nicht aufblähen.
 - **Integritätsprüfung**: Vergleicht jede Datei mit ihrem ursprünglichen Fingerabdruck und erkennt verdächtige Dateien, auch eine `.php`-Datei ohne Schutzzeile in `data/` oder `cache/`.
 - **Live-Schutztest**: Die Seite „Sicherheit“ prüft aus deinem Browser heraus, ob interne Dateien wirklich unzugänglich sind und ob die Adresse der Website verifiziert ist.
@@ -161,7 +251,7 @@ Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` L
 
 **Éclair aktualisieren**:
 1. Erstelle ein Backup.
-2. Ersetze per FTP `index.php`, `.htaccess` sowie die Ordner `app/` und `assets/` durch die der neuen Version.
+2. **Lösche** per FTP die Ordner `app/` und `assets/` und lade dann die der neuen Version zusammen mit `index.php` und `.htaccess` hoch (durch das vorherige Löschen bleiben keine alten Dateien zurück, die die Integritätsprüfung melden würde).
 3. **Lass** `data/` (Inhalte, Einstellungen, Konten) und `media/` (Bilder) **unverändert**.
 4. In der Verwaltung: Einstellungen › Erweitert › Cache leeren.
 
@@ -229,13 +319,15 @@ eclair/                  ← das kommt auf den Webspace
 ├── app/lib/             Code (Klassen Eclair\…): Content, Blocks, Seo, Analyzer, Media, Auth …
 ├── app/admin/views/     Bildschirme der Verwaltung
 ├── app/theme/           Vorlagen der öffentlichen Website + theme.css (in jede Seite eingefügt)
-├── app/lang/            Übersetzungen der Verwaltung (en, es); der französische Text dient als Schlüssel
+├── app/lang/            Übersetzungen der Verwaltung (6 Sprachen, komprimiertes JSON); der französische Text dient als Schlüssel
 ├── assets/admin/        CSS und JavaScript der Verwaltung (keine Abhängigkeiten)
 ├── assets/site/site.js  das einzige öffentliche Skript (2,4 KB, 1,2 KB komprimiert)
 ├── data/                Inhalte, Einstellungen, Konten (bei der Installation angelegt, nie öffentlich)
 ├── cache/               erzeugte Seiten
 └── media/               hochgeladene Bilder
+i18n/                    lesbare Quellen der Übersetzungen (kompiliert von tools/i18n.php)
 tests/run.php            Unit-Tests + HTTP-Integration (einschließlich der Angriffe aus dem Sicherheitsaudit)
+tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der Assistent wird ohne Schlüssel und ohne Kosten getestet
 tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
 tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip
 ```

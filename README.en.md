@@ -22,6 +22,7 @@
 <p align="center">
   <a href="#install-in-3-minutes"><b>Install</b></a> ·
   <a href="#why-éclair"><b>Why Éclair</b></a> ·
+  <a href="#ai-assistant-ask-review-publish"><b>AI assistant</b></a> ·
   <a href="#preview"><b>Preview</b></a> ·
   <a href="#security"><b>Security</b></a> ·
   <a href="docs/GUIDE.en.md"><b>Full guide</b></a>
@@ -68,6 +69,52 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
   </tr>
 </table>
 
+## AI assistant: ask, review, publish
+
+<p align="center">
+  <img src="docs/images/en/frame-ai.webp" alt="Éclair's AI assistant: asked to “Write an article about choosing brand colors, with an image”, it creates the image and a complete draft scored SEO 91 and GEO 100" width="100%">
+</p>
+
+Type what you need, as you would to a colleague: *“Write an article about choosing brand colors, with an image.”* The assistant checks that the topic isn't already covered, creates the image, writes the complete draft (title, Key takeaways, subheadings, table, FAQ, meta description, internal links) **in your site's voice**, then shows it to you with its SEO and GEO scores. **Nothing is published without your click.**
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>✍️ Writes like you</h3>
+      An <b>editorial profile</b> drafted from your site in one click: audience, tone, values, rules, image style. Every text also follows Éclair's analysis rules, so drafts aim for a high score right from the start.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🖼️ Images included</h3>
+      <b>GPT Image 2.5</b>, <b>FLUX 3</b> or <b>Ideogram 3</b>: the featured image is designed around the article, optimized as WebP and described (alt text). Or attach your own photos.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>👥 Acts on your site</h3>
+      “Add Léa Martin to the team page with the attached photo”: the change is ready, you preview it and apply it in one click. It can be undone in one click, too.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🛡️ You stay in control</h3>
+      The AI never publishes or deletes anything. Encrypted keys, monthly budget, daily quota. <b>Claude or ChatGPT</b> with your own key: no subscription, about <b>$0.24 per post</b> with Claude Opus 5.5.
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/en/frame-ai-team.webp" alt="The assistant prepares to add Léa Martin, with her photo, to the “À propos” (About) page: preview, apply or dismiss">
+      <p align="center"><b>Suggestions to approve</b><br><sub>On a published page, nothing changes until you approve.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/en/frame-ai-editor.webp" alt="In the editor, a selected passage and the AI menu: improve, fix mistakes, shorten, expand, simplify, translate">
+      <p align="center"><b>One-click touch-ups</b><br><sub>Improve, fix, shorten, translate, write the FAQ or the alt texts.</sub></p>
+    </td>
+  </tr>
+</table>
+
+5-minute setup and detailed pricing: see the [guide, AI assistant section](docs/GUIDE.en.md#ai-assistant).
+
 ## Éclair vs. WordPress
 
 | | Classic WordPress | ⚡ Éclair |
@@ -81,6 +128,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
 | **Cookies on the public site** | Often many | ✅ None |
 | **Two-factor authentication, brute-force protection** | Plugins | ✅ Built in |
 | **Plugin updates** | Frequent, the #1 source of vulnerabilities | ✅ No plugins to update |
+| **AI assistant (writing, images)** | Plugins, often with a subscription | ✅ Built in: Claude or ChatGPT, with your own key |
 
 ## Performance
 
@@ -195,6 +243,7 @@ The [full guide](docs/GUIDE.en.md) covers everything else:
 - [Installation](docs/GUIDE.en.md#installation): requirements, site types, first steps
 - [Features in detail](docs/GUIDE.en.md#features-in-detail): speed, SEO, GEO, block editor
 - [Everyday use](docs/GUIDE.en.md#everyday-use)
+- [AI assistant](docs/GUIDE.en.md#ai-assistant): activation, editorial profile, costs, security
 - [Updating, backing up, moving](docs/GUIDE.en.md#updating-backing-up-moving)
 - [Troubleshooting](docs/GUIDE.en.md#troubleshooting): forgotten password, 404 or 500 errors, Nginx…
 

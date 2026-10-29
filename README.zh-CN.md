@@ -22,6 +22,7 @@
 <p align="center">
   <a href="#3-分钟完成安装"><b>安装</b></a> ·
   <a href="#为什么选择-éclair"><b>为什么选择 Éclair</b></a> ·
+  <a href="#ai-助手提需求审阅发布"><b>AI 助手</b></a> ·
   <a href="#界面预览"><b>界面预览</b></a> ·
   <a href="#安全"><b>安全</b></a> ·
   <a href="docs/GUIDE.zh-CN.md"><b>完整指南</b></a>
@@ -68,6 +69,52 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   </tr>
 </table>
 
+## AI 助手：提需求、审阅、发布
+
+<p align="center">
+  <img src="docs/images/zh-CN/frame-ai.webp" alt="Éclair 的 AI 助手：收到“写一篇关于如何选择品牌色彩的文章，并配一张图片”的请求后，生成了图片和一篇完整的草稿，SEO 评分 91，GEO 评分 100" width="100%">
+</p>
+
+像跟同事交代工作一样，写下你的需求：*“写一篇关于如何选择品牌色彩的文章，并配一张图片。”* 助手会先确认网站上还没有这个主题，然后生成图片，**按照你网站的语气**写出完整的草稿（标题、核心要点、小标题、表格、FAQ、元描述、内部链接），再连同 SEO 和 GEO 评分一起交给你。**不经你点击，任何内容都不会发布。**
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>✍️ 用你的口吻写作</h3>
+      一键根据你的网站起草<b>编辑风格档案</b>：目标读者、语气、价值观、规则、图片风格。每篇文字还会遵循 Éclair 的分析规则：草稿从一开始就力求高分。
+    </td>
+    <td width="50%" valign="top">
+      <h3>🖼️ 配图一并搞定</h3>
+      <b>GPT Image 2.5</b>、<b>FLUX 3</b> 或 <b>Ideogram 3</b>：根据文章内容构思特色图片，优化为 WebP 格式并配上描述（替代文本）。也可以附上你自己的照片。
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>👥 直接修改你的网站</h3>
+      “把 Léa Martin 连同附带的照片加到团队页面”：修改随即准备就绪，你先预览，再一键应用。撤销同样只需一键。
+    </td>
+    <td width="50%" valign="top">
+      <h3>🛡️ 一切由你掌控</h3>
+      AI 从不发布、也从不删除任何内容。密钥加密存储，设有每月预算和每日配额。<b>Claude 或 ChatGPT</b>，用你自己的密钥：无需订阅，使用 Claude Opus 5.5 时<b>每篇文章约 $0.24</b>。
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/zh-CN/frame-ai-team.webp" alt="助手准备把 Léa Martin 连同她的照片加入“À propos”页面：预览、应用或忽略">
+      <p align="center"><b>修改建议，确认后生效</b><br><sub>对于已发布的页面，未经你同意，什么都不会改变。</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/zh-CN/frame-ai-editor.webp" alt="编辑器中选中的一段文字和 AI 菜单：润色、修正错误、缩短、扩写、简化、翻译">
+      <p align="center"><b>一键修改</b><br><sub>润色、修正错误、缩短、翻译，还能撰写 FAQ 或替代文本。</sub></p>
+    </td>
+  </tr>
+</table>
+
+5 分钟即可启用，详细价格请见[指南中的 AI 助手章节](docs/GUIDE.zh-CN.md#ai-助手)。
+
 ## Éclair 与 WordPress 对比
 
 | | 传统 WordPress | ⚡ Éclair |
@@ -81,6 +128,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 | **公开网站上的 Cookie** | 往往很多 | ✅ 没有 |
 | **双重认证、防暴力破解** | 需要插件 | ✅ 内置 |
 | **插件更新** | 频繁，是安全漏洞的头号来源 | ✅ 没有插件需要更新 |
+| **AI 助手（写作、配图）** | 依赖插件，往往还要订阅 | ✅ 内置：Claude 或 ChatGPT，使用你自己的密钥 |
 
 ## 性能
 
@@ -195,6 +243,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 - [安装](docs/GUIDE.zh-CN.md#安装)：环境要求、网站类型、入门步骤
 - [功能详解](docs/GUIDE.zh-CN.md#功能详解)：速度、SEO、GEO、区块编辑器
 - [日常使用](docs/GUIDE.zh-CN.md#日常使用)
+- [AI 助手](docs/GUIDE.zh-CN.md#ai-助手)：启用、编辑风格档案、费用、安全
 - [更新、备份、迁移](docs/GUIDE.zh-CN.md#更新备份迁移)
 - [故障排除](docs/GUIDE.zh-CN.md#故障排除)：忘记密码、404 或 500 错误、Nginx……
 

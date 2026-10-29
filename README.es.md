@@ -22,6 +22,7 @@
 <p align="center">
   <a href="#instalación-en-3-minutos"><b>Instalar</b></a> ·
   <a href="#por-qué-éclair"><b>Por qué Éclair</b></a> ·
+  <a href="#asistente-ia-pide-revisa-publica"><b>Asistente IA</b></a> ·
   <a href="#vista-previa"><b>Vista previa</b></a> ·
   <a href="#seguridad"><b>Seguridad</b></a> ·
   <a href="docs/GUIDE.es.md"><b>Guía completa</b></a>
@@ -68,6 +69,52 @@ WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la
   </tr>
 </table>
 
+## Asistente IA: pide, revisa, publica
+
+<p align="center">
+  <img src="docs/images/es/frame-ai.webp" alt="El asistente IA de Éclair: ante la petición «Escribe un artículo sobre cómo elegir los colores de una marca, con una imagen», crea la imagen y un borrador completo con una puntuación SEO de 91 y GEO de 100" width="100%">
+</p>
+
+Escribe lo que necesitas, como si se lo pidieras a un compañero: *«Escribe un artículo sobre cómo elegir los colores de una marca, con una imagen»*. El asistente comprueba que el tema no exista ya, crea la imagen, redacta el borrador completo (título, Lo esencial, subtítulos, tabla, FAQ, metadescripción, enlaces internos) **con el tono de tu sitio** y te lo presenta con sus puntuaciones SEO y GEO. **No se publica nada sin tu clic.**
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>✍️ Escribe como tú</h3>
+      Un <b>perfil editorial</b> redactado en un clic a partir de tu sitio: público, tono, valores, reglas, estilo de las imágenes. Cada texto sigue además las reglas de análisis de Éclair: los borradores apuntan a una puntuación alta desde el principio.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🖼️ Imágenes incluidas</h3>
+      <b>GPT Image 2.5</b>, <b>FLUX 3</b> o <b>Ideogram 3</b>: la imagen destacada se concibe a partir del artículo, se optimiza en WebP y se describe (texto alternativo). O adjunta tus propias fotos.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>👥 Actúa en tu sitio</h3>
+      «Añade a Léa Martin a la página del equipo con la foto adjunta»: el cambio queda listo, lo revisas en vista previa y lo aplicas con un clic. Y se deshace con otro clic.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🛡️ Tú tienes el control</h3>
+      La IA nunca publica ni elimina nada. Claves cifradas, presupuesto mensual, cuota diaria. <b>Claude o ChatGPT</b> con tu propia clave: sin suscripción, unos <b>0,24 $ por artículo</b> con Claude Opus 5.5.
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/es/frame-ai-team.webp" alt="El asistente prepara la incorporación de Léa Martin, con su foto, a la página À propos: vista previa, aplicar o descartar">
+      <p align="center"><b>Propuestas por validar</b><br><sub>En una página publicada, nada cambia sin tu aprobación.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/es/frame-ai-editor.webp" alt="En el editor, un fragmento seleccionado y el menú de IA: mejorar, corregir errores, acortar, desarrollar, simplificar, traducir">
+      <p align="center"><b>Retoques en un clic</b><br><sub>Mejorar, corregir, acortar, traducir, redactar las FAQ o los textos alternativos.</sub></p>
+    </td>
+  </tr>
+</table>
+
+Activación en 5 minutos y tarifas detalladas: consulta la [guía, sección Asistente IA](docs/GUIDE.es.md#asistente-ia).
+
 ## Éclair frente a WordPress
 
 | | WordPress clásico | ⚡ Éclair |
@@ -81,6 +128,7 @@ WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la
 | **Cookies en el sitio público** | A menudo muchas | ✅ Ninguna |
 | **Verificación en dos pasos, protección contra fuerza bruta** | Plugins | ✅ Integradas |
 | **Actualizaciones de plugins** | Constantes, la principal fuente de vulnerabilidades | ✅ Ningún plugin que actualizar |
+| **Asistente IA (redacción, imágenes)** | Plugins, a menudo con suscripción | ✅ Integrado: Claude o ChatGPT, con tu clave |
 
 ## Rendimiento
 
@@ -195,6 +243,7 @@ La [guía completa](docs/GUIDE.es.md) detalla todo lo demás:
 - [Instalación](docs/GUIDE.es.md#instalación): requisitos, tipos de sitio, primeros pasos
 - [Funciones en detalle](docs/GUIDE.es.md#funciones-en-detalle): velocidad, SEO, GEO, editor de bloques
 - [Uso diario](docs/GUIDE.es.md#uso-diario)
+- [Asistente IA](docs/GUIDE.es.md#asistente-ia): activación, perfil editorial, costes, seguridad
 - [Actualizar, hacer copias de seguridad, mudarse](docs/GUIDE.es.md#actualizar-hacer-copias-de-seguridad-mudarse)
 - [Solución de problemas](docs/GUIDE.es.md#solución-de-problemas): contraseña olvidada, errores 404 o 500, Nginx…
 

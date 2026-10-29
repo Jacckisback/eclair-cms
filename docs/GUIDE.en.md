@@ -11,10 +11,11 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 1. [Installation](#installation)
 2. [Features in detail](#features-in-detail)
 3. [Everyday use](#everyday-use)
-4. [Security](#security)
-5. [Updating, backing up, moving](#updating-backing-up-moving)
-6. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
-7. [For developers](#for-developers)
+4. [AI assistant](#ai-assistant)
+5. [Security](#security)
+6. [Updating, backing up, moving](#updating-backing-up-moving)
+7. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
+8. [For developers](#for-developers)
 
 ---
 
@@ -91,7 +92,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 
 ### ✍️ Block editor
 
-- 16 blocks: text, subheading (H2-H4), list, quote, image, callout, FAQ, table, button, YouTube/Vimeo video (no cookies until clicked), code, separator, hero, features, latest posts, contact form.
+- 17 blocks: text, subheading (H2-H4), list, quote, image, callout, FAQ, table, button, YouTube/Vimeo video (no cookies until clicked), code, separator, hero, features, team (portraits, roles, bios), latest posts, contact form.
 - Type **`/`** on an empty line to pick a block, drag and drop, formatting toolbar (bold, italic, link, code, highlight).
 - **Assisted internal links**: as you type a link, the editor suggests your pages and posts (internal linking in 2 seconds).
 - **Smart paste** from Word, Google Docs or a web page: headings, lists, tables and bold text become clean blocks.
@@ -108,17 +109,105 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | I want to… | Where |
 |---|---|
 | Write a post | Dashboard › **Write a post** |
+| Ask the AI for a post, a page, an image | **“What do you want to create today?”** field on the dashboard, or **✨ AI assistant** (`Ctrl+J`) |
 | Edit a page from the site | **✏️ Edit** button (visible only when you're logged in) |
 | Change the logo, color, fonts | Settings › Appearance |
 | Choose the home page | Settings › General |
 | Allow or block AI | Settings › AI & GEO |
+| Turn on the AI assistant | Settings › AI assistant |
 | Connect Google Search Console | Settings › SEO |
 | Add a link to the menu | Menus |
 | Redirect an old URL | Redirects |
 | Turn on two-factor authentication | My profile › Two-factor authentication |
 | Download a backup | Security › Backup |
 
-Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+B` bold · `Ctrl+I` italic · `Enter` new paragraph · `Shift+Enter` line break.
+Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+B` bold · `Ctrl+I` italic · `Enter` new paragraph · `Shift+Enter` line break · `Ctrl+J` AI assistant.
+
+---
+
+## AI assistant
+
+The assistant writes drafts, improves your texts and creates images **in your site's voice**. You talk to it in plain language, as you would to a colleague: “Write an article about choosing brand colors, with an image.” It first checks whether the topic has already been covered, creates the image, writes the complete draft (title, Key takeaways, subheadings, lists or tables, FAQ, meta description, internal links), then shows it to you with its SEO and GEO scores. **Nothing is published without your click.**
+
+It works with **Claude** (Anthropic) or **ChatGPT** (OpenAI), using your own API key: no Éclair subscription, you pay the provider directly, for what you actually use.
+
+### Turn on the assistant (5 minutes)
+
+1. Create an API key with the provider of your choice: [console.anthropic.com](https://console.anthropic.com/settings/keys) for Claude, [platform.openai.com](https://platform.openai.com/api-keys) for ChatGPT, and add a few dollars of credit.
+2. In **Settings › AI assistant**, choose the provider, paste the key, choose the model, then click **Test the connection** (free: no text is generated).
+3. For images, choose a generator: **GPT Image 2.5** (same key as ChatGPT), **FLUX 3** ([dashboard.bfl.ai](https://dashboard.bfl.ai)) or **Ideogram 3** ([ideogram.ai](https://ideogram.ai/manage-api), ideal for visuals that include text). Without a generator, the assistant uses your media library and the photos you attach.
+4. Click **Draft my profile from my site**, then review it, adjust it and save.
+
+The assistant then appears in the menu (**✨ AI assistant**, `Ctrl+J`), in the editor and on the dashboard. Editors can use it too, if you allow it.
+
+### The editorial profile
+
+This is what makes the AI write **like you**: who you are and what you offer, who you're writing for, tone and style (formal or casual, sentence length, humor), values, rules to follow (“always link to the contact page”, “never mention prices”) and image style. One click drafts it from your pages and posts; you have the final say. With every request, the assistant also follows Éclair's analysis rules: its drafts aim for a high SEO and GEO score right from the start.
+
+### What you can ask
+
+- “Write an article about servicing an e-bike in spring, with an image.”
+- “Add Léa Martin, art director, to the team page with the attached photo.” (attach the photo with 📎, by drag and drop or by pasting it)
+- “Create an ‘Our services’ page that presents our three packages.”
+- “Give me 5 article ideas to attract new customers.”
+- “Review my home page and suggest improvements.”
+- In the editor: “Add a FAQ to this article”, “Make the introduction punchier”.
+
+Each action produces a **card** below the reply:
+
+| Card | What happened | Your buttons |
+|---|---|---|
+| 📝 Draft | New post or new page, never published | Open · Preview · Publish now or schedule |
+| ✏️ Suggested change | For **published** content: nothing changes until you approve | Preview · Apply · Dismiss, then Cancel if needed |
+| ✅ Updated | A **draft** changed directly | Open · Preview · Cancel |
+| ✅ Changed in the editor | The content you have open is changed in the editor | Cancel (then you save) |
+| 🖼️ Image | Image created, optimized (WebP) and added to the media library | Featured image (in the editor) |
+
+“Cancel” works as long as nobody has edited the content since; otherwise, its earlier versions are still in the editor's **Version history**. The assistant's history keeps your last 30 conversations. The assistant never makes up facts about your business (prices, opening hours, figures, testimonials): when information is missing, it leaves a visible placeholder such as **[price to confirm]** and points it out to you.
+
+### Touch-ups in the editor
+
+- **Select a passage**, then click ✨ in the formatting toolbar: improve, fix mistakes, shorten, expand, simplify, warmer, more professional, translate. A click on “Cancel” restores the text.
+- **Key takeaways**: “Write” button.
+- **SEO tab**: SEO title and description, focus keyphrase, title ideas.
+- **Analysis tab**: add a FAQ, missing alt texts, “Improve with the assistant”.
+- **Featured image**: “Create with AI” (posts).
+- **Media library**: “Describe with AI” writes an image's alt text by looking at it.
+
+### How much does it cost?
+
+You pay the provider for what you actually use. Éclair calculates each expense from the billed tokens and shows it in Settings › AI assistant. Estimate for a full post (about 25,000 input tokens and 7,000 output tokens, searches and checks included):
+
+| Model | Price per million tokens (input / output) | Full post |
+|---|---|---|
+| Claude Opus 5.5 (the most capable) | $4 / $20 | ≈ $0.24 |
+| Claude Sonnet 5.5 | $2 / $10 | ≈ $0.12 |
+| Claude Haiku 5.5 | $0.10 / $0.50 | < $0.01 |
+| GPT-6 Astra | $10 / $50 | ≈ $0.60 |
+| GPT-6.1 Sol | $2 / $10 | ≈ $0.12 |
+| GPT-6.1 Terra | $1 / $5 | ≈ $0.06 |
+| GPT-6 Luna | $0.10 / $0.50 | < $0.01 |
+
+An image costs about $0.05 (FLUX 3 at 1 megapixel: $0.048). Public prices taken from the official pages of [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing), [OpenAI](https://developers.openai.com/api/docs/pricing) and [Black Forest Labs](https://docs.bfl.ml/release-notes) on October 29, 2026; they may change. The assistant's fixed instructions are cached by the provider, which lowers the cost of follow-up requests.
+
+**Safeguards**: a maximum monthly budget ($10 by default), checked before each step of a request: once it's reached, the assistant stops until the following month. There's also a limit on requests per person per day (60 by default), and each person can run at most two requests at a time. The budget and quota are set in Settings › AI assistant.
+
+### Security and privacy
+
+- **The AI prepares, you decide**: it can search and read your content, create drafts, edit a draft (undoable), suggest a change to published content and create images. It **cannot publish, delete, or touch the settings, menus or accounts**. Publishing always takes a human click.
+- **Encrypted keys** on your server (libsodium, or AES-256-GCM), never sent to the browser, never displayed (only a hint like “sk-ant…ab12” is shown), **excluded from backups**, as is the conversation history. For stronger protection, add `define('ECLAIR_SECRET', 'a-long-secret-phrase');` to `eclair-config.php` (do this before saving your keys).
+- **What goes to the provider**: your request, the images you attach, the editorial profile and the relevant context (the list of your pages and posts, the content open in the editor). Don't include sensitive data. According to their terms (checked on October 29, 2026), [Anthropic](https://www.anthropic.com/legal/commercial-terms) doesn't train its models on data sent through the API, and neither does [OpenAI](https://help.openai.com/en/articles/5722486-api-data-usage-policies) by default.
+- **Sanitized content**: everything the AI writes goes through the same allowlist as the editor, and its edits only touch the visible text (never a link's URL). Generated images are downloaded over HTTPS from a verified public address, then re-encoded just like an upload.
+- **Prompt injection**: content the AI reads is treated as data, never as instructions; and even if a booby-trapped page tried to hijack it, it could only prepare a draft or a suggestion, which you would see before anything takes effect.
+
+### If the assistant doesn't respond
+
+- **“API key rejected”**: the key was copied incompletely or has been revoked; paste it again and test the connection.
+- **“Out of credit”**: top up your account with the provider.
+- **“This month's AI budget is used up”**: raise the budget in Settings › AI assistant, or wait until next month.
+- **The reply arrives all at once instead of streaming in**: your host's buffering is holding back the stream. Everything works, just without the “live” effect. On Nginx, add `fastcgi_buffering off;` to the PHP block.
+- **“Can't reach…”**: your host blocks outgoing connections. Ask them to allow `api.anthropic.com` or `api.openai.com` (and the image generator you chose).
+- **The assistant doesn't appear**: it needs the PHP cURL extension and encryption (sodium or openssl), available at almost every host; the setup wizard checks for them.
 
 ---
 
@@ -149,6 +238,7 @@ Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+
 
 **Admin**
 - **Customizable admin URL** (fewer bots), administrator / editor roles; the site's “Edit” button doesn't reveal that URL.
+- **Bounded AI assistant**: drafts and suggestions only, API keys encrypted and excluded from backups, monthly budget and daily quota (details in [AI assistant](#security-and-privacy)).
 - **Bounded logs** (truncated fields, 1 MB maximum): they can't be inflated.
 - **Integrity check**: compares every file with its original fingerprint and flags suspicious files, including a `.php` file without the protection line in `data/` or `cache/`.
 - **Live protection test**: the Security page checks from your browser that internal files really are inaccessible, and that the site address is verified.
@@ -161,7 +251,7 @@ Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+
 
 **Update Éclair**:
 1. Make a backup.
-2. Via FTP, replace `index.php`, `.htaccess` and the `app/` and `assets/` folders with those from the new version.
+2. Via FTP, **delete** the `app/` and `assets/` folders, then upload the ones from the new version along with `index.php` and `.htaccess` (deleting first avoids leaving old files behind, which the integrity check would flag).
 3. **Don't touch** `data/` (content, settings, accounts) or `media/` (images).
 4. In the admin: Settings › Advanced › Clear cache.
 
@@ -229,13 +319,15 @@ eclair/                  ← upload this to your hosting
 ├── app/lib/             code (Eclair\… classes): Content, Blocks, Seo, Analyzer, Media, Auth…
 ├── app/admin/views/     admin screens
 ├── app/theme/           public site templates + theme.css (inlined in every page)
-├── app/lang/            admin translations (en, es); the French text is the key
+├── app/lang/            admin translations (6 languages, compressed JSON) — the French text is the key
 ├── assets/admin/        admin CSS and JavaScript (no dependencies)
 ├── assets/site/site.js  the only public script (2.4 KB, 1.2 KB compressed)
 ├── data/                content, settings, accounts (created at installation, never public)
 ├── cache/               generated pages
 └── media/               uploaded images
+i18n/                    human-readable translation sources (compiled by tools/i18n.php)
 tests/run.php            unit tests + HTTP integration (including the attacks from the security review)
+tests/fake-ai.php        fake AI providers (Claude, ChatGPT, images): the assistant is tested with no key and no spending
 tools/router.php         router for PHP's built-in server (development)
 tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive
 ```
