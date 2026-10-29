@@ -1,0 +1,221 @@
+<p align="center">
+  <a href="README.md">Français</a> · <a href="README.en.md">English</a> · <a href="README.es.md">Español</a> · <a href="README.de.md">Deutsch</a> · <b>Italiano</b> · <a href="README.pt-BR.md">Português</a> · <a href="README.zh-CN.md">简体中文</a>
+</p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/it/banner-dark.webp">
+    <img src="docs/images/it/banner-light.webp" alt="Éclair CMS: il CMS ultraleggero e ultraveloce, pensato per Google e per l’IA" width="100%">
+  </picture>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.0.0.zip"><img src="https://img.shields.io/badge/scarica-v1.0.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.0.0"></a>
+  <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o successivo">
+  <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
+  <img src="https://img.shields.io/badge/database-nessuno-14122b?style=for-the-badge" alt="Nessun database">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licenza-MIT-22c55e?style=for-the-badge" alt="Licenza MIT"></a>
+</p>
+
+<h3 align="center">Un sito professionale in 3 minuti, su qualsiasi hosting condiviso.<br>Senza database. Senza plugin. Senza manutenzione.</h3>
+
+<p align="center">
+  <a href="#installazione-in-3-minuti"><b>Installa</b></a> ·
+  <a href="#perché-éclair"><b>Perché Éclair</b></a> ·
+  <a href="#anteprima"><b>Anteprima</b></a> ·
+  <a href="#sicurezza"><b>Sicurezza</b></a> ·
+  <a href="docs/GUIDE.md"><b>Guida completa (in francese)</b></a>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="docs/images/en/showcase.webp" alt="L’editor di Éclair con l’analisi SEO e GEO a 100 su 100, e l’articolo pubblicato su uno smartphone" width="100%">
+</p>
+
+## Perché Éclair
+
+WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicurezza e la cache… e di aggiornamenti continui. Éclair riunisce l’essenziale in un CMS di **meno di 1 MB**, pensato per liberi professionisti, artigiani e piccole imprese.
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>⚡ Ultraveloce</h3>
+      Ogni pagina è servita da una cache statica, senza caricare l’applicazione: <b>100/100</b> su Lighthouse e <b>0,7 ms</b> di tempo di risposta del server (misurato in locale).
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔎 SEO integrata</h3>
+      Dati strutturati, sitemap, reindirizzamenti, anteprima Google e <b>punteggio SEO in tempo reale</b> nell’editor, senza alcun plugin.
+    </td>
+    <td width="33%" valign="top">
+      <h3>🤖 Pronto per l’IA</h3>
+      <code>llms.txt</code>, versione Markdown di ogni pagina, regole per 30 bot IA e <b>punteggio GEO</b> per farti citare da ChatGPT, Perplexity o Gemini.
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🛡️ Sicuro di default</h3>
+      Autenticazione a due fattori, protezione anti brute force, header rigorosi, contenuti sanificati. <b>Un audit di sicurezza offensivo</b>, tutte le vulnerabilità corrette.
+    </td>
+    <td width="33%" valign="top">
+      <h3>🪶 Ultraleggero</h3>
+      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>257 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
+    </td>
+    <td width="33%" valign="top">
+      <h3>😊 Semplicissimo</h3>
+      Installazione guidata in 4 domande, editor a blocchi con <code>/</code>, checklist per iniziare. Pannello in <b>inglese, francese e spagnolo</b>, sito in 6 lingue (italiano compreso).
+    </td>
+  </tr>
+</table>
+
+## Éclair a confronto con WordPress
+
+| | WordPress classico | ⚡ Éclair |
+|---|---|---|
+| **Installazione** | Creare un database MySQL, poi avviare la procedura guidata | ✅ Caricare la cartella, rispondere a 4 domande |
+| **Database** | MySQL obbligatorio | ✅ Nessuno (file protetti) |
+| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 257 KB |
+| **SEO, sitemap, dati strutturati** | Un plugin da installare e mantenere | ✅ Integrati |
+| **GEO: llms.txt, Markdown, bot IA** | Plugin, raramente completi | ✅ Integrato |
+| **Pagine pubbliche** | Generate a ogni visita, salvo con un plugin di cache | ✅ Servite da una cache statica |
+| **Cookie sul sito pubblico** | Spesso tanti | ✅ Nessuno |
+| **Autenticazione a due fattori, anti brute force** | Plugin | ✅ Integrate |
+| **Aggiornamenti dei plugin** | Continui, la prima fonte di vulnerabilità | ✅ Nessun plugin da aggiornare |
+
+## Prestazioni
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/it/performance-dark.webp">
+  <img src="docs/images/it/performance-light.webp" alt="Lighthouse: 100 in prestazioni, accessibilità, best practice e SEO. 0,7 ms di tempo di risposta, da 7 a 10 KB di HTML compresso, 1,2 KB di JavaScript, 0 cookie" width="100%">
+</picture>
+
+Misurato in locale sul sito dimostrativo (PHP 8.3, home page illustrata e articolo di 600 parole), con Lighthouse 12 su mobile e desktop; un punteggio può variare di un punto da un’esecuzione all’altra. Come funziona:
+
+- **Cache statica automatica**: ogni pagina viene generata una volta, poi servita direttamente da `index.php`. La cache si svuota da sola a ogni modifica.
+- **CSS incorporato nella pagina**, font di sistema: nessuna richiesta bloccante, nessuno spostamento del layout.
+- **Immagini ottimizzate al caricamento**: ridimensionate, convertite in **WebP responsive** (da 480 a 1600 px), dimensioni esplicite e caricamento differito.
+- **Un solo script pubblico**, differito, di 1,2 KB compresso. Compressione Brotli o Gzip e cache del browser di un anno tramite `.htaccess`.
+
+Su un vero hosting condiviso, aggiungi la latenza di rete e l’avvio di PHP del tuo provider.
+
+## SEO e GEO: trovato su Google, citato dalle IA
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/it/geo-dark.webp">
+  <img src="docs/images/it/geo-light.webp" alt="Un articolo pubblicato diventa una pagina HTML con JSON-LD, una sitemap con IndexNow, un feed RSS, llms.txt, una versione Markdown e un robots.txt, letti da Google, Bing, ChatGPT, Perplexity, Gemini, Claude e Copilot" width="100%">
+</picture>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🔎 SEO</h3>
+      <ul>
+        <li><b>Analisi in tempo reale</b> con punteggio: titolo, meta description, frase chiave, struttura, link interni, testi alternativi…</li>
+        <li><b>Dati strutturati JSON-LD</b>: Organization o LocalBusiness, BlogPosting, FAQPage, BreadcrumbList, autore…</li>
+        <li>Sitemap con immagini e <code>hreflang</code>, feed RSS completo, Open Graph con <b>immagine di condivisione generata</b>.</li>
+        <li><b>Reindirizzamenti 301 automatici</b> quando un indirizzo cambia, e un gestore dei reindirizzamenti per migrare un vecchio sito.</li>
+        <li><b>IndexNow</b>: Bing e gli altri motori compatibili vengono avvisati a ogni pubblicazione.</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🤖 GEO (motori di risposta IA)</h3>
+      <ul>
+        <li><code>/llms.txt</code> e <code>/llms-full.txt</code> generati automaticamente (proposta <a href="https://llmstxt.org/">llmstxt.org</a>).</li>
+        <li><b>Versione Markdown di ogni pagina</b>: aggiungi <code>.md</code> a qualsiasi indirizzo.</li>
+        <li><b>Regole per i bot IA in un clic</b>: aperto, solo citazioni o chiuso, per 30 bot (GPTBot, ClaudeBot, PerplexityBot…).</li>
+        <li>Blocco <b>«In breve»</b> in apertura di ogni articolo: il riassunto che le IA citano volentieri.</li>
+        <li><b>Punteggio GEO</b>: FAQ, sottotitoli in forma di domanda, dati concreti, fonti, autore identificato (E-E-A-T)…</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+## Anteprima
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/en/frame-dashboard.webp" alt="Bacheca di Éclair: statistiche, pagine da migliorare e stato del sito">
+      <p align="center"><b>Bacheca</b><br><sub>Cosa migliorare e lo stato del sito, a colpo d’occhio.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/en/frame-geo.webp" alt="Impostazioni IA e GEO: scelta delle regole per i bot di intelligenza artificiale">
+      <p align="center"><b>Visibilità nelle IA</b><br><sub>Consenti, limita o blocca i bot IA in un clic.</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/en/frame-media.webp" alt="Libreria media di Éclair con le immagini caricate">
+      <p align="center"><b>Libreria media</b><br><sub>Immagini ridimensionate e convertite in WebP automaticamente.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/frame-dark.webp" alt="Articolo del sito pubblico in modalità scura">
+      <p align="center"><b>Modalità scura automatica</b><br><sub>Il sito si adatta al tema di ogni visitatore.</sub></p>
+    </td>
+  </tr>
+</table>
+
+<sub>Screenshot di «Atelier Nova», un sito dimostrativo immaginario creato con Éclair (illustrazioni originali). Il pannello è mostrato in inglese, i contenuti dimostrativi sono in francese.</sub>
+
+## Sicurezza
+
+Éclair è pensato per un ambiente ostile: hosting condiviso e bot che provano password giorno e notte.
+
+- **Nessun database**, quindi nessuna SQL injection. I file di dati hanno una doppia protezione (`.htaccess` e una riga `<?php exit; ?>`), sono privati e scritti in modo atomico.
+- **Accesso blindato**: password con Argon2id, limiti per rete e per account (il tuo dispositivo abituale non viene mai bloccato da un attaccante), **autenticazione a due fattori** con codici di recupero.
+- **Password richiesta di nuovo** per le azioni sensibili, password provvisorie da cambiare, sessioni brevi e revocabili.
+- **Sito pubblico blindato**: Content-Security-Policy rigorosa, contenuti sanificati tramite lista bianca, nessun reindirizzamento aperto, immagini ricodificate.
+- **Installazione protetta**: una finestra di 2 ore, e l’indirizzo del sito verificato dal server stesso prima di qualsiasi reindirizzamento.
+- **Pagina Sicurezza**: controllo di integrità dei file, test di protezione delle cartelle, registro, backup in un clic.
+
+> [!NOTE]
+> **Audit di sicurezza offensivo.** Race condition, brute force, reindirizzamenti, injection, file trappola: sono state trovate 17 vulnerabilità (2 gravi, 7 medie, 8 lievi), tutte corrette. I 13 scenari di attacco sono poi stati ripetuti sulla versione corretta: tutti neutralizzati. I test automatici (`php tests/run.php`) ne coprono gran parte.
+
+Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.md#sécurité) (in francese).
+
+## Installazione in 3 minuti
+
+<p align="center">
+  <img src="docs/images/it/install.webp" alt="Installazione in tre passaggi: carica la cartella, rispondi a quattro domande, il sito è online" width="100%">
+</p>
+
+1. **Scarica** l’archivio [`eclair-cms-1.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.0.0.zip) (257 KB) ed estrailo.
+2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
+3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
+
+**Requisiti**: PHP 8.1 o successivo (consigliato 8.3), Apache o LiteSpeed (praticamente tutti gli hosting condivisi: Hostinger, IONOS, OVHcloud…) e un certificato HTTPS. La procedura guidata controlla tutto e spiega cosa correggere. Funziona anche con Nginx ([configurazione](docs/GUIDE.md#nginx)).
+
+> [!TIP]
+> Per sicurezza, l’installazione va completata entro **2 ore** dalla prima visita. Scaduto il tempo, elimina `data/install-window.php` via FTP e ricarica la pagina.
+
+## Documentazione
+
+La [guida completa](docs/GUIDE.md) è per ora disponibile in francese. Comprende:
+
+- [Installazione](docs/GUIDE.md#installation): requisiti, tipi di sito, primi passi
+- [Funzionalità in dettaglio](docs/GUIDE.md#fonctionnalités-en-détail): velocità, SEO, GEO, editor a blocchi
+- [Uso quotidiano](docs/GUIDE.md#utiliser-éclair-au-quotidien)
+- [Aggiornare, fare backup, traslocare](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager)
+- [Risoluzione dei problemi](docs/GUIDE.md#dépannage): password dimenticata, errori 404 o 500, Nginx…
+
+## Per sviluppatori
+
+PHP 8.1+ senza framework né Composer: classi semplici in `eclair/app/lib/`, viste PHP e JavaScript nativo.
+
+```bash
+PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
+php tests/run.php                                                           # 174 test unitari e HTTP
+php tools/build.php                                                         # archivio pronto da distribuire
+```
+
+Struttura del progetto e personalizzazione del tema: vedi [Pour les développeurs](docs/GUIDE.md#pour-les-développeurs) (in francese).
+
+## Licenza
+
+Éclair è distribuito con **licenza MIT** ([`LICENSE`](LICENSE)): usalo, modificalo e ridistribuiscilo liberamente, anche per uso commerciale, mantenendo l’avviso di copyright. Una parte delle icone del pannello deriva da [Lucide](https://lucide.dev) (licenza ISC, vedi [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)).
+
+<br>
+
+<p align="center"><sub>⚡ Éclair, per liberi professionisti e piccole imprese che vogliono un sito veloce, ben posizionato e senza pensieri.</sub></p>
+
+[^wp]: Archivio ufficiale di WordPress 7.1.4: 37.239.942 byte, cioè 35,5 MB ([link per il download](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), verificato il 29 ottobre 2026).

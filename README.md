@@ -1,4 +1,8 @@
 <p align="center">
+  <b>Français</b> · <a href="README.en.md">English</a> · <a href="README.es.md">Español</a> · <a href="README.de.md">Deutsch</a> · <a href="README.it.md">Italiano</a> · <a href="README.pt-BR.md">Português</a> · <a href="README.zh-CN.md">简体中文</a>
+</p>
+
+<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/images/banner-dark.webp">
     <img src="docs/images/banner-light.webp" alt="Éclair CMS : le CMS ultra léger, ultra rapide, taillé pour Google et les IA" width="100%">
