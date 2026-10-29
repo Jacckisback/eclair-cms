@@ -35,7 +35,7 @@
 
 ### 安装步骤
 
-1. 下载安装包 [`eclair-cms-1.1.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.1.0.zip)（315 KB）并解压。
+1. 下载安装包 [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip)（402 KB）并解压。
 2. 使用 FTP 软件（如 FileZilla）或主机的文件管理器，把 **`eclair` 文件夹里的内容**上传到主机的公开目录（`public_html`、`www`……）。
    > ⚠️ `.htaccess` 是隐藏文件：请开启“显示隐藏文件”，确保它们也被上传。
 3. 打开你的网站地址：**安装向导随即启动**（支持 7 种语言，包括简体中文）。
@@ -89,7 +89,7 @@
 - 自动生成 **`/llms.txt`**（llmstxt.org 标准）和 **`/llms-full.txt`**。
 - **每个页面都有 Markdown 版本**：在任意网址后加上 `.md` 即可（带元数据头、`noindex` 和规范网址，不会产生重复内容）。
 - **一键设置 AI 爬虫策略**：开放（推荐，便于被引用）、仅限引用（允许问答引擎，拒绝模型训练）或关闭。覆盖 GPTBot、OAI-SearchBot、ChatGPT-User、ClaudeBot、Claude-SearchBot、Claude-User、PerplexityBot、Google-Extended、Applebot-Extended、CCBot、Meta-ExternalAgent 等，并可选 `Content-Signal` 指令。
-- **要点区块**（界面中名为 Key takeaways）：显示在文章开头，是 AI 最爱引用的摘要。
+- **要点区块**（后台中名为“核心要点”）：显示在文章开头，是 AI 最爱引用的摘要。
 - 编辑器内的 **GEO 评分**：摘要、开门见山的引言、FAQ、问句式小标题、列表和表格、具体数据、外部来源、明确的作者（E-E-A-T）、短段落、内容新鲜度。
 - 作者页面包含简介和社交主页（`sameAs`），并显示发布日期和更新日期。
 
@@ -191,7 +191,7 @@
 | GPT-6.1 Terra | $1 / $5 | ≈ $0.06 |
 | GPT-6 Luna | $0.10 / $0.50 | < $0.01 |
 
-一张图片约 $0.05（FLUX 3，100 万像素：$0.048）。以上为 2026 年 10 月 29 日在 [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing)、[OpenAI](https://developers.openai.com/api/docs/pricing) 和 [Black Forest Labs](https://docs.bfl.ml/release-notes) 官方页面查到的公开价格，今后可能会调整。助手的固定指令会缓存在服务商那里，从而降低后续请求的费用。
+一张图片约 $0.05（FLUX 3 生成一张 100 万像素的图片为 $0.048）。以上为 2026 年 10 月 29 日在 [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing)、[OpenAI](https://developers.openai.com/api/docs/pricing) 和 [Black Forest Labs](https://docs.bfl.ml/release-notes) 官方页面查到的公开价格，今后可能会调整。助手的固定指令会缓存在服务商那里，从而降低后续请求的费用。
 
 **防护措施**：每月预算上限（默认 $10），在处理请求的每一步之前都会检查；一旦达到上限，助手就会停止工作，直到下个月。此外还有每人每天的请求次数限制（默认 60 次），而且每人同一时间最多只能进行两个请求。预算和配额都可以在 设置 › AI 助手 中调整。
 
@@ -337,7 +337,7 @@ tools/build.php          生成完整性指纹 + 安装包 dist/eclair-cms-<版�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                  # 测试（单元 + HTTP）
+php tests/run.php                                  # 299 项单元与 HTTP 检查
 php tools/build.php                                # 生成可发布的安装包
 ```
 

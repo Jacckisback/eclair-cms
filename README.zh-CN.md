@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.1.0.zip"><img src="https://img.shields.io/badge/download-v1.1.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.1.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip"><img src="https://img.shields.io/badge/download-v1.2.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.2.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -60,7 +60,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>315 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>402 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -75,13 +75,13 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/frame-ai.webp" alt="Éclair 的 AI 助手：收到“写一篇关于如何选择品牌色彩的文章，并配一张图片”的请求后，生成了图片和一篇完整的草稿，SEO 评分 91，GEO 评分 100" width="100%">
 </p>
 
-像跟同事交代工作一样，写下你的需求：*“写一篇关于如何选择品牌色彩的文章，并配一张图片。”* 助手会先确认网站上还没有这个主题，然后生成图片，**按照你网站的语气**写出完整的草稿（标题、核心要点、小标题、表格、FAQ、元描述、内部链接），再连同 SEO 和 GEO 评分一起交给你。**不经你点击，任何内容都不会发布。**
+像跟同事交代工作一样，写下你的需求：*“写一篇关于如何选择品牌色彩的文章，并配一张图片。”* 助手会先确认网站上还没有写过这个主题，然后生成图片，**按照你网站的语气**写出完整的草稿（标题、核心要点、小标题、表格、FAQ、元描述、内部链接），再连同 SEO 和 GEO 评分一起交给你。**不经你点击，任何内容都不会发布。**
 
 <table>
   <tr>
     <td width="50%" valign="top">
       <h3>✍️ 用你的口吻写作</h3>
-      一键根据你的网站起草<b>编辑风格档案</b>：目标读者、语气、价值观、规则、图片风格。每篇文字还会遵循 Éclair 的分析规则：草稿从一开始就力求高分。
+      一键根据你的网站起草<b>编辑风格档案</b>：目标读者、语气、价值观、规则、图片风格。写出的每篇内容也都遵循 Éclair 的分析规则：草稿从一开始就力求高分。
     </td>
     <td width="50%" valign="top">
       <h3>🖼️ 配图一并搞定</h3>
@@ -95,7 +95,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="50%" valign="top">
       <h3>🛡️ 一切由你掌控</h3>
-      AI 从不发布、也从不删除任何内容。密钥加密存储，设有每月预算和每日配额。<b>Claude 或 ChatGPT</b>，用你自己的密钥：无需订阅，使用 Claude Opus 5.5 时<b>每篇文章约 $0.24</b>。
+      AI 从不发布，也从不删除任何内容。密钥加密存储，设有每月预算和每日配额。<b>Claude 或 ChatGPT</b>，用你自己的密钥：无需订阅，使用 Claude Opus 5.5 时<b>每篇文章约 $0.24</b>。
     </td>
   </tr>
 </table>
@@ -121,7 +121,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 315 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 402 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -171,7 +171,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
         <li>自动生成 <code>/llms.txt</code> 和 <code>/llms-full.txt</code>（<a href="https://llmstxt.org/">llmstxt.org</a> 提案）。</li>
         <li><b>每个页面都有 Markdown 版本</b>：在任意网址后加上 <code>.md</code> 即可。</li>
         <li><b>一键设置 AI 爬虫策略</b>：开放、仅限引用或关闭，覆盖 30 个爬虫（GPTBot、ClaudeBot、PerplexityBot……）。</li>
-        <li>文章开头的<b>要点区块</b>（Key takeaways）：AI 最爱引用的摘要。</li>
+        <li>文章开头的<b>要点区块</b>（后台中名为“核心要点”）：AI 最爱引用的摘要。</li>
         <li><b>GEO 评分</b>：FAQ、问句式小标题、具体数据、信息来源、明确的作者（E-E-A-T）……</li>
       </ul>
     </td>
@@ -227,7 +227,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.1.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.1.0.zip)（315 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip)（402 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
@@ -253,7 +253,7 @@ PHP 8.1+，不依赖框架，也不需要 Composer：`eclair/app/lib/` 中是简
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                                           # 199 项单元测试和 HTTP 测试
+php tests/run.php                                                           # 299 项单元与 HTTP 检查
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 
