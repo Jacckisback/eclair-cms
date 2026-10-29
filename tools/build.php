@@ -66,7 +66,7 @@ $zip->addFromString('LISEZ-MOI.txt', <<<TXT
 2. Ouvre l'adresse de ton site dans le navigateur : l'assistant d'installation démarre.
    Par sécurité, termine-le dans les 2 heures qui suivent la première visite
    (sinon : supprime data/install-window.php par FTP et recharge la page).
-3. C'est tout. Documentation complète : README.md du dépôt.
+3. C'est tout. Documentation complète : https://github.com/Jacckisback/clair-cms
 
 Mot de passe oublié et aucun autre administrateur ? Crée par FTP le fichier data/reset.php
 avec ces trois lignes, puis connecte-toi dans les 24 h avec cet e-mail et ce nouveau mot de passe :
@@ -75,5 +75,11 @@ ton-adresse@email.fr
 TonNouveauMotDePasse2026
 
 TXT);
+// Licence MIT et mentions des tiers : elles accompagnent chaque copie distribuée.
+foreach (['LICENSE' => 'LICENSE.txt', 'THIRD-PARTY-NOTICES.txt' => 'THIRD-PARTY-NOTICES.txt'] as $source => $target) {
+    if (is_file(dirname(__DIR__) . '/' . $source)) {
+        $zip->addFile(dirname(__DIR__) . '/' . $source, $target);
+    }
+}
 $zip->close();
 printf("✓ Archive : %s (%s Ko)\n", $zipFile, round(filesize($zipFile) / 1024));

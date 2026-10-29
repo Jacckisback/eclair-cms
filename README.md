@@ -48,7 +48,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge `dist/eclair-cms-1.0.0.zip` et décompresse-le.
+1. Télécharge [`dist/eclair-cms-1.0.0.zip`](dist/eclair-cms-1.0.0.zip) (bouton « Download raw file » sur GitHub) et décompresse-le.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (français, anglais ou espagnol).
@@ -267,4 +267,8 @@ php tools/build.php                                # archive prête à distribue
 
 Le thème se personnalise en modifiant `app/theme/*.php` et `app/theme/theme.css` (garde une sauvegarde : le contrôle d'intégrité signalera ces fichiers comme modifiés, c'est normal).
 
-Icônes de l'administration inspirées de [Lucide](https://lucide.dev) (licence ISC).
+## Licence
+
+Éclair est distribué sous **licence MIT** (voir [`LICENSE`](LICENSE)) : tu peux l'utiliser, le modifier et le redistribuer, y compris pour un usage commercial, à condition de conserver la mention de copyright et la licence.
+
+Une partie des icônes de l'administration est dérivée de [Lucide](https://lucide.dev) (licence ISC) : voir [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).

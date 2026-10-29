@@ -1,7 +1,7 @@
 <?php exit; ?>
 {
     "version": "1.0.0",
-    "generated": "2026-10-29T01:10:06+00:00",
+    "generated": "2026-10-29T07:44:24+00:00",
     "files": {
         ".htaccess": "3c7ec6140820ba41a357d63a9f96aa4c3469f13abca8d735e844896c3a9784cd",
         "app/.htaccess": "c591e29d6749697612e0932106a1820ff05705e63910dfa19d7b2e5c7ff39253",
