@@ -29,6 +29,29 @@ $cls = static fn (int $s): string => $s >= 80 ? 'good' : ($s >= 50 ? 'ok' : 'bad
     </div>
   </div>
 
+  <?php if (\Eclair\Ai::allowed($user)): ?>
+  <form class="card ai-prompt" data-ai-prompt>
+    <label class="ai-prompt-title" for="ai-quick"><?= Icons::svg('spark') ?><?= e(t('Que veux-tu créer aujourd’hui ?')) ?></label>
+    <div class="ai-input">
+      <textarea id="ai-quick" rows="2" placeholder="<?= e(t('Ex. : écris un article sur l’entretien d’un vélo électrique, avec une image.')) ?>"></textarea>
+      <button class="btn btn-primary" type="submit"><?= e(t('Envoyer')) ?></button>
+    </div>
+    <div class="ai-chips">
+      <?php foreach ([
+          ['✍️', t('Écrire un article'), t('Écris un article sur ')],
+          ['👥', t('Ajouter un membre à l’équipe'), t('Ajoute à la page équipe : Prénom Nom, fonction, avec la photo jointe.')],
+          ['💡', t('5 idées d’articles'), t('Propose-moi 5 idées d’articles pour attirer de nouveaux clients.')],
+          ['📄', t('Créer une page'), t('Crée une page « Nos services » qui présente ')],
+      ] as [$emoji, $label, $idea]): ?>
+        <button class="ai-chip" type="button" data-ai-idea="<?= e($idea) ?>"><?= $emoji ?> <?= e($label) ?></button>
+      <?php endforeach ?>
+    </div>
+  </form>
+  <?php elseif ($user['role'] === 'admin' && \Eclair\Settings::get('ai.provider') === ''): ?>
+  <div class="notice"><span>✨</span><p><?= e(t('Nouveau : l’assistant IA rédige articles et pages dans le ton de ton site, avec images. Tu relis, tu publies.')) ?>
+    <a href="<?= e(admin_url('settings?tab=ai')) ?>"><?= e(t('Activer l’assistant')) ?> →</a></p></div>
+  <?php endif ?>
+
   <?php if ($v['onboarding']): ?>
   <section class="card onboard" aria-labelledby="onboard-title">
     <div class="card-head">

@@ -16,6 +16,9 @@ $isPost = $item['type'] === 'post';
     <span class="status" id="save-status" aria-live="polite"></span>
     <span class="spacer"></span>
     <a class="btn btn-ghost btn-sm" id="view-link" href="#" target="_blank" rel="noopener" hidden><?= Icons::svg('external') ?><span><?= e(t('Voir')) ?></span></a>
+    <?php if (\Eclair\Ai::allowed(\Eclair\Auth::user())): ?>
+      <button class="btn btn-sm" type="button" data-ai-open title="<?= e(t('Assistant IA')) ?> (Ctrl+J)"><?= Icons::svg('spark') ?><span><?= e(t('Assistant')) ?></span></button>
+    <?php endif ?>
     <button class="btn btn-sm" type="button" id="btn-preview"><?= Icons::svg('eye') ?><span><?= e(t('Aperçu')) ?></span></button>
     <button class="btn btn-sm" type="button" id="btn-save"><?= e(t('Enregistrer')) ?></button>
     <button class="btn btn-primary btn-sm" type="button" id="btn-publish"><?= e(t('Publier')) ?></button>

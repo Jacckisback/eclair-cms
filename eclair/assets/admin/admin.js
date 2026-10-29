@@ -215,6 +215,17 @@
       if (res.ok) { Object.assign(current, res.media); render(); toast(t('Texte alternatif enregistré.'), 'ok'); detail.close(); }
     });
     $('#md-copy').addEventListener('click', () => navigator.clipboard.writeText($('#md-url').value).then(() => toast(t('Lien copié !'), 'ok')));
+    if (D.ai) {
+      const gen = h('button', { class: 'ai-mini', type: 'button', text: '✨ ' + t('Décrire avec l’IA') });
+      gen.addEventListener('click', async () => {
+        if (gen.hasAttribute('aria-busy')) return;
+        gen.setAttribute('aria-busy', 'true');
+        const res = await api('api/ai/assist', { task: 'alt', media: current.id }).catch(() => ({}));
+        gen.removeAttribute('aria-busy');
+        if (res.ok) { Object.assign(current, res.media); $('#md-alt').value = res.media.alt; render(); toast(t('Texte alternatif enregistré.'), 'ok'); }
+      });
+      $('#md-alt').after(gen);
+    }
     $('#md-delete').addEventListener('click', async () => {
       if (!confirm(t('Supprimer définitivement ?'))) return;
       let res = await api('api/media/delete', { id: current.id });
@@ -293,6 +304,41 @@
         }));
       });
       $('#menus-json').value = JSON.stringify(out);
+    });
+  }
+
+  /* ── Réglages › Assistant IA ── */
+  const aiSettings = $('#ai-settings');
+  if (aiSettings) {
+    const sync = () => {
+      const provider = ($('[data-ai-provider]:checked', aiSettings) || {}).value || '';
+      const image = ($('[data-ai-image]:checked', aiSettings) || {}).value || '';
+      $$('[data-ai-for]', aiSettings).forEach((box) => { box.hidden = box.dataset.aiFor !== provider; });
+      $$('[data-ai-image-for]', aiSettings).forEach((box) => { box.hidden = box.dataset.aiImageFor !== image; });
+    };
+    aiSettings.addEventListener('change', sync);
+    $$('[data-ai-test]', aiSettings).forEach((btn) => btn.addEventListener('click', async () => {
+      const box = btn.closest('[data-ai-for]');
+      const out = $('[data-ai-result]', box);
+      btn.disabled = true;
+      out.textContent = t('Vérification…');
+      const res = await api('api/ai/test', { provider: btn.dataset.aiTest, key: $('input[type=password]', box).value.trim(), model: $('select', box).value }, { quiet: true }).catch(() => ({}));
+      btn.disabled = false;
+      out.textContent = res.ok ? '✅ ' + res.message : '⚠️ ' + (res.error || t('Erreur réseau : vérifie ta connexion.'));
+    }));
+    const profile = $('[data-ai-profile]', aiSettings);
+    if (profile) profile.addEventListener('click', async () => {
+      const status = $('[data-ai-profile-status]', aiSettings);
+      const fields = $$('textarea[name^=profile_]', aiSettings);
+      if (fields.some((x) => x.value.trim()) && !confirm(t('Remplacer le profil actuel par celui rédigé par l’IA ?'))) return;
+      profile.disabled = true;
+      status.textContent = t('L’IA lit ton site… (20 à 60 secondes)');
+      const res = await api('api/ai/profile', {}, { quiet: true }).catch(() => ({}));
+      profile.disabled = false;
+      if (!res.ok) { status.textContent = '⚠️ ' + (res.error || t('Erreur réseau : vérifie ta connexion.')); return; }
+      fields.forEach((x) => { const k = x.name.slice(8); if (res.profile[k] != null) x.value = res.profile[k]; });
+      aiSettings.closest('form').dispatchEvent(new Event('input', { bubbles: true }));
+      status.textContent = '✅ ' + t('Profil rédigé : relis-le, ajuste-le, puis enregistre.');
     });
   }
 

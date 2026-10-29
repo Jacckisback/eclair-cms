@@ -93,7 +93,7 @@ final class AdminSecurity
             $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
             foreach ($it as $path => $info) {
                 $rel = $prefix . '/' . str_replace('\\', '/', substr((string) $path, strlen($dir) + 1));
-                if ($info->isFile() && !preg_match('~^data/(sessions/|limits/|reset\.php$)~', $rel) && !str_ends_with($rel, '.lock')) {
+                if ($info->isFile() && !preg_match('~^data/(sessions/|limits/|ai/|reset\.php$|vault\.php$)~', $rel) && !str_ends_with($rel, '.lock')) {
                     $zip->addFile((string) $path, $rel);
                 }
             }

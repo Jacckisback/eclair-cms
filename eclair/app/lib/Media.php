@@ -98,6 +98,27 @@ final class Media
         if (!is_uploaded_file($tmp) && !(defined('ECLAIR_TESTING') && is_file($tmp))) {
             throw new \RuntimeException(t('Envoi invalide.'));
         }
+        return self::ingest($tmp, (string) ($file['name'] ?? 'image'), $userId);
+    }
+
+    /** Image reçue d'un service (génération par IA) : même contrôle et même ré-encodage qu'un envoi. */
+    public static function import(string $bytes, string $name, string $userId): array
+    {
+        Store::ensureDir(ECLAIR_ROOT . '/cache');
+        $tmp = ECLAIR_ROOT . '/cache/import-' . bin2hex(random_bytes(8)) . '.tmp';
+        if (@file_put_contents($tmp, $bytes) !== strlen($bytes)) {
+            @unlink($tmp);
+            throw new \RuntimeException(t("Impossible d'enregistrer l'image : vérifie les droits du dossier media."));
+        }
+        try {
+            return self::ingest($tmp, $name, $userId);
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    private static function ingest(string $tmp, string $originalName, string $userId): array
+    {
         if (filesize($tmp) > self::MAX_BYTES) {
             throw new \RuntimeException(t('Image trop lourde (20 Mo maximum).'));
         }
@@ -119,7 +140,7 @@ final class Media
                 @file_put_contents($dir . '/index.html', '');
             }
         }
-        $base = substr(slugify(pathinfo((string) ($file['name'] ?? 'image'), PATHINFO_FILENAME)) ?: 'image', 0, 60);
+        $base = substr(slugify(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'image', 0, 60);
         $name = $base;
         $prefix = self::dir() . '/' . $folder . '/';
         for ($n = 2; glob($prefix . $name . '.*') || glob($prefix . $name . '-*'); $n++) {
@@ -133,7 +154,7 @@ final class Media
             'h' => $h,
             'webp' => [],
             'alt' => '',
-            'name' => mb_substr(basename((string) ($file['name'] ?? '')), 0, 120),
+            'name' => mb_substr(basename($originalName), 0, 120),
             'created' => time(),
             'user' => $userId,
         ];

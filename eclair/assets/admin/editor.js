@@ -51,6 +51,7 @@
     divider: ['—', t('Séparateur'), t('Ligne de séparation'), () => ({ type: 'divider' })],
     hero: ['★', t('Bannière'), t('Grand titre d’accueil avec boutons'), () => ({ type: 'hero', title: '', text: '', button: '', url: '', button2: '', url2: '', media: '' })],
     features: ['▤', t('Atouts'), t('Grille de services ou d’avantages'), () => ({ type: 'features', title: '', items: [{ icon: '🚀', title: '', text: '' }, { icon: '🤝', title: '', text: '' }, { icon: '✅', title: '', text: '' }] })],
+    team: ['👥', t('Équipe'), t('Portraits, fonctions et présentations'), () => ({ type: 'team', title: '', items: [{ name: '', role: '', bio: '', media: '', link: '' }] })],
     posts: ['📰', t('Derniers articles'), t('Liste automatique des articles'), () => ({ type: 'posts', title: '', count: 3, category: '' })],
     contact: ['✉', t('Formulaire de contact'), t('Formulaire anti-spam intégré'), () => ({ type: 'contact', title: '', button: '' })],
   };
@@ -297,6 +298,37 @@
       (d.items || []).forEach(add);
       body.append(title, grid, h('button', { class: 'btn btn-sm', type: 'button', text: '+ ' + t('Ajouter un atout'), onclick: () => { add(); changed(); } }));
       el._read = () => ({ type: 'features', title: title.value.trim(), items: $$('.item-row', grid).map((r) => r._read()) });
+      el._focus = () => title.focus();
+    },
+    team(el, body, d) {
+      const title = input(d.title, t('Titre de la section (facultatif)'));
+      const grid = h('div', { class: 'item-grid' });
+      const add = (p = { name: '', role: '', bio: '', media: '', link: '' }) => {
+        const state = { media: p.media || '' };
+        const name = input(p.name, t('Prénom et nom'));
+        const role = input(p.role, t('Fonction'));
+        const bio = rich(p.bio, t('Présentation en une ou deux phrases'));
+        const link = input(p.link, t('Lien du profil (LinkedIn…)'));
+        linkAssist(link);
+        const pic = h('button', { type: 'button', class: 'member-pic', title: t('Choisir la photo'), 'aria-label': t('Choisir la photo') });
+        const drop = h('button', { type: 'button', class: 'link-btn small', text: t('Retirer la photo') });
+        const drawPic = () => {
+          const m = media[state.media];
+          pic.replaceChildren(m ? h('img', { src: m.thumb, alt: '' }) : h('span', { text: '📷' }));
+          drop.hidden = !m;
+        };
+        pic.addEventListener('click', async () => { const x = await pickMedia(); if (x) { media[x.id] = x; state.media = x.id; drawPic(); changed(); } });
+        drop.addEventListener('click', () => { state.media = ''; drawPic(); changed(); });
+        drawPic();
+        const row = h('div', { class: 'item-row member-row' }, h('div', { class: 'member-side' }, pic, drop),
+          h('div', { class: 'member-fields' }, h('div', { class: 'row' }, name, role), bio, link),
+          h('span', { class: 'item-del' }, iconBtn('x', t('Supprimer'), () => { row.remove(); changed(); })));
+        row._read = () => ({ name: name.value.trim(), role: role.value.trim(), bio: cleanHtml(bio), media: state.media, link: link.value.trim() });
+        grid.append(row);
+      };
+      (d.items || []).forEach(add);
+      body.append(title, grid, h('button', { class: 'btn btn-sm', type: 'button', text: '+ ' + t('Ajouter une personne'), onclick: () => { add(); changed(); } }));
+      el._read = () => ({ type: 'team', title: title.value.trim(), items: $$('.item-row', grid).map((r) => r._read()) });
       el._focus = () => title.focus();
     },
     posts(el, body, d) {
@@ -962,6 +994,139 @@
   let activity = Date.now();
   root.addEventListener('keydown', () => { activity = Date.now(); });
   setInterval(() => { if (Date.now() - activity < 15 * 60 * 1000) api('api/ping', {}, { quiet: true }).catch(() => {}); }, 10 * 60 * 1000);
+
+  /* ───────────── Assistant IA ───────────── */
+  // L'assistant (assets/admin/assistant.js) lit le contenu en cours et y applique ses modifications, annulables.
+  window.EclairEditor = {
+    read: serialize,
+    apply(patch, extraMedia = {}) {
+      const before = serialize();
+      Object.assign(media, extraMedia);
+      const next = { ...item, ...before, date_local: before.date };
+      ['title', 'summary', 'image', 'blocks'].forEach((k) => { if (patch[k] != null) next[k] = patch[k]; });
+      if (patch.seo) next.seo = { ...before.seo, ...patch.seo };
+      load(next);
+      changed();
+      return () => { load({ ...item, ...before, date_local: before.date }); changed(); };
+    },
+  };
+  if (D.ai) {
+    const assist = async (task, extra = {}, btn = null) => {
+      if (btn) btn.setAttribute('aria-busy', 'true');
+      const res = await api('api/ai/assist', { task, item: serialize(), ...extra }).catch(() => ({ ok: false }));
+      if (btn) btn.removeAttribute('aria-busy');
+      return res;
+    };
+    const mini = (label, run) => {
+      const b = h('button', { type: 'button', class: 'ai-mini', text: '✨ ' + label });
+      b.addEventListener('click', () => { if (!b.hasAttribute('aria-busy')) run(b); });
+      return b;
+    };
+    const setField = (el, value) => { el.value = value; el.dispatchEvent(new Event('input', { bubbles: true })); };
+
+    /* Réécrire la sélection (barre de mise en forme). */
+    let menu = null;
+    const closeMenu = () => { if (menu) { menu.remove(); menu = null; } };
+    const keep = (e) => e.preventDefault();
+    const rewrite = async (mode, lang, range, ed) => {
+      closeMenu();
+      const holder = document.createElement('div');
+      holder.append(range.cloneContents());
+      const before = ed.innerHTML;
+      toast(t('L’IA retravaille le passage…'));
+      const res = await api('api/ai/assist', { task: 'rewrite', mode, lang, html: holder.innerHTML, item: { id: item.id, type: item.type, title: titleEl.value } }).catch(() => ({}));
+      if (!res.ok || !res.html || !ed.isConnected) return;
+      ed.focus();
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      document.execCommand('insertHTML', false, res.html);
+      changed();
+      toast(t('Passage réécrit.'), 'ok', { label: t('Annuler'), run: () => { ed.innerHTML = before; changed(); } });
+    };
+    const openMenu = () => {
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) return;
+      const range = sel.getRangeAt(0).cloneRange();
+      const node = range.commonAncestorContainer;
+      const ed = (node.nodeType === 1 ? node : node.parentElement).closest('#blocks [contenteditable]');
+      if (!ed) return;
+      closeMenu();
+      const choice = (label, run) => h('button', { type: 'button', role: 'menuitem', onmousedown: keep, onclick: run }, label);
+      const modes = [['improve', '✨ ' + t('Améliorer')], ['fix', '✔️ ' + t('Corriger les fautes')], ['shorten', '✂️ ' + t('Raccourcir')], ['expand', '➕ ' + t('Développer')],
+        ['simplify', '🧩 ' + t('Simplifier')], ['warmer', '🤝 ' + t('Plus chaleureux')], ['formal', '👔 ' + t('Plus professionnel')]];
+      menu = h('div', { class: 'ai-menu', role: 'menu', 'aria-label': t('Retoucher avec l’IA') },
+        modes.map(([mode, label]) => choice(label, () => rewrite(mode, '', range, ed))), h('hr'),
+        choice('🌍 ' + t('Traduire…'), () => menu.replaceChildren(...Object.entries(cfg.langs).map(([code, name]) => choice(name, () => rewrite('translate', code, range, ed))))));
+      document.body.append(menu);
+      const r = range.getBoundingClientRect();
+      menu.style.top = Math.max(8, Math.min(r.bottom + 10, innerHeight - menu.offsetHeight - 8)) + 'px';
+      menu.style.left = Math.max(8, Math.min(r.left, innerWidth - menu.offsetWidth - 8)) + 'px';
+    };
+    bar.append(cmd('ai', '✨', t('Retoucher avec l’IA'), openMenu));
+    document.addEventListener('mousedown', (e) => { if (menu && !menu.contains(e.target)) closeMenu(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+
+    /* « L'essentiel ». */
+    const writeSummary = async (b) => {
+      const res = await assist('summary', {}, b);
+      if (!res.ok) return;
+      $('#summary-card').hidden = false;
+      $('#summary-add').hidden = true;
+      setField(summaryEl, res.summary);
+    };
+    $('#summary-card .row').append(mini(t('Rédiger'), writeSummary));
+    $('#summary-box').append(mini(t('Rédiger « L’essentiel » avec l’IA'), writeSummary));
+
+    /* Titres, méta-description et expression-clé (onglet SEO). */
+    const picks = h('div', { class: 'ai-picks' });
+    $('[data-pane=seo]').prepend(h('div', { class: 'row wrap' },
+      mini(t('Titre SEO et description'), async (b) => {
+        const res = await assist('meta', {}, b);
+        if (res.ok) { setField(f('f-seo-title'), res.seo_title); setField(f('f-seo-desc'), res.seo_description); }
+      }),
+      mini(t('Expression-clé'), async (b) => { const res = await assist('keyword', {}, b); if (res.ok) setField(f('f-keyword'), res.keyword); }),
+      mini(t('Idées de titres'), async (b) => {
+        const res = await assist('titles', {}, b);
+        if (!res.ok) return;
+        picks.replaceChildren(...res.titles.map((x) => h('button', { type: 'button', text: x, onclick: () => { setField(titleEl, x); picks.textContent = ''; toast(t('Titre mis à jour.'), 'ok'); } })));
+      })), picks);
+
+    /* Points faibles de l'analyse : FAQ, textes alternatifs, assistant. */
+    $('[data-pane=score]').prepend(h('div', { class: 'row wrap' },
+      mini(t('Ajouter une FAQ'), async (b) => {
+        const res = await assist('faq', {}, b);
+        if (!res.ok || !res.items.length) return;
+        const existing = blocks().find((x) => x.dataset.type === 'faq');
+        if (existing) {
+          const data = existing._read();
+          replaceBlock(existing, { ...data, items: [...data.items.filter((q) => q.q), ...res.items] });
+        } else {
+          insertBlock({ type: 'faq', title: '', items: res.items }, blocks().filter((x) => !['contact', 'posts'].includes(x.dataset.type)).at(-1) || null, false);
+        }
+        toast(t('FAQ ajoutée : relis les réponses.'), 'ok');
+      }),
+      mini(t('Textes alternatifs'), async (b) => {
+        const missing = [...new Set(blocks().filter((x) => x.dataset.type === 'image').map((x) => x._read()).filter((d) => d.media && !d.alt && !(media[d.media] || {}).alt).map((d) => d.media))];
+        if (!missing.length) { toast(t('Toutes les images ont un texte alternatif.'), 'ok'); return; }
+        for (const id of missing) {
+          const res = await assist('alt', { media: id, lang: f('f-lang').value }, b);
+          if (res.ok) media[id] = res.media;
+        }
+        analyze();
+        toast(t('Textes alternatifs ajoutés.'), 'ok');
+      }),
+      mini(t('Améliorer avec l’assistant'), () => window.EclairAI && window.EclairAI.send(t('Analyse ce contenu et améliore ses points faibles pour le SEO et le GEO.')))));
+
+    /* Image à la une créée par l'IA. */
+    if (D.ai.images && f('f-image-pick')) {
+      f('f-image-pick').after(mini(t('Créer avec l’IA'), async (b) => {
+        toast(t('Création de l’image (10 à 60 secondes)…'));
+        const res = await assist('cover', {}, b);
+        if (res.ok) { media[res.media.id] = res.media; item.image = res.media.id; drawImage(); changed(); toast(t('Image à la une créée.'), 'ok'); }
+      }));
+    }
+  }
 
   /* ───────────── Démarrage ───────────── */
   load(item);

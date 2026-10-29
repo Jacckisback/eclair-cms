@@ -15,6 +15,7 @@ use Eclair\Settings;
 <link rel="icon" href="<?= e(asset('admin/favicon.svg')) ?>" type="image/svg+xml">
 <script src="<?= e(asset('admin/admin.js')) ?>" defer></script>
 <script src="<?= e(asset('admin/editor.js')) ?>" defer></script>
+<?php if (\Eclair\Ai::allowed(\Eclair\Auth::user())): ?><script src="<?= e(asset('admin/assistant.js')) ?>" defer></script><?php endif ?>
 </head>
 <body>
 <?= $v['content'] ?>

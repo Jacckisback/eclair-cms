@@ -93,6 +93,18 @@ final class Admin
             'GET /security' => [AdminSecurity::class, 'page', 'security'],
             'POST /security' => [AdminSecurity::class, 'action', 'security'],
             'POST /backup' => [AdminSecurity::class, 'backup', 'security'],
+            'POST /api/ai/chat' => [AdminAi::class, 'chat', 'content'],
+            'GET /api/ai/chats' => [AdminAi::class, 'chats', 'content'],
+            'GET /api/ai/chat/([a-z0-9]+)' => [AdminAi::class, 'load', 'content'],
+            'POST /api/ai/forget' => [AdminAi::class, 'forget', 'content'],
+            'POST /api/ai/assist' => [AdminAi::class, 'assist', 'content'],
+            'POST /api/ai/apply' => [AdminAi::class, 'apply', 'content'],
+            'GET /ai/preview/([a-z0-9]+)' => [AdminAi::class, 'preview', 'content'],
+            'POST /api/ai/dismiss' => [AdminAi::class, 'dismiss', 'content'],
+            'POST /api/ai/undo' => [AdminAi::class, 'undo', 'content'],
+            'POST /api/ai/publish' => [AdminAi::class, 'publish', 'content'],
+            'POST /api/ai/test' => [AdminAi::class, 'test', 'settings'],
+            'POST /api/ai/profile' => [AdminAi::class, 'profile', 'settings'],
             'POST /cache' => [AdminSecurity::class, 'clearCache', 'content'],
         ];
         foreach ($routes as $pattern => [$class, $fn, $area]) {
@@ -167,11 +179,13 @@ final class Admin
     /** Données passées au JavaScript (sans script en ligne : bloc JSON non exécutable). */
     public static function jsData(array $extra = []): string
     {
+        $user = Auth::user();
         return '<script type="application/json" id="eclair-data">' . json_script($extra + [
-            'csrf' => Auth::user() ? Security::csrfToken() : '',
+            'csrf' => $user ? Security::csrfToken() : '',
             'admin' => admin_url(),
             'base' => Req::base(),
             'i18n' => AdminStrings::js(),
+            'ai' => $user ? AdminAi::client($user) : null,
         ]) . '</script>';
     }
 

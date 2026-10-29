@@ -39,6 +39,7 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
 <link rel="stylesheet" href="<?= e(asset('admin/admin.css')) ?>">
 <link rel="icon" href="<?= e(asset('admin/favicon.svg')) ?>" type="image/svg+xml">
 <script src="<?= e(asset('admin/admin.js')) ?>" defer></script>
+<?php if (\Eclair\Ai::allowed($user)): ?><script src="<?= e(asset('admin/assistant.js')) ?>" defer></script><?php endif ?>
 <?= $v['scripts'] ?? '' ?>
 </head>
 <body>
@@ -62,6 +63,9 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
         <?php endforeach ?>
       <?php endif ?>
       <span class="nav-title"><?= e(t('Raccourcis')) ?></span>
+      <?php if (\Eclair\Ai::allowed($user)): ?>
+        <a href="#" data-ai-open aria-keyshortcuts="Control+J"><?= Icons::svg('spark') ?><?= e(t('Assistant IA')) ?><kbd>Ctrl J</kbd></a>
+      <?php endif ?>
       <a href="<?= e(path_to('/')) ?>" target="_blank" rel="noopener"><?= Icons::svg('external') ?><?= e(t('Voir le site')) ?></a>
     </nav>
     <div class="sidebar-foot">

@@ -8,7 +8,7 @@ defined('ECLAIR') || exit;
 /** Réglages du site, par onglets. */
 final class AdminSettings
 {
-    public const TABS = ['general', 'appearance', 'seo', 'geo', 'contact', 'advanced'];
+    public const TABS = ['general', 'appearance', 'seo', 'geo', 'ai', 'contact', 'advanced'];
 
     public static function page(array $user): never
     {
@@ -27,7 +27,18 @@ final class AdminSettings
             'pages' => $pages,
             'media' => $media,
             'indexnow' => IndexNow::key(),
+            'ai' => $tab === 'ai' ? self::aiState() : [],
         ], t('Réglages'));
+    }
+
+    /** État de l'assistant pour l'onglet IA : indices des clés (jamais les clés), dépenses du mois. */
+    private static function aiState(): array
+    {
+        $hints = [];
+        foreach (['ai.anthropic', 'ai.openai', 'image.openai', 'image.bfl', 'image.ideogram'] as $name) {
+            $hints[$name] = Vault::hint($name);
+        }
+        return ['hints' => $hints, 'usage' => Ai::usage(), 'crypto' => Vault::available()];
     }
 
     public static function save(array $user): never
@@ -128,6 +139,43 @@ final class AdminSettings
                     'signal' => Req::bool('signal'),
                     'about' => Sanitize::multiline(Req::input('about'), 3000),
                 ]];
+                break;
+
+            case 'ai':
+                $provider = isset(Ai::PROVIDERS[Req::input('provider')]) ? Req::input('provider') : '';
+                try {
+                    foreach (['ai.anthropic', 'ai.openai', 'image.openai', 'image.bfl', 'image.ideogram'] as $name) {
+                        $field = str_replace('.', '_', $name);
+                        $key = (string) preg_replace('/\s+/', '', Req::input('key_' . $field));
+                        if (Req::bool('remove_' . $field)) {
+                            Vault::set($name, '');
+                        } elseif ($key !== '') {
+                            Vault::set($name, mb_substr($key, 0, 500));
+                        }
+                    }
+                } catch (\RuntimeException $e) {
+                    Admin::back($redirect, $e->getMessage(), 'bad');
+                }
+                $model = Req::input('model_' . $provider);
+                $profile = [];
+                foreach (array_keys(Settings::DEFAULTS['ai']['profile']) as $k) {
+                    $profile[$k] = Sanitize::multiline(Req::input('profile_' . $k), 2000);
+                }
+                $patch = ['ai' => [
+                    'provider' => $provider,
+                    'model' => isset(Ai::MODELS[$provider][$model]) ? $model : '',
+                    'image' => isset(Ai::IMAGES[Req::input('image')]) ? Req::input('image') : '',
+                    'budget' => max(0, min(100000, round((float) str_replace(',', '.', Req::input('budget')), 2))),
+                    'daily' => max(0, min(100000, (int) Req::input('daily'))),
+                    'editors' => Req::bool('editors'),
+                    'profile' => $profile,
+                ]];
+                if ($provider !== '' && !Vault::has('ai.' . $provider)) {
+                    Session::flash('warn', t('Ajoute la clé d’API de {name} pour activer l’assistant.', ['name' => Ai::PROVIDERS[$provider]]));
+                }
+                if ($patch['ai']['image'] !== '' && Ai::imageKey($patch['ai']['image']) === '') {
+                    Session::flash('warn', t('Ajoute la clé d’API de {name} pour créer des images.', ['name' => Ai::IMAGES[$patch['ai']['image']][0]]));
+                }
                 break;
 
             case 'contact':

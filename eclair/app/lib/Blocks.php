@@ -13,7 +13,7 @@ final class Blocks
 {
     public const TYPES = [
         'paragraph', 'heading', 'list', 'quote', 'image', 'callout', 'faq', 'table',
-        'button', 'video', 'code', 'divider', 'hero', 'features', 'posts', 'contact',
+        'button', 'video', 'code', 'divider', 'hero', 'features', 'team', 'posts', 'contact',
     ];
     private const CALLOUTS = ['info' => 'ℹ️', 'tip' => '💡', 'warning' => '⚠️', 'success' => '✅', 'note' => '📝'];
     private const RESERVED_IDS = ['main', 'top', 'toc', 'menu', 'contenu', 'content', 'search', 'site-nav'];
@@ -165,6 +165,22 @@ final class Blocks
                 }
                 return $items ? ['type' => 'features', 'title' => $s('title', 200), 'items' => $items] : null;
 
+            case 'team':
+                $items = [];
+                foreach (array_slice((array) ($b['items'] ?? []), 0, 60) as $item) {
+                    $name = is_array($item) ? Sanitize::text($item['name'] ?? '', 120) : '';
+                    if ($name !== '') {
+                        $items[] = [
+                            'name' => $name,
+                            'role' => Sanitize::text($item['role'] ?? '', 120),
+                            'bio' => Sanitize::inline(is_string($item['bio'] ?? null) ? $item['bio'] : ''),
+                            'media' => preg_replace('/[^a-z0-9]/', '', (string) ($item['media'] ?? '')) ?? '',
+                            'link' => Sanitize::url((string) ($item['link'] ?? '')),
+                        ];
+                    }
+                }
+                return $items ? ['type' => 'team', 'title' => $s('title', 200), 'items' => $items] : null;
+
             case 'posts':
                 return [
                     'type' => 'posts',
@@ -212,6 +228,7 @@ final class Blocks
                 'divider' => "<hr>\n",
                 'hero' => self::hero($b, $h1 && $i === 0, $lang),
                 'features' => self::features($b, $anchors[$i] ?? ''),
+                'team' => self::team($b, $anchors[$i] ?? ''),
                 'posts' => self::postsHtml($b, $anchors[$i] ?? '', $lang),
                 'contact' => self::contactHtml($b, (string) ($ctx['page'] ?? ''), $lang),
                 default => '',
@@ -320,6 +337,25 @@ final class Blocks
         return $out . "</div></section>\n";
     }
 
+    /** Équipe : portraits ronds (ou initiales), nom, fonction, présentation et lien de profil. */
+    private static function team(array $b, string $anchor): string
+    {
+        $out = '<section class="team">' . ($b['title'] !== '' ? '<h2 id="' . e($anchor) . '">' . e($b['title']) . '</h2>' : '') . '<div class="grid">';
+        foreach ($b['items'] as $p) {
+            $m = $p['media'] !== '' ? Media::get($p['media']) : null;
+            $initials = mb_strtoupper(implode('', array_map(fn ($w) => mb_substr($w, 0, 1), array_slice(preg_split('/\s+/u', $p['name']) ?: [], 0, 2))));
+            $out .= '<div class="feature member">'
+                . ($m ? Media::picture($m, (string) ($m['alt'] !== '' ? $m['alt'] : $p['name']), '8rem') : '<span class="member-initials" aria-hidden="true">' . e($initials) . '</span>')
+                . '<h3>' . e($p['name']) . '</h3>'
+                . ($p['role'] !== '' ? '<p class="member-role">' . e($p['role']) . '</p>' : '')
+                . ($p['bio'] !== '' ? '<p>' . self::rich($p['bio']) . '</p>' : '')
+                . ($p['link'] !== '' ? '<p class="member-link"><a href="' . e(self::href($p['link'])) . '">'
+                    . e((string) preg_replace('/^www\./', '', (string) (parse_url($p['link'], PHP_URL_HOST) ?: $p['link']))) . ' ↗</a></p>' : '')
+                . '</div>';
+        }
+        return $out . "</div></section>\n";
+    }
+
     private static function postsHtml(array $b, string $anchor, string $lang): string
     {
         if (!Settings::get('blog.enabled')) {
@@ -365,7 +401,7 @@ final class Blocks
             $text = match ($b['type']) {
                 'heading' => $b['anchor'] !== '' ? $b['anchor'] : plain($b['text']),
                 'faq' => $b['title'] !== '' ? $b['title'] : 'faq',
-                'features', 'posts' => $b['title'] ?? '',
+                'features', 'posts', 'team' => $b['title'] ?? '',
                 default => null,
             };
             if ($text === null || $text === '') {
@@ -424,6 +460,7 @@ final class Blocks
                 'table' => implode(' ', array_map(fn ($r) => implode(' ', array_map('plain', $r)), $b['rows'])),
                 'hero' => $b['title'] . ' ' . plain($b['text']),
                 'features' => $b['title'] . ' ' . implode(' ', array_map(fn ($i) => $i['title'] . ' ' . plain($i['text']), $b['items'])),
+                'team' => $b['title'] . ' ' . implode(' ', array_map(fn ($p) => $p['name'] . ' ' . $p['role'] . ' ' . plain($p['bio']), $b['items'])),
                 'image' => plain($b['caption']),
                 default => '',
             };
@@ -452,6 +489,9 @@ final class Blocks
         foreach ($blocks as $b) {
             if (in_array($b['type'], ['image', 'hero'], true) && ($b['media'] ?? '') !== '') {
                 $ids[] = $b['media'];
+            }
+            if ($b['type'] === 'team') {
+                $ids = array_merge($ids, array_filter(array_column($b['items'], 'media')));
             }
         }
         return array_values(array_unique($ids));
@@ -527,6 +567,9 @@ final class Blocks
                     . ($b['button'] !== '' && $b['url'] !== '' ? "\n\n" . self::mdLink($b['button'], $b['url']) : ''),
                 'features' => ($b['title'] !== '' ? '## ' . self::mdText($b['title']) . "\n\n" : '')
                     . implode("\n\n", array_map(fn ($i) => '### ' . self::mdText(trim($i['icon'] . ' ' . $i['title'])) . ($i['text'] !== '' ? "\n\n" . self::md($i['text']) : ''), $b['items'])),
+                'team' => ($b['title'] !== '' ? '## ' . self::mdText($b['title']) . "\n\n" : '')
+                    . implode("\n\n", array_map(fn ($p) => '### ' . self::mdText($p['name']) . ($p['role'] !== '' ? ' — ' . self::mdText($p['role']) : '')
+                        . ($p['bio'] !== '' ? "\n\n" . self::md($p['bio']) : '') . ($p['link'] !== '' ? "\n\n" . self::mdLink($p['link'], $p['link']) : ''), $b['items'])),
                 'posts' => self::mdPosts($b, $lang),
                 default => '',
             };
