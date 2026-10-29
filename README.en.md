@@ -63,7 +63,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
-      Guided setup in 4 questions, block editor with <code>/</code>, getting-started checklist. Admin in <b>English, French and Spanish</b>, site in 6 languages.
+      Guided setup in 4 questions, block editor with <code>/</code>, getting-started checklist. Admin in <b>7 languages</b>, site in 6 languages.
     </td>
   </tr>
 </table>

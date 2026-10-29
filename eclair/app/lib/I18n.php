@@ -6,12 +6,13 @@ namespace Eclair;
 defined('ECLAIR') || exit;
 
 /**
- * Traductions de l'administration. Le texte français sert de clé ;
- * app/lang/en.php et app/lang/es.php contiennent les correspondances.
+ * Traductions de l'administration. Le texte français sert de référence : les sources lisibles
+ * i18n/<langue>.php du dépôt sont compilées par tools/i18n.php en app/lang/<langue>.php,
+ * indexées par l'empreinte CRC32 du texte français.
  */
 final class I18n
 {
-    public const LANGS = ['fr' => 'Français', 'en' => 'English', 'es' => 'Español'];
+    public const LANGS = ['fr' => 'Français', 'en' => 'English', 'es' => 'Español', 'de' => 'Deutsch', 'it' => 'Italiano', 'pt' => 'Português', 'zh' => '简体中文'];
 
     private static string $lang = 'fr';
     private static ?array $dict = null;
@@ -38,7 +39,7 @@ final class I18n
                 $dict = is_file($file) ? include $file : [];
                 self::$dict = is_array($dict) ? $dict : [];
             }
-            $text = self::$dict[$text] ?? $text;
+            $text = self::$dict[hash('crc32b', $text)] ?? $text;
         }
         if ($vars) {
             $pairs = [];

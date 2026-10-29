@@ -40,7 +40,7 @@ final class AdminStrings
             'Raccourcis clavier', 'Copié !', 'Rechercher une image…', 'Lié à :', 'Aucune', 'Aucun', 'Restaurer', 'Publié ✓', 'Programmé ✓',
             'Passer en brouillon', 'Nouvelle version disponible', 'Choisir une image', 'Sans titre', 'Articles', 'Pages', 'Supprimer la ligne',
             'Image introuvable', 'Glisse une image ici ou clique pour choisir', 'Texte du lien', 'Nouvel onglet',
-            'Astuce', 'Bon à savoir', 'Attention', 'À retenir', 'Note',
+            'Astuce', 'Bon à savoir', 'Attention', 'À retenir', 'Note', 'Catégorie',
         ];
         $out = [];
         foreach ($keys as $k) {

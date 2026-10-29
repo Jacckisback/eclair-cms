@@ -63,7 +63,7 @@ WordPress sait tout faire, mais il lui faut une base de données, des extensions
     </td>
     <td width="33%" valign="top">
       <h3>😊 Simple comme bonjour</h3>
-      Installation guidée en 4 questions, éditeur de blocs avec <code>/</code>, checklist de démarrage. Administration en <b>français, anglais et espagnol</b>, site en 6 langues.
+      Installation guidée en 4 questions, éditeur de blocs avec <code>/</code>, checklist de démarrage. Administration en <b>7 langues</b>, site en 6 langues.
     </td>
   </tr>
 </table>

@@ -63,7 +63,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
-      Geführte Installation mit 4 Fragen, Block-Editor mit <code>/</code>, Checkliste für den Start. Verwaltung auf <b>Englisch, Französisch und Spanisch</b>, Website in 6 Sprachen (darunter Deutsch).
+      Geführte Installation mit 4 Fragen, Block-Editor mit <code>/</code>, Checkliste für den Start. Verwaltung in <b>7 Sprachen</b>, Website in 6 Sprachen (jeweils auch auf Deutsch).
     </td>
   </tr>
 </table>

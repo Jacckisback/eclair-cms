@@ -129,6 +129,7 @@ function fmt_date(int $ts, ?string $lang = null, bool $time = false): string
         'es', 'pt' => "$d de $month de $y",
         'en' => "$month $d, $y",
         'de' => "$d. $month $y",
+        'zh' => "{$y}年{$m}月{$d}日",
         default => "$d $month $y",
     };
     return $time ? $out . ' · ' . date('H:i', $ts) : $out;
@@ -147,13 +148,14 @@ function ago(int $ts): string
     };
 }
 
-/** Taille de fichier lisible. */
+/** Taille de fichier lisible (Mo/Ko en français, MB/KB ailleurs). */
 function human_size(int $bytes): string
 {
+    [$mb, $kb, $b] = I18n::lang() === 'fr' ? ['Mo', 'Ko', 'o'] : ['MB', 'KB', 'B'];
     return match (true) {
-        $bytes >= 1048576 => round($bytes / 1048576, 1) . ' Mo',
-        $bytes >= 1024 => round($bytes / 1024) . ' Ko',
-        default => $bytes . ' o',
+        $bytes >= 1048576 => round($bytes / 1048576, 1) . " $mb",
+        $bytes >= 1024 => round($bytes / 1024) . " $kb",
+        default => "$bytes $b",
     };
 }
 

@@ -34,7 +34,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 1. Descarga el archivo [`eclair-cms-1.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.0.0.zip) (257 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
-3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en español, francés o inglés).
+3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
 4. Responde 4 preguntas (tu sitio, tu cuenta, tu visibilidad, la dirección de tu panel). Confeti 🎉: tu sitio está en línea, con páginas y un artículo de ejemplo.
 
 > 🔒 Por seguridad, la instalación debe hacerse **en las 2 horas** siguientes a la primera visita (si no, cualquiera podría apropiarse de un sitio subido y olvidado). Pasado ese plazo, borra el archivo `data/install-window.php` por FTP y recarga la página.
@@ -99,7 +99,7 @@ El panel muestra una lista de «Primeros pasos»: logo y color, página de inici
 
 ### 🧩 Todo lo demás
 
-Biblioteca de medios (arrastrar y soltar, textos alternativos, detección de las imágenes en uso), menús con arrastrar y soltar (cabecera y pie de página), categorías «pilar» para un clúster temático, buscador interno, formulario de contacto antispam **sin captcha** (campo trampa, token, límites por red y por día) con bandeja de entrada, cuentas de administrador y redactor, modo oscuro automático, 6 fuentes del sistema, color principal con contraste WCAG garantizado, panel en español, francés e inglés, sitio público en 6 idiomas (fr, es, en, de, it, pt).
+Biblioteca de medios (arrastrar y soltar, textos alternativos, detección de las imágenes en uso), menús con arrastrar y soltar (cabecera y pie de página), categorías «pilar» para un clúster temático, buscador interno, formulario de contacto antispam **sin captcha** (campo trampa, token, límites por red y por día) con bandeja de entrada, cuentas de administrador y redactor, modo oscuro automático, 6 fuentes del sistema, color principal con contraste WCAG garantizado, panel en 7 idiomas (español, francés, inglés, alemán, italiano, portugués, chino), sitio público en 6 idiomas (fr, es, en, de, it, pt).
 
 ---
 

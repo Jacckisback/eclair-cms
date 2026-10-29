@@ -175,6 +175,28 @@ check('nombre de mots', word_count("Un  deux\u{00A0}trois\nquatre") === 4);
 check('redirection normalisée', Redirects::normalize('https://ex.fr/Ancienne-Page/') === '/Ancienne-Page');
 check('date française', fmt_date(mktime(12, 0, 0, 10, 1, 2026), 'fr') === '1er octobre 2026');
 check('date espagnole', fmt_date(mktime(12, 0, 0, 10, 28, 2026), 'es') === '28 de octubre de 2026');
+check('date chinoise', fmt_date(mktime(12, 0, 0, 10, 28, 2026), 'zh') === '2026年10月28日');
+
+/* ───────────────────── Traductions de l'administration ───────────────────── */
+section('Traductions de l’administration');
+require_once dirname(__DIR__) . '/tools/i18n.php';
+$reference = include dirname(__DIR__) . '/i18n/en.php';
+$marks = static fn (string $s): array => [preg_match_all('/\{\w+\}|<\/?[a-z][a-z0-9]*/i', $s, $m) ? array_count_values($m[0]) : [], substr_count($s, "\n")];
+foreach (array_keys(Eclair\I18n::LANGS) as $lang) {
+    if ($lang === 'fr') {
+        continue;
+    }
+    $source = dirname(__DIR__) . "/i18n/$lang.php";
+    $dict = is_file($source) ? include $source : [];
+    $gaps = array_merge(array_keys(array_diff_key($reference, $dict)), array_keys(array_diff_key($dict, $reference)));
+    check("$lang : tous les textes traduits", $gaps === [], implode(' | ', array_slice($gaps, 0, 3)));
+    $broken = array_filter(array_keys($dict), static fn ($fr) => trim((string) $dict[$fr]) === '' || $marks((string) $fr) != $marks((string) $dict[$fr]));
+    check("$lang : variables, balises et retours à la ligne conservés", $broken === [], implode(' | ', array_slice($broken, 0, 3)));
+    check("$lang : fichier livré à jour (php tools/i18n.php)", is_file($source) && (string) @file_get_contents(ECLAIR_ROOT . "/app/lang/$lang.php") === eclair_i18n_compile($source));
+    Eclair\I18n::setLang($lang);
+    check("$lang : interface traduite", t('Réglages') !== 'Réglages' && t('il y a {n} min', ['n' => 5]) !== 'il y a 5 min');
+}
+Eclair\I18n::setLang('fr');
 
 /* ─────────────────────────── Sécurité (unitaire) ─────────────────────────── */
 section('Limites, journaux, comptes, médias');

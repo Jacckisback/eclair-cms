@@ -33,6 +33,10 @@ function distributable(string $root): array
     return $files;
 }
 
+// Traductions de l'administration : les fichiers livrés sont recompilés depuis i18n/.
+require __DIR__ . '/i18n.php';
+echo '✓ Traductions : ' . count(eclair_i18n_build()) . " langues compilées (eclair/app/lang)\n";
+
 $files = distributable($root);
 $hashes = [];
 foreach ($files as $rel) {

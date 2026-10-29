@@ -63,7 +63,7 @@ WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facilísimo</h3>
-      Instalación guiada en 4 preguntas, editor de bloques con <code>/</code>, lista de primeros pasos. Panel en <b>español, francés e inglés</b>, sitio en 6 idiomas.
+      Instalación guiada en 4 preguntas, editor de bloques con <code>/</code>, lista de primeros pasos. Panel en <b>7 idiomas</b>, sitio en 6 idiomas.
     </td>
   </tr>
 </table>
