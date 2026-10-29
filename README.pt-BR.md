@@ -30,7 +30,7 @@
 <br>
 
 <p align="center">
-  <img src="docs/images/en/showcase.webp" alt="O editor do Éclair com a análise de SEO e GEO em 100 de 100, e o artigo publicado em um celular" width="100%">
+  <img src="docs/images/pt-BR/showcase.webp" alt="O editor do Éclair com a análise de SEO e GEO em 100 de 100, e o artigo publicado em um celular" width="100%">
 </p>
 
 ## Por que o Éclair
@@ -135,17 +135,17 @@ Em uma hospedagem compartilhada de verdade, some a latência de rede e a inicial
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-dashboard.webp" alt="Painel do Éclair: estatísticas, páginas para melhorar e saúde do site">
+      <img src="docs/images/pt-BR/frame-dashboard.webp" alt="Painel do Éclair: estatísticas, páginas para melhorar e saúde do site">
       <p align="center"><b>Painel</b><br><sub>O que melhorar e a saúde do site, em um piscar de olhos.</sub></p>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-geo.webp" alt="Configurações de IA e GEO: escolha das regras para os robôs de inteligência artificial">
+      <img src="docs/images/pt-BR/frame-geo.webp" alt="Configurações de IA e GEO: escolha das regras para os robôs de inteligência artificial">
       <p align="center"><b>Visibilidade nas IAs</b><br><sub>Permita, limite ou bloqueie os robôs de IA em um clique.</sub></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-media.webp" alt="Biblioteca de mídia do Éclair com as imagens enviadas">
+      <img src="docs/images/pt-BR/frame-media.webp" alt="Biblioteca de mídia do Éclair com as imagens enviadas">
       <p align="center"><b>Biblioteca de mídia</b><br><sub>Imagens redimensionadas e convertidas em WebP automaticamente.</sub></p>
     </td>
     <td width="50%" valign="top">
@@ -155,7 +155,7 @@ Em uma hospedagem compartilhada de verdade, some a latência de rede e a inicial
   </tr>
 </table>
 
-<sub>Capturas de tela do “Atelier Nova”, um site de demonstração fictício criado com o Éclair (ilustrações originais). O painel aparece em inglês; o conteúdo de demonstração está em francês.</sub>
+<sub>Capturas de tela do “Atelier Nova”, um site de demonstração fictício criado com o Éclair (ilustrações originais). O painel aparece em português; o conteúdo de demonstração está em francês.</sub>
 
 ## Segurança
 

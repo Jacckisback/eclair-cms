@@ -6,9 +6,6 @@
 
 Tutto quello che c’è da sapere per installare, usare, proteggere e mantenere Éclair. Per la presentazione, torna al [README](../README.it.md).
 
-> [!NOTE]
-> Il pannello di Éclair è disponibile in inglese, francese e spagnolo. Questa guida indica menu e pulsanti con i nomi dell’interfaccia inglese. Il sito pubblico, invece, può essere in italiano.
-
 ## Indice
 
 1. [Installazione](#installazione)
@@ -37,7 +34,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 1. Scarica l’archivio [`eclair-cms-1.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.0.0.zip) (257 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
-3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in inglese, francese o spagnolo).
+3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
 4. Rispondi a 4 domande (il tuo sito, il tuo account, la tua visibilità, l’indirizzo del pannello). Coriandoli 🎉: il tuo sito è online, con alcune pagine e un articolo di esempio.
 
 > 🔒 Per sicurezza, l’installazione va completata **entro 2 ore** dalla prima visita (altrimenti chiunque potrebbe impadronirsi di un sito caricato e poi dimenticato). Scaduto il tempo, elimina il file `data/install-window.php` via FTP e ricarica la pagina.
@@ -48,16 +45,16 @@ Installazione in una sottocartella (`esempio.it/sito/`): basta caricare i file i
 
 | Tipo (nella procedura guidata) | Cosa viene creato |
 |---|---|
-| 🏢 Business website | Home (banner, punti di forza, ultimi articoli), Servizi (con FAQ), Chi siamo, Contatti, Blog, note legali, privacy policy |
+| 🏢 Sito vetrina | Home (banner, punti di forza, ultimi articoli), Servizi (con FAQ), Chi siamo, Contatti, Blog, note legali, privacy policy |
 | ✍️ Blog | Home = ultimi articoli, Chi siamo, Contatti, categoria «Guides», pagine legali |
-| 🧑‍💻 Freelancer / portfolio | Home a tuo nome, competenze, Chi sono, Blog, Contatti, pagine legali |
-| 🎯 Landing page | Una pagina di vendita (banner, punti di forza, FAQ, modulo) + pagine legali, senza blog |
+| 🧑‍💻 Freelance / portfolio | Home a tuo nome, competenze, Chi sono, Blog, Contatti, pagine legali |
+| 🎯 Pagina unica | Una pagina di vendita (banner, punti di forza, FAQ, modulo) + pagine legali, senza blog |
 
 I contenuti iniziali esistono in francese, spagnolo e inglese: un sito in italiano parte dai testi inglesi, da tradurre. Le pagine legali contengono uno schema basato sul diritto francese (LCEN), spagnolo (LSSI) e sul GDPR; gli obblighi specifici del tuo Paese vanno aggiunti da te.
 
 ### Subito dopo l’installazione
 
-La bacheca mostra una checklist «Getting started»: logo e colore, home page, primo articolo, profilo dell’autore, autenticazione a due fattori, note legali, Google Search Console.
+La bacheca mostra una checklist «Primi passi»: logo e colore, home page, primo articolo, profilo dell’autore, autenticazione a due fattori, note legali, Google Search Console.
 
 ---
 
@@ -102,24 +99,24 @@ La bacheca mostra una checklist «Getting started»: logo e colore, home page, p
 
 ### 🧩 Tutto il resto
 
-Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagini in uso), menu con trascina e rilascia (intestazione e piè di pagina), categorie «pilastro» per un cluster tematico, ricerca nel sito, modulo di contatto antispam **senza captcha** (campo trappola, token, limiti per rete e per giorno) con casella di posta, account amministratore e redattore, modalità scura automatica, 6 font di sistema, colore principale con contrasto WCAG garantito, pannello in inglese, francese e spagnolo, sito pubblico in 6 lingue (fr, es, en, de, it, pt).
+Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagini in uso), menu con trascina e rilascia (intestazione e piè di pagina), categorie «pilastro» per un cluster tematico, ricerca nel sito, modulo di contatto antispam **senza captcha** (campo trappola, token, limiti per rete e per giorno) con casella di posta, account amministratore e redattore, modalità scura automatica, 6 font di sistema, colore principale con contrasto WCAG garantito, pannello in 7 lingue (italiano, inglese, francese, spagnolo, tedesco, portoghese, cinese), sito pubblico in 6 lingue (fr, es, en, de, it, pt).
 
 ---
 
 ## Uso quotidiano
 
-| Voglio… | Dove (interfaccia inglese) |
+| Voglio… | Dove |
 |---|---|
-| Scrivere un articolo | Dashboard › **Write a post** |
+| Scrivere un articolo | Bacheca › **Scrivi un articolo** |
 | Modificare una pagina dal sito | Pulsante **✏️ Modifica** (visibile solo quando hai effettuato l’accesso) |
-| Cambiare logo, colore, font | Settings › Appearance |
-| Scegliere la home page | Settings › General |
-| Consentire o bloccare le IA | Settings › AI & GEO |
-| Collegare Google Search Console | Settings › SEO |
-| Aggiungere un link al menu | Menus |
-| Reindirizzare un vecchio URL | Redirects |
-| Attivare l’autenticazione a due fattori | My profile › Two-factor authentication |
-| Scaricare un backup | Security › Backup |
+| Cambiare logo, colore, font | Impostazioni › Aspetto |
+| Scegliere la home page | Impostazioni › Generali |
+| Consentire o bloccare le IA | Impostazioni › IA & GEO |
+| Collegare Google Search Console | Impostazioni › SEO |
+| Aggiungere un link al menu | Menu |
+| Reindirizzare un vecchio URL | Reindirizzamenti |
+| Attivare l’autenticazione a due fattori | Il mio profilo › Autenticazione a due fattori |
+| Scaricare un backup | Sicurezza › Backup |
 
 Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K` link · `Ctrl+B` grassetto · `Ctrl+I` corsivo · `Invio` nuovo paragrafo · `Maiusc+Invio` a capo.
 
@@ -140,7 +137,7 @@ Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K`
 - **Autenticazione a due fattori TOTP** (Google Authenticator, 1Password, Bitwarden…) con codice QR e 8 codici di recupero mostrati una sola volta; ogni codice vale una sola volta, anche se inviato in parallelo; dopo 10 codici sbagliati, la 2FA dell’account viene bloccata per 15 minuti e il titolare viene avvisato via e-mail.
 - **Account modificati in modo atomico**: un accesso in corso non può mai annullare un cambio di password, una disconnessione generale, l’attivazione della 2FA, un declassamento o un’eliminazione.
 - **Password richiesta di nuovo** per le azioni sensibili (backup, gestione degli account, impostazioni avanzate, cambio di e-mail) oltre 15 minuti dopo l’accesso. Le password provvisorie vanno sostituite al primo accesso.
-- **Sessioni rafforzate**: nessuna sessione prima dell’accesso (i bot non riempiono il disco), cookie `HttpOnly`, `Secure`, `SameSite=Strict`, rigenerazione all’accesso, disconnessione dopo inattività, legate al browser, «Log out my other devices». Il pannello viene forzato su HTTPS non appena il sito lo usa.
+- **Sessioni rafforzate**: nessuna sessione prima dell’accesso (i bot non riempiono il disco), cookie `HttpOnly`, `Secure`, `SameSite=Strict`, rigenerazione all’accesso, disconnessione dopo inattività, legate al browser, «Disconnetti i miei altri dispositivi». Il pannello viene forzato su HTTPS non appena il sito lo usa.
 - **Token CSRF** su tutte le azioni e verifica dell’origine delle richieste.
 
 **Sito pubblico**
@@ -154,21 +151,21 @@ Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K`
 - **Indirizzo del pannello personalizzabile** (meno bot), ruoli amministratore / redattore; il pulsante «Modifica» del sito non rivela questo indirizzo.
 - **Registri limitati** (campi troncati, massimo 1 MB): impossibile gonfiarli.
 - **Controllo di integrità**: confronta ogni file con la sua impronta originale e individua i file sospetti, compreso un `.php` senza riga di protezione in `data/` o `cache/`.
-- **Test di protezione in tempo reale**: la pagina Security verifica dal tuo browser che i file interni siano davvero inaccessibili e che l’indirizzo del sito sia verificato.
+- **Test di protezione in tempo reale**: la pagina Sicurezza verifica dal tuo browser che i file interni siano davvero inaccessibili e che l’indirizzo del sito sia verificato.
 
 ---
 
 ## Aggiornare, fare backup, traslocare
 
-**Fare un backup**: Security › Download a backup (archivio ZIP di `data/` e `media/`). Senza l’estensione zip, copia queste due cartelle via FTP.
+**Fare un backup**: Sicurezza › Scarica un backup (archivio ZIP di `data/` e `media/`). Senza l’estensione zip, copia queste due cartelle via FTP.
 
 **Aggiornare Éclair**:
 1. Fai un backup.
 2. Sostituisci via FTP `index.php`, `.htaccess` e le cartelle `app/` e `assets/` con quelli della nuova versione.
 3. **Non toccare** `data/` (contenuti, impostazioni, account) né `media/` (immagini).
-4. Nel pannello: Settings › Advanced › Clear cache.
+4. Nel pannello: Impostazioni › Avanzate › Svuota la cache.
 
-**Traslocare su un altro hosting o dominio**: copia l’intera cartella, poi cambia l’indirizzo in Settings › General. I link interni si adattano automaticamente, anche in una sottocartella.
+**Traslocare su un altro hosting o dominio**: copia l’intera cartella, poi cambia l’indirizzo in Impostazioni › Generali. I link interni si adattano automaticamente, anche in una sottocartella.
 
 ---
 
@@ -185,9 +182,9 @@ LaTuaNuovaPassword2026
 
 Entro 24 ore, **accedi con questa e-mail e questa nuova password**: la password viene sostituita, l’autenticazione a due fattori di quell’account viene disattivata, le tue altre sessioni vengono chiuse e il file viene eliminato automaticamente. Nessun altro può attivarlo (bisogna conoscerne il contenuto); un file senza la prima riga viene rifiutato ed eliminato.
 
-**«Installation locked»**: la finestra di 2 ore dalla prima visita è scaduta. Elimina `data/install-window.php` via FTP e ricarica la pagina.
+**«Installazione bloccata»**: la finestra di 2 ore dalla prima visita è scaduta. Elimina `data/install-window.php` via FTP e ricarica la pagina.
 
-**Indirizzo del sito non verificato (pagina Security)**: il tuo server non riesce a chiamare se stesso sull’indirizzo del sito (firewall del provider, DNS non ancora propagato…). Il sito funziona normalmente, ma senza reindirizzamento all’indirizzo ufficiale (con/senza www). Clicca su «Verify the site address» quando il dominio è pronto.
+**Indirizzo del sito non verificato (pagina Sicurezza)**: il tuo server non riesce a chiamare se stesso sull’indirizzo del sito (firewall del provider, DNS non ancora propagato…). Il sito funziona normalmente, ma senza reindirizzamento all’indirizzo ufficiale (con/senza www). Clicca su «Verifica l’indirizzo del sito» quando il dominio è pronto.
 
 **Errore 404 su tutte le pagine tranne la home**: il file `.htaccess` non è stato caricato (file nascosto) oppure la riscrittura degli URL è disattivata. Se il tuo provider lo richiede, togli il commento alla riga `RewriteBase /` del `.htaccess`.
 
@@ -195,7 +192,7 @@ Entro 24 ore, **accedi con questa e-mail e questa nuova password**: la password 
 
 **Le immagini non vengono convertite in WebP**: manca l’estensione GD (o il suo supporto WebP). Attivala nel pannello PHP del tuo provider; nel frattempo le immagini restano in JPG/PNG.
 
-**Non ricevo le e-mail del modulo**: i messaggi vengono salvati anche nel pannello (Messages). Controlla l’indirizzo in Settings › Contact; alcuni provider richiedono che il mittente appartenga al dominio.
+**Non ricevo le e-mail del modulo**: i messaggi vengono salvati anche nel pannello (Messaggi). Controlla l’indirizzo in Impostazioni › Contatti; alcuni provider richiedono che il mittente appartenga al dominio.
 
 **Modalità debug**: crea un file `eclair-config.php` nella radice (vedi `eclair-config.exemple.php`) con `define('ECLAIR_DEBUG', true);`, poi eliminalo una volta risolto il problema.
 

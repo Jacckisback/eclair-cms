@@ -30,7 +30,7 @@
 <br>
 
 <p align="center">
-  <img src="docs/images/en/showcase.webp" alt="Éclair 编辑器，SEO 与 GEO 分析均为 100 分，以及在手机上显示的已发布文章" width="100%">
+  <img src="docs/images/zh-CN/showcase.webp" alt="Éclair 编辑器，SEO 与 GEO 分析均为 100 分，以及在手机上显示的已发布文章" width="100%">
 </p>
 
 ## 为什么选择 Éclair
@@ -135,17 +135,17 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-dashboard.webp" alt="Éclair 仪表盘：统计数据、待改进的页面和网站健康状况">
+      <img src="docs/images/zh-CN/frame-dashboard.webp" alt="Éclair 仪表盘：统计数据、待改进的页面和网站健康状况">
       <p align="center"><b>仪表盘</b><br><sub>需要改进的地方和网站健康状况，一目了然。</sub></p>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-geo.webp" alt="AI 与 GEO 设置：为人工智能爬虫选择策略">
+      <img src="docs/images/zh-CN/frame-geo.webp" alt="AI 与 GEO 设置：为人工智能爬虫选择策略">
       <p align="center"><b>AI 可见性</b><br><sub>一键允许、限制或屏蔽 AI 爬虫。</sub></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-media.webp" alt="Éclair 媒体库及已上传的图片">
+      <img src="docs/images/zh-CN/frame-media.webp" alt="Éclair 媒体库及已上传的图片">
       <p align="center"><b>媒体库</b><br><sub>图片自动缩放并转换为 WebP。</sub></p>
     </td>
     <td width="50%" valign="top">
@@ -155,7 +155,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   </tr>
 </table>
 
-<sub>截图来自“Atelier Nova”，一个用 Éclair 搭建的虚构演示网站（插图均为原创）。后台界面为英文，演示内容为法语。</sub>
+<sub>截图来自“Atelier Nova”，一个用 Éclair 搭建的虚构演示网站（插图均为原创）。后台界面为简体中文，演示内容为法语。</sub>
 
 ## 安全
 

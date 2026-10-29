@@ -30,7 +30,7 @@
 <br>
 
 <p align="center">
-  <img src="docs/images/en/showcase.webp" alt="L’editor di Éclair con l’analisi SEO e GEO a 100 su 100, e l’articolo pubblicato su uno smartphone" width="100%">
+  <img src="docs/images/it/showcase.webp" alt="L’editor di Éclair con l’analisi SEO e GEO a 100 su 100, e l’articolo pubblicato su uno smartphone" width="100%">
 </p>
 
 ## Perché Éclair
@@ -135,17 +135,17 @@ Su un vero hosting condiviso, aggiungi la latenza di rete e l’avvio di PHP del
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-dashboard.webp" alt="Bacheca di Éclair: statistiche, pagine da migliorare e stato del sito">
+      <img src="docs/images/it/frame-dashboard.webp" alt="Bacheca di Éclair: statistiche, pagine da migliorare e stato del sito">
       <p align="center"><b>Bacheca</b><br><sub>Cosa migliorare e lo stato del sito, a colpo d’occhio.</sub></p>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-geo.webp" alt="Impostazioni IA e GEO: scelta delle regole per i bot di intelligenza artificiale">
+      <img src="docs/images/it/frame-geo.webp" alt="Impostazioni IA e GEO: scelta delle regole per i bot di intelligenza artificiale">
       <p align="center"><b>Visibilità nelle IA</b><br><sub>Consenti, limita o blocca i bot IA in un clic.</sub></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/en/frame-media.webp" alt="Libreria media di Éclair con le immagini caricate">
+      <img src="docs/images/it/frame-media.webp" alt="Libreria media di Éclair con le immagini caricate">
       <p align="center"><b>Libreria media</b><br><sub>Immagini ridimensionate e convertite in WebP automaticamente.</sub></p>
     </td>
     <td width="50%" valign="top">
@@ -155,7 +155,7 @@ Su un vero hosting condiviso, aggiungi la latenza di rete e l’avvio di PHP del
   </tr>
 </table>
 
-<sub>Screenshot di «Atelier Nova», un sito dimostrativo immaginario creato con Éclair (illustrazioni originali). Il pannello è mostrato in inglese, i contenuti dimostrativi sono in francese.</sub>
+<sub>Screenshot di «Atelier Nova», un sito dimostrativo immaginario creato con Éclair (illustrazioni originali). Il pannello è mostrato in italiano, i contenuti dimostrativi sono in francese.</sub>
 
 ## Sicurezza
 

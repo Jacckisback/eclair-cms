@@ -6,9 +6,6 @@
 
 Tudo o que você precisa saber para instalar, usar, proteger e manter o Éclair. Para a apresentação, volte ao [README](../README.pt-BR.md).
 
-> [!NOTE]
-> O painel do Éclair está disponível em inglês, francês e espanhol. Este guia cita os menus e botões com os nomes da interface em inglês. Já o site público pode ser exibido em português.
-
 ## Sumário
 
 1. [Instalação](#instalação)
@@ -37,7 +34,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 1. Baixe o arquivo [`eclair-cms-1.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.0.0.zip) (257 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
-3. Abra o endereço do seu site: **o assistente de instalação começa** (em inglês, francês ou espanhol).
+3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
 4. Responda a 4 perguntas (seu site, sua conta, sua visibilidade, o endereço do seu painel). Confete 🎉: seu site está no ar, com páginas e um artigo de exemplo.
 
 > 🔒 Por segurança, a instalação precisa ser feita **nas 2 horas** seguintes à primeira visita (senão qualquer pessoa poderia se apoderar de um site enviado e esquecido). Depois desse prazo, apague o arquivo `data/install-window.php` por FTP e recarregue a página.
@@ -48,16 +45,16 @@ Instalação em uma subpasta (`exemplo.com.br/site/`): basta enviar os arquivos 
 
 | Tipo (no assistente) | O que é criado |
 |---|---|
-| 🏢 Business website | Página inicial (destaque, diferenciais, últimos artigos), Serviços (com FAQ), Sobre, Contato, Blog, aviso legal, política de privacidade |
+| 🏢 Site institucional | Página inicial (destaque, diferenciais, últimos artigos), Serviços (com FAQ), Sobre, Contato, Blog, aviso legal, política de privacidade |
 | ✍️ Blog | Página inicial = últimos artigos, Sobre, Contato, categoria “Guides”, páginas legais |
-| 🧑‍💻 Freelancer / portfolio | Página inicial com o seu nome, habilidades, Sobre, Blog, Contato, páginas legais |
-| 🎯 Landing page | Uma página de vendas (destaque, diferenciais, FAQ, formulário) + páginas legais, sem blog |
+| 🧑‍💻 Freelancer / portfólio | Página inicial com o seu nome, habilidades, Sobre, Blog, Contato, páginas legais |
+| 🎯 Página única | Uma página de vendas (destaque, diferenciais, FAQ, formulário) + páginas legais, sem blog |
 
 Os conteúdos iniciais existem em francês, espanhol e inglês: um site em português começa com os textos em inglês, para você traduzir. As páginas legais trazem uma estrutura baseada na legislação francesa (LCEN), espanhola (LSSI) e no RGPD europeu; as exigências do seu país (por exemplo, a LGPD no Brasil) ficam por sua conta.
 
 ### Logo após a instalação
 
-O painel mostra uma checklist “Getting started”: logo e cor, página inicial, primeiro artigo, perfil de autor, autenticação em dois fatores, aviso legal, Google Search Console.
+O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicial, primeiro artigo, perfil de autor, autenticação em dois fatores, aviso legal, Google Search Console.
 
 ---
 
@@ -102,24 +99,24 @@ O painel mostra uma checklist “Getting started”: logo e cor, página inicial
 
 ### 🧩 Todo o resto
 
-Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das imagens em uso), menus com arrastar e soltar (cabeçalho e rodapé), categorias “pilar” para um cluster de conteúdo, busca no site, formulário de contato antispam **sem captcha** (campo isca, token, limites por rede e por dia) com caixa de entrada, contas de administrador e redator, modo escuro automático, 6 fontes do sistema, cor principal com contraste WCAG garantido, painel em inglês, francês e espanhol, site público em 6 idiomas (fr, es, en, de, it, pt).
+Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das imagens em uso), menus com arrastar e soltar (cabeçalho e rodapé), categorias “pilar” para um cluster de conteúdo, busca no site, formulário de contato antispam **sem captcha** (campo isca, token, limites por rede e por dia) com caixa de entrada, contas de administrador e redator, modo escuro automático, 6 fontes do sistema, cor principal com contraste WCAG garantido, painel em 7 idiomas (português, inglês, francês, espanhol, alemão, italiano, chinês), site público em 6 idiomas (fr, es, en, de, it, pt).
 
 ---
 
 ## Uso no dia a dia
 
-| Quero… | Onde (interface em inglês) |
+| Quero… | Onde |
 |---|---|
-| Escrever um artigo | Dashboard › **Write a post** |
+| Escrever um artigo | Painel › **Escrever um artigo** |
 | Editar uma página a partir do site | Botão **✏️ Editar** (visível só quando você está logado) |
-| Mudar logo, cor, fontes | Settings › Appearance |
-| Escolher a página inicial | Settings › General |
-| Permitir ou bloquear as IAs | Settings › AI & GEO |
-| Conectar o Google Search Console | Settings › SEO |
+| Mudar logo, cor, fontes | Configurações › Aparência |
+| Escolher a página inicial | Configurações › Geral |
+| Permitir ou bloquear as IAs | Configurações › IA & GEO |
+| Conectar o Google Search Console | Configurações › SEO |
 | Adicionar um link ao menu | Menus |
-| Redirecionar uma URL antiga | Redirects |
-| Ativar a autenticação em dois fatores | My profile › Two-factor authentication |
-| Baixar um backup | Security › Backup |
+| Redirecionar uma URL antiga | Redirecionamentos |
+| Ativar a autenticação em dois fatores | Meu perfil › Autenticação de dois fatores |
+| Baixar um backup | Segurança › Backup |
 
 Atalhos do editor: `/` inserir um bloco · `Ctrl+S` salvar · `Ctrl+K` link · `Ctrl+B` negrito · `Ctrl+I` itálico · `Enter` novo parágrafo · `Shift+Enter` quebra de linha.
 
@@ -140,7 +137,7 @@ O Éclair foi feito para um ambiente hostil (hospedagem compartilhada, robôs te
 - **Autenticação em dois fatores TOTP** (Google Authenticator, 1Password, Bitwarden…) com QR code e 8 códigos de recuperação exibidos uma única vez; cada código só vale uma vez, mesmo enviado em paralelo; depois de 10 códigos errados, a 2FA da conta fica bloqueada por 15 minutos e o titular é avisado por e-mail.
 - **Contas alteradas de forma atômica**: um login em andamento nunca consegue desfazer uma troca de senha, uma desconexão geral, a ativação da 2FA, um rebaixamento ou uma exclusão.
 - **Senha solicitada de novo** nas ações sensíveis (backup, gestão de contas, configurações avançadas, troca de e-mail) depois de 15 minutos do login. As senhas provisórias precisam ser trocadas no primeiro login.
-- **Sessões reforçadas**: nenhuma sessão antes do login (os robôs não enchem o disco), cookies `HttpOnly`, `Secure`, `SameSite=Strict`, regeneradas no login, desconexão por inatividade, vinculadas ao navegador, “Log out my other devices”. O painel é forçado para HTTPS assim que o site usa HTTPS.
+- **Sessões reforçadas**: nenhuma sessão antes do login (os robôs não enchem o disco), cookies `HttpOnly`, `Secure`, `SameSite=Strict`, regeneradas no login, desconexão por inatividade, vinculadas ao navegador, “Desconectar meus outros dispositivos”. O painel é forçado para HTTPS assim que o site usa HTTPS.
 - **Tokens CSRF** em todas as ações e verificação da origem das requisições.
 
 **Site público**
@@ -154,21 +151,21 @@ O Éclair foi feito para um ambiente hostil (hospedagem compartilhada, robôs te
 - **Endereço do painel personalizável** (menos robôs), papéis de administrador / redator; o botão “Editar” do site não revela esse endereço.
 - **Registros limitados** (campos truncados, no máximo 1 MB): impossível inflá-los.
 - **Verificação de integridade**: compara cada arquivo com sua impressão digital original e aponta arquivos suspeitos, inclusive um `.php` sem a linha de proteção em `data/` ou `cache/`.
-- **Teste de proteção ao vivo**: a página Security verifica, a partir do seu navegador, se os arquivos internos estão mesmo inacessíveis e se o endereço do site está verificado.
+- **Teste de proteção ao vivo**: a página Segurança verifica, a partir do seu navegador, se os arquivos internos estão mesmo inacessíveis e se o endereço do site está verificado.
 
 ---
 
 ## Atualizar, fazer backup, mudar de hospedagem
 
-**Fazer backup**: Security › Download a backup (arquivo ZIP de `data/` e `media/`). Sem a extensão zip, copie essas duas pastas por FTP.
+**Fazer backup**: Segurança › Baixar backup (arquivo ZIP de `data/` e `media/`). Sem a extensão zip, copie essas duas pastas por FTP.
 
 **Atualizar o Éclair**:
 1. Faça um backup.
 2. Substitua por FTP `index.php`, `.htaccess` e as pastas `app/` e `assets/` pelos da nova versão.
 3. **Não mexa** em `data/` (conteúdos, configurações, contas) nem em `media/` (imagens).
-4. No painel: Settings › Advanced › Clear cache.
+4. No painel: Configurações › Avançado › Limpar cache.
 
-**Mudar de hospedagem ou de domínio**: copie a pasta inteira e depois troque o endereço em Settings › General. Os links internos se adaptam automaticamente, inclusive em uma subpasta.
+**Mudar de hospedagem ou de domínio**: copie a pasta inteira e depois troque o endereço em Configurações › Geral. Os links internos se adaptam automaticamente, inclusive em uma subpasta.
 
 ---
 
@@ -185,9 +182,9 @@ SuaNovaSenha2026
 
 Em até 24 horas, **faça login com esse e-mail e essa nova senha**: a senha é substituída, a autenticação em dois fatores dessa conta é desativada, suas outras sessões são encerradas e o arquivo é apagado automaticamente. Ninguém mais consegue acionar isso (é preciso conhecer o conteúdo do arquivo); um arquivo sem a primeira linha é recusado e apagado.
 
-**“Installation locked”**: a janela de 2 horas após a primeira visita já passou. Apague `data/install-window.php` por FTP e recarregue a página.
+**“Instalação bloqueada”**: a janela de 2 horas após a primeira visita já passou. Apague `data/install-window.php` por FTP e recarregue a página.
 
-**Endereço do site não verificado (página Security)**: seu servidor não consegue chamar a si mesmo no endereço do site (firewall da hospedagem, DNS ainda não propagado…). O site funciona normalmente, mas sem redirecionamento para o endereço oficial (com/sem www). Clique em “Verify the site address” quando o domínio estiver pronto.
+**Endereço do site não verificado (página Segurança)**: seu servidor não consegue chamar a si mesmo no endereço do site (firewall da hospedagem, DNS ainda não propagado…). O site funciona normalmente, mas sem redirecionamento para o endereço oficial (com/sem www). Clique em “Verificar endereço do site” quando o domínio estiver pronto.
 
 **Erro 404 em todas as páginas, menos na inicial**: o arquivo `.htaccess` não foi enviado (arquivo oculto) ou a reescrita de URL está desativada. Se a sua hospedagem exigir, tire o comentário da linha `RewriteBase /` do `.htaccess`.
 
@@ -195,7 +192,7 @@ Em até 24 horas, **faça login com esse e-mail e essa nova senha**: a senha é 
 
 **As imagens não são convertidas em WebP**: falta a extensão GD (ou o suporte a WebP dela). Ative-a no painel de PHP da sua hospedagem; enquanto isso, as imagens continuam em JPG/PNG.
 
-**Não recebo os e-mails do formulário**: as mensagens também ficam salvas no painel (Messages). Confira o endereço em Settings › Contact; algumas hospedagens exigem que o remetente pertença ao domínio.
+**Não recebo os e-mails do formulário**: as mensagens também ficam salvas no painel (Mensagens). Confira o endereço em Configurações › Contato; algumas hospedagens exigem que o remetente pertença ao domínio.
 
 **Modo de depuração**: crie um arquivo `eclair-config.php` na raiz (veja `eclair-config.exemple.php`) com `define('ECLAIR_DEBUG', true);` e apague-o quando o problema estiver resolvido.
 
