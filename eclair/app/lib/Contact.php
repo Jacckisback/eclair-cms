@@ -6,8 +6,8 @@ namespace Eclair;
 defined('ECLAIR') || exit;
 
 /**
- * Formulaire de contact sans captcha : champ piège, jeton posé par JavaScript,
- * limitation par adresse IP et filtrage des liens. Les messages sont aussi archivés.
+ * Formulaire de contact sans captcha : champ piège, jeton posé par JavaScript, limitation
+ * par réseau et plafond quotidien, filtrage des liens. Les messages sont aussi archivés.
  */
 final class Contact
 {
@@ -25,10 +25,6 @@ final class Contact
         if (!Security::sameOrigin()) {
             self::reply(false, 403, $lang);
         }
-        $ip = Req::ip();
-        if (RateLimit::blocked('contact:' . $ip)) {
-            self::reply(false, 429, $lang);
-        }
         // Un robot remplit le champ piège : on fait semblant d'accepter, sans rien garder.
         if (Req::input('website') !== '') {
             self::reply(true, 200, $lang);
@@ -39,18 +35,21 @@ final class Contact
         if ($name === '' || $email === '' || mb_strlen($message) < 5) {
             self::reply(false, 422, $lang);
         }
-        RateLimit::hit('contact:' . $ip, 5, 600, 1800);
+        // 5 messages par réseau (IPv4, ou /64 en IPv6) toutes les 10 min, et 100 par jour pour tout le site.
+        if (!RateLimit::attempt('contact:' . Req::ipPrefix(), 5, 600, 1800) || !RateLimit::attempt('contact:site', 100, 86400, 21600)) {
+            self::reply(false, 429, $lang);
+        }
         $page = Content::index()[preg_replace('/[^a-z0-9]/', '', Req::input('page')) ?? ''] ?? null;
         $suspect = !hash_equals(self::token(), Req::input('k')) || preg_match_all('~https?://|www\.~i', $message) > 3;
         $record = [
             'name' => $name,
             'email' => $email,
-            'message' => $message,
+            'message' => $suspect ? mb_substr($message, 0, 1000) : $message,
             'page' => $page['title'] ?? '',
-            'ip' => $ip,
+            'ip' => Req::ip(),
             'suspect' => $suspect,
         ];
-        if (Settings::get('contact.store') || $suspect) {
+        if (Settings::get('contact.store')) {
             Messages::add($record);
         }
         if (!$suspect) {
@@ -71,31 +70,15 @@ final class Contact
 
     private static function mail(array $m): bool
     {
-        if (!function_exists('mail')) {
-            return false;
-        }
         $to = Sanitize::email(Settings::get('contact.email'));
         if ($to === '') {
             $admins = Users::admins();
             $to = (string) (reset($admins)['email'] ?? '');
         }
-        if ($to === '') {
-            return false;
-        }
         $site = (string) Settings::get('name');
-        $host = preg_replace('/^www\./', '', (string) parse_url((string) Settings::get('url'), PHP_URL_HOST)) ?: 'localhost';
-        $encode = static fn (string $s): string => '=?UTF-8?B?' . base64_encode($s) . '?=';
-        $subject = $encode('[' . $site . '] ' . t('Nouveau message de {name}', ['name' => $m['name']]));
         $body = t('Nom') . ' : ' . $m['name'] . "\n" . t('E-mail') . ' : ' . $m['email'] . "\n"
             . ($m['page'] !== '' ? t('Page') . ' : ' . $m['page'] . "\n" : '')
             . "\n" . $m['message'] . "\n\n— " . t('Message envoyé depuis le formulaire de contact de {site}.', ['site' => $site]) . "\n";
-        $headers = [
-            'From: ' . $encode($site) . ' <no-reply@' . $host . '>',
-            'Reply-To: ' . $m['email'],
-            'MIME-Version: 1.0',
-            'Content-Type: text/plain; charset=UTF-8',
-            'Content-Transfer-Encoding: 8bit',
-        ];
-        return @mail($to, $subject, $body, implode("\r\n", $headers));
+        return Mail::send($to, t('Nouveau message de {name}', ['name' => $m['name']]), $body, $m['email']);
     }
 }

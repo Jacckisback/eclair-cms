@@ -16,7 +16,11 @@ final class Admin
         foreach (Security::headers('admin') as $h) {
             header($h);
         }
-        Session::start();
+        // Mot de passe et cookie de session ne circulent jamais en clair quand le site est en HTTPS.
+        if (Security::httpsOnly() && !Req::isHttps()) {
+            Http::redirect('https://' . Req::host() . admin_url(ltrim(self::$sub, '/')));
+        }
+        // Aucune session n'est créée avant la connexion (pas de fichier pour les robots qui sondent l'adresse).
         $method = Req::method();
         $route = self::$sub;
 
@@ -39,6 +43,13 @@ final class Admin
             }
             Session::flash('bad', t('Jeton de sécurité expiré : réessaie.'));
             Http::redirect(admin_url(ltrim($route, '/')));
+        }
+        // Mot de passe provisoire (créé ou réinitialisé par un administrateur) : à remplacer avant tout le reste.
+        if (!empty($user['must_change']) && !in_array($route, ['/profile', '/logout'], true)) {
+            if (str_starts_with($route, '/api/') || Req::wantsJson()) {
+                Http::json(['ok' => false, 'error' => t('Choisis d’abord ton mot de passe personnel (page Mon profil).')], 403);
+            }
+            Http::redirect(admin_url('profile#mot-de-passe'));
         }
 
         $routes = [
@@ -157,7 +168,7 @@ final class Admin
     public static function jsData(array $extra = []): string
     {
         return '<script type="application/json" id="eclair-data">' . json_script($extra + [
-            'csrf' => Security::csrfToken(),
+            'csrf' => Auth::user() ? Security::csrfToken() : '',
             'admin' => admin_url(),
             'base' => Req::base(),
             'i18n' => AdminStrings::js(),
@@ -168,15 +179,14 @@ final class Admin
 
     private static function login(): never
     {
-        self::ftpReset();
         $error = '';
         $email = '';
         if (Req::isPost()) {
-            $email = Req::input('email');
-            if (!Security::checkCsrf()) {
+            $email = mb_substr(Req::input('email'), 0, 254);
+            if (!Security::checkFormToken()) {
                 $error = t('Session expirée : réessaie.');
             } else {
-                $result = Auth::attempt($email, Req::input('password'));
+                $result = Auth::attempt(Req::input('email'), Req::input('password'));
                 if ($result === 'ok') {
                     self::redirectNext();
                 }
@@ -184,17 +194,25 @@ final class Admin
                     $_SESSION['next'] = Req::input('next');
                     Http::redirect(admin_url('login/2fa'));
                 }
-                $error = $result === 'locked'
-                    ? t('Trop de tentatives. Par sécurité, réessaie dans quelques minutes.')
-                    : t('E-mail ou mot de passe incorrect.');
+                $error = match ($result) {
+                    'locked' => t('Trop de tentatives. Par sécurité, réessaie dans quelques minutes.'),
+                    'busy' => t('Le serveur est très sollicité : réessaie dans un instant.'),
+                    default => t('E-mail ou mot de passe incorrect.'),
+                };
             }
         }
-        self::view('login', ['layout' => 'auth', 'error' => $error, 'email' => $email, 'next' => Req::query('next') ?: Req::input('next')], t('Connexion'), $error !== '' ? 401 : 200);
+        self::view('login', [
+            'layout' => 'auth',
+            'error' => $error,
+            'email' => $email,
+            'next' => Req::query('next') ?: Req::input('next'),
+            'bye' => Req::query('bye') === '1' && !Req::isPost(),
+        ], t('Connexion'), $error !== '' ? 401 : 200);
     }
 
     private static function loginTotp(): never
     {
-        if (empty($_SESSION['pending'])) {
+        if (!Session::resume() || empty($_SESSION['pending'])) {
             Http::redirect(admin_url('login'));
         }
         $error = '';
@@ -208,42 +226,16 @@ final class Admin
                     unset($_SESSION['next']);
                     self::redirectNext($next);
                 }
-                if ($result === 'expired') {
-                    Session::flash('bad', t('Délai dépassé : recommence la connexion.'));
+                if ($result === 'expired' || $result === 'locked') {
+                    Session::flash('bad', $result === 'locked'
+                        ? t('Trop de codes incorrects : la double authentification de ce compte est bloquée 15 minutes.')
+                        : t('Délai dépassé : recommence la connexion.'));
                     Http::redirect(admin_url('login'));
                 }
                 $error = t('Code incorrect. Vérifie l’heure de ton téléphone ou utilise un code de secours.');
             }
         }
         self::view('login-2fa', ['layout' => 'auth', 'error' => $error], t('Double authentification'));
-    }
-
-    /**
-     * Secours par FTP (preuve d'accès au serveur) : un fichier data/reset.php contenant
-     * « <?php exit; ?> », puis l'e-mail et le nouveau mot de passe sur deux lignes, remplace
-     * le mot de passe, désactive la double authentification du compte, puis il est supprimé.
-     */
-    private static function ftpReset(): void
-    {
-        $file = ECLAIR_DATA . '/reset.php';
-        if (!is_file($file)) {
-            return;
-        }
-        $lines = array_values(array_filter(array_map('trim', preg_split('/\R/', Store::strip((string) file_get_contents($file))) ?: [])));
-        @unlink($file);
-        $user = Users::findByEmail($lines[0] ?? '');
-        $password = $lines[1] ?? '';
-        if (!$user || Security::passwordIssues($password)) {
-            Session::flash('bad', t('Réinitialisation par FTP refusée : e-mail inconnu ou mot de passe trop faible (10 caractères minimum).'));
-            return;
-        }
-        $user['pass'] = Security::hashPassword($password);
-        $user['totp'] = ['on' => false, 'secret' => '', 'last' => 0, 'recovery' => []];
-        Auth::revokeAll($user);
-        RateLimit::clear('login-ip:' . Req::ip());
-        RateLimit::clear('login-user:' . mb_strtolower((string) $user['email']));
-        Log::security('ftp_reset', ['email' => $user['email']]);
-        Session::flash('ok', t('Mot de passe réinitialisé par FTP. Connecte-toi, puis réactive la double authentification.'));
     }
 
     private static function redirectNext(string $next = ''): never
@@ -255,9 +247,7 @@ final class Admin
     public static function logout(array $user): never
     {
         Auth::logout();
-        Session::start();
-        Session::flash('ok', t('À bientôt ! Tu es bien déconnecté.'));
-        Http::redirect(admin_url('login'));
+        Http::redirect(admin_url('login?bye=1'));
     }
 
     /* ─────────────────────────── Tableau de bord ─────────────────────────── */

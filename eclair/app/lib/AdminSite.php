@@ -71,7 +71,9 @@ final class AdminSite
 
     public static function messages(array $user): never
     {
-        Admin::view('messages', ['messages' => Messages::all()], t('Messages'));
+        $pages = max(1, (int) ceil(Messages::count() / Messages::PER_PAGE));
+        $page = max(1, min($pages, (int) Req::query('p', '1')));
+        Admin::view('messages', ['messages' => Messages::page($page), 'page' => $page, 'pages' => $pages], t('Messages'));
     }
 
     public static function messageAction(array $user): never

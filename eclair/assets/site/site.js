@@ -2,13 +2,13 @@
 (() => {
   const body = document.body;
 
-  // Bouton « Modifier » visible uniquement par les administrateurs connectés.
-  const cookie = document.cookie.match(/(?:^|;\s*)eclair_edit=([^;]+)/);
-  const admin = cookie ? decodeURIComponent(cookie[1]) : '';
-  if (body.dataset.id && /^(\/[A-Za-z0-9_-]+)+$/.test(admin)) {
+  // Bouton « Modifier » pour les personnes connectées (le lien ne révèle pas l'adresse de l'administration).
+  const script = document.currentScript;
+  const base = script ? new URL(script.src).pathname.replace(/\/assets\/site\/site\.js$/, '') : '';
+  if (body.dataset.id && /(?:^|;\s*)eclair_edit=1(?:;|$)/.test(document.cookie)) {
     const a = document.createElement('a');
     a.className = 'edit-fab';
-    a.href = admin + '/edit/' + encodeURIComponent(body.dataset.id);
+    a.href = base + '/_eclair/edit/' + encodeURIComponent(body.dataset.id);
     a.textContent = '✏️ ' + (body.dataset.edit || 'Modifier');
     body.appendChild(a);
   }

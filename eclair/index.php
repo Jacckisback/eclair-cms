@@ -24,9 +24,10 @@ define('ECLAIR_ROOT', __DIR__);
     if (!is_array($rt) || empty($rt['on']) || (!empty($rt['expires']) && time() >= $rt['expires'])) {
         return;
     }
-    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || ($_SERVER['SERVER_PORT'] ?? '') === '443'
-        || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    $https = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+        || (string) ($_SERVER['SERVER_PORT'] ?? '') === '443'
+        || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https'
+        || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '')) === 'on';
     if ((!empty($rt['https']) && !$https)
         || (!empty($rt['host']) && strcasecmp($_SERVER['HTTP_HOST'] ?? '', $rt['host']) !== 0)) {
         return;

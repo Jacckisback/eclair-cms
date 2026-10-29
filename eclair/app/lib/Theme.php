@@ -125,17 +125,18 @@ final class Theme
         if ($lang !== 'fr') {
             return $html;
         }
-        return (string) preg_replace_callback(
+        // En cas d'échec (texte démesuré), la page est rendue telle quelle plutôt que vide.
+        return preg_replace_callback(
             '~(<(script|style|pre|code|textarea)\b.*?</\2>)|(<[^>]*>)|([^<]+)~si',
             static function (array $m): string {
                 if (!isset($m[4]) || $m[4] === '') {
                     return $m[0];
                 }
-                $text = (string) preg_replace('/[ \x{00A0}]+([:;!?»])/u', "\u{00A0}$1", $m[4]);
-                return (string) preg_replace('/«[ \x{00A0}]*/u', "«\u{00A0}", $text);
+                $text = preg_replace('/[ \x{00A0}]+([:;!?»])/u', "\u{00A0}$1", $m[4]) ?? $m[4];
+                return preg_replace('/«[ \x{00A0}]*/u', "«\u{00A0}", $text) ?? $text;
             },
             $html
-        );
+        ) ?? $html;
     }
 
     public static function partial(string $name, array $v): string
@@ -184,11 +185,11 @@ final class Theme
     public static function minify(string $css): string
     {
         // Prudent : on ne touche jamais aux espaces autour de + et - (obligatoires dans calc()).
-        $css = (string) preg_replace('~/\*.*?\*/~s', '', $css);
-        $css = (string) preg_replace('~\s+~', ' ', $css);
-        $css = (string) preg_replace('~\s*([{};,>])\s*~', '$1', $css);
-        $css = (string) preg_replace('~:\s+~', ':', $css);
-        $css = (string) preg_replace('~([{;])([a-z-]+)\s+:~i', '$1$2:', $css);
+        $css = preg_replace('~/\*.*?\*/~s', '', $css) ?? $css;
+        $css = preg_replace('~\s+~', ' ', $css) ?? $css;
+        $css = preg_replace('~\s*([{};,>])\s*~', '$1', $css) ?? $css;
+        $css = preg_replace('~:\s+~', ':', $css) ?? $css;
+        $css = preg_replace('~([{;])([a-z-]+)\s+:~i', '$1$2:', $css) ?? $css;
         return trim(str_replace(';}', '}', $css));
     }
 

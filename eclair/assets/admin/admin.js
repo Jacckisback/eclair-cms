@@ -132,7 +132,11 @@
     if (color && $('#accent')) { $('#accent').value = color.dataset.color; $('#accent').dispatchEvent(new Event('input', { bubbles: true })); }
     if (e.target.closest('dialog [data-close]')) e.target.closest('dialog').close();
   });
-  $$('form[data-confirm]').forEach((form) => form.addEventListener('submit', (e) => { if (!confirm(form.dataset.confirm)) e.preventDefault(); }));
+  // Confirmation avant une action irréversible (sur le formulaire, ou sur le bouton qui l'envoie).
+  $$('form').forEach((form) => form.addEventListener('submit', (e) => {
+    const text = (e.submitter && e.submitter.dataset.confirm) || form.dataset.confirm;
+    if (text && !confirm(text)) e.preventDefault();
+  }));
   $$('[data-width]').forEach((el) => requestAnimationFrame(() => { el.style.width = el.dataset.width + '%'; }));
   $$('[data-strength]').forEach((input) => input.addEventListener('input', () => {
     const v = input.value;

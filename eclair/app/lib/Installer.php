@@ -9,6 +9,7 @@ defined('ECLAIR') || exit;
 final class Installer
 {
     private const TIMEZONES = ['fr' => 'Europe/Paris', 'es' => 'Europe/Madrid', 'en' => 'Europe/London', 'de' => 'Europe/Berlin', 'it' => 'Europe/Rome', 'pt' => 'Europe/Lisbon'];
+    private const WINDOW = 7200; // l'installation doit être faite dans les 2 h qui suivent la première visite
 
     public static function handle(): never
     {
@@ -18,9 +19,13 @@ final class Installer
         if (Req::path() !== '/') {
             Http::redirect(path_to('/') . (Req::query('lang') !== '' ? '?lang=' . rawurlencode(Req::query('lang')) : ''));
         }
+        // Un site déposé mais jamais installé ne reste pas indéfiniment ouvert au premier venu.
+        if (!self::window()) {
+            $html = Theme::partial('../install/locked', ['lang' => I18n::lang()]);
+            Http::send($html, 403, array_merge(['Content-Type: text/html; charset=utf-8'], Security::headers('admin')));
+        }
         if (Req::isPost()) {
-            Session::start();
-            if (!Security::checkCsrf()) {
+            if (!Security::checkFormToken()) {
                 Http::json(['ok' => false, 'errors' => ['_' => t('Session expirée : recharge la page.')]], 400);
             }
             $errors = self::validate();
@@ -37,13 +42,32 @@ final class Installer
             Http::json(['ok' => true, 'admin' => admin_url(), 'site' => path_to('/')]);
         }
         $checks = self::checks();
-        Security::csrfToken();
         $html = Theme::partial('../install/view', [
             'checks' => $checks,
             'blocking' => (bool) array_filter($checks, fn ($c) => $c['level'] === 'error'),
             'lang' => I18n::lang(),
+            'url' => Req::origin(),
         ]);
         Http::send($html, 200, array_merge(['Content-Type: text/html; charset=utf-8'], Security::headers('admin')));
+    }
+
+    /**
+     * Fenêtre d'installation : elle s'ouvre à la première visite (data/install-window.php) et se ferme
+     * 2 h plus tard. Pour la rouvrir, il suffit de supprimer ce fichier par FTP (preuve d'accès au serveur).
+     */
+    private static function window(): bool
+    {
+        $file = ECLAIR_DATA . '/install-window.php';
+        if (!is_file($file)) {
+            try {
+                Store::ensureDir(ECLAIR_DATA);
+                Store::atomic($file, Store::GUARD . time());
+            } catch (\Throwable) {
+                return true; // dossier data/ non accessible : le diagnostic l'affichera, rien ne peut s'installer
+            }
+            return true;
+        }
+        return time() - (int) Store::strip((string) @file_get_contents($file)) < self::WINDOW;
     }
 
     /** Diagnostic du serveur, présenté de façon rassurante. */
@@ -144,7 +168,7 @@ final class Installer
         Settings::forget();
         date_default_timezone_set((string) Settings::get('timezone'));
 
-        $user = Users::save([
+        $user = Users::create([
             'name' => Sanitize::text(Req::input('user_name'), 80),
             'email' => Sanitize::email(Req::input('user_email')),
             'pass' => Security::hashPassword(Req::input('user_pass')),
@@ -153,6 +177,9 @@ final class Installer
         ]);
         Starter::create($type, $lang, $user, $name);
         Media::icons(null, (string) Settings::get('appearance.accent'));
+        @unlink(ECLAIR_DATA . '/install-window.php');
+        // Les visiteurs ne seront redirigés vers cette adresse que si elle mène vraiment à ce site.
+        Settings::verifyUrl();
         Cache::purge();
         Auth::login($user);
         Log::security('install', ['email' => $user['email']]);

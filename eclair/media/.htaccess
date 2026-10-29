@@ -1,6 +1,8 @@
-# Médias : uniquement des images, jamais de scripts ni de pages.
+# Médias : uniquement des images, jamais de scripts, de pages ni de liste de fichiers.
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [R=404,L]
     RewriteRule \.(php\d?|phtml|phar|inc|pl|py|cgi|sh|asp|aspx|jsp|s?html?|xht(ml)?|svgz?|xml)$ - [R=404,NC,L]
 </IfModule>
 <IfModule mod_headers.c>

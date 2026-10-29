@@ -9,8 +9,9 @@ use Eclair\Settings;
   <a class="logo" href="<?= e(path_to('/')) ?>"><span class="logo-mark"><?= Icons::bolt() ?></span><span><b>Éclair</b><small><?= e(Settings::get('name')) ?></small></span></a>
   <h1><?= e(t('Bon retour 👋')) ?></h1>
   <p class="sub"><?= e(t('Connecte-toi pour gérer ton site.')) ?></p>
+  <?php if ($v['bye']): ?><div class="notice ok" role="status"><p><?= e(t('À bientôt ! Tu es bien déconnecté.')) ?></p></div><?php endif ?>
   <?php if ($v['error'] !== ''): ?><div class="notice bad" role="alert"><p><?= e($v['error']) ?></p></div><?php endif ?>
-  <?= Security::csrfField() ?>
+  <?= Security::formField() ?>
   <input type="hidden" name="next" value="<?= e($v['next']) ?>">
   <label class="field"><span class="label"><?= e(t('E-mail')) ?></span>
     <input type="email" name="email" value="<?= e($v['email']) ?>" autocomplete="username" required autofocus></label>

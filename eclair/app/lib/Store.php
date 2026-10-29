@@ -54,9 +54,11 @@ final class Store
     {
         $file = self::file($name);
         self::ensureDir(dirname($file));
+        // HEX_TAG/HEX_AMP : aucune séquence « <?php » ne peut apparaître dans un fichier de données.
         $json = json_encode(
             $data,
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION
+                | JSON_INVALID_UTF8_SUBSTITUTE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR
         );
         self::atomic($file, self::GUARD . $json);
         self::$memo[$name] = $data;
@@ -108,22 +110,29 @@ final class Store
     }
 
     /** Écrit un fichier de façon atomique. */
+    /**
+     * Écrit un fichier de façon atomique, lisible uniquement par PHP (0600).
+     * Le fichier temporaire ne porte l'extension .php que s'il commence par la ligne de protection.
+     */
     public static function atomic(string $file, string $content): void
     {
-        $tmp = $file . '.' . bin2hex(random_bytes(4)) . '.tmp.php';
-        if (@file_put_contents($tmp, $content, LOCK_EX) === false) {
+        $tmp = $file . '.' . bin2hex(random_bytes(4)) . (str_starts_with($content, self::GUARD) ? '.tmp.php' : '.tmp');
+        if (@file_put_contents($tmp, $content, LOCK_EX) !== strlen($content)) {
+            @unlink($tmp);
             throw new \RuntimeException("Impossible d'écrire « " . basename($file) . ' » : vérifie les droits du dossier.');
         }
-        @chmod($tmp, 0644);
+        @chmod($tmp, 0600);
         if (!@rename($tmp, $file)) {
             @unlink($tmp);
             throw new \RuntimeException("Impossible d'enregistrer « " . basename($file) . ' ».');
         }
     }
 
+    /** Crée un dossier : privé (0700) pour les données et le cache, public (0755) ailleurs (médias). */
     public static function ensureDir(string $dir): void
     {
-        if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        $private = str_starts_with($dir, ECLAIR_DATA) || str_starts_with($dir, ECLAIR_ROOT . '/cache');
+        if (!is_dir($dir) && !@mkdir($dir, $private ? 0700 : 0755, true) && !is_dir($dir)) {
             throw new \RuntimeException('Impossible de créer le dossier ' . basename($dir) . '.');
         }
     }

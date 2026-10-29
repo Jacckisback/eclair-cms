@@ -12,7 +12,8 @@ $events = [
     '2fa_reset' => t('2FA réinitialisée'), 'password_changed' => t('Mot de passe modifié'), 'password_reset' => t('Mot de passe réinitialisé'),
     'user_created' => t('Compte créé'), 'user_deleted' => t('Compte supprimé'), 'settings_saved' => t('Réglages modifiés'),
     'sessions_revoked' => t('Sessions fermées'), 'backup_downloaded' => t('Sauvegarde téléchargée'), 'install' => t('Installation'),
-    'ftp_reset' => t('Mot de passe réinitialisé par FTP'),
+    'ftp_reset' => t('Mot de passe réinitialisé par FTP'), 'ftp_reset_refused' => t('Réinitialisation par FTP refusée'),
+    'totp_locked' => t('2FA bloquée (trop de codes faux)'), 'sudo_failed' => t('Confirmation du mot de passe refusée'),
 ];
 ?>
 <div class="page">
@@ -24,8 +25,13 @@ $events = [
         <?php foreach ($v['checks'] as $c): ?><li><span class="dot <?= $c['ok'] ? 'ok' : 'warn' ?>"></span><?= e($c['label']) ?></li><?php endforeach ?>
         <li><span class="dot ok"></span><?= e(t('Aucune base de données : pas d’injection SQL possible')) ?></li>
         <li><span class="dot ok"></span><?= e(t('En-têtes de sécurité stricts (CSP, anti-clickjacking…)')) ?></li>
-        <li><span class="dot ok"></span><?= e(t('Images ré-encodées à l’envoi, scripts interdits dans /media')) ?></li>
+        <li><span class="dot <?= $v['gd'] ? 'ok' : 'warn' ?>"></span><?= e($v['gd'] ? t('Images ré-encodées à l’envoi, scripts interdits dans /media') : t('Images contrôlées à l’envoi (sans GD, elles ne sont pas ré-encodées), scripts interdits dans /media')) ?></li>
       </ul>
+      <?php if (!$v['verified']): ?>
+        <form method="post" action="<?= e(admin_url('security')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="verify-url">
+          <p class="hint"><?= e(t('Tant que l’adresse du site n’est pas vérifiée, Éclair ne redirige personne vers elle (protection contre une adresse erronée ou piégée).')) ?></p>
+          <button class="btn btn-sm" type="submit"><?= Icons::svg('shield') ?><?= e(t('Vérifier l’adresse du site')) ?></button></form>
+      <?php endif ?>
     </section>
     <section class="card">
       <h2><?= e(t('Test de protection des dossiers')) ?></h2>
@@ -57,6 +63,7 @@ $events = [
       <h2><?= e(t('Sauvegarde')) ?></h2>
       <p class="small muted"><?= e(t('Télécharge une archive de tout ton site (contenus, réglages, comptes, images). Fais-le avant chaque grosse modification.')) ?></p>
       <form method="post" action="<?= e(admin_url('backup')) ?>"><?= Security::csrfField() ?>
+        <?= \Eclair\Admin::partial('partials/confirm', []) ?>
         <button class="btn btn-primary" type="submit"<?= $v['zip'] ? '' : ' disabled' ?>><?= Icons::svg('download') ?><?= e(t('Télécharger une sauvegarde')) ?></button></form>
       <?php if (!$v['zip']): ?><p class="hint"><?= e(t('Extension zip indisponible : copie les dossiers data/ et media/ par FTP.')) ?></p><?php endif ?>
     </section>

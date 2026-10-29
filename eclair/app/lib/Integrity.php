@@ -47,9 +47,19 @@ final class Integrity
         foreach (self::scan(['data', 'cache']) as $path) {
             if (preg_match('~\.(phtml|phar|php\d|sh|cgi|pl|py|html?)$~i', $path) && basename($path) !== 'index.html') {
                 $result['suspicious'][] = $path;
+            } elseif (str_ends_with($path, '.php') && !self::guarded($path)) {
+                // Tout fichier .php des données doit commencer par la ligne de protection : sinon, c'est un intrus.
+                $result['suspicious'][] = $path;
             }
         }
         return $result;
+    }
+
+    private static function guarded(string $path): bool
+    {
+        $file = str_starts_with($path, 'data/') ? ECLAIR_DATA . substr($path, 4) : ECLAIR_ROOT . '/' . $path;
+        $head = (string) @file_get_contents($file, false, null, 0, strlen(Store::GUARD));
+        return $head === Store::GUARD || ($path === 'data/reset.php' && str_starts_with($head, '<?php'));
     }
 
     /** Liste récursive (chemins relatifs à la racine d'Éclair). */

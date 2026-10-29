@@ -17,12 +17,13 @@ final class AdminSecurity
         }
         $admins = Users::admins();
         $checks = [
-            ['ok' => str_starts_with((string) Settings::get('url'), 'https://'), 'label' => t('Connexion chiffrée (HTTPS)')],
+            ['ok' => Security::httpsOnly(), 'label' => t('Connexion chiffrée (HTTPS) imposée')],
+            ['ok' => Settings::verified(), 'label' => t('Adresse du site vérifiée ({url})', ['url' => (string) Settings::get('url')])],
             ['ok' => !array_filter($admins, fn ($u) => empty($u['totp']['on'])), 'label' => t('Double authentification pour tous les administrateurs')],
             ['ok' => Settings::get('admin_path') !== 'admin', 'label' => t('Adresse d’administration personnalisée (moins de robots)')],
             ['ok' => PHP_VERSION_ID >= 80200, 'label' => t('Version de PHP maintenue')],
             ['ok' => defined('PASSWORD_ARGON2ID'), 'label' => t('Mots de passe chiffrés avec Argon2id')],
-            ['ok' => (bool) Settings::get('security.hsts') || !str_starts_with((string) Settings::get('url'), 'https://'), 'label' => t('HSTS (navigateurs forcés en HTTPS)')],
+            ['ok' => (bool) Settings::get('security.hsts') && Security::httpsOnly(), 'label' => t('HSTS (navigateurs forcés en HTTPS)')],
         ];
         Admin::view('security', [
             'checks' => $checks,
@@ -32,6 +33,8 @@ final class AdminSecurity
             'errors' => Log::read('errors', 20),
             'integrity' => $integrity,
             'zip' => class_exists('ZipArchive'),
+            'gd' => Media::gd(),
+            'verified' => Settings::verified(),
         ], t('Sécurité'));
     }
 
@@ -42,9 +45,9 @@ final class AdminSecurity
                 RateLimit::clear(Req::input('key'));
                 Admin::back('security', t('Adresse débloquée.'));
             case 'revoke-all':
-                foreach (Users::all() as $u) {
-                    $saved = Auth::revokeAll($u);
-                    if ($u['id'] === $user['id']) {
+                foreach (array_keys(Users::all()) as $id) {
+                    $saved = Auth::revokeAll((string) $id);
+                    if ($saved && $id === $user['id']) {
                         Auth::login($saved);
                     }
                 }
@@ -53,6 +56,10 @@ final class AdminSecurity
             case 'integrity':
                 $_SESSION['integrity'] = Integrity::check();
                 Http::redirect(admin_url('security#integrite'));
+            case 'verify-url':
+                Settings::verifyUrl()
+                    ? Admin::back('security', t('Adresse vérifiée : les visiteurs sont redirigés vers elle.'))
+                    : Admin::back('security', t('Vérification impossible : ton serveur ne parvient pas à joindre {url}. Le site fonctionne, mais sans redirection vers l’adresse officielle.', ['url' => (string) Settings::get('url')]), 'warn');
             case 'reindex':
                 Content::reindex();
                 Cache::purge();
@@ -70,6 +77,9 @@ final class AdminSecurity
     /** Sauvegarde complète (contenus, réglages, médias) dans un fichier ZIP. */
     public static function backup(array $user): never
     {
+        if (!Auth::confirmed($user)) {
+            Admin::back('security', t('Mot de passe incorrect.'), 'bad');
+        }
         if (!class_exists('ZipArchive')) {
             Admin::back('security', t('L’extension zip n’est pas disponible : copie les dossiers data et media par FTP.'), 'bad');
         }
@@ -83,7 +93,7 @@ final class AdminSecurity
             $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
             foreach ($it as $path => $info) {
                 $rel = $prefix . '/' . str_replace('\\', '/', substr((string) $path, strlen($dir) + 1));
-                if ($info->isFile() && !preg_match('~^data/(sessions|limits)/~', $rel) && !str_ends_with($rel, '.lock')) {
+                if ($info->isFile() && !preg_match('~^data/(sessions/|limits/|reset\.php$)~', $rel) && !str_ends_with($rel, '.lock')) {
                     $zip->addFile((string) $path, $rel);
                 }
             }

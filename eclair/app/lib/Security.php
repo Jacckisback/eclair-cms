@@ -15,17 +15,22 @@ final class Security
         '0123456789', '9876543210', '1111111111', 'aaaaaaaaaa', 'abcdefghij', 'loveyou123', 'welcome123',
     ];
 
-    /** En-têtes communs + politique adaptée au contexte (site public, admin, texte brut). */
+    private const FORM_COOKIE = 'eclair_ft';
+
+    /**
+     * En-têtes communs + politique adaptée au contexte (site public, admin, texte brut).
+     * Ils dépendent des réglages, jamais de la requête : une page mise en cache sert les mêmes à tous.
+     */
     public static function headers(string $mode, string $styleHash = ''): array
     {
-        $https = Req::isHttps();
+        $https = self::httpsOnly();
         $h = [
             'X-Content-Type-Options: nosniff',
             'Referrer-Policy: strict-origin-when-cross-origin',
             'Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()',
             'Cross-Origin-Opener-Policy: same-origin',
         ];
-        if ($https && Settings::installed() && Settings::get('security.hsts')) {
+        if ($https && Settings::get('security.hsts')) {
             $h[] = 'Strict-Transport-Security: max-age=31536000';
         }
         if ($mode === 'admin') {
@@ -47,6 +52,16 @@ final class Security
             $h[] = "Content-Security-Policy: default-src 'none'; frame-ancestors 'none'";
         }
         return $h;
+    }
+
+    /**
+     * Le site impose-t-il le HTTPS ? Oui si l'option est cochée, ou si l'adresse du site est en https://
+     * et a été vérifiée (le serveur y répond bien et voit la connexion chiffrée).
+     */
+    public static function httpsOnly(): bool
+    {
+        return Settings::installed() && ((bool) Settings::get('security.https')
+            || (str_starts_with((string) Settings::get('url'), 'https://') && Settings::verified()));
     }
 
     public static function csrfToken(): string
@@ -75,6 +90,38 @@ final class Security
         return is_string($expected) && $expected !== '' && hash_equals($expected, $token) && self::sameOrigin();
     }
 
+    /**
+     * Jeton anti-CSRF sans session (connexion, installation) : la valeur d'un cookie aléatoire,
+     * renvoyée dans le formulaire. Aucun fichier n'est créé pour un visiteur anonyme.
+     */
+    public static function formToken(): string
+    {
+        $token = (string) ($_COOKIE[self::FORM_COOKIE] ?? '');
+        if (!preg_match('/^[a-f0-9]{32}$/', $token)) {
+            $token = bin2hex(random_bytes(16));
+            $_COOKIE[self::FORM_COOKIE] = $token;
+            setcookie(self::FORM_COOKIE, $token, [
+                'expires' => 0,
+                'path' => Req::base() . '/',
+                'secure' => Req::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Strict',
+            ]);
+        }
+        return $token;
+    }
+
+    public static function formField(): string
+    {
+        return '<input type="hidden" name="_ft" value="' . e(self::formToken()) . '">';
+    }
+
+    public static function checkFormToken(): bool
+    {
+        $token = (string) ($_COOKIE[self::FORM_COOKIE] ?? '');
+        return preg_match('/^[a-f0-9]{32}$/', $token) === 1 && hash_equals($token, Req::input('_ft')) && self::sameOrigin();
+    }
+
     /** Défense en profondeur : refuse les requêtes envoyées depuis un autre site. */
     public static function sameOrigin(): bool
     {
@@ -93,7 +140,21 @@ final class Security
 
     public static function hashPassword(string $password): string
     {
-        return password_hash($password, self::algo());
+        return password_hash($password, self::algo(), self::options());
+    }
+
+    public static function needsRehash(string $hash): bool
+    {
+        return password_needs_rehash($hash, self::algo(), self::options());
+    }
+
+    /**
+     * Coût du hachage, calibré pour les hébergements mutualisés (recommandation OWASP pour Argon2id :
+     * 19 Mio de mémoire, 2 passes) : plusieurs connexions simultanées n'épuisent pas la mémoire.
+     */
+    public static function options(): array
+    {
+        return defined('PASSWORD_ARGON2ID') ? ['memory_cost' => 19456, 'time_cost' => 2, 'threads' => 1] : ['cost' => 11];
     }
 
     public static function algo(): string|int|null

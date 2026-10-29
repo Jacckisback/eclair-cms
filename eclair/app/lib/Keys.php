@@ -28,6 +28,25 @@ final class Keys
         return $keys;
     }
 
+    /**
+     * Empreinte factice, aux mêmes paramètres que les vrais mots de passe :
+     * tester un e-mail inconnu prend autant de temps qu'un vrai (aucune énumération possible).
+     */
+    public static function dummy(): string
+    {
+        $hash = self::get('dummy');
+        if (!Security::needsRehash($hash)) {
+            return $hash;
+        }
+        return Store::locked(function (): string {
+            $keys = Store::read('keys', []);
+            $keys = is_array($keys) ? $keys : [];
+            $keys['dummy'] = Security::hashPassword(bin2hex(random_bytes(12)));
+            Store::write('keys', $keys);
+            return $keys['dummy'];
+        });
+    }
+
     /** Signature HMAC avec la clé du site. */
     public static function sign(string $data): string
     {

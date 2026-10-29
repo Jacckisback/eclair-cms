@@ -139,6 +139,9 @@ final class AdminSettings
                 break;
 
             case 'advanced':
+                if (!Auth::confirmed($user)) {
+                    Admin::back($redirect, t('Mot de passe incorrect.'), 'bad');
+                }
                 $admin = strtolower(trim(Req::input('admin_path')));
                 if (!preg_match('/^[a-z0-9-]{3,40}$/', $admin) || in_array($admin, ['app', 'data', 'cache', 'assets', 'media', $s['blog']['base']], true)) {
                     Admin::back($redirect, t('Adresse d’administration invalide : 3 à 40 caractères (lettres, chiffres, tirets).'), 'bad');
@@ -157,10 +160,17 @@ final class AdminSettings
                 if ($patch['security']['https'] && !Req::isHttps()) {
                     Admin::back($redirect, t('Active d’abord HTTPS chez ton hébergeur et connecte-toi en https:// avant de forcer HTTPS.'), 'bad');
                 }
+                // Forcer HTTPS fait aussi passer l'adresse officielle en https://.
+                if ($patch['security']['https'] && str_starts_with((string) $s['url'], 'http://')) {
+                    $patch['url'] = 'https://' . substr((string) $s['url'], 7);
+                }
                 break;
         }
         Settings::save($patch);
         Log::security('settings_saved', ['tab' => $tab]);
+        if (isset($patch['url']) && $patch['url'] !== $s['url'] && !Settings::verifyUrl()) {
+            Session::flash('warn', t('Je n’ai pas pu vérifier que {url} mène bien à ce site : en attendant, personne n’est redirigé vers cette adresse. Vérifie-la depuis la page Sécurité.', ['url' => $patch['url']]));
+        }
         if ($tab === 'advanced' && $patch['admin_path'] !== $s['admin_path']) {
             Session::flash('ok', t('Nouvelle adresse de l’administration enregistrée : pense à mettre à jour tes favoris.'));
             Http::redirect(Req::base() . '/' . $patch['admin_path'] . '/settings?tab=advanced');

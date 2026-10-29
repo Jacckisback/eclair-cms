@@ -154,11 +154,12 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
 
   <?php else: ?>
     <div class="notice warn"><span>⚠️</span><p><?= e(t('Réglages techniques : modifie-les seulement si tu sais pourquoi.')) ?></p></div>
+    <?= \Eclair\Admin::partial('partials/confirm', []) ?>
     <label class="field"><span class="label"><?= e(t('Adresse de l’administration')) ?></span>
       <span class="input-group"><span><?= e(rtrim((string) $s['url'], '/')) ?>/</span><input type="text" name="admin_path" value="<?= e($s['admin_path']) ?>" pattern="[a-z0-9-]{3,40}" required></span>
       <span class="hint"><?= e(t('Une adresse personnalisée éloigne les robots qui testent des mots de passe. Note-la bien !')) ?></span></label>
     <?= $sw('https', (bool) $s['security']['https'], t('Forcer HTTPS'), t('Redirige toutes les visites en http:// vers https://.')) ?>
-    <?= $sw('canonical', (bool) $s['security']['canonical'], t('Rediriger vers l’adresse officielle'), t('www / sans www et http / https : une seule version, pas de contenu dupliqué.')) ?>
+    <?= $sw('canonical', (bool) $s['security']['canonical'], t('Rediriger vers l’adresse officielle'), t('www / sans www et http / https : une seule version, pas de contenu dupliqué.') . ' ' . (\Eclair\Settings::verified() ? t('Adresse vérifiée ✓') : t('Active dès que l’adresse est vérifiée (page Sécurité).'))) ?>
     <?= $sw('hsts', (bool) $s['security']['hsts'], t('HSTS'), t('Les navigateurs n’utiliseront plus jamais http:// pour ton site (1 an). À activer quand HTTPS fonctionne parfaitement.')) ?>
     <?= $sw('cache', (bool) $s['cache'], t('Cache statique des pages'), t('Les pages sont servies en quelques millisecondes. Le cache se vide tout seul à chaque modification.')) ?>
     <div class="grid-2">

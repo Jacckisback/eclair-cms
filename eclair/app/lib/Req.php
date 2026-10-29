@@ -67,18 +67,36 @@ final class Req
         return (self::isHttps() ? 'https://' : 'http://') . self::host() . self::base();
     }
 
-    /** Adresse IP du visiteur (en-tête de proxy seulement si configuré explicitement). */
+    /**
+     * Adresse IP du visiteur. L'en-tête d'un proxy n'est lu que s'il a été choisi dans les réglages,
+     * et seulement sa dernière adresse : celle ajoutée par le proxy (les précédentes viennent du client).
+     */
     public static function ip(): string
     {
         $proxy = Settings::installed() ? (string) Settings::get('security.proxy') : '';
-        if ($proxy !== '' && !empty($_SERVER[$proxy])) {
-            $ip = trim(explode(',', (string) $_SERVER[$proxy])[0]);
+        if ($proxy !== '' && !empty($_SERVER[$proxy]) && is_string($_SERVER[$proxy])) {
+            $hops = explode(',', $_SERVER[$proxy]);
+            $ip = trim((string) end($hops));
             if (filter_var($ip, FILTER_VALIDATE_IP)) {
                 return $ip;
             }
         }
         $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
         return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
+    }
+
+    /** Réseau du visiteur pour les limites : l'adresse IPv4, ou le bloc /64 en IPv6 (un abonné en possède des milliards). */
+    public static function ipPrefix(): string
+    {
+        $ip = self::ip();
+        $bin = str_contains($ip, ':') ? @inet_pton($ip) : false;
+        if ($bin === false || strlen($bin) !== 16) {
+            return $ip;
+        }
+        if (str_starts_with($bin, str_repeat("\0", 10) . "\xff\xff")) {
+            return (string) inet_ntop(substr($bin, 12));
+        }
+        return inet_ntop(substr($bin, 0, 8) . str_repeat("\0", 8)) . '/64';
     }
 
     public static function userAgent(): string

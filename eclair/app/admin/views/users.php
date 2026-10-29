@@ -1,6 +1,7 @@
 <?php
 defined('ECLAIR') || exit;
 
+use Eclair\Admin;
 use Eclair\Icons;
 use Eclair\Security;
 ?>
@@ -27,6 +28,7 @@ use Eclair\Security;
         <label class="field"><span class="label"><?= e(t('Nom')) ?></span><input type="text" name="name" required maxlength="80"></label>
         <label class="field"><span class="label"><?= e(t('E-mail')) ?></span><input type="email" name="email" required></label>
         <label class="field"><span class="label"><?= e(t('Rôle')) ?></span><select name="role"><option value="editor"><?= e(t('Rédacteur')) ?></option><option value="admin"><?= e(t('Administrateur')) ?></option></select></label>
+        <?= Admin::partial('partials/confirm', []) ?>
         <button class="btn btn-primary" type="submit"><?= Icons::svg('plus') ?><?= e(t('Créer le compte')) ?></button>
         <p class="hint"><?= e(t('Un mot de passe provisoire sécurisé est généré : transmets-le de vive voix ou par un canal sûr.')) ?></p>
       </form>

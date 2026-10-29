@@ -62,6 +62,10 @@ final class Site
     /** Une seule URL par contenu : protocole, domaine, slash final, majuscules, index.php. */
     private static function canonical(string $path): void
     {
+        // Antislash ou caractère de contrôle : jamais une adresse légitime, et un piège à redirection.
+        if (preg_match('~[\\\\\x00-\x1f\x7f]~', $path)) {
+            self::notFound();
+        }
         $query = Req::queryString();
         $suffix = $query !== '' ? '?' . $query : '';
         $clean = $path;
@@ -75,15 +79,16 @@ final class Site
         if (preg_match('/[A-Z]/', $clean)) {
             $clean = strtolower($clean);
         }
+        // Domaine officiel : seulement si l'adresse enregistrée a été vérifiée (elle mène bien à ce site).
         $url = rtrim((string) Settings::get('url'), '/');
-        if ($url !== '' && Settings::get('security.canonical')) {
+        if (Settings::get('security.canonical') && Settings::verified()) {
             $p = parse_url($url) ?: [];
             $host = strtolower(($p['host'] ?? '') . (isset($p['port']) ? ':' . $p['port'] : ''));
-            $https = ($p['scheme'] ?? '') === 'https';
-            if ($host !== '' && (Req::host() !== $host || ($https && !Req::isHttps()))) {
+            if ($host !== '' && (Req::host() !== $host || (Security::httpsOnly() && !Req::isHttps()))) {
                 Http::redirect($url . $clean . $suffix, 301);
             }
-        } elseif (Settings::get('security.https') && !Req::isHttps()) {
+        }
+        if (Security::httpsOnly() && !Req::isHttps()) {
             Http::redirect('https://' . Req::host() . Req::base() . $clean . $suffix, 301);
         }
         if ($clean !== $path) {
@@ -397,9 +402,15 @@ final class Site
         $lang = (string) Settings::get('lang');
         $head = Seo::head(['kind' => 'message', 'lang' => $lang, 'title' => Seo::format($title), 'description' => '',
             'canonical' => absolute_url('/'), 'noindex' => true, 'breadcrumbs' => []]);
+        // Lien retour vers la page d'origine seulement si elle est sur ce site (schéma, hôte et port identiques).
         $back = Req::header('Referer');
+        $ref = parse_url($back) ?: [];
+        $here = parse_url(Req::origin()) ?: [];
+        $same = isset($ref['scheme'], $ref['host']) && strtolower($ref['scheme']) === ($here['scheme'] ?? '')
+            && strtolower($ref['host']) === strtolower($here['host'] ?? '') && ($ref['port'] ?? null) === ($here['port'] ?? null)
+            && !preg_match('~[\\\\\x00-\x1f]~', $back);
         $content = '<section class="notfound wrap"><h1>' . e($title) . '</h1><p>' . e($text) . '</p><p><a class="btn btn-secondary" href="'
-            . e(str_starts_with($back, Req::origin()) ? $back : path_to('/')) . '">← ' . e(Theme::t('back_home', $lang)) . '</a></p></section>';
+            . e($same ? $back : path_to('/')) . '">← ' . e(Theme::t('back_home', $lang)) . '</a></p></section>';
         $html = Theme::partial('layout', ['lang' => $lang, 'head' => $head, 'css' => Theme::css(), 'current' => '', 'class' => 'is-message', 'content' => $content]);
         self::html($html, $status, null);
     }

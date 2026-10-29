@@ -11,6 +11,9 @@ $on = !empty($me['totp']['on']);
 ?>
 <div class="page-narrow">
   <div class="topbar"><div><h1><?= e(t('Mon profil')) ?></h1><p><?= e(t('Ces informations apparaissent sous tes articles : elles renforcent ta crédibilité (E-E-A-T) auprès de Google et des IA.')) ?></p></div></div>
+  <?php if (!empty($me['must_change'])): ?>
+    <div class="notice warn" role="alert"><span>🔑</span><p><?= e(t('Tu utilises un mot de passe provisoire : choisis ton mot de passe personnel ci-dessous pour accéder au reste de l’administration.')) ?></p></div>
+  <?php endif ?>
   <form class="card" method="post" action="<?= e(admin_url('profile')) ?>" data-dirty>
     <?= Security::csrfField() ?>
     <div class="grid-2">
@@ -23,6 +26,7 @@ $on = !empty($me['totp']['on']);
     <label class="field"><span class="label"><?= e(t('Tes profils en ligne (un lien par ligne)')) ?></span><textarea name="links" rows="3" placeholder="https://www.linkedin.com/in/…"><?= e(implode("\n", (array) ($me['links'] ?? []))) ?></textarea></label>
     <label class="field"><span class="label"><?= e(t('Langue de l’administration')) ?></span><select name="lang">
       <?php foreach (I18n::LANGS as $code => $name): ?><option value="<?= e($code) ?>"<?= ($me['lang'] ?? 'fr') === $code ? ' selected' : '' ?>><?= e($name) ?></option><?php endforeach ?></select></label>
+    <?= Admin::partial('partials/confirm', ['required' => false, 'hint' => t('Nécessaire seulement si tu changes ton e-mail de connexion.')]) ?>
     <button class="btn btn-primary" type="submit"><?= e(t('Enregistrer le profil')) ?></button>
   </form>
 

@@ -42,13 +42,14 @@ final class Users
         return null;
     }
 
-    public static function save(array $user): array
+    /** Crée un compte (identifiant généré). */
+    public static function create(array $user): array
     {
         return Store::locked(function () use ($user): array {
             $users = Store::read('users', []);
             $users = is_array($users) ? $users : [];
-            $user += [
-                'id' => random_id(),
+            // Les valeurs fournies l'emportent sur les valeurs par défaut (l'identifiant est toujours généré).
+            $user = ['id' => random_id()] + array_diff_key($user, ['id' => true]) + [
                 'role' => 'editor',
                 'ver' => 1,
                 'created' => time(),
@@ -57,10 +58,36 @@ final class Users
                 'avatar' => '',
                 'links' => [],
                 'lang' => 'fr',
+                'must_change' => false,
                 'totp' => ['on' => false, 'secret' => '', 'last' => 0, 'recovery' => []],
             ];
             $user['slug'] = self::uniqueSlug(slugify((string) $user['name']) ?: 'auteur', $user['id'], $users);
             $users[$user['id']] = $user;
+            Store::write('users', $users);
+            return $user;
+        });
+    }
+
+    /**
+     * Modifie un compte à partir de sa version enregistrée la plus récente, sous verrou :
+     * aucune copie périmée ne peut écraser un changement concurrent (mot de passe, révocation, 2FA…).
+     * Le rappel reçoit le compte et renvoie le compte modifié, ou null pour ne rien changer.
+     * Renvoie le compte tel qu'enregistré, ou null s'il n'existe plus.
+     */
+    public static function update(string $id, callable $change): ?array
+    {
+        return Store::locked(function () use ($id, $change): ?array {
+            $users = Store::read('users', []);
+            if (!is_array($users) || !isset($users[$id])) {
+                return null;
+            }
+            $user = $change($users[$id]);
+            if (!is_array($user)) {
+                return $users[$id];
+            }
+            $user['id'] = $id;
+            $user['slug'] = self::uniqueSlug(slugify((string) $user['name']) ?: 'auteur', $id, $users);
+            $users[$id] = $user;
             Store::write('users', $users);
             return $user;
         });

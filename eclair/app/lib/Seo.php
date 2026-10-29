@@ -407,14 +407,14 @@ final class Seo
         $lang = (string) Settings::get('lang');
         $md = (bool) Settings::get('geo.markdown');
         $link = static fn (array $e): string => absolute_url($md ? self::mdPath(Content::path($e)) : Content::path($e));
-        $out = '# ' . Settings::get('name') . "\n\n";
+        $out = '# ' . Blocks::mdText((string) Settings::get('name')) . "\n\n";
         $summary = trim((string) (Settings::get('description') ?: Settings::get('tagline')));
         if ($summary !== '') {
-            $out .= '> ' . str_replace("\n", ' ', $summary) . "\n\n";
+            $out .= '> ' . Blocks::mdText(str_replace("\n", ' ', $summary)) . "\n\n";
         }
         $about = trim((string) Settings::get('geo.about'));
         if ($about !== '') {
-            $out .= $about . "\n\n";
+            $out .= Blocks::mdText($about) . "\n\n";
         }
         $facts = ['- ' . Theme::t('website', $lang) . ' : ' . absolute_url('/')];
         $email = (string) (Settings::get('seo.email') ?: '');
@@ -442,7 +442,8 @@ final class Seo
             $out .= '## ' . $label . "\n\n";
             foreach ($list as $e) {
                 $note = $e['summary'] !== '' ? $e['summary'] : $e['excerpt'];
-                $out .= '- [' . $e['title'] . '](' . $link($e) . ')' . ($note !== '' ? ': ' . str_replace("\n", ' ', $note) : '') . "\n";
+                $out .= '- [' . Blocks::mdText(str_replace(['[', ']'], '', $e['title'])) . '](' . $link($e) . ')'
+                    . ($note !== '' ? ': ' . Blocks::mdText(str_replace("\n", ' ', $note)) : '') . "\n";
             }
             $out .= "\n";
         }
@@ -451,7 +452,8 @@ final class Seo
         if ($cats && Settings::get('blog.enabled')) {
             $out .= '## ' . Theme::t('categories', $lang) . "\n\n";
             foreach ($cats as $c) {
-                $out .= '- [' . $c['name'] . '](' . absolute_url(Categories::path($c)) . ')' . ($c['description'] !== '' ? ': ' . excerpt(str_replace("\n", ' ', $c['description']), 200) : '') . "\n";
+                $out .= '- [' . Blocks::mdText(str_replace(['[', ']'], '', $c['name'])) . '](' . absolute_url(Categories::path($c)) . ')'
+                    . ($c['description'] !== '' ? ': ' . Blocks::mdText(excerpt(str_replace("\n", ' ', $c['description']), 200)) : '') . "\n";
             }
             $out .= "\n";
         }
@@ -487,20 +489,20 @@ final class Seo
             ]);
             $out .= "---\n";
             foreach ($meta as $k => $v) {
-                $out .= $k . ': ' . json_encode((string) $v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
+                $out .= $k . ': ' . json_encode((string) $v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . "\n";
             }
             $out .= "---\n\n";
         }
-        $out .= '# ' . $item['title'] . "\n\n";
+        $out .= '# ' . Blocks::mdText($item['title']) . "\n\n";
         if (!$frontMatter) {
             $out .= 'URL : ' . $url . "\n\n";
         }
         if ($item['summary'] !== '') {
-            $out .= '> **' . Theme::t('key_points', $lang) . '** — ' . str_replace("\n", "\n> ", $item['summary']) . "\n\n";
+            $out .= '> **' . Theme::t('key_points', $lang) . '** — ' . str_replace("\n", "\n> ", Blocks::mdText($item['summary'])) . "\n\n";
         }
         $out .= Blocks::markdown($item['blocks'], $lang);
         if ($author && $item['type'] === 'post') {
-            $out .= "\n— " . $author['name'] . ($author['job'] !== '' ? ', ' . $author['job'] : '') . ' · ' . fmt_date(max((int) $item['date'], (int) $item['updated']), $lang) . "\n";
+            $out .= "\n— " . Blocks::mdText($author['name'] . ($author['job'] !== '' ? ', ' . $author['job'] : '')) . ' · ' . fmt_date(max((int) $item['date'], (int) $item['updated']), $lang) . "\n";
         }
         return $out;
     }
@@ -534,14 +536,15 @@ final class Seo
                 . '<guid isPermaLink="true">' . self::xml($url) . '</guid><pubDate>' . date(DATE_RSS, (int) $item['date']) . '</pubDate>'
                 . ($author ? '<dc:creator>' . self::xml($author['name']) . '</dc:creator>' : '')
                 . ($cat ? '<category>' . self::xml($cat['name']) . '</category>' : '')
-                . '<description>' . self::xml($entry['excerpt']) . '</description>'
+                // Les lecteurs RSS lisent la description comme du HTML : le texte est échappé pour HTML, puis pour XML.
+                . '<description>' . self::xml(e($entry['excerpt'])) . '</description>'
                 . '<content:encoded><![CDATA[' . str_replace(']]>', ']]]]><![CDATA[>', $html) . ']]></content:encoded></item>' . "\n";
         }
         $title = (string) Settings::get('name');
         return '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
             . '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">' . "\n"
             . '<channel><title>' . self::xml($title) . '</title><link>' . self::xml(absolute_url('/')) . '</link>'
-            . '<description>' . self::xml((string) (Settings::get('description') ?: Settings::get('tagline') ?: $title)) . '</description>'
+            . '<description>' . self::xml(e((string) (Settings::get('description') ?: Settings::get('tagline') ?: $title))) . '</description>'
             . '<language>' . self::xml((string) Settings::get('lang')) . '</language>'
             . '<lastBuildDate>' . date(DATE_RSS, $posts ? (int) reset($posts)['date'] : time()) . '</lastBuildDate>'
             . '<atom:link href="' . self::xml(absolute_url('/feed.xml')) . '" rel="self" type="application/rss+xml"/>' . "\n"

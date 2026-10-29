@@ -14,6 +14,7 @@ final class Media
     public const WIDTHS = [480, 800, 1200, 1600];
     private const MAX = 2000;
     private const MAX_BYTES = 20 * 1048576;
+    private const MAX_PIXELS = 40_000_000;
 
     public static function dir(): string
     {
@@ -106,12 +107,18 @@ final class Media
             throw new \RuntimeException(t('Format non pris en charge : JPG, PNG, WebP ou GIF uniquement.'));
         }
         [$w, $h, $type] = $info;
-        if ($w < 1 || $h < 1 || $w * $h > 60_000_000) {
-            throw new \RuntimeException(t('Dimensions d’image invalides ou trop grandes.'));
+        if ($w < 1 || $h < 1 || $w * $h > self::MAX_PIXELS) {
+            throw new \RuntimeException(t('Dimensions d’image invalides ou trop grandes (40 mégapixels maximum).'));
         }
         $ext = $types[$type];
         $folder = date('Y/m');
         Store::ensureDir(self::dir() . '/' . $folder);
+        // Pas de liste des fichiers si l'hébergeur affiche le contenu des dossiers.
+        foreach ([dirname(self::dir() . '/' . $folder), self::dir() . '/' . $folder] as $dir) {
+            if (!is_file($dir . '/index.html')) {
+                @file_put_contents($dir . '/index.html', '');
+            }
+        }
         $base = substr(slugify(pathinfo((string) ($file['name'] ?? 'image'), PATHINFO_FILENAME)) ?: 'image', 0, 60);
         $name = $base;
         $prefix = self::dir() . '/' . $folder . '/';
@@ -134,7 +141,7 @@ final class Media
         $animated = $type === IMAGETYPE_GIF && self::animated($tmp);
         if (self::gd() && !$animated) {
             $record = self::process($tmp, $type, $target, $record);
-        } elseif (!@move_uploaded_file($tmp, $target . '.' . $ext) && !@copy($tmp, $target . '.' . $ext)) {
+        } elseif (@file_put_contents($target . '.' . $ext, self::raw($tmp, $type)) === false) {
             throw new \RuntimeException(t("Impossible d'enregistrer l'image : vérifie les droits du dossier media."));
         }
         $record['bytes'] = (int) @filesize($target . '.' . $record['ext']);
@@ -261,6 +268,76 @@ final class Media
         return $rotated ?: $img;
     }
 
+    /**
+     * Image conservée telle quelle (GIF animé, ou serveur sans GD) : un GIF est réécrit sans ses
+     * commentaires ni extensions, et tout fichier contenant du code (PHP, HTML, script) est refusé.
+     */
+    private static function raw(string $file, int $type): string
+    {
+        $data = (string) file_get_contents($file);
+        if ($type === IMAGETYPE_GIF) {
+            $data = self::cleanGif($data) ?? throw new \RuntimeException(t('Ce GIF est invalide ou endommagé.'));
+        }
+        if (preg_match('~<\?php|<\?=|<script|<html|<iframe|<svg~i', $data)) {
+            throw new \RuntimeException(t('Image refusée : elle contient du code.'));
+        }
+        return $data;
+    }
+
+    /** Réécrit un GIF bloc par bloc : images, minutage et boucle d'animation seulement. */
+    private static function cleanGif(string $d): ?string
+    {
+        $len = strlen($d);
+        if ($len < 13 || !in_array(substr($d, 0, 6), ['GIF87a', 'GIF89a'], true)) {
+            return null;
+        }
+        $table = static fn (int $flags): int => ($flags & 0x80) ? 3 * (2 << ($flags & 7)) : 0;
+        // Fin d'une suite de sous-blocs (taille, données… jusqu'au bloc de taille 0).
+        $chain = static function (int $p) use ($d, $len): ?int {
+            while ($p < $len) {
+                $n = ord($d[$p]);
+                $p += 1 + $n;
+                if ($n === 0) {
+                    return $p;
+                }
+            }
+            return null;
+        };
+        $pos = 13 + $table(ord($d[10]));
+        $out = substr($d, 0, $pos);
+        while ($pos < $len) {
+            $byte = ord($d[$pos]);
+            if ($byte === 0x3B) {
+                return strlen($out) === $pos ? null : $out . "\x3B";
+            }
+            if ($byte === 0x2C && $pos + 10 <= $len) {
+                $end = $chain($pos + 10 + $table(ord($d[$pos + 9])) + 1);
+                if ($end === null || $end > $len) {
+                    return null;
+                }
+                $out .= substr($d, $pos, $end - $pos);
+                $pos = $end;
+                continue;
+            }
+            if ($byte === 0x21 && $pos + 2 < $len) {
+                $label = ord($d[$pos + 1]);
+                $end = $chain($pos + 2);
+                if ($end === null || $end > $len) {
+                    return null;
+                }
+                if ($label === 0xF9 && $end - $pos === 8) {
+                    $out .= substr($d, $pos, 8); // minutage de l'animation (taille fixe)
+                } elseif ($label === 0xFF && substr($d, $pos + 2, 12) === "\x0BNETSCAPE2.0" && substr($d, $pos + 14, 2) === "\x03\x01") {
+                    $out .= "\x21\xFF\x0BNETSCAPE2.0\x03\x01" . substr($d, $pos + 16, 2) . "\x00"; // boucle, reconstruite
+                }
+                $pos = $end;
+                continue;
+            }
+            return null;
+        }
+        return null;
+    }
+
     private static function animated(string $file): bool
     {
         $data = (string) @file_get_contents($file, false, null, 0, 1048576);
@@ -272,7 +349,12 @@ final class Media
         $need = (int) ($w * $h * 6) + 24 * 1048576;
         $limit = self::bytes((string) ini_get('memory_limit'));
         if ($limit > 0 && memory_get_usage() + $need > $limit) {
-            @ini_set('memory_limit', (int) ceil((memory_get_usage() + $need) / 1048576 + 16) . 'M');
+            // La mémoire n'est jamais montée au-delà de 320 Mo.
+            $wanted = (int) ceil((memory_get_usage() + $need) / 1048576 + 16);
+            if ($wanted > 320) {
+                throw new \RuntimeException(t('Image trop grande pour la mémoire de ton hébergement : réduis-la sous 4000 pixels de large.'));
+            }
+            @ini_set('memory_limit', $wanted . 'M');
             $limit = self::bytes((string) ini_get('memory_limit'));
             if ($limit > 0 && memory_get_usage() + $need > $limit) {
                 throw new \RuntimeException(t('Image trop grande pour la mémoire de ton hébergement : réduis-la sous 4000 pixels de large.'));

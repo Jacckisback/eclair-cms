@@ -19,8 +19,12 @@ final class App
 
         $path = Req::path();
 
-        // Vérification de la réécriture d'URL (utilisée par l'installateur).
+        // Test de la réécriture d'URL (installateur) et preuve d'identité du site (Loopback).
         if ($path === '/__eclair/ping') {
+            $nonce = Req::query('n');
+            if (preg_match('/^[a-f0-9]{32}$/', $nonce) && Settings::installed()) {
+                Http::json(Loopback::answer($nonce));
+            }
             Http::send('ok', 200, ['Content-Type: text/plain; charset=utf-8', 'Cache-Control: no-store']);
         }
 
@@ -37,6 +41,10 @@ final class App
         }
         if ($path === '/_eclair/contact') {
             Contact::handle();
+        }
+        // Bouton « Modifier » du site public : n'envoie vers l'administration que les personnes connectées.
+        if (preg_match('~^/_eclair/edit/([a-z0-9]{1,40})$~', $path, $m) && Auth::can('content')) {
+            Http::redirect(admin_url('edit/' . $m[1]));
         }
         Site::handle($path);
     }

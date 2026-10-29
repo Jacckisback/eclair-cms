@@ -24,7 +24,7 @@ $siteLang = array_key_exists($lang, Content::LANGS) ? $lang : 'fr';
 <div class="auth">
   <noscript><div class="notice warn"><p><?= e(t('Active JavaScript pour installer Éclair.')) ?></p></div></noscript>
   <form class="wizard" id="wizard" method="post" action="<?= e(path_to('/')) ?>" novalidate>
-    <input type="hidden" name="_csrf" value="<?= e(Security::csrfToken()) ?>">
+    <?= Security::formField() ?>
     <input type="hidden" name="ui" value="<?= e($lang) ?>">
     <div class="wizard-top">
       <div class="row between">
@@ -140,8 +140,9 @@ $siteLang = array_key_exists($lang, Content::LANGS) ? $lang : 'fr';
   </form>
 </div>
 <script type="application/json" id="install-data"><?= json_script([
+    'url' => rtrim($v['url'], '/'),
     'recap' => [
-        'site' => t('Site'), 'type' => t('Type'), 'account' => t('Compte'), 'visibility' => t('Visibilité'), 'admin' => t('Administration'),
+        'site' => t('Site'), 'address' => t('Adresse'), 'type' => t('Type'), 'account' => t('Compte'), 'visibility' => t('Visibilité'), 'admin' => t('Administration'),
         'indexed' => t('visible sur Google'), 'hidden' => t('masqué pendant la construction'), 'ai' => t('IA'),
     ],
     'errors' => ['required' => t('Ce champ est obligatoire.'), 'email' => t('Adresse e-mail invalide.'), 'short' => t('10 caractères minimum.'), 'network' => t('Erreur réseau : réessaie.')],

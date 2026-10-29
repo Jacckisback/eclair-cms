@@ -78,6 +78,7 @@ final class Settings
             'hsts' => false,
             'idle' => 240,
             'proxy' => '',
+            'verified' => '',
         ],
         'cache' => true,
         'onboarding' => ['done' => false],
@@ -124,6 +125,27 @@ final class Settings
         });
         self::$data = null;
         Cache::purge();
+    }
+
+    /**
+     * L'adresse enregistrée mène-t-elle vraiment à ce site ? Tant que ce n'est pas prouvé,
+     * aucun visiteur n'est redirigé vers elle (une adresse erronée ou piégée ne détourne rien).
+     */
+    public static function verified(): bool
+    {
+        $url = (string) self::get('url');
+        return $url !== '' && (string) self::get('security.verified') === $url;
+    }
+
+    /** Vérifie l'adresse du site par une requête du serveur vers lui-même, et mémorise le résultat. */
+    public static function verifyUrl(): bool
+    {
+        $url = (string) self::get('url');
+        $ok = Loopback::check($url);
+        if ($ok !== self::verified()) {
+            self::save(['security' => ['verified' => $ok ? $url : '']]);
+        }
+        return $ok;
     }
 
     /** Fusion récursive où les listes sont remplacées (et non fusionnées index par index). */

@@ -512,21 +512,21 @@ final class Blocks
                     $b['items'],
                     array_keys($b['items'])
                 )),
-                'quote' => '> ' . str_replace("\n", "\n> ", self::md($b['text'])) . ($b['cite'] !== '' ? "\n>\n> — " . $b['cite'] : ''),
+                'quote' => '> ' . str_replace("\n", "\n> ", self::md($b['text'])) . ($b['cite'] !== '' ? "\n>\n> — " . self::mdText($b['cite']) : ''),
                 'image' => self::mdImage($b),
-                'callout' => '> **' . ($b['title'] !== '' ? $b['title'] : Theme::t('callout_' . $b['variant'], $lang)) . '** — '
+                'callout' => '> **' . self::mdText($b['title'] !== '' ? $b['title'] : Theme::t('callout_' . $b['variant'], $lang)) . '** — '
                     . str_replace("\n", "\n> ", self::md($b['text'])),
-                'faq' => '## ' . ($b['title'] !== '' ? $b['title'] : Theme::t('faq', $lang)) . "\n\n"
-                    . implode("\n\n", array_map(fn ($i) => '### ' . $i['q'] . "\n\n" . self::md($i['a']), $b['items'])),
+                'faq' => '## ' . self::mdText($b['title'] !== '' ? $b['title'] : Theme::t('faq', $lang)) . "\n\n"
+                    . implode("\n\n", array_map(fn ($i) => '### ' . self::mdText($i['q']) . "\n\n" . self::md($i['a']), $b['items'])),
                 'table' => self::mdTable($b),
-                'button' => '[' . $b['text'] . '](' . self::abs($b['url']) . ')',
-                'video' => ($v = self::video($b['url'])) ? '[▶ ' . ($b['caption'] !== '' ? $b['caption'] : Theme::t('video', $lang)) . '](' . $v['watch'] . ')' : '',
+                'button' => self::mdLink($b['text'], $b['url']),
+                'video' => ($v = self::video($b['url'])) ? self::mdLink('▶ ' . ($b['caption'] !== '' ? $b['caption'] : Theme::t('video', $lang)), $v['watch']) : '',
                 'code' => "```" . $b['lang'] . "\n" . rtrim($b['code']) . "\n```",
                 'divider' => '---',
-                'hero' => '## ' . $b['title'] . ($b['text'] !== '' ? "\n\n" . self::md($b['text']) : '')
-                    . ($b['button'] !== '' && $b['url'] !== '' ? "\n\n[" . $b['button'] . '](' . self::abs($b['url']) . ')' : ''),
-                'features' => ($b['title'] !== '' ? '## ' . $b['title'] . "\n\n" : '')
-                    . implode("\n\n", array_map(fn ($i) => '### ' . trim($i['icon'] . ' ' . $i['title']) . ($i['text'] !== '' ? "\n\n" . self::md($i['text']) : ''), $b['items'])),
+                'hero' => '## ' . self::mdText($b['title']) . ($b['text'] !== '' ? "\n\n" . self::md($b['text']) : '')
+                    . ($b['button'] !== '' && $b['url'] !== '' ? "\n\n" . self::mdLink($b['button'], $b['url']) : ''),
+                'features' => ($b['title'] !== '' ? '## ' . self::mdText($b['title']) . "\n\n" : '')
+                    . implode("\n\n", array_map(fn ($i) => '### ' . self::mdText(trim($i['icon'] . ' ' . $i['title'])) . ($i['text'] !== '' ? "\n\n" . self::md($i['text']) : ''), $b['items'])),
                 'posts' => self::mdPosts($b, $lang),
                 default => '',
             };
@@ -534,19 +534,41 @@ final class Blocks
         return trim(implode("\n\n", array_filter($out, fn ($s) => $s !== ''))) . "\n";
     }
 
-    /** HTML en ligne (déjà assaini) → Markdown. */
+    /**
+     * HTML en ligne (déjà assaini) → Markdown. Chaque valeur n'est décodée qu'une fois, l'adresse des liens
+     * est revalidée, et « < » reste du texte : un lecteur Markdown n'y verra jamais de balise active.
+     */
     public static function md(string $html): string
     {
-        $md = (string) preg_replace_callback(
-            '~<a href="([^"]*)"[^>]*>(.*?)</a>~s',
-            fn ($m) => '[' . $m[2] . '](' . self::abs(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')) . ')',
-            $html
-        );
+        $links = [];
+        $md = (string) preg_replace_callback('~<a href="([^"]*)"[^>]*>(.*?)</a>~s', static function (array $m) use (&$links): string {
+            $url = Sanitize::url(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if ($url === '') {
+                return $m[2];
+            }
+            $links[] = str_replace([' ', '(', ')', '<', '>'], ['%20', '%28', '%29', '%3C', '%3E'], self::abs($url));
+            return '[' . $m[2] . "]\x01" . (count($links) - 1) . "\x02";
+        }, str_replace(["\x01", "\x02"], '', $html));
         $md = strtr($md, [
             '<strong>' => '**', '</strong>' => '**', '<em>' => '*', '</em>' => '*', '<code>' => '`', '</code>' => '`',
             '<s>' => '~~', '</s>' => '~~', '<br>' => "  \n",
         ]);
-        return trim(html_entity_decode(strip_tags($md), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $md = self::mdText(html_entity_decode(strip_tags($md), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return trim((string) preg_replace_callback("~\x01(\\d+)\x02~", static fn (array $m): string => '(' . $links[(int) $m[1]] . ')', $md));
+    }
+
+    /** Texte brut inséré dans du Markdown : « < » hors code devient « &lt; ». */
+    public static function mdText(string $text): string
+    {
+        return (string) preg_replace_callback('~(`[^`\n]*`)|<~', static fn (array $m): string => ($m[1] ?? '') !== '' ? $m[1] : '&lt;', $text);
+    }
+
+    /** Lien Markdown à partir d'un texte brut et d'une adresse (revalidée). */
+    private static function mdLink(string $text, string $url): string
+    {
+        $url = Sanitize::url($url);
+        $text = str_replace(['[', ']'], '', self::mdText($text));
+        return $url === '' ? $text : '[' . $text . '](' . str_replace([' ', '(', ')', '<', '>'], ['%20', '%28', '%29', '%3C', '%3E'], self::abs($url)) . ')';
     }
 
     private static function abs(string $url): string
@@ -561,7 +583,7 @@ final class Blocks
             return '';
         }
         $alt = $b['alt'] !== '' ? $b['alt'] : (string) $media['alt'];
-        return '![' . str_replace(['[', ']'], '', $alt) . '](' . absolute_url(Media::url($media)) . ')'
+        return '![' . str_replace(['[', ']'], '', self::mdText($alt)) . '](' . absolute_url(Media::url($media)) . ')'
             . ($b['caption'] !== '' ? "\n*" . self::md($b['caption']) . '*' : '');
     }
 
@@ -590,7 +612,7 @@ final class Blocks
         if (!$posts) {
             return '';
         }
-        $lines = array_map(fn ($p) => '- [' . $p['title'] . '](' . absolute_url(Content::path($p)) . ')', $posts);
-        return '## ' . ($b['title'] !== '' ? $b['title'] : Theme::t('latest_posts', $lang)) . "\n\n" . implode("\n", $lines);
+        $lines = array_map(fn ($p) => '- ' . self::mdLink($p['title'], absolute_url(Content::path($p))), $posts);
+        return '## ' . self::mdText($b['title'] !== '' ? $b['title'] : Theme::t('latest_posts', $lang)) . "\n\n" . implode("\n", $lines);
     }
 }

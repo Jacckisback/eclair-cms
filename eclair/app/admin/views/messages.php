@@ -28,4 +28,11 @@ use Eclair\Security;
       <pre><?= e($m['message']) ?></pre>
     </article>
   <?php endforeach ?>
+  <?php if ($v['pages'] > 1): ?>
+    <nav class="row between" aria-label="<?= e(t('Pagination')) ?>">
+      <?php if ($v['page'] > 1): ?><a class="btn btn-sm" href="<?= e(admin_url('messages?p=' . ($v['page'] - 1))) ?>">← <?= e(t('Plus récents')) ?></a><?php else: ?><span></span><?php endif ?>
+      <span class="small muted"><?= e(t('Page {n} sur {total}', ['n' => $v['page'], 'total' => $v['pages']])) ?></span>
+      <?php if ($v['page'] < $v['pages']): ?><a class="btn btn-sm" href="<?= e(admin_url('messages?p=' . ($v['page'] + 1))) ?>"><?= e(t('Plus anciens')) ?> →</a><?php else: ?><span></span><?php endif ?>
+    </nav>
+  <?php endif ?>
 </div>

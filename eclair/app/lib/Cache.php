@@ -26,7 +26,7 @@ final class Cache
 
     public static function put(string $path, string $body, array $headers): void
     {
-        if (!self::enabled()) {
+        if (!self::enabled() || $body === '') {
             return;
         }
         try {
@@ -42,7 +42,7 @@ final class Cache
     public static function purge(): void
     {
         foreach (glob(self::dir() . '/*') ?: [] as $file) {
-            if (preg_match('~/[a-f0-9]{32}(\.[a-f0-9]{8}\.tmp\.php)?$~', $file)) {
+            if (preg_match('~/[a-f0-9]{32}(\.[a-f0-9]{8}\.tmp(\.php)?)?$~', $file)) {
                 @unlink($file);
             }
         }
@@ -66,7 +66,7 @@ final class Cache
         }
         $host = '';
         $url = (string) Settings::get('url');
-        if (Settings::get('security.canonical') && $url !== '') {
+        if (Settings::get('security.canonical') && Settings::verified()) {
             $host = strtolower((string) parse_url($url, PHP_URL_HOST));
             $port = parse_url($url, PHP_URL_PORT);
             if ($port) {
@@ -77,7 +77,7 @@ final class Cache
             'on' => self::enabled(),
             'expires' => Content::nextScheduled(),
             'host' => $host,
-            'https' => (bool) Settings::get('security.https') || ($host !== '' && str_starts_with($url, 'https://')),
+            'https' => Security::httpsOnly(),
         ];
         try {
             Store::ensureDir(ECLAIR_ROOT . '/cache');

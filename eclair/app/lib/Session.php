@@ -21,6 +21,11 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
         }
         $lifetime = 86400 * 2;
         ini_set('session.use_strict_mode', '1');
+        if (PHP_VERSION_ID < 80400) {
+            // Valeurs imposées depuis PHP 8.4 (et dépréciées) : identifiant uniquement par cookie.
+            ini_set('session.use_only_cookies', '1');
+            ini_set('session.use_trans_sid', '0');
+        }
         ini_set('session.cache_limiter', '');
         ini_set('session.gc_maxlifetime', (string) $lifetime);
         ini_set('session.gc_probability', '1');
@@ -35,6 +40,19 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
             'samesite' => 'Strict',
         ]);
         session_start();
+    }
+
+    /** Reprend une session existante, sans jamais en créer pour un visiteur anonyme. */
+    public static function resume(): bool
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return true;
+        }
+        if (empty($_COOKIE[self::NAME]) || !is_string($_COOKIE[self::NAME])) {
+            return false;
+        }
+        self::start();
+        return true;
     }
 
     public static function regenerate(): void
@@ -66,7 +84,9 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
 
     public static function pullFlash(): array
     {
-        self::start();
+        if (!self::resume()) {
+            return [];
+        }
         $out = $_SESSION['flash'] ?? [];
         unset($_SESSION['flash']);
         return is_array($out) ? $out : [];
@@ -96,6 +116,9 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
 
     public function write(string $id, string $data): bool
     {
+        if ($data === '' && !is_file($this->path($id))) {
+            return true;
+        }
         try {
             Store::atomic($this->path($id), Store::GUARD . $data);
             return true;
@@ -126,8 +149,10 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
         return is_file($this->path($id));
     }
 
+    /** Ne crée jamais de fichier : une session vide (identifiant inconnu, visiteur anonyme) ne laisse aucune trace. */
     public function updateTimestamp(string $id, string $data): bool
     {
-        return @touch($this->path($id));
+        $file = $this->path($id);
+        return !is_file($file) || @touch($file);
     }
 }

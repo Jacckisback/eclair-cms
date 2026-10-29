@@ -105,10 +105,11 @@
     const ai = form.querySelector('input[name=ai]:checked');
     const rows = [
       [data.recap.site, f.site_name.value + (f.site_tagline.value ? ' — ' + f.site_tagline.value : '')],
+      [data.recap.address, data.url + '/'],
       [data.recap.type, type ? type.closest('.choice').querySelector('b').textContent : ''],
       [data.recap.account, f.user_name.value + ' · ' + f.user_email.value],
       [data.recap.visibility, (f.index.checked ? data.recap.indexed : data.recap.hidden) + ' · ' + data.recap.ai + ' : ' + (ai ? ai.closest('.choice').querySelector('b').textContent : '')],
-      [data.recap.admin, '/' + f.admin_path.value],
+      [data.recap.admin, data.url + '/' + f.admin_path.value],
     ];
     const list = document.getElementById('recap');
     list.textContent = '';

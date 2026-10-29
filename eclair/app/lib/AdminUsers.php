@@ -5,9 +5,14 @@ namespace Eclair;
 
 defined('ECLAIR') || exit;
 
-/** Comptes : profil personnel (mot de passe, double authentification) et gestion de l'équipe. */
+/**
+ * Comptes : profil personnel (mot de passe, double authentification) et gestion de l'équipe.
+ * Chaque modification part de la version enregistrée la plus récente du compte (Users::update).
+ */
 final class AdminUsers
 {
+    private const NO_TOTP = ['on' => false, 'secret' => '', 'last' => 0, 'recovery' => []];
+
     public static function list(array $user): never
     {
         Admin::view('users', ['users' => Users::all()], t('Utilisateurs'));
@@ -15,6 +20,9 @@ final class AdminUsers
 
     public static function create(array $user): never
     {
+        if (!Auth::confirmed($user)) {
+            Admin::back('users', t('Mot de passe incorrect.'), 'bad');
+        }
         $email = Sanitize::email(Req::input('email'));
         $name = Sanitize::text(Req::input('name'), 80);
         if ($name === '' || $email === '') {
@@ -24,12 +32,13 @@ final class AdminUsers
             Admin::back('users', t('Cette adresse e-mail est déjà utilisée.'), 'bad');
         }
         $password = Security::randomPassword();
-        Users::save([
+        Users::create([
             'name' => $name,
             'email' => $email,
             'pass' => Security::hashPassword($password),
             'role' => Req::input('role') === 'admin' ? 'admin' : 'editor',
             'lang' => I18n::lang(),
+            'must_change' => true,
         ]);
         Log::security('user_created', ['target' => $email]);
         Session::flash('secret', t('Compte créé. Transmets ce mot de passe provisoire à {name} (il ne sera plus affiché) : {pass}', ['name' => $name, 'pass' => $password]));
@@ -51,6 +60,9 @@ final class AdminUsers
         if (!$target) {
             Admin::back('users', t('Compte introuvable.'), 'bad');
         }
+        if (!Auth::confirmed($user)) {
+            Admin::back('users/' . $id, t('Mot de passe incorrect.'), 'bad');
+        }
         $isSelf = $target['id'] === $user['id'];
         $lastAdmin = $target['role'] === 'admin' && count(Users::admins()) <= 1;
         switch (Req::input('action')) {
@@ -63,14 +75,17 @@ final class AdminUsers
                 Admin::back('users', t('Compte supprimé.'));
             case 'reset':
                 $password = Security::randomPassword();
-                $target['pass'] = Security::hashPassword($password);
-                $target = Auth::revokeAll($target);
+                $hash = Security::hashPassword($password);
+                $target = Users::update($id, fn (array $u): array => [
+                    'pass' => $hash,
+                    'ver' => (int) ($u['ver'] ?? 1) + 1,
+                    'must_change' => true,
+                ] + $u) ?? Admin::back('users', t('Compte introuvable.'), 'bad');
                 Log::security('password_reset', ['target' => $target['email']]);
                 Session::flash('secret', t('Nouveau mot de passe provisoire pour {name} : {pass}', ['name' => $target['name'], 'pass' => $password]));
                 Http::redirect(admin_url('users/' . $id));
             case 'disable2fa':
-                $target['totp'] = ['on' => false, 'secret' => '', 'last' => 0, 'recovery' => []];
-                Users::save($target);
+                Users::update($id, fn (array $u): array => ['totp' => self::NO_TOTP] + $u);
                 Log::security('2fa_reset', ['target' => $target['email']]);
                 Admin::back('users/' . $id, t('Double authentification désactivée pour ce compte.'));
             default:
@@ -79,12 +94,17 @@ final class AdminUsers
                 if ($email === '' || ($other && $other['id'] !== $id)) {
                     Admin::back('users/' . $id, t('Adresse e-mail invalide ou déjà utilisée.'), 'bad');
                 }
-                $target['name'] = Sanitize::text(Req::input('name'), 80) ?: $target['name'];
-                $target['email'] = $email;
-                if (!$lastAdmin && !$isSelf) {
-                    $target['role'] = Req::input('role') === 'admin' ? 'admin' : 'editor';
-                }
-                Users::save($target);
+                $name = Sanitize::text(Req::input('name'), 80);
+                $role = Req::input('role') === 'admin' ? 'admin' : 'editor';
+                Users::update($id, function (array $u) use ($name, $email, $role, $isSelf, $lastAdmin): array {
+                    $u['name'] = $name !== '' ? $name : $u['name'];
+                    $u['email'] = $email;
+                    if (!$lastAdmin && !$isSelf) {
+                        $u['role'] = $role;
+                    }
+                    return $u;
+                });
+                Cache::purge();
                 Admin::back('users/' . $id, t('Compte mis à jour.'));
         }
     }
@@ -96,19 +116,22 @@ final class AdminUsers
         if (is_string($secret) && $secret !== '') {
             $qr = Qr::svg(Totp::uri($secret, $user['email'], (string) Settings::get('name')), 5, 2);
         }
+        // Les codes de secours ne s'affichent qu'une seule fois.
+        $recovery = $_SESSION['recovery_show'] ?? [];
+        unset($_SESSION['recovery_show']);
         $avatar = Media::get((string) ($user['avatar'] ?? ''));
         Admin::view('profile', [
             'me' => $user,
             'setup' => $secret,
             'qr' => $qr,
-            'recovery' => $_SESSION['recovery_show'] ?? [],
+            'recovery' => is_array($recovery) ? $recovery : [],
             'avatar' => $avatar ? AdminMedia::export($avatar) : null,
         ], t('Mon profil'));
     }
 
     public static function saveProfile(array $user): never
     {
-        unset($_SESSION['recovery_show']);
+        $id = (string) $user['id'];
         switch (Req::input('action')) {
             case 'password':
                 if (!password_verify(Req::input('current'), (string) $user['pass'])) {
@@ -119,9 +142,15 @@ final class AdminUsers
                 if ($issues) {
                     Admin::back('profile#mot-de-passe', implode(' ', $issues), 'bad');
                 }
-                $user['pass'] = Security::hashPassword($new);
-                $user = Auth::revokeAll($user);
-                Auth::login($user);
+                $hash = Security::hashPassword($new);
+                $user = Users::update($id, fn (array $u): array => [
+                    'pass' => $hash,
+                    'ver' => (int) ($u['ver'] ?? 1) + 1,
+                    'must_change' => false,
+                ] + $u);
+                if (!$user || !Auth::login($user)) {
+                    Admin::back('profile', t('Session expirée : réessaie.'), 'bad');
+                }
                 Log::security('password_changed');
                 Admin::back('profile', t('Mot de passe modifié. Les autres appareils ont été déconnectés.'));
             case '2fa-start':
@@ -134,8 +163,8 @@ final class AdminUsers
                     Admin::back('profile#securite', t('Code incorrect : vérifie l’heure de ton téléphone et réessaie.'), 'bad');
                 }
                 $codes = Totp::recoveryCodes();
-                $user['totp'] = ['on' => true, 'secret' => $secret, 'last' => $step, 'recovery' => array_map([Totp::class, 'hashRecovery'], $codes)];
-                Users::save($user);
+                $totp = ['on' => true, 'secret' => $secret, 'last' => $step, 'recovery' => array_map([Totp::class, 'hashRecovery'], $codes)];
+                Users::update($id, fn (array $u): array => ['totp' => $totp] + $u);
                 unset($_SESSION['totp_setup']);
                 $_SESSION['recovery_show'] = $codes;
                 Log::security('2fa_enabled');
@@ -145,8 +174,7 @@ final class AdminUsers
                 if (!password_verify(Req::input('current'), (string) $user['pass'])) {
                     Admin::back('profile#securite', t('Mot de passe incorrect.'), 'bad');
                 }
-                $user['totp'] = ['on' => false, 'secret' => '', 'last' => 0, 'recovery' => []];
-                Users::save($user);
+                Users::update($id, fn (array $u): array => ['totp' => self::NO_TOTP] + $u);
                 Log::security('2fa_disabled');
                 Admin::back('profile#securite', t('Double authentification désactivée.'), 'warn');
             case 'recovery':
@@ -154,19 +182,27 @@ final class AdminUsers
                     Admin::back('profile#securite', t('Mot de passe incorrect.'), 'bad');
                 }
                 $codes = Totp::recoveryCodes();
-                $user['totp']['recovery'] = array_map([Totp::class, 'hashRecovery'], $codes);
-                Users::save($user);
+                $hashes = array_map([Totp::class, 'hashRecovery'], $codes);
+                Users::update($id, function (array $u) use ($hashes): array {
+                    $u['totp']['recovery'] = $hashes;
+                    return $u;
+                });
                 $_SESSION['recovery_show'] = $codes;
                 Http::redirect(admin_url('profile#securite'));
             case 'revoke':
-                $user = Auth::revokeAll($user);
-                Auth::login($user);
+                $user = Auth::revokeAll($id);
+                if (!$user || !Auth::login($user)) {
+                    Admin::back('profile', t('Session expirée : réessaie.'), 'bad');
+                }
                 Admin::back('profile#securite', t('Tous tes autres appareils ont été déconnectés.'));
             default:
                 $email = Sanitize::email(Req::input('email'));
                 $other = $email !== '' ? Users::findByEmail($email) : null;
-                if ($email === '' || ($other && $other['id'] !== $user['id'])) {
+                if ($email === '' || ($other && $other['id'] !== $id)) {
                     Admin::back('profile', t('Adresse e-mail invalide ou déjà utilisée.'), 'bad');
+                }
+                if (mb_strtolower($email) !== mb_strtolower((string) $user['email']) && !Auth::confirmed($user)) {
+                    Admin::back('profile', t('Confirme ton mot de passe pour changer ton e-mail de connexion.'), 'bad');
                 }
                 $links = [];
                 foreach (preg_split('/\R/', Req::input('links')) ?: [] as $line) {
@@ -175,16 +211,22 @@ final class AdminUsers
                         $links[] = $url;
                     }
                 }
-                $user['name'] = Sanitize::text(Req::input('name'), 80) ?: $user['name'];
-                $user['email'] = $email;
-                $user['job'] = Sanitize::text(Req::input('job'), 120);
-                $user['bio'] = Sanitize::multiline(Req::input('bio'), 1200);
-                $user['avatar'] = Media::get(Req::input('avatar')) ? Req::input('avatar') : '';
-                $user['links'] = array_slice($links, 0, 8);
-                $user['lang'] = isset(I18n::LANGS[Req::input('lang')]) ? Req::input('lang') : 'fr';
-                Users::save($user);
+                $lang = isset(I18n::LANGS[Req::input('lang')]) ? Req::input('lang') : 'fr';
+                $changes = [
+                    'email' => $email,
+                    'job' => Sanitize::text(Req::input('job'), 120),
+                    'bio' => Sanitize::multiline(Req::input('bio'), 1200),
+                    'avatar' => Media::get(Req::input('avatar')) ? Req::input('avatar') : '',
+                    'links' => array_slice($links, 0, 8),
+                    'lang' => $lang,
+                ];
+                $name = Sanitize::text(Req::input('name'), 80);
+                if ($name !== '') {
+                    $changes['name'] = $name;
+                }
+                Users::update($id, fn (array $u): array => $changes + $u);
                 Cache::purge();
-                I18n::setLang($user['lang']);
+                I18n::setLang($lang);
                 Admin::back('profile', t('Profil enregistré.'));
         }
     }

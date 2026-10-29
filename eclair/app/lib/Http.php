@@ -27,8 +27,9 @@ final class Http
 
     public static function redirect(string $to, int $code = 302): never
     {
-        // Jamais de redirection vers un autre domaine à partir d'une valeur relative douteuse.
-        if (str_starts_with($to, '//') || str_contains($to, "\n") || str_contains($to, "\r")) {
+        // Jamais de redirection vers un autre domaine à partir d'une valeur douteuse : « //hôte », « /\hôte »,
+        // antislash ou caractère de contrôle (que les navigateurs suppriment ou transforment en « / »).
+        if (preg_match('~^[/\\\\]{2}|[\\\\\x00-\x1f\x7f]~', $to)) {
             $to = path_to('/');
         }
         if (!headers_sent()) {

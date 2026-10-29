@@ -36,9 +36,36 @@ final class Sanitize
         if (!$root) {
             return e(plain($html));
         }
-        $out = self::walk($root);
-        $out = (string) preg_replace('~^(?:\s|<br>)+|(?:\s|<br>)+$~u', '', $out);
-        return (string) preg_replace('~(<br>\s*){3,}~', '<br><br>', $out);
+        $out = self::trimBreaks(self::walk($root));
+        return (string) (preg_replace('~(?:<br>\s*+){3,}~', '<br><br>', $out) ?? $out);
+    }
+
+    /** Retire espaces, espaces insécables et <br> aux deux extrémités (parcours linéaire, sans expression régulière). */
+    private static function trimBreaks(string $html): string
+    {
+        $blank = static function (string $s, int $i, bool $back): int {
+            $c = $back ? $s[$i - 1] : $s[$i];
+            if (str_contains(" \t\n\r\x0B\x0C\0", $c)) {
+                return 1;
+            }
+            foreach (["\xC2\xA0", '<br>'] as $token) {
+                $n = strlen($token);
+                $at = $back ? $i - $n : $i;
+                if ($at >= 0 && $at + $n <= strlen($s) && substr_compare($s, $token, $at, $n) === 0) {
+                    return $n;
+                }
+            }
+            return 0;
+        };
+        $start = 0;
+        $end = strlen($html);
+        while ($start < $end && ($n = $blank($html, $start, false)) > 0) {
+            $start += $n;
+        }
+        while ($end > $start && ($n = $blank($html, $end, true)) > 0) {
+            $end -= $n;
+        }
+        return substr($html, $start, $end - $start);
     }
 
     private static function walk(\DOMNode $node): string
@@ -107,8 +134,16 @@ final class Sanitize
         if ($url === '' || mb_strlen($url) > 2000) {
             return '';
         }
-        if (preg_match('~^([a-z][a-z0-9+.\-]*):~i', $url, $m)) {
-            return in_array(strtolower($m[1]), ['http', 'https', 'mailto', 'tel'], true) ? $url : '';
+        // Le schéma est aussi vérifié sur la forme décodée et compactée (« javascript&colon; », « java&#9;script: »…).
+        $probe = $url;
+        for ($i = 0; $i < 3; $i++) {
+            $probe = html_entity_decode($probe, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+        $probe = (string) preg_replace('/[\x00-\x20\x7F]+/u', '', $probe);
+        foreach ([$url, $probe] as $candidate) {
+            if (preg_match('~^([a-z][a-z0-9+.\-]*):~i', $candidate, $m) && !in_array(strtolower($m[1]), ['http', 'https', 'mailto', 'tel'], true)) {
+                return '';
+            }
         }
         return $url;
     }
