@@ -6,9 +6,6 @@
 
 Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern und zu pflegen. Zur Übersicht geht es zurück zum [README](../README.de.md).
 
-> [!NOTE]
-> Die Verwaltung von Éclair gibt es auf Englisch, Französisch und Spanisch. Dieses Handbuch nennt die Menüs und Schaltflächen so, wie sie in der englischen Oberfläche heißen. Die öffentliche Website kann dagegen auf Deutsch erscheinen.
-
 ## Inhalt
 
 1. [Installation](#installation)
@@ -34,10 +31,10 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.0.0.zip) (257 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.1.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.1.0.zip) (315 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
-3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (auf Englisch, Französisch oder Spanisch).
+3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
 4. Beantworte 4 Fragen (deine Website, dein Konto, deine Sichtbarkeit, die Adresse deiner Verwaltung). Konfetti 🎉: Deine Website ist online, mit ersten Seiten und einem Beispielartikel.
 
 > 🔒 Aus Sicherheitsgründen muss die Installation **innerhalb von 2 Stunden** nach dem ersten Aufruf abgeschlossen werden (sonst könnte jeder eine hochgeladene und dann vergessene Website übernehmen). Danach lösche die Datei `data/install-window.php` per FTP und lade die Seite neu.
@@ -48,16 +45,16 @@ Installation in einem Unterordner (`beispiel.de/website/`): Lade die Dateien ein
 
 | Typ (im Assistenten) | Was angelegt wird |
 |---|---|
-| 🏢 Business website | Startseite (Hero, Vorteile, neueste Artikel), Leistungen (mit FAQ), Über uns, Kontakt, Blog, Impressum, Datenschutzerklärung |
+| 🏢 Unternehmenswebsite | Startseite (Hero, Vorteile, neueste Artikel), Leistungen (mit FAQ), Über uns, Kontakt, Blog, Impressum, Datenschutzerklärung |
 | ✍️ Blog | Startseite = neueste Artikel, Über uns, Kontakt, Kategorie „Guides“, rechtliche Seiten |
-| 🧑‍💻 Freelancer / portfolio | Startseite mit deinem Namen, Kompetenzen, Über mich, Blog, Kontakt, rechtliche Seiten |
-| 🎯 Landing page | Eine Verkaufsseite (Hero, Vorteile, FAQ, Formular) + rechtliche Seiten, ohne Blog |
+| 🧑‍💻 Freelancer / Portfolio | Startseite mit deinem Namen, Kompetenzen, Über mich, Blog, Kontakt, rechtliche Seiten |
+| 🎯 Landingpage | Eine Verkaufsseite (Hero, Vorteile, FAQ, Formular) + rechtliche Seiten, ohne Blog |
 
 Die Startinhalte gibt es auf Französisch, Spanisch und Englisch: Eine Website auf Deutsch startet mit den englischen Texten, die du dann übersetzt. Die rechtlichen Seiten enthalten ein Gerüst nach französischem (LCEN) und spanischem Recht (LSSI) sowie der DSGVO; die Pflichtangaben deines Landes (zum Beispiel das Impressum) musst du selbst ergänzen.
 
 ### Direkt nach der Installation
 
-Das Dashboard zeigt eine Checkliste „Getting started“: Logo und Farbe, Startseite, erster Artikel, Autorenprofil, Zwei-Faktor-Authentifizierung, rechtliche Angaben, Google Search Console.
+Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Startseite, erster Artikel, Autorenprofil, Zwei-Faktor-Authentifizierung, rechtliche Angaben, Google Search Console.
 
 ---
 
@@ -102,24 +99,24 @@ Das Dashboard zeigt eine Checkliste „Getting started“: Logo und Farbe, Start
 
 ### 🧩 Alles Weitere
 
-Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs per Drag-and-drop (Kopf- und Fußzeile), „Säulen“-Kategorien für ein Themencluster, Suche auf der Website, Kontaktformular gegen Spam **ohne Captcha** (Honeypot-Feld, Token, Limits pro Netzwerk und pro Tag) mit Posteingang, Konten für Administratoren und Redakteure, automatischer Dark Mode, 6 Systemschriften, Hauptfarbe mit garantiertem WCAG-Kontrast, Verwaltung auf Englisch, Französisch und Spanisch, öffentliche Website in 6 Sprachen (fr, es, en, de, it, pt).
+Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs per Drag-and-drop (Kopf- und Fußzeile), „Säulen“-Kategorien für ein Themencluster, Suche auf der Website, Kontaktformular gegen Spam **ohne Captcha** (Honeypot-Feld, Token, Limits pro Netzwerk und pro Tag) mit Posteingang, Konten für Administratoren und Redakteure, automatischer Dark Mode, 6 Systemschriften, Hauptfarbe mit garantiertem WCAG-Kontrast, Verwaltung in 7 Sprachen (Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Chinesisch), öffentliche Website in 6 Sprachen (fr, es, en, de, it, pt).
 
 ---
 
 ## Éclair im Alltag
 
-| Ich möchte … | Wo (englische Oberfläche) |
+| Ich möchte … | Wo |
 |---|---|
-| Einen Artikel schreiben | Dashboard › **Write a post** |
+| Einen Beitrag schreiben | Dashboard › **Beitrag schreiben** |
 | Eine Seite direkt auf der Website bearbeiten | Schaltfläche **✏️ Bearbeiten** (nur sichtbar, wenn du angemeldet bist) |
-| Logo, Farbe, Schriften ändern | Settings › Appearance |
-| Die Startseite festlegen | Settings › General |
-| KI zulassen oder sperren | Settings › AI & GEO |
-| Google Search Console verbinden | Settings › SEO |
-| Einen Link zum Menü hinzufügen | Menus |
-| Eine alte URL weiterleiten | Redirects |
-| Zwei-Faktor-Authentifizierung aktivieren | My profile › Two-factor authentication |
-| Ein Backup herunterladen | Security › Backup |
+| Logo, Farbe, Schriften ändern | Einstellungen › Design |
+| Die Startseite festlegen | Einstellungen › Allgemein |
+| KI zulassen oder sperren | Einstellungen › KI & GEO |
+| Google Search Console verbinden | Einstellungen › SEO |
+| Einen Link zum Menü hinzufügen | Menüs |
+| Eine alte URL weiterleiten | Weiterleitungen |
+| Zwei-Faktor-Authentifizierung aktivieren | Mein Profil › Zwei-Faktor-Authentifizierung |
+| Ein Backup herunterladen | Sicherheit › Backup |
 
 Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` Link · `Strg+B` fett · `Strg+I` kursiv · `Enter` neuer Absatz · `Umschalt+Enter` Zeilenumbruch.
 
@@ -140,7 +137,7 @@ Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` L
 - **Zwei-Faktor-Authentifizierung per TOTP** (Google Authenticator, 1Password, Bitwarden …) mit QR-Code und 8 Wiederherstellungscodes, die nur einmal angezeigt werden; jeder Code funktioniert nur einmal, auch bei parallelen Anfragen; nach 10 falschen Codes wird die 2FA des Kontos 15 Minuten lang gesperrt und der Inhaber per E-Mail benachrichtigt.
 - **Konten werden atomar geändert**: Eine laufende Anmeldung kann niemals eine Passwortänderung, eine allgemeine Abmeldung, die Aktivierung der 2FA, eine Herabstufung oder eine Löschung rückgängig machen.
 - **Erneute Passwortabfrage** bei sensiblen Aktionen (Backup, Kontoverwaltung, erweiterte Einstellungen, Änderung der E-Mail-Adresse), wenn die Anmeldung mehr als 15 Minuten zurückliegt. Vorläufige Passwörter müssen bei der ersten Anmeldung ersetzt werden.
-- **Gehärtete Sitzungen**: keine Sitzung vor der Anmeldung (Bots können die Festplatte nicht füllen), Cookies mit `HttpOnly`, `Secure`, `SameSite=Strict`, Neuerzeugung bei der Anmeldung, Abmeldung bei Inaktivität, an den Browser gebunden, „Log out my other devices“. Die Verwaltung wird auf HTTPS gezwungen, sobald die Website es nutzt.
+- **Gehärtete Sitzungen**: keine Sitzung vor der Anmeldung (Bots können die Festplatte nicht füllen), Cookies mit `HttpOnly`, `Secure`, `SameSite=Strict`, Neuerzeugung bei der Anmeldung, Abmeldung bei Inaktivität, an den Browser gebunden, „Meine anderen Geräte abmelden“. Die Verwaltung wird auf HTTPS gezwungen, sobald die Website es nutzt.
 - **CSRF-Token** bei allen Aktionen und Prüfung der Herkunft der Anfragen.
 
 **Öffentliche Website**
@@ -154,21 +151,21 @@ Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` L
 - **Anpassbare Adresse der Verwaltung** (weniger Bots), Rollen Administrator / Redakteur; die Schaltfläche „Bearbeiten“ der Website verrät diese Adresse nicht.
 - **Begrenzte Protokolle** (gekürzte Felder, maximal 1 MB): Sie lassen sich nicht aufblähen.
 - **Integritätsprüfung**: Vergleicht jede Datei mit ihrem ursprünglichen Fingerabdruck und erkennt verdächtige Dateien, auch eine `.php`-Datei ohne Schutzzeile in `data/` oder `cache/`.
-- **Live-Schutztest**: Die Seite „Security“ prüft aus deinem Browser heraus, ob interne Dateien wirklich unzugänglich sind und ob die Adresse der Website verifiziert ist.
+- **Live-Schutztest**: Die Seite „Sicherheit“ prüft aus deinem Browser heraus, ob interne Dateien wirklich unzugänglich sind und ob die Adresse der Website verifiziert ist.
 
 ---
 
 ## Aktualisieren, sichern, umziehen
 
-**Sichern**: Security › Download a backup (ZIP-Archiv von `data/` und `media/`). Ohne die Erweiterung zip kopierst du diese beiden Ordner per FTP.
+**Sichern**: Sicherheit › Backup herunterladen (ZIP-Archiv von `data/` und `media/`). Ohne die Erweiterung zip kopierst du diese beiden Ordner per FTP.
 
 **Éclair aktualisieren**:
 1. Erstelle ein Backup.
 2. Ersetze per FTP `index.php`, `.htaccess` sowie die Ordner `app/` und `assets/` durch die der neuen Version.
 3. **Lass** `data/` (Inhalte, Einstellungen, Konten) und `media/` (Bilder) **unverändert**.
-4. In der Verwaltung: Settings › Advanced › Clear cache.
+4. In der Verwaltung: Einstellungen › Erweitert › Cache leeren.
 
-**Zu einem anderen Hoster oder einer anderen Domain umziehen**: Kopiere den ganzen Ordner und ändere dann die Adresse unter Settings › General. Interne Links passen sich automatisch an, auch in einem Unterordner.
+**Zu einem anderen Hoster oder einer anderen Domain umziehen**: Kopiere den ganzen Ordner und ändere dann die Adresse unter Einstellungen › Allgemein. Interne Links passen sich automatisch an, auch in einem Unterordner.
 
 ---
 
@@ -185,9 +182,9 @@ DeinNeuesPasswort2026
 
 Melde dich innerhalb von 24 Stunden **mit dieser E-Mail-Adresse und diesem neuen Passwort an**: Das Passwort wird ersetzt, die Zwei-Faktor-Authentifizierung dieses Kontos deaktiviert, deine anderen Sitzungen werden beendet und die Datei wird automatisch gelöscht. Niemand sonst kann das auslösen (man müsste ihren Inhalt kennen); eine Datei ohne die erste Zeile wird abgelehnt und gelöscht.
 
-**„Installation locked“**: Das Zeitfenster von 2 Stunden nach dem ersten Aufruf ist abgelaufen. Lösche `data/install-window.php` per FTP und lade die Seite neu.
+**„Installation gesperrt“**: Das Zeitfenster von 2 Stunden nach dem ersten Aufruf ist abgelaufen. Lösche `data/install-window.php` per FTP und lade die Seite neu.
 
-**Adresse der Website nicht verifiziert (Seite „Security“)**: Dein Server kann sich unter der Adresse der Website nicht selbst aufrufen (Firewall des Hosters, DNS noch nicht verbreitet …). Die Website funktioniert normal, aber ohne Weiterleitung auf die offizielle Adresse (mit/ohne www). Klicke auf „Verify the site address“, sobald die Domain eingerichtet ist.
+**Adresse der Website nicht verifiziert (Seite „Sicherheit“)**: Dein Server kann sich unter der Adresse der Website nicht selbst aufrufen (Firewall des Hosters, DNS noch nicht verbreitet …). Die Website funktioniert normal, aber ohne Weiterleitung auf die offizielle Adresse (mit/ohne www). Klicke auf „Adresse der Website verifizieren“, sobald die Domain eingerichtet ist.
 
 **Fehler 404 auf allen Seiten außer der Startseite**: Die Datei `.htaccess` wurde nicht hochgeladen (versteckte Datei) oder die URL-Umschreibung ist deaktiviert. Falls dein Hoster es verlangt, entferne das Kommentarzeichen vor der Zeile `RewriteBase /` in der `.htaccess`.
 
@@ -195,7 +192,7 @@ Melde dich innerhalb von 24 Stunden **mit dieser E-Mail-Adresse und diesem neuen
 
 **Bilder werden nicht in WebP umgewandelt**: Die Erweiterung GD (oder ihre WebP-Unterstützung) fehlt. Aktiviere sie im PHP-Bereich deines Hosters; bis dahin bleiben die Bilder im JPG-/PNG-Format.
 
-**Ich erhalte die E-Mails des Kontaktformulars nicht**: Die Nachrichten werden auch in der Verwaltung gespeichert (Messages). Prüfe die Adresse unter Settings › Contact; manche Hoster verlangen, dass der Absender zur Domain gehört.
+**Ich erhalte die E-Mails des Kontaktformulars nicht**: Die Nachrichten werden auch in der Verwaltung gespeichert (Nachrichten). Prüfe die Adresse unter Einstellungen › Kontakt; manche Hoster verlangen, dass der Absender zur Domain gehört.
 
 **Debug-Modus**: Lege im Stammverzeichnis eine Datei `eclair-config.php` an (siehe `eclair-config.exemple.php`) mit `define('ECLAIR_DEBUG', true);` und lösche sie wieder, sobald das Problem behoben ist.
 
