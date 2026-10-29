@@ -32,6 +32,7 @@ final class Theme
         'toc' => ['Sommaire', 'Índice', 'Contents', 'Inhalt', 'Indice', 'Índice'],
         'key_points' => ['L’essentiel', 'Lo esencial', 'Key takeaways', 'Das Wichtigste', 'In breve', 'O essencial'],
         'faq' => ['Questions fréquentes', 'Preguntas frecuentes', 'Frequently asked questions', 'Häufige Fragen', 'Domande frequenti', 'Perguntas frequentes'],
+        'team' => ['Notre équipe', 'Nuestro equipo', 'Our team', 'Unser Team', 'Il nostro team', 'Nossa equipe'],
         'latest_posts' => ['Derniers articles', 'Últimos artículos', 'Latest posts', 'Neueste Beiträge', 'Ultimi articoli', 'Últimos artigos'],
         'all_posts' => ['Voir tous les articles', 'Ver todos los artículos', 'See all posts', 'Alle Beiträge ansehen', 'Vedi tutti gli articoli', 'Ver todos os artigos'],
         'related' => ['À lire aussi', 'También te puede interesar', 'Read next', 'Auch lesenswert', 'Leggi anche', 'Leia também'],

@@ -1064,7 +1064,8 @@
       menu.style.left = Math.max(8, Math.min(r.left, innerWidth - menu.offsetWidth - 8)) + 'px';
     };
     bar.append(cmd('ai', '✨', t('Retoucher avec l’IA'), openMenu));
-    document.addEventListener('mousedown', (e) => { if (menu && !menu.contains(e.target)) closeMenu(); });
+    // Le clic qui ouvre le menu (bouton ✨) ne doit pas le refermer aussitôt.
+    document.addEventListener('mousedown', (e) => { if (menu && !menu.contains(e.target) && !e.target.closest('[data-cmd=ai]')) closeMenu(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
     /* « L'essentiel ». */
@@ -1076,7 +1077,7 @@
       setField(summaryEl, res.summary);
     };
     $('#summary-card .row').append(mini(t('Rédiger'), writeSummary));
-    $('#summary-box').append(mini(t('Rédiger « L’essentiel » avec l’IA'), writeSummary));
+    $('#summary-add').after(mini(t('Rédiger « L’essentiel » avec l’IA'), writeSummary));
 
     /* Titres, méta-description et expression-clé (onglet SEO). */
     const picks = h('div', { class: 'ai-picks' });

@@ -445,7 +445,7 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .ai-chip{border:1px solid var(--line);background:var(--panel-2);color:inherit;font:inherit;font-size:.85rem;padding:.42rem .8rem;border-radius:999px;cursor:pointer;transition:border-color .15s,background .15s}
 .ai-chip:hover{border-color:var(--brand);background:var(--brand-soft)}
 .ai-msg{font-size:.93rem;overflow-wrap:anywhere}
-.ai-msg.me{align-self:flex-end;max-width:88%}
+.ai-msg.ai-user{align-self:flex-end;max-width:88%}
 .ai-bubble{background:var(--brand);color:#fff;padding:.6rem .85rem;border-radius:16px 16px 4px 16px;white-space:pre-wrap}
 .ai-thumbs{display:flex;gap:.35rem;justify-content:flex-end;margin-top:.35rem}
 .ai-thumbs img{width:3.4rem;height:3.4rem;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
@@ -509,3 +509,5 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .b-team .item-grid{grid-template-columns:1fr}
 .ai-prompt-title svg{width:1.3rem;height:1.3rem;color:var(--brand);flex:none}
 .side-pane>.row:first-child{margin-bottom:.8rem;gap:.4rem}
+#summary-add[hidden]+.ai-mini{display:none}
+#summary-add+.ai-mini{margin-left:.6rem}

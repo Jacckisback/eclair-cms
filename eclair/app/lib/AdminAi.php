@@ -16,7 +16,7 @@ final class AdminAi
         }
         return [
             'model' => Ai::label(),
-            'images' => Ai::imager() !== '' ? Ai::IMAGES[Ai::imager()][0] : '',
+            'images' => Ai::imager() !== '' ? (string) preg_replace('/\s*\(.*\)$/', '', Ai::IMAGES[Ai::imager()][0]) : '',
             'name' => explode(' ', trim((string) $user['name']))[0],
             'admin' => $user['role'] === 'admin',
             'langs' => Content::LANGS,

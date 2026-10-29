@@ -228,7 +228,7 @@ final class Blocks
                 'divider' => "<hr>\n",
                 'hero' => self::hero($b, $h1 && $i === 0, $lang),
                 'features' => self::features($b, $anchors[$i] ?? ''),
-                'team' => self::team($b, $anchors[$i] ?? ''),
+                'team' => self::team($b, $anchors[$i] ?? '', $lang),
                 'posts' => self::postsHtml($b, $anchors[$i] ?? '', $lang),
                 'contact' => self::contactHtml($b, (string) ($ctx['page'] ?? ''), $lang),
                 default => '',
@@ -338,9 +338,9 @@ final class Blocks
     }
 
     /** Équipe : portraits ronds (ou initiales), nom, fonction, présentation et lien de profil. */
-    private static function team(array $b, string $anchor): string
+    private static function team(array $b, string $anchor, string $lang): string
     {
-        $out = '<section class="team">' . ($b['title'] !== '' ? '<h2 id="' . e($anchor) . '">' . e($b['title']) . '</h2>' : '') . '<div class="grid">';
+        $out = '<section class="team"><h2 id="' . e($anchor) . '">' . e($b['title'] !== '' ? $b['title'] : Theme::t('team', $lang)) . '</h2><div class="grid">';
         foreach ($b['items'] as $p) {
             $m = $p['media'] !== '' ? Media::get($p['media']) : null;
             $initials = mb_strtoupper(implode('', array_map(fn ($w) => mb_substr($w, 0, 1), array_slice(preg_split('/\s+/u', $p['name']) ?: [], 0, 2))));
@@ -401,7 +401,8 @@ final class Blocks
             $text = match ($b['type']) {
                 'heading' => $b['anchor'] !== '' ? $b['anchor'] : plain($b['text']),
                 'faq' => $b['title'] !== '' ? $b['title'] : 'faq',
-                'features', 'posts', 'team' => $b['title'] ?? '',
+                'features', 'posts' => $b['title'] ?? '',
+                'team' => $b['title'] !== '' ? $b['title'] : 'team',
                 default => null,
             };
             if ($text === null || $text === '') {
@@ -567,7 +568,7 @@ final class Blocks
                     . ($b['button'] !== '' && $b['url'] !== '' ? "\n\n" . self::mdLink($b['button'], $b['url']) : ''),
                 'features' => ($b['title'] !== '' ? '## ' . self::mdText($b['title']) . "\n\n" : '')
                     . implode("\n\n", array_map(fn ($i) => '### ' . self::mdText(trim($i['icon'] . ' ' . $i['title'])) . ($i['text'] !== '' ? "\n\n" . self::md($i['text']) : ''), $b['items'])),
-                'team' => ($b['title'] !== '' ? '## ' . self::mdText($b['title']) . "\n\n" : '')
+                'team' => '## ' . self::mdText($b['title'] !== '' ? $b['title'] : Theme::t('team', $lang)) . "\n\n"
                     . implode("\n\n", array_map(fn ($p) => '### ' . self::mdText($p['name']) . ($p['role'] !== '' ? ' — ' . self::mdText($p['role']) : '')
                         . ($p['bio'] !== '' ? "\n\n" . self::md($p['bio']) : '') . ($p['link'] !== '' ? "\n\n" . self::mdLink($p['link'], $p['link']) : ''), $b['items'])),
                 'posts' => self::mdPosts($b, $lang),

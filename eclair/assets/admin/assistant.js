@@ -209,7 +209,7 @@
   /* ───────── Messages ───────── */
   const addUser = (text, media = []) => {
     log.querySelector('.ai-empty')?.remove();
-    const el = h('div', { class: 'ai-msg me' }, h('div', { class: 'ai-bubble', text }));
+    const el = h('div', { class: 'ai-msg ai-user' }, h('div', { class: 'ai-bubble', text }));
     if (media.length) el.append(h('div', { class: 'ai-thumbs' }, media.map((m) => h('img', { src: m.thumb, alt: m.alt || m.name }))));
     log.append(el);
     scroll();
@@ -218,7 +218,7 @@
     const body = h('div', { class: 'ai-text' });
     const status = h('div', { class: 'ai-status', hidden: true });
     const cards = h('div', { class: 'ai-cards' });
-    const el = h('div', { class: 'ai-msg bot', 'aria-busy': 'true' }, body, cards, status);
+    const el = h('div', { class: 'ai-msg ai-bot', 'aria-busy': 'true' }, body, cards, status);
     log.append(el);
     let text = '';
     let frame = 0;
@@ -239,7 +239,8 @@
   const stateLabel = (s) => ({ draft: t('Brouillon'), published: t('Publié'), scheduled: t('Programmé') }[s] || s);
   const btn = (label, onclick, cls = 'btn btn-sm') => h('button', { type: 'button', class: cls, text: label, onclick });
   const link = (label, href, cls = 'btn btn-sm', blank = false) => h('a', { class: cls, href, text: label, target: blank ? '_blank' : null, rel: blank ? 'noopener' : null });
-  const changesList = (c) => (c.changes && c.changes.length ? h('ul', { class: 'ai-changes' }, c.changes.map((x) => h('li', { text: x }))) : null);
+  // Liste des changements, sauf si la note de l'IA dit déjà tout (un seul changement).
+  const changesList = (c) => (c.changes && (c.changes.length > 1 || !c.note) ? h('ul', { class: 'ai-changes' }, c.changes.map((x) => h('li', { text: x }))) : null);
   const undoBtn = (token, card) => btn(t('Annuler'), async (e) => {
     e.target.disabled = true;
     const res = await api('api/ai/undo', { token });

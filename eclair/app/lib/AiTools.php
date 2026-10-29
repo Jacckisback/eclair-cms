@@ -460,7 +460,7 @@ final class AiTools
                     $blocks[$at]['items'][] = $person;
                 }
             }
-            $labels[] = t('{name} ajouté(e) à l’équipe', ['name' => Sanitize::text($person['name'], 120)]);
+            $labels[] = t('Nouveau membre dans l’équipe : {name}', ['name' => Sanitize::text($person['name'], 120)]);
         }
         $item['blocks'] = Blocks::normalize($blocks);
         // Données au format de l'éditeur : la date existante est conservée telle quelle.
