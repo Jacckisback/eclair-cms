@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.1.0.zip"><img src="https://img.shields.io/badge/t%C3%A9l%C3%A9charger-v1.1.0-5b4cf0?style=for-the-badge" alt="Télécharger Éclair 1.1.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip"><img src="https://img.shields.io/badge/t%C3%A9l%C3%A9charger-v1.2.0-5b4cf0?style=for-the-badge" alt="Télécharger Éclair 1.2.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 ou plus">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_donn%C3%A9es-aucune-14122b?style=for-the-badge" alt="Aucune base de données">
@@ -22,6 +22,7 @@
 <p align="center">
   <a href="#installation-en-3-minutes"><b>Installer</b></a> ·
   <a href="#pourquoi-éclair"><b>Pourquoi Éclair</b></a> ·
+  <a href="#assistant-ia--demande-relis-publie"><b>Assistant IA</b></a> ·
   <a href="#aperçu"><b>Aperçu</b></a> ·
   <a href="#sécurité"><b>Sécurité</b></a> ·
   <a href="docs/GUIDE.md"><b>Guide complet</b></a>
@@ -59,7 +60,7 @@ WordPress sait tout faire, mais il lui faut une base de données, des extensions
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra léger</h3>
-      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>315 Ko</b>, zéro dépendance, zéro cookie sur le site public.
+      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>402 Ko</b>, zéro dépendance, zéro cookie sur le site public.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Simple comme bonjour</h3>
@@ -68,19 +69,66 @@ WordPress sait tout faire, mais il lui faut une base de données, des extensions
   </tr>
 </table>
 
+## Assistant IA : demande, relis, publie
+
+<p align="center">
+  <img src="docs/images/frame-ai.webp" alt="L'assistant IA d'Éclair : à la demande « Écris un article sur le choix des couleurs d'une marque, avec une image », il crée l'image et un brouillon complet noté SEO 91 et GEO 100" width="100%">
+</p>
+
+Écris ce dont tu as besoin, comme à un collègue : *« Écris un article sur le choix des couleurs d'une marque, avec une image. »* L'assistant vérifie que le sujet n'existe pas déjà, crée l'image, rédige le brouillon complet (titre, L'essentiel, intertitres, tableau, FAQ, méta-description, liens internes) **dans le ton de ton site**, puis te le présente avec ses scores SEO et GEO. **Rien n'est publié sans ton clic.**
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>✍️ Écrit comme toi</h3>
+      Un <b>profil éditorial</b> rédigé en un clic à partir de ton site : public, ton, valeurs, règles, style des images. Chaque texte suit aussi les règles d'analyse d'Éclair : les brouillons visent un score élevé dès le départ.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🖼️ Images comprises</h3>
+      <b>GPT Image 2.5</b>, <b>FLUX 3</b> ou <b>Ideogram 3</b> : l'image à la une est imaginée à partir de l'article, optimisée en WebP et décrite (texte alternatif). Ou joins tes propres photos.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>👥 Agit sur ton site</h3>
+      « Ajoute Léa Martin à la page équipe avec la photo jointe » : la modification est prête, tu la prévisualises et l’appliques d’un clic. Annulable d’un clic aussi.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🛡️ Tu gardes la main</h3>
+      L'IA ne publie et ne supprime jamais rien. Clés chiffrées, budget mensuel, quota quotidien. <b>Claude ou ChatGPT</b> avec ta propre clé : aucun abonnement, environ <b>0,24 $ l'article</b> avec Claude Opus 5.5.
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/frame-ai-team.webp" alt="L'assistant prépare l'ajout de Léa Martin, avec sa photo, à la page À propos : aperçu, appliquer ou ignorer">
+      <p align="center"><b>Propositions à valider</b><br><sub>Sur une page publiée, rien ne change avant ton accord.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/frame-ai-editor.webp" alt="Dans l'éditeur, un passage sélectionné et le menu IA : améliorer, corriger, raccourcir, développer, simplifier, traduire">
+      <p align="center"><b>Retouches en un clic</b><br><sub>Améliorer, corriger, raccourcir, traduire, rédiger la FAQ ou les textes alternatifs.</sub></p>
+    </td>
+  </tr>
+</table>
+
+Activation en 5 minutes et tarifs détaillés : voir le [guide, section Assistant IA](docs/GUIDE.md#assistant-ia).
+
 ## Éclair face à WordPress
 
 | | WordPress classique | ⚡ Éclair |
 |---|---|---|
 | **Installation** | Créer une base MySQL, puis lancer l'assistant | ✅ Envoyer le dossier, répondre à 4 questions |
 | **Base de données** | MySQL obligatoire | ✅ Aucune (fichiers protégés) |
-| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 315 Ko |
+| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 402 Ko |
 | **SEO, sitemap, données structurées** | Extension à installer et à maintenir | ✅ Intégré |
 | **GEO : llms.txt, Markdown, robots IA** | Extensions, rarement complet | ✅ Intégré |
 | **Pages publiques** | Générées à chaque visite, sauf extension de cache | ✅ Servies depuis un cache statique |
 | **Cookies sur le site public** | Souvent nombreux | ✅ Aucun |
 | **Double authentification, anti-bruteforce** | Extensions | ✅ Intégrés |
 | **Mises à jour d'extensions** | Régulières, première source de failles | ✅ Aucune extension à mettre à jour |
+| **Assistant IA (rédaction, images)** | Extensions, souvent avec abonnement | ✅ Intégré : Claude ou ChatGPT, avec ta clé |
 
 ## Performances
 
@@ -179,7 +227,7 @@ Détails complets dans le [guide, section Sécurité](docs/GUIDE.md#sécurité).
   <img src="docs/images/install.webp" alt="Installation en trois étapes : envoyer le dossier, répondre à quatre questions, le site est en ligne" width="100%">
 </p>
 
-1. **Télécharge** l'archive [`eclair-cms-1.1.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.1.0.zip) (315 Ko) et décompresse-la.
+1. **Télécharge** l'archive [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip) (402 Ko) et décompresse-la.
 2. **Envoie le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…), fichiers cachés `.htaccess` compris.
 3. **Ouvre l'adresse de ton site** : l'assistant démarre. Quatre questions, des confettis, et ton site est en ligne avec ses premières pages.
 
@@ -195,6 +243,7 @@ Le [guide complet](docs/GUIDE.md) détaille tout le reste :
 - [Installation](docs/GUIDE.md#installation) : prérequis, types de site, premiers pas
 - [Fonctionnalités en détail](docs/GUIDE.md#fonctionnalités-en-détail) : vitesse, SEO, GEO, éditeur de blocs
 - [Utiliser Éclair au quotidien](docs/GUIDE.md#utiliser-éclair-au-quotidien)
+- [Assistant IA](docs/GUIDE.md#assistant-ia) : activation, profil éditorial, coûts, sécurité
 - [Mettre à jour, sauvegarder, déménager](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager)
 - [Dépannage](docs/GUIDE.md#dépannage) : mot de passe oublié, erreurs 404 ou 500, Nginx…
 
@@ -204,7 +253,7 @@ PHP 8.1+ sans framework ni Composer : des classes simples dans `eclair/app/lib/`
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # serveur de développement
-php tests/run.php                                                           # 199 tests unitaires et HTTP
+php tests/run.php                                                           # 299 vérifications unitaires et HTTP
 php tools/build.php                                                         # archive prête à distribuer
 ```
 

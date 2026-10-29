@@ -11,10 +11,11 @@ Tout ce qu'il faut savoir pour installer, utiliser, sécuriser et maintenir Écl
 1. [Installation](#installation)
 2. [Fonctionnalités en détail](#fonctionnalités-en-détail)
 3. [Utiliser Éclair au quotidien](#utiliser-éclair-au-quotidien)
-4. [Sécurité](#sécurité)
-5. [Mettre à jour, sauvegarder, déménager](#mettre-à-jour-sauvegarder-déménager)
-6. [Dépannage](#dépannage) (dont [Nginx](#nginx))
-7. [Pour les développeurs](#pour-les-développeurs)
+4. [Assistant IA](#assistant-ia)
+5. [Sécurité](#sécurité)
+6. [Mettre à jour, sauvegarder, déménager](#mettre-à-jour-sauvegarder-déménager)
+7. [Dépannage](#dépannage) (dont [Nginx](#nginx))
+8. [Pour les développeurs](#pour-les-développeurs)
 
 ---
 
@@ -31,7 +32,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.1.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.1.0.zip) (315 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip) (402 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -91,7 +92,7 @@ Le tableau de bord affiche une checklist « Premiers pas » : logo et couleur, p
 
 ### ✍️ Éditeur de blocs
 
-- 16 blocs : texte, intertitre (H2-H4), liste, citation, image, encadré, FAQ, tableau, bouton, vidéo YouTube/Vimeo (sans cookie avant le clic), code, séparateur, bannière, atouts, derniers articles, formulaire de contact.
+- 17 blocs : texte, intertitre (H2-H4), liste, citation, image, encadré, FAQ, tableau, bouton, vidéo YouTube/Vimeo (sans cookie avant le clic), code, séparateur, bannière, atouts, équipe (portraits, fonctions, présentations), derniers articles, formulaire de contact.
 - Tape **`/`** sur une ligne vide pour choisir un bloc, glisser-déposer, barre de mise en forme (gras, italique, lien, code, surlignage).
 - **Liens internes assistés** : en tapant un lien, l'éditeur propose tes pages et articles (maillage interne en 2 secondes).
 - **Collage intelligent** depuis Word, Google Docs ou une page web : titres, listes, tableaux et gras sont convertis en blocs propres.
@@ -108,17 +109,105 @@ Médiathèque (glisser-déposer, textes alternatifs, détection des images utili
 | Je veux… | Où |
 |---|---|
 | Écrire un article | Tableau de bord › **Écrire un article** |
+| Demander un article, une page, une image à l'IA | Champ **« Que veux-tu créer aujourd'hui ? »** du tableau de bord, ou **✨ Assistant IA** (`Ctrl+J`) |
 | Modifier une page depuis le site | Bouton **✏️ Modifier** (visible seulement quand tu es connecté) |
 | Changer logo, couleur, polices | Réglages › Apparence |
 | Choisir la page d'accueil | Réglages › Général |
 | Autoriser ou bloquer les IA | Réglages › IA & GEO |
+| Activer l'assistant IA | Réglages › Assistant IA |
 | Relier Google Search Console | Réglages › SEO |
 | Ajouter un lien au menu | Menus |
 | Rediriger une ancienne URL | Redirections |
 | Activer la double authentification | Mon profil › Double authentification |
 | Télécharger une sauvegarde | Sécurité › Sauvegarde |
 
-Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl+K` lien · `Ctrl+B` gras · `Ctrl+I` italique · `Entrée` nouveau paragraphe · `Maj+Entrée` retour à la ligne.
+Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl+K` lien · `Ctrl+B` gras · `Ctrl+I` italique · `Entrée` nouveau paragraphe · `Maj+Entrée` retour à la ligne · `Ctrl+J` assistant IA.
+
+---
+
+## Assistant IA
+
+L'assistant rédige des brouillons, améliore tes textes et crée des images **dans le ton de ton site**. Tu le pilotes en langage naturel, comme un collègue : « Écris un article sur le choix des couleurs d'une marque, avec une image. » Il cherche d'abord si le sujet existe déjà, crée l'image, rédige le brouillon complet (titre, L'essentiel, intertitres, listes ou tableaux, FAQ, méta-description, liens internes), puis te le présente avec ses scores SEO et GEO. **Rien n'est publié sans ton clic.**
+
+Il fonctionne avec **Claude** (Anthropic) ou **ChatGPT** (OpenAI), avec ta propre clé d'API : pas d'abonnement Éclair, tu paies directement le fournisseur, au réel.
+
+### Activer l'assistant (5 minutes)
+
+1. Crée une clé d'API chez le fournisseur choisi : [console.anthropic.com](https://console.anthropic.com/settings/keys) pour Claude, [platform.openai.com](https://platform.openai.com/api-keys) pour ChatGPT, et ajoute quelques dollars de crédit.
+2. Dans **Réglages › Assistant IA**, choisis le fournisseur, colle la clé, choisis le modèle, puis clique sur **Tester la connexion** (gratuit : aucun texte n'est généré).
+3. Pour les images, choisis un générateur : **GPT Image 2.5** (même clé que ChatGPT), **FLUX 3** ([dashboard.bfl.ai](https://dashboard.bfl.ai)) ou **Ideogram 3** ([ideogram.ai](https://ideogram.ai/manage-api), idéal pour les visuels avec du texte). Sans générateur, l'assistant utilise ta médiathèque et les photos que tu lui joins.
+4. Clique sur **Rédiger mon profil à partir de mon site**, relis, ajuste, enregistre.
+
+L'assistant apparaît alors dans le menu (**✨ Assistant IA**, `Ctrl+J`), dans l'éditeur et sur le tableau de bord. Les rédacteurs y ont accès si tu le permets.
+
+### Le profil éditorial
+
+C'est ce qui fait écrire l'IA **comme toi** : qui tu es et ce que tu proposes, pour qui tu écris, ton et style (tutoiement ou vouvoiement, longueur des phrases, humour), valeurs, règles à respecter (« toujours un lien vers la page contact », « jamais de prix ») et style des images. Un clic le rédige à partir de tes pages et articles ; tu gardes le dernier mot. À chaque demande, l'assistant suit aussi les règles d'analyse d'Éclair : ses brouillons visent un score SEO et GEO élevé dès le départ.
+
+### Ce que tu peux demander
+
+- « Écris un article sur l'entretien d'un vélo électrique au printemps, avec une image. »
+- « Ajoute Léa Martin, directrice artistique, à la page équipe avec la photo jointe. » (joins la photo avec 📎, un glisser-déposer ou un collage)
+- « Crée une page Nos services qui présente nos trois formules. »
+- « Propose-moi 5 idées d'articles pour attirer de nouveaux clients. »
+- « Relis ma page d'accueil et propose des améliorations. »
+- Dans l'éditeur : « Ajoute une FAQ à cet article », « Rends l'introduction plus percutante ».
+
+Chaque action produit une **carte** sous la réponse :
+
+| Carte | Ce qui s'est passé | Tes boutons |
+|---|---|---|
+| 📝 Brouillon | Nouvel article ou nouvelle page, jamais publié | Ouvrir · Aperçu · Publier maintenant ou programmer |
+| ✏️ Modification proposée | Pour un contenu **publié** : rien ne change avant ton accord | Aperçu · Appliquer · Ignorer, puis Annuler si besoin |
+| ✅ Mis à jour | Un **brouillon** modifié directement | Ouvrir · Aperçu · Annuler |
+| ✅ Dans l'éditeur | Le contenu ouvert est modifié dans l'éditeur | Annuler (puis tu enregistres) |
+| 🖼️ Image | Image créée, optimisée (WebP) et rangée dans la médiathèque | Image à la une (dans l'éditeur) |
+
+« Annuler » reste possible tant que personne n'a retouché le contenu depuis ; sinon, ses versions précédentes restent dans l'**historique des versions** de l'éditeur. L'historique garde tes 30 dernières conversations. L'assistant n'invente jamais de faits sur ton activité (prix, horaires, chiffres, témoignages) : quand une information manque, il laisse un repère visible comme **[prix à confirmer]** et te le signale.
+
+### Retouches dans l'éditeur
+
+- **Sélectionne un passage**, puis ✨ dans la barre de mise en forme : améliorer, corriger les fautes, raccourcir, développer, simplifier, plus chaleureux, plus professionnel, traduire. Un clic sur « Annuler » rétablit le texte.
+- **L'essentiel** : bouton « Rédiger ».
+- **Onglet SEO** : titre SEO et méta-description, expression-clé, idées de titres.
+- **Onglet Analyse** : ajouter une FAQ, textes alternatifs manquants, « Améliorer avec l'assistant ».
+- **Image à la une** : « Créer avec l'IA » (articles).
+- **Médiathèque** : « Décrire avec l'IA » écrit le texte alternatif d'une image en la regardant.
+
+### Combien ça coûte ?
+
+Tu paies le fournisseur selon l'usage réel. Éclair calcule chaque dépense à partir des jetons facturés et l'affiche dans Réglages › Assistant IA. Estimation pour un article complet (environ 25 000 jetons lus et 7 000 écrits, recherches et vérifications comprises) :
+
+| Modèle | Prix pour 1 million de jetons (lus / écrits) | Article complet |
+|---|---|---|
+| Claude Opus 5.5 (le plus doué) | 4 $ / 20 $ | ≈ 0,24 $ |
+| Claude Sonnet 5.5 | 2 $ / 10 $ | ≈ 0,12 $ |
+| Claude Haiku 5.5 | 0,10 $ / 0,50 $ | < 0,01 $ |
+| GPT-6 Astra | 10 $ / 50 $ | ≈ 0,60 $ |
+| GPT-6.1 Sol | 2 $ / 10 $ | ≈ 0,12 $ |
+| GPT-6.1 Terra | 1 $ / 5 $ | ≈ 0,06 $ |
+| GPT-6 Luna | 0,10 $ / 0,50 $ | < 0,01 $ |
+
+Une image coûte environ 0,05 $ (FLUX 3 en 1 mégapixel : 0,048 $). Tarifs publics relevés le 29 octobre 2026 sur les pages officielles d'[Anthropic](https://platform.claude.com/docs/en/about-claude/pricing), d'[OpenAI](https://developers.openai.com/api/docs/pricing) et de [Black Forest Labs](https://docs.bfl.ml/release-notes) ; ils peuvent évoluer. Les instructions fixes de l'assistant sont mises en cache chez le fournisseur, ce qui réduit le coût des demandes suivantes.
+
+**Garde-fous** : budget mensuel maximum (10 $ par défaut), vérifié avant chaque étape d'une demande : une fois atteint, l'assistant s'arrête jusqu'au mois suivant. S'y ajoutent un nombre de demandes par personne et par jour (60 par défaut) et deux demandes à la fois au plus par personne. Budget et quota se règlent dans Réglages › Assistant IA.
+
+### Sécurité et confidentialité
+
+- **L'IA prépare, tu décides** : elle peut chercher et lire tes contenus, créer des brouillons, modifier un brouillon (annulable), proposer une modification d'un contenu publié et créer des images. Elle ne peut **ni publier, ni supprimer, ni toucher aux réglages, aux menus ou aux comptes**. Publier reste un clic humain.
+- **Clés chiffrées** sur ton serveur (libsodium, ou AES-256-GCM), jamais envoyées au navigateur, jamais affichées (seul un indice « sk-ant…ab12 » l'est), **exclues des sauvegardes** comme l'historique des conversations. Pour une protection renforcée, ajoute `define('ECLAIR_SECRET', 'une-longue-phrase-secrète');` dans `eclair-config.php` (à faire avant d'enregistrer tes clés).
+- **Ce qui part chez le fournisseur** : ta demande, les images que tu joins, le profil éditorial et le contexte utile (liste de tes pages et articles, contenu ouvert dans l'éditeur). N'y mets pas de données sensibles. Selon leurs conditions (vérifiées le 29 octobre 2026), [Anthropic](https://www.anthropic.com/legal/commercial-terms) n'entraîne pas ses modèles sur les données envoyées par API, et [OpenAI](https://help.openai.com/en/articles/5722486-api-data-usage-policies) non plus par défaut.
+- **Contenus assainis** : tout ce que l'IA écrit passe par la même liste blanche que l'éditeur, et ses retouches ne touchent que le texte visible (jamais l'adresse d'un lien). Les images générées sont téléchargées en HTTPS depuis une adresse publique vérifiée, puis ré-encodées comme un envoi.
+- **Injections de consignes** : les contenus lus par l'IA sont traités comme des données, jamais comme des ordres ; et même si une page piégée tentait de la détourner, elle ne pourrait que préparer un brouillon ou une proposition, que tu verrais avant tout effet.
+
+### Si l'assistant ne répond pas
+
+- **« Clé d'API refusée »** : la clé a été copiée incomplète ou révoquée : colle-la de nouveau et teste la connexion.
+- **« Crédit épuisé »** : recharge ton compte chez le fournisseur.
+- **« Budget IA du mois atteint »** : augmente le budget dans Réglages › Assistant IA, ou attends le mois suivant.
+- **La réponse arrive d'un bloc au lieu de s'afficher au fil de l'eau** : un tampon de ton hébergeur retient le flux. Tout fonctionne, mais sans l'effet « en direct ». Sur Nginx, ajoute `fastcgi_buffering off;` dans le bloc PHP.
+- **« Impossible de joindre… »** : ton hébergeur bloque les connexions sortantes. Demande-lui d'autoriser `api.anthropic.com` ou `api.openai.com` (et le générateur d'images choisi).
+- **L'assistant ne s'affiche pas** : il faut l'extension PHP cURL et le chiffrement (sodium ou openssl), présents chez presque tous les hébergeurs ; l'assistant d'installation les vérifie.
 
 ---
 
@@ -149,6 +238,7 @@ Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl
 
 **Administration**
 - **Adresse d'administration personnalisable** (moins de robots), rôles administrateur / rédacteur ; le bouton « Modifier » du site ne révèle pas cette adresse.
+- **Assistant IA borné** : brouillons et propositions seulement, clés d'API chiffrées et exclues des sauvegardes, budget mensuel et quota quotidien (détails dans [Assistant IA](#sécurité-et-confidentialité)).
 - **Journaux bornés** (champs tronqués, 1 Mo maximum) : impossible de les faire gonfler.
 - **Contrôle d'intégrité** : compare chaque fichier à son empreinte d'origine et repère les fichiers suspects, y compris un `.php` sans ligne de protection dans `data/` ou `cache/`.
 - **Test de protection en direct** : la page Sécurité vérifie depuis ton navigateur que les fichiers internes sont bien inaccessibles, et que l'adresse du site est vérifiée.
@@ -161,7 +251,7 @@ Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl
 
 **Mettre à jour Éclair** :
 1. Fais une sauvegarde.
-2. Remplace par FTP `index.php`, `.htaccess`, et les dossiers `app/` et `assets/` par ceux de la nouvelle version.
+2. Par FTP, **supprime** les dossiers `app/` et `assets/`, puis envoie ceux de la nouvelle version avec `index.php` et `.htaccess` (supprimer d'abord évite de garder d'anciens fichiers, que le contrôle d'intégrité signalerait).
 3. **Ne touche pas** à `data/` (contenus, réglages, comptes) ni à `media/` (images).
 4. Dans l'administration : Réglages › Avancé › Vider le cache.
 
@@ -229,13 +319,15 @@ eclair/                  ← à envoyer sur l'hébergement
 ├── app/lib/             code (classes Eclair\…) : Content, Blocks, Seo, Analyzer, Media, Auth…
 ├── app/admin/views/     écrans de l'administration
 ├── app/theme/           gabarits du site public + theme.css (inséré dans chaque page)
-├── app/lang/            traductions de l'administration (en, es) — le français sert de clé
+├── app/lang/            traductions de l'administration (6 langues, JSON compressé) — le français sert de clé
 ├── assets/admin/        CSS et JavaScript de l'administration (aucune dépendance)
 ├── assets/site/site.js  le seul script public (2,4 Ko, 1,2 Ko compressé)
 ├── data/                contenus, réglages, comptes (créé à l'installation, jamais public)
 ├── cache/               pages générées
 └── media/               images envoyées
+i18n/                    sources lisibles des traductions (compilées par tools/i18n.php)
 tests/run.php            tests unitaires + intégration HTTP (dont les attaques de la revue de sécurité)
+tests/fake-ai.php        faux fournisseurs d'IA (Claude, ChatGPT, images) : l'assistant est testé sans clé ni dépense
 tools/router.php         routeur pour le serveur PHP intégré (développement)
 tools/build.php          empreintes d'intégrité + archive dist/eclair-cms-<version>.zip
 ```
