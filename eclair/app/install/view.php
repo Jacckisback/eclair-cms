@@ -112,7 +112,7 @@ $siteLang = array_key_exists($lang, Content::LANGS) ? $lang : 'fr';
           <?php endforeach ?>
         </div></div>
       <label class="field"><span class="label"><?= e(t('Adresse de ton administration')) ?></span>
-        <span class="input-group"><span><?= e(rtrim(\Eclair\Req::origin(), '/')) ?>/</span><input type="text" name="admin_path" value="admin" required pattern="[a-z0-9-]{3,40}" autocomplete="off" spellcheck="false"></span>
+        <span class="input-group"><span><?= e(rtrim(\Eclair\Req::origin(), '/')) ?>/</span><input type="text" name="admin_path" value="admin" required pattern="[a-z0-9\-]{3,40}" autocomplete="off" spellcheck="false"></span>
         <span class="hint"><?= e(t('Une adresse personnelle éloigne les robots pirates.')) ?> <button class="link-btn" type="button" id="secret-path"><?= e(t('Générer une adresse secrète')) ?></button></span></label>
       <div class="step-foot"><button class="btn btn-ghost" type="button" data-prev>← <?= e(t('Retour')) ?></button><button class="btn btn-primary btn-lg" type="button" data-next><?= e(t('Continuer')) ?> →</button></div>
     </section>

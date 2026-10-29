@@ -54,6 +54,8 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (français, anglais ou espagnol).
 4. Réponds à 4 questions (ton site, ton compte, ta visibilité, l'adresse de ton administration). Confettis 🎉 : ton site est en ligne, avec des pages et un article d'exemple.
 
+> 🔒 Par sécurité, l'installation doit être faite **dans les 2 heures** qui suivent la première visite (sinon n'importe qui pourrait s'emparer d'un site déposé puis oublié). Passé ce délai, supprime le fichier `data/install-window.php` par FTP et recharge la page.
+
 Installation dans un sous-dossier (`exemple.fr/site/`) : envoie simplement les fichiers dans ce sous-dossier, tout est détecté automatiquement.
 
 ### Les 4 types de site proposés
@@ -139,21 +141,34 @@ Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl
 
 ## Sécurité
 
-Éclair est conçu pour un environnement hostile (mutualisé, robots qui testent des mots de passe en permanence) :
+Éclair est conçu pour un environnement hostile (mutualisé, robots qui testent des mots de passe en permanence). Il a fait l'objet d'une revue de sécurité offensive (courses entre requêtes, force brute, redirections, injections, fichiers piégés) : chaque faille trouvée a été corrigée, puis l'attaque rejouée pour le prouver (`tests/run.php`).
 
+**Données et serveur**
 - **Aucune base de données** : pas d'injection SQL possible.
-- **Données doublement protégées** : dossiers `data/`, `app/` et `cache/` interdits par `.htaccess` ; chaque fichier de données commence par `<?php exit; ?>` (même si un serveur ignorait les `.htaccess`, rien ne s'affiche). Sessions stockées sous un nom haché.
-- **Mots de passe** chiffrés avec Argon2id (bcrypt en repli), 10 caractères minimum, mots de passe courants refusés.
-- **Anti-bruteforce** : blocage de 15 minutes après 8 échecs par adresse IP, limite par compte, journal des tentatives.
-- **Double authentification TOTP** (Google Authenticator, 1Password, Bitwarden…) avec QR code et 8 codes de secours, protection contre le rejeu.
+- **Données doublement protégées** : dossiers `data/`, `app/` et `cache/` interdits par `.htaccess` ; chaque fichier de données commence par `<?php exit; ?>` (même si un serveur ignorait les `.htaccess`, rien ne s'affiche) et aucune séquence `<?php` ne peut y être écrite. Fichiers privés (droits 0600), écritures atomiques.
+- **Installation protégée** : elle n'est possible que dans les 2 heures suivant la première visite, et l'adresse du site n'est utilisée pour rediriger les visiteurs qu'après avoir été **vérifiée par le serveur lui-même** (une adresse erronée ou piégée ne détourne rien).
+
+**Connexion**
+- **Mots de passe** chiffrés avec Argon2id (19 Mio, 2 passes : sûr et supportable sur un mutualisé ; bcrypt en repli), 10 caractères minimum, mots de passe courants refusés.
+- **Anti-bruteforce** : chaque tentative est réservée avant d'être vérifiée (impossible de dépasser la limite en parallèle) ; limite par réseau (adresse IPv4 ou bloc /64 en IPv6) et par compte visé. **Ton appareil habituel n'est jamais bloqué** par un attaquant qui rate exprès. Deux vérifications de mot de passe à la fois au maximum : un afflux de requêtes n'épuise pas la mémoire.
+- **Double authentification TOTP** (Google Authenticator, 1Password, Bitwarden…) avec QR code et 8 codes de secours affichés une seule fois ; chaque code ne sert qu'une fois, même envoyé en parallèle ; après 10 codes faux, la 2FA du compte est bloquée 15 minutes et son titulaire est prévenu par e-mail.
+- **Comptes modifiés de façon atomique** : une connexion en cours ne peut jamais annuler un changement de mot de passe, une déconnexion générale, l'activation de la 2FA, une rétrogradation ou une suppression.
+- **Mot de passe redemandé** pour les actions sensibles (sauvegarde, gestion des comptes, réglages avancés, changement d'e-mail) au-delà de 15 minutes après la connexion. Les mots de passe provisoires doivent être remplacés à la première connexion.
+- **Sessions durcies** : aucune session avant la connexion (les robots ne remplissent pas le disque), cookies `HttpOnly`, `Secure`, `SameSite=Strict`, régénération à la connexion, déconnexion après inactivité, liées au navigateur, « déconnecter tous les appareils ». L'administration est forcée en HTTPS dès que le site l'est.
 - **Jetons CSRF** sur toutes les actions et vérification de l'origine des requêtes.
-- **Sessions durcies** : cookies `HttpOnly`, `Secure`, `SameSite=Strict`, régénération à la connexion, déconnexion après inactivité, liées au navigateur, « déconnecter tous les appareils ».
-- **En-têtes stricts** : Content-Security-Policy (aucun script en ligne, empreinte SHA-256 pour le style), anti-clickjacking, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS en option.
-- **Contenus assainis** par liste blanche (le HTML est analysé puis entièrement réécrit) ; liens `javascript:` et `data:` impossibles.
-- **Images ré-encodées à l'envoi** (supprime les charges cachées et les données EXIF/GPS), SVG refusés, aucun script exécutable dans `/media`.
-- **Adresse d'administration personnalisable** (moins de robots), rôles administrateur / rédacteur.
-- **Contrôle d'intégrité** : compare chaque fichier à son empreinte d'origine et repère les fichiers suspects (typique des infections sur mutualisé).
-- **Test de protection en direct** : la page Sécurité vérifie depuis ton navigateur que les fichiers internes sont bien inaccessibles.
+
+**Site public**
+- **En-têtes stricts** : Content-Security-Policy (aucun script en ligne, empreinte SHA-256 pour le style), anti-clickjacking, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS en option. Ils dépendent des réglages, jamais de la requête : le cache ne peut pas être empoisonné.
+- **Aucune redirection ouverte** : les adresses piégées (`/\exemple.com`, caractères de contrôle…) donnent une 404.
+- **Contenus assainis** par liste blanche (le HTML est analysé puis entièrement réécrit) ; liens `javascript:` et `data:` impossibles, même déguisés (`javascript&colon;`). Les versions Markdown, `llms.txt` et RSS restent inertes.
+- **Formulaire de contact** sans captcha : champ piège, jeton, 5 messages par réseau toutes les 10 minutes et 100 par jour pour tout le site ; boîte plafonnée à 500 messages (le spam part en premier), paginée.
+- **Images ré-encodées à l'envoi** (supprime les charges cachées et les données EXIF/GPS) ; GIF animés réécrits bloc par bloc ; toute image contenant du code est refusée ; 40 mégapixels maximum ; SVG refusés, aucun script ni liste de fichiers dans `/media`.
+
+**Administration**
+- **Adresse d'administration personnalisable** (moins de robots), rôles administrateur / rédacteur ; le bouton « Modifier » du site ne révèle pas cette adresse.
+- **Journaux bornés** (champs tronqués, 1 Mo maximum) : impossible de les faire gonfler.
+- **Contrôle d'intégrité** : compare chaque fichier à son empreinte d'origine et repère les fichiers suspects, y compris un `.php` sans ligne de protection dans `data/` ou `cache/`.
+- **Test de protection en direct** : la page Sécurité vérifie depuis ton navigateur que les fichiers internes sont bien inaccessibles, et que l'adresse du site est vérifiée.
 
 ---
 
@@ -182,7 +197,11 @@ ton-adresse@email.fr
 TonNouveauMotDePasse2026
 ```
 
-Ouvre ensuite la page de connexion : le mot de passe est remplacé, la double authentification de ce compte est désactivée et le fichier est supprimé automatiquement.
+Dans les 24 heures, **connecte-toi avec cet e-mail et ce nouveau mot de passe** : le mot de passe est remplacé, la double authentification de ce compte est désactivée, tes autres sessions sont fermées et le fichier est supprimé automatiquement. Personne d'autre ne peut le déclencher (il faut connaître son contenu) ; un fichier sans la première ligne est refusé et supprimé.
+
+**« Installation verrouillée »** : la fenêtre de 2 heures après la première visite est passée. Supprime `data/install-window.php` par FTP et recharge la page.
+
+**« Adresse non vérifiée » (page Sécurité)** : ton serveur n'arrive pas à s'appeler lui-même sur l'adresse du site (pare-feu de l'hébergeur, DNS pas encore propagé…). Le site fonctionne normalement, mais sans redirection vers l'adresse officielle (www / sans www). Clique sur « Vérifier l'adresse du site » une fois le domaine en place.
 
 **Erreur 404 sur toutes les pages sauf l'accueil** : le fichier `.htaccess` n'a pas été envoyé (fichier caché) ou la réécriture d'URL est désactivée. Si ton hébergeur l'exige, décommente la ligne `RewriteBase /` du `.htaccess`.
 
@@ -233,16 +252,18 @@ eclair/                  ← à envoyer sur l'hébergement
 ├── data/                contenus, réglages, comptes (créé à l'installation, jamais public)
 ├── cache/               pages générées
 └── media/               images envoyées
-tests/run.php            tests unitaires + intégration HTTP
+tests/run.php            tests unitaires + intégration HTTP (dont les attaques de la revue de sécurité)
 tools/router.php         routeur pour le serveur PHP intégré (développement)
 tools/build.php          empreintes d'intégrité + archive dist/eclair-cms-<version>.zip
 ```
 
 ```bash
-php -S localhost:8000 -t eclair tools/router.php   # serveur de développement
+PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # serveur de développement
 php tests/run.php                                  # tests (unitaires + HTTP)
 php tools/build.php                                # archive prête à distribuer
 ```
+
+`PHP_CLI_SERVER_WORKERS` permet au site de s'appeler lui-même (vérification de son adresse) : avec un seul processus, la vérification échoue simplement et les redirections vers l'adresse officielle restent désactivées.
 
 Le thème se personnalise en modifiant `app/theme/*.php` et `app/theme/theme.css` (garde une sauvegarde : le contrôle d'intégrité signalera ces fichiers comme modifiés, c'est normal).
 

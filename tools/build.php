@@ -64,7 +64,15 @@ $zip->addFromString('LISEZ-MOI.txt', <<<TXT
 1. Envoie le CONTENU du dossier « eclair » sur ton hébergement (dans public_html, www…),
    y compris les fichiers cachés .htaccess (active « afficher les fichiers cachés » dans ton logiciel FTP).
 2. Ouvre l'adresse de ton site dans le navigateur : l'assistant d'installation démarre.
+   Par sécurité, termine-le dans les 2 heures qui suivent la première visite
+   (sinon : supprime data/install-window.php par FTP et recharge la page).
 3. C'est tout. Documentation complète : README.md du dépôt.
+
+Mot de passe oublié et aucun autre administrateur ? Crée par FTP le fichier data/reset.php
+avec ces trois lignes, puis connecte-toi dans les 24 h avec cet e-mail et ce nouveau mot de passe :
+<?php exit; ?>
+ton-adresse@email.fr
+TonNouveauMotDePasse2026
 
 TXT);
 $zip->close();

@@ -11,9 +11,7 @@ $on = !empty($me['totp']['on']);
 ?>
 <div class="page-narrow">
   <div class="topbar"><div><h1><?= e(t('Mon profil')) ?></h1><p><?= e(t('Ces informations apparaissent sous tes articles : elles renforcent ta crédibilité (E-E-A-T) auprès de Google et des IA.')) ?></p></div></div>
-  <?php if (!empty($me['must_change'])): ?>
-    <div class="notice warn" role="alert"><span>🔑</span><p><?= e(t('Tu utilises un mot de passe provisoire : choisis ton mot de passe personnel ci-dessous pour accéder au reste de l’administration.')) ?></p></div>
-  <?php endif ?>
+
   <form class="card" method="post" action="<?= e(admin_url('profile')) ?>" data-dirty>
     <?= Security::csrfField() ?>
     <div class="grid-2">
@@ -33,6 +31,9 @@ $on = !empty($me['totp']['on']);
   <form class="card" id="mot-de-passe" method="post" action="<?= e(admin_url('profile')) ?>">
     <?= Security::csrfField() ?><input type="hidden" name="action" value="password">
     <h2><?= e(t('Mot de passe')) ?></h2>
+    <?php if (!empty($me['must_change'])): ?>
+      <div class="notice warn" role="alert"><span>🔑</span><p><?= e(t('Tu utilises un mot de passe provisoire : choisis ton mot de passe personnel ci-dessous pour accéder au reste de l’administration.')) ?></p></div>
+    <?php endif ?>
     <label class="field"><span class="label"><?= e(t('Mot de passe actuel')) ?></span><input type="password" name="current" autocomplete="current-password" required></label>
     <label class="field"><span class="label"><?= e(t('Nouveau mot de passe')) ?></span>
       <span class="password"><input type="password" name="password" autocomplete="new-password" minlength="10" required data-strength><button type="button" data-reveal><?= e(t('Afficher')) ?></button></span>
