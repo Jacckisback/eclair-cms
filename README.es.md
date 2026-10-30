@@ -128,7 +128,7 @@ Activación en 5 minutos y tarifas detalladas: consulta la [guía, sección Asis
   <img src="docs/images/shop.webp" alt="Una ficha de producto de Éclair: galería de fotos, precio tachado, variantes, botón de compra conectado a Stripe, envío y devoluciones; a la derecha, el catálogo en el móvil" width="100%">
 </p>
 
-**Modo tienda ligera**: vende tus productos sin el peso de un e-commerce. Cada producto tiene su ficha, su botón **Comprar** lleva a un **enlace de pago de Stripe**, y nada más: sin carrito, sin base de datos, ningún dato bancario en tu servidor. Único coste: la comisión de Stripe, **1,5 % + 0,25 €** por pago con una tarjeta europea estándar[^stripe].
+**Modo tienda ligera**: vende tus productos sin el peso de un e-commerce. Cada producto tiene su ficha y su botón **Comprar** lleva a un **enlace de pago de Stripe**, y eso es todo: sin carrito, sin base de datos, ningún dato bancario en tu servidor. Único coste: la comisión de Stripe, **1,5 % + 0,25 €** por pago con una tarjeta europea estándar[^stripe].
 
 <table>
   <tr>

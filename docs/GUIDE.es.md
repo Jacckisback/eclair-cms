@@ -186,7 +186,7 @@ Cada pedido te llega a Stripe (y por correo electrónico si lo has activado): t�
 
 ### Lo que Éclair hace para Google y las IA
 
-- **Datos estructurados** Product y Offer en cada ficha (ProductGroup para las variantes): precio, moneda, stock, estado, marca, gastos y plazos de envío, y **política de devoluciones** a nivel de tu empresa. Es la información que Google muestra en los resultados de productos.
+- **Datos estructurados** Product y Offer en cada ficha (ProductGroup para las variantes): precio, moneda, stock, estado, marca, gastos y plazos de envío, y una **política de devoluciones** común a toda tu empresa. Es la información que Google muestra en los resultados de productos.
 - **Feed de productos** `/products.xml` en formato Google Merchant Center: añádelo como fuente de productos en Merchant Center para aparecer gratis en la pestaña Shopping.
 - Categorías de productos como páginas pilar, sitemap con todas las fotos, migas de pan.
 - Para las IA: precio y disponibilidad de cada producto en `llms.txt` y en la versión Markdown de cada ficha (añade `.md` a su dirección).
