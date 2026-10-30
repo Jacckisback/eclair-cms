@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip"><img src="https://img.shields.io/badge/download-v1.2.0-5b4cf0?style=for-the-badge" alt="Éclair 1.2.0 herunterladen"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip"><img src="https://img.shields.io/badge/download-v1.3.0-5b4cf0?style=for-the-badge" alt="Éclair 1.3.0 herunterladen"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 oder neuer">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/Datenbank-keine-14122b?style=for-the-badge" alt="Keine Datenbank">
@@ -23,6 +23,7 @@
   <a href="#installation-in-3-minuten"><b>Installieren</b></a> ·
   <a href="#warum-éclair"><b>Warum Éclair</b></a> ·
   <a href="#ki-assistent-bitten-prüfen-veröffentlichen"><b>KI-Assistent</b></a> ·
+  <a href="#themes-und-shop"><b>Themes und Shop</b></a> ·
   <a href="#vorschau"><b>Vorschau</b></a> ·
   <a href="#sicherheit"><b>Sicherheit</b></a> ·
   <a href="docs/GUIDE.de.md"><b>Vollständiges Handbuch</b></a>
@@ -60,7 +61,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleicht</h3>
-      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>402 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
+      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>415 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
@@ -115,13 +116,65 @@ Beschreib einfach, was du brauchst, wie im Gespräch mit einem Kollegen: *„Sch
 
 Aktivierung in 5 Minuten und Preise im Detail: siehe [Handbuch, Abschnitt KI-Assistent](docs/GUIDE.de.md#ki-assistent).
 
+## Themes und Shop
+
+<p align="center">
+  <img src="docs/images/de/themes.webp" alt="Dieselbe Website mit den 6 Themes von Éclair: Éclair, Editorial, Atelier, Studio, Shop und Kontrast" width="100%">
+</p>
+
+**6 Themes inklusive**, auswählbar unter Einstellungen › Design, mit einer **Live-Vorschau** deiner echten Website in der Desktop- oder Mobilansicht, bevor du speicherst: Éclair, Editorial, Atelier, Studio, Shop und Kontrast. Header zentriert oder nicht, Listen als Kartenraster oder Liste, Farbe und Schriften nach Wahl. Jedes Theme ist nur ein Stylesheet von 1,5 bis 3 KB: Das HTML bleibt gleich und damit auch Geschwindigkeit, Barrierefreiheit und SEO.
+
+<p align="center">
+  <img src="docs/images/shop.webp" alt="Eine Éclair-Produktseite: Fotogalerie, Streichpreis, Varianten, Kauf-Button mit Stripe-Anbindung, Versand und Rückgabe; rechts der Katalog auf dem Smartphone" width="100%">
+</p>
+
+**Schlanker Shop-Modus**: Verkaufe deine Produkte ohne den Ballast eines klassischen Onlineshops. Jedes Produkt hat seine eigene Seite, sein **Kauf-Button** führt zu einem **Stripe-Zahlungslink**, und das war's: kein Warenkorb, keine Datenbank, keine Bankdaten auf deinem Server.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🛍️ Produktseiten, die verkaufen</h3>
+      Fotogalerie, Preis und Streichpreis, <b>Varianten ohne JavaScript</b> (Größe, Farbe), Lagerbestand, angezeigte Versandkosten und Rückgabebedingungen, ähnliche Produkte. Katalog mit Kategoriefiltern und ein Block <b>Produkte</b> für deine Startseite.
+    </td>
+    <td width="50%" valign="top">
+      <h3>💳 Bezahlt über Stripe</h3>
+      Ein <b>Stripe-Zahlungslink</b> pro Produkt (oder pro Variante): Stripe wickelt die Zahlung ab, verschickt die Belege und kümmert sich um Rückerstattungen. Kein Abo: nur die Stripe-Gebühr von <b>1,5 % + 0,25 €</b> pro Zahlung mit einer europäischen Standardkarte<a href="#user-content-fn-stripe">¹</a>.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🔎 Gemacht für Google</h3>
+      Strukturierte Daten <b>Product und Offer</b> (Preis, Lagerbestand, Versand, Rückgabebedingungen), „Säulen“-Kategorien und ein <b>Produktfeed für Google Merchant Center</b>, um kostenlos auf dem Tab „Shopping“ zu erscheinen.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🤖 Zitiert von KI</h3>
+      Preis und Verfügbarkeit in <code>llms.txt</code> und in der Markdown-Version jeder Produktseite. Der KI-Assistent schreibt eine Produktseite anhand deines Fotos, ohne je einen Preis zu erfinden.
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/de/frame-appearance.webp" alt="Einstellungen › Design: Auswahl des Themes und Live-Vorschau der Website">
+      <p align="center"><b>Live-Vorschau</b><br><sub>Probiere jedes Theme auf deiner echten Website aus: Nichts wird veröffentlicht, bevor du speicherst.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/de/frame-product.webp" alt="Der Editor einer Produktseite: Preis, Streichpreis, Verfügbarkeit, Stripe-Zahlungslink und Fotos">
+      <p align="center"><b>Produktseite</b><br><sub>Preis, Stripe-Link, Fotos und Varianten, ganz oben im Editor.</sub></p>
+    </td>
+  </tr>
+</table>
+
+Der Shop lässt sich erst öffnen, wenn Impressum und Allgemeine Geschäftsbedingungen veröffentlicht sind. Vollständige Anleitung: [Handbuch, Abschnitt Shop](docs/GUIDE.de.md#shop).
+
 ## Éclair im Vergleich zu WordPress
 
 | | Klassisches WordPress | ⚡ Éclair |
 |---|---|---|
 | **Installation** | MySQL-Datenbank anlegen, dann den Assistenten starten | ✅ Ordner hochladen, 4 Fragen beantworten |
 | **Datenbank** | MySQL erforderlich | ✅ Keine (geschützte Dateien) |
-| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 402 KB |
+| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 415 KB |
 | **SEO, Sitemap, strukturierte Daten** | Ein Plugin, das installiert und gepflegt werden muss | ✅ Integriert |
 | **GEO: llms.txt, Markdown, KI-Bots** | Plugins, selten vollständig | ✅ Integriert |
 | **Öffentliche Seiten** | Bei jedem Aufruf neu erzeugt, außer mit Cache-Plugin | ✅ Aus einem statischen Cache ausgeliefert |
@@ -129,6 +182,8 @@ Aktivierung in 5 Minuten und Preise im Detail: siehe [Handbuch, Abschnitt KI-Ass
 | **Zwei-Faktor-Authentifizierung, Brute-Force-Schutz** | Plugins | ✅ Integriert |
 | **Plugin-Updates** | Ständig, die häufigste Ursache für Sicherheitslücken | ✅ Keine Plugins zu aktualisieren |
 | **KI-Assistent (Texte, Bilder)** | Plugins, oft mit Abo | ✅ Integriert: Claude oder ChatGPT, mit deinem Schlüssel |
+| **Themes** | Müssen installiert werden, oft schwergewichtig, manchmal kostenpflichtig | ✅ 6 integrierte Themes, Live-Vorschau |
+| **Online verkaufen** | WooCommerce: Plugin, Datenbank, Updates | ✅ Schlanker Shop integriert, Bezahlung per Stripe-Zahlungslink |
 
 ## Performance
 
@@ -227,7 +282,7 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
   <img src="docs/images/de/install.webp" alt="Installation in drei Schritten: Ordner hochladen, vier Fragen beantworten, die Website ist online" width="100%">
 </p>
 
-1. **Lade** das Archiv [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip) (402 KB) **herunter** und entpacke es.
+1. **Lade** das Archiv [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (415 KB) **herunter** und entpacke es.
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 
@@ -243,6 +298,7 @@ Das [vollständige Handbuch](docs/GUIDE.de.md) erklärt alles Weitere:
 - [Installation](docs/GUIDE.de.md#installation): Voraussetzungen, Website-Typen, erste Schritte
 - [Funktionen im Detail](docs/GUIDE.de.md#funktionen-im-detail): Geschwindigkeit, SEO, GEO, Block-Editor
 - [Éclair im Alltag](docs/GUIDE.de.md#éclair-im-alltag)
+- [Themes](docs/GUIDE.de.md#themes) und [Shop](docs/GUIDE.de.md#shop): Live-Vorschau, Produktseiten, Stripe, Google Shopping
 - [KI-Assistent](docs/GUIDE.de.md#ki-assistent): Aktivierung, Redaktionsprofil, Kosten, Sicherheit
 - [Aktualisieren, sichern, umziehen](docs/GUIDE.de.md#aktualisieren-sichern-umziehen)
 - [Fehlerbehebung](docs/GUIDE.de.md#fehlerbehebung): Passwort vergessen, Fehler 404 oder 500, Nginx …
@@ -253,7 +309,7 @@ PHP 8.1+ ohne Framework und ohne Composer: einfache Klassen in `eclair/app/lib/`
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                                           # 299 Unit- und HTTP-Prüfungen
+php tests/run.php                                                           # 367 Unit- und HTTP-Prüfungen
 php tools/build.php                                                         # Archiv zum Verteilen
 ```
 
@@ -266,5 +322,7 @@ Projektstruktur und Anpassung des Themes: siehe [Für Entwickler](docs/GUIDE.de.
 <br>
 
 <p align="center"><sub>⚡ Éclair, für Selbstständige und kleine Unternehmen, die eine schnelle, gut auffindbare und sorgenfreie Website wollen.</sub></p>
+
+[^stripe]: Stripe-Gebühr in Frankreich für eine Standardkarte aus dem Europäischen Wirtschaftsraum (EWR); 2,8 % + 0,25 € für eine Premiumkarte, 3,15 % + 0,25 € für Karten von außerhalb des EWR ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), geprüft am 30. Oktober 2026). Zahlungslinks sind ohne Zusatzkosten enthalten.
 
 [^wp]: Offizielles Archiv von WordPress 7.1.4: 37.239.942 Bytes, also 35,5 MB ([Download-Link](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), geprüft am 29. Oktober 2026).

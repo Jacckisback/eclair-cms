@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip"><img src="https://img.shields.io/badge/download-v1.2.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.2.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip"><img src="https://img.shields.io/badge/download-v1.3.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.3.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -23,6 +23,7 @@
   <a href="#3-分钟完成安装"><b>安装</b></a> ·
   <a href="#为什么选择-éclair"><b>为什么选择 Éclair</b></a> ·
   <a href="#ai-助手提需求审阅发布"><b>AI 助手</b></a> ·
+  <a href="#主题与商店"><b>主题与商店</b></a> ·
   <a href="#界面预览"><b>界面预览</b></a> ·
   <a href="#安全"><b>安全</b></a> ·
   <a href="docs/GUIDE.zh-CN.md"><b>完整指南</b></a>
@@ -60,7 +61,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>402 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>415 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -115,13 +116,65 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 
 5 分钟即可启用，详细价格请见[指南中的 AI 助手章节](docs/GUIDE.zh-CN.md#ai-助手)。
 
+## 主题与商店
+
+<p align="center">
+  <img src="docs/images/zh-CN/themes.webp" alt="同一个网站分别使用 Éclair 的 6 个主题：Éclair、杂志、工坊、工作室、商店和高对比" width="100%">
+</p>
+
+**内置 6 个主题**：Éclair、杂志、工坊、工作室、商店和高对比。在 设置 › 外观 中挑选，保存之前就能在电脑或手机上**实时预览**你的真实网站。页眉可选是否居中，列表可选网格或列表样式，主色和字体随你选择。每个主题只是一个 1.5 至 3 KB 的样式表：HTML 不变，速度、无障碍和 SEO 自然也不变。
+
+<p align="center">
+  <img src="docs/images/shop.webp" alt="Éclair 的商品详情页：照片图库、划线价、规格、连接 Stripe 的“购买”按钮、配送与退货信息；右侧是手机上的商品目录" width="100%">
+</p>
+
+**轻量商店模式**：无需笨重的电商系统，也能销售你的商品。每件商品都有自己的详情页，**购买**按钮直接通向 **Stripe 付款链接**，仅此而已：没有购物车，没有数据库，你的服务器上也不保存任何银行卡数据。
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🛍️ 会卖货的详情页</h3>
+      照片图库、价格和划线价、<b>无需 JavaScript 的规格选择</b>（尺码、颜色）、库存，清楚标明运费和退货信息，并推荐相关商品。商品目录支持按分类筛选，还有可放在首页的<b>商品</b>区块。
+    </td>
+    <td width="50%" valign="top">
+      <h3>💳 由 Stripe 收款</h3>
+      每件商品（或每个规格）对应一个 <b>Stripe 付款链接</b>：Stripe 负责收款、发送收据并处理退款。无需订阅，只需支付 Stripe 的手续费：欧洲标准卡每笔 <b>1.5% + €0.25</b><a href="#user-content-fn-stripe">¹</a>。
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🔎 专为 Google 优化</h3>
+      <b>Product 和 Offer</b> 结构化数据（价格、库存、配送、退货政策）、支柱分类，以及 <b>Google Merchant Center 商品 Feed</b>，让你的商品免费出现在“购物”（Shopping）标签页中。
+    </td>
+    <td width="50%" valign="top">
+      <h3>🤖 被 AI 引用</h3>
+      价格和库存状态会写入 <code>llms.txt</code> 和每个详情页的 Markdown 版本。AI 助手能根据你的照片撰写商品详情页，但绝不会编造价格。
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/zh-CN/frame-appearance.webp" alt="设置 › 外观：选择主题，并实时预览网站">
+      <p align="center"><b>实时预览</b><br><sub>在你的真实网站上试用每个主题，保存之前什么都不会发布。</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/zh-CN/frame-product.webp" alt="商品详情页的编辑器：价格、划线价、库存状态、Stripe 付款链接和照片">
+      <p align="center"><b>商品详情</b><br><sub>价格、Stripe 链接、照片和规格，都在编辑器顶部。</sub></p>
+    </td>
+  </tr>
+</table>
+
+只有发布了法律声明和销售条款之后，商店才能开放。完整使用说明请见[指南中的商店章节](docs/GUIDE.zh-CN.md#商店)。
+
 ## Éclair 与 WordPress 对比
 
 | | 传统 WordPress | ⚡ Éclair |
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 402 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 415 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -129,6 +182,8 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 | **双重认证、防暴力破解** | 需要插件 | ✅ 内置 |
 | **插件更新** | 频繁，是安全漏洞的头号来源 | ✅ 没有插件需要更新 |
 | **AI 助手（写作、配图）** | 依赖插件，往往还要订阅 | ✅ 内置：Claude 或 ChatGPT，使用你自己的密钥 |
+| **主题** | 需要另行安装，往往很臃肿，有时还要付费 | ✅ 内置 6 个主题，支持实时预览 |
+| **在线销售** | WooCommerce：插件、数据库、更新 | ✅ 内置轻量商店，通过 Stripe 付款链接收款 |
 
 ## 性能
 
@@ -227,7 +282,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip)（402 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip)（415 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
@@ -243,6 +298,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 - [安装](docs/GUIDE.zh-CN.md#安装)：环境要求、网站类型、入门步骤
 - [功能详解](docs/GUIDE.zh-CN.md#功能详解)：速度、SEO、GEO、区块编辑器
 - [日常使用](docs/GUIDE.zh-CN.md#日常使用)
+- [主题](docs/GUIDE.zh-CN.md#主题)和[商店](docs/GUIDE.zh-CN.md#商店)：实时预览、商品详情页、Stripe、Google Shopping
 - [AI 助手](docs/GUIDE.zh-CN.md#ai-助手)：启用、编辑风格档案、费用、安全
 - [更新、备份、迁移](docs/GUIDE.zh-CN.md#更新备份迁移)
 - [故障排除](docs/GUIDE.zh-CN.md#故障排除)：忘记密码、404 或 500 错误、Nginx……
@@ -253,7 +309,7 @@ PHP 8.1+，不依赖框架，也不需要 Composer：`eclair/app/lib/` 中是简
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                                           # 299 项单元与 HTTP 检查
+php tests/run.php                                                           # 367 项单元与 HTTP 检查
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 
@@ -266,5 +322,7 @@ php tools/build.php                                                         # �
 <br>
 
 <p align="center"><sub>⚡ Éclair，献给想要一个快速、易被搜索到、省心网站的自由职业者和小企业。</sub></p>
+
+[^stripe]: Stripe 在法国针对欧洲经济区标准卡的收费标准；高级卡为 2.8% + €0.25，欧洲经济区以外的卡为 3.15% + €0.25（[stripe.com/fr/pricing](https://stripe.com/fr/pricing)，2026 年 10 月 30 日核实）。付款链接已包含在内，不另收费。
 
 [^wp]: WordPress 7.1.4 官方安装包：37,239,942 字节，即 35.5 MB（[下载链接](https://downloads.wordpress.org/release/wordpress-7.1.4.zip)，2026 年 10 月 29 日核实）。

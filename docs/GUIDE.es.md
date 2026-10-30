@@ -11,11 +11,13 @@ Todo lo que necesitas saber para instalar, usar, proteger y mantener Éclair. Pa
 1. [Instalación](#instalación)
 2. [Funciones en detalle](#funciones-en-detalle)
 3. [Uso diario](#uso-diario)
-4. [Asistente IA](#asistente-ia)
-5. [Seguridad](#seguridad)
-6. [Actualizar, hacer copias de seguridad, mudarse](#actualizar-hacer-copias-de-seguridad-mudarse)
-7. [Solución de problemas](#solución-de-problemas) (incluido [Nginx](#nginx))
-8. [Para desarrolladores](#para-desarrolladores)
+4. [Temas](#temas)
+5. [Tienda](#tienda)
+6. [Asistente IA](#asistente-ia)
+7. [Seguridad](#seguridad)
+8. [Actualizar, hacer copias de seguridad, mudarse](#actualizar-hacer-copias-de-seguridad-mudarse)
+9. [Solución de problemas](#solución-de-problemas) (incluido [Nginx](#nginx))
+10. [Para desarrolladores](#para-desarrolladores)
 
 ---
 
@@ -32,7 +34,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 
 ### Pasos
 
-1. Descarga el archivo [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip) (402 KB) y descomprímelo.
+1. Descarga el archivo [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (415 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
 3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
@@ -64,7 +66,7 @@ El panel muestra una lista de «Primeros pasos»: logo y color, página de inici
 ### ⚡ Velocidad
 
 - **Caché estática automática**: cada página se genera una vez y después se sirve sin cargar la aplicación. La caché se vacía sola con cada cambio (y a la hora prevista para un artículo programado).
-- **CSS integrado en la página** (≈ 12 KB minificado), fuentes del sistema: ninguna petición bloqueante, ningún salto de diseño.
+- **CSS integrado en la página** (de 17 a 23 KB según el tema y la tienda, de 5 a 6 KB comprimido), fuentes del sistema: ninguna petición bloqueante, ningún salto de diseño.
 - **Imágenes optimizadas al subirlas**: redimensionadas (2000 px como máximo), disponibles en **WebP adaptable** (480, 800, 1200, 1600 px), dimensiones explícitas, carga diferida y prioridad para la imagen principal.
 - ETag y respuestas `304 Not Modified`, compresión Brotli/Gzip y caché del navegador de un año para los archivos estáticos (mediante `.htaccess`).
 
@@ -73,7 +75,7 @@ El panel muestra una lista de «Primeros pasos»: logo y color, página de inici
 - URL limpias, **redirección 301 automática** cuando cambia una dirección, gestor de redirecciones (práctico para migrar una web antigua en WordPress o Wix).
 - Título, metadescripción y **vista previa de Google en directo** en el editor, con contadores.
 - **Análisis SEO en tiempo real** con puntuación: longitud del título y de la descripción, frase clave (título, URL, introducción, subtítulos, densidad), número de palabras, estructura, textos alternativos, enlazado interno, imagen destacada…
-- **Datos estructurados JSON-LD** completos: WebSite (+ búsqueda), Organization / Person / LocalBusiness (dirección, horario, perfiles sociales), WebPage / AboutPage / ContactPage, BlogPosting (autor, fechas, sección), BreadcrumbList, FAQPage, ProfilePage.
+- **Datos estructurados JSON-LD** completos: WebSite (+ búsqueda), Organization / Person / LocalBusiness (dirección, horario, perfiles sociales, política de devoluciones), WebPage / AboutPage / ContactPage, BlogPosting (autor, fechas, sección), BreadcrumbList, FAQPage, ProfilePage y, para la tienda, Product / ProductGroup / Offer (precio, stock, envío).
 - Sitemap XML con imágenes y `hreflang`, robots.txt, feed RSS completo, Open Graph y Twitter Cards (**imagen para compartir de 1200×630 generada automáticamente**), migas de pan, URL canónicas.
 - Una sola dirección por contenido: redirecciones de HTTPS, con o sin www, barra final, mayúsculas, `index.php`.
 - **IndexNow**: Bing, Yandex, Seznam… reciben un aviso en cada publicación.
@@ -92,7 +94,7 @@ El panel muestra una lista de «Primeros pasos»: logo y color, página de inici
 
 ### ✍️ Editor de bloques
 
-- 17 bloques: texto, subtítulo (H2-H4), lista, cita, imagen, recuadro, FAQ, tabla, botón, vídeo de YouTube/Vimeo (sin cookies antes del clic), código, separador, portada, ventajas, equipo (retratos, cargos, presentaciones), últimos artículos, formulario de contacto.
+- 18 bloques: texto, subtítulo (H2-H4), lista, cita, imagen, recuadro, FAQ, tabla, botón, vídeo de YouTube/Vimeo (sin cookies antes del clic), código, separador, portada, ventajas, equipo (retratos, cargos, presentaciones), últimos artículos, productos (escaparate de la tienda), formulario de contacto.
 - Escribe **`/`** en una línea vacía para elegir un bloque, arrastrar y soltar, barra de formato (negrita, cursiva, enlace, código, resaltado).
 - **Enlaces internos asistidos**: mientras escribes un enlace, el editor te propone tus páginas y artículos (enlazado interno en 2 segundos).
 - **Pegado inteligente** desde Word, Google Docs o una página web: títulos, listas, tablas y negritas se convierten en bloques limpios.
@@ -100,7 +102,7 @@ El panel muestra una lista de «Primeros pasos»: logo y color, página de inici
 
 ### 🧩 Todo lo demás
 
-Biblioteca de medios (arrastrar y soltar, textos alternativos, detección de las imágenes en uso), menús con arrastrar y soltar (cabecera y pie de página), categorías «pilar» para un clúster temático, buscador interno, formulario de contacto antispam **sin captcha** (campo trampa, token, límites por red y por día) con bandeja de entrada, cuentas de administrador y redactor, modo oscuro automático, 6 fuentes del sistema, color principal con contraste WCAG garantizado, panel en 7 idiomas (español, francés, inglés, alemán, italiano, portugués, chino), sitio público en 6 idiomas (fr, es, en, de, it, pt).
+Biblioteca de medios (arrastrar y soltar, textos alternativos, detección de las imágenes en uso), menús con arrastrar y soltar (cabecera y pie de página), categorías «pilar» para un clúster temático, buscador interno, formulario de contacto antispam **sin captcha** (campo trampa, token, límites por red y por día) con bandeja de entrada, cuentas de administrador y redactor, 6 temas con vista previa en directo, modo oscuro automático, 6 fuentes del sistema, color principal con contraste WCAG garantizado, panel en 7 idiomas (español, francés, inglés, alemán, italiano, portugués, chino), sitio público en 6 idiomas (fr, es, en, de, it, pt).
 
 ---
 
@@ -111,7 +113,9 @@ Biblioteca de medios (arrastrar y soltar, textos alternativos, detección de las
 | Escribir un artículo | Panel › **Escribir un artículo** |
 | Pedirle a la IA un artículo, una página o una imagen | Campo **«¿Qué quieres crear hoy?»** del panel, o **✨ Asistente IA** (`Ctrl+J`) |
 | Editar una página desde el sitio | Botón **✏️ Editar** (visible solo cuando has iniciado sesión) |
-| Cambiar el logo, el color, las fuentes | Ajustes › Apariencia |
+| Cambiar el tema, el logo, el color, las fuentes | Ajustes › Apariencia |
+| Abrir la tienda | Ajustes › Tienda |
+| Añadir un producto | Contenidos › **+ Producto** |
 | Elegir la página de inicio | Ajustes › General |
 | Permitir o bloquear las IA | Ajustes › IA & GEO |
 | Activar el asistente IA | Ajustes › Asistente IA |
@@ -122,6 +126,78 @@ Biblioteca de medios (arrastrar y soltar, textos alternativos, detección de las
 | Descargar una copia de seguridad | Seguridad › Copia de seguridad |
 
 Atajos del editor: `/` insertar un bloque · `Ctrl+S` guardar · `Ctrl+K` enlace · `Ctrl+B` negrita · `Ctrl+I` cursiva · `Intro` nuevo párrafo · `Mayús+Intro` salto de línea · `Ctrl+J` asistente IA.
+
+---
+
+## Temas
+
+Éclair incluye **6 temas**. Elige uno en **Ajustes › Apariencia**: la **vista previa en directo** muestra tu sitio real (inicio, blog, un artículo, la tienda, un producto) en ordenador o en móvil, y no se publica nada hasta que guardes. Puedes navegar por la vista previa: los enlaces se quedan dentro de ella.
+
+| Tema | Estilo | Para quién |
+|---|---|---|
+| **Éclair** | Claro, moderno y versátil: el tema original | Todo tipo de sitios |
+| **Editorial** | Estilo revista: tipografía con serifa, líneas finas, letra capitular, artículo destacado | Blogs, medios, autores |
+| **Taller** | Cálido y artesanal: tonos crema y terracota, formas suaves | Artesanos, restaurantes, bienestar |
+| **Estudio** | Portfolio minimalista: blanco y negro, títulos grandes, imágenes sin marco | Fotógrafos, diseñadores, agencias |
+| **Tienda** | Pensado para vender: fotos cuadradas, cabecera fija, botones bien visibles | Tiendas, creadores |
+| **Contraste** | Máxima legibilidad: texto grande, contrastes fuertes, enlaces subrayados | Servicios públicos, asociaciones, personas mayores |
+
+Al elegir un tema se aplican su color y sus fuentes recomendadas: puedes cambiarlos después. Dos ajustes de diseño completan el tema: la **cabecera** (logo a la izquierda y menú a la derecha, o todo centrado) y las **listas de artículos y productos** (cuadrícula de tarjetas, o lista con la imagen a la izquierda).
+
+**Por qué es ligero**: un tema de Éclair es solo una hoja de estilos de 1,5 a 3 KB que se añade a la hoja base. El HTML no cambia de un tema a otro: la velocidad, la accesibilidad, los datos estructurados y el posicionamiento siguen siendo idénticos. Solo se inserta en la página el tema activo, y el modo oscuro automático funciona con todos.
+
+---
+
+## Tienda
+
+El **modo tienda ligera** sirve para vender unas decenas de productos sin el peso de un e-commerce: sin carrito, sin cuentas de cliente, sin base de datos, ningún dato bancario en tu servidor. Cada producto tiene su ficha, optimizada para Google y las IA, y su botón **Comprar** lleva a un **enlace de pago de Stripe** (Payment Links): Stripe cobra, envía los recibos y gestiona los reembolsos.
+
+### Abrir la tienda
+
+1. **Publica tu aviso legal** (la instalación creó un esqueleto que completar) **y tus condiciones generales de venta**. La tienda no se abre sin estas dos páginas: haz que las revisen, te comprometen legalmente como vendedor.
+2. En **Ajustes › Tienda**: elige esas dos páginas, la moneda, los gastos de envío y el plazo de entrega, los países de envío y el plazo de devolución (en la UE, la venta a distancia da un plazo de desistimiento de 14 días como mínimo, salvo excepciones como un producto personalizado).
+3. Haz clic en **Crear la página de agradecimiento**: Stripe redirigirá allí a tus clientes después del pago.
+4. Activa **Tienda abierta**, guarda y añade la tienda al menú (Menús › Tienda).
+
+El catálogo está en la dirección `/tienda` (`/boutique`, `/shop`, `/negozio` o `/loja` según el idioma del sitio), que puedes cambiar; si la cambias, las direcciones antiguas se redirigen.
+
+### Crear una ficha de producto
+
+Contenidos › **+ Producto**. En la parte superior del editor, la ficha de producto:
+
+- **Precio** y **precio tachado** (opcional: el descuento se muestra en porcentaje), **disponibilidad** (en stock, agotado, reserva).
+- **Enlace de pago**: el enlace de Stripe del producto (`https://buy.stripe.com/…`).
+- **Fotos**: la primera es la principal (Google, redes sociales); procura tener al menos 3 vistas.
+- **Variantes** (talla, color…): cada una puede tener su precio y su enlace. En el sitio, la elección se hace sin JavaScript.
+- **Detalles para Google Shopping**: marca, referencia, código de barras (GTIN/EAN), estado (nuevo, usado, reacondicionado), producto digital o servicio (sin envío).
+
+Debajo, describe el producto con los bloques de siempre y clasifícalo en una **categoría de productos** (Categorías › «Agrupa: Productos (tienda)»). El análisis SEO comprueba además el precio, el enlace de pago, el número de fotos y los identificadores. Para destacar productos en una página, añade el bloque **Productos**.
+
+Con el asistente IA: adjunta una foto y pide «Crea la ficha del producto de la foto adjunta. Precio: 29,90 €». Redacta un borrador completo, pero **nunca se inventa un precio, un descuento ni un enlace de pago**: lo que falte, lo completas tú.
+
+### Conectar Stripe (Payment Links)
+
+1. En Stripe, abre **Payment Links** y crea un enlace: producto, precio y, si hace falta, la recogida de la dirección de envío.
+2. En la pestaña **After the payment**, elige redirigir al cliente a tu página de agradecimiento (su dirección aparece en Ajustes › Tienda).
+3. En la configuración de Stripe (**Customer emails**), activa los recibos de los pagos realizados correctamente.
+4. Copia el enlace y pégalo en la ficha del producto. Éclair le añade la referencia del producto (`client_reference_id`): cada pago indica qué se ha comprado.
+
+Cada pedido te llega a Stripe (y por correo electrónico si lo has activado): tú lo preparas y lo envías, y Stripe gestiona el reembolso si hace falta. Otro proveedor de pagos también sirve, siempre que su enlace de pago empiece por `https://`.
+
+### Lo que Éclair hace para Google y las IA
+
+- **Datos estructurados** Product y Offer en cada ficha (ProductGroup para las variantes): precio, moneda, stock, estado, marca, gastos y plazos de envío, y **política de devoluciones** a nivel de tu empresa. Es la información que Google muestra en los resultados de productos.
+- **Feed de productos** `/products.xml` en formato Google Merchant Center: añádelo como fuente de productos en Merchant Center para aparecer gratis en la pestaña Shopping.
+- Categorías de productos como páginas pilar, sitemap con todas las fotos, migas de pan.
+- Para las IA: precio y disponibilidad de cada producto en `llms.txt` y en la versión Markdown de cada ficha (añade `.md` a su dirección).
+
+### ¿Cuánto cuesta?
+
+Nada por parte de Éclair. Stripe no cobra ni suscripción ni gastos de configuración, y los enlaces de pago están incluidos: solo pagas una comisión por cada pago, por ejemplo **1,5 % + 0,25 €** con una tarjeta estándar del Espacio Económico Europeo (2,8 % + 0,25 € con una tarjeta premium, 3,15 % + 0,25 € con una tarjeta de fuera del EEE, y un 2 % más si hay conversión de divisas). Tarifas de Stripe en España consultadas el 30 de octubre de 2026 en [stripe.com/es/pricing](https://stripe.com/es/pricing); pueden cambiar.
+
+### Lo que la tienda no hace
+
+No hay carrito con varios productos, ni códigos promocionales, ni cuentas de cliente, ni gestión automática del stock: la idea es que siga siendo sencillo. Si vendes cientos de referencias o necesitas esas funciones, te convendrá más un e-commerce completo (Shopify, WooCommerce, PrestaShop). Los precios que se muestran son los que introduces: muéstralos con IVA incluido si vendes a particulares.
 
 ---
 
@@ -319,6 +395,7 @@ eclair/                  ← lo que se sube al hosting
 ├── app/lib/             código (clases Eclair\…): Content, Blocks, Seo, Analyzer, Media, Auth…
 ├── app/admin/views/     pantallas del panel
 ├── app/theme/           plantillas del sitio público + theme.css (insertado en cada página)
+├── app/theme/themes/    los 5 temas opcionales (una hoja CSS cada uno, que se añade a theme.css)
 ├── app/lang/            traducciones del panel (6 idiomas, JSON comprimido); el texto francés sirve de clave
 ├── assets/admin/        CSS y JavaScript del panel (sin dependencias)
 ├── assets/site/site.js  el único script público (2,4 KB, 1,2 KB comprimido)
@@ -328,19 +405,20 @@ eclair/                  ← lo que se sube al hosting
 i18n/                    fuentes legibles de las traducciones (compiladas por tools/i18n.php)
 tests/run.php            pruebas unitarias + integración HTTP (incluidos los ataques de la auditoría de seguridad)
 tests/fake-ai.php        proveedores de IA simulados (Claude, ChatGPT, imágenes): el asistente se prueba sin clave ni gasto
+tests/shop.php           temas y tienda (fichas, Stripe, JSON-LD, feed de Merchant Center)
 tools/router.php         enrutador para el servidor integrado de PHP (desarrollo)
-tools/build.php          huellas de integridad + archivo dist/eclair-cms-<versión>.zip
+tools/build.php          huellas de integridad + archivo dist/eclair-cms-<versión>.zip (PHP compactado)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desarrollo
-php tests/run.php                                  # 299 comprobaciones unitarias y HTTP
+php tests/run.php                                  # 367 comprobaciones unitarias y HTTP
 php tools/build.php                                # archivo listo para distribuir
 ```
 
 `PHP_CLI_SERVER_WORKERS` permite que el sitio se llame a sí mismo (verificación de su dirección): con un solo proceso, la verificación simplemente falla y las redirecciones a la dirección oficial siguen desactivadas.
 
-El tema se personaliza modificando `app/theme/*.php` y `app/theme/theme.css` (guarda una copia: el control de integridad marcará esos archivos como modificados, es normal).
+El tema se personaliza modificando `app/theme/*.php`, `app/theme/theme.css` y `app/theme/themes/*.css` (guarda una copia: el control de integridad marcará esos archivos como modificados, es normal). En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios) para quedarse por debajo de 1 MB: el código fuente comentado está en GitHub.
 
 ---
 

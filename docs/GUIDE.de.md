@@ -11,11 +11,13 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 1. [Installation](#installation)
 2. [Funktionen im Detail](#funktionen-im-detail)
 3. [Éclair im Alltag](#éclair-im-alltag)
-4. [KI-Assistent](#ki-assistent)
-5. [Sicherheit](#sicherheit)
-6. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
-7. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
-8. [Für Entwickler](#für-entwickler)
+4. [Themes](#themes)
+5. [Shop](#shop)
+6. [KI-Assistent](#ki-assistent)
+7. [Sicherheit](#sicherheit)
+8. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
+9. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
+10. [Für Entwickler](#für-entwickler)
 
 ---
 
@@ -32,7 +34,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip) (402 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (415 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -64,7 +66,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 ### ⚡ Geschwindigkeit
 
 - **Automatischer statischer Cache**: Jede Seite wird einmal erzeugt und dann ausgeliefert, ohne die Anwendung zu laden. Bei jeder Änderung leert sich der Cache von selbst (und zum geplanten Zeitpunkt eines geplanten Artikels).
-- **CSS direkt in der Seite** (≈ 12 KB minifiziert), Systemschriften: keine blockierenden Anfragen, keine Layoutverschiebungen.
+- **CSS direkt in der Seite** (17 bis 23 KB je nach Theme und Shop, 5 bis 6 KB komprimiert), Systemschriften: keine blockierenden Anfragen, keine Layoutverschiebungen.
 - **Bilder beim Hochladen optimiert**: verkleinert (maximal 2000 px), als **responsives WebP** bereitgestellt (480, 800, 1200, 1600 px), feste Abmessungen, Lazy Loading, Priorität für das Hauptbild.
 - ETag und `304 Not Modified`-Antworten, Brotli-/Gzip-Komprimierung und ein Jahr Browser-Cache für statische Dateien (per `.htaccess`).
 
@@ -73,7 +75,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 - Saubere URLs, **automatische 301-Weiterleitung**, wenn sich eine Adresse ändert, Weiterleitungsmanager (praktisch, um eine alte WordPress- oder Wix-Website zu übernehmen).
 - Titel, Meta-Beschreibung und **Live-Vorschau in Google** im Editor, mit Zeichenzählern.
 - **SEO-Analyse in Echtzeit** mit Score: Länge von Titel und Beschreibung, Fokus-Keyphrase (Titel, URL, Einleitung, Zwischenüberschriften, Dichte), Wortanzahl, Struktur, Alternativtexte, interne Verlinkung, Beitragsbild …
-- Vollständige **strukturierte Daten in JSON-LD**: WebSite (+ Suche), Organization / Person / LocalBusiness (Adresse, Öffnungszeiten, Social-Media-Profile), WebPage / AboutPage / ContactPage, BlogPosting (Autor, Daten, Rubrik), BreadcrumbList, FAQPage, ProfilePage.
+- Vollständige **strukturierte Daten in JSON-LD**: WebSite (+ Suche), Organization / Person / LocalBusiness (Adresse, Öffnungszeiten, Social-Media-Profile, Rückgabebedingungen), WebPage / AboutPage / ContactPage, BlogPosting (Autor, Daten, Rubrik), BreadcrumbList, FAQPage, ProfilePage sowie für den Shop Product / ProductGroup / Offer (Preis, Lagerbestand, Versand).
 - XML-Sitemap mit Bildern und `hreflang`, robots.txt, vollständiger RSS-Feed, Open Graph und Twitter Cards (**Vorschaubild 1200×630, automatisch erzeugt**), Breadcrumbs, kanonische URLs.
 - Eine einzige Adresse pro Inhalt: Weiterleitungen für HTTPS, mit/ohne www, abschließenden Schrägstrich, Großbuchstaben, `index.php`.
 - **IndexNow**: Bing, Yandex, Seznam … werden bei jeder Veröffentlichung benachrichtigt.
@@ -92,7 +94,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 
 ### ✍️ Block-Editor
 
-- 17 Blöcke: Text, Zwischenüberschrift (H2–H4), Liste, Zitat, Bild, Hinweisbox, FAQ, Tabelle, Button, YouTube-/Vimeo-Video (ohne Cookies vor dem Klick), Code, Trennlinie, Hero, Vorteile, Team (Porträts, Funktionen, Kurzvorstellungen), neueste Artikel, Kontaktformular.
+- 18 Blöcke: Text, Zwischenüberschrift (H2–H4), Liste, Zitat, Bild, Hinweisbox, FAQ, Tabelle, Button, YouTube-/Vimeo-Video (ohne Cookies vor dem Klick), Code, Trennlinie, Hero, Vorteile, Team (Porträts, Funktionen, Kurzvorstellungen), neueste Artikel, Produkte (Schaufenster des Shops), Kontaktformular.
 - Tippe **`/`** in eine leere Zeile, um einen Block auszuwählen, Drag-and-drop, Formatierungsleiste (fett, kursiv, Link, Code, Hervorhebung).
 - **Unterstützte interne Links**: Während du einen Link eingibst, schlägt der Editor deine Seiten und Artikel vor (interne Verlinkung in 2 Sekunden).
 - **Intelligentes Einfügen** aus Word, Google Docs oder einer Webseite: Überschriften, Listen, Tabellen und Fettdruck werden zu sauberen Blöcken.
@@ -100,7 +102,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 
 ### 🧩 Alles Weitere
 
-Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs per Drag-and-drop (Kopf- und Fußzeile), „Säulen“-Kategorien für ein Themencluster, Suche auf der Website, Kontaktformular gegen Spam **ohne Captcha** (Honeypot-Feld, Token, Limits pro Netzwerk und pro Tag) mit Posteingang, Konten für Administratoren und Redakteure, automatischer Dark Mode, 6 Systemschriften, Hauptfarbe mit garantiertem WCAG-Kontrast, Verwaltung in 7 Sprachen (Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Chinesisch), öffentliche Website in 6 Sprachen (fr, es, en, de, it, pt).
+Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs per Drag-and-drop (Kopf- und Fußzeile), „Säulen“-Kategorien für ein Themencluster, Suche auf der Website, Kontaktformular gegen Spam **ohne Captcha** (Honeypot-Feld, Token, Limits pro Netzwerk und pro Tag) mit Posteingang, Konten für Administratoren und Redakteure, 6 Themes mit Live-Vorschau, automatischer Dark Mode, 6 Systemschriften, Hauptfarbe mit garantiertem WCAG-Kontrast, Verwaltung in 7 Sprachen (Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Chinesisch), öffentliche Website in 6 Sprachen (fr, es, en, de, it, pt).
 
 ---
 
@@ -111,7 +113,9 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Einen Beitrag schreiben | Dashboard › **Beitrag schreiben** |
 | Die KI um einen Beitrag, eine Seite oder ein Bild bitten | Feld **„Was möchtest du heute erstellen?“** im Dashboard oder **✨ KI-Assistent** (`Strg+J`) |
 | Eine Seite direkt auf der Website bearbeiten | Schaltfläche **✏️ Bearbeiten** (nur sichtbar, wenn du angemeldet bist) |
-| Logo, Farbe, Schriften ändern | Einstellungen › Design |
+| Theme, Logo, Farbe, Schriften ändern | Einstellungen › Design |
+| Den Shop öffnen | Einstellungen › Shop |
+| Ein Produkt hinzufügen | Inhalte › **+ Produkt** |
 | Die Startseite festlegen | Einstellungen › Allgemein |
 | KI zulassen oder sperren | Einstellungen › KI & GEO |
 | Den KI-Assistenten aktivieren | Einstellungen › KI-Assistent |
@@ -122,6 +126,78 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Ein Backup herunterladen | Sicherheit › Backup |
 
 Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` Link · `Strg+B` fett · `Strg+I` kursiv · `Enter` neuer Absatz · `Umschalt+Enter` Zeilenumbruch · `Strg+J` KI-Assistent.
+
+---
+
+## Themes
+
+Éclair enthält **6 Themes**. Wähle eines unter **Einstellungen › Design** aus: Die **Live-Vorschau** zeigt deine echte Website (Startseite, Blog, einen Beitrag, den Shop, ein Produkt) in der Desktop- oder Mobilansicht, und nichts wird veröffentlicht, bevor du speicherst. Du kannst in der Vorschau navigieren: Links bleiben in der Vorschau.
+
+| Theme | Stil | Für wen |
+|---|---|---|
+| **Éclair** | Klar, modern und vielseitig: das Original-Theme | Alle Websites |
+| **Editorial** | Magazin-Look: Serifenschrift, feine Linien, Initiale, hervorgehobener Beitrag | Blogs, Medien, Autoren |
+| **Atelier** | Warm und handgemacht: Creme- und Terrakottatöne, weiche Formen | Handwerksbetriebe, Restaurants, Wellness |
+| **Studio** | Minimalistisches Portfolio: Schwarz-Weiß, große Überschriften, Bilder ohne Rahmen | Fotografen, Designer, Agenturen |
+| **Shop** | Zum Verkaufen gemacht: quadratische Fotos, fixierter Header, markante Buttons | Shops, Kreative |
+| **Kontrast** | Maximale Lesbarkeit: große Schrift, starke Kontraste, unterstrichene Links | Öffentliche Einrichtungen, Vereine, Senioren |
+
+Wenn du ein Theme auswählst, werden seine Farbe und seine empfohlenen Schriftarten übernommen: Du kannst sie danach ändern. Zwei Layout-Einstellungen ergänzen das Theme: der **Header** (Logo links und Menü rechts oder alles zentriert) und die **Beitrags- und Produktlisten** (Kartenraster oder Liste mit dem Bild links).
+
+**Warum das leicht bleibt**: Ein Éclair-Theme ist nur ein Stylesheet von 1,5 bis 3 KB, das zum Basis-Stylesheet hinzukommt. Das HTML ändert sich von Theme zu Theme nicht: Geschwindigkeit, Barrierefreiheit, strukturierte Daten und SEO bleiben gleich. Nur das aktive Theme wird in die Seite eingefügt, und der automatische Dark Mode funktioniert mit jedem Theme.
+
+---
+
+## Shop
+
+Der **schlanke Shop-Modus** ist dafür gedacht, ein paar Dutzend Produkte ohne den Ballast eines klassischen Onlineshops zu verkaufen: kein Warenkorb, keine Kundenkonten, keine Datenbank, keine Bankdaten auf deinem Server. Jedes Produkt hat seine eigene Seite, optimiert für Google und KI, und sein **Kauf-Button** führt zu einem **Stripe-Zahlungslink** (Payment Links): Stripe wickelt die Zahlung ab, verschickt die Belege und kümmert sich um Rückerstattungen.
+
+### Shop öffnen
+
+1. **Veröffentliche dein Impressum** (die Installation hat dafür ein Gerüst angelegt, das du ergänzen musst) **und deine Allgemeinen Geschäftsbedingungen (AGB)**. Ohne sie lässt sich der Shop nicht öffnen: Lass sie prüfen, denn als Verkäufer haftest du für ihren Inhalt.
+2. Unter **Einstellungen › Shop**: Wähle diese beiden Seiten aus und lege die Währung, die Versandkosten und Lieferzeiten, die Lieferländer und die Rückgabefrist fest (beim Fernabsatz in der EU gilt ein Widerrufsrecht von mindestens 14 Tagen, mit Ausnahmen wie personalisierten Produkten).
+3. Klicke auf **Danke-Seite erstellen**: Dorthin leitet Stripe deine Kunden nach der Zahlung weiter.
+4. Aktiviere **Shop geöffnet**, speichere und füge den Shop dann zum Menü hinzu (Menüs › Shop).
+
+Der Katalog liegt unter der Adresse `/shop` (`/boutique`, `/tienda`, `/negozio` oder `/loja` je nach Sprache der Website) und lässt sich ändern; wenn du sie änderst, werden die alten Adressen weitergeleitet.
+
+### Eine Produktseite erstellen
+
+Inhalte › **+ Produkt**. Ganz oben im Editor stehen die Angaben der Produktseite:
+
+- **Preis** und **Streichpreis** (optional: Der Rabatt wird in Prozent angezeigt), **Verfügbarkeit** (auf Lager, ausverkauft, Vorbestellung).
+- **Zahlungslink**: der Stripe-Link des Produkts (`https://buy.stripe.com/…`).
+- **Fotos**: Das erste ist das Hauptfoto (Google, soziale Netzwerke); Ziel sind mindestens 3 Ansichten.
+- **Varianten** (Größe, Farbe …): Jede Variante kann einen eigenen Preis und Link haben. Auf der Website funktioniert die Auswahl ohne JavaScript.
+- **Details für Google Shopping**: Marke, Artikelnummer, Barcode (GTIN/EAN), Zustand (neu, gebraucht, generalüberholt), digitales Produkt oder Dienstleistung (kein Versand).
+
+Darunter beschreibst du das Produkt mit den gewohnten Blöcken und ordnest es einer **Produktkategorie** zu (Kategorien › „Sie enthält: Produkte (Shop)“). Die SEO-Analyse prüft zusätzlich Preis, Zahlungslink, Anzahl der Fotos und Produktkennungen. Um Produkte auf einer Seite hervorzuheben, füge den Block **Produkte** hinzu.
+
+Mit dem KI-Assistenten: Hänge ein Foto an und schreibe „Erstelle eine Produktseite zum angehängten Foto. Preis: 29,90 €“. Er schreibt einen vollständigen Entwurf, **erfindet aber nie einen Preis, einen Rabatt oder einen Zahlungslink**: Was fehlt, ergänzt du selbst.
+
+### Stripe verbinden (Payment Links)
+
+1. Öffne in Stripe **Payment Links** und erstelle einen Link: Produkt, Preis und bei Bedarf die Erfassung der Lieferadresse.
+2. Lege auf dem Tab **After the payment** fest, dass Kunden auf deine Danke-Seite weitergeleitet werden (ihre Adresse wird unter Einstellungen › Shop angezeigt).
+3. Aktiviere in den Stripe-Einstellungen (**Customer emails**) die Belege für erfolgreiche Zahlungen.
+4. Kopiere den Link und füge ihn in die Produktseite ein. Éclair hängt die Produktreferenz an (`client_reference_id`): Bei jeder Zahlung siehst du, was gekauft wurde.
+
+Jede Bestellung kommt in Stripe an (und per E-Mail, wenn du das aktiviert hast): Du verpackst und versendest, Stripe kümmert sich bei Bedarf um die Rückerstattung. Ein anderer Zahlungsanbieter funktioniert ebenfalls, solange sein Zahlungslink mit `https://` beginnt.
+
+### Was Éclair für Google und KI tut
+
+- **Strukturierte Daten** Product und Offer auf jeder Produktseite (ProductGroup für Varianten): Preis, Währung, Lagerbestand, Zustand, Marke, Versandkosten und Lieferzeiten sowie die **Rückgabebedingungen** auf Ebene deines Unternehmens. Das sind die Informationen, die Google in seinen Produktergebnissen anzeigt.
+- **Produktfeed** `/products.xml` im Format von Google Merchant Center: Füge ihn im Merchant Center als Produktquelle hinzu, um kostenlos auf dem Tab „Shopping“ zu erscheinen.
+- Produktkategorien als „Säulen“-Seiten, Sitemap mit allen Fotos, Breadcrumbs.
+- Für KI: Preis und Verfügbarkeit jedes Produkts in `llms.txt` und in der Markdown-Version jeder Produktseite (hänge `.md` an ihre Adresse an).
+
+### Was kostet das?
+
+Éclair selbst kostet nichts. Stripe verlangt weder ein Abo noch eine Einrichtungsgebühr, und Zahlungslinks sind inklusive: Du zahlst nur eine Gebühr pro Zahlung, zum Beispiel **1,5 % + 0,25 €** für eine Standardkarte aus dem Europäischen Wirtschaftsraum (2,8 % + 0,25 € für eine Premiumkarte, 3,15 % + 0,25 € für eine Karte von außerhalb des EWR, plus 2 % bei einer Währungsumrechnung). Das sind die Preise von Stripe in Frankreich laut [stripe.com/fr/pricing](https://stripe.com/fr/pricing), Stand: 30. Oktober 2026; sie können sich ändern.
+
+### Was der Shop nicht kann
+
+Kein Warenkorb für mehrere Produkte, keine Rabattcodes, keine Kundenkonten und keine automatische Lagerverwaltung: Die Idee ist, einfach zu bleiben. Wenn du Hunderte Artikel verkaufst oder diese Funktionen brauchst, ist ein vollwertiger Onlineshop (Shopify, WooCommerce, PrestaShop) besser geeignet. Angezeigt werden die Preise, die du eingibst: Gib sie inklusive Mehrwertsteuer an, wenn du an Privatkunden verkaufst.
 
 ---
 
@@ -319,6 +395,7 @@ eclair/                  ← das kommt auf den Webspace
 ├── app/lib/             Code (Klassen Eclair\…): Content, Blocks, Seo, Analyzer, Media, Auth …
 ├── app/admin/views/     Bildschirme der Verwaltung
 ├── app/theme/           Vorlagen der öffentlichen Website + theme.css (in jede Seite eingefügt)
+├── app/theme/themes/    die 5 optionalen Themes (je eine CSS-Datei, die theme.css ergänzt)
 ├── app/lang/            Übersetzungen der Verwaltung (6 Sprachen, komprimiertes JSON); der französische Text dient als Schlüssel
 ├── assets/admin/        CSS und JavaScript der Verwaltung (keine Abhängigkeiten)
 ├── assets/site/site.js  das einzige öffentliche Skript (2,4 KB, 1,2 KB komprimiert)
@@ -329,18 +406,19 @@ i18n/                    lesbare Quellen der Übersetzungen (kompiliert von tool
 tests/run.php            Unit-Tests + HTTP-Integration (einschließlich der Angriffe aus dem Sicherheitsaudit)
 tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der Assistent wird ohne Schlüssel und ohne Kosten getestet
 tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
-tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip
+tests/shop.php           Themes und Shop (Produktseiten, Stripe, JSON-LD, Merchant-Center-Feed)
+tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 299 Unit- und HTTP-Prüfungen
+php tests/run.php                                  # 367 Unit- und HTTP-Prüfungen
 php tools/build.php                                # Archiv zum Verteilen
 ```
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Das Theme passt du an, indem du `app/theme/*.php` und `app/theme/theme.css` bearbeitest (mach vorher eine Sicherung: Die Integritätsprüfung meldet diese Dateien als geändert, das ist normal).
+Das Theme passt du an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (mach vorher eine Sicherung: Die Integritätsprüfung meldet diese Dateien als geändert, das ist normal). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), damit es unter 1 MB bleibt: Die kommentierten Quellen liegen auf GitHub.
 
 ---
 
