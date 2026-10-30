@@ -476,7 +476,7 @@ tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 374 Unit- und HTTP-Prüfungen
+php tests/run.php                                  # 435 Unit- und HTTP-Prüfungen
 php tools/build.php                                # Archiv zum Verteilen
 ```
 
