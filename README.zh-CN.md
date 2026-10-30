@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip"><img src="https://img.shields.io/badge/download-v1.3.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.3.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip"><img src="https://img.shields.io/badge/download-v1.4.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.4.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -23,6 +23,7 @@
   <a href="#3-分钟完成安装"><b>安装</b></a> ·
   <a href="#为什么选择-éclair"><b>为什么选择 Éclair</b></a> ·
   <a href="#ai-助手提需求审阅发布"><b>AI 助手</b></a> ·
+  <a href="#claude-与-chatgpt用你的订阅"><b>Claude 与 ChatGPT</b></a> ·
   <a href="#主题与商店"><b>主题与商店</b></a> ·
   <a href="#界面预览"><b>界面预览</b></a> ·
   <a href="#安全"><b>安全</b></a> ·
@@ -61,7 +62,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>416 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>432 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -115,6 +116,21 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 </table>
 
 5 分钟即可启用，详细价格请见[指南中的 AI 助手章节](docs/GUIDE.zh-CN.md#ai-助手)。
+
+## Claude 与 ChatGPT，用你的订阅
+
+<p align="center">
+  <img src="docs/images/zh-CN/frame-mcp.webp" alt="左侧是 Claude 请求访问网站的页面：读取内容、创建草稿、提出修改建议，绝不发布或删除。右侧是 设置 › AI 助手：MCP 连接器地址，以及已连接的应用 Claude 和 ChatGPT" width="100%">
+</p>
+
+你已经在用 Claude 或 ChatGPT 工作了？用内置的 **MCP 连接器**把它们接入你的网站：在 设置 › AI 助手 中启用它，把它的地址粘贴到 Claude 或 ChatGPT 中，再确认授权。你的 AI 会读取你的网站，获取你的编辑风格档案以及 Éclair 的 SEO 和 GEO 规则，撰写草稿，并为你已发布的页面准备修改，供你在编辑器中核对。**你的订阅负责干活：无需 API 密钥，网站零成本。**
+
+- **任何内容都不会被发布或删除**：只有草稿和修改建议，发布由你在 Éclair 中完成。
+- **访问由你掌控**：采用带 PKCE 的 OAuth 2.1，登录（含双重认证）后才由你授权，一键即可撤销访问，修改密码时也会自动撤销。
+- **轻量**：MCP 服务器和授权功能加起来不到 25 KB 的 PHP 代码，零依赖。
+- **内置助手中也能用**：使用你的 Claude 和 ChatGPT API 密钥，每次对话都可以选择 AI。
+
+3 分钟即可完成设置，支持的订阅方案请见[指南中的 MCP 连接器章节](docs/GUIDE.zh-CN.md#mcp-连接器claude-与-chatgpt)。
 
 ## 主题与商店
 
@@ -174,7 +190,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 416 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 432 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -270,6 +286,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 - **公开网站全面防护**：严格的 Content-Security-Policy，基于白名单的内容过滤，没有开放重定向，图片重新编码。
 - **受保护的安装过程**：2 小时安装时限，并且在任何重定向之前由服务器自行验证网站地址。
 - **安全页面**：文件完整性检查、目录保护测试、安全日志、一键备份。
+- **MCP 连接器默认关闭**：启用后，采用带 PKCE 的 OAuth 2.1，须登录后授权，令牌经过哈希处理且可撤销，无法发布或删除任何内容。
 
 > [!NOTE]
 > **攻击性安全审计。** 竞态条件、暴力破解、重定向、注入、恶意文件：共发现 17 个漏洞（2 个高危、7 个中危、8 个低危），已全部修复。随后在修复后的版本上重放了 13 个攻击场景：全部被成功拦截。自动化测试（`php tests/run.php`）覆盖了其中的大部分。
@@ -282,7 +299,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip)（416 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip)（432 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
@@ -300,6 +317,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 - [日常使用](docs/GUIDE.zh-CN.md#日常使用)
 - [主题](docs/GUIDE.zh-CN.md#主题)和[商店](docs/GUIDE.zh-CN.md#商店)：实时预览、商品详情页、Stripe、Google Shopping
 - [AI 助手](docs/GUIDE.zh-CN.md#ai-助手)：启用、编辑风格档案、费用、安全
+- [MCP 连接器](docs/GUIDE.zh-CN.md#mcp-连接器claude-与-chatgpt)：用你的订阅使用 Claude 和 ChatGPT
 - [更新、备份、迁移](docs/GUIDE.zh-CN.md#更新备份迁移)
 - [故障排除](docs/GUIDE.zh-CN.md#故障排除)：忘记密码、404 或 500 错误、Nginx……
 
@@ -309,7 +327,7 @@ PHP 8.1+，不依赖框架，也不需要 Composer：`eclair/app/lib/` 中是简
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                                           # 374 项单元与 HTTP 检查
+php tests/run.php                                                           # 435 项单元与 HTTP 检查
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 

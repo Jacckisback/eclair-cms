@@ -14,10 +14,11 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 4. [Themes](#themes)
 5. [Shop](#shop)
 6. [KI-Assistent](#ki-assistent)
-7. [Sicherheit](#sicherheit)
-8. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
-9. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
-10. [Für Entwickler](#für-entwickler)
+7. [MCP-Connector (Claude und ChatGPT)](#mcp-connector-claude-und-chatgpt)
+8. [Sicherheit](#sicherheit)
+9. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
+10. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
+11. [Für Entwickler](#für-entwickler)
 
 ---
 
@@ -34,7 +35,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (416 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -205,7 +206,7 @@ Kein Warenkorb für mehrere Produkte, keine Rabattcodes, keine Kundenkonten und 
 
 Der Assistent schreibt Entwürfe, verbessert deine Texte und erstellt Bilder **im Ton deiner Website**. Du sprichst mit ihm in natürlicher Sprache, wie mit einem Kollegen: „Schreib einen Artikel über die Wahl der Markenfarben, mit einem Bild.“ Er prüft zuerst, ob es zum Thema schon einen Artikel gibt, erstellt das Bild, schreibt den vollständigen Entwurf (Titel, „Das Wichtigste“, Zwischenüberschriften, Listen oder Tabellen, FAQ, Meta-Beschreibung, interne Links) und legt ihn dir dann mit seinen SEO- und GEO-Scores vor. **Nichts wird ohne deinen Klick veröffentlicht.**
 
-Er funktioniert mit **Claude** (Anthropic) oder **ChatGPT** (OpenAI) und deinem eigenen API-Schlüssel: kein Éclair-Abo, du bezahlst direkt beim Anbieter, und zwar nur deinen tatsächlichen Verbrauch.
+Er funktioniert mit **Claude** (Anthropic) oder **ChatGPT** (OpenAI) und deinem eigenen API-Schlüssel: kein Éclair-Abo, du bezahlst direkt beim Anbieter, und zwar nur deinen tatsächlichen Verbrauch. Du arbeitest lieber mit deinem Claude- oder ChatGPT-Abo? Dann nutze den [MCP-Connector](#mcp-connector-claude-und-chatgpt).
 
 ### Den Assistenten aktivieren (5 Minuten)
 
@@ -215,6 +216,8 @@ Er funktioniert mit **Claude** (Anthropic) oder **ChatGPT** (OpenAI) und deinem 
 4. Klicke auf **Mein Profil aus meiner Website entwerfen**, lies den Entwurf durch, passe ihn an und speichere.
 
 Danach erscheint der Assistent im Menü (**✨ KI-Assistent**, `Strg+J`), im Editor und im Dashboard. Redakteure können ihn nutzen, wenn du es erlaubst.
+
+**Claude oder ChatGPT, nach Wahl**: Speichere beide Schlüssel, dann erscheint oben im Assistenten eine Auswahl, mit der du die KI für jede Unterhaltung festlegst. Éclair merkt sich deine Entscheidung für dein Konto, Feinschliff im Editor inklusive; der in den Einstellungen gewählte Anbieter bleibt voreingestellt.
 
 ### Das Redaktionsprofil
 
@@ -284,6 +287,66 @@ Ein Bild kostet etwa 0,05 $ (FLUX 3 mit 1 Megapixel: 0,048 $). Öffentliche Prei
 - **Die Antwort erscheint auf einmal statt nach und nach**: Ein Puffer deines Hosters hält den Datenstrom zurück. Alles funktioniert, nur ohne den „Live“-Effekt. Füge unter Nginx `fastcgi_buffering off;` in den PHP-Block ein.
 - **„… ist nicht erreichbar“**: Dein Hoster blockiert ausgehende Verbindungen. Bitte ihn, `api.anthropic.com` bzw. `api.openai.com` (und den gewählten Bildgenerator) freizugeben.
 - **Der Assistent wird nicht angezeigt**: Er braucht die PHP-Erweiterung cURL und Verschlüsselung (sodium oder openssl), die fast alle Hoster bereitstellen; der Installationsassistent prüft das.
+
+---
+
+## MCP-Connector (Claude und ChatGPT)
+
+Du arbeitest lieber in **Claude** oder **ChatGPT**, mit dem Abo, das du schon hast? Der MCP-Connector (*Model Context Protocol*, der offene Standard, der KI mit Werkzeugen verbindet) öffnet ihnen deine Website: Sie lesen deine Inhalte, schreiben Entwürfe in deinem Ton und bereiten Änderungen vor. **Kein API-Schlüssel, keine Kosten für die Website**: Die Arbeit erledigt dein Abo. Wie beim integrierten Assistenten wird ohne dich **nichts veröffentlicht oder gelöscht**.
+
+### Den Connector aktivieren (3 Minuten)
+
+1. Deine Website muss über **HTTPS** laufen: Claude und ChatGPT lehnen andere Adressen ab.
+2. Aktiviere unter **Einstellungen › KI-Assistent** unten auf der Seite **MCP-Verbindungen erlauben**, speichere und kopiere dann die **Adresse des Connectors** (`https://beispiel.de/_eclair/mcp`).
+3. Füge sie in deiner KI hinzu:
+   - **Claude** (Web und Desktop-App): *Anpassen › Connectors › Hinzufügen › Benutzerdefinierten Connector hinzufügen*, gib einen Namen ein („Meine Website“), füge die Adresse ein, klicke auf **Weiter**, übernimm die erkannten Authentifizierungseinstellungen und klicke dann auf **Hinzufügen**. Bei den Tarifen Team und Enterprise fügt ihn ein Inhaber der Organisation hinzu; die Mitglieder klicken danach auf **Verbinden**.
+   - **ChatGPT** (im Web): *Plugins › + › Benutzerdefinierten MCP-Server hinzufügen*, gib einen Namen ein, füge die Adresse unter **Verbindung** ein, wähle die Authentifizierung **OAuth**, akzeptiere den Warnhinweis und erstelle dann das Plugin.
+4. Eine Seite deiner Website öffnet sich: Melde dich bei Bedarf an (Zwei-Faktor-Authentifizierung inklusive), prüfe die App und ihre Rücksprungadresse (`claude.ai` oder `chatgpt.com`) und klicke dann auf **Erlauben**.
+
+Fertig. Frag zum Beispiel: „Sieh dir meine Website an und schlag mir 5 Artikelideen vor“, „Schreib als Entwurf einen Artikel über die Wartung eines E-Bikes“ oder „Lies meine Startseite durch und schlag einen direkteren Aufhänger vor“.
+
+**Kompatible Tarife** (geprüft am 30. Oktober 2026):
+
+| Tarif | Website lesen | Entwürfe und Vorschläge |
+|---|---|---|
+| **Claude** Free, Pro, Max, Team, Enterprise | ✅ | ✅ (Free: nur ein benutzerdefinierter Connector) |
+| **ChatGPT** Business, Enterprise, Edu | ✅ | ✅ |
+| **ChatGPT** Pro | ✅ | ❌ (nur Lesezugriff) |
+| **ChatGPT**, andere Tarife | in der Hilfe von OpenAI nicht vorgesehen | |
+
+Quellen: [Claude-Hilfe zu benutzerdefinierten Connectors](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp), [OpenAI-Hilfe zu benutzerdefinierten MCP-Servern](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt) und [OpenAI-Dokumentation](https://developers.openai.com/api/docs/guides/custom-mcp-server). Diese Tarife ändern sich schnell: Prüfe das in deiner App.
+
+### Was die KI tun kann
+
+Sie beginnt mit `get_site` und nutzt dann dieselben Werkzeuge wie der integrierte Assistent:
+
+| Werkzeug | Aufgabe |
+|---|---|
+| `get_site` | Inventar der Website (Seiten, Beiträge, Produkte, Kategorien und ihre IDs), Redaktionsprofil, SEO- und GEO-Regeln |
+| `search_content` · `get_content` | einen Inhalt suchen und als Markdown lesen |
+| `find_media` | ein Bild in der Mediathek suchen |
+| `create_draft` | einen Beitrag, eine Seite oder eine Produktseite **als Entwurf** erstellen |
+| `update_content` | einen Entwurf ändern; bei einem veröffentlichten Inhalt einen **Vorschlag** vorbereiten |
+| `generate_image` | ein Bild erstellen, nur wenn ein Bildgenerator eingerichtet ist (abgerechnet über deinen Schlüssel, innerhalb deines KI-Budgets) |
+
+Jeder Entwurf kommt mit einem Link zurück, um ihn **in Éclair zu öffnen**; jeder Vorschlag mit einem Link, der ihn **im Editor übernimmt**, ohne ihn zu speichern: Du prüfst und speicherst dann (oder du schließt den Editor, und nichts ändert sich). Claude und ChatGPT fragen außerdem vor jeder Schreibaktion nach deiner Zustimmung, je nach ihren eigenen Einstellungen.
+
+### Sicherheit des Connectors
+
+- **Standardmäßig deaktiviert**: Solange er es ist, antwortet keine seiner Adressen.
+- **OAuth 2.1**: PKCE verpflichtend, automatische Registrierung der App, ohne etwas zu speichern, Rücksprungadresse auf exakte Übereinstimmung geprüft.
+- **Deine ausdrückliche Zustimmung**, nachdem du dich bei deinem Konto angemeldet hast (Zwei-Faktor-Authentifizierung inklusive), auf einer Seite, die die Adresse deiner Verwaltung nie verrät.
+- **Tokens mit einer Stunde Gültigkeit**, automatisch erneuert und bei jeder Erneuerung ersetzt; nach 60 Tagen ohne Nutzung musst du erneut zustimmen. Gespeichert werden nur ihre Hashes, von Backups ausgeschlossen.
+- **Zugriff entziehen**: eine Schaltfläche pro App unter Einstellungen › KI-Assistent. Wenn du den Connector deaktivierst, verlieren alle Apps den Zugriff; ebenso, wenn du dein Passwort änderst oder alle deine Geräte abmeldest.
+- **Dieselben Rechte wie der integrierte Assistent**: Redakteure haben nur Zugriff, wenn „Redakteure dürfen den Assistenten nutzen“ aktiviert ist; höchstens 60 Änderungen pro Stunde und App, gegen Endlosschleifen.
+- **Was an Anthropic oder OpenAI geht**: die Inhalte, die die KI liest, um dir zu antworten, gemäß den Bedingungen deines Abos.
+
+### Wenn die Verbindung scheitert
+
+- **Die KI erreicht die Website nicht, oder die Autorisierung scheitert**: Prüfe, ob die Website über HTTPS läuft und die Adresse auf `/_eclair/mcp` endet. Halte unter Apache die `.htaccess` von Éclair aktuell: Sie leitet den Autorisierungs-Header weiter, den manche Hoster entfernen.
+- **Éclair ist in einem Unterordner installiert**: Manche Apps suchen die Autorisierung im Stammverzeichnis der Domain. Installiere Éclair besser im Stammverzeichnis einer Domain oder Subdomain.
+- **Firewall oder Bot-Schutz** (Cloudflare …): Lass `/_eclair/` und `/.well-known/` durch.
+- **Ein Vorschlag lässt sich nicht mehr übernehmen**: Der Inhalt hat sich inzwischen geändert; bitte die KI erneut um die Änderung.
 
 ---
 
@@ -406,6 +469,7 @@ i18n/                    lesbare Quellen der Übersetzungen (kompiliert von tool
 tests/run.php            Unit-Tests + HTTP-Integration (einschließlich der Angriffe aus dem Sicherheitsaudit)
 tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der Assistent wird ohne Schlüssel und ohne Kosten getestet
 tests/shop.php           Themes und Shop (Produktseiten, Stripe, JSON-LD, Merchant-Center-Feed)
+tests/mcp.php            MCP-Connector (OAuth, PKCE, Protokoll, Widerruf) und Wahl der KI
 tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
 tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert)
 ```
