@@ -405,8 +405,8 @@ eclair/                  ← das kommt auf den Webspace
 i18n/                    lesbare Quellen der Übersetzungen (kompiliert von tools/i18n.php)
 tests/run.php            Unit-Tests + HTTP-Integration (einschließlich der Angriffe aus dem Sicherheitsaudit)
 tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der Assistent wird ohne Schlüssel und ohne Kosten getestet
-tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
 tests/shop.php           Themes und Shop (Produktseiten, Stripe, JSON-LD, Merchant-Center-Feed)
+tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
 tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert)
 ```
 

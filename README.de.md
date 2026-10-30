@@ -128,7 +128,7 @@ Aktivierung in 5 Minuten und Preise im Detail: siehe [Handbuch, Abschnitt KI-Ass
   <img src="docs/images/shop.webp" alt="Eine Éclair-Produktseite: Fotogalerie, Streichpreis, Varianten, Kauf-Button mit Stripe-Anbindung, Versand und Rückgabe; rechts der Katalog auf dem Smartphone" width="100%">
 </p>
 
-**Schlanker Shop-Modus**: Verkaufe deine Produkte ohne den Ballast eines klassischen Onlineshops. Jedes Produkt hat seine eigene Seite, sein **Kauf-Button** führt zu einem **Stripe-Zahlungslink**, und das war's: kein Warenkorb, keine Datenbank, keine Bankdaten auf deinem Server.
+**Schlanker Shop-Modus**: Verkaufe deine Produkte ohne den Ballast eines klassischen Onlineshops. Jedes Produkt hat seine eigene Seite, sein **Kauf-Button** führt zu einem **Stripe-Zahlungslink**, und das war's: kein Warenkorb, keine Datenbank, keine Bankdaten auf deinem Server. Einzige Kosten: die Stripe-Gebühr von **1,5 % + 0,25 €** pro Zahlung mit einer europäischen Standardkarte[^stripe].
 
 <table>
   <tr>
@@ -138,7 +138,7 @@ Aktivierung in 5 Minuten und Preise im Detail: siehe [Handbuch, Abschnitt KI-Ass
     </td>
     <td width="50%" valign="top">
       <h3>💳 Bezahlt über Stripe</h3>
-      Ein <b>Stripe-Zahlungslink</b> pro Produkt (oder pro Variante): Stripe wickelt die Zahlung ab, verschickt die Belege und kümmert sich um Rückerstattungen. Kein Abo: nur die Stripe-Gebühr von <b>1,5 % + 0,25 €</b> pro Zahlung mit einer europäischen Standardkarte<a href="#user-content-fn-stripe">¹</a>.
+      Ein <b>Stripe-Zahlungslink</b> pro Produkt (oder pro Variante): Stripe wickelt die Zahlung ab, verschickt die Belege und kümmert sich um Rückerstattungen. <b>Kein Abo</b>, weder bei Éclair noch bei Stripe.
     </td>
   </tr>
   <tr>
