@@ -36,6 +36,24 @@ Theme::preview(['dark' => 'light']);
 check('mode sombre désactivé : bloc retiré', !str_contains(Theme::css(), 'prefers-color-scheme:dark'));
 Theme::preview([]);
 
+section('Thèmes : CSS personnalisé');
+$evil = Theme::cleanCss("@import url(https://evil.example/x.css);\r\n.a{color:red}</style><script>alert(1)</script>\x00\x07.b{x:y}");
+check('CSS personnalisé : impossible de refermer la balise <style>', !str_contains($evil, '<') && str_contains($evil, '.a{color:red}'));
+check('CSS personnalisé : ni @import ni caractère de contrôle', !str_contains($evil, '@import') && !str_contains($evil, 'evil.example')
+    && !preg_match('/[\x00-\x08\x0B-\x1F]/', $evil) && str_contains($evil, '.b{x:y}'));
+check('CSS personnalisé : taille bornée sans couper un caractère', strlen(Theme::cleanCss(str_repeat('é', Theme::CUSTOM_MAX))) <= Theme::CUSTOM_MAX
+    && mb_check_encoding(Theme::cleanCss(str_repeat('é', Theme::CUSTOM_MAX)), 'UTF-8'));
+Theme::saveCustom(".mon-site{color:#123456}\n/*dark*/@media (prefers-color-scheme:dark){.mon-site{color:#fff}}/*/dark*/");
+Theme::preview(['theme' => 'atelier']);
+$css = Theme::css();
+check('CSS personnalisé : rangé dans data/ et ajouté après le thème', Store::exists('custom-css') && Theme::custom() !== ''
+    && strrpos($css, '.mon-site{color:#123456}') > strpos($css, '.site-header'));
+Theme::preview(['dark' => 'light']);
+check('CSS personnalisé : ses blocs « mode sombre » suivent le réglage', !str_contains(Theme::css(), '.mon-site{color:#fff}') && str_contains(Theme::css(), '.mon-site{color:#123456}'));
+Theme::saveCustom('  ');
+Theme::preview([]);
+check('CSS personnalisé : champ vidé, fichier supprimé', !Store::exists('custom-css') && !str_contains(Theme::css(), '.mon-site'));
+
 /* ─────────────────────────── Boutique : unités ─────────────────────────── */
 section('Boutique : prix, liens, fiches produit');
 check('prix saisis : virgule, symbole, espaces', Shop::amount('1 290,5 €') === '1290.50' && Shop::amount('19.9') === '19.90' && Shop::amount('19') === '19.00');
@@ -136,6 +154,17 @@ try {
     $home = $v->req('GET', '/');
     check('thème enregistré : appliqué au site', preg_match('~<body class="[^"]*theme-studio hdr-center~', $home['body']) && $cspOk($home));
     check('thème : couleur du navigateur = accent', str_contains($home['body'], '<meta name="theme-color" content="#111111">'));
+    $look = ['theme' => 'studio', 'header' => 'center', 'cards' => 'grid', 'accent' => '#111111', 'font_head' => 'grotesque', 'font_body' => 'grotesque', 'dark' => 'auto', 'credit' => '1'];
+    $settingsForm('appearance', $look + ['custom_css' => ".maison{border:3px solid #0a7}\n</style><script>alert(1)</script>"]);
+    $home = $v->req('GET', '/');
+    check('CSS personnalisé : appliqué au site, autorisé par la CSP', str_contains($home['body'], '.maison{border:3px solid #0a7}') && $cspOk($home)
+        && substr_count($home['body'], '</style>') === 1 && !str_contains($home['body'], '<script>alert'));
+    check('CSS personnalisé : rangé avec les données (conservé par les mises à jour)', str_contains((string) @file_get_contents($copy . '/data/custom-css.php'), '.maison'));
+    check('CSS personnalisé : présent dans le formulaire', str_contains($c->req('GET', '/gestion/settings?tab=appearance')['body'], '.maison{border:3px solid #0a7}'));
+    $settingsForm('appearance', $look + ['custom_css' => str_repeat('a', Eclair\Theme::CUSTOM_MAX + 1)]);
+    check('CSS personnalisé : trop long, refusé sans rien changer', str_contains($v->req('GET', '/')['body'], '.maison{border:3px solid #0a7}'));
+    $settingsForm('appearance', $look + ['custom_css' => '']);
+    check('CSS personnalisé : vidé depuis le formulaire', !str_contains($v->req('GET', '/')['body'], '.maison') && !is_file($copy . '/data/custom-css.php'));
 
     // Boutique fermée : rien n'est publié.
     check('boutique fermée : catalogue et flux introuvables', $v->req('GET', '/boutique')['status'] === 404 && $v->req('GET', '/products.xml')['status'] === 404);

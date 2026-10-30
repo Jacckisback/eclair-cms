@@ -129,6 +129,9 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
       <option value="light"<?= $s['appearance']['dark'] === 'light' ? ' selected' : '' ?>><?= e(t('Toujours clair')) ?></option></select></label>
     <label class="field"><span class="label"><?= e(t('Texte du pied de page')) ?></span><textarea name="footer" rows="2"><?= e($s['appearance']['footer']) ?></textarea></label>
     <?= $sw('credit', (bool) $s['appearance']['credit'], t('Afficher « Propulsé par ⚡ Éclair »')) ?>
+    <label class="field"><span class="label"><?= e(t('CSS personnalisé')) ?></span>
+      <textarea name="custom_css" rows="8" class="code" spellcheck="false" autocomplete="off"><?= e(Theme::custom()) ?></textarea>
+      <span class="hint"><?= e(t('Ajouté après le thème dans chaque page, il l’emporte sur lui. Il est rangé avec tes données : les mises à jour d’Éclair le conservent. 64 Ko maximum.')) ?></span></label>
 
   <?php elseif ($tab === 'seo'): ?>
     <?= $sw('index', (bool) $s['seo']['index'], t('Visible par les moteurs de recherche'), t('Décoche pendant la construction du site : tout passe en noindex.')) ?>

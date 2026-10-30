@@ -35,7 +35,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) (433 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
@@ -115,6 +115,7 @@ Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagi
 | Chiedere all’IA un articolo, una pagina, un’immagine | Campo **«Cosa vuoi creare oggi?»** della bacheca, oppure **✨ Assistente IA** (`Ctrl+J`) |
 | Modificare una pagina dal sito | Pulsante **✏️ Modifica** (visibile solo quando hai effettuato l’accesso) |
 | Cambiare tema, logo, colore, font | Impostazioni › Aspetto |
+| Aggiungere il mio CSS | Impostazioni › Aspetto › CSS personalizzato |
 | Aprire il negozio | Impostazioni › Negozio |
 | Aggiungere un prodotto | Contenuti › **+ Prodotto** |
 | Scegliere la home page | Impostazioni › Generali |
@@ -146,6 +147,8 @@ Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K`
 Scegliendo un tema ne applichi il colore e i font consigliati: puoi cambiarli in seguito. Due impostazioni di layout completano il tema: l’**intestazione** (logo a sinistra e menu a destra, oppure tutto centrato) e gli **elenchi di articoli e prodotti** (griglia di card, oppure elenco con l’immagine a sinistra).
 
 **Perché è leggero**: un tema di Éclair è solo un foglio di stile da 1,5 a 3 KB, che si aggiunge a quello di base. Il codice HTML non cambia da un tema all’altro: velocità, accessibilità, dati strutturati e posizionamento restano identici. Nella pagina viene inserito solo il tema attivo, e la modalità scura automatica funziona con ognuno.
+
+**CSS personalizzato**: per andare oltre il tema (il colore di un pulsante, le spaziature, lo stile di un blocco), incolla le tue regole in **Impostazioni › Aspetto › CSS personalizzato**. Vengono aggiunte dopo il tema in ogni pagina, quindi hanno la precedenza, e sono salvate con i tuoi dati (`data/`): **gli aggiornamenti di Éclair le conservano**. Funzionano anche i segnaposto `/*dark*/ … /*/dark*/`: le loro regole scompaiono quando la modalità scura è impostata su «Sempre chiaro». Per sicurezza, il carattere `<` e le regole `@import` vengono rimossi; massimo 64 KB.
 
 ---
 
@@ -390,7 +393,7 @@ Ogni bozza torna con un link per **aprirla in Éclair**; ogni proposta, con un l
 **Aggiornare Éclair**:
 1. Fai un backup.
 2. Via FTP, **elimina** le cartelle `app/` e `assets/`, poi carica quelle della nuova versione insieme a `index.php` e `.htaccess` (eliminarle prima evita di lasciare vecchi file, che il controllo di integrità segnalerebbe).
-3. **Non toccare** `data/` (contenuti, impostazioni, account) né `media/` (immagini).
+3. **Non toccare** `data/` (contenuti, impostazioni, account, CSS personalizzato) né `media/` (immagini).
 4. Nel pannello: Impostazioni › Avanzate › Svuota la cache.
 
 **Traslocare su un altro hosting o dominio**: copia l’intera cartella, poi cambia l’indirizzo in Impostazioni › Generali. I link interni si adattano automaticamente, anche in una sottocartella.
@@ -475,13 +478,13 @@ tools/build.php          impronte di integrità + archivio dist/eclair-cms-<vers
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
-php tests/run.php                                  # 445 verifiche unitarie e HTTP
+php tests/run.php                                  # 456 verifiche unitarie e HTTP
 php tools/build.php                                # archivio pronto da distribuire
 ```
 
 `PHP_CLI_SERVER_WORKERS` permette al sito di chiamare se stesso (verifica del suo indirizzo): con un solo processo, la verifica semplicemente fallisce e i reindirizzamenti all’indirizzo ufficiale restano disattivati.
 
-Il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnalerà questi file come modificati, è normale). Nell’archivio, il PHP è compattato (`php -w`, senza commenti) per restare sotto 1 MB: i sorgenti commentati sono su GitHub.
+Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnalerà questi file come modificati, è normale). Nell’archivio, il PHP è compattato (`php -w`, senza commenti) per restare sotto 1 MB: i sorgenti commentati sono su GitHub.
 
 ---
 

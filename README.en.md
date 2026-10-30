@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip"><img src="https://img.shields.io/badge/download-v1.4.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.4.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip"><img src="https://img.shields.io/badge/download-v1.5.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.5.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -62,7 +62,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>432 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>433 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -138,7 +138,7 @@ Already working in Claude or ChatGPT? Connect them to your site with the built-i
   <img src="docs/images/en/themes.webp" alt="The same site in Éclair's 6 themes: Éclair, Editorial, Atelier, Studio, Shop and Contrast" width="100%">
 </p>
 
-**6 built-in themes**, to choose from in Settings › Appearance with a **live preview** of your real site, on desktop or mobile, before you save: Éclair, Editorial, Atelier, Studio, Shop and Contrast. Centered header or not, posts and products in a grid or a list, your choice of color and fonts. Each theme is just a 1.5 to 3 KB stylesheet: the HTML stays the same, and so do speed, accessibility and SEO.
+**6 built-in themes**, to choose from in Settings › Appearance with a **live preview** of your real site, on desktop or mobile, before you save: Éclair, Editorial, Atelier, Studio, Shop and Contrast. Centered header or not, posts and products in a grid or a list, your choice of color and fonts. Each theme is just a 1.5 to 3 KB stylesheet: the HTML stays the same, and so do speed, accessibility and SEO. For your own tweaks, a **Custom CSS** field is added after the theme and stays in place through updates.
 
 <p align="center">
   <img src="docs/images/shop.webp" alt="An Éclair product page: photo gallery, strikethrough price, variants, Buy now button linked to Stripe, shipping and returns; on the right, the catalog on mobile" width="100%">
@@ -190,7 +190,7 @@ The shop only opens once your legal notice and terms of sale are published. Step
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 432 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 433 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -299,7 +299,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) archive (432 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) archive (433 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
@@ -327,7 +327,7 @@ PHP 8.1+ with no framework and no Composer: plain classes in `eclair/app/lib/`, 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                                           # 445 unit and HTTP checks
+php tests/run.php                                                           # 456 unit and HTTP checks
 php tools/build.php                                                         # ready-to-ship archive
 ```
 

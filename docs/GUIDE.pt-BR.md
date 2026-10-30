@@ -35,7 +35,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) (433 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -115,6 +115,7 @@ Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das ima
 | Pedir à IA um artigo, uma página ou uma imagem | Campo **“O que você quer criar hoje?”** do painel ou **✨ Assistente de IA** (`Ctrl+J`) |
 | Editar uma página a partir do site | Botão **✏️ Editar** (visível só quando você está logado) |
 | Mudar tema, logo, cor, fontes | Configurações › Aparência |
+| Adicionar meu próprio CSS | Configurações › Aparência › CSS personalizado |
 | Abrir a loja | Configurações › Loja |
 | Adicionar um produto | Conteúdos › **+ Produto** |
 | Escolher a página inicial | Configurações › Geral |
@@ -146,6 +147,8 @@ O Éclair vem com **6 temas**. Escolha um em **Configurações › Aparência**:
 Escolher um tema aplica a cor e as fontes recomendadas dele: você pode alterá-las depois. Duas configurações de layout completam o tema: o **cabeçalho** (logo à esquerda e menu à direita, ou tudo centralizado) e as **listas de artigos e produtos** (grade de cards ou lista com a imagem à esquerda).
 
 **Por que é leve**: um tema do Éclair é só uma folha de estilo de 1,5 a 3 KB, somada à folha de estilo base. O HTML não muda de um tema para outro: a velocidade, a acessibilidade, os dados estruturados e o SEO continuam iguais. Só o tema ativo é inserido na página, e o modo escuro automático funciona com todos eles.
+
+**CSS personalizado**: para ir além do tema (a cor de um botão, os espaçamentos, o estilo de um bloco), cole suas regras em **Configurações › Aparência › CSS personalizado**. Elas são adicionadas depois do tema em todas as páginas, então têm prioridade, e ficam guardadas com os seus dados (`data/`): **as atualizações do Éclair as mantêm**. Os marcadores `/*dark*/ … /*/dark*/` também funcionam: as regras deles somem quando o modo escuro está em “Sempre claro”. Por segurança, o caractere `<` e as regras `@import` são removidos; máximo de 64 KB.
 
 ---
 
@@ -390,7 +393,7 @@ O Éclair foi feito para um ambiente hostil (hospedagem compartilhada, robôs te
 **Atualizar o Éclair**:
 1. Faça um backup.
 2. Por FTP, **apague** as pastas `app/` e `assets/` e depois envie as da nova versão, junto com `index.php` e `.htaccess` (apagar antes evita que sobrem arquivos antigos, que a verificação de integridade apontaria).
-3. **Não mexa** em `data/` (conteúdos, configurações, contas) nem em `media/` (imagens).
+3. **Não mexa** em `data/` (conteúdos, configurações, contas, CSS personalizado) nem em `media/` (imagens).
 4. No painel: Configurações › Avançado › Limpar cache.
 
 **Mudar de hospedagem ou de domínio**: copie a pasta inteira e depois troque o endereço em Configurações › Geral. Os links internos se adaptam automaticamente, inclusive em uma subpasta.
@@ -475,13 +478,13 @@ tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<v
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 445 verificações unitárias e HTTP
+php tests/run.php                                  # 456 verificações unitárias e HTTP
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 
 `PHP_CLI_SERVER_WORKERS` permite que o site chame a si mesmo (verificação do endereço): com um único processo, a verificação simplesmente falha e os redirecionamentos para o endereço oficial continuam desativados.
 
-O tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade vai apontar esses arquivos como modificados, é normal). No arquivo zip, o PHP é compactado (`php -w`, sem comentários) para ficar abaixo de 1 MB: o código-fonte comentado está no GitHub.
+Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade vai apontar esses arquivos como modificados, é normal). No arquivo zip, o PHP é compactado (`php -w`, sem comentários) para ficar abaixo de 1 MB: o código-fonte comentado está no GitHub.
 
 ---
 
