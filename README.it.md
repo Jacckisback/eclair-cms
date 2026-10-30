@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip"><img src="https://img.shields.io/badge/scarica-v1.3.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.3.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip"><img src="https://img.shields.io/badge/scarica-v1.4.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.4.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o successivo">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-nessuno-14122b?style=for-the-badge" alt="Nessun database">
@@ -23,6 +23,7 @@
   <a href="#installazione-in-3-minuti"><b>Installa</b></a> ·
   <a href="#perché-éclair"><b>Perché Éclair</b></a> ·
   <a href="#assistente-ia-chiedi-rileggi-pubblica"><b>Assistente IA</b></a> ·
+  <a href="#claude-e-chatgpt-con-il-tuo-abbonamento"><b>Claude e ChatGPT</b></a> ·
   <a href="#temi-e-negozio"><b>Temi e negozio</b></a> ·
   <a href="#anteprima"><b>Anteprima</b></a> ·
   <a href="#sicurezza"><b>Sicurezza</b></a> ·
@@ -61,7 +62,7 @@ WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicur
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleggero</h3>
-      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>416 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
+      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>432 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Semplicissimo</h3>
@@ -115,6 +116,21 @@ Chiedi quello che ti serve, come faresti con un collega: *«Scrivi un articolo s
 </table>
 
 Attivazione in 5 minuti e prezzi nel dettaglio: vedi la [guida, sezione Assistente IA](docs/GUIDE.it.md#assistente-ia).
+
+## Claude e ChatGPT, con il tuo abbonamento
+
+<p align="center">
+  <img src="docs/images/it/frame-mcp.webp" alt="A sinistra, la pagina in cui Claude chiede l’accesso al sito: leggere i contenuti, creare bozze, proporre modifiche, mai pubblicare né eliminare. A destra, Impostazioni › Assistente IA: l’indirizzo del connettore MCP e le app collegate, Claude e ChatGPT" width="100%">
+</p>
+
+Lavori già in Claude o ChatGPT? Collegali al tuo sito con il **connettore MCP** integrato: attivalo in Impostazioni › Assistente IA, incolla il suo indirizzo in Claude o ChatGPT, dai il tuo consenso. La tua IA legge il tuo sito, riceve il tuo profilo editoriale e le regole SEO e GEO di Éclair, scrive bozze e prepara modifiche alle tue pagine pubblicate, che verifichi nell’editor. **Il lavoro lo fa il tuo abbonamento: nessuna chiave API, nessun costo per il sito.**
+
+- **Nulla viene pubblicato né eliminato**: solo bozze e proposte, sei tu a pubblicare in Éclair.
+- **Accesso sotto il tuo controllo**: OAuth 2.1 con PKCE, consenso dato dopo l’accesso (autenticazione a due fattori compresa), accesso revocato in un clic, o automaticamente se cambi password.
+- **Leggero**: server MCP e autorizzazione stanno in meno di 25 KB di PHP, senza dipendenze.
+- **Anche nell’assistente integrato**, con le tue chiavi API di Claude e ChatGPT, scegli l’IA a ogni conversazione.
+
+Configurazione in 3 minuti e piani compatibili: vedi la [guida, sezione Connettore MCP](docs/GUIDE.it.md#connettore-mcp-claude-e-chatgpt).
 
 ## Temi e negozio
 
@@ -174,7 +190,7 @@ Il negozio si apre solo quando le note legali e le condizioni generali di vendit
 |---|---|---|
 | **Installazione** | Creare un database MySQL, poi avviare la procedura guidata | ✅ Caricare la cartella, rispondere a 4 domande |
 | **Database** | MySQL obbligatorio | ✅ Nessuno (file protetti) |
-| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 416 KB |
+| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 432 KB |
 | **SEO, sitemap, dati strutturati** | Un plugin da installare e mantenere | ✅ Integrati |
 | **GEO: llms.txt, Markdown, bot IA** | Plugin, raramente completi | ✅ Integrato |
 | **Pagine pubbliche** | Generate a ogni visita, salvo con un plugin di cache | ✅ Servite da una cache statica |
@@ -270,6 +286,7 @@ Su un vero hosting condiviso, aggiungi la latenza di rete e l’avvio di PHP del
 - **Sito pubblico blindato**: Content-Security-Policy rigorosa, contenuti sanificati tramite lista bianca, nessun reindirizzamento aperto, immagini ricodificate.
 - **Installazione protetta**: una finestra di 2 ore, e l’indirizzo del sito verificato dal server stesso prima di qualsiasi reindirizzamento.
 - **Pagina Sicurezza**: controllo di integrità dei file, test di protezione delle cartelle, registro, backup in un clic.
+- **Connettore MCP disattivato di default**: una volta attivato, OAuth 2.1 con PKCE, consenso dopo l’accesso, token salvati come hash e revocabili, nessuna pubblicazione né eliminazione possibile.
 
 > [!NOTE]
 > **Audit di sicurezza offensivo.** Race condition, brute force, reindirizzamenti, injection, file trappola: sono state trovate 17 vulnerabilità (2 gravi, 7 medie, 8 lievi), tutte corrette. I 13 scenari di attacco sono poi stati ripetuti sulla versione corretta: tutti neutralizzati. I test automatici (`php tests/run.php`) ne coprono gran parte.
@@ -282,7 +299,7 @@ Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.it.md#sicurezza).
   <img src="docs/images/it/install.webp" alt="Installazione in tre passaggi: carica la cartella, rispondi a quattro domande, il sito è online" width="100%">
 </p>
 
-1. **Scarica** l’archivio [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (416 KB) ed estrailo.
+1. **Scarica** l’archivio [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) ed estrailo.
 2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
 3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
 
@@ -300,6 +317,7 @@ La [guida completa](docs/GUIDE.it.md) spiega tutto il resto:
 - [Uso quotidiano](docs/GUIDE.it.md#uso-quotidiano)
 - [Temi](docs/GUIDE.it.md#temi) e [Negozio](docs/GUIDE.it.md#negozio): anteprima in tempo reale, schede prodotto, Stripe, Google Shopping
 - [Assistente IA](docs/GUIDE.it.md#assistente-ia): attivazione, profilo editoriale, costi, sicurezza
+- [Connettore MCP](docs/GUIDE.it.md#connettore-mcp-claude-e-chatgpt): Claude e ChatGPT con il tuo abbonamento
 - [Aggiornare, fare backup, traslocare](docs/GUIDE.it.md#aggiornare-fare-backup-traslocare)
 - [Risoluzione dei problemi](docs/GUIDE.it.md#risoluzione-dei-problemi): password dimenticata, errori 404 o 500, Nginx…
 
@@ -309,7 +327,7 @@ PHP 8.1+ senza framework né Composer: classi semplici in `eclair/app/lib/`, vis
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
-php tests/run.php                                                           # 374 verifiche unitarie e HTTP
+php tests/run.php                                                           # 435 verifiche unitarie e HTTP
 php tools/build.php                                                         # archivio pronto da distribuire
 ```
 
