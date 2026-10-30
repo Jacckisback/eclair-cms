@@ -14,10 +14,11 @@ Tudo o que você precisa saber para instalar, usar, proteger e manter o Éclair.
 4. [Temas](#temas)
 5. [Loja](#loja)
 6. [Assistente de IA](#assistente-de-ia)
-7. [Segurança](#segurança)
-8. [Atualizar, fazer backup, mudar de hospedagem](#atualizar-fazer-backup-mudar-de-hospedagem)
-9. [Solução de problemas](#solução-de-problemas) (incluindo [Nginx](#nginx))
-10. [Para desenvolvedores](#para-desenvolvedores)
+7. [Conector MCP (Claude e ChatGPT)](#conector-mcp-claude-e-chatgpt)
+8. [Segurança](#segurança)
+9. [Atualizar, fazer backup, mudar de hospedagem](#atualizar-fazer-backup-mudar-de-hospedagem)
+10. [Solução de problemas](#solução-de-problemas) (incluindo [Nginx](#nginx))
+11. [Para desenvolvedores](#para-desenvolvedores)
 
 ---
 
@@ -34,7 +35,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (416 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -205,7 +206,7 @@ Não há carrinho com vários produtos, cupons de desconto, contas de clientes n
 
 O assistente escreve rascunhos, melhora seus textos e cria imagens **no tom do seu site**. Você dá as instruções em linguagem natural, como faria com um colega: “Escreva um artigo sobre como escolher as cores de uma marca, com uma imagem.” Primeiro ele verifica se já existe algo sobre o assunto no site; depois cria a imagem, redige o rascunho completo (título, O essencial, subtítulos, listas ou tabelas, FAQ, meta description, links internos) e o apresenta a você com as pontuações de SEO e GEO. **Nada é publicado sem o seu clique.**
 
-Ele funciona com o **Claude** (Anthropic) ou o **ChatGPT** (OpenAI), com a sua própria chave de API: sem assinatura do Éclair, você paga direto ao provedor, pelo uso real.
+Ele funciona com o **Claude** (Anthropic) ou o **ChatGPT** (OpenAI), com a sua própria chave de API: sem assinatura do Éclair, você paga direto ao provedor, pelo uso real. Você prefere usar a sua assinatura do Claude ou do ChatGPT? Use o [conector MCP](#conector-mcp-claude-e-chatgpt).
 
 ### Ativar o assistente (5 minutos)
 
@@ -215,6 +216,8 @@ Ele funciona com o **Claude** (Anthropic) ou o **ChatGPT** (OpenAI), com a sua p
 4. Clique em **Redigir meu perfil a partir do meu site**, revise, ajuste e salve.
 
 A partir daí, o assistente aparece no menu (**✨ Assistente de IA**, `Ctrl+J`), no editor e no painel. Os redatores também podem usá-lo, se você permitir.
+
+**Claude ou ChatGPT, à sua escolha**: salve as duas chaves e um seletor aparece no topo do assistente para você escolher a IA a cada conversa. A sua escolha fica guardada na sua conta, inclusive para os retoques no editor; o provedor escolhido nas configurações continua sendo o padrão.
 
 ### O perfil editorial
 
@@ -284,6 +287,66 @@ Uma imagem custa cerca de US$ 0,05 (FLUX 3 em 1 megapixel: US$ 0,048). Preços p
 - **A resposta chega de uma vez, em vez de aparecer aos poucos**: um buffer da sua hospedagem está retendo o fluxo. Tudo funciona, mas sem o efeito “ao vivo”. No Nginx, adicione `fastcgi_buffering off;` no bloco do PHP.
 - **“Não foi possível conectar à…”**: sua hospedagem bloqueia as conexões de saída. Peça ao suporte da hospedagem para liberar `api.anthropic.com` ou `api.openai.com` (e o gerador de imagens escolhido).
 - **O assistente não aparece**: ele precisa da extensão cURL do PHP e de criptografia (sodium ou openssl), disponíveis em quase todas as hospedagens; o assistente de instalação verifica isso.
+
+---
+
+## Conector MCP (Claude e ChatGPT)
+
+Você prefere trabalhar no **Claude** ou no **ChatGPT**, com a assinatura que já tem? O conector MCP (*Model Context Protocol*, o padrão aberto que conecta as IAs a ferramentas) abre o seu site para eles, que leem os seus conteúdos, escrevem rascunhos no seu tom e preparam alterações. **Sem chave de API e sem custo para o site**: quem trabalha é a sua assinatura. Assim como no assistente integrado, **nada é publicado nem excluído** sem você.
+
+### Ativar o conector (3 minutos)
+
+1. O seu site precisa estar em **HTTPS**: o Claude e o ChatGPT recusam os outros endereços.
+2. Em **Configurações › Assistente de IA**, no fim da página, ative **Permitir conexões MCP**, salve e depois copie o **endereço do conector** (`https://seu-site.com.br/_eclair/mcp`).
+3. Adicione-o à sua IA:
+   - **Claude** (na web e no aplicativo para desktop): *Personalizar › Conectores › Adicionar › Adicionar conector personalizado*, dê um nome (“Meu site”), cole o endereço, **Continuar**, mantenha as configurações de autenticação detectadas e depois **Adicionar**. Nos planos Team e Enterprise, quem adiciona o conector é um proprietário da organização; depois, os membros clicam em **Conectar**.
+   - **ChatGPT** (na web): *Plugins › + › Adicionar servidor MCP personalizado*, dê um nome, cole o endereço em **Conexão**, escolha a autenticação **OAuth**, aceite o aviso e depois crie o plugin.
+4. Uma página do seu site se abre: faça login se for preciso (autenticação em dois fatores incluída), confira o aplicativo e o endereço de retorno dele (`claude.ai` ou `chatgpt.com`) e depois **Permitir**.
+
+Pronto. Peça, por exemplo: “Dê uma olhada no meu site e sugira 5 ideias de artigos”, “Escreva um rascunho de artigo sobre a manutenção de uma bicicleta elétrica” ou “Revise minha página inicial e sugira uma chamada mais direta”.
+
+**Planos compatíveis** (verificados em 30 de outubro de 2026):
+
+| Plano | Ler o site | Rascunhos e propostas |
+|---|---|---|
+| **Claude** Free, Pro, Max, Team, Enterprise | ✅ | ✅ (Free: um único conector personalizado) |
+| **ChatGPT** Business, Enterprise, Edu | ✅ | ✅ |
+| **ChatGPT** Pro | ✅ | ❌ (somente leitura) |
+| **ChatGPT**, outros planos | não previsto na ajuda da OpenAI | |
+
+Fontes: [ajuda do Claude sobre conectores personalizados](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp), [ajuda da OpenAI sobre servidores MCP personalizados](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt) e [documentação da OpenAI](https://developers.openai.com/api/docs/guides/custom-mcp-server). Esses planos mudam rápido: confira no seu aplicativo.
+
+### O que a IA pode fazer
+
+Ela começa por `get_site` e depois usa as mesmas ferramentas do assistente integrado:
+
+| Ferramenta | Função |
+|---|---|
+| `get_site` | inventário do site (páginas, artigos, produtos, categorias e seus identificadores), perfil editorial, regras de SEO e GEO |
+| `search_content` · `get_content` | buscar um conteúdo e lê-lo em Markdown |
+| `find_media` | buscar uma imagem na biblioteca de mídia |
+| `create_draft` | criar um artigo, uma página ou uma página de produto **como rascunho** |
+| `update_content` | alterar um rascunho; para um conteúdo publicado, preparar uma **proposta** |
+| `generate_image` | criar uma imagem, só se um gerador estiver configurado (cobrada na sua chave, dentro do seu orçamento de IA) |
+
+Cada rascunho volta com um link para **abri-lo no Éclair**; cada proposta, com um link que a **aplica no editor** sem salvá-la: você revisa e depois salva (ou fecha, e nada muda). Além disso, o Claude e o ChatGPT pedem a sua autorização antes de cada ação de escrita, conforme as configurações deles.
+
+### Segurança do conector
+
+- **Desativado por padrão**: enquanto ele estiver desativado, nenhum dos endereços dele responde.
+- **OAuth 2.1**: PKCE obrigatório, registro automático do aplicativo sem armazenar nada, endereço de retorno verificado de forma exata.
+- **A sua autorização explícita**, depois do login na sua conta (autenticação em dois fatores incluída), em uma página que nunca revela o endereço do seu painel.
+- **Tokens de uma hora**, renovados automaticamente e substituídos a cada renovação; depois de 60 dias sem uso, é preciso dar a sua autorização de novo. Só os hashes deles são armazenados, fora dos backups.
+- **Revogar acesso**: um botão por aplicativo em Configurações › Assistente de IA. Desativar o conector corta o acesso de todos os aplicativos; trocar a senha ou desconectar todos os seus dispositivos também.
+- **Mesmas permissões do assistente integrado**: os redatores só têm acesso se a opção “Os editores podem usar o assistente” estiver marcada; no máximo 60 alterações por hora e por aplicativo, para evitar loops.
+- **O que vai para a Anthropic ou a OpenAI**: os conteúdos que a IA lê para responder a você, conforme os termos da sua assinatura.
+
+### Se a conexão falhar
+
+- **A IA não consegue acessar o site, ou a autorização falha**: confira se o site está em HTTPS e se o endereço termina em `/_eclair/mcp`. No Apache, mantenha o `.htaccess` do Éclair atualizado: ele repassa o cabeçalho de autorização que algumas hospedagens removem.
+- **O Éclair está instalado em uma subpasta**: alguns aplicativos procuram a autorização na raiz do domínio. Prefira instalar o Éclair na raiz de um domínio ou de um subdomínio.
+- **Firewall ou proteção contra robôs** (Cloudflare…): libere `/_eclair/` e `/.well-known/`.
+- **Uma proposta não pode mais ser aplicada**: o conteúdo mudou desde então; peça a alteração de novo à IA.
 
 ---
 
@@ -406,13 +469,14 @@ i18n/                    arquivos-fonte legíveis das traduções (compilados po
 tests/run.php            testes unitários + integração HTTP (incluindo os ataques da auditoria de segurança)
 tests/fake-ai.php        provedores de IA falsos (Claude, ChatGPT, imagens): o assistente é testado sem chave nem custo
 tests/shop.php           temas e loja (páginas de produto, Stripe, JSON-LD, feed do Merchant Center)
+tests/mcp.php            conector MCP (OAuth, PKCE, protocolo, revogação) e escolha da IA
 tools/router.php         roteador para o servidor embutido do PHP (desenvolvimento)
 tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<versão>.zip (PHP compactado)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 374 verificações unitárias e HTTP
+php tests/run.php                                  # 435 verificações unitárias e HTTP
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 

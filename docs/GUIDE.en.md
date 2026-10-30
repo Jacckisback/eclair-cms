@@ -14,10 +14,11 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 4. [Themes](#themes)
 5. [Shop](#shop)
 6. [AI assistant](#ai-assistant)
-7. [Security](#security)
-8. [Updating, backing up, moving](#updating-backing-up-moving)
-9. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
-10. [For developers](#for-developers)
+7. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
+8. [Security](#security)
+9. [Updating, backing up, moving](#updating-backing-up-moving)
+10. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
+11. [For developers](#for-developers)
 
 ---
 
@@ -34,7 +35,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) archive (416 KB) and unzip it.
+1. Download the [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) archive (432 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -205,7 +206,7 @@ No multi-product cart, discount codes, customer accounts or automatic inventory 
 
 The assistant writes drafts, improves your texts and creates images **in your site's voice**. You talk to it in plain language, as you would to a colleague: “Write an article about choosing brand colors, with an image.” It first checks whether the topic has already been covered, creates the image, writes the complete draft (title, Key takeaways, subheadings, lists or tables, FAQ, meta description, internal links), then shows it to you with its SEO and GEO scores. **Nothing is published without your click.**
 
-It works with **Claude** (Anthropic) or **ChatGPT** (OpenAI), using your own API key: no Éclair subscription, you pay the provider directly, for what you actually use.
+It works with **Claude** (Anthropic) or **ChatGPT** (OpenAI), using your own API key: no Éclair subscription, you pay the provider directly, for what you actually use. Would you rather use your Claude or ChatGPT subscription? Go through the [MCP connector](#mcp-connector-claude-and-chatgpt).
 
 ### Turn on the assistant (5 minutes)
 
@@ -215,6 +216,8 @@ It works with **Claude** (Anthropic) or **ChatGPT** (OpenAI), using your own API
 4. Click **Draft my profile from my site**, then review it, adjust it and save.
 
 The assistant then appears in the menu (**✨ AI assistant**, `Ctrl+J`), in the editor and on the dashboard. Editors can use it too, if you allow it.
+
+**Claude or ChatGPT, your choice**: save both keys and a selector appears at the top of the assistant so you can choose the AI for each conversation. Your choice is remembered for your account, editor touch-ups included; the provider chosen in the settings remains the default.
 
 ### The editorial profile
 
@@ -284,6 +287,66 @@ An image costs about $0.05 (FLUX 3 at 1 megapixel: $0.048). Public prices taken 
 - **The reply arrives all at once instead of streaming in**: your host's buffering is holding back the stream. Everything works, just without the “live” effect. On Nginx, add `fastcgi_buffering off;` to the PHP block.
 - **“Can't reach…”**: your host blocks outgoing connections. Ask them to allow `api.anthropic.com` or `api.openai.com` (and the image generator you chose).
 - **The assistant doesn't appear**: it needs the PHP cURL extension and encryption (sodium or openssl), available at almost every host; the setup wizard checks for them.
+
+---
+
+## MCP connector (Claude and ChatGPT)
+
+Would you rather work in **Claude** or **ChatGPT**, with the subscription you already have? The MCP connector (*Model Context Protocol*, the open standard that connects AI assistants to tools) opens your site to them: they read your content, write drafts in your voice and prepare changes. **No API key, no cost for the site**: your subscription does the work. Just like with the built-in assistant, **nothing is published or deleted** without you.
+
+### Turn on the connector (3 minutes)
+
+1. Your site must use **HTTPS**: Claude and ChatGPT refuse any other URL.
+2. In **Settings › AI assistant**, at the bottom of the page, turn on **Allow MCP connections**, save, then copy the **Connector URL** (`https://example.com/_eclair/mcp`).
+3. Add it to your AI:
+   - **Claude** (web and desktop app): *Customize › Connectors › Add › Add custom connector*, give it a name (“My site”), paste the URL, click **Continue**, keep the detected authentication settings, then click **Add**. On Team and Enterprise plans, an organization owner adds it; members then click **Connect**.
+   - **ChatGPT** (on the web): *Plugins › + › Add custom MCP server*, give it a name, paste the URL under **Connection**, choose **OAuth** authentication, accept the warning, then click **Create as a plugin**.
+4. A page on your site opens: log in if needed (two-factor authentication included), check the app and its return URL (`claude.ai` or `chatgpt.com`), then click **Allow**.
+
+You're all set. Ask, for example: “Look at my site and give me 5 article ideas”, “Write a draft article about servicing an e-bike” or “Review my home page and suggest a more direct tagline”.
+
+**Compatible plans** (checked on October 30, 2026):
+
+| Plan | Read the site | Drafts and suggestions |
+|---|---|---|
+| **Claude** Free, Pro, Max, Team, Enterprise | ✅ | ✅ (Free: only one custom connector) |
+| **ChatGPT** Business, Enterprise, Edu | ✅ | ✅ |
+| **ChatGPT** Pro | ✅ | ❌ (read-only) |
+| **ChatGPT**, other plans | not listed in OpenAI's help | |
+
+Sources: [Claude help on custom connectors](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp), [OpenAI help on custom MCP servers](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt) and [OpenAI documentation](https://developers.openai.com/api/docs/guides/custom-mcp-server). These plans change quickly: check in your app.
+
+### What the AI can do
+
+It starts with `get_site`, then uses the same tools as the built-in assistant:
+
+| Tool | What it does |
+|---|---|
+| `get_site` | site inventory (pages, posts, products, categories and their IDs), editorial profile, SEO and GEO rules |
+| `search_content` · `get_content` | search for content, read it in Markdown |
+| `find_media` | search for an image in the media library |
+| `create_draft` | create a post, a page or a product page **as a draft** |
+| `update_content` | edit a draft; for published content, prepare a **suggestion** |
+| `generate_image` | create an image, only if a generator is set up (billed to your key, within your AI budget) |
+
+Each draft comes back with a link to **open it in Éclair**; each suggestion, with a link that **applies it in the editor** without saving it: you review it, then you save (or you close it, and nothing changes). Claude and ChatGPT also ask for your approval before each write action, depending on their own settings.
+
+### Connector security
+
+- **Disabled by default**: as long as it is, none of its URLs respond.
+- **OAuth 2.1**: PKCE required, automatic app registration without storing anything, return URL checked for an exact match.
+- **Your explicit approval**, after you log in to your account (two-factor authentication included), on a page that never reveals your admin URL.
+- **One-hour tokens**, renewed automatically and replaced at each renewal; after 60 days without use, you have to give your approval again. Only their hashes are stored, excluded from backups.
+- **Revoke access**: one button per app in Settings › AI assistant. Turning off the connector cuts off all apps; so does changing your password or logging out all your devices.
+- **Same permissions as the built-in assistant**: editors only have access if “Editors can use the assistant” is checked; at most 60 changes per hour per app, to prevent loops.
+- **What goes to Anthropic or OpenAI**: the content the AI reads to answer you, under the terms of your subscription.
+
+### If the connection fails
+
+- **The AI can't reach the site, or authorization fails**: check that the site uses HTTPS and that the URL ends with `/_eclair/mcp`. On Apache, keep Éclair's `.htaccess` up to date: it passes along the authorization header, which some hosts strip.
+- **Éclair is installed in a subfolder**: some apps look for authorization at the root of the domain. Install Éclair at the root of a domain or subdomain instead.
+- **Firewall or bot protection** (Cloudflare…): let `/_eclair/` and `/.well-known/` through.
+- **A suggestion no longer applies**: the content has changed since; ask the AI for the change again.
 
 ---
 
@@ -406,13 +469,14 @@ i18n/                    human-readable translation sources (compiled by tools/i
 tests/run.php            unit tests + HTTP integration (including the attacks from the security review)
 tests/fake-ai.php        fake AI providers (Claude, ChatGPT, images): the assistant is tested with no key and no spending
 tests/shop.php           themes and shop (product pages, Stripe, JSON-LD, Merchant Center feed)
+tests/mcp.php            MCP connector (OAuth, PKCE, protocol, revocation) and choosing the AI
 tools/router.php         router for PHP's built-in server (development)
 tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 374 unit and HTTP checks
+php tests/run.php                                  # 435 unit and HTTP checks
 php tools/build.php                                # ready-to-ship archive
 ```
 

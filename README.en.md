@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip"><img src="https://img.shields.io/badge/download-v1.3.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.3.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip"><img src="https://img.shields.io/badge/download-v1.4.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.4.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -23,6 +23,7 @@
   <a href="#install-in-3-minutes"><b>Install</b></a> ·
   <a href="#why-éclair"><b>Why Éclair</b></a> ·
   <a href="#ai-assistant-ask-review-publish"><b>AI assistant</b></a> ·
+  <a href="#claude-and-chatgpt-with-your-subscription"><b>Claude and ChatGPT</b></a> ·
   <a href="#themes-and-shop"><b>Themes and shop</b></a> ·
   <a href="#preview"><b>Preview</b></a> ·
   <a href="#security"><b>Security</b></a> ·
@@ -61,7 +62,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>416 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>432 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -115,6 +116,21 @@ Type what you need, as you would to a colleague: *“Write an article about choo
 </table>
 
 5-minute setup and detailed pricing: see the [guide, AI assistant section](docs/GUIDE.en.md#ai-assistant).
+
+## Claude and ChatGPT, with your subscription
+
+<p align="center">
+  <img src="docs/images/en/frame-mcp.webp" alt="On the left, the page where Claude asks for access to the site: read content, create drafts, suggest changes, never publish or delete. On the right, Settings › AI assistant: the MCP connector URL and the connected apps, Claude and ChatGPT" width="100%">
+</p>
+
+Already working in Claude or ChatGPT? Connect them to your site with the built-in **MCP connector**: turn it on in Settings › AI assistant, paste its URL into Claude or ChatGPT, and give your approval. Your AI reads your site, gets your editorial profile and Éclair's SEO and GEO rules, writes drafts and prepares changes to your published pages, which you review in the editor. **Your subscription does the work: no API key, no cost for the site.**
+
+- **Nothing is published or deleted**: drafts and suggestions only, and you're the one who publishes in Éclair.
+- **Access under your control**: OAuth 2.1 with PKCE, approval given after you log in (two-factor authentication included), access revoked in one click, or automatically if you change your password.
+- **Lightweight**: the MCP server and authorization fit in under 25 KB of PHP, with no dependencies.
+- **In the built-in assistant too**, with your Claude and ChatGPT API keys, you choose the AI for each conversation.
+
+3-minute setup and compatible plans: see the [guide, MCP connector section](docs/GUIDE.en.md#mcp-connector-claude-and-chatgpt).
 
 ## Themes and shop
 
@@ -174,7 +190,7 @@ The shop only opens once your legal notice and terms of sale are published. Step
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 416 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 432 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -270,6 +286,7 @@ On real shared hosting, add your host's network latency and PHP startup time.
 - **Locked-down public site**: strict Content-Security-Policy, allowlist-based content sanitizing, no open redirects, re-encoded images.
 - **Protected installation**: a 2-hour window, and the site URL verified by the server itself before any redirect.
 - **Security page**: file integrity check, folder protection test, security log, one-click backup.
+- **MCP connector disabled by default**: once enabled, OAuth 2.1 with PKCE, approval after login, hashed and revocable tokens, no publishing or deleting possible.
 
 > [!NOTE]
 > **Offensive security review.** Race conditions, brute force, redirects, injections, booby-trapped files: 17 vulnerabilities were found (2 high, 7 medium, 8 low) and all of them fixed. The 13 attack scenarios were then replayed against the fixed version: all neutralized. The automated tests (`php tests/run.php`) cover a large part of them.
@@ -282,7 +299,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) archive (416 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) archive (432 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
@@ -300,6 +317,7 @@ The [full guide](docs/GUIDE.en.md) covers everything else:
 - [Everyday use](docs/GUIDE.en.md#everyday-use)
 - [Themes](docs/GUIDE.en.md#themes) and [Shop](docs/GUIDE.en.md#shop): live preview, product pages, Stripe, Google Shopping
 - [AI assistant](docs/GUIDE.en.md#ai-assistant): activation, editorial profile, costs, security
+- [MCP connector](docs/GUIDE.en.md#mcp-connector-claude-and-chatgpt): Claude and ChatGPT with your subscription
 - [Updating, backing up, moving](docs/GUIDE.en.md#updating-backing-up-moving)
 - [Troubleshooting](docs/GUIDE.en.md#troubleshooting): forgotten password, 404 or 500 errors, Nginx…
 
@@ -309,7 +327,7 @@ PHP 8.1+ with no framework and no Composer: plain classes in `eclair/app/lib/`, 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                                           # 374 unit and HTTP checks
+php tests/run.php                                                           # 435 unit and HTTP checks
 php tools/build.php                                                         # ready-to-ship archive
 ```
 
