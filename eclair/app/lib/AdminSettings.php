@@ -29,6 +29,7 @@ final class AdminSettings
             'indexnow' => IndexNow::key(),
             'ai' => $tab === 'ai' ? self::aiState() : [],
             'previews' => $tab === 'appearance' ? self::previewPages() : [],
+            'custom_css' => $tab === 'appearance' ? Theme::customSource() : '',
         ], t('Réglages'));
     }
 
@@ -77,7 +78,8 @@ final class AdminSettings
                 $look[$k] = $q($k);
             }
         }
-        Theme::preview($look);
+        // custom=0 : sans la feuille de style enregistrée, remplacée dans l'aperçu par celle du formulaire.
+        Theme::preview($look, $q('custom') !== '0');
         $path = $q('path');
         Site::preview(preg_match('~^/[a-z0-9/_-]*$~', $path) ? $path : '/');
     }
@@ -134,6 +136,17 @@ final class AdminSettings
                 break;
 
             case 'appearance':
+                // CSS personnalisé : data/theme.css, que les mises à jour ne remplacent pas. Trop lourd, rien n'est enregistré.
+                if (Req::has('custom_css')) {
+                    try {
+                        $saved = Theme::saveCustom(Req::input('custom_css'));
+                    } catch (\RuntimeException $e) {
+                        Admin::back($redirect, $e->getMessage(), 'bad');
+                    }
+                    if (!$saved) {
+                        Admin::back($redirect, t('Le CSS personnalisé dépasse {max} : allège-le. Rien n’a été enregistré.', ['max' => human_size(Theme::CUSTOM_MAX)]), 'bad');
+                    }
+                }
                 $patch = ['appearance' => [
                     'theme' => isset(Theme::THEMES[Req::input('theme')]) ? Req::input('theme') : 'eclair',
                     'header' => Req::input('header') === 'center' ? 'center' : 'left',

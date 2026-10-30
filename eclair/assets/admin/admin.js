@@ -313,6 +313,18 @@
     const form = look.closest('form');
     const frame = $('iframe', look);
     const field = (name) => form.elements[name];
+    // CSS personnalisé : l'aperçu est rendu sans celui enregistré et reçoit celui du formulaire, à chaque frappe.
+    // Feuille construite (adoptedStyleSheets) : la CSP du site, qui n'autorise que son propre <style>, ne la bloque pas.
+    const custom = field('custom_css');
+    const live = !!custom && 'adoptedStyleSheets' in Document.prototype && 'replaceSync' in CSSStyleSheet.prototype;
+    const restyle = () => {
+      const doc = frame.contentDocument;
+      if (!doc) return;
+      const sheet = new frame.contentWindow.CSSStyleSheet();
+      // Trop lourd, il est ignoré par le site : l'aperçu fait de même.
+      sheet.replaceSync(custom.value.length > custom.maxLength ? '' : custom.value);
+      doc.adoptedStyleSheets = [sheet];
+    };
     let timer = 0;
     const show = () => {
       const q = new URLSearchParams({
@@ -320,8 +332,14 @@
         accent: field('accent').value, font_head: field('font_head').value, font_body: field('font_body').value,
         header: field('header').value, cards: field('cards').value, dark: field('dark').value, path: $('#preview-page').value,
       });
+      if (live) q.set('custom', '0');
       frame.src = look.dataset.src + '?' + q;
     };
+    if (live) {
+      let typing = 0;
+      frame.addEventListener('load', restyle);
+      custom.addEventListener('input', () => { clearTimeout(typing); typing = setTimeout(restyle, 150); });
+    }
     const refresh = () => { clearTimeout(timer); timer = setTimeout(show, 250); };
     // Choisir un thème applique ses réglages conseillés (modifiables ensuite).
     $$('[name=theme]', form).forEach((radio) => radio.addEventListener('change', () => {

@@ -57,7 +57,8 @@ final class Cache
 
     /**
      * Fichier lu par index.php à chaque requête : il dit si le cache est actif,
-     * quand il expire (prochain article programmé) et quel hôte/protocole exiger.
+     * quand il expire (prochain article programmé ou feuille de style du site modifiée)
+     * et quel hôte/protocole exiger.
      */
     public static function runtime(): void
     {
@@ -78,6 +79,7 @@ final class Cache
             'expires' => Content::nextScheduled(),
             'host' => $host,
             'https' => Security::httpsOnly(),
+            'css' => [Theme::customFile(), Theme::customStamp()],
         ];
         try {
             Store::ensureDir(ECLAIR_ROOT . '/cache');
@@ -87,12 +89,12 @@ final class Cache
         }
     }
 
-    /** Si un article programmé doit paraître, on vide le cache avant de servir. */
+    /** Si un article programmé doit paraître, ou si la feuille de style du site a changé, on vide le cache avant de servir. */
     public static function checkExpiry(): void
     {
         $raw = @file_get_contents(ECLAIR_ROOT . '/cache/runtime.php');
         $rt = $raw === false ? null : json_decode(Store::strip($raw), true);
-        if (!is_array($rt) || (!empty($rt['expires']) && time() >= (int) $rt['expires'])) {
+        if (!is_array($rt) || (!empty($rt['expires']) && time() >= (int) $rt['expires']) || ($rt['css'][1] ?? '') !== Theme::customStamp()) {
             self::purge();
         }
     }

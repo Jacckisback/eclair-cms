@@ -32,6 +32,9 @@ final class Theme
         'contraste' => ['accent' => '#1d4ed8', 'font_head' => 'system', 'font_body' => 'system', 'header' => 'left', 'cards' => 'list'],
     ];
 
+    /** Poids maximal de la feuille de style du site (data/theme.css), insérée dans chaque page : au-delà, elle est ignorée. */
+    public const CUSTOM_MAX = 64 * 1024;
+
     private const LANG_ORDER = ['fr', 'es', 'en', 'de', 'it', 'pt'];
     private const STRINGS = [
         'skip' => ['Aller au contenu', 'Ir al contenido', 'Skip to content', 'Zum Inhalt springen', 'Vai al contenuto', 'Ir para o conteúdo'],
@@ -131,6 +134,8 @@ final class Theme
     /** Apparence essayée dans l'aperçu des réglages (jamais enregistrée ni mise en cache). */
     private static ?array $preview = null;
     private static bool $shop = false;
+    /** Feuille de style du site incluse (l'aperçu peut la remplacer par celle en cours de saisie). */
+    private static bool $custom = true;
 
     public static function t(string $key, ?string $lang = null, array $vars = []): string
     {
@@ -223,10 +228,14 @@ final class Theme
         return $a;
     }
 
-    /** Essaie une apparence pour l'aperçu en direct (valeurs déjà vérifiées par l'appelant). */
-    public static function preview(array $look): void
+    /**
+     * Essaie une apparence pour l'aperçu en direct (valeurs déjà vérifiées par l'appelant).
+     * Sans la feuille de style du site, l'administration y applique celle du formulaire, pas encore enregistrée.
+     */
+    public static function preview(array $look, bool $custom = true): void
     {
         self::$preview = $look;
+        self::$custom = $custom;
         self::$css = null;
     }
 
@@ -264,6 +273,10 @@ final class Theme
         if ($a['theme'] !== 'eclair') {
             $css .= (string) @file_get_contents(ECLAIR_ROOT . '/app/theme/themes/' . $a['theme'] . '.css');
         }
+        // Feuille de style du site en dernier : elle l'emporte sur le thème, et une erreur de sa part n'abîme qu'elle.
+        if (self::$custom) {
+            $css .= "\n" . self::custom();
+        }
         if (($a['dark'] ?? 'auto') !== 'auto') {
             $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', $css);
         }
@@ -271,7 +284,74 @@ final class Theme
         if (!self::$shop && !Shop::enabled()) {
             $css = (string) preg_replace('~/\*shop\*/.*?/\*/shop\*/~s', '', $css);
         }
-        return self::$css = self::minify($vars . $css);
+        // Nettoyé après la minification : retirer un commentaire ne peut plus reformer un « </style ».
+        return self::$css = self::cleanCss(self::minify($vars . $css));
+    }
+
+    /* ─────────────────────── Feuille de style du site ─────────────────────── */
+
+    /** data/theme.css : hors de app/, les mises à jour d'Éclair ne la remplacent pas. */
+    public static function customFile(): string
+    {
+        return ECLAIR_DATA . '/theme.css';
+    }
+
+    /** Contenu de la feuille de style du site, tel qu'enregistré ('' si elle n'existe pas). */
+    public static function customSource(): string
+    {
+        $file = self::customFile();
+        return is_file($file) ? (string) @file_get_contents($file) : '';
+    }
+
+    /** Feuille de style du site insérée dans les pages : ignorée au-delà de CUSTOM_MAX. */
+    private static function custom(): string
+    {
+        $file = self::customFile();
+        $css = is_file($file) ? (string) @file_get_contents($file, false, null, 0, self::CUSTOM_MAX + 1) : '';
+        return strlen($css) <= self::CUSTOM_MAX ? $css : '';
+    }
+
+    /** Empreinte de la feuille de style du site (date et taille) : si elle change, par FTP par exemple, le cache est vidé. */
+    public static function customStamp(): string
+    {
+        $file = self::customFile();
+        clearstatcache(true, $file);
+        // Même calcul que le chemin rapide d'index.php.
+        return is_file($file) ? filemtime($file) . ':' . filesize($file) : '';
+    }
+
+    /**
+     * CSS sûr dans l'élément <style> de la page : balises <style> retirées (bloc HTML collé tel quel), plus aucun « </ »
+     * qui pourrait refermer l'élément, ni octet nul, BOM ou UTF-8 invalide (l'empreinte CSP ne correspondrait plus).
+     */
+    public static function cleanCss(string $css): string
+    {
+        $css = mb_scrub(str_replace(["\0", "\u{FEFF}", "\r\n", "\r"], ['', '', "\n", "\n"], $css), 'UTF-8');
+        $css = (string) preg_replace('~</?style\b[^<>{}]*>~i', '', $css);
+        return trim(str_replace('</', '<\/', $css));
+    }
+
+    /**
+     * Enregistre la feuille de style saisie dans l'administration (vide : fichier supprimé).
+     * Inchangée, elle n'est pas réécrite ; false si elle dépasse CUSTOM_MAX (rien n'est écrit).
+     */
+    public static function saveCustom(string $css): bool
+    {
+        $css = self::cleanCss($css);
+        if ($css === self::cleanCss(self::customSource())) {
+            return true;
+        }
+        if (strlen($css) > self::CUSTOM_MAX) {
+            return false;
+        }
+        $file = self::customFile();
+        if ($css !== '') {
+            Store::ensureDir(dirname($file));
+            Store::atomic($file, $css);
+        } elseif (is_file($file) && !@unlink($file)) {
+            throw new \RuntimeException(t('Impossible de supprimer {file} : vérifie les droits du dossier.', ['file' => basename($file)]));
+        }
+        return true;
     }
 
     public static function minify(string $css): string

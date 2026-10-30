@@ -35,7 +35,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 
 ### Pasos
 
-1. Descarga el archivo [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) y descomprímelo.
+1. Descarga el archivo [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (435 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
 3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
@@ -115,6 +115,7 @@ Biblioteca de medios (arrastrar y soltar, textos alternativos, detección de las
 | Pedirle a la IA un artículo, una página o una imagen | Campo **«¿Qué quieres crear hoy?»** del panel, o **✨ Asistente IA** (`Ctrl+J`) |
 | Editar una página desde el sitio | Botón **✏️ Editar** (visible solo cuando has iniciado sesión) |
 | Cambiar el tema, el logo, el color, las fuentes | Ajustes › Apariencia |
+| Añadir mi propio CSS | Ajustes › Apariencia › **CSS personalizado** (o `data/theme.css` por FTP) |
 | Abrir la tienda | Ajustes › Tienda |
 | Añadir un producto | Contenidos › **+ Producto** |
 | Elegir la página de inicio | Ajustes › General |
@@ -146,6 +147,16 @@ Atajos del editor: `/` insertar un bloque · `Ctrl+S` guardar · `Ctrl+K` enlace
 Al elegir un tema se aplican su color y sus fuentes recomendadas: puedes cambiarlos después. Dos ajustes de diseño completan el tema: la **cabecera** (logo a la izquierda y menú a la derecha, o todo centrado) y las **listas de artículos y productos** (cuadrícula de tarjetas, o lista con la imagen a la izquierda).
 
 **Por qué es ligero**: un tema de Éclair es solo una hoja de estilos de 1,5 a 3 KB que se añade a la hoja base. El HTML no cambia de un tema a otro: la velocidad, la accesibilidad, los datos estructurados y el posicionamiento siguen siendo idénticos. Solo se inserta en la página el tema activo, y el modo oscuro automático funciona con todos.
+
+### Tu propia hoja de estilos
+
+Para ir más allá de los ajustes, escribe tus propias reglas en **Ajustes › Apariencia › CSS personalizado**. Éclair las guarda en **`data/theme.css`** y las inserta **después del tema activo**: tienen la última palabra, y se minifican y quedan autorizadas por la política de seguridad (CSP) como el resto del estilo. La vista previa en directo las aplica mientras escribes.
+
+- **Sobreviven a las actualizaciones**: `data/` nunca se sustituye, y el control de integridad no señala este archivo. Se acabó volver a copiar tu CSS al final de `app/theme/theme.css` después de cada actualización.
+- **También por FTP**: sube o modifica directamente `data/theme.css` (o `theme.css` en tu carpeta de datos, si la moviste con `ECLAIR_DATA`). La caché de las páginas se vacía sola en cuanto el archivo cambia.
+- **64 KB como máximo**, porque la hoja se inserta en cada página: por encima, se ignora y la pestaña Apariencia te avisa.
+- **Sin riesgo para la página**: todo lo que podría cerrar la etiqueta `<style>` queda neutralizado, y un bloque `<style>…</style>` pegado tal cual conserva sus reglas.
+- **Consejos**: apóyate en las variables del tema (`var(--accent)`, `var(--font)`, `var(--font-head)`…) para mantener la coherencia con tus ajustes. Las imágenes pueden venir de cualquier dirección https; las fuentes, solo de tu propio sitio (CSP), y `@import` se ignora.
 
 ---
 
@@ -390,7 +401,7 @@ Cada borrador vuelve con un enlace para **abrirlo en Éclair**; cada propuesta, 
 **Actualizar Éclair**:
 1. Haz una copia de seguridad.
 2. Por FTP, **borra** las carpetas `app/` y `assets/` y después sube las de la nueva versión junto con `index.php` y `.htaccess` (borrar primero evita que queden archivos antiguos, que el control de integridad señalaría).
-3. **No toques** `data/` (contenidos, ajustes, cuentas) ni `media/` (imágenes).
+3. **No toques** `data/` (contenidos, ajustes, cuentas, tu hoja de estilos `theme.css`) ni `media/` (imágenes).
 4. En el panel: Ajustes › Avanzado › Vaciar la caché.
 
 **Mudarse a otro hosting o dominio**: copia toda la carpeta y después cambia la dirección en Ajustes › General. Los enlaces internos se adaptan automáticamente, también en una subcarpeta.
@@ -461,7 +472,7 @@ eclair/                  ← lo que se sube al hosting
 ├── app/lang/            traducciones del panel (6 idiomas, JSON comprimido); el texto francés sirve de clave
 ├── assets/admin/        CSS y JavaScript del panel (sin dependencias)
 ├── assets/site/site.js  el único script público (2,4 KB, 1,2 KB comprimido)
-├── data/                contenidos, ajustes, cuentas (se crea al instalar, nunca es público)
+├── data/                contenidos, ajustes, cuentas, theme.css del sitio (se crea al instalar, nunca es público)
 ├── cache/               páginas generadas
 └── media/               imágenes subidas
 i18n/                    fuentes legibles de las traducciones (compiladas por tools/i18n.php)
@@ -475,13 +486,13 @@ tools/build.php          huellas de integridad + archivo dist/eclair-cms-<versi�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desarrollo
-php tests/run.php                                  # 445 comprobaciones unitarias y HTTP
+php tests/run.php                                  # 470 comprobaciones unitarias y HTTP
 php tools/build.php                                # archivo listo para distribuir
 ```
 
 `PHP_CLI_SERVER_WORKERS` permite que el sitio se llame a sí mismo (verificación de su dirección): con un solo proceso, la verificación simplemente falla y las redirecciones a la dirección oficial siguen desactivadas.
 
-El tema se personaliza modificando `app/theme/*.php`, `app/theme/theme.css` y `app/theme/themes/*.css` (guarda una copia: el control de integridad marcará esos archivos como modificados, es normal). En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios) para quedarse por debajo de 1 MB: el código fuente comentado está en GitHub.
+Para cambiar el aspecto de un sitio, mejor usa `data/theme.css` ([Tu propia hoja de estilos](#tu-propia-hoja-de-estilos)): `Theme::css()` lo añade después del tema activo y sobrevive a las actualizaciones. Las plantillas `app/theme/*.php` y las hojas `app/theme/theme.css` y `app/theme/themes/*.css` se pueden seguir modificando, pero una actualización las sustituye: guarda una copia (el control de integridad las marcará como modificadas, es normal). En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios) para quedarse por debajo de 1 MB: el código fuente comentado está en GitHub.
 
 ---
 

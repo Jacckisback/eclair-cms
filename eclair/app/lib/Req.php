@@ -122,6 +122,12 @@ final class Req
         return in_array(self::input($key), ['1', 'on', 'true', 'yes'], true);
     }
 
+    /** Le formulaire envoyé contient-il ce champ texte, même vide ? */
+    public static function has(string $key): bool
+    {
+        return is_string($_POST[$key] ?? null);
+    }
+
     public static function inputArray(string $key): array
     {
         $value = $_POST[$key] ?? [];

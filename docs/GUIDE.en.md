@@ -35,7 +35,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) archive (432 KB) and unzip it.
+1. Download the [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) archive (435 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -115,6 +115,7 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Ask the AI for a post, a page, an image | **“What do you want to create today?”** field on the dashboard, or **✨ AI assistant** (`Ctrl+J`) |
 | Edit a page from the site | **✏️ Edit** button (visible only when you're logged in) |
 | Change the theme, logo, color, fonts | Settings › Appearance |
+| Add my own CSS | Settings › Appearance › **Custom CSS** (or `data/theme.css` via FTP) |
 | Open the shop | Settings › Shop |
 | Add a product | Content › **+ Product** |
 | Choose the home page | Settings › General |
@@ -146,6 +147,16 @@ Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+
 Choosing a theme applies its recommended color and fonts: you can change them later. Two layout settings round out the theme: the **header** (logo on the left and menu on the right, or everything centered) and the **post and product lists** (card grid, or a list with the image on the left).
 
 **Why it stays light**: an Éclair theme is just a 1.5 to 3 KB stylesheet, added to the base one. The HTML doesn't change from one theme to another: speed, accessibility, structured data and SEO stay exactly the same. Only the active theme is inlined in the page, and the automatic dark mode works with each of them.
+
+### Your own stylesheet
+
+To go beyond the settings, write your own rules in **Settings › Appearance › Custom CSS**. Éclair saves them in **`data/theme.css`** and inserts them **after the active theme**: they have the last word, and they are minified and allowed by the Content Security Policy (CSP) like the rest of the style. The live preview applies them as you type.
+
+- **They survive updates**: `data/` is never replaced, and the integrity check doesn't flag this file. No more copying your CSS back to the end of `app/theme/theme.css` after every update.
+- **Via FTP too**: upload or edit `data/theme.css` directly (or `theme.css` in your data folder, if you moved it with `ECLAIR_DATA`). The page cache clears itself as soon as the file changes.
+- **64 KB maximum**, since the stylesheet is inlined in every page: above that, it is ignored and the Appearance tab warns you.
+- **Safe for the page**: anything that could close the `<style>` tag is neutralized, and a `<style>…</style>` block pasted as is keeps its rules.
+- **Tips**: rely on the theme variables (`var(--accent)`, `var(--font)`, `var(--font-head)`…) to stay consistent with your settings. Images can come from any https address, fonts only from your own site (CSP), and `@import` is ignored.
 
 ---
 
@@ -390,7 +401,7 @@ Each draft comes back with a link to **open it in Éclair**; each suggestion, wi
 **Update Éclair**:
 1. Make a backup.
 2. Via FTP, **delete** the `app/` and `assets/` folders, then upload the ones from the new version along with `index.php` and `.htaccess` (deleting first avoids leaving old files behind, which the integrity check would flag).
-3. **Don't touch** `data/` (content, settings, accounts) or `media/` (images).
+3. **Don't touch** `data/` (content, settings, accounts, your `theme.css` stylesheet) or `media/` (images).
 4. In the admin: Settings › Advanced › Clear cache.
 
 **Move to another host or domain**: copy the whole folder, then change the address in Settings › General. Internal links adapt automatically, including in a subfolder.
@@ -461,7 +472,7 @@ eclair/                  ← upload this to your hosting
 ├── app/lang/            admin translations (6 languages, compressed JSON) — the French text is the key
 ├── assets/admin/        admin CSS and JavaScript (no dependencies)
 ├── assets/site/site.js  the only public script (2.4 KB, 1.2 KB compressed)
-├── data/                content, settings, accounts (created at installation, never public)
+├── data/                content, settings, accounts, the site’s theme.css (created at installation, never public)
 ├── cache/               generated pages
 └── media/               uploaded images
 i18n/                    human-readable translation sources (compiled by tools/i18n.php)
@@ -475,13 +486,13 @@ tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 445 unit and HTTP checks
+php tests/run.php                                  # 470 unit and HTTP checks
 php tools/build.php                                # ready-to-ship archive
 ```
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-Customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a backup: the integrity check will flag these files as modified, which is expected). In the archive, the PHP is compacted (`php -w`, comments removed) to stay under 1 MB: the commented sources are on GitHub.
+To restyle a site, prefer `data/theme.css` ([Your own stylesheet](#your-own-stylesheet)): `Theme::css()` adds it after the active theme, and it survives updates. The `app/theme/*.php` templates and the `app/theme/theme.css` and `app/theme/themes/*.css` stylesheets can still be edited, but an update replaces them: keep a backup (the integrity check will flag them as modified, which is expected). In the archive, the PHP is compacted (`php -w`, comments removed) to stay under 1 MB: the commented sources are on GitHub.
 
 ---
 
