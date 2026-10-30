@@ -1,0 +1,44 @@
+/* ⚡ Éclair — thème Éditorial : un magazine, typographie à empattements, filets fins et article « à la une ». */
+:root{--bg:#fbfaf7;--bg-soft:#f3f0e8;--card:#fffefb;--text:#1c1a17;--muted:#5f5a51;--line:#e2ddd1;--code:#f0ece2;--radius:4px;--shadow:none;--text-w:40rem}
+/*dark*/@media (prefers-color-scheme:dark){:root{--bg:#15130f;--bg-soft:#1d1a15;--card:#1a1813;--text:#efe9de;--muted:#aca595;--line:#353128;--code:#221f19}}/*/dark*/
+
+body{font-size:1.1rem;line-height:1.78}
+h1,h2,h3,h4{font-weight:700;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem, 1.4rem + 3.2vw, 3.7rem);line-height:1.06}
+h2{font-size:clamp(1.5rem, 1.25rem + 1vw, 2.05rem)}
+
+.site-header{border-bottom:3px double var(--line)}
+.brand{font-size:clamp(1.5rem, 1.15rem + 1.5vw, 2.35rem);letter-spacing:-.02em}
+.site-nav a{border-radius:0;text-transform:uppercase;font-size:.76rem;letter-spacing:.14em;font-weight:650;padding:.5rem .8rem}
+.site-nav a:hover{background:none;color:var(--link-c)}
+.site-nav a[aria-current]{background:none;box-shadow:inset 0 -2px 0 var(--accent);color:var(--text)}
+
+.chip{border-radius:0;background:none;padding:0;text-transform:uppercase;letter-spacing:.14em;font-size:.72rem}
+.chip:hover{background:none;text-decoration:underline}
+.meta{font-style:italic}
+.key{border-radius:0;border-width:1px 0;border-color:var(--line);background:none;padding:1.2rem 0}
+.key-title{letter-spacing:.16em}
+.content.post>p:first-of-type::first-letter{float:left;font:700 3.7em/.82 var(--font-head);margin:.06em .12em 0 0;color:var(--accent)}
+blockquote{border-left:0;text-align:center;font-size:clamp(1.25rem, 1.1rem + .6vw, 1.55rem);line-height:1.5;padding:.4rem 1.5rem 0}
+blockquote::before{content:"“";display:block;font:700 3.6rem/.6 var(--font-head);color:var(--accent);margin-bottom:.35rem}
+.btn{border-radius:2px;text-transform:uppercase;letter-spacing:.09em;font-size:.84rem}
+.toc,.callout,.faq details,.table,.code,.contact,.author,.feature{border-radius:var(--radius)}
+.feature{box-shadow:none;background:none;border-width:1px 0 0;padding:1.3rem 0 0}
+.feature-icon{background:none;width:auto;height:auto;margin-bottom:.2rem}
+
+/* Cartes : filets plutôt que boîtes, premier article en grand sur les listes */
+.card{border:0;border-top:1px solid var(--line);border-radius:0;background:none;padding-top:1.1rem}
+.card:hover{transform:none;box-shadow:none}
+.card-img img{border-radius:var(--radius)}
+.card-body{padding:.9rem 0 0}
+.card-title{font-size:1.38rem;line-height:1.22}
+.card-excerpt{font-size:1rem}
+.cards-list .card-body{padding:0 0 0 1.5rem}
+@media (min-width:52rem){
+  .is-list:not(.cards-list) .cards>.card:first-child{grid-column:1/-1;display:grid;grid-template-columns:1.35fr 1fr;gap:2rem;align-items:center;border-top:0;padding-top:0}
+  .is-list:not(.cards-list) .cards>.card:first-child .card-body{padding:0}
+  .is-list:not(.cards-list) .cards>.card:first-child .card-title{font-size:clamp(1.8rem, 1.2rem + 1.4vw, 2.5rem)}
+}
+
+.site-footer{background:none;border-top:3px double var(--line)}
+.footer-brand{font-size:1.35rem}

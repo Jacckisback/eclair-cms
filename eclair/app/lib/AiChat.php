@@ -315,6 +315,13 @@ You are the content assistant built into the website "{$name}", made with Éclai
 - End with a short conclusion and, when it fits the site, a call to action (contact page or a relevant service).
 - Write in the content language with the voice of the editorial profile. No filler, no clichés, no AI-sounding phrases (such as "in today's fast-paced world", "let's dive in", "in conclusion", "game-changer"), no emojis in content unless the profile asks for them.
 
+# Products (only when the context says the shop is open)
+- A product sheet sells one item: create it with create_draft, type "product". Title = the product name. The body speaks to buyers: what it is and what it brings first, then materials, dimensions, care, what is included and how it is delivered or used; 150 to 400 words, with a short list of key features. FAQ: real buyer questions (size, delivery, returns, use).
+- Never invent a price, a discount, a stock level, a payment link, a brand, a reference or a barcode: fill product fields only with what the person gives you. If the price or the payment link is missing, leave it out and remind the person to add it before publishing (in the editor, or by telling you).
+- Photos attached by the person are already in the media library: the first goes in "image", the others in product.gallery. Never generate pictures of the product itself: they would mislead buyers. Image generation is for illustrating articles and pages only.
+- Variants (sizes, colours…) go in product.variants, with their own price and payment link only when the person gives them.
+- To change a price, the stock or a payment link, use update_content with the "product" field.
+
 # Markdown accepted in "body" and "append"
 - "## Heading" (H2) and "### Sub-heading" (H3). Never "#": the title is separate.
 - Paragraphs separated by a blank line; **bold**, *italic*, [link text](/path or https://…).
@@ -370,9 +377,14 @@ PROMPT;
                 . '. Content language: ' . (Content::LANGS[$lang] ?? $lang) . ' (' . $lang . ').',
             Settings::get('blog.enabled') ? 'Blog: enabled, articles live under ' . Content::blogPath() . '/.' : 'Blog: disabled (create pages only).',
         ];
-        $cats = array_map(fn ($c) => $c['id'] . ' = ' . $c['name'], Categories::all());
-        if ($cats) {
-            $lines[] = 'Categories (id = name): ' . implode('; ', $cats) . '.';
+        if (Shop::enabled()) {
+            $lines[] = 'Shop: open, catalog at ' . Shop::path() . '/, products live under ' . Shop::path() . '/, prices in ' . Shop::currency() . ', payment by link (Stripe Payment Links).';
+        }
+        foreach (['post' => 'Article categories', 'product' => 'Product categories'] as $kind => $label) {
+            $cats = array_map(fn ($c) => $c['id'] . ' = ' . $c['name'], Categories::of($kind));
+            if ($cats) {
+                $lines[] = $label . ' (id = name): ' . implode('; ', $cats) . '.';
+            }
         }
         $index = Content::index();
         uasort($index, fn ($a, $b) => $b['updated'] <=> $a['updated']);
@@ -382,13 +394,18 @@ PROMPT;
         $posts = array_slice(array_filter($index, fn ($e) => $e['type'] === 'post'), 0, 40);
         $lines[] = "\n## Pages (id | title | path | status)\n" . ($pages ? implode("\n", array_map($row, $pages)) : '(none)');
         $lines[] = "\n## Latest articles (id | title | path | status)\n" . ($posts ? implode("\n", array_map($row, $posts)) : '(none yet)');
+        $products = array_slice(array_filter($index, fn ($e) => $e['type'] === 'product'), 0, 40);
+        if ($products) {
+            $lines[] = "\n## Products (id | title | path | status | price)\n" . implode("\n", array_map(fn ($e) => $row($e) . ' | ' . (($e['price'] ?? '') !== '' ? $e['price'] . ' ' . Shop::currency() : 'no price'), $products));
+        }
         $lines[] = "\nMedia library: " . count(Media::all()) . ' images (find_media). Image AI: ' . (Ai::imager() !== '' ? Ai::IMAGES[Ai::imager()][0] : 'not configured') . '.';
         if ($editing) {
             $it = $editing['item'];
-            $lines[] = "\n# Open in the editor\nThe person is editing the " . ($it['type'] === 'page' ? 'page' : 'article') . ' "' . $it['title'] . '" (id ' . $editing['id']
+            $lines[] = "\n# Open in the editor\nThe person is editing the " . (['page' => 'page', 'product' => 'product'][$it['type']] ?? 'article') . ' "' . $it['title'] . '" (id ' . $editing['id']
                 . ', ' . ($it['status'] === 'published' ? 'published' : 'draft') . '). "This article", "this page" or "the text" refer to it. Use update_content with this id: '
                 . "changes appear in the editor and the person saves them.\nCurrent content (unsaved changes included), between the markers:\n<content>\n"
-                . 'Summary: ' . ($it['summary'] !== '' ? $it['summary'] : '(empty)') . "\nKey phrase: " . ($it['seo']['keyword'] !== '' ? $it['seo']['keyword'] : '(none)') . "\n\n"
+                . 'Summary: ' . ($it['summary'] !== '' ? $it['summary'] : '(empty)') . "\nKey phrase: " . ($it['seo']['keyword'] !== '' ? $it['seo']['keyword'] : '(none)') . "\n"
+                . (isset($it['product']) ? 'Product fields: ' . str_replace(['<content>', '</content>'], '', (string) json_encode($it['product'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . "\n" : '') . "\n"
                 . str_replace(['<content>', '</content>'], '', mb_substr(Markdown::fromBlocks($it['blocks']), 0, 16000)) . "\n</content>";
         }
         return implode("\n", $lines);

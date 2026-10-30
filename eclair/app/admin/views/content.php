@@ -4,20 +4,23 @@ defined('ECLAIR') || exit;
 use Eclair\Content;
 use Eclair\Icons;
 use Eclair\Settings;
+use Eclair\Shop;
 
 $cls = static fn (int $s): string => $s >= 80 ? 'good' : ($s >= 50 ? 'ok' : 'bad');
-$filters = [
-    '' => t('Tout'), 'type=page' => t('Pages'), 'type=post' => t('Articles'),
+$shop = Shop::enabled() || array_filter(Content::index(), fn ($e) => $e['type'] === 'product');
+$filters = array_merge(['' => t('Tout'), 'type=page' => t('Pages'), 'type=post' => t('Articles')], $shop ? ['type=product' => t('Produits')] : [], [
     'status=draft' => t('Brouillons'), 'status=scheduled' => t('Programmés'),
-];
+]);
+$types = ['page' => t('Page'), 'post' => t('Article'), 'product' => t('Produit')];
 $currentFilter = $v['type'] !== '' ? 'type=' . $v['type'] : ($v['status'] !== '' ? 'status=' . $v['status'] : '');
 $home = (string) Settings::get('home');
 ?>
 <div class="page">
   <div class="topbar">
-    <div><h1><?= e(t('Contenus')) ?></h1><p><?= e(t('Pages et articles de ton site.')) ?></p></div>
+    <div><h1><?= e(t('Contenus')) ?></h1><p><?= e($shop ? t('Pages, articles et produits de ton site.') : t('Pages et articles de ton site.')) ?></p></div>
     <div class="row">
       <a class="btn" href="<?= e(admin_url('new/page')) ?>"><?= Icons::svg('plus') ?><?= e(t('Page')) ?></a>
+      <?php if ($shop): ?><a class="btn" href="<?= e(admin_url('new/product')) ?>"><?= Icons::svg('plus') ?><?= e(t('Produit')) ?></a><?php endif ?>
       <?php if (Settings::get('blog.enabled')): ?><a class="btn btn-primary" href="<?= e(admin_url('new/post')) ?>"><?= Icons::svg('pen') ?><?= e(t('Article')) ?></a><?php endif ?>
     </div>
   </div>
@@ -45,7 +48,7 @@ $home = (string) Settings::get('home');
         <tr data-row="<?= e($e['id']) ?>">
           <td class="title-cell">
             <a href="<?= e(admin_url('edit/' . $e['id'])) ?>"><?= e($e['title']) ?></a>
-            <small><?= e($e['type'] === 'post' ? t('Article') : t('Page')) ?><?= $e['id'] === $home ? ' · 🏠 ' . e(t('Accueil')) : '' ?> · <?= e($path) ?><?= $e['lang'] !== Settings::get('lang') ? ' · ' . e(strtoupper($e['lang'])) : '' ?><?= $e['noindex'] ? ' · noindex' : '' ?></small>
+            <small><?= e($types[$e['type']] ?? t('Page')) ?><?= ($e['price'] ?? '') !== '' ? ' · ' . e(Shop::money((string) $e['price'], \Eclair\I18n::lang() === 'zh' ? 'en' : \Eclair\I18n::lang())) : '' ?><?= $e['id'] === $home ? ' · 🏠 ' . e(t('Accueil')) : '' ?> · <?= e($path) ?><?= $e['lang'] !== Settings::get('lang') ? ' · ' . e(strtoupper($e['lang'])) : '' ?><?= $e['noindex'] ? ' · noindex' : '' ?></small>
           </td>
           <td><?= $visible ? '<span class="badge ok">' . e(t('Publié')) . '</span>' : ($e['status'] === 'published' ? '<span class="badge brand">' . e(t('Programmé')) . ' · ' . e(fmt_date((int) $e['date'], \Eclair\I18n::lang())) . '</span>' : '<span class="badge">' . e(t('Brouillon')) . '</span>') ?></td>
           <td><span class="score <?= $cls((int) $e['score']['seo']) ?>"><?= (int) $e['score']['seo'] ?></span></td>

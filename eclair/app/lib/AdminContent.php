@@ -45,9 +45,12 @@ final class AdminContent
             'seo' => ['title' => '', 'description' => '', 'keyword' => '', 'canonical' => '', 'noindex' => false],
             'options' => ['hide_title' => false, 'toc' => 'auto', 'wide' => false],
         ];
+        if ($item['type'] === 'product') {
+            $item['product'] = Shop::normalize($item['product'] ?? []);
+        }
         // Dates affichées dans le fuseau du site (et non celui du navigateur).
         $item['date_local'] = $item['date'] ? date('Y-m-d\TH:i', (int) $item['date']) : '';
-        $mediaIds = array_merge([$item['image']], Blocks::media($item['blocks']));
+        $mediaIds = array_merge([$item['image']], $item['product']['gallery'] ?? [], Blocks::media($item['blocks']));
         $media = [];
         foreach (array_filter($mediaIds) as $id) {
             $m = Media::get($id);
@@ -71,7 +74,7 @@ final class AdminContent
                 'path' => $entry ? Content::path($entry) : '',
                 'visible' => $entry ? Content::visible($entry) : false,
                 'media' => $media,
-                'categories' => array_map(fn ($c) => ['id' => $c['id'], 'name' => $c['name']], Categories::all()),
+                'categories' => array_map(fn ($c) => ['id' => $c['id'], 'name' => $c['name'], 'kind' => $c['kind']], Categories::all()),
                 'users' => array_values(array_map(fn ($u) => ['id' => $u['id'], 'name' => $u['name']], Users::all())),
                 'langs' => Content::LANGS,
                 'translations' => $translations,
@@ -83,6 +86,9 @@ final class AdminContent
                     'home' => Settings::get('home'),
                     'format' => Settings::get('seo.title_format'),
                     'blogOn' => (bool) Settings::get('blog.enabled'),
+                    'shop' => Shop::path(),
+                    'shopOn' => Shop::enabled(),
+                    'currency' => Shop::CURRENCIES[Shop::currency()],
                 ],
                 'gd' => Media::gd(),
                 'analysis' => Analyzer::run($item),
@@ -185,7 +191,7 @@ final class AdminContent
         $out = [];
         foreach (Content::published() as $e) {
             if ($q === '' || str_contains(mb_strtolower($e['title'] . ' ' . $e['slug']), $q)) {
-                $out[] = ['title' => $e['title'], 'path' => Content::path($e), 'type' => $e['type'] === 'post' ? t('Article') : t('Page')];
+                $out[] = ['title' => $e['title'], 'path' => Content::path($e), 'type' => ['post' => t('Article'), 'product' => t('Produit')][$e['type']] ?? t('Page')];
             }
         }
         foreach (Categories::all() as $c) {

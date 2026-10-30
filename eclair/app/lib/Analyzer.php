@@ -17,6 +17,7 @@ final class Analyzer
         $text = Blocks::text($blocks);
         $words = word_count($text);
         $isPost = ($item['type'] ?? 'post') === 'post';
+        $isProduct = ($item['type'] ?? '') === 'product' && isset($item['product']);
         $landing = (bool) array_filter($blocks, fn ($b) => in_array($b['type'], ['hero', 'features'], true));
         $title = (string) ($item['title'] ?? '');
         $seo = $item['seo'] ?? [];
@@ -30,7 +31,7 @@ final class Analyzer
         $host = (string) parse_url((string) Settings::get('url'), PHP_URL_HOST);
         $internal = array_filter($links, fn ($u) => str_starts_with($u, '/') && !str_starts_with($u, '//') || ($host !== '' && parse_url($u, PHP_URL_HOST) === $host));
         $external = array_filter($links, fn ($u) => preg_match('~^https?://~', $u) && parse_url($u, PHP_URL_HOST) !== $host);
-        $minWords = $isPost ? 600 : ($landing ? 150 : 250);
+        $minWords = $isPost ? 600 : ($isProduct || $landing ? 150 : 250);
         $checks = [];
         $add = static function (string $group, string $status, string $label, int $weight = 1) use (&$checks): void {
             $checks[] = ['group' => $group, 'status' => $status, 'label' => $label, 'weight' => $weight];
@@ -80,6 +81,23 @@ final class Analyzer
         }
         if ($isPost) {
             $add('seo', ($item['image'] ?? '') !== '' ? 'good' : 'ok', t('Image à la une pour les partages et Google Discover.'));
+        }
+        if ($isProduct) {
+            $offers = Shop::offers($item);
+            $add('seo', array_filter($offers, fn ($o) => $o['price'] !== '' && (float) $o['price'] > 0) ? 'good' : 'bad',
+                t('Prix indiqué : sans prix, Google n’affiche pas la fiche dans ses résultats produits.'), 3);
+            $add('seo', array_filter(array_column($offers, 'link')) ? 'good' : 'bad',
+                t('Lien de paiement (Stripe Payment Links) : sans lui, le bouton « Acheter » reste désactivé.'), 2);
+            $photos = Shop::images($item);
+            $add('seo', count($photos) >= 3 ? 'good' : ($photos ? 'ok' : 'bad'),
+                t('{n} photo(s) du produit : vise au moins 3 vues.', ['n' => count($photos)]), 2);
+            $noAlt = count(array_filter($photos, fn ($m) => $m['alt'] === ''));
+            if ($noAlt) {
+                $add('seo', 'ok', t('{n} image(s) sans texte alternatif.', ['n' => $noAlt]));
+            }
+            $p = $item['product'];
+            $add('seo', $p['gtin'] !== '' || ($p['brand'] !== '' && $p['sku'] !== '') ? 'good' : 'ok',
+                t('Marque et code produit (GTIN/EAN ou référence) : ils aident Google Shopping à identifier le produit.'));
         }
         if (strlen((string) ($item['slug'] ?? '')) > 75) {
             $add('seo', 'ok', t('URL longue : raccourcis-la à l’essentiel.'));

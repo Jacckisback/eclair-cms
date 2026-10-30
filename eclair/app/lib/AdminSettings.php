@@ -8,7 +8,7 @@ defined('ECLAIR') || exit;
 /** Réglages du site, par onglets. */
 final class AdminSettings
 {
-    public const TABS = ['general', 'appearance', 'seo', 'geo', 'ai', 'contact', 'advanced'];
+    public const TABS = ['general', 'appearance', 'shop', 'seo', 'geo', 'ai', 'contact', 'advanced'];
 
     public static function page(array $user): never
     {
@@ -28,7 +28,58 @@ final class AdminSettings
             'media' => $media,
             'indexnow' => IndexNow::key(),
             'ai' => $tab === 'ai' ? self::aiState() : [],
+            'previews' => $tab === 'appearance' ? self::previewPages() : [],
         ], t('Réglages'));
+    }
+
+    /** Pages proposées dans l'aperçu en direct de l'apparence. */
+    private static function previewPages(): array
+    {
+        $pages = ['/' => t('Accueil')];
+        $posts = array_values(Content::published('post'));
+        if (Settings::get('blog.enabled') && Settings::get('home') !== '') {
+            $pages[Content::blogPath()] = t('Blog');
+        }
+        if ($posts) {
+            $pages[Content::path($posts[0])] = t('Un article');
+        }
+        if (Shop::enabled()) {
+            $pages[Shop::path()] = t('La boutique');
+            $products = array_values(Content::published('product'));
+            if ($products) {
+                $pages[Content::path($products[0])] = t('Un produit');
+            }
+        }
+        return $pages;
+    }
+
+    /**
+     * Aperçu en direct de l'apparence : une page du site rendue avec l'apparence choisie dans le formulaire,
+     * sans rien enregistrer ni mettre en cache. Seules des valeurs connues sont acceptées.
+     */
+    public static function preview(array $user): never
+    {
+        $q = static fn (string $k): string => (string) Req::query($k);
+        $look = [];
+        if (isset(Theme::THEMES[$q('theme')])) {
+            $look['theme'] = $q('theme');
+        }
+        foreach (['header' => ['left', 'center'], 'cards' => ['grid', 'list'], 'dark' => ['auto', 'light']] as $k => $allowed) {
+            if (in_array($q($k), $allowed, true)) {
+                $look[$k] = $q($k);
+            }
+        }
+        if (preg_match('/^#[0-9a-f]{6}$/i', $q('accent'))) {
+            $look['accent'] = strtolower($q('accent'));
+        }
+        foreach (['font_head', 'font_body'] as $k) {
+            if (isset(Theme::FONTS[$q($k)])) {
+                $look[$k] = $q($k);
+            }
+        }
+        Theme::preview($look);
+        $path = $q('path');
+        Site::preview(preg_match('~^/[a-z0-9/_-]*$~', $path) ? $path : '/');
     }
 
     /** État de l'assistant pour l'onglet IA : indices des clés (jamais les clés), dépenses du mois. */
@@ -69,7 +120,7 @@ final class AdminSettings
                     'search' => Req::bool('search'),
                     'blog' => [
                         'enabled' => Req::bool('blog_enabled'),
-                        'base' => in_array($base, [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache'], true) ? 'blog' : $base,
+                        'base' => in_array($base, [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'products', ltrim(Shop::path(), '/')], true) ? 'blog' : $base,
                         'title' => $text('blog_title', 80) ?: 'Blog',
                         'description' => Sanitize::multiline(Req::input('blog_description'), 500),
                         'per_page' => max(1, min(48, (int) Req::input('per_page'))),
@@ -84,6 +135,9 @@ final class AdminSettings
 
             case 'appearance':
                 $patch = ['appearance' => [
+                    'theme' => isset(Theme::THEMES[Req::input('theme')]) ? Req::input('theme') : 'eclair',
+                    'header' => Req::input('header') === 'center' ? 'center' : 'left',
+                    'cards' => Req::input('cards') === 'list' ? 'list' : 'grid',
                     'logo' => $mediaId('logo'),
                     'favicon' => $mediaId('favicon'),
                     'accent' => Sanitize::color(Req::input('accent'), $s['appearance']['accent']),
@@ -178,6 +232,10 @@ final class AdminSettings
                 }
                 break;
 
+            case 'shop':
+                $patch = self::shop($user, $s, $redirect);
+                break;
+
             case 'contact':
                 $patch = ['contact' => [
                     'email' => Sanitize::email(Req::input('email')),
@@ -224,6 +282,78 @@ final class AdminSettings
             Http::redirect(Req::base() . '/' . $patch['admin_path'] . '/settings?tab=advanced');
         }
         Admin::back($redirect, t('Réglages enregistrés. Le site est déjà à jour ⚡'));
+    }
+
+    /**
+     * Onglet Boutique. Elle ne s'ouvre qu'avec des mentions légales et des CGV publiées ; si son adresse change,
+     * le catalogue, les fiches et les catégories de produits sont redirigés (301).
+     */
+    private static function shop(array $user, array $s, string $redirect): array
+    {
+        $page = static fn (string $k): string => (Content::index()[Req::input($k)]['type'] ?? '') === 'page' ? Req::input($k) : '';
+        $text = static fn (string $k, int $max = 200): string => Sanitize::text(Req::input($k), $max);
+        $old = ltrim(Shop::path(), '/');
+        $base = str_replace('/', '-', slugify(Req::input('shop_base'))) ?: Theme::words()['shop'];
+        $taken = [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'products', 'feed', $s['blog']['base'], Theme::words()['search']];
+        foreach (Content::index() as $e) {
+            if ($e['type'] === 'page') {
+                $taken[] = $e['slug'];
+            }
+        }
+        if ($base !== $old && in_array($base, $taken, true)) {
+            Admin::back($redirect, t('Cette adresse est déjà utilisée : choisis-en une autre.'), 'bad');
+        }
+        $legal = $page('legal');
+        $terms = $page('terms');
+        $enabled = Req::bool('shop_enabled');
+        if ($enabled && ($missing = Shop::missing($legal, $terms))) {
+            $enabled = false;
+            Session::flash('warn', t('La boutique reste fermée : publie d’abord ces pages, puis choisis-les ci-dessous : {pages}.', ['pages' => implode(', ', $missing)]));
+        }
+        $min = max(0, min(60, (int) Req::input('days_min')));
+        $patch = ['shop' => [
+            'enabled' => $enabled,
+            'base' => $base,
+            'title' => $text('shop_title', 80),
+            'description' => Sanitize::multiline(Req::input('shop_description'), 500),
+            'currency' => isset(Shop::CURRENCIES[Req::input('currency')]) ? Req::input('currency') : 'EUR',
+            'button' => $text('button', 40),
+            'per_page' => max(1, min(48, (int) Req::input('shop_per_page'))),
+            'shipping' => [
+                'price' => Shop::amount(Req::input('shipping_price')),
+                'free_from' => Shop::amount(Req::input('free_from')),
+                'countries' => implode(', ', Shop::parseCountries(Req::input('countries'))),
+                'days_min' => $min,
+                'days_max' => max($min, min(90, (int) Req::input('days_max'))),
+            ],
+            'returns' => ['days' => max(0, min(365, (int) Req::input('returns_days'))), 'free' => Req::bool('returns_free')],
+            'legal' => $legal,
+            'terms' => $terms,
+            'delivery' => $page('delivery'),
+            'thanks' => $page('thanks'),
+        ]];
+        if ($base !== $old && $s['shop']['enabled']) {
+            foreach (array_merge([['slug' => '']], Content::published('product'), Categories::of('product')) as $x) {
+                Redirects::add(rtrim('/' . $old . '/' . $x['slug'], '/'), rtrim('/' . $base . '/' . $x['slug'], '/'), true);
+            }
+        }
+        // Page de remerciement (après le paiement, Stripe peut y rediriger le client) : créée à la demande, hors index.
+        if (Req::input('action') === 'thanks' && $patch['shop']['thanks'] === '') {
+            $lang = (string) $s['lang'];
+            $thanks = Content::save([
+                'type' => 'page',
+                'status' => 'published',
+                'title' => Theme::t('thanks_title', $lang),
+                'lang' => $lang,
+                'blocks' => [
+                    ['type' => 'paragraph', 'text' => Theme::t('thanks_text', $lang)],
+                    ['type' => 'button', 'text' => Theme::t('all_products', $lang), 'url' => '/' . $base, 'style' => 'secondary', 'align' => 'left'],
+                ],
+                'seo' => ['noindex' => true],
+            ], $user);
+            $patch['shop']['thanks'] = $thanks['id'];
+        }
+        return $patch;
     }
 
     /** Accepte le code seul ou la balise <meta> complète copiée depuis Google / Bing. */

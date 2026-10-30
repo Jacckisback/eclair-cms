@@ -5,13 +5,24 @@ namespace Eclair;
 
 defined('ECLAIR') || exit;
 
-/** Catégories d'articles : de vraies pages « piliers » pour structurer le cocon sémantique. */
+/**
+ * Catégories : de vraies pages « piliers » pour structurer le cocon sémantique.
+ * Chacune regroupe un seul type de contenu : des articles (blog) ou des produits (boutique).
+ */
 final class Categories
 {
+    public const KINDS = ['post', 'product'];
+
     public static function all(): array
     {
         $cats = Store::read('categories', []);
-        return is_array($cats) ? $cats : [];
+        return is_array($cats) ? array_map(fn (array $c): array => $c + ['kind' => 'post'], $cats) : [];
+    }
+
+    /** Catégories d'articles (post) ou de produits (product). */
+    public static function of(string $kind): array
+    {
+        return array_values(array_filter(self::all(), fn (array $c): bool => $c['kind'] === $kind));
     }
 
     public static function get(string $id): ?array
@@ -24,9 +35,9 @@ final class Categories
         return null;
     }
 
-    public static function bySlug(string $slug): ?array
+    public static function bySlug(string $slug, string $kind = 'post'): ?array
     {
-        foreach (self::all() as $cat) {
+        foreach (self::of($kind) as $cat) {
             if ($cat['slug'] === $slug) {
                 return $cat;
             }
@@ -36,7 +47,7 @@ final class Categories
 
     public static function path(array $cat): string
     {
-        return Content::blogPath() . '/' . $cat['slug'];
+        return (($cat['kind'] ?? 'post') === 'product' ? Shop::path() : Content::blogPath()) . '/' . $cat['slug'];
     }
 
     public static function save(array $data): array
@@ -44,11 +55,16 @@ final class Categories
         $cat = Store::locked(function () use ($data): array {
             $cats = self::all();
             $id = preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '';
+            $existing = $id !== '' ? self::get($id) : null;
+            // Le type d'une catégorie existante ne change pas : ses contenus garderaient une catégorie de l'autre type.
+            $kind = $existing['kind'] ?? (($data['kind'] ?? '') === 'product' ? 'product' : 'post');
             $name = Sanitize::text($data['name'] ?? '', 80);
             $slug = slugify((string) ($data['slug'] ?? '') ?: $name) ?: 'categorie';
-            $taken = array_column(array_filter($cats, fn ($c) => $c['id'] !== $id), 'slug');
-            foreach (Content::published('post') as $post) {
-                $taken[] = $post['slug'];
+            $taken = array_column(array_filter($cats, fn ($c) => $c['id'] !== $id && $c['kind'] === $kind), 'slug');
+            foreach (Content::index() as $entry) {
+                if ($entry['type'] === $kind) {
+                    $taken[] = $entry['slug'];
+                }
             }
             $words = Theme::words();
             array_push($taken, $words['page'], $words['author'], 'feed');
@@ -58,16 +74,17 @@ final class Categories
             }
             $cat = [
                 'id' => $id !== '' ? $id : random_id(),
+                'kind' => $kind,
                 'name' => $name !== '' ? $name : t('Sans titre'),
                 'slug' => $slug,
                 'description' => Sanitize::multiline($data['description'] ?? '', 1000),
                 'seo_title' => Sanitize::text($data['seo_title'] ?? '', 120),
             ];
             $found = false;
-            foreach ($cats as $i => $existing) {
-                if ($existing['id'] === $cat['id']) {
-                    if ($existing['slug'] !== $cat['slug']) {
-                        Redirects::add(self::path($existing), self::path($cat), true);
+            foreach ($cats as $i => $old) {
+                if ($old['id'] === $cat['id']) {
+                    if ($old['slug'] !== $cat['slug']) {
+                        Redirects::add(self::path($old), self::path($cat), true);
                     }
                     $cats[$i] = $cat;
                     $found = true;
@@ -91,13 +108,13 @@ final class Categories
         Cache::purge();
     }
 
-    /** Nombre d'articles publiés par catégorie. */
-    public static function counts(): array
+    /** Nombre de contenus publiés par catégorie (articles par défaut, ou produits). */
+    public static function counts(string $kind = 'post'): array
     {
         $counts = [];
-        foreach (Content::published('post') as $post) {
-            if ($post['category'] !== '') {
-                $counts[$post['category']] = ($counts[$post['category']] ?? 0) + 1;
+        foreach (Content::published($kind) as $entry) {
+            if ($entry['category'] !== '') {
+                $counts[$entry['category']] = ($counts[$entry['category']] ?? 0) + 1;
             }
         }
         return $counts;

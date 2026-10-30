@@ -39,7 +39,8 @@ final class Content
 
     public static function visible(array $entry): bool
     {
-        return $entry['status'] === 'published' && (int) $entry['date'] <= time();
+        // Les produits ne sont en ligne que si la boutique est ouverte.
+        return $entry['status'] === 'published' && (int) $entry['date'] <= time() && ($entry['type'] !== 'product' || Shop::enabled());
     }
 
     /** Contenus visibles d'un type, du plus récent au plus ancien. */
@@ -62,7 +63,11 @@ final class Content
         if ($entry['type'] === 'page' && $entry['id'] === Settings::get('home')) {
             return '/';
         }
-        return $entry['type'] === 'post' ? self::blogPath() . '/' . $entry['slug'] : '/' . $entry['slug'];
+        return match ($entry['type']) {
+            'post' => self::blogPath() . '/' . $entry['slug'],
+            'product' => Shop::path() . '/' . $entry['slug'],
+            default => '/' . $entry['slug'],
+        };
     }
 
     public static function blogPath(): string
@@ -196,7 +201,7 @@ final class Content
         $index ??= self::index();
         $id = $old['id'] ?? random_id();
         $now = time();
-        $type = $old['type'] ?? (($data['type'] ?? '') === 'page' ? 'page' : 'post');
+        $type = $old['type'] ?? (in_array($data['type'] ?? '', ['page', 'product'], true) ? (string) $data['type'] : 'post');
         $lang = array_key_exists($data['lang'] ?? '', self::LANGS) ? (string) $data['lang'] : (string) Settings::get('lang');
         $title = Sanitize::text($data['title'] ?? '', 200);
         $title = $title !== '' ? $title : t('Sans titre');
@@ -234,7 +239,7 @@ final class Content
             'blocks' => Blocks::normalize($data['blocks'] ?? []),
             'summary' => Sanitize::multiline($data['summary'] ?? '', 800),
             'image' => preg_replace('/[^a-z0-9]/', '', (string) ($data['image'] ?? '')) ?? '',
-            'category' => $type === 'post' && Categories::get($category) ? $category : '',
+            'category' => $type !== 'page' && (Categories::get($category)['kind'] ?? '') === $type ? $category : '',
             'author' => Users::find($author) ? $author : (string) ($old['author'] ?? $user['id']),
             'created' => (int) ($old['created'] ?? $now),
             'date' => $date,
@@ -252,6 +257,9 @@ final class Content
                 'wide' => !empty($options['wide']),
             ],
         ];
+        if ($type === 'product') {
+            $item['product'] = Shop::normalize($data['product'] ?? []);
+        }
         $analysis = Analyzer::run($item);
         $item['score'] = ['seo' => $analysis['seo'], 'geo' => $analysis['geo']];
         return $item;
@@ -281,6 +289,19 @@ final class Content
             'noindex' => $item['seo']['noindex'],
             'words' => word_count($text),
             'score' => $item['score'] ?? ['seo' => 0, 'geo' => 0],
+        ] + (isset($item['product']) ? self::productEntry($item) : []);
+    }
+
+    /** Résumé d'un produit pour l'index : prix le plus bas (« à partir de » si les variantes diffèrent), disponibilité. */
+    private static function productEntry(array $item): array
+    {
+        $prices = array_values(array_unique(array_filter(array_column(Shop::offers($item), 'price'), fn ($p) => $p !== '')));
+        sort($prices, SORT_NUMERIC);
+        return [
+            'price' => $prices[0] ?? '',
+            'from' => count($prices) > 1,
+            'compare' => $item['product']['compare'],
+            'availability' => $item['product']['availability'],
         ];
     }
 
@@ -411,7 +432,7 @@ final class Content
                 $taken[$word] = true;
             }
         } else {
-            foreach (Categories::all() as $cat) {
+            foreach (Categories::of($type) as $cat) {
                 $taken[$cat['slug']] = true;
             }
             $words = Theme::words();

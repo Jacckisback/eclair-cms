@@ -242,7 +242,7 @@
   };
 
   /* ───────── Cartes d'action ───────── */
-  const typeLabel = (c) => (c.type === 'page' ? t('Page') : t('Article'));
+  const typeLabel = (c) => ({ page: t('Page'), product: t('Produit') }[c.type] || t('Article'));
   const stateLabel = (s) => ({ draft: t('Brouillon'), published: t('Publié'), scheduled: t('Programmé') }[s] || s);
   const btn = (label, onclick, cls = 'btn btn-sm') => h('button', { type: 'button', class: cls, text: label, onclick });
   const link = (label, href, cls = 'btn btn-sm', blank = false) => h('a', { class: cls, href, text: label, target: blank ? '_blank' : null, rel: blank ? 'noopener' : null });

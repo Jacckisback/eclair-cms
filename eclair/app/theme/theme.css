@@ -208,5 +208,63 @@ tr:last-child td{border-bottom:0}
 .footer-bottom p{margin:0}
 .edit-fab{position:fixed;right:1.1rem;bottom:1.1rem;z-index:30;background:var(--accent);color:var(--on-accent);padding:.6rem 1rem;border-radius:999px;font-weight:700;text-decoration:none;box-shadow:var(--shadow)}
 
+/*shop*//* Boutique : cartes produit, fiche produit, variantes sans JavaScript */
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.3rem}
+.chips .chip{font-size:.88rem;padding:.35rem .95rem}
+.chips .chip[aria-current]{background:var(--accent);color:var(--on-accent)}
+.products{grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}
+.product-card .card-img img{aspect-ratio:1/1}
+.card-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:.3rem .6rem;margin:0;font-size:1.02rem;font-weight:700;color:var(--text)}
+.card-price .price-was{font-weight:400;font-size:.88rem}
+@media (max-width:40rem){.products{grid-template-columns:1fr 1fr;gap:.8rem}.product-card .card-body{padding:.75rem .8rem .9rem}.product-card .card-title{font-size:.98rem}.card-price{font-size:.95rem}}
+.price-was{color:var(--muted)}
+.badge{display:inline-block;padding:.1rem .55rem;border-radius:999px;border:1px solid var(--line);background:var(--bg-soft);color:var(--muted);font-size:.76rem;font-weight:700;white-space:nowrap}
+.badge-sale{background:#b42318;border-color:#b42318;color:#fff}
+.product>.entry-header,.content>.product-main{grid-column:wide}
+.product-main{display:grid;gap:clamp(1.5rem, 1rem + 2.5vw, 3.2rem);align-items:start;margin:0 0 2.5rem}
+.product-main>*{min-width:0}
+.product-gallery{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.product-img:first-child,.product-img:nth-child(even):last-child{grid-column:1 / -1}
+.product-img{margin:0}
+.product-img img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:var(--radius);background:var(--bg-soft)}
+.product-title{margin:.3em 0 .35em}
+.price{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .8rem;margin:0 0 .5rem}
+.price .price-now{font:750 clamp(1.5rem, 1.3rem + .8vw, 1.95rem)/1.2 var(--font-head);letter-spacing:-.02em}
+.stock{display:flex;align-items:center;gap:.5rem;font-size:.95rem;font-weight:650;margin:0 0 1.2rem}
+.stock::before{content:"";width:.6rem;height:.6rem;border-radius:50%;background:#16a34a}
+.stock-out_of_stock::before{background:#b42318}
+.stock-preorder::before{background:#f59e0b}
+.product-lead{font-size:1.08rem;color:var(--muted)}
+.variants{border:0;padding:0;margin:0 0 1.3rem;min-width:0}
+.variants legend{padding:0;margin-bottom:.6rem;font-weight:700}
+.variant-list{display:flex;flex-wrap:wrap;gap:.5rem}
+.variant-list label{order:1;display:inline-flex;align-items:baseline;gap:.4rem;padding:.5rem 1rem;border:2px solid var(--line);border-radius:999px;background:var(--card);font-weight:600;cursor:pointer}
+.variant-list label small{color:var(--muted);font-weight:500}
+.variant-list label.is-out{color:var(--muted)}
+.variant-list input:checked+label{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--card))}
+.variant-list input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.variant-list .buy{order:2;display:none;margin-top:.6rem}
+.variant-list input:checked+label+.buy{display:flex}
+.buy{width:100%}
+.buy.is-disabled{background:var(--bg-soft);border-color:var(--line);color:var(--muted);cursor:not-allowed;transform:none;box-shadow:none}
+.reassure{display:grid;gap:.45rem;list-style:none;padding:0;margin:1.3rem 0;font-size:.93rem;color:var(--muted)}
+.reassure li{display:flex;gap:.55rem;margin:0}
+.legal-links{font-size:.85rem;color:var(--muted)}
+.legal-links a{color:inherit}
+@media (min-width:56rem){.product-main{grid-template-columns:1.1fr .9fr}.product-info{position:sticky;top:1.2rem}}
+@media (max-width:55.99rem){.product-gallery{display:flex;gap:.6rem;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-1.25rem;padding-inline:1.25rem;scrollbar-width:none}.product-img{flex:0 0 86%;scroll-snap-align:center}.product-img:only-child{flex-basis:100%}}/*/shop*/
+
+/* Variantes de mise en page (Réglages › Apparence) : en-tête centré, cartes en liste */
+.hdr-center .header-inner{flex-direction:column;justify-content:center;gap:.35rem;padding:1.2rem 0 .7rem}
+.hdr-center .brand{justify-content:center;text-align:center}
+.hdr-center .site-nav{margin-left:0;max-width:100%}
+.hdr-center .site-nav ul{justify-content:center}
+@media (max-width:44rem){.hdr-center .site-nav ul{justify-content:flex-start;width:max-content;margin-inline:auto}}
+.cards-list .cards{grid-template-columns:1fr;gap:1.1rem}
+.cards-list .card{flex-direction:row}
+.cards-list .card-img{flex:0 0 clamp(7.5rem, 32%, 17rem)}
+.cards-list .card-img img{height:100%;min-height:9rem;aspect-ratio:auto}
+@media (max-width:40rem){.cards-list .card{flex-direction:column}.cards-list .card-img{flex:none}.cards-list .card-img img{aspect-ratio:16/9;min-height:0}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
-@media print{.site-header,.site-footer,.toc,.related,.edit-fab{display:none}body{font-size:12pt}}
+@media print{.site-header,.site-footer,.toc,.related,.edit-fab,.buy{display:none}body{font-size:12pt}}

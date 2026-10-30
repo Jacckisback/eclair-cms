@@ -1,7 +1,8 @@
 <?php
 /**
- * Listes : accueil du blog, catégorie, auteur, recherche.
- * Variables : title, description, entries, crumbs, page, pages, prev, next, query (recherche), lang, empty
+ * Listes : accueil du blog, catégorie, auteur, recherche, boutique.
+ * Variables : title, description, entries, crumbs, page, pages, prev, next, query (recherche), lang, empty,
+ * products (cartes produit), chips (filtres par catégorie de la boutique)
  */
 defined('ECLAIR') || exit;
 
@@ -36,10 +37,17 @@ $lang = $v['lang'];
         <p role="status"><?= e(Theme::t('search_results', $lang, ['n' => count($v['entries']), 'q' => $v['query']])) ?></p>
       <?php endif ?>
     <?php endif ?>
+    <?php if (!empty($v['chips'])): ?>
+      <nav class="chips" aria-label="<?= e(Theme::t('categories', $lang)) ?>">
+        <?php foreach ($v['chips'] as $chip): ?>
+          <a class="chip" href="<?= e(path_to($chip['path'])) ?>"<?= $chip['current'] ? ' aria-current="page"' : '' ?>><?= e($chip['name']) ?></a>
+        <?php endforeach ?>
+      </nav>
+    <?php endif ?>
   </header>
 
   <?php if ($v['entries']): ?>
-    <?= Theme::cards($v['entries'], $lang, 2) ?>
+    <?= !empty($v['products']) ? Theme::products($v['entries'], $lang, 2) : Theme::cards($v['entries'], $lang, 2) ?>
   <?php elseif ($v['empty'] !== ''): ?>
     <p class="empty"><?= e($v['empty']) ?></p>
   <?php endif ?>

@@ -527,6 +527,7 @@ if (!in_array('--unit', $argv, true)) {
 }
 
 require __DIR__ . '/ai.php';
+require __DIR__ . '/shop.php';
 
 exec('rm -rf ' . escapeshellarg(ECLAIR_DATA));
 echo "\n" . ($failed ? '❌ ' . count($failed) . ' échec(s), ' : '✅ ') . $passed . " vérifications réussies\n";

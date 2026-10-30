@@ -65,6 +65,9 @@ final class AdminStrings
             'Créer avec l’IA', 'Création de l’image (10 à 60 secondes)…', 'Image à la une créée.', 'Décrire avec l’IA',
             'Remplacer le profil actuel par celui rédigé par l’IA ?', 'L’IA lit ton site… (20 à 60 secondes)',
             'Profil rédigé : relis-le, ajuste-le, puis enregistre.',
+            // Boutique
+            'Produits', 'Produit', 'Vitrine automatique de la boutique', 'Nombre de produits', 'La boutique est fermée : ce bloc reste invisible.',
+            'En stock', 'Épuisé', 'Précommande', 'Choisir comme photo principale', 'Principale', 'Libellé (ex. : Taille M)', 'Prix', 'Lien de paiement', 'Disponibilité',
         ];
         $out = [];
         foreach ($keys as $k) {

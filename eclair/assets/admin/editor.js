@@ -32,6 +32,7 @@
     copy: '<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/>',
     trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/>',
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
   };
   const iconBtn = (name, label, onclick) => h('button', { type: 'button', title: label, 'aria-label': label, onclick }, svg(ICON[name]));
 
@@ -53,6 +54,7 @@
     features: ['▤', t('Atouts'), t('Grille de services ou d’avantages'), () => ({ type: 'features', title: '', items: [{ icon: '🚀', title: '', text: '' }, { icon: '🤝', title: '', text: '' }, { icon: '✅', title: '', text: '' }] })],
     team: ['👥', t('Équipe'), t('Portraits, fonctions et présentations'), () => ({ type: 'team', title: '', items: [{ name: '', role: '', bio: '', media: '', link: '' }] })],
     posts: ['📰', t('Derniers articles'), t('Liste automatique des articles'), () => ({ type: 'posts', title: '', count: 3, category: '' })],
+    products: ['🛍', t('Produits'), t('Vitrine automatique de la boutique'), () => ({ type: 'products', title: '', count: 4, category: '' })],
     contact: ['✉', t('Formulaire de contact'), t('Formulaire anti-spam intégré'), () => ({ type: 'contact', title: '', button: '' })],
   };
   const RICH = ['paragraph', 'heading', 'quote'];
@@ -335,10 +337,21 @@
       const title = input(d.title, t('Titre de la section (facultatif)'));
       const count = h('input', { type: 'number', min: '1', max: '12', value: d.count || 3, 'aria-label': t('Nombre d’articles') });
       const cats = { '': t('Toutes les catégories') };
-      cfg.categories.forEach((c) => { cats[c.id] = c.name; });
+      cfg.categories.filter((c) => c.kind !== 'product').forEach((c) => { cats[c.id] = c.name; });
       const category = select(d.category || '', cats, t('Catégorie'));
       body.append(h('div', { class: 'posts-box' }, h('b', { text: '📰 ' + t('Derniers articles') }), h('div', { class: 'sub-fields' }, title, count, category)));
       el._read = () => ({ type: 'posts', title: title.value.trim(), count: +count.value || 3, category: category.value });
+      el._focus = () => title.focus();
+    },
+    products(el, body, d) {
+      const title = input(d.title, t('Titre de la section (facultatif)'));
+      const count = h('input', { type: 'number', min: '1', max: '12', value: d.count || 4, 'aria-label': t('Nombre de produits') });
+      const cats = { '': t('Toutes les catégories') };
+      cfg.categories.filter((c) => c.kind === 'product').forEach((c) => { cats[c.id] = c.name; });
+      const category = select(d.category || '', cats, t('Catégorie'));
+      body.append(h('div', { class: 'posts-box' }, h('b', { text: '🛍️ ' + t('Produits') }), h('div', { class: 'sub-fields' }, title, count, category),
+        cfg.site.shopOn ? '' : h('p', { class: 'small muted', text: t('La boutique est fermée : ce bloc reste invisible.') })));
+      el._read = () => ({ type: 'products', title: title.value.trim(), count: +count.value || 4, category: category.value });
       el._focus = () => title.focus();
     },
     contact(el, body, d) {
@@ -586,7 +599,7 @@
     const draw = () => {
       const q = searchBox.value.trim().toLowerCase();
       list.textContent = '';
-      const entries = Object.entries(TYPES).filter(([k, v]) => !q || (k + ' ' + v[1] + ' ' + v[2]).toLowerCase().includes(q));
+      const entries = Object.entries(TYPES).filter(([k, v]) => (k !== 'products' || cfg.site.shopOn) && (!q || (k + ' ' + v[1] + ' ' + v[2]).toLowerCase().includes(q)));
       if (!entries.length) list.append(h('p', { class: 'small muted', text: t('Aucun bloc trouvé') }));
       active = Math.min(active, Math.max(0, entries.length - 1));
       entries.forEach(([k, v], i) => list.append(h('button', {
@@ -723,9 +736,87 @@
   };
   if (f('f-category')) {
     const cats = { '': t('Aucune') };
-    cfg.categories.forEach((c) => { cats[c.id] = c.name; });
+    cfg.categories.filter((c) => (c.kind || 'post') === (item.type === 'product' ? 'product' : 'post')).forEach((c) => { cats[c.id] = c.name; });
     fill(f('f-category'), cats, item.category || '');
   }
+
+  /* ───────────── Fiche produit : prix, lien de paiement, photos, variantes ───────────── */
+  const isProduct = item.type === 'product';
+  const photos = []; // la première est l'image principale (item.image), les suivantes la galerie
+  const AVAIL = { in_stock: t('En stock'), out_of_stock: t('Épuisé'), preorder: t('Précommande') };
+  // Même règle que le serveur (Shop::amount) : « 29,90 », « 29.9 € » ; null si la saisie est invalide.
+  const amount = (v) => {
+    const x = String(v || '').replace(/[\s\u00a0\u202f€$£]|CHF/g, '').replace(',', '.');
+    return x === '' ? '' : /^\d{1,7}(\.\d{1,2})?$/.test(x) ? x : null;
+  };
+  const comma = !['en', 'zh'].includes(document.documentElement.lang);
+  const showAmount = (v) => (v && comma ? String(v).replace('.', ',') : v || '');
+  const checkAmount = (el) => {
+    const bad = amount(el.value) === null;
+    el.classList.toggle('invalid', bad);
+    el.setAttribute('aria-invalid', String(bad));
+  };
+  root.addEventListener('input', (e) => { if (e.target.matches('#p-price, #p-compare, .v-price')) checkAmount(e.target); });
+  function drawGallery() {
+    const box = f('p-gallery');
+    if (!box) return;
+    box.textContent = '';
+    photos.forEach((id, i) => {
+      const m = media[id];
+      box.append(h('figure', { class: 'thumb' + (i ? '' : ' is-main') },
+        m ? h('img', { src: m.thumb, alt: m.alt || '' }) : h('span', { class: 'small muted', text: '?' }),
+        h('figcaption', {},
+          i ? iconBtn('star', t('Choisir comme photo principale'), () => { photos.unshift(...photos.splice(i, 1)); drawGallery(); changed(); }) : h('span', { class: 'badge brand', text: t('Principale') }),
+          iconBtn('x', t('Retirer'), () => { photos.splice(i, 1); drawGallery(); changed(); }))));
+    });
+    if (photos.length < 9) {
+      box.append(h('button', { class: 'thumb add', type: 'button', onclick: async () => {
+        const m = await pickMedia();
+        if (m && !photos.includes(m.id)) { media[m.id] = m; photos.push(m.id); drawGallery(); changed(); }
+      } }, svg(ICON.plus), h('span', { text: t('Ajouter') })));
+    }
+  }
+  function variantRow(v = {}) {
+    const label = input(v.label, t('Libellé (ex. : Taille M)'), { maxlength: '80' });
+    const price = input(showAmount(v.price), t('Prix'), { inputmode: 'decimal', class: 'v-price' });
+    const link = input(v.link, t('Lien de paiement'), { type: 'url', spellcheck: 'false' });
+    const avail = select(v.availability || 'in_stock', AVAIL, t('Disponibilité'));
+    const row = h('div', { class: 'variant-row' }, label, price, link, avail, iconBtn('x', t('Supprimer'), () => { row.remove(); changed(); }));
+    row._read = () => ({ label: label.value.trim(), price: price.value.trim(), link: link.value.trim(), availability: avail.value });
+    return row;
+  }
+  f('p-variant-add')?.addEventListener('click', () => { const row = variantRow(); f('p-variants').append(row); row.firstChild.focus(); changed(); });
+  const loadProduct = (it) => {
+    if (!isProduct) return;
+    const p = it.product || {};
+    f('p-price').value = showAmount(p.price);
+    f('p-compare').value = showAmount(p.compare);
+    f('p-availability').value = p.availability || 'in_stock';
+    f('p-link').value = p.link || '';
+    ['brand', 'sku', 'gtin'].forEach((k) => { f('p-' + k).value = p[k] || ''; });
+    f('p-condition').value = p.condition || 'new';
+    f('p-digital').checked = !!p.digital;
+    photos.length = 0;
+    [it.image, ...(p.gallery || [])].forEach((id) => { if (id && !photos.includes(id)) photos.push(id); });
+    f('p-variants').textContent = '';
+    (p.variants || []).forEach((v) => f('p-variants').append(variantRow(v)));
+    if ((p.variants || []).length) f('p-variants-box').open = true;
+    $$('#p-price, #p-compare, .v-price').forEach(checkAmount);
+    drawGallery();
+  };
+  const readProduct = () => ({
+    price: f('p-price').value.trim(),
+    compare: f('p-compare').value.trim(),
+    availability: f('p-availability').value,
+    link: f('p-link').value.trim(),
+    gallery: photos.slice(1),
+    variants: $$('.variant-row', f('p-variants')).map((r) => r._read()).filter((v) => v.label),
+    brand: f('p-brand').value.trim(),
+    sku: f('p-sku').value.trim(),
+    gtin: f('p-gtin').value.trim(),
+    condition: f('p-condition').value,
+    digital: f('p-digital').checked,
+  });
   fill(f('f-author'), Object.fromEntries(cfg.users.map((u) => [u.id, u.name])), item.author);
   fill(f('f-lang'), cfg.langs, item.lang);
   const trans = { '': t('Aucun') };
@@ -767,6 +858,7 @@
     $('#summary-add').hidden = !!it.summary;
     if ('image' in it) item.image = it.image;
     drawImage();
+    loadProduct(it);
     autosize();
   };
 
@@ -781,8 +873,9 @@
     tgroup: item.tgroup,
     translation_of: f('f-translation').value,
     summary: summaryEl.value.trim(),
-    image: item.image || '',
+    image: isProduct ? photos[0] || '' : item.image || '',
     category: f('f-category') ? f('f-category').value : '',
+    product: isProduct ? readProduct() : undefined,
     author: f('f-author').value,
     seo: {
       title: f('f-seo-title').value.trim(),
@@ -817,7 +910,7 @@
   const slugify = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/ß/g, 'ss')
     .replace(/[^a-z0-9/]+/g, '-').replace(/\/+/g, '/').replace(/(^[-/]+|[-/]+$)/g, '').replace(/-+/g, '-').slice(0, 80);
   f('f-slug').addEventListener('input', () => { slugTouched = true; });
-  f('f-slug').addEventListener('change', () => { const v = slugify(f('f-slug').value); f('f-slug').value = item.type === 'post' ? v.replace(/\//g, '-') : v; });
+  f('f-slug').addEventListener('change', () => { const v = slugify(f('f-slug').value); f('f-slug').value = item.type === 'page' ? v : v.replace(/\//g, '-'); });
 
   const autosize = () => { titleEl.style.height = 'auto'; titleEl.style.height = titleEl.scrollHeight + 'px'; };
   titleEl.addEventListener('input', () => {
@@ -828,7 +921,7 @@
   $('#summary-add').addEventListener('click', () => { $('#summary-card').hidden = false; $('#summary-add').hidden = true; summaryEl.focus(); });
 
   /* ───────────── Aperçu Google et compteurs ───────────── */
-  const prefix = () => (item.type === 'post' ? cfg.site.blog + '/' : '/');
+  const prefix = () => ({ post: cfg.site.blog + '/', product: cfg.site.shop + '/' }[item.type] || '/');
   const serp = () => {
     const title = titleEl.value.trim() || t('Sans titre');
     const seoTitle = f('f-seo-title').value.trim() || (item.id && item.id === cfg.site.home ? cfg.site.name : (cfg.site.format || '{title} · {site}').replace('{title}', title).replace('{site}', cfg.site.name));
@@ -937,7 +1030,7 @@
     if (wasNew) history.replaceState(null, '', D.admin + '/edit/' + item.id);
     showAnalysis(res.analysis);
     updateBadge();
-    status('✓ ' + t('Enregistré') + ' · ' + new Date().toLocaleTimeString().slice(0, 5));
+    status('✓ ' + t('Enregistré') + ' · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     if (data.status === 'published') toast(item.date > Date.now() / 1000 ? t('Programmé ✓') : t('Publié ✓'), 'ok');
   }
   $('#btn-save').addEventListener('click', () => save(false));
@@ -1005,6 +1098,7 @@
       const next = { ...item, ...before, date_local: before.date };
       ['title', 'summary', 'image', 'blocks'].forEach((k) => { if (patch[k] != null) next[k] = patch[k]; });
       if (patch.seo) next.seo = { ...before.seo, ...patch.seo };
+      if (patch.product && isProduct) next.product = { ...before.product, ...patch.product };
       load(next);
       changed();
       return () => { load({ ...item, ...before, date_local: before.date }); changed(); };
@@ -1103,17 +1197,19 @@
           const data = existing._read();
           replaceBlock(existing, { ...data, items: [...data.items.filter((q) => q.q), ...res.items] });
         } else {
-          insertBlock({ type: 'faq', title: '', items: res.items }, blocks().filter((x) => !['contact', 'posts'].includes(x.dataset.type)).at(-1) || null, false);
+          insertBlock({ type: 'faq', title: '', items: res.items }, blocks().filter((x) => !['contact', 'posts', 'products'].includes(x.dataset.type)).at(-1) || null, false);
         }
         toast(t('FAQ ajoutée : relis les réponses.'), 'ok');
       }),
       mini(t('Textes alternatifs'), async (b) => {
-        const missing = [...new Set(blocks().filter((x) => x.dataset.type === 'image').map((x) => x._read()).filter((d) => d.media && !d.alt && !(media[d.media] || {}).alt).map((d) => d.media))];
+        const missing = [...new Set([...blocks().filter((x) => x.dataset.type === 'image').map((x) => x._read()).filter((d) => d.media && !d.alt).map((d) => d.media), ...photos])]
+          .filter((id) => !(media[id] || {}).alt);
         if (!missing.length) { toast(t('Toutes les images ont un texte alternatif.'), 'ok'); return; }
         for (const id of missing) {
           const res = await assist('alt', { media: id, lang: f('f-lang').value }, b);
           if (res.ok) media[id] = res.media;
         }
+        drawGallery();
         analyze();
         toast(t('Textes alternatifs ajoutés.'), 'ok');
       }),

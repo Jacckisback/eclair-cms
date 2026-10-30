@@ -12,13 +12,16 @@ final class AdminSite
     {
         $options = [];
         foreach (Content::index() as $e) {
-            $options[] = ['type' => 'content', 'id' => $e['id'], 'label' => $e['title'], 'kind' => $e['type'] === 'post' ? t('Article') : t('Page'), 'draft' => !Content::visible($e)];
+            $options[] = ['type' => 'content', 'id' => $e['id'], 'label' => $e['title'], 'kind' => ['post' => t('Article'), 'product' => t('Produit')][$e['type']] ?? t('Page'), 'draft' => !Content::visible($e)];
         }
         foreach (Categories::all() as $c) {
             $options[] = ['type' => 'category', 'id' => $c['id'], 'label' => $c['name'], 'kind' => t('Catégorie')];
         }
         if (Settings::get('blog.enabled')) {
             $options[] = ['type' => 'blog', 'id' => '', 'label' => (string) Settings::get('blog.title'), 'kind' => t('Blog')];
+        }
+        if (Shop::enabled()) {
+            $options[] = ['type' => 'shop', 'id' => '', 'label' => Shop::title(), 'kind' => t('Boutique')];
         }
         $resolve = function (array $item) use ($options): array {
             foreach ($options as $o) {
@@ -47,7 +50,13 @@ final class AdminSite
 
     public static function categories(array $user): never
     {
-        Admin::view('categories', ['categories' => Categories::all(), 'counts' => Categories::counts(), 'edit' => Categories::get(Req::query('edit'))], t('Catégories'));
+        Admin::view('categories', [
+            'categories' => Categories::all(),
+            'counts' => Categories::counts('post') + Categories::counts('product'),
+            'edit' => Categories::get(Req::query('edit')),
+            'shop' => Shop::enabled() || Categories::of('product'),
+            'kind' => Req::query('kind') === 'product' ? 'product' : 'post',
+        ], t('Catégories'));
     }
 
     public static function saveCategory(array $user): never
@@ -65,6 +74,7 @@ final class AdminSite
             'slug' => Req::input('slug'),
             'description' => Req::input('description'),
             'seo_title' => Req::input('seo_title'),
+            'kind' => Req::input('kind'),
         ]);
         Admin::back('categories', t('Catégorie enregistrée.'));
     }

@@ -1,0 +1,23 @@
+/* ⚡ Éclair — thème Boutique : pensé pour vendre, photos carrées, en-tête fixe, boutons francs. */
+:root{--bg:#fff;--bg-soft:#f4f6f5;--card:#fff;--text:#14201c;--muted:#56625e;--line:#e1e6e4;--code:#eff2f1;--radius:12px;--wide-w:76rem;
+  --shadow:0 1px 2px rgb(16 24 20 / .05),0 12px 28px -18px rgb(16 24 20 / .32)}
+/*dark*/@media (prefers-color-scheme:dark){:root{--bg:#0f1513;--bg-soft:#161e1b;--card:#141b19;--text:#e9f0ed;--muted:#9fb0aa;--line:#26302d;--code:#18211e;
+  --shadow:0 1px 2px rgb(0 0 0 / .4),0 12px 28px -18px rgb(0 0 0 / .8)}}/*/dark*/
+
+.site-header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:saturate(1.6) blur(10px);backdrop-filter:saturate(1.6) blur(10px)}
+.site-nav a{font-weight:600}
+.site-nav a[aria-current]{background:var(--bg-soft);color:var(--text)}
+.btn{border-radius:10px;font-weight:700}
+.btn-primary{box-shadow:0 8px 18px -10px color-mix(in srgb,var(--accent) 75%,transparent)}
+.hero{background:var(--bg-soft);border-radius:var(--radius);padding:clamp(2rem, 1rem + 4vw, 4.5rem) clamp(1.3rem, .5rem + 4vw, 4rem);margin-top:1.2rem}
+.feature{box-shadow:none;background:var(--bg-soft);border-color:transparent}
+
+/* Cartes : photo carrée sur fond doux */
+.card{border-color:transparent;background:var(--bg-soft)}
+.card:hover{box-shadow:var(--shadow)}
+.card-img img{aspect-ratio:1/1}
+.card-title{font-size:1.08rem}
+.cards-list .card-img img{aspect-ratio:auto}
+@media (min-width:56rem){.product-info{top:5.6rem}}
+
+.site-footer{background:var(--bg-soft)}

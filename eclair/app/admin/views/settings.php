@@ -7,12 +7,13 @@ use Eclair\Content;
 use Eclair\Icons;
 use Eclair\Security;
 use Eclair\Seo;
+use Eclair\Shop;
 use Eclair\Theme;
 
 $s = $v['s'];
 $tab = $v['tab'];
 $tabs = [
-    'general' => t('Général'), 'appearance' => t('Apparence'), 'seo' => t('SEO'),
+    'general' => t('Général'), 'appearance' => t('Apparence'), 'shop' => t('Boutique'), 'seo' => t('SEO'),
     'geo' => t('IA & GEO'), 'ai' => t('Assistant IA'), 'contact' => t('Contact'), 'advanced' => t('Avancé'),
 ];
 $sw = static function (string $name, bool $on, string $title, string $hint = ''): string {
@@ -61,6 +62,53 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <?= $sw('search', (bool) $s['search'], t('Recherche sur le site'), t('Ajoute une loupe dans le menu et une page de résultats.')) ?>
 
   <?php elseif ($tab === 'appearance'): ?>
+    <?php $themes = [
+        'eclair' => [t('Éclair'), t('Clair, moderne et polyvalent : le thème d’origine.')],
+        'editorial' => [t('Éditorial'), t('Un magazine : typographie à empattements, filets fins, article à la une.')],
+        'atelier' => [t('Atelier'), t('Chaleureux et artisanal : tons crème et terre cuite, formes douces.')],
+        'studio' => [t('Studio'), t('Portfolio minimaliste : noir et blanc, grands titres, images à vif.')],
+        'boutique' => [t('Boutique'), t('Pensé pour vendre : photos carrées, en-tête fixe, boutons francs.')],
+        'contraste' => [t('Contraste'), t('Lisibilité maximale : grand texte, contrastes forts, liens soulignés.')],
+    ]; ?>
+    <fieldset class="field">
+      <legend class="label"><?= e(t('Thème')) ?></legend>
+      <div class="theme-grid">
+        <?php foreach ($themes as $key => [$name, $desc]): $p = Theme::THEMES[$key]; ?>
+          <label class="theme-card" data-look="<?= e($key) ?>">
+            <input type="radio" name="theme" value="<?= e($key) ?>"<?= $s['appearance']['theme'] === $key ? ' checked' : '' ?> data-accent="<?= e($p['accent']) ?>"
+              data-font-head="<?= e($p['font_head']) ?>" data-font-body="<?= e($p['font_body']) ?>" data-header="<?= e($p['header']) ?>" data-cards="<?= e($p['cards']) ?>">
+            <span class="theme-mock" aria-hidden="true"><span class="tm-bar"></span><span class="tm-title">Aa</span><span class="tm-line"></span><span class="tm-line short"></span><span class="tm-btn"></span></span>
+            <span class="theme-name"><?= e($name) ?></span>
+            <span class="theme-desc"><?= e($desc) ?></span>
+          </label>
+        <?php endforeach ?>
+      </div>
+      <span class="hint"><?= e(t('Choisir un thème applique sa couleur et ses polices conseillées : tu peux les changer ensuite. Le HTML ne change pas : vitesse, accessibilité et référencement restent intacts.')) ?></span>
+    </fieldset>
+    <div class="theme-preview" id="theme-preview" data-src="<?= e(admin_url('appearance/preview')) ?>">
+      <div class="row between">
+        <span class="label"><?= e(t('Aperçu en direct')) ?></span>
+        <div class="row">
+          <select id="preview-page" aria-label="<?= e(t('Page affichée dans l’aperçu')) ?>">
+            <?php foreach ($v['previews'] as $path => $label): ?><option value="<?= e($path) ?>"><?= e($label) ?></option><?php endforeach ?>
+          </select>
+          <div class="seg" role="group" aria-label="<?= e(t('Taille d’écran')) ?>">
+            <button class="btn btn-sm" type="button" data-device="desktop" aria-pressed="true"><?= e(t('Ordinateur')) ?></button>
+            <button class="btn btn-sm" type="button" data-device="mobile" aria-pressed="false"><?= e(t('Mobile')) ?></button>
+          </div>
+        </div>
+      </div>
+      <div class="preview-frame"><iframe title="<?= e(t('Aperçu du site avec cette apparence')) ?>" tabindex="-1"></iframe></div>
+      <span class="hint"><?= e(t('Rien n’est publié tant que tu n’as pas enregistré.')) ?></span>
+    </div>
+    <div class="grid-2">
+      <label class="field"><span class="label"><?= e(t('En-tête')) ?></span><select name="header">
+        <option value="left"<?= $s['appearance']['header'] === 'left' ? ' selected' : '' ?>><?= e(t('Logo à gauche, menu à droite')) ?></option>
+        <option value="center"<?= $s['appearance']['header'] === 'center' ? ' selected' : '' ?>><?= e(t('Centré : logo au-dessus du menu')) ?></option></select></label>
+      <label class="field"><span class="label"><?= e(t('Listes d’articles et de produits')) ?></span><select name="cards">
+        <option value="grid"<?= $s['appearance']['cards'] === 'grid' ? ' selected' : '' ?>><?= e(t('Grille de cartes')) ?></option>
+        <option value="list"<?= $s['appearance']['cards'] === 'list' ? ' selected' : '' ?>><?= e(t('Liste : image à gauche')) ?></option></select></label>
+    </div>
     <?= $media('logo', (string) $s['appearance']['logo'], t('Logo'), t('PNG ou WebP sur fond transparent, environ 400 px de large.')) ?>
     <?= $media('favicon', (string) $s['appearance']['favicon'], t('Icône du site (favicon)'), t('Image carrée d’au moins 512 px. Sans icône, un éclair à ta couleur est généré.')) ?>
     <div class="field"><span class="label"><?= e(t('Couleur principale')) ?></span>
@@ -239,6 +287,78 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <?= $sw('editors', (bool) $ai['editors'], t('Les rédacteurs peuvent utiliser l’assistant'), t('Les administrateurs y ont toujours accès.')) ?>
     <div class="notice"><span>🔒</span><p><?= e(t('Tes clés sont chiffrées sur ton serveur : elles ne sont jamais envoyées au navigateur ni incluses dans les sauvegardes. Les textes confiés à l’assistant sont transmis au fournisseur choisi pour être traités : n’y mets pas de données sensibles.')) ?></p></div>
     </div>
+
+  <?php elseif ($tab === 'shop'):
+    $shop = $s['shop'];
+    $missing = Shop::missing();
+    $symbol = Shop::CURRENCIES[Shop::currency()];
+    $amount = static fn (string $a): string => in_array(\Eclair\I18n::lang(), ['en', 'zh'], true) ? $a : str_replace('.', ',', $a);
+    $pageSelect = static function (string $name, string $label, string $value, string $hint = '') use ($v): string {
+        $out = '<label class="field"><span class="label">' . e($label) . '</span><select name="' . e($name) . '"><option value="">' . e(t('— Aucune —')) . '</option>';
+        foreach ($v['pages'] as $p) {
+            $out .= '<option value="' . e($p['id']) . '"' . ($p['id'] === $value ? ' selected' : '') . '>' . e($p['title']) . ($p['status'] !== 'published' ? ' (' . e(t('Brouillon')) . ')' : '') . '</option>';
+        }
+        return $out . '</select>' . ($hint !== '' ? '<span class="hint">' . e($hint) . '</span>' : '') . '</label>';
+    };
+    $thanks = Shop::pageLink('thanks'); ?>
+    <div class="notice"><span>🛍️</span><p><?= e(t('Boutique légère : chaque produit a sa fiche, optimisée pour Google et les IA. Le paiement passe par un lien Stripe : pas de panier ni de base de données. Stripe encaisse, envoie les reçus et gère les remboursements.')) ?></p></div>
+    <?= $sw('shop_enabled', (bool) $shop['enabled'], t('Boutique ouverte'), $missing ? t('Publie d’abord : {pages}.', ['pages' => implode(', ', $missing)]) : t('Catalogue, fiches produit et flux Google Shopping en ligne.')) ?>
+    <div class="grid-2">
+      <label class="field"><span class="label"><?= e(t('Adresse de la boutique')) ?></span><span class="input-group"><span>/</span><input type="text" name="shop_base" value="<?= e(ltrim(Shop::path(), '/')) ?>"></span>
+        <span class="hint"><?= e(t('Si tu la changes, les anciennes adresses sont redirigées.')) ?></span></label>
+      <label class="field"><span class="label"><?= e(t('Produits par page')) ?></span><input type="number" name="shop_per_page" min="1" max="48" value="<?= (int) $shop['per_page'] ?>"></label>
+    </div>
+    <label class="field"><span class="label"><?= e(t('Titre de la boutique')) ?></span><input type="text" name="shop_title" value="<?= e($shop['title']) ?>" maxlength="80" placeholder="<?= e(Theme::t('shop')) ?>"></label>
+    <label class="field"><span class="label"><?= e(t('Présentation de la boutique')) ?></span><textarea name="shop_description" rows="2"><?= e($shop['description']) ?></textarea>
+      <span class="hint"><?= e(t('Affichée en haut du catalogue et utilisée comme méta-description.')) ?></span></label>
+    <div class="grid-2">
+      <label class="field"><span class="label"><?= e(t('Devise')) ?></span><select name="currency">
+        <?php foreach (Shop::CURRENCIES as $code => $sym): ?><option value="<?= e($code) ?>"<?= Shop::currency() === $code ? ' selected' : '' ?>><?= e($code . ' (' . $sym . ')') ?></option><?php endforeach ?></select></label>
+      <label class="field"><span class="label"><?= e(t('Texte du bouton d’achat')) ?></span><input type="text" name="button" value="<?= e($shop['button']) ?>" maxlength="40" placeholder="<?= e(Theme::t('buy')) ?>"></label>
+    </div>
+    <hr>
+    <h2><?= e(t('Livraison')) ?></h2>
+    <div class="grid-2">
+      <label class="field"><span class="label"><?= e(t('Frais de livraison')) ?></span><span class="input-group"><input type="text" name="shipping_price" inputmode="decimal" value="<?= e($amount((string) $shop['shipping']['price'])) ?>" placeholder="4,90"><span><?= e($symbol) ?></span></span>
+        <span class="hint"><?= e(t('Vide : non affichés. 0 : livraison offerte. Ignorés pour les produits numériques.')) ?></span></label>
+      <label class="field"><span class="label"><?= e(t('Livraison offerte dès')) ?></span><span class="input-group"><input type="text" name="free_from" inputmode="decimal" value="<?= e($amount((string) $shop['shipping']['free_from'])) ?>" placeholder="<?= e(t('facultatif')) ?>"><span><?= e($symbol) ?></span></span></label>
+      <label class="field"><span class="label"><?= e(t('Délai de livraison (jours)')) ?></span><span class="input-pair">
+        <input type="number" name="days_min" min="0" max="60" value="<?= (int) $shop['shipping']['days_min'] ?>" aria-label="<?= e(t('Minimum')) ?>"> – <input type="number" name="days_max" min="0" max="90" value="<?= (int) $shop['shipping']['days_max'] ?>" aria-label="<?= e(t('Maximum')) ?>"></span></label>
+      <label class="field"><span class="label"><?= e(t('Pays de livraison')) ?></span><input type="text" name="countries" value="<?= e($shop['shipping']['countries']) ?>" placeholder="<?= e(implode(', ', Shop::countries())) ?>" spellcheck="false">
+        <span class="hint"><?= e(t('Codes à deux lettres, séparés par des virgules : FR, BE, CH…')) ?></span></label>
+    </div>
+    <h2><?= e(t('Retours')) ?></h2>
+    <div class="grid-2">
+      <label class="field"><span class="label"><?= e(t('Délai de retour (jours)')) ?></span><input type="number" name="returns_days" min="0" max="365" value="<?= (int) $shop['returns']['days'] ?>">
+        <span class="hint"><?= e(t('Vente à distance dans l’UE : 14 jours de rétractation au minimum, sauf exceptions (contenu numérique, produit personnalisé…).')) ?></span></label>
+      <div class="field"><?= $sw('returns_free', (bool) $shop['returns']['free'], t('Retours gratuits')) ?></div>
+    </div>
+    <hr>
+    <h2><?= e(t('Pages de la boutique')) ?></h2>
+    <div class="grid-2">
+      <?= $pageSelect('legal', t('Mentions légales') . ' *', (string) $shop['legal']) ?>
+      <?= $pageSelect('terms', t('Conditions générales de vente') . ' *', (string) $shop['terms']) ?>
+      <?= $pageSelect('delivery', t('Livraison et retours'), (string) $shop['delivery'], t('Lien affiché sous le bouton d’achat et dans la politique de retour envoyée à Google.')) ?>
+      <?= $pageSelect('thanks', t('Page de remerciement'), (string) $shop['thanks'], t('Après le paiement, Stripe peut rediriger le client vers cette page.')) ?>
+    </div>
+    <p class="hint">* <?= e(t('Obligatoires pour ouvrir la boutique. Fais-les relire : elles engagent ta responsabilité de vendeur.')) ?></p>
+    <?php if ($thanks): ?>
+      <label class="field"><span class="label"><?= e(t('Adresse à coller dans Stripe (« Après le paiement »)')) ?></span><input type="text" readonly value="<?= e(absolute_url(Content::path($thanks))) ?>" data-copy="<?= e(absolute_url(Content::path($thanks))) ?>"></label>
+    <?php elseif ($shop['thanks'] === ''): ?>
+      <p><button class="btn btn-sm" type="submit" name="action" value="thanks"><?= Icons::svg('plus') ?><?= e(t('Créer la page de remerciement')) ?></button></p>
+    <?php endif ?>
+    <hr>
+    <h2><?= e(t('Stripe en 4 étapes')) ?></h2>
+    <ol class="small">
+      <li><?= e(t('Dans Stripe, ouvre « Liens de paiement » et crée un lien : nom du produit, prix, et livraison si besoin (adresse, frais).')) ?></li>
+      <li><?= e(t('Dans « Après le paiement », choisis de rediriger le client vers ta page de remerciement.')) ?></li>
+      <li><?= e(t('Dans les réglages de Stripe (E-mails clients), active les reçus des paiements réussis.')) ?></li>
+      <li><?= e(t('Copie le lien (https://buy.stripe.com/…) et colle-le dans la fiche produit. Chaque paiement porte la référence du produit.')) ?></li>
+    </ol>
+    <?php if ($shop['enabled']): ?>
+      <label class="field"><span class="label"><?= e(t('Flux produits (Google Merchant Center)')) ?></span><input type="text" readonly value="<?= e(absolute_url('/products.xml')) ?>" data-copy="<?= e(absolute_url('/products.xml')) ?>">
+        <span class="hint"><?= e(t('Ajoute cette adresse comme source de produits dans Google Merchant Center : tes produits peuvent apparaître gratuitement dans l’onglet Shopping.')) ?></span></label>
+    <?php endif ?>
 
   <?php elseif ($tab === 'contact'): ?>
     <label class="field"><span class="label"><?= e(t('Recevoir les messages à l’adresse')) ?></span><input type="email" name="email" value="<?= e($s['contact']['email']) ?>" placeholder="<?= e(t('par défaut : l’e-mail du premier administrateur')) ?>"></label>

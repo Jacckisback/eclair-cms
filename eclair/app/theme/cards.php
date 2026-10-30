@@ -1,10 +1,11 @@
 <?php
-/** Grille de cartes d'articles. Variables : entries, lang, level (niveau de titre). */
+/** Grille de cartes d'articles (et de produits dans la recherche). Variables : entries, lang, level (niveau de titre). */
 defined('ECLAIR') || exit;
 
 use Eclair\Categories;
 use Eclair\Content;
 use Eclair\Media;
+use Eclair\Shop;
 
 $tag = 'h' . max(2, min(4, (int) $v['level']));
 ?>
@@ -18,7 +19,11 @@ $tag = 'h' . max(2, min(4, (int) $v['level']));
     <div class="card-body">
       <p class="card-meta">
         <?php if ($cat): ?><a class="chip" href="<?= e(path_to(Categories::path($cat))) ?>"><?= e($cat['name']) ?></a><?php endif ?>
-        <time datetime="<?= e(date('c', (int) $entry['date'])) ?>"><?= e(fmt_date((int) $entry['date'], $v['lang'])) ?></time>
+        <?php if ($entry['type'] === 'product'): ?>
+          <?php if (($entry['price'] ?? '') !== ''): ?><span class="card-price"><?= e(Shop::money((string) $entry['price'], $v['lang'])) ?></span><?php endif ?>
+        <?php else: ?>
+          <time datetime="<?= e(date('c', (int) $entry['date'])) ?>"><?= e(fmt_date((int) $entry['date'], $v['lang'])) ?></time>
+        <?php endif ?>
       </p>
       <<?= $tag ?> class="card-title"><a href="<?= e(path_to(Content::path($entry))) ?>"><?= e($entry['title']) ?></a></<?= $tag ?>>
       <?php if ($entry['excerpt'] !== ''): ?><p class="card-excerpt"><?= e($entry['excerpt']) ?></p><?php endif ?>

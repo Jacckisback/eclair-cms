@@ -13,7 +13,7 @@ final class Blocks
 {
     public const TYPES = [
         'paragraph', 'heading', 'list', 'quote', 'image', 'callout', 'faq', 'table',
-        'button', 'video', 'code', 'divider', 'hero', 'features', 'team', 'posts', 'contact',
+        'button', 'video', 'code', 'divider', 'hero', 'features', 'team', 'posts', 'products', 'contact',
     ];
     private const CALLOUTS = ['info' => 'ℹ️', 'tip' => '💡', 'warning' => '⚠️', 'success' => '✅', 'note' => '📝'];
     private const RESERVED_IDS = ['main', 'top', 'toc', 'menu', 'contenu', 'content', 'search', 'site-nav'];
@@ -182,10 +182,11 @@ final class Blocks
                 return $items ? ['type' => 'team', 'title' => $s('title', 200), 'items' => $items] : null;
 
             case 'posts':
+            case 'products':
                 return [
-                    'type' => 'posts',
+                    'type' => $type,
                     'title' => $s('title', 150),
-                    'count' => max(1, min(12, (int) ($b['count'] ?? 3))),
+                    'count' => max(1, min(12, (int) ($b['count'] ?? ($type === 'posts' ? 3 : 4)))),
                     'category' => preg_replace('/[^a-z0-9]/', '', (string) ($b['category'] ?? '')) ?? '',
                 ];
 
@@ -230,6 +231,7 @@ final class Blocks
                 'features' => self::features($b, $anchors[$i] ?? ''),
                 'team' => self::team($b, $anchors[$i] ?? '', $lang),
                 'posts' => self::postsHtml($b, $anchors[$i] ?? '', $lang),
+                'products' => self::productsHtml($b, $anchors[$i] ?? '', $lang),
                 'contact' => self::contactHtml($b, (string) ($ctx['page'] ?? ''), $lang),
                 default => '',
             };
@@ -366,9 +368,31 @@ final class Blocks
             return '';
         }
         $title = $b['title'] !== '' ? $b['title'] : Theme::t('latest_posts', $lang);
-        return '<section class="posts-block"><h2 id="' . e($anchor) . '">' . e($title) . '</h2>'
+        return '<section class="posts-block"><h2' . ($anchor !== '' ? ' id="' . e($anchor) . '"' : '') . '>' . e($title) . '</h2>'
             . Theme::cards($posts, $lang)
             . '<p class="more"><a href="' . e(path_to(Content::blogPath())) . '">' . e(Theme::t('all_posts', $lang)) . " →</a></p></section>\n";
+    }
+
+    /** Derniers produits de la boutique (tous, ou ceux d'une catégorie). */
+    public static function products(array $b): array
+    {
+        if (!Shop::enabled()) {
+            return [];
+        }
+        $list = array_filter(Content::published('product'), fn ($p) => $b['category'] === '' || $p['category'] === $b['category']);
+        return array_slice(array_values($list), 0, $b['count']);
+    }
+
+    private static function productsHtml(array $b, string $anchor, string $lang): string
+    {
+        $products = self::products($b);
+        if (!$products) {
+            return '';
+        }
+        $title = $b['title'] !== '' ? $b['title'] : Theme::t('products', $lang);
+        return '<section class="posts-block products-block"><h2' . ($anchor !== '' ? ' id="' . e($anchor) . '"' : '') . '>' . e($title) . '</h2>'
+            . Theme::products($products, $lang)
+            . '<p class="more"><a href="' . e(path_to(Shop::path())) . '">' . e(Theme::t('all_products', $lang)) . " →</a></p></section>\n";
     }
 
     private static function contactHtml(array $b, string $page, string $lang): string
@@ -401,7 +425,7 @@ final class Blocks
             $text = match ($b['type']) {
                 'heading' => $b['anchor'] !== '' ? $b['anchor'] : plain($b['text']),
                 'faq' => $b['title'] !== '' ? $b['title'] : 'faq',
-                'features', 'posts' => $b['title'] ?? '',
+                'features', 'posts', 'products' => $b['title'] ?? '',
                 'team' => $b['title'] !== '' ? $b['title'] : 'team',
                 default => null,
             };
@@ -572,6 +596,7 @@ final class Blocks
                     . implode("\n\n", array_map(fn ($p) => '### ' . self::mdText($p['name']) . ($p['role'] !== '' ? ' — ' . self::mdText($p['role']) : '')
                         . ($p['bio'] !== '' ? "\n\n" . self::md($p['bio']) : '') . ($p['link'] !== '' ? "\n\n" . self::mdLink($p['link'], $p['link']) : ''), $b['items'])),
                 'posts' => self::mdPosts($b, $lang),
+                'products' => self::mdProducts($b, $lang),
                 default => '',
             };
         }
@@ -658,5 +683,15 @@ final class Blocks
         }
         $lines = array_map(fn ($p) => '- ' . self::mdLink($p['title'], absolute_url(Content::path($p))), $posts);
         return '## ' . self::mdText($b['title'] !== '' ? $b['title'] : Theme::t('latest_posts', $lang)) . "\n\n" . implode("\n", $lines);
+    }
+
+    private static function mdProducts(array $b, string $lang): string
+    {
+        $products = self::products($b);
+        if (!$products) {
+            return '';
+        }
+        $lines = array_map(fn ($p) => '- ' . self::mdLink($p['title'], absolute_url(Content::path($p))) . ' — ' . Shop::summary($p, $lang), $products);
+        return '## ' . self::mdText($b['title'] !== '' ? $b['title'] : Theme::t('products', $lang)) . "\n\n" . implode("\n", $lines);
     }
 }

@@ -5,9 +5,12 @@ defined('ECLAIR') || exit;
 use Eclair\Content;
 use Eclair\Icons;
 use Eclair\Settings;
+use Eclair\Shop;
 
 $item = $v['item'];
 $isPost = $item['type'] === 'post';
+$isProduct = $item['type'] === 'product';
+$symbol = Shop::CURRENCIES[Shop::currency()];
 ?>
 <div class="editor-shell" id="editor">
   <header class="editor-top">
@@ -27,7 +30,45 @@ $isPost = $item['type'] === 'post';
 
   <div class="canvas">
     <div class="doc">
-      <textarea class="doc-title" id="doc-title" rows="1" placeholder="<?= e($isPost ? t('Titre de l’article') : t('Titre de la page')) ?>" aria-label="<?= e(t('Titre')) ?>"></textarea>
+      <textarea class="doc-title" id="doc-title" rows="1" placeholder="<?= e($isProduct ? t('Nom du produit') : ($isPost ? t('Titre de l’article') : t('Titre de la page'))) ?>" aria-label="<?= e(t('Titre')) ?>"></textarea>
+      <?php if ($isProduct): ?>
+      <section class="card product-box" id="product-box" aria-label="<?= e(t('Fiche produit')) ?>">
+        <?php if (!Shop::enabled()): ?>
+          <p class="notice small"><span>🛍️</span><span><?= e(t('La boutique est fermée : ce produit restera invisible jusqu’à son ouverture.')) ?> <a href="<?= e(admin_url('settings?tab=shop')) ?>"><?= e(t('Ouvrir la boutique')) ?> →</a></span></p>
+        <?php endif ?>
+        <div class="product-fields">
+          <label class="field"><span class="label"><?= e(t('Prix')) ?></span>
+            <span class="input-group"><input type="text" id="p-price" inputmode="decimal" autocomplete="off" placeholder="29,90"><span><?= e($symbol) ?></span></span></label>
+          <label class="field"><span class="label"><?= e(t('Prix barré')) ?></span>
+            <span class="input-group"><input type="text" id="p-compare" inputmode="decimal" autocomplete="off" placeholder="<?= e(t('facultatif')) ?>"><span><?= e($symbol) ?></span></span></label>
+          <label class="field"><span class="label"><?= e(t('Disponibilité')) ?></span>
+            <select id="p-availability"><option value="in_stock"><?= e(t('En stock')) ?></option><option value="out_of_stock"><?= e(t('Épuisé')) ?></option><option value="preorder"><?= e(t('Précommande')) ?></option></select></label>
+        </div>
+        <label class="field"><span class="label"><?= e(t('Lien de paiement')) ?></span>
+          <input type="url" id="p-link" placeholder="https://buy.stripe.com/…" spellcheck="false">
+          <span class="hint"><?= e(t('Crée le lien dans Stripe (« Liens de paiement »), puis colle-le ici. Stripe encaisse le paiement et gère les remboursements.')) ?></span></label>
+        <div class="field"><span class="label"><?= e(t('Photos')) ?></span>
+          <div class="gallery-strip" id="p-gallery"></div>
+          <span class="hint"><?= e(t('La première photo est la principale (Google, réseaux sociaux). Vise au moins 3 vues, sur fond neutre.')) ?></span></div>
+        <details class="product-more" id="p-variants-box">
+          <summary><?= e(t('Variantes (taille, couleur…)')) ?></summary>
+          <div class="variant-rows" id="p-variants"></div>
+          <button class="btn btn-sm" type="button" id="p-variant-add"><?= Icons::svg('plus') ?><?= e(t('Ajouter une variante')) ?></button>
+          <span class="hint"><?= e(t('Une variante sans prix ni lien reprend ceux du produit. Avec Stripe, crée un lien de paiement par variante.')) ?></span>
+        </details>
+        <details class="product-more">
+          <summary><?= e(t('Détails pour Google Shopping')) ?></summary>
+          <div class="product-fields">
+            <label class="field"><span class="label"><?= e(t('Marque')) ?></span><input type="text" id="p-brand" maxlength="80"></label>
+            <label class="field"><span class="label"><?= e(t('Référence (SKU)')) ?></span><input type="text" id="p-sku" maxlength="64" spellcheck="false"></label>
+            <label class="field"><span class="label"><?= e(t('Code-barres (GTIN, EAN)')) ?></span><input type="text" id="p-gtin" inputmode="numeric" maxlength="14" spellcheck="false"></label>
+            <label class="field"><span class="label"><?= e(t('État')) ?></span>
+              <select id="p-condition"><option value="new"><?= e(t('Neuf')) ?></option><option value="used"><?= e(t('Occasion')) ?></option><option value="refurbished"><?= e(t('Reconditionné')) ?></option></select></label>
+          </div>
+          <label class="check"><input type="checkbox" id="p-digital"><span><?= e(t('Produit numérique ou service (pas de livraison)')) ?></span></label>
+        </details>
+      </section>
+      <?php endif ?>
       <div class="key-box" id="summary-box">
         <button class="link-btn small" type="button" id="summary-add">✨ <?= e(t('Ajouter « L’essentiel » : le résumé que Google et les IA adorent citer')) ?></button>
         <div class="card" id="summary-card" hidden>
@@ -63,16 +104,18 @@ $isPost = $item['type'] === 'post';
           <span class="input-group"><span id="slug-prefix">/</span><input type="text" id="f-slug" spellcheck="false" autocomplete="off"></span>
           <span class="hint" id="slug-hint"><?= e(t('Courte, en minuscules, avec ton mot-clé. Si tu la changes, une redirection 301 est créée automatiquement.')) ?></span></label>
       </div>
-      <?php if ($isPost): ?>
+      <?php if ($isPost || $isProduct): ?>
       <div class="side-section">
         <h3><?= e(t('Classement')) ?></h3>
         <label class="field"><span class="label"><?= e(t('Catégorie')) ?></span><select id="f-category"></select>
           <span class="hint"><a href="<?= e(admin_url('categories')) ?>"><?= e(t('Gérer les catégories')) ?></a></span></label>
+        <?php if ($isPost): ?>
         <div class="field"><span class="label"><?= e(t('Image à la une')) ?></span>
           <div class="picker-preview" id="f-image-preview"></div>
           <div class="row"><button class="btn btn-sm" type="button" id="f-image-pick"><?= Icons::svg('image') ?><?= e(t('Choisir')) ?></button>
           <button class="btn btn-sm btn-ghost" type="button" id="f-image-clear"><?= e(t('Retirer')) ?></button></div>
           <span class="hint"><?= e(t('Affichée en haut de l’article et sur les réseaux sociaux (1200×630 généré automatiquement).')) ?></span></div>
+        <?php endif ?>
       </div>
       <?php endif ?>
       <div class="side-section">
@@ -82,7 +125,7 @@ $isPost = $item['type'] === 'post';
         <label class="field"><span class="label"><?= e(t('Traduction de…')) ?></span><select id="f-translation"></select>
           <span class="hint"><?= e(t('Relie les versions d’un même contenu : les balises hreflang sont ajoutées automatiquement.')) ?></span></label>
       </div>
-      <div class="side-section">
+      <div class="side-section"<?= $isProduct ? ' hidden' : '' ?>>
         <h3><?= e(t('Mise en page')) ?></h3>
         <label class="check"><input type="checkbox" id="f-hide-title"><span><?= e(t('Masquer le titre (le titre du premier bandeau devient le H1)')) ?></span></label>
         <label class="check"><input type="checkbox" id="f-wide"><span><?= e(t('Pleine largeur')) ?></span></label>

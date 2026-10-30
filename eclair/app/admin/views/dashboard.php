@@ -23,6 +23,9 @@ $cls = static fn (int $s): string => $s >= 80 ? 'good' : ($s >= 50 ? 'ok' : 'bad
     </div>
     <div class="row">
       <a class="btn" href="<?= e(admin_url('new/page')) ?>"><?= Icons::svg('file') ?><?= e(t('Nouvelle page')) ?></a>
+      <?php if (\Eclair\Shop::enabled()): ?>
+        <a class="btn" href="<?= e(admin_url('new/product')) ?>"><?= Icons::svg('plus') ?><?= e(t('Nouveau produit')) ?></a>
+      <?php endif ?>
       <?php if (Settings::get('blog.enabled')): ?>
         <a class="btn btn-primary" href="<?= e(admin_url('new/post')) ?>"><?= Icons::svg('pen') ?><?= e(t('Écrire un article')) ?></a>
       <?php endif ?>
@@ -37,12 +40,12 @@ $cls = static fn (int $s): string => $s >= 80 ? 'good' : ($s >= 50 ? 'ok' : 'bad
       <button class="btn btn-primary" type="submit"><?= e(t('Envoyer')) ?></button>
     </div>
     <div class="ai-chips">
-      <?php foreach ([
+      <?php foreach (array_merge([
           ['✍️', t('Écrire un article'), t('Écris un article sur ')],
           ['👥', t('Ajouter un membre à l’équipe'), t('Ajoute à la page équipe : Prénom Nom, fonction, avec la photo jointe.')],
           ['💡', t('5 idées d’articles'), t('Propose-moi 5 idées d’articles pour attirer de nouveaux clients.')],
           ['📄', t('Créer une page'), t('Crée une page « Nos services » qui présente ')],
-      ] as [$emoji, $label, $idea]): ?>
+      ], \Eclair\Shop::enabled() ? [['🛍️', t('Fiche produit'), t('Crée la fiche produit de la photo jointe. Prix : ')]] : []) as [$emoji, $label, $idea]): ?>
         <button class="ai-chip" type="button" data-ai-idea="<?= e($idea) ?>"><?= $emoji ?> <?= e($label) ?></button>
       <?php endforeach ?>
     </div>
@@ -119,7 +122,7 @@ $cls = static fn (int $s): string => $s >= 80 ? 'good' : ($s >= 50 ? 'ok' : 'bad
     <table class="list"><tbody>
       <?php foreach ($v['recent'] as $e): ?>
         <tr>
-          <td class="title-cell"><a href="<?= e(admin_url('edit/' . $e['id'])) ?>"><?= e($e['title']) ?></a><small><?= e($e['type'] === 'post' ? t('Article') : t('Page')) ?> · <?= e(ago((int) $e['updated'])) ?></small></td>
+          <td class="title-cell"><a href="<?= e(admin_url('edit/' . $e['id'])) ?>"><?= e($e['title']) ?></a><small><?= e(['post' => t('Article'), 'product' => t('Produit')][$e['type']] ?? t('Page')) ?> · <?= e(ago((int) $e['updated'])) ?></small></td>
           <td class="right"><?= Content::visible($e) ? '<span class="badge ok">' . e(t('Publié')) . '</span>' : ($e['status'] === 'published' ? '<span class="badge brand">' . e(t('Programmé')) . '</span>' : '<span class="badge">' . e(t('Brouillon')) . '</span>') ?></td>
         </tr>
       <?php endforeach ?>

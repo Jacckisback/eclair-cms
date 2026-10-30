@@ -37,9 +37,15 @@ final class Menus
                         $out[] = ['label' => $label !== '' ? $label : (string) Settings::get('blog.title'), 'href' => path_to($path), 'path' => $path];
                     }
                     break;
+                case 'shop':
+                    if (Shop::enabled()) {
+                        $path = Shop::path();
+                        $out[] = ['label' => $label !== '' ? $label : Shop::title(), 'href' => path_to($path), 'path' => $path];
+                    }
+                    break;
                 case 'category':
                     $cat = Categories::get((string) ($item['id'] ?? ''));
-                    if ($cat) {
+                    if ($cat && ($cat['kind'] !== 'product' || Shop::enabled())) {
                         $path = Categories::path($cat);
                         $out[] = ['label' => $label !== '' ? $label : $cat['name'], 'href' => path_to($path), 'path' => $path];
                     }
@@ -67,7 +73,7 @@ final class Menus
                 continue;
             }
             $type = (string) ($item['type'] ?? '');
-            if (!in_array($type, ['content', 'blog', 'category', 'link'], true)) {
+            if (!in_array($type, ['content', 'blog', 'shop', 'category', 'link'], true)) {
                 continue;
             }
             $clean[] = [

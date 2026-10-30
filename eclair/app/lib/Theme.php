@@ -19,6 +19,19 @@ final class Theme
         'mono' => ['Machine à écrire', 'ui-monospace,"Cascadia Code","Source Code Pro",Menlo,Consolas,"DejaVu Sans Mono",monospace'],
     ];
 
+    /**
+     * Thèmes livrés : une feuille de style ajoutée au thème de base (seul le thème choisi est inséré dans la page)
+     * et des réglages conseillés, appliqués quand on choisit le thème (couleur, polices, en-tête, cartes).
+     */
+    public const THEMES = [
+        'eclair' => ['accent' => '#5b4cf0', 'font_head' => 'system', 'font_body' => 'system', 'header' => 'left', 'cards' => 'grid'],
+        'editorial' => ['accent' => '#b42318', 'font_head' => 'oldstyle', 'font_body' => 'serif', 'header' => 'center', 'cards' => 'grid'],
+        'atelier' => ['accent' => '#c2410c', 'font_head' => 'humanist', 'font_body' => 'humanist', 'header' => 'left', 'cards' => 'grid'],
+        'studio' => ['accent' => '#111111', 'font_head' => 'grotesque', 'font_body' => 'grotesque', 'header' => 'left', 'cards' => 'grid'],
+        'boutique' => ['accent' => '#0f766e', 'font_head' => 'geometric', 'font_body' => 'system', 'header' => 'center', 'cards' => 'grid'],
+        'contraste' => ['accent' => '#1d4ed8', 'font_head' => 'system', 'font_body' => 'system', 'header' => 'left', 'cards' => 'list'],
+    ];
+
     private const LANG_ORDER = ['fr', 'es', 'en', 'de', 'it', 'pt'];
     private const STRINGS = [
         'skip' => ['Aller au contenu', 'Ir al contenido', 'Skip to content', 'Zum Inhalt springen', 'Vai al contenuto', 'Ir para o conteúdo'],
@@ -75,17 +88,49 @@ final class Theme
         'read_in' => ['Lire en', 'Leer en', 'Read in', 'Lesen auf', 'Leggi in', 'Ler em'],
         'edit' => ['Modifier', 'Editar', 'Edit', 'Bearbeiten', 'Modifica', 'Editar'],
         'social' => ['Réseaux sociaux', 'Redes sociales', 'Social media', 'Soziale Medien', 'Social', 'Redes sociais'],
+        'shop' => ['Boutique', 'Tienda', 'Shop', 'Shop', 'Negozio', 'Loja'],
+        'products' => ['Produits', 'Productos', 'Products', 'Produkte', 'Prodotti', 'Produtos'],
+        'price' => ['Prix', 'Precio', 'Price', 'Preis', 'Prezzo', 'Preço'],
+        'buy' => ['Acheter', 'Comprar', 'Buy now', 'Jetzt kaufen', 'Acquista', 'Comprar'],
+        'in_stock' => ['En stock', 'En stock', 'In stock', 'Auf Lager', 'Disponibile', 'Em stock'],
+        'out_of_stock' => ['Épuisé', 'Agotado', 'Sold out', 'Ausverkauft', 'Esaurito', 'Esgotado'],
+        'preorder' => ['Précommande', 'Reserva', 'Pre-order', 'Vorbestellung', 'Preordine', 'Pré-encomenda'],
+        'unavailable' => ['Bientôt disponible', 'Próximamente', 'Coming soon', 'Bald erhältlich', 'Presto disponibile', 'Brevemente disponível'],
+        'from_price' => ['À partir de {price}', 'Desde {price}', 'From {price}', 'Ab {price}', 'Da {price}', 'Desde {price}'],
+        'was_price' => ['Prix habituel', 'Precio habitual', 'Regular price', 'Normalpreis', 'Prezzo abituale', 'Preço habitual'],
+        'sale' => ['Promo', 'Oferta', 'Sale', 'Angebot', 'Offerta', 'Promoção'],
+        'choose_option' => ['Choisissez une option', 'Elige una opción', 'Choose an option', 'Option wählen', 'Scegli un’opzione', 'Escolha uma opção'],
+        'secure_payment' => ['Paiement sécurisé', 'Pago seguro', 'Secure payment', 'Sichere Zahlung', 'Pagamento sicuro', 'Pagamento seguro'],
+        'secure_stripe' => ['Paiement sécurisé par Stripe', 'Pago seguro con Stripe', 'Secure payment with Stripe', 'Sichere Zahlung über Stripe', 'Pagamento sicuro con Stripe', 'Pagamento seguro com Stripe'],
+        'shipping_cost' => ['Livraison : {price}', 'Envío: {price}', 'Shipping: {price}', 'Versand: {price}', 'Spedizione: {price}', 'Envio: {price}'],
+        'shipping_free' => ['Livraison offerte', 'Envío gratis', 'Free shipping', 'Kostenloser Versand', 'Spedizione gratuita', 'Envio grátis'],
+        'free_from' => ['offerte dès {price}', 'gratis desde {price}', 'free over {price}', 'kostenlos ab {price}', 'gratuita da {price}', 'grátis a partir de {price}'],
+        'delivery_days' => ['Livré en {min} à {max} jours', 'Entrega en {min}-{max} días', 'Delivered in {min}–{max} days', 'Lieferung in {min}–{max} Tagen', 'Consegna in {min}-{max} giorni', 'Entrega em {min} a {max} dias'],
+        'returns' => ['Retours sous {n} jours', 'Devoluciones en {n} días', 'Returns within {n} days', 'Rückgabe innerhalb von {n} Tagen', 'Resi entro {n} giorni', 'Devoluções em {n} dias'],
+        'free_returns' => ['Retours gratuits sous {n} jours', 'Devoluciones gratuitas en {n} días', 'Free returns within {n} days', 'Kostenlose Rückgabe innerhalb von {n} Tagen', 'Resi gratuiti entro {n} giorni', 'Devoluções grátis em {n} dias'],
+        'terms' => ['Conditions générales de vente', 'Condiciones generales de venta', 'Terms of sale', 'Allgemeine Geschäftsbedingungen', 'Condizioni generali di vendita', 'Condições gerais de venda'],
+        'delivery' => ['Livraison et retours', 'Envíos y devoluciones', 'Shipping & returns', 'Versand & Rückgabe', 'Spedizioni e resi', 'Envios e devoluções'],
+        'all' => ['Tout', 'Todo', 'All', 'Alle', 'Tutto', 'Tudo'],
+        'all_products' => ['Voir toute la boutique', 'Ver toda la tienda', 'See all products', 'Alle Produkte ansehen', 'Vedi tutto il negozio', 'Ver toda a loja'],
+        'related_products' => ['Vous aimerez aussi', 'También te puede gustar', 'You may also like', 'Das könnte Ihnen auch gefallen', 'Potrebbe piacerti anche', 'Também poderá gostar'],
+        'no_products' => ['Aucun produit pour l’instant.', 'Todavía no hay productos.', 'No products yet.', 'Noch keine Produkte.', 'Ancora nessun prodotto.', 'Ainda não há produtos.'],
+        'product_photos' => ['Photos du produit', 'Fotos del producto', 'Product photos', 'Produktfotos', 'Foto del prodotto', 'Fotos do produto'],
+        'thanks_title' => ['Merci pour votre commande !', '¡Gracias por tu pedido!', 'Thank you for your order!', 'Vielen Dank für Ihre Bestellung!', 'Grazie per il tuo ordine!', 'Obrigado pela sua encomenda!'],
+        'thanks_text' => ['Votre paiement est confirmé : vous allez recevoir un reçu par e-mail. Une question ? Contactez-nous.', 'Tu pago está confirmado: recibirás un recibo por correo electrónico. ¿Alguna pregunta? Escríbenos.', 'Your payment is confirmed: you will receive a receipt by email. Any questions? Get in touch.', 'Ihre Zahlung ist bestätigt: Sie erhalten eine Quittung per E-Mail. Fragen? Schreiben Sie uns.', 'Il pagamento è confermato: riceverai una ricevuta via e-mail. Domande? Scrivici.', 'O seu pagamento está confirmado: vai receber um recibo por e-mail. Alguma dúvida? Contacte-nos.'],
     ];
     private const WORDS = [
-        'fr' => ['page' => 'page', 'author' => 'auteur', 'search' => 'recherche'],
-        'es' => ['page' => 'pagina', 'author' => 'autor', 'search' => 'buscar'],
-        'en' => ['page' => 'page', 'author' => 'author', 'search' => 'search'],
-        'de' => ['page' => 'seite', 'author' => 'autor', 'search' => 'suche'],
-        'it' => ['page' => 'pagina', 'author' => 'autore', 'search' => 'cerca'],
-        'pt' => ['page' => 'pagina', 'author' => 'autor', 'search' => 'pesquisa'],
+        'fr' => ['page' => 'page', 'author' => 'auteur', 'search' => 'recherche', 'shop' => 'boutique'],
+        'es' => ['page' => 'pagina', 'author' => 'autor', 'search' => 'buscar', 'shop' => 'tienda'],
+        'en' => ['page' => 'page', 'author' => 'author', 'search' => 'search', 'shop' => 'shop'],
+        'de' => ['page' => 'seite', 'author' => 'autor', 'search' => 'suche', 'shop' => 'shop'],
+        'it' => ['page' => 'pagina', 'author' => 'autore', 'search' => 'cerca', 'shop' => 'negozio'],
+        'pt' => ['page' => 'pagina', 'author' => 'autor', 'search' => 'pesquisa', 'shop' => 'loja'],
     ];
 
     private static ?string $css = null;
+    /** Apparence essayée dans l'aperçu des réglages (jamais enregistrée ni mise en cache). */
+    private static ?array $preview = null;
+    private static bool $shop = false;
 
     public static function t(string $key, ?string $lang = null, array $vars = []): string
     {
@@ -160,7 +205,46 @@ final class Theme
         return self::partial('cards', ['entries' => $entries, 'lang' => $lang, 'level' => $level]);
     }
 
+    /** Grille de cartes produit. */
+    public static function products(array $entries, string $lang, int $level = 3): string
+    {
+        return self::partial('products', ['entries' => $entries, 'lang' => $lang, 'level' => $level]);
+    }
+
     /* ─────────────────────────────── Styles ─────────────────────────────── */
+
+    /** Apparence en vigueur : réglages du site, ou ceux essayés dans l'aperçu. */
+    public static function look(): array
+    {
+        $a = array_merge((array) Settings::get('appearance'), self::$preview ?? []);
+        $a['theme'] = isset(self::THEMES[$a['theme'] ?? '']) ? $a['theme'] : 'eclair';
+        $a['header'] = ($a['header'] ?? '') === 'center' ? 'center' : 'left';
+        $a['cards'] = ($a['cards'] ?? '') === 'list' ? 'list' : 'grid';
+        return $a;
+    }
+
+    /** Essaie une apparence pour l'aperçu en direct (valeurs déjà vérifiées par l'appelant). */
+    public static function preview(array $look): void
+    {
+        self::$preview = $look;
+        self::$css = null;
+    }
+
+    /** Styles de la boutique pour cette page, même boutique fermée (aperçu d'une fiche produit dans l'éditeur). */
+    public static function withShop(): void
+    {
+        if (!self::$shop) {
+            self::$shop = true;
+            self::$css = null;
+        }
+    }
+
+    /** Classes du <body> qui portent les variantes de mise en page. */
+    public static function bodyClass(): string
+    {
+        $a = self::look();
+        return 'theme-' . $a['theme'] . ($a['header'] === 'center' ? ' hdr-center' : '') . ($a['cards'] === 'list' ? ' cards-list' : '');
+    }
 
     /** CSS du thème, personnalisé et minifié, destiné à être inséré dans la page. */
     public static function css(): string
@@ -168,7 +252,7 @@ final class Theme
         if (self::$css !== null) {
             return self::$css;
         }
-        $a = Settings::get('appearance');
+        $a = self::look();
         $accent = Sanitize::color($a['accent'] ?? '', '#5b4cf0');
         $vars = ':root{--accent:' . $accent
             . ';--on-accent:' . (self::contrast($accent, '#ffffff') >= 4.5 ? '#ffffff' : '#111111')
@@ -177,8 +261,15 @@ final class Theme
             . ';--font:' . (self::FONTS[$a['font_body'] ?? 'system'][1] ?? self::FONTS['system'][1])
             . ';--font-head:' . (self::FONTS[$a['font_head'] ?? 'system'][1] ?? self::FONTS['system'][1]) . '}';
         $css = (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css');
+        if ($a['theme'] !== 'eclair') {
+            $css .= (string) @file_get_contents(ECLAIR_ROOT . '/app/theme/themes/' . $a['theme'] . '.css');
+        }
         if (($a['dark'] ?? 'auto') !== 'auto') {
             $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', $css);
+        }
+        // Styles de la boutique : seulement quand elle est ouverte (la plupart des sites n'en ont pas).
+        if (!self::$shop && !Shop::enabled()) {
+            $css = (string) preg_replace('~/\*shop\*/.*?/\*/shop\*/~s', '', $css);
         }
         return self::$css = self::minify($vars . $css);
     }

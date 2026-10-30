@@ -27,13 +27,27 @@ final class AiTools
             'name' => $str(), 'role' => $str('Job title'), 'bio' => $str('1-3 sentences, only facts given by the user or the site'),
             'photo' => $str('media id of the portrait (optional)'), 'link' => $str('Profile URL, e.g. LinkedIn (optional)'),
         ], 'required' => ['name'], 'additionalProperties' => false];
+        $shop = Shop::enabled();
+        $availability = ['type' => 'string', 'enum' => array_keys(Shop::AVAILABILITY)];
+        $product = ['type' => 'object', 'description' => 'Products only. Use ONLY values given by the user: never invent a price, a discount, a payment link, a brand or a code; leave them out instead.', 'properties' => [
+            'price' => $str('Price given by the user, e.g. "29.90"'),
+            'compare' => $str('Former price, only if the user mentions a discount'),
+            'availability' => $availability,
+            'link' => $str('Payment link given by the user (https://buy.stripe.com/…)'),
+            'brand' => $str(), 'sku' => $str('Reference'), 'gtin' => $str('Barcode (EAN, UPC)'),
+            'condition' => ['type' => 'string', 'enum' => array_keys(Shop::CONDITIONS)],
+            'digital' => ['type' => 'boolean', 'description' => 'Digital product or service: nothing to ship'],
+            'gallery' => ['type' => 'array', 'items' => $str(), 'description' => 'media ids of the extra photos (the main photo goes in "image")'],
+            'variants' => ['type' => 'array', 'description' => 'Sizes, colours… with their price and payment link when given',
+                'items' => ['type' => 'object', 'properties' => ['label' => $str(), 'price' => $str(), 'link' => $str(), 'availability' => $availability], 'required' => ['label'], 'additionalProperties' => false]],
+        ], 'additionalProperties' => false];
         $tools = [
             [
                 'name' => 'search_content',
-                'description' => 'Search the site\'s pages and articles by keywords (title and text). With an empty query, lists the most recent content. Use it to avoid duplicates, to find the content to change (for example the team page) and to choose internal links.',
+                'description' => 'Search the site\'s pages, articles and products by keywords (title and text). With an empty query, lists the most recent content. Use it to avoid duplicates, to find the content to change (for example the team page) and to choose internal links.',
                 'schema' => ['type' => 'object', 'properties' => [
                     'query' => $str('Keywords; empty to list recent content'),
-                    'type' => ['type' => 'string', 'enum' => ['any', 'post', 'page']],
+                    'type' => ['type' => 'string', 'enum' => ['any', 'post', 'page', 'product']],
                 ], 'additionalProperties' => false],
             ],
             [
@@ -43,9 +57,9 @@ final class AiTools
             ],
             [
                 'name' => 'create_draft',
-                'description' => 'Create a new article or page as a DRAFT (never published: the user publishes it). Returns its id and its SEO/GEO scores out of 100.',
+                'description' => 'Create a new ' . ($shop ? 'article, page or product' : 'article or page') . ' as a DRAFT (never published: the user publishes it). Returns its id and its SEO/GEO scores out of 100.',
                 'schema' => ['type' => 'object', 'properties' => [
-                    'type' => ['type' => 'string', 'enum' => ['post', 'page'], 'description' => 'post = blog article, page = site page'],
+                    'type' => ['type' => 'string', 'enum' => $shop ? ['post', 'page', 'product'] : ['post', 'page'], 'description' => 'post = blog article, page = site page' . ($shop ? ', product = product sheet of the shop' : '')],
                     'title' => $str('Title shown on the page (H1)'),
                     'body' => $str('Content in Markdown, without the title and without the FAQ'),
                     'summary' => $str('« L’essentiel »: 2-3 sentences, 25-90 words, a direct answer AI engines can quote'),
@@ -53,12 +67,12 @@ final class AiTools
                     'seo_title' => $str('Max 60 characters'),
                     'seo_description' => $str('120-155 characters'),
                     'slug' => $str('Short URL slug (optional)'),
-                    'category' => $str('Category id from the context (articles, optional)'),
-                    'image' => $str('media id of the featured image (optional)'),
+                    'category' => $str('Category id from the context, of the same kind as the content (articles or products, optional)'),
+                    'image' => $str('media id of the featured image, or of the main photo of a product (optional)'),
                     'faq' => $qa,
                     'team' => ['type' => 'array', 'items' => $person, 'description' => 'Team members block (pages, optional)'],
                     'lang' => $str('Content language code if different from the site language (optional)'),
-                ], 'required' => ['type', 'title', 'body'], 'additionalProperties' => false],
+                ] + ($shop ? ['product' => $product] : []), 'required' => ['type', 'title', 'body'], 'additionalProperties' => false],
             ],
             [
                 'name' => 'update_content',
@@ -78,7 +92,7 @@ final class AiTools
                     'after_heading' => $str('Exact text of the heading after whose section "append" is inserted (default: end of content)'),
                     'faq' => $qa,
                     'team_member' => $person,
-                ], 'required' => ['id', 'note'], 'additionalProperties' => false],
+                ] + ($shop ? ['product' => ['description' => 'Products only: fields to change (price, availability, payment link…), only with values given by the user'] + $product] : []), 'required' => ['id', 'note'], 'additionalProperties' => false],
             ],
             [
                 'name' => 'find_media',
@@ -147,7 +161,7 @@ final class AiTools
 
     private static function search(array $in): array
     {
-        $type = in_array($in['type'] ?? '', ['post', 'page'], true) ? $in['type'] : '';
+        $type = in_array($in['type'] ?? '', ['post', 'page', 'product'], true) ? $in['type'] : '';
         $terms = array_filter(preg_split('/\s+/u', mb_strtolower(trim((string) ($in['query'] ?? '')))) ?: [], fn ($w) => mb_strlen($w) >= 2);
         $texts = Store::read('search', []);
         $found = [];
@@ -199,7 +213,7 @@ final class AiTools
             'summary' => $item['summary'], 'keyword' => $item['seo']['keyword'], 'seo_title' => $item['seo']['title'],
             'seo_description' => $item['seo']['description'], 'image' => $item['image'],
             'markdown' => mb_substr(Markdown::fromBlocks($item['blocks']), 0, 24000),
-        ], 'card' => null, 'error' => false];
+        ] + (isset($item['product']) ? ['product' => $item['product']] : []), 'card' => null, 'error' => false];
     }
 
     private static function findMedia(string $query): array
@@ -225,7 +239,10 @@ final class AiTools
         if (++$ctx['turn']['drafts'] > self::MAX_DRAFTS) {
             return self::fail('Limit reached: at most ' . self::MAX_DRAFTS . ' drafts per request. Tell the user and stop.');
         }
-        $type = ($in['type'] ?? '') === 'page' ? 'page' : 'post';
+        $type = in_array($in['type'] ?? '', ['page', 'product'], true) ? $in['type'] : 'post';
+        if ($type === 'product' && !Shop::enabled()) {
+            return self::fail('The shop is closed: no product can be created. Tell the user to open it in Settings › Shop first.');
+        }
         $title = Sanitize::text($in['title'] ?? '', 200);
         $blocks = Markdown::toBlocks((string) ($in['body'] ?? ''));
         if ($title === '' || !$blocks) {
@@ -253,10 +270,11 @@ final class AiTools
             'blocks' => $blocks,
             'summary' => (string) ($in['summary'] ?? ''),
             'image' => Media::get($image) ? $image : '',
-            'category' => $type === 'post' && Categories::get($category) ? $category : '',
+            'category' => $type !== 'page' && (Categories::get($category)['kind'] ?? '') === $type ? $category : '',
             'author' => $ctx['user']['id'],
             'seo' => ['title' => (string) ($in['seo_title'] ?? ''), 'description' => (string) ($in['seo_description'] ?? ''), 'keyword' => (string) ($in['keyword'] ?? '')],
             'options' => ['toc' => 'auto'],
+            'product' => $type === 'product' && is_array($in['product'] ?? null) ? $in['product'] : [],
         ], $ctx['user']);
         $analysis = Analyzer::run($item);
         $todo = array_values(array_map(fn ($c) => $c['label'], array_filter($analysis['checks'], fn ($c) => $c['status'] === 'bad')));
@@ -347,12 +365,13 @@ final class AiTools
             // Les modifications suivantes du tour (et get_content) partent de cette version.
             $ctx['editing']['item'] = ['id' => $item['id']] + $built;
             $media = [];
-            foreach (array_filter(array_merge([$built['image']], Blocks::media($built['blocks']))) as $mid) {
+            foreach (array_filter(array_merge([$built['image']], $built['product']['gallery'] ?? [], Blocks::media($built['blocks']))) as $mid) {
                 if ($m = Media::get($mid)) {
                     $media[$mid] = AdminMedia::export($m);
                 }
             }
-            $patch = ['title' => $built['title'], 'summary' => $built['summary'], 'image' => $built['image'], 'seo' => $built['seo'], 'blocks' => $built['blocks']];
+            $patch = ['title' => $built['title'], 'summary' => $built['summary'], 'image' => $built['image'], 'seo' => $built['seo'], 'blocks' => $built['blocks']]
+                + (isset($built['product']) ? ['product' => $built['product']] : []);
             return ['result' => ['done' => 'Applied in the editor; the user saves it.'] + $scores + $warn,
                 'card' => ['kind' => 'editor', 'id' => $id, 'title' => $built['title'], 'note' => $note, 'changes' => $labels, 'patch' => $patch, 'media' => $media],
                 'error' => false];
@@ -518,6 +537,13 @@ final class AiTools
                 }
             }
             $labels[] = t('Nouveau membre dans l’équipe : {name}', ['name' => Sanitize::text($person['name'], 120)]);
+        }
+        if (!empty($in['product']) && is_array($in['product']) && isset($item['product'])) {
+            $p = Shop::normalize(array_replace($item['product'], array_intersect_key($in['product'], $item['product'])));
+            if ($p !== $item['product']) {
+                $item['product'] = $p;
+                $labels[] = t('Fiche produit (prix, disponibilité, paiement…)');
+            }
         }
         $item['blocks'] = Blocks::normalize($blocks);
         // Données au format de l'éditeur : la date existante est conservée telle quelle.

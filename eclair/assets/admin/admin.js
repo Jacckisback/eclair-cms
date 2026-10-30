@@ -307,6 +307,44 @@
     });
   }
 
+  /* ── Réglages › Apparence : thèmes et aperçu en direct ── */
+  const look = $('#theme-preview');
+  if (look) {
+    const form = look.closest('form');
+    const frame = $('iframe', look);
+    const field = (name) => form.elements[name];
+    let timer = 0;
+    const show = () => {
+      const q = new URLSearchParams({
+        theme: (form.querySelector('[name=theme]:checked') || {}).value || 'eclair',
+        accent: field('accent').value, font_head: field('font_head').value, font_body: field('font_body').value,
+        header: field('header').value, cards: field('cards').value, dark: field('dark').value, path: $('#preview-page').value,
+      });
+      frame.src = look.dataset.src + '?' + q;
+    };
+    const refresh = () => { clearTimeout(timer); timer = setTimeout(show, 250); };
+    // Choisir un thème applique ses réglages conseillés (modifiables ensuite).
+    $$('[name=theme]', form).forEach((radio) => radio.addEventListener('change', () => {
+      const d = radio.dataset;
+      field('accent').value = d.accent;
+      field('font_head').value = d.fontHead;
+      field('font_body').value = d.fontBody;
+      field('header').value = d.header;
+      field('cards').value = d.cards;
+      refresh();
+    }));
+    ['accent', 'font_head', 'font_body', 'header', 'cards', 'dark'].forEach((name) => {
+      field(name).addEventListener('input', refresh);
+      field(name).addEventListener('change', refresh);
+    });
+    $('#preview-page').addEventListener('change', show);
+    $$('[data-device]', look).forEach((b) => b.addEventListener('click', () => {
+      look.classList.toggle('mobile', b.dataset.device === 'mobile');
+      $$('[data-device]', look).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    }));
+    show();
+  }
+
   /* ── Réglages › Assistant IA ── */
   const aiSettings = $('#ai-settings');
   if (aiSettings) {

@@ -1,0 +1,36 @@
+/* ⚡ Éclair — thème Studio : portfolio minimaliste, noir et blanc, grands titres, images à vif. */
+:root{--bg:#fff;--bg-soft:#f5f5f5;--card:#fff;--text:#0a0a0a;--muted:#666;--line:#e6e6e6;--code:#f2f2f2;--radius:0px;--shadow:none;--wide-w:80rem}
+/*dark*/@media (prefers-color-scheme:dark){:root{--bg:#0a0a0a;--bg-soft:#141414;--card:#0a0a0a;--text:#f5f5f5;--muted:#9c9c9c;--line:#272727;--code:#171717}}/*/dark*/
+
+h1{font-size:clamp(2.6rem, 1.5rem + 4.6vw, 5.3rem);letter-spacing:-.048em;line-height:.98}
+h2{letter-spacing:-.03em}
+.hero-title{font-size:clamp(2.8rem, 1.5rem + 5.4vw, 6rem);letter-spacing:-.055em;line-height:.95}
+.site-header{border:0}
+.header-inner{min-height:5.2rem}
+.brand{text-transform:uppercase;letter-spacing:.16em;font-size:.95rem;font-weight:800}
+.site-nav a{border-radius:0;padding:.4rem .75rem;font-size:.92rem}
+.site-nav a:hover{background:none;text-decoration:underline;text-underline-offset:.35em}
+.site-nav a[aria-current]{background:none;color:var(--text);text-decoration:underline;text-underline-offset:.35em;text-decoration-thickness:2px}
+
+.chip{border-radius:0;background:var(--text);color:var(--bg)}
+.chip:hover{background:var(--text);opacity:.85}
+.btn{border-radius:0;border-color:var(--text)}
+.btn-primary{background:var(--text);color:var(--bg)}
+.btn-secondary{color:var(--text)}
+.key{border:0;border-left:3px solid var(--text);background:var(--bg-soft)}
+.key-title{color:var(--text)}
+.feature{border:0;border-top:2px solid var(--text);box-shadow:none;background:none;padding:1.2rem 0 0}
+.feature-icon{background:none;width:auto;height:auto}
+blockquote{border-color:var(--text)}
+
+/* Cartes : l'image d'abord, sans cadre */
+.card{border:0;background:none}
+.card:hover{transform:none;box-shadow:none}
+.card-img img{aspect-ratio:4/5;filter:grayscale(.2);transition:filter .3s}
+.card:hover .card-img img{filter:none}
+.card-body{padding:.95rem 0 0}
+.card-title{font-size:1.28rem;letter-spacing:-.02em}
+.cards-list .card-img img{aspect-ratio:auto}
+.cards-list .card-body{padding:0 0 0 1.4rem}
+
+.site-footer{background:none}

@@ -3,6 +3,8 @@
  * Prépare une version distribuable d'Éclair :
  *   1. calcule l'empreinte SHA-256 de chaque fichier (app/manifest.php, pour le contrôle d'intégrité) ;
  *   2. crée dist/eclair-cms-<version>.zip, prêt à téléverser sur un hébergement.
+ * Dans l'archive, le PHP est compacté (php -w : ni commentaires ni espaces superflus) : même code, un quart plus léger.
+ * Son manifeste porte les empreintes de ces fichiers compactés ; celui du dépôt, les empreintes des sources.
  *
  *   php tools/build.php
  */
@@ -56,9 +58,19 @@ $zipFile = $dist . '/eclair-cms-' . $version . '.zip';
 @unlink($zipFile);
 $zip = new ZipArchive();
 $zip->open($zipFile, ZipArchive::CREATE);
-foreach (array_merge($files, ['app/manifest.php']) as $rel) {
-    $zip->addFile($root . '/' . $rel, 'eclair/' . $rel);
+$shipped = [];
+$size = 0;
+foreach ($files as $rel) {
+    // Le modèle de configuration reste lisible : ses commentaires sont son mode d'emploi.
+    $body = str_ends_with($rel, '.php') && $rel !== 'eclair-config.exemple.php'
+        ? php_strip_whitespace($root . '/' . $rel) : (string) file_get_contents($root . '/' . $rel);
+    $shipped[$rel] = hash('sha256', $body);
+    $size += strlen($body);
+    $zip->addFromString('eclair/' . $rel, $body);
 }
+$zipManifest = "<?php exit; ?>\n" . json_encode(array_replace($manifest, ['files' => $shipped]), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n";
+$zip->addFromString('eclair/app/manifest.php', $zipManifest);
+$size += strlen($zipManifest);
 foreach (['data', 'cache/pages', 'media'] as $dir) {
     $zip->addEmptyDir('eclair/' . $dir);
 }
@@ -86,4 +98,4 @@ foreach (['LICENSE' => 'LICENSE.txt', 'THIRD-PARTY-NOTICES.txt' => 'THIRD-PARTY-
     }
 }
 $zip->close();
-printf("✓ Archive : %s (%s Ko)\n", $zipFile, round(filesize($zipFile) / 1024));
+printf("✓ Archive : %s (%s Ko, %s octets une fois décompressée)\n", $zipFile, round(filesize($zipFile) / 1024), number_format($size, 0, ',', ' '));

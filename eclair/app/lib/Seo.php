@@ -91,6 +91,10 @@ final class Seo
                 $h[] = '<meta property="og:image:alt" content="' . e($image['alt']) . '">';
             }
         }
+        if (($ctx['type'] ?? '') === 'product' && ($ctx['price'] ?? '') !== '') {
+            $h[] = '<meta property="product:price:amount" content="' . e($ctx['price']) . '">';
+            $h[] = '<meta property="product:price:currency" content="' . e(Shop::currency()) . '">';
+        }
         if (($ctx['type'] ?? '') === 'article') {
             $h[] = '<meta property="article:published_time" content="' . e(date('c', (int) $ctx['published'])) . '">';
             $h[] = '<meta property="article:modified_time" content="' . e(date('c', (int) $ctx['modified'])) . '">';
@@ -148,10 +152,10 @@ final class Seo
         $kind = (string) ($ctx['kind'] ?? 'item');
         $item = $ctx['item'] ?? null;
         $pageType = match ($kind) {
-            'blog', 'category' => 'CollectionPage',
+            'blog', 'category', 'shop' => 'CollectionPage',
             'author' => 'ProfilePage',
             'search' => 'SearchResultsPage',
-            default => self::pageType($item),
+            default => ($item['type'] ?? '') === 'product' ? 'ItemPage' : self::pageType($item),
         };
         $page = [
             '@type' => $pageType,
@@ -177,7 +181,13 @@ final class Seo
         if ($kind === 'author' && !empty($ctx['author'])) {
             $page['mainEntity'] = self::person($ctx['author']);
         }
+        if (!empty($ctx['product'])) {
+            $page['mainEntity'] = ['@id' => $ctx['product']['@id']];
+        }
         $graph[] = $page;
+        if (!empty($ctx['product'])) {
+            $graph[] = $ctx['product'] + ['mainEntityOfPage' => ['@id' => $canonical . '#webpage']];
+        }
 
         if ($item && $item['type'] === 'post' && $kind === 'item') {
             $article = [
@@ -258,6 +268,9 @@ final class Seo
             if ($type === 'LocalBusiness') {
                 $entity['image'] = absolute_url(Media::url($logo));
             }
+        }
+        if ($type !== 'Person' && ($policy = Shop::returnPolicy())) {
+            $entity['hasMerchantReturnPolicy'] = $policy;
         }
         $sameAs = array_values(array_filter(array_map('strval', (array) Settings::get('social'))));
         if ($sameAs) {
@@ -346,7 +359,7 @@ final class Seo
                 }
                 $images = [];
                 $item = Content::get($entry['id']);
-                foreach (array_merge([$entry['image']], $item ? Blocks::media($item['blocks']) : []) as $mid) {
+                foreach (array_merge([$entry['image']], $item['product']['gallery'] ?? [], $item ? Blocks::media($item['blocks']) : []) as $mid) {
                     $m = Media::get((string) $mid);
                     if ($m) {
                         $images[] = Media::url($m);
@@ -355,10 +368,21 @@ final class Seo
                 $alternates = array_map(fn ($t) => Content::path($t), Content::translations($entry));
                 $add(Content::path($entry), max($entry['date'], $entry['updated']), array_values(array_unique($images)), $alternates);
             }
+            $products = Content::published('product');
+            if ($products) {
+                $newest = max(array_map(fn ($e) => max($e['date'], $e['updated']), $products));
+                $add(Shop::path(), $newest);
+                $counts = Categories::counts('product');
+                foreach (Categories::of('product') as $cat) {
+                    if (!empty($counts[$cat['id']])) {
+                        $add(Categories::path($cat), $newest);
+                    }
+                }
+            }
             if (Settings::get('blog.enabled')) {
                 $add(Settings::get('home') === '' ? '/' : Content::blogPath(), $latest);
                 $counts = Categories::counts();
-                foreach (Categories::all() as $cat) {
+                foreach (Categories::of('post') as $cat) {
                     if (!empty($counts[$cat['id']])) {
                         $add(Categories::path($cat), $latest);
                     }
@@ -433,7 +457,7 @@ final class Seo
             }
             return $out;
         }
-        foreach (['page' => Theme::t('pages', $lang), 'post' => Theme::t('posts', $lang)] as $type => $label) {
+        foreach (['page' => Theme::t('pages', $lang), 'product' => Theme::t('products', $lang), 'post' => Theme::t('posts', $lang)] as $type => $label) {
             $list = array_filter($published, fn ($e) => $e['type'] === $type);
             uasort($list, fn ($a, $b) => (Content::path($b) === '/') <=> (Content::path($a) === '/'));
             if (!$list) {
@@ -442,13 +466,16 @@ final class Seo
             $out .= '## ' . $label . "\n\n";
             foreach ($list as $e) {
                 $note = $e['summary'] !== '' ? $e['summary'] : $e['excerpt'];
+                if ($type === 'product') {
+                    $note = Shop::summary($e, $lang) . ($note !== '' ? ' — ' . $note : '');
+                }
                 $out .= '- [' . Blocks::mdText(str_replace(['[', ']'], '', $e['title'])) . '](' . $link($e) . ')'
                     . ($note !== '' ? ': ' . Blocks::mdText(str_replace("\n", ' ', $note)) : '') . "\n";
             }
             $out .= "\n";
         }
         $counts = Categories::counts();
-        $cats = array_filter(Categories::all(), fn ($c) => !empty($counts[$c['id']]));
+        $cats = array_filter(Categories::of('post'), fn ($c) => !empty($counts[$c['id']]));
         if ($cats && Settings::get('blog.enabled')) {
             $out .= '## ' . Theme::t('categories', $lang) . "\n\n";
             foreach ($cats as $c) {
@@ -464,6 +491,9 @@ final class Seo
         $out .= '- [Sitemap](' . absolute_url('/sitemap.xml') . ")\n";
         if (Settings::get('blog.enabled')) {
             $out .= '- [RSS](' . absolute_url('/feed.xml') . ")\n";
+        }
+        if (Shop::enabled() && Content::published('product')) {
+            $out .= '- [' . Theme::t('products', $lang) . ' (Google Merchant RSS)](' . absolute_url('/products.xml') . ")\n";
         }
         return $out;
     }
@@ -486,6 +516,8 @@ final class Seo
                 'author' => $author['name'] ?? '',
                 'published' => date('Y-m-d', (int) $item['date']),
                 'updated' => date('Y-m-d', max((int) $item['date'], (int) $item['updated'])),
+                'price' => ($entry['price'] ?? '') !== '' ? $entry['price'] . ' ' . Shop::currency() : '',
+                'availability' => $entry['availability'] ?? '',
             ]);
             $out .= "---\n";
             foreach ($meta as $k => $v) {
@@ -500,11 +532,38 @@ final class Seo
         if ($item['summary'] !== '') {
             $out .= '> **' . Theme::t('key_points', $lang) . '** — ' . str_replace("\n", "\n> ", Blocks::mdText($item['summary'])) . "\n\n";
         }
+        if (isset($item['product'])) {
+            $out .= self::productMarkdown($item, $entry, $url);
+        }
         $out .= Blocks::markdown($item['blocks'], $lang);
         if ($author && $item['type'] === 'post') {
             $out .= "\n— " . Blocks::mdText($author['name'] . ($author['job'] !== '' ? ', ' . $author['job'] : '')) . ' · ' . fmt_date(max((int) $item['date'], (int) $item['updated']), $lang) . "\n";
         }
         return $out;
+    }
+
+    /** Prix, disponibilité, variantes et lien d'achat d'un produit, en tête de sa version Markdown. */
+    private static function productMarkdown(array $item, array $entry, string $url): string
+    {
+        $lang = $item['lang'];
+        $p = $item['product'];
+        $lines = ['- ' . Theme::t('price', $lang) . ' : ' . Shop::summary($entry, $lang)];
+        if ($p['compare'] !== '' && (float) $p['compare'] > (float) ($entry['price'] ?? 0)) {
+            $lines[] = '- ' . Theme::t('was_price', $lang) . ' : ' . Shop::money($p['compare'], $lang);
+        }
+        foreach (array_filter(['Brand' => $p['brand'], 'SKU' => $p['sku'], 'GTIN' => $p['gtin']]) as $k => $v) {
+            $lines[] = '- ' . $k . ' : ' . Blocks::mdText($v);
+        }
+        if ($p['variants']) {
+            $lines[] = '- ' . Theme::t('choose_option', $lang) . ' :';
+            foreach (Shop::offers($item) as $o) {
+                $lines[] = '  - ' . Blocks::mdText($o['label']) . ($o['price'] !== '' ? ' — ' . Shop::money($o['price'], $lang) : '') . ' · ' . Theme::t($o['availability'], $lang);
+            }
+        }
+        if (Shop::enabled() && $p['availability'] !== 'out_of_stock' && array_filter(array_column(Shop::offers($item), 'link'))) {
+            $lines[] = '- ' . Shop::button($lang) . ' : ' . $url;
+        }
+        return implode("\n", $lines) . "\n\n";
     }
 
     public static function mdPath(string $path): string

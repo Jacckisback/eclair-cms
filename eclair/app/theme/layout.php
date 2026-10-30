@@ -23,7 +23,7 @@ $hasIcon = is_file(ECLAIR_ROOT . '/media/site/icon-32.png');
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?= $v['head'] ?>
 
-<meta name="theme-color" content="<?= e($site['appearance']['accent']) ?>">
+<meta name="theme-color" content="<?= e(Theme::look()['accent']) ?>">
 <?php if ($hasIcon): ?>
 <link rel="icon" type="image/png" sizes="32x32" href="<?= e(path_to('/media/site/icon-32.png')) ?>">
 <link rel="apple-touch-icon" href="<?= e(path_to('/media/site/icon-180.png')) ?>">
@@ -31,7 +31,7 @@ $hasIcon = is_file(ECLAIR_ROOT . '/media/site/icon-32.png');
 <style><?= $v['css'] ?></style>
 <script src="<?= e(asset('site/site.js')) ?>" defer></script>
 </head>
-<body class="<?= e($v['class'] ?? '') ?>"<?= !empty($v['id']) ? ' data-id="' . e($v['id']) . '"' : '' ?> data-edit="<?= e(Theme::t('edit', $lang)) ?>">
+<body class="<?= e(trim(($v['class'] ?? '') . ' ' . Theme::bodyClass())) ?>"<?= !empty($v['id']) ? ' data-id="' . e($v['id']) . '"' : '' ?> data-edit="<?= e(Theme::t('edit', $lang)) ?>">
 <a class="skip" href="#main"><?= e(Theme::t('skip', $lang)) ?></a>
 <header class="site-header">
   <div class="wrap header-inner">

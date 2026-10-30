@@ -1,0 +1,21 @@
+/* ⚡ Éclair — thème Contraste : lisibilité maximale (texte plus grand, contrastes forts, liens soulignés, focus très visible). */
+:root{--bg:#fff;--bg-soft:#f1f1f1;--card:#fff;--text:#000;--muted:#262626;--line:#1a1a1a;--code:#ececec;--radius:6px;--shadow:none}
+/*dark*/@media (prefers-color-scheme:dark){:root{--bg:#000;--bg-soft:#121212;--card:#000;--text:#fff;--muted:#e6e6e6;--line:#f0f0f0;--code:#1a1a1a}}/*/dark*/
+
+body{font-size:1.18rem;line-height:1.8}
+a{text-decoration-thickness:2px}
+:focus-visible{outline:4px solid var(--text);outline-offset:3px;box-shadow:0 0 0 8px #ffd400}
+.site-header{border-bottom:2px solid var(--line)}
+.site-nav a{text-decoration:underline;text-underline-offset:.25em;font-weight:650}
+.site-nav a[aria-current]{background:var(--text);color:var(--bg);text-decoration:none}
+.crumbs a,.meta a,.toc a,.card-title a,.site-footer a{text-decoration:underline}
+.chip{background:var(--bg);color:var(--text);border:2px solid var(--text);font-size:.85rem}
+.btn{border-width:3px;font-weight:750}
+.btn:hover{transform:none;box-shadow:none;text-decoration:underline}
+.key,.toc,.callout,.faq details,.table,.code,.contact,.author,.feature,.card{border:2px solid var(--line)}
+.card:hover{transform:none;box-shadow:none}
+.card-excerpt{color:var(--text)}
+.feature p,.hero-lead,.listing-header p,.author p,.site-footer{color:var(--text)}
+th{background:var(--text);color:var(--bg)}
+.site-footer{border-top:2px solid var(--line)}
+*,*::before,*::after{transition:none!important;animation:none!important}

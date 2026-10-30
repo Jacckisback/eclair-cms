@@ -5,7 +5,7 @@
   // Bouton « Modifier » pour les personnes connectées (le lien ne révèle pas l'adresse de l'administration).
   const script = document.currentScript;
   const base = script ? new URL(script.src).pathname.replace(/\/assets\/site\/site\.js$/, '') : '';
-  if (body.dataset.id && /(?:^|;\s*)eclair_edit=1(?:;|$)/.test(document.cookie)) {
+  if (window.self === window.top && body.dataset.id && /(?:^|;\s*)eclair_edit=1(?:;|$)/.test(document.cookie)) {
     const a = document.createElement('a');
     a.className = 'edit-fab';
     a.href = base + '/_eclair/edit/' + encodeURIComponent(body.dataset.id);

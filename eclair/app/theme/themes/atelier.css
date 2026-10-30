@@ -1,0 +1,30 @@
+/* ⚡ Éclair — thème Atelier : chaleureux et artisanal, tons crème et terre cuite, formes douces. */
+:root{--bg:#fbf6ee;--bg-soft:#f4eadb;--card:#fffaf2;--text:#2d2118;--muted:#6b5848;--line:#eadbc6;--code:#f3e7d6;--radius:22px;
+  --shadow:0 2px 4px rgb(80 50 20 / .06),0 18px 40px -24px rgb(80 50 20 / .38)}
+/*dark*/@media (prefers-color-scheme:dark){:root{--bg:#1b1511;--bg-soft:#241c16;--card:#271f18;--text:#f4eadf;--muted:#c1ae9b;--line:#3c3026;--code:#2c231b;
+  --shadow:0 2px 4px rgb(0 0 0 / .3),0 18px 40px -24px rgb(0 0 0 / .7)}}/*/dark*/
+
+h1,h2,h3{letter-spacing:-.012em}
+.content>h2::after,.listing-header h1::after{content:"";display:block;width:2.8rem;height:4px;border-radius:4px;margin-top:.45em;background:var(--accent);opacity:.75}
+.site-header{background:var(--bg-soft);border:0}
+.site-nav a:hover{background:var(--card)}
+.site-nav a[aria-current]{background:var(--card);color:var(--link-c)}
+
+.hero{position:relative;isolation:isolate}
+.hero::before{content:"";position:absolute;z-index:-1;top:-2rem;right:-4rem;width:min(30rem, 70vw);aspect-ratio:1;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 20%,transparent),transparent)}
+.hero-img img,figure img,.featured img{border-radius:var(--radius)}
+.btn{border-radius:16px}
+.feature{border:0}
+.key{border-style:dashed;border-width:2px}
+.callout,.faq details,.table,.code,.toc,.contact,.author{border-radius:18px}
+
+.card{border:0;box-shadow:var(--shadow)}
+.card:hover{transform:translateY(-4px)}
+.card-img{overflow:hidden}
+.card-img img{transition:transform .5s ease}
+.card:hover .card-img img{transform:scale(1.045)}
+.chip{background:var(--bg-soft)}
+
+.site-footer{background:var(--bg-soft);border:0}
+.footer-bottom{border-color:var(--line)}

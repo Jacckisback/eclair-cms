@@ -8,6 +8,18 @@ defined('ECLAIR') || exit;
 /** Routeur et rendu du site public. Chaque page générée est mise en cache statique. */
 final class Site
 {
+    /** Aperçu de l'apparence en cours (Réglages › Apparence) : rien n'est mis en cache. */
+    private static bool $preview = false;
+
+    /**
+     * Aperçu de l'apparence : la page demandée du site, rendue avec l'apparence essayée (Theme::preview),
+     * jamais mise en cache, avec un petit script qui garde la navigation dans l'aperçu.
+     */
+    public static function preview(string $path): never
+    {
+        self::$preview = true;
+        self::route($path);
+    }
     public static function handle(string $path): never
     {
         if (!in_array(Req::method(), ['GET', 'HEAD'], true)) {
@@ -34,6 +46,11 @@ final class Site
             case '/feed.xml':
                 if (Settings::get('blog.enabled')) {
                     self::file($path, Seo::feed(), 'application/rss+xml; charset=utf-8', ['X-Robots-Tag: noindex, follow']);
+                }
+                break;
+            case '/products.xml':
+                if (Shop::enabled()) {
+                    self::file($path, Shop::feed(), 'application/rss+xml; charset=utf-8', ['X-Robots-Tag: noindex']);
                 }
                 break;
             case '/favicon.ico':
@@ -135,10 +152,23 @@ final class Site
                 }
             }
             if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/(\d{1,6}))?$~', $rest, $m)) {
-                $cat = Categories::bySlug($m[1]);
+                $cat = Categories::bySlug($m[1], 'post');
                 if ($cat) {
                     self::listing('category', (int) ($m[2] ?? 1), $cat);
                 }
+            }
+        }
+        if (Shop::enabled() && ($path === Shop::path() || str_starts_with($path, Shop::path() . '/'))) {
+            $rest = substr($path, strlen(Shop::path()));
+            $page = preg_quote($words['page'], '~');
+            if ($rest === '') {
+                self::catalog(1);
+            }
+            if (preg_match('~^/' . $page . '/(\d{1,6})$~', $rest, $m)) {
+                self::catalog((int) $m[1]);
+            }
+            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/(\d{1,6}))?$~', $rest, $m) && ($cat = Categories::bySlug($m[1], 'product'))) {
+                self::catalog((int) ($m[2] ?? 1), $cat);
             }
         }
         $entry = Content::findByPath($path);
@@ -161,6 +191,9 @@ final class Site
         $item ??= Content::get($entry['id']);
         if (!$item) {
             self::notFound();
+        }
+        if ($item['type'] === 'product') {
+            self::product($entry, $item, $preview);
         }
         $lang = $item['lang'];
         $path = Content::path($entry);
@@ -256,6 +289,187 @@ final class Site
             'h1_in_content' => $h1InContent,
         ]);
         self::html($page, 200, $preview ? null : $path);
+    }
+
+    /* ─────────────────────────────── Boutique ─────────────────────────────── */
+
+    /** Fiche produit : galerie, prix, variantes, bouton de paiement, réassurance, puis la description. */
+    private static function product(array $entry, array $item, bool $preview): never
+    {
+        Theme::withShop();
+        $lang = $item['lang'];
+        $path = Content::path($entry);
+        $p = $item['product'];
+        $category = Categories::get($item['category']);
+        $images = Shop::images($item);
+        $blocks = $item['blocks'];
+        $html = Blocks::html($blocks, ['lang' => $lang, 'h1' => false, 'eager' => !$images, 'page' => $item['id']]);
+        $crumbs = [['name' => (string) Settings::get('name'), 'path' => '/'], ['name' => Shop::title($lang), 'path' => Shop::path()]];
+        if ($category) {
+            $crumbs[] = ['name' => $category['name'], 'path' => Categories::path($category)];
+        }
+        $crumbs[] = ['name' => $item['title'], 'path' => $path];
+
+        // Offres prêtes à afficher : libellé, prix formaté, adresse du bouton (vide si indisponible).
+        $offers = [];
+        foreach (Shop::offers($item) as $i => $o) {
+            $buy = $o['availability'] !== 'out_of_stock' && $o['link'] !== '' && $o['price'] !== '';
+            $offers[] = $o + [
+                'money' => Shop::money($o['price'], $lang),
+                'href' => $buy ? Shop::buyUrl($o['link'], $item['slug'] . ($p['variants'] ? '-' . ($i + 1) : '')) : '',
+                'state' => $o['availability'] === 'out_of_stock' ? Theme::t('out_of_stock', $lang) : ($buy ? '' : Theme::t('unavailable', $lang)),
+            ];
+        }
+        $info = [];
+        $links = array_filter(array_column(Shop::offers($item), 'link'));
+        $info[] = ['🔒', Theme::t($links && !array_filter($links, fn ($l) => !preg_match('~^https://buy\.stripe\.com/~i', $l)) ? 'secure_stripe' : 'secure_payment', $lang)];
+        if (!$p['digital']) {
+            $shipping = (array) Settings::get('shop.shipping');
+            $cost = Shop::amount($shipping['price'] ?? '');
+            $free = Shop::amount($shipping['free_from'] ?? '');
+            if ($cost !== '') {
+                $line = (float) $cost > 0 ? Theme::t('shipping_cost', $lang, ['price' => Shop::money($cost, $lang)]) . ($free !== '' ? ' · ' . Theme::t('free_from', $lang, ['price' => Shop::money($free, $lang)]) : '')
+                    : Theme::t('shipping_free', $lang);
+                $info[] = ['🚚', $line . ' · ' . Theme::t('delivery_days', $lang, ['min' => (int) ($shipping['days_min'] ?? 2), 'max' => max((int) ($shipping['days_min'] ?? 2), (int) ($shipping['days_max'] ?? 5))])];
+            }
+            $days = (int) Settings::get('shop.returns.days');
+            if ($days > 0) {
+                $info[] = ['↩️', Theme::t(Settings::get('shop.returns.free') ? 'free_returns' : 'returns', $lang, ['n' => $days])];
+            }
+        }
+        $legal = array_values(array_filter([
+            ($t = Shop::pageLink('terms')) ? ['name' => Theme::t('terms', $lang), 'path' => Content::path($t)] : null,
+            ($d = Shop::pageLink('delivery')) ? ['name' => Theme::t('delivery', $lang), 'path' => Content::path($d)] : null,
+        ]));
+
+        $related = array_values(array_filter(Content::published('product'), fn ($e) => $e['id'] !== $item['id'] && $category && $e['category'] === $category['id']));
+        foreach (Content::published('product') as $e) {
+            if (count($related) < 4 && $e['id'] !== $item['id'] && !in_array($e, $related, true)) {
+                $related[] = $e;
+            }
+        }
+        $translations = $preview ? [] : Content::translations($entry);
+        $description = $item['seo']['description'] !== '' ? $item['seo']['description'] : excerpt($item['summary'] ?: (Blocks::intro($blocks) ?: Blocks::text($blocks)), 158);
+        $og = $images[0] ?? Media::get((string) Settings::get('seo.image'));
+        $canonical = $item['seo']['canonical'] !== '' ? $item['seo']['canonical'] : absolute_url($path);
+        $head = Seo::head([
+            'kind' => 'item',
+            'item' => $item,
+            'lang' => $lang,
+            'title' => Seo::title($item),
+            'og_title' => $item['title'],
+            'description' => $description,
+            'canonical' => $canonical,
+            'noindex' => $item['seo']['noindex'] || $preview,
+            'image' => $og ? Media::og($og) + ['alt' => (string) $og['alt']] : null,
+            'type' => 'product',
+            'price' => $entry['price'] ?? '',
+            'published' => $item['date'],
+            'modified' => max((int) $item['date'], (int) $item['updated']),
+            'breadcrumbs' => $crumbs,
+            'alternates' => array_map(fn ($t) => Content::path($t), $translations),
+            'faq' => Blocks::faq($blocks),
+            'markdown' => $item['seo']['noindex'] ? '' : Seo::mdPath($path),
+            'product' => Shop::schema($item, absolute_url($path), array_map(fn ($m) => absolute_url(Media::url($m)), $images), $description, $category),
+        ]);
+        $page = Theme::render('product', [
+            'lang' => $lang,
+            'head' => $head,
+            'css' => Theme::css(),
+            'current' => $path,
+            'id' => $item['id'],
+            'class' => 'is-product',
+            'item' => $item,
+            'entry' => $entry,
+            'html' => $html,
+            'images' => $images,
+            'offers' => $offers,
+            'info' => $info,
+            'legal' => $legal,
+            'category' => $category,
+            'crumbs' => $crumbs,
+            'related' => array_slice($related, 0, 4),
+            'translations' => $translations,
+        ]);
+        self::html($page, 200, $preview ? null : $path);
+    }
+
+    /** Catalogue : tous les produits, ou ceux d'une catégorie. */
+    private static function catalog(int $page, ?array $category = null): never
+    {
+        $lang = (string) Settings::get('lang');
+        $words = Theme::words();
+        $products = array_values(Content::published('product'));
+        $shop = Shop::path();
+        $crumbs = [['name' => (string) Settings::get('name'), 'path' => '/'], ['name' => Shop::title($lang), 'path' => $shop]];
+        if ($category) {
+            $products = array_values(array_filter($products, fn ($e) => $e['category'] === $category['id']));
+            $base = Categories::path($category);
+            $title = $category['name'];
+            $seoTitle = $category['seo_title'] !== '' ? $category['seo_title'] : Seo::format($title);
+            $description = $category['description'];
+            $crumbs[] = ['name' => $title, 'path' => $base];
+        } else {
+            $base = $shop;
+            $title = Shop::title($lang);
+            $seoTitle = Seo::format($title);
+            $description = (string) Settings::get('shop.description');
+        }
+        $per = max(1, (int) Settings::get('shop.per_page', 12));
+        $pages = max(1, (int) ceil(count($products) / $per));
+        if ($page < 1 || $page > $pages) {
+            self::notFound();
+        }
+        $pagePath = fn (int $n): string => $n <= 1 ? $base : $base . '/' . $words['page'] . '/' . $n;
+        $path = $pagePath($page);
+        $entries = array_slice($products, ($page - 1) * $per, $per);
+        if ($page > 1) {
+            $seoTitle .= ' · ' . Theme::t('page_n', $lang, ['n' => $page]);
+        }
+        $counts = Categories::counts('product');
+        $chips = [];
+        foreach (Categories::of('product') as $c) {
+            if (!empty($counts[$c['id']])) {
+                $chips[] = ['name' => $c['name'], 'path' => Categories::path($c), 'current' => $category && $category['id'] === $c['id']];
+            }
+        }
+        if ($chips) {
+            array_unshift($chips, ['name' => Theme::t('all', $lang), 'path' => $shop, 'current' => !$category]);
+        }
+        $og = Media::get((string) ($entries[0]['image'] ?? '')) ?? Media::get((string) Settings::get('seo.image'));
+        $head = Seo::head([
+            'kind' => 'shop',
+            'lang' => $lang,
+            'title' => $seoTitle,
+            'og_title' => $title,
+            'description' => excerpt($description, 158),
+            'canonical' => absolute_url($path),
+            'image' => $og ? Media::og($og) + ['alt' => (string) $og['alt']] : null,
+            'type' => 'website',
+            'breadcrumbs' => $crumbs,
+            'prev' => $page > 1 ? $pagePath($page - 1) : null,
+            'next' => $page < $pages ? $pagePath($page + 1) : null,
+        ]);
+        $html = Theme::render('list', [
+            'lang' => $lang,
+            'head' => $head,
+            'css' => Theme::css(),
+            'current' => $base,
+            'class' => 'is-list is-shop',
+            'title' => $title,
+            'description' => $description,
+            'entries' => $entries,
+            'products' => true,
+            'chips' => $chips,
+            'crumbs' => $crumbs,
+            'page' => $page,
+            'pages' => $pages,
+            'prev' => $page > 1 ? $pagePath($page - 1) : null,
+            'next' => $page < $pages ? $pagePath($page + 1) : null,
+            'query' => null,
+            'empty' => Theme::t('no_products', $lang),
+        ]);
+        self::html($html, 200, $path);
     }
 
     /* ─────────────────────────────── Listes ─────────────────────────────── */
@@ -369,7 +583,7 @@ final class Site
             'class' => 'is-search',
             'title' => $title,
             'description' => '',
-            'entries' => array_values(array_filter($results, fn ($e) => $e['type'] === 'post' || $e['type'] === 'page')),
+            'entries' => $results,
             'crumbs' => [],
             'page' => 1,
             'pages' => 1,
@@ -420,6 +634,10 @@ final class Site
     /** Envoie une page HTML ; si $cachePath est fourni, la page est mise en cache statique. */
     private static function html(string $html, int $status, ?string $cachePath): never
     {
+        if (self::$preview) {
+            $cachePath = null;
+            $html = str_replace('</body>', '<script src="' . e(asset('admin/theme-preview.js')) . '" data-base="' . e(Req::base()) . '" defer></script></body>', $html);
+        }
         $headers = array_merge(
             ['Content-Type: text/html; charset=utf-8', 'Cache-Control: ' . ($cachePath !== null ? 'public, max-age=0, must-revalidate' : 'no-store')],
             Security::headers('site', Theme::hash(Theme::css()))

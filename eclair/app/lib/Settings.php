@@ -26,6 +26,9 @@ final class Settings
         ],
         'search' => true,
         'appearance' => [
+            'theme' => 'eclair',
+            'header' => 'left',
+            'cards' => 'grid',
             'accent' => '#5b4cf0',
             'font_head' => 'system',
             'font_body' => 'system',
@@ -81,6 +84,21 @@ final class Settings
             'verified' => '',
         ],
         'cache' => true,
+        'shop' => [
+            'enabled' => false,
+            'base' => '',
+            'title' => '',
+            'description' => '',
+            'currency' => 'EUR',
+            'button' => '',
+            'per_page' => 12,
+            'shipping' => ['price' => '', 'free_from' => '', 'countries' => '', 'days_min' => 2, 'days_max' => 5],
+            'returns' => ['days' => 14, 'free' => false],
+            'terms' => '',
+            'legal' => '',
+            'delivery' => '',
+            'thanks' => '',
+        ],
         'ai' => [
             'provider' => '',
             'model' => '',
@@ -185,6 +203,8 @@ final class Settings
             (string) self::get('admin_path'),
             (string) self::get('blog.base'),
             $words['search'],
+            ltrim(Shop::path(), '/'),
+            'products',
         ]));
     }
 }
