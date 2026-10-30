@@ -189,7 +189,7 @@
 
 ### 为 Google 和 AI 所做的优化
 
-- 每个详情页都带有 Product 和 Offer **结构化数据**（有规格时使用 ProductGroup）：价格、货币、库存、商品状况、品牌、运费和配送时间，以及企业层面的**退货政策**。这些正是 Google 在商品搜索结果中展示的信息。
+- 每个详情页都带有 Product 和 Offer **结构化数据**（有规格时使用 ProductGroup）：价格、货币、库存、商品状况、品牌、运费和配送时间，以及全店统一的**退货政策**。这些正是 Google 在商品搜索结果中展示的信息。
 - Google Merchant Center 格式的**商品 Feed** `/products.xml`：在 Merchant Center 中把它添加为商品来源，你的商品就能免费出现在“购物”（Shopping）标签页中。
 - 商品分类作为支柱页面，站点地图包含所有照片，并带面包屑导航。
 - 面向 AI：每件商品的价格和库存状态都会写入 `llms.txt` 和每个详情页的 Markdown 版本（在详情页地址后加上 `.md` 即可）。
@@ -408,8 +408,8 @@ eclair/                  ← 上传到主机的目录
 i18n/                    可读的翻译源文件（由 tools/i18n.php 编译）
 tests/run.php            单元测试 + HTTP 集成测试（包括安全审计中的攻击场景）
 tests/fake-ai.php        模拟的 AI 服务商（Claude、ChatGPT、图片）：测试助手无需密钥，也不产生费用
-tools/router.php         PHP 内置服务器的路由脚本（开发用）
 tests/shop.php           主题和商店测试（商品详情页、Stripe、JSON-LD、Merchant Center Feed）
+tools/router.php         PHP 内置服务器的路由脚本（开发用）
 tools/build.php          生成完整性指纹 + 安装包 dist/eclair-cms-<版本>.zip（PHP 经过精简）
 ```
 

@@ -405,8 +405,8 @@ eclair/                  ← o que vai para a hospedagem
 i18n/                    arquivos-fonte legíveis das traduções (compilados por tools/i18n.php)
 tests/run.php            testes unitários + integração HTTP (incluindo os ataques da auditoria de segurança)
 tests/fake-ai.php        provedores de IA falsos (Claude, ChatGPT, imagens): o assistente é testado sem chave nem custo
-tools/router.php         roteador para o servidor embutido do PHP (desenvolvimento)
 tests/shop.php           temas e loja (páginas de produto, Stripe, JSON-LD, feed do Merchant Center)
+tools/router.php         roteador para o servidor embutido do PHP (desenvolvimento)
 tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<versão>.zip (PHP compactado)
 ```
 

@@ -128,7 +128,7 @@ Ativação em 5 minutos e preços detalhados: veja o [guia, seção Assistente d
   <img src="docs/images/shop.webp" alt="Uma página de produto do Éclair: galeria de fotos, preço riscado, variantes, botão Comprar ligado à Stripe, entrega e devoluções; à direita, o catálogo no celular" width="100%">
 </p>
 
-**Modo loja leve**: venda seus produtos sem o peso de um e-commerce. Cada produto tem sua própria página, com um botão **Comprar** que leva a um **link de pagamento da Stripe**, e pronto: sem carrinho, sem banco de dados, nenhum dado bancário no seu servidor.
+**Modo loja leve**: venda seus produtos sem o peso de um e-commerce. Cada produto tem sua própria página, com um botão **Comprar** que leva a um **link de pagamento da Stripe**, e pronto: sem carrinho, sem banco de dados, nenhum dado bancário no seu servidor. Único custo: a taxa da Stripe, **1,5% + € 0,25** por pagamento com um cartão europeu padrão[^stripe].
 
 <table>
   <tr>
@@ -138,7 +138,7 @@ Ativação em 5 minutos e preços detalhados: veja o [guia, seção Assistente d
     </td>
     <td width="50%" valign="top">
       <h3>💳 Pagamento via Stripe</h3>
-      Um <b>link de pagamento da Stripe</b> por produto (ou por variante): a Stripe recebe os pagamentos, envia os recibos e gerencia os reembolsos. Sem assinatura: só a taxa da Stripe, <b>1,5% + € 0,25</b> por cartão europeu padrão<a href="#user-content-fn-stripe">¹</a>.
+      Um <b>link de pagamento da Stripe</b> por produto (ou por variante): a Stripe recebe os pagamentos, envia os recibos e gerencia os reembolsos. <b>Sem assinatura</b>, nem no Éclair nem na Stripe.
     </td>
   </tr>
   <tr>
@@ -323,6 +323,6 @@ O Éclair é distribuído sob a **licença MIT** ([`LICENSE`](LICENSE)): use, mo
 
 <p align="center"><sub>⚡ Éclair, para profissionais autônomos e pequenas empresas que querem um site rápido, bem posicionado e sem dor de cabeça.</sub></p>
 
-[^stripe]: Tarifa da Stripe na França para um cartão padrão do Espaço Econômico Europeu; 2,8% + € 0,25 para um cartão premium, 3,15% + € 0,25 fora do EEE ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), verificado em 30 de outubro de 2026). Os links de pagamento estão incluídos sem custo adicional.
+[^stripe]: Tarifa da Stripe na França para um cartão padrão do Espaço Econômico Europeu (EEE); 2,8% + € 0,25 para um cartão premium, 3,15% + € 0,25 fora do EEE ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), verificado em 30 de outubro de 2026). Os links de pagamento estão incluídos sem custo adicional.
 
 [^wp]: Arquivo oficial do WordPress 7.1.4: 37.239.942 bytes, ou seja, 35,5 MB ([link para download](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), verificado em 29 de outubro de 2026).
