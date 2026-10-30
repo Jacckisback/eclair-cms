@@ -313,6 +313,19 @@ try {
     $ideo = $api('POST', 'api/ai/assist', ['task' => 'cover', 'item' => $doc])['json'];
     check('Ideogram : image créée (formulaire multipart)', ($ideo['ok'] ?? false) && ($ideo['media']['w'] ?? 0) === 1344, json_encode($ideo));
 
+    // Deux clés enregistrées : Claude ou ChatGPT au choix dans l'assistant, choix retenu pour la personne.
+    preg_match('~<script type="application/json" id="eclair-data">(.*?)</script>~s', $c->req('GET', '/gestion')['body'], $m);
+    $client = json_decode($m[1] ?? '', true)['ai'] ?? [];
+    check('assistant : choix entre Claude et ChatGPT proposé', array_keys($client['providers'] ?? []) === ['anthropic', 'openai'] && $client['providers']['anthropic'] === 'Claude Opus 5.5'
+        && ($client['provider'] ?? '') === 'openai', json_encode($client));
+    $before = count($fakeLog());
+    $r = $chat('Bonjour', ['provider' => 'anthropic']);
+    $paths = array_column(array_slice($fakeLog(), $before), 'p');
+    check('assistant : Claude choisi alors que ChatGPT est l’IA par défaut', in_array('/v1/messages', $paths, true) && !in_array('/v1/responses', $paths, true) && !$r['errors'], json_encode($paths));
+    $users = json_decode(substr((string) file_get_contents($copy . '/data/users.php'), strlen(Store::GUARD)), true);
+    preg_match('~<script type="application/json" id="eclair-data">(.*?)</script>~s', $c->req('GET', '/gestion')['body'], $m);
+    check('assistant : choix retenu pour la personne', (array_values($users)[0]['ai'] ?? '') === 'anthropic' && (json_decode($m[1] ?? '', true)['ai']['provider'] ?? '') === 'anthropic');
+
     // Budget et quotas : vérifié à l'entrée, puis avant chaque étape (la dépense est comptée étape par étape).
     $settingsAi(['provider' => 'anthropic', 'image' => '']);
     $usage = json_decode(substr((string) file_get_contents($copy . '/data/ai/usage.php'), strlen(Store::GUARD)), true);

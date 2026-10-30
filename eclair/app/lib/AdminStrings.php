@@ -68,6 +68,9 @@ final class AdminStrings
             // Boutique
             'Produits', 'Produit', 'Vitrine automatique de la boutique', 'Nombre de produits', 'La boutique est fermée : ce bloc reste invisible.',
             'En stock', 'Épuisé', 'Précommande', 'Choisir comme photo principale', 'Principale', 'Libellé (ex. : Taille M)', 'Prix', 'Lien de paiement', 'Disponibilité',
+            // Choix de l'IA, connecteur MCP
+            'Choisir l’IA', 'Modification proposée par l’IA : vérifie-la, puis enregistre pour l’appliquer.',
+            'Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.',
         ];
         $out = [];
         foreach ($keys as $k) {

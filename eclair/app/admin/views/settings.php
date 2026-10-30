@@ -227,9 +227,9 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
           <label class="choice"><input type="radio" name="provider" value="<?= e($k) ?>" data-ai-provider<?= $ai['provider'] === $k ? ' checked' : '' ?>>
             <span><?= $tag !== '' ? '<em class="tag">' . e($tag) . '</em>' : '' ?><span class="emoji"><?= $emoji ?></span><b><?= e($label) ?></b><small><?= e($desc) ?></small></span></label>
         <?php endforeach ?>
-      </div></div>
+      </div><span class="hint"><?= e(t('IA par défaut. Avec les deux clés, tu passes de Claude à ChatGPT dans l’assistant, à chaque conversation.')) ?></span></div>
     <?php foreach (Ai::PROVIDERS as $p => $name): ?>
-      <div class="ai-box" data-ai-for="<?= e($p) ?>"<?= $ai['provider'] === $p ? '' : ' hidden' ?>>
+      <div class="ai-box" data-ai-for="<?= e($p) ?>"<?= $ai['provider'] !== '' ? '' : ' hidden' ?>>
         <?= $key('ai.' . $p, t('Clé d’API {name}', ['name' => $name]), $p === 'anthropic'
             ? e(t('À créer sur')) . ' ' . $link('https://console.anthropic.com/settings/keys', 'console.anthropic.com') . ' — ' . e(t('chiffrée sur ton serveur, jamais affichée.'))
             : e(t('À créer sur')) . ' ' . $link('https://platform.openai.com/api-keys', 'platform.openai.com') . ' — ' . e(t('chiffrée sur ton serveur, jamais affichée.')), $p === 'anthropic' ? 'sk-ant-…' : 'sk-…') ?>
@@ -286,6 +286,25 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <?php if ((float) $ai['budget'] > 0): ?><?php $pct = (int) min(100, round((float) $usage['cost'] / (float) $ai['budget'] * 100)) ?><div class="progress" role="progressbar" aria-label="<?= e(t('Budget utilisé ce mois-ci')) ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<?= $pct ?>"><i data-width="<?= $pct ?>"></i></div><?php endif ?>
     <?= $sw('editors', (bool) $ai['editors'], t('Les rédacteurs peuvent utiliser l’assistant'), t('Les administrateurs y ont toujours accès.')) ?>
     <div class="notice"><span>🔒</span><p><?= e(t('Tes clés sont chiffrées sur ton serveur : elles ne sont jamais envoyées au navigateur ni incluses dans les sauvegardes. Les textes confiés à l’assistant sont transmis au fournisseur choisi pour être traités : n’y mets pas de données sensibles.')) ?></p></div>
+    <hr>
+    <h2 id="mcp"><?= e(t('Claude ou ChatGPT avec ton abonnement (MCP)')) ?></h2>
+    <p class="hint"><?= e(t('Le connecteur MCP laisse Claude ou ChatGPT lire ton site, rédiger des brouillons et proposer des modifications depuis leur propre application : aucune clé d’API, aucun coût pour le site. Ils ne peuvent ni publier, ni supprimer, ni toucher aux réglages.')) ?></p>
+    <?= $sw('mcp', (bool) $ai['mcp'], t('Autoriser les connexions MCP'), t('Chaque application demande ton accord, après connexion à ton compte (double authentification comprise).')) ?>
+    <?php if ($ai['mcp']): ?>
+      <div class="field"><span class="label"><?= e(t('Adresse du connecteur')) ?></span>
+        <span class="input-group"><input type="text" value="<?= e($state['mcp_url']) ?>" readonly aria-label="<?= e(t('Adresse du connecteur')) ?>"><button class="btn" type="button" data-copy="<?= e($state['mcp_url']) ?>"><?= e(t('Copier')) ?></button></span>
+        <span class="hint"><?= e(t('Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (offres payantes, sur le web) : Paramètres › Applications › Paramètres avancés › Mode développeur, puis crée une application avec cette adresse et l’authentification OAuth.')) ?></span></div>
+      <?php if (!str_starts_with($state['mcp_url'], 'https://')): ?><div class="notice bad"><span>⚠️</span><p><?= e(t('Claude et ChatGPT n’acceptent que les adresses en https:// : active d’abord le HTTPS de ton site.')) ?></p></div><?php endif ?>
+      <?php if (\Eclair\Req::base() !== ''): ?><div class="notice warn"><span>⚠️</span><p><?= e(t('Éclair est installé dans un sous-dossier : certaines applications cherchent l’autorisation à la racine du domaine. Si la connexion échoue, installe Éclair sur un sous-domaine.')) ?></p></div><?php endif ?>
+      <h3><?= e(t('Applications connectées')) ?></h3>
+      <?php if (!$state['mcp']): ?><p class="muted small"><?= e(t('Aucune application connectée pour l’instant.')) ?></p><?php endif ?>
+      <ul class="mcp-list">
+        <?php foreach ($state['mcp'] as $g): ?>
+          <li><span><b><?= e($g['client']) ?></b> <small class="muted"><?= e($g['host'] . ' · ' . $g['user'] . ' · ' . t('dernière utilisation : {when}', ['when' => ago($g['used'])])) ?></small></span>
+            <button class="btn btn-sm" type="submit" name="mcp_revoke" value="<?= e($g['id']) ?>"><?= e(t('Couper l’accès')) ?></button></li>
+        <?php endforeach ?>
+      </ul>
+    <?php endif ?>
     </div>
 
   <?php elseif ($tab === 'shop'):

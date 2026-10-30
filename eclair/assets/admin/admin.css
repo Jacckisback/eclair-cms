@@ -77,6 +77,13 @@ input[type=color]{width:3rem;height:2.5rem;padding:.2rem;border:1px solid var(--
 .input-group>input{border-radius:0 10px 10px 0}
 .input-group>input:first-child{border-radius:10px 0 0 10px}
 .input-group>input+span{border:1px solid var(--line);border-left:0;border-radius:0 10px 10px 0}
+.input-group>input+.btn{border-radius:0 10px 10px 0;margin-left:-1px}
+.mcp-list{list-style:none;padding:0;margin:0 0 1rem}
+.mcp-list li{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.55rem 0;border-bottom:1px solid var(--line)}
+.mcp-list small{display:block}
+.grant{list-style:none;margin:1rem 0;padding:0;font-size:.92rem}
+.grant li{margin:.35rem 0}
+.auth-card .row .btn{flex:1}
 input.invalid{border-color:var(--bad);box-shadow:0 0 0 3px var(--bad-soft)}
 .input-pair{display:flex;align-items:center;gap:.5rem}
 .input-pair input{min-width:0}
@@ -459,6 +466,7 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .ai-title{flex:1;min-width:0;line-height:1.25}
 .ai-title b,.ai-title small{display:block}
 .ai-title small{color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-pick{display:block;width:auto;max-width:100%;margin:.05rem 0 0 -.3rem;padding:.1rem .3rem;font-size:.76rem;color:var(--muted);border-color:transparent;border-radius:6px}
 .ai-history{border-bottom:1px solid var(--line);max-height:45%;overflow:auto;padding:.4rem}
 .ai-history-row{display:flex;align-items:center;gap:.2rem;border-radius:10px}
 .ai-history-row.current,.ai-history-row:hover{background:var(--panel-2)}

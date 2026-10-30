@@ -98,10 +98,16 @@
     chips,
     h('div', { class: 'ai-input' }, iconBtn('clip', t('Joindre une image'), () => fileInput.click()), input, sendBtn, stopBtn, fileInput),
     h('p', { class: 'ai-foot' }, h('span', { text: t('L’IA peut se tromper : relis avant de publier.') }), costEl));
+  // Claude ou ChatGPT : sélecteur quand les deux clés sont enregistrées (le choix est retenu pour la personne).
+  let provider = AI.provider || '';
+  const picks = Object.keys(AI.providers || {});
   const drawer = h('aside', { class: 'ai-drawer', id: 'ai-drawer', 'aria-label': t('Assistant IA'), hidden: true },
     h('header', { class: 'ai-head' },
       h('span', { class: 'ai-logo' }, icon('spark')),
-      h('div', { class: 'ai-title' }, h('b', { text: t('Assistant') }), h('small', { text: AI.model + (AI.images ? ' · ' + AI.images : '') })),
+      h('div', { class: 'ai-title' }, h('b', { text: t('Assistant') }), picks.length > 1
+        ? h('select', { class: 'ai-pick', 'aria-label': t('Choisir l’IA'), onchange: (e) => { provider = e.target.value; } },
+          picks.map((p) => h('option', { value: p, text: AI.providers[p], selected: p === provider })))
+        : h('small', { text: AI.model + (AI.images ? ' · ' + AI.images : '') })),
       iconBtn('clock', t('Conversations'), () => toggleHistory()),
       iconBtn('plus', t('Nouvelle conversation'), () => reset(true)),
       iconBtn('x', t('Fermer (Échap)'), () => close())),
@@ -343,7 +349,7 @@
     sendBtn.hidden = true;
     stopBtn.hidden = false;
     controller = new AbortController();
-    const payload = { chat: chatId, message: text, media: media.map((m) => m.id) };
+    const payload = { chat: chatId, message: text, media: media.map((m) => m.id), provider };
     if (editor) payload.context = { item: editor.read() };
     try {
       const res = await fetch(D.admin + '/api/ai/chat', {

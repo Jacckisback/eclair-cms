@@ -351,7 +351,7 @@
     const sync = () => {
       const provider = ($('[data-ai-provider]:checked', aiSettings) || {}).value || '';
       const image = ($('[data-ai-image]:checked', aiSettings) || {}).value || '';
-      $$('[data-ai-for]', aiSettings).forEach((box) => { box.hidden = box.dataset.aiFor !== provider; });
+      $$('[data-ai-for]', aiSettings).forEach((box) => { box.hidden = !provider; });
       $$('[data-ai-image-for]', aiSettings).forEach((box) => { box.hidden = box.dataset.aiImageFor !== image; });
     };
     aiSettings.addEventListener('change', sync);

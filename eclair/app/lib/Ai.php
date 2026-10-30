@@ -53,11 +53,32 @@ final class Ai
         return (is_array($c) ? $c : []) + Settings::DEFAULTS['ai'];
     }
 
+    /** Fournisseur choisi par la personne dans l'assistant (s'il a sa clé), à la place de celui des réglages. */
+    private static string $chosen = '';
+
     /** Fournisseur de texte actif (« » si l'assistant est désactivé ou sans clé). */
     public static function provider(): string
     {
         $p = (string) self::config()['provider'];
-        return isset(self::PROVIDERS[$p]) && function_exists('curl_init') && Vault::has('ai.' . $p) ? $p : '';
+        return isset(self::PROVIDERS[$p]) && function_exists('curl_init') && Vault::has('ai.' . $p) ? (self::$chosen ?: $p) : '';
+    }
+
+    /** Fournisseurs prêts à servir (clé enregistrée), avec le nom du modèle choisi pour chacun. */
+    public static function providers(): array
+    {
+        $out = [];
+        foreach (self::PROVIDERS as $p => $name) {
+            if (self::enabled() && Vault::has('ai.' . $p)) {
+                $out[$p] = (string) self::MODELS[$p][self::model($p)][0];
+            }
+        }
+        return $out;
+    }
+
+    /** Passe à Claude ou à ChatGPT pour les demandes de cette personne (sélecteur de l'assistant). */
+    public static function choose(string $provider): void
+    {
+        self::$chosen = isset(self::providers()[$provider]) ? $provider : '';
     }
 
     public static function enabled(): bool
@@ -73,7 +94,8 @@ final class Ai
     public static function model(?string $provider = null): string
     {
         $provider ??= self::provider();
-        $model = (string) self::config()['model'];
+        $c = self::config();
+        $model = (string) ($c['models'][$provider] ?? '') ?: ($provider === $c['provider'] ? (string) $c['model'] : '');
         $models = self::MODELS[$provider] ?? [];
         return isset($models[$model]) ? $model : (string) array_key_first($models);
     }

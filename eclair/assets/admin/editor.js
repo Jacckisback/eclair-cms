@@ -1104,6 +1104,14 @@
       return () => { load({ ...item, ...before, date_local: before.date }); changed(); };
     },
   };
+  // Modification proposée par Claude ou ChatGPT (connecteur MCP) : appliquée ici, à vérifier puis enregistrer.
+  if (cfg.proposal) {
+    if (cfg.proposal.stale) toast(t('Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.'), 'warn');
+    else {
+      const undo = window.EclairEditor.apply(cfg.proposal.patch, cfg.proposal.media);
+      toast(t('Modification proposée par l’IA : vérifie-la, puis enregistre pour l’appliquer.') + (cfg.proposal.note ? ' (' + cfg.proposal.note + ')' : ''), 'ok', { label: t('Annuler'), run: undo });
+    }
+  }
   if (D.ai) {
     const assist = async (task, extra = {}, btn = null) => {
       if (btn) btn.setAttribute('aria-busy', 'true');

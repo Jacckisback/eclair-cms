@@ -8,6 +8,9 @@
     # Décommente et adapte si ton hébergeur l'exige (rare) :
     # RewriteBase /
 
+    # En-tête Authorization transmis à PHP (connecteur MCP : certains hébergements le retirent)
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
     # Dossiers internes jamais accessibles depuis le web
     RewriteRule ^(app|data|cache)(/|$) - [R=404,L]
     # Fichiers cachés (.git, .env…) sauf .well-known

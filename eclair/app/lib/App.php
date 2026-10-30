@@ -46,6 +46,10 @@ final class App
         if (preg_match('~^/_eclair/edit/([a-z0-9]{1,40})$~', $path, $m) && Auth::can('content')) {
             Http::redirect(admin_url('edit/' . $m[1]));
         }
+        // Connecteur MCP (Claude, ChatGPT) et sa découverte OAuth : rien ne répond tant qu'il est désactivé.
+        if (str_starts_with($path, '/_eclair/') || str_starts_with($path, '/.well-known/')) {
+            Mcp::handle($path);
+        }
         Site::handle($path);
     }
 

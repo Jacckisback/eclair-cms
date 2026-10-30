@@ -33,10 +33,35 @@ final class AdminContent
         if (!$item) {
             Admin::view('error', ['title' => t('Contenu introuvable'), 'text' => t('Il a peut-être été supprimé.')], t('Contenu introuvable'), 404);
         }
-        self::editor($user, $item, $item['type']);
+        self::editor($user, $item, $item['type'], self::proposal($user, $item));
     }
 
-    private static function editor(array $user, ?array $item, string $type): never
+    /**
+     * Modification proposée par Claude ou ChatGPT (connecteur MCP) pour un contenu publié : elle s'applique dans
+     * l'éditeur, et la personne l'enregistre (ou non). Périmée si le contenu a changé depuis.
+     */
+    private static function proposal(array $user, array $item): ?array
+    {
+        $pid = preg_replace('/[^a-z0-9]/', '', Req::query('proposal')) ?? '';
+        $p = $pid !== '' ? Store::read('ai/proposals/' . $pid) : null;
+        if (!is_array($p) || $p['content'] !== $item['id'] || ($p['user'] !== $user['id'] && $user['role'] !== 'admin')) {
+            return null;
+        }
+        if ((int) $item['updated'] !== (int) $p['base']) {
+            return ['stale' => true];
+        }
+        $d = Content::build($p['data'], $user, $item);
+        $media = [];
+        foreach (array_filter(array_merge([$d['image']], $d['product']['gallery'] ?? [], Blocks::media($d['blocks']))) as $mid) {
+            if ($m = Media::get($mid)) {
+                $media[$mid] = AdminMedia::export($m);
+            }
+        }
+        return ['note' => $p['note'], 'media' => $media, 'patch' => ['title' => $d['title'], 'summary' => $d['summary'], 'image' => $d['image'],
+            'seo' => $d['seo'], 'blocks' => $d['blocks']] + (isset($d['product']) ? ['product' => $d['product']] : [])];
+    }
+
+    private static function editor(array $user, ?array $item, string $type, ?array $proposal = null): never
     {
         $isNew = $item === null;
         $item ??= [
@@ -92,6 +117,7 @@ final class AdminContent
                 ],
                 'gd' => Media::gd(),
                 'analysis' => Analyzer::run($item),
+                'proposal' => $proposal,
             ]],
         ], $isNew ? t('Nouveau contenu') : $item['title']);
     }

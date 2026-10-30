@@ -14,8 +14,12 @@ final class AdminAi
         if (!Ai::allowed($user)) {
             return null;
         }
+        Ai::choose((string) ($user['ai'] ?? ''));
+        $providers = Ai::providers();
         return [
             'model' => Ai::label(),
+            'provider' => Ai::provider(),
+            'providers' => count($providers) > 1 ? $providers : [],
             'images' => Ai::imager() !== '' ? (string) preg_replace('/\s*\(.*\)$/', '', Ai::IMAGES[Ai::imager()][0]) : '',
             'name' => explode(' ', trim((string) $user['name']))[0],
             'admin' => $user['role'] === 'admin',
@@ -28,6 +32,7 @@ final class AdminAi
         if (!Ai::allowed($user)) {
             Http::json(['ok' => false, 'error' => t('L’assistant IA n’est pas activé pour ton compte.')], 403);
         }
+        Ai::choose((string) ($user['ai'] ?? ''));
     }
 
     /**
@@ -53,6 +58,12 @@ final class AdminAi
     {
         self::guard($user);
         $data = Req::json();
+        // Claude ou ChatGPT, choisi dans l'assistant : retenu pour cette personne (conversations et retouches).
+        $pick = (string) ($data['provider'] ?? '');
+        if ($pick !== '' && $pick !== ($user['ai'] ?? '') && isset(Ai::providers()[$pick])) {
+            $user = Users::update($user['id'], fn (array $u): array => ['ai' => $pick] + $u) ?? $user;
+            Ai::choose($pick);
+        }
         $message = trim(mb_substr(Sanitize::utf8(str_replace("\0", '', (string) ($data['message'] ?? ''))), 0, 8000));
         if ($message === '') {
             Http::json(['ok' => false, 'error' => t('Écris ta demande.')], 422);

@@ -89,7 +89,7 @@ final class AdminSettings
         foreach (['ai.anthropic', 'ai.openai', 'image.openai', 'image.bfl', 'image.ideogram'] as $name) {
             $hints[$name] = Vault::hint($name);
         }
-        return ['hints' => $hints, 'usage' => Ai::usage(), 'crypto' => Vault::available()];
+        return ['hints' => $hints, 'usage' => Ai::usage(), 'crypto' => Vault::available(), 'mcp' => Mcp::grants(), 'mcp_url' => Mcp::url()];
     }
 
     public static function save(array $user): never
@@ -210,20 +210,32 @@ final class AdminSettings
                 } catch (\RuntimeException $e) {
                     Admin::back($redirect, $e->getMessage(), 'bad');
                 }
-                $model = Req::input('model_' . $provider);
+                $models = [];
+                foreach (array_keys(Ai::PROVIDERS) as $p) {
+                    $models[$p] = isset(Ai::MODELS[$p][Req::input('model_' . $p)]) ? Req::input('model_' . $p) : '';
+                }
                 $profile = [];
                 foreach (array_keys(Settings::DEFAULTS['ai']['profile']) as $k) {
                     $profile[$k] = Sanitize::multiline(Req::input('profile_' . $k), 2000);
                 }
                 $patch = ['ai' => [
                     'provider' => $provider,
-                    'model' => isset(Ai::MODELS[$provider][$model]) ? $model : '',
+                    'model' => $models[$provider] ?? '',
+                    'models' => $models,
                     'image' => isset(Ai::IMAGES[Req::input('image')]) ? Req::input('image') : '',
                     'budget' => max(0, min(100000, round((float) str_replace(',', '.', Req::input('budget')), 2))),
                     'daily' => max(0, min(100000, (int) Req::input('daily'))),
                     'editors' => Req::bool('editors'),
+                    'mcp' => Req::bool('mcp'),
                     'profile' => $profile,
                 ]];
+                // Connecteur MCP : couper une application, ou toutes quand il est désactivé.
+                $revoke = preg_replace('/[^a-z0-9]/', '', Req::input('mcp_revoke')) ?? '';
+                if ($s['ai']['mcp'] && !$patch['ai']['mcp']) {
+                    Mcp::revoke();
+                } elseif ($revoke !== '') {
+                    Mcp::revoke($revoke);
+                }
                 if ($provider !== '' && !Vault::has('ai.' . $provider)) {
                     Session::flash('warn', t('Ajoute la clé d’API de {name} pour activer l’assistant.', ['name' => Ai::PROVIDERS[$provider]]));
                 }

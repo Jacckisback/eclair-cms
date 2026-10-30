@@ -102,10 +102,12 @@ final class Settings
         'ai' => [
             'provider' => '',
             'model' => '',
+            'models' => ['anthropic' => '', 'openai' => ''],
             'image' => '',
             'budget' => 10,
             'daily' => 60,
             'editors' => true,
+            'mcp' => false,
             'profile' => ['about' => '', 'audience' => '', 'tone' => '', 'values' => '', 'rules' => '', 'visual' => ''],
         ],
         'onboarding' => ['done' => false],
