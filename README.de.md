@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip"><img src="https://img.shields.io/badge/download-v1.4.0-5b4cf0?style=for-the-badge" alt="Éclair 1.4.0 herunterladen"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip"><img src="https://img.shields.io/badge/download-v1.5.0-5b4cf0?style=for-the-badge" alt="Éclair 1.5.0 herunterladen"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 oder neuer">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/Datenbank-keine-14122b?style=for-the-badge" alt="Keine Datenbank">
@@ -62,7 +62,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleicht</h3>
-      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>432 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
+      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>433 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
@@ -138,7 +138,7 @@ Einrichtung in 3 Minuten und kompatible Tarife: siehe [Handbuch, Abschnitt MCP-C
   <img src="docs/images/de/themes.webp" alt="Dieselbe Website mit den 6 Themes von Éclair: Éclair, Editorial, Atelier, Studio, Shop und Kontrast" width="100%">
 </p>
 
-**6 Themes inklusive**, auswählbar unter Einstellungen › Design, mit einer **Live-Vorschau** deiner echten Website in der Desktop- oder Mobilansicht, bevor du speicherst: Éclair, Editorial, Atelier, Studio, Shop und Kontrast. Header zentriert oder nicht, Listen als Kartenraster oder Liste, Farbe und Schriften nach Wahl. Jedes Theme ist nur ein Stylesheet von 1,5 bis 3 KB: Das HTML bleibt gleich und damit auch Geschwindigkeit, Barrierefreiheit und SEO.
+**6 Themes inklusive**, auswählbar unter Einstellungen › Design, mit einer **Live-Vorschau** deiner echten Website in der Desktop- oder Mobilansicht, bevor du speicherst: Éclair, Editorial, Atelier, Studio, Shop und Kontrast. Header zentriert oder nicht, Listen als Kartenraster oder Liste, Farbe und Schriften nach Wahl. Jedes Theme ist nur ein Stylesheet von 1,5 bis 3 KB: Das HTML bleibt gleich und damit auch Geschwindigkeit, Barrierefreiheit und SEO. Für eigene Anpassungen gibt es ein Feld **Eigenes CSS**: Es kommt nach dem Theme und bleibt bei Updates erhalten.
 
 <p align="center">
   <img src="docs/images/shop.webp" alt="Eine Éclair-Produktseite: Fotogalerie, Streichpreis, Varianten, Kauf-Button mit Stripe-Anbindung, Versand und Rückgabe; rechts der Katalog auf dem Smartphone" width="100%">
@@ -190,7 +190,7 @@ Der Shop lässt sich erst öffnen, wenn Impressum und Allgemeine Geschäftsbedin
 |---|---|---|
 | **Installation** | MySQL-Datenbank anlegen, dann den Assistenten starten | ✅ Ordner hochladen, 4 Fragen beantworten |
 | **Datenbank** | MySQL erforderlich | ✅ Keine (geschützte Dateien) |
-| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 432 KB |
+| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 433 KB |
 | **SEO, Sitemap, strukturierte Daten** | Ein Plugin, das installiert und gepflegt werden muss | ✅ Integriert |
 | **GEO: llms.txt, Markdown, KI-Bots** | Plugins, selten vollständig | ✅ Integriert |
 | **Öffentliche Seiten** | Bei jedem Aufruf neu erzeugt, außer mit Cache-Plugin | ✅ Aus einem statischen Cache ausgeliefert |
@@ -299,7 +299,7 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
   <img src="docs/images/de/install.webp" alt="Installation in drei Schritten: Ordner hochladen, vier Fragen beantworten, die Website ist online" width="100%">
 </p>
 
-1. **Lade** das Archiv [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) **herunter** und entpacke es.
+1. **Lade** das Archiv [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) (433 KB) **herunter** und entpacke es.
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 
@@ -327,7 +327,7 @@ PHP 8.1+ ohne Framework und ohne Composer: einfache Klassen in `eclair/app/lib/`
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                                           # 445 Unit- und HTTP-Prüfungen
+php tests/run.php                                                           # 456 Unit- und HTTP-Prüfungen
 php tools/build.php                                                         # Archiv zum Verteilen
 ```
 

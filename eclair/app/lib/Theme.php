@@ -127,7 +127,11 @@ final class Theme
         'pt' => ['page' => 'pagina', 'author' => 'autor', 'search' => 'pesquisa', 'shop' => 'loja'],
     ];
 
+    /** Taille maximale du CSS personnalisé, en octets : il est inséré dans chaque page. */
+    public const CUSTOM_MAX = 65536;
+
     private static ?string $css = null;
+    private static ?string $custom = null;
     /** Apparence essayée dans l'aperçu des réglages (jamais enregistrée ni mise en cache). */
     private static ?array $preview = null;
     private static bool $shop = false;
@@ -264,6 +268,11 @@ final class Theme
         if ($a['theme'] !== 'eclair') {
             $css .= (string) @file_get_contents(ECLAIR_ROOT . '/app/theme/themes/' . $a['theme'] . '.css');
         }
+        // CSS personnalisé du site, après le thème : il l'emporte et suit les mêmes repères (mode sombre, boutique).
+        $custom = self::custom();
+        if ($custom !== '') {
+            $css .= "\n" . $custom;
+        }
         if (($a['dark'] ?? 'auto') !== 'auto') {
             $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', $css);
         }
@@ -272,6 +281,44 @@ final class Theme
             $css = (string) preg_replace('~/\*shop\*/.*?/\*/shop\*/~s', '', $css);
         }
         return self::$css = self::minify($vars . $css);
+    }
+
+    /** CSS personnalisé (Réglages › Apparence), rangé dans data/ : les mises à jour d'Éclair ne le touchent pas. */
+    public static function custom(): string
+    {
+        if (self::$custom === null) {
+            $stored = Store::read('custom-css');
+            self::$custom = is_array($stored) ? (string) ($stored['css'] ?? '') : '';
+        }
+        return self::$custom;
+    }
+
+    /** Enregistre le CSS personnalisé (nettoyé) ; vide si le champ est vide. Renvoie le CSS conservé. */
+    public static function saveCustom(string $css): string
+    {
+        $css = self::cleanCss($css);
+        if ($css === '') {
+            Store::delete('custom-css');
+        } else {
+            Store::write('custom-css', ['css' => $css, 'updated' => time()]);
+        }
+        self::$custom = $css;
+        self::$css = null;
+        Cache::purge();
+        return $css;
+    }
+
+    /**
+     * CSS saisi dans l'administration, prêt à être inséré dans la balise <style> de chaque page :
+     * aucun « < » (la balise ne peut pas être refermée), aucun @import (pas de requête bloquante),
+     * aucun caractère de contrôle, et une taille bornée.
+     */
+    public static function cleanCss(string $css): string
+    {
+        $css = str_replace(["\r\n", "\r", '<'], ["\n", "\n", ''], Sanitize::utf8($css));
+        $css = (string) preg_replace('/[\x00-\x08\x0B-\x1F\x7F]/', '', $css);
+        $css = (string) preg_replace('/@import\b[^;{}]*;?/i', '', $css);
+        return trim(mb_strcut($css, 0, self::CUSTOM_MAX, 'UTF-8'));
     }
 
     public static function minify(string $css): string

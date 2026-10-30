@@ -69,6 +69,7 @@ hr{border:0;border-top:1px solid var(--line);margin:1.5rem 0}
 input[type=text],input[type=email],input[type=password],input[type=url],input[type=search],input[type=number],input[type=datetime-local],input[type=tel],select,textarea{
   width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.58rem .75rem;transition:border-color .15s,box-shadow .15s}
 textarea{min-height:5.5rem;resize:vertical;line-height:1.5}
+textarea.code{font:.86rem/1.55 var(--mono);tab-size:2;white-space:pre;overflow-x:auto}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
 input[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--bad)}
 input[type=color]{width:3rem;height:2.5rem;padding:.2rem;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer}

@@ -151,6 +151,11 @@ final class AdminSettings
                 if ($patch['appearance']['favicon'] !== $s['appearance']['favicon'] || (!$icon && $patch['appearance']['accent'] !== $s['appearance']['accent'])) {
                     Media::icons($icon, $patch['appearance']['accent']);
                 }
+                $custom = Req::input('custom_css');
+                if (strlen($custom) > Theme::CUSTOM_MAX) {
+                    Admin::back($redirect, t('CSS personnalisé trop long : {n} Ko maximum.', ['n' => intdiv(Theme::CUSTOM_MAX, 1024)]), 'bad');
+                }
+                Theme::saveCustom($custom);
                 break;
 
             case 'seo':
