@@ -11,11 +11,13 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 1. [Installation](#installation)
 2. [Features in detail](#features-in-detail)
 3. [Everyday use](#everyday-use)
-4. [AI assistant](#ai-assistant)
-5. [Security](#security)
-6. [Updating, backing up, moving](#updating-backing-up-moving)
-7. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
-8. [For developers](#for-developers)
+4. [Themes](#themes)
+5. [Shop](#shop)
+6. [AI assistant](#ai-assistant)
+7. [Security](#security)
+8. [Updating, backing up, moving](#updating-backing-up-moving)
+9. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
+10. [For developers](#for-developers)
 
 ---
 
@@ -32,7 +34,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip) archive (402 KB) and unzip it.
+1. Download the [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) archive (415 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -64,7 +66,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 ### ⚡ Speed
 
 - **Automatic static cache**: each page is generated once, then served without loading the application. The cache clears itself on every change (and at the scheduled time for a scheduled post).
-- **CSS inlined in the page** (≈ 12 KB minified), system fonts: no render-blocking requests, no layout shift.
+- **CSS inlined in the page** (17 to 23 KB depending on the theme and whether the shop is open, 5 to 6 KB compressed), system fonts: no render-blocking requests, no layout shift.
 - **Images optimized on upload**: resized (2000 px max), available as **responsive WebP** (480, 800, 1200, 1600 px), explicit dimensions, lazy loading, priority given to the main image.
 - ETag and `304 Not Modified` responses, Brotli/Gzip compression and one-year browser caching for static files (via `.htaccess`).
 
@@ -73,7 +75,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 - Clean URLs, **automatic 301 redirect** when an address changes, redirect manager (handy for taking over an old WordPress or Wix site).
 - Title, meta description and **live Google preview** in the editor, with counters.
 - **Real-time SEO analysis** with a score: title and description length, keyphrase (title, URL, introduction, subheadings, density), word count, structure, alt text, internal linking, featured image…
-- Complete **JSON-LD structured data**: WebSite (+ search), Organization / Person / LocalBusiness (address, opening hours, social profiles), WebPage / AboutPage / ContactPage, BlogPosting (author, dates, section), BreadcrumbList, FAQPage, ProfilePage.
+- Complete **JSON-LD structured data**: WebSite (+ search), Organization / Person / LocalBusiness (address, opening hours, social profiles, return policy), WebPage / AboutPage / ContactPage, BlogPosting (author, dates, section), BreadcrumbList, FAQPage, ProfilePage, and for the shop, Product / ProductGroup / Offer (price, stock, shipping).
 - XML sitemap with images and `hreflang`, robots.txt, full RSS feed, Open Graph and Twitter Cards (**1200×630 share image generated automatically**), breadcrumbs, canonical URLs.
 - One address per piece of content: redirects for HTTPS, www/non-www, trailing slash, uppercase, `index.php`.
 - **IndexNow**: Bing, Yandex, Seznam… are notified every time you publish.
@@ -92,7 +94,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 
 ### ✍️ Block editor
 
-- 17 blocks: text, subheading (H2-H4), list, quote, image, callout, FAQ, table, button, YouTube/Vimeo video (no cookies until clicked), code, separator, hero, features, team (portraits, roles, bios), latest posts, contact form.
+- 18 blocks: text, subheading (H2-H4), list, quote, image, callout, FAQ, table, button, YouTube/Vimeo video (no cookies until clicked), code, separator, hero, features, team (portraits, roles, bios), latest posts, products (shop showcase), contact form.
 - Type **`/`** on an empty line to pick a block, drag and drop, formatting toolbar (bold, italic, link, code, highlight).
 - **Assisted internal links**: as you type a link, the editor suggests your pages and posts (internal linking in 2 seconds).
 - **Smart paste** from Word, Google Docs or a web page: headings, lists, tables and bold text become clean blocks.
@@ -100,7 +102,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 
 ### 🧩 Everything else
 
-Media library (drag and drop, alt text, detection of images in use), drag-and-drop menus (header and footer), “pillar” categories for a topic cluster, site search, spam-proof contact form **without a captcha** (honeypot field, token, limits per network and per day) with an inbox, administrator and editor accounts, automatic dark mode, 6 system font stacks, main color with guaranteed WCAG contrast, admin in 7 languages (English, French, Spanish, German, Italian, Portuguese, Chinese), public site in 6 languages (fr, es, en, de, it, pt).
+Media library (drag and drop, alt text, detection of images in use), drag-and-drop menus (header and footer), “pillar” categories for a topic cluster, site search, spam-proof contact form **without a captcha** (honeypot field, token, limits per network and per day) with an inbox, administrator and editor accounts, 6 themes with live preview, automatic dark mode, 6 system font stacks, main color with guaranteed WCAG contrast, admin in 7 languages (English, French, Spanish, German, Italian, Portuguese, Chinese), public site in 6 languages (fr, es, en, de, it, pt).
 
 ---
 
@@ -111,7 +113,9 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Write a post | Dashboard › **Write a post** |
 | Ask the AI for a post, a page, an image | **“What do you want to create today?”** field on the dashboard, or **✨ AI assistant** (`Ctrl+J`) |
 | Edit a page from the site | **✏️ Edit** button (visible only when you're logged in) |
-| Change the logo, color, fonts | Settings › Appearance |
+| Change the theme, logo, color, fonts | Settings › Appearance |
+| Open the shop | Settings › Shop |
+| Add a product | Content › **+ Product** |
 | Choose the home page | Settings › General |
 | Allow or block AI | Settings › AI & GEO |
 | Turn on the AI assistant | Settings › AI assistant |
@@ -122,6 +126,78 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Download a backup | Security › Backup |
 
 Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+B` bold · `Ctrl+I` italic · `Enter` new paragraph · `Shift+Enter` line break · `Ctrl+J` AI assistant.
+
+---
+
+## Themes
+
+Éclair comes with **6 themes**. Pick one in **Settings › Appearance**: the **live preview** shows your real site (home page, blog, a post, the shop, a product) on desktop or mobile, and nothing is published until you save. You can click around in the preview: links stay inside the preview.
+
+| Theme | Look and feel | Best for |
+|---|---|---|
+| **Éclair** | Clean, modern and versatile: the original theme | Any kind of site |
+| **Editorial** | Magazine style: serif typography, fine rules, drop cap, featured post | Blogs, media outlets, authors |
+| **Atelier** | Warm and handcrafted: cream and terracotta tones, soft shapes | Craftspeople, restaurants, wellness |
+| **Studio** | Minimalist portfolio: black and white, big headlines, frameless images | Photographers, designers, agencies |
+| **Shop** | Built to sell: square photos, sticky header, bold buttons | Shops, makers |
+| **Contrast** | Maximum readability: large text, strong contrast, underlined links | Public services, nonprofits, seniors |
+
+Choosing a theme applies its recommended color and fonts: you can change them later. Two layout settings round out the theme: the **header** (logo on the left and menu on the right, or everything centered) and the **post and product lists** (card grid, or a list with the image on the left).
+
+**Why it stays light**: an Éclair theme is just a 1.5 to 3 KB stylesheet, added to the base one. The HTML doesn't change from one theme to another: speed, accessibility, structured data and SEO stay exactly the same. Only the active theme is inlined in the page, and the automatic dark mode works with each of them.
+
+---
+
+## Shop
+
+The **lightweight shop mode** lets you sell a few dozen products without the overhead of a full e-commerce platform: no cart, no customer accounts, no database, no payment details on your server. Each product gets its own page, optimized for Google and AI, and its **Buy now** button leads to a **Stripe payment link** (Payment Links): Stripe collects payments, sends receipts and handles refunds.
+
+### Open the shop
+
+1. **Publish your legal notice** (the installation created an outline for you to complete) **and your terms of sale**. The shop won't open without them. Have them reviewed: as the seller, you're legally responsible for them.
+2. In **Settings › Shop**: select these two pages, then set the currency, the shipping cost and delivery time, the shipping countries and the return window (in the EU, distance selling comes with a withdrawal period of at least 14 days, with some exceptions such as personalized products).
+3. Click **Create the thank-you page**: Stripe will send your customers back there after payment.
+4. Turn on **Shop open**, save, then add the shop to the menu (Menus › Shop).
+
+The catalog is at `/shop` (`/boutique`, `/tienda`, `/negozio` or `/loja` depending on the site's language), and you can change it; if you do, old URLs are redirected.
+
+### Create a product page
+
+Content › **+ Product**. The product page fields are at the top of the editor:
+
+- **Price** and **compare-at price** (optional: the discount is shown as a percentage), **availability** (in stock, sold out, pre-order).
+- **Payment link**: the product's Stripe link (`https://buy.stripe.com/…`).
+- **Photos**: the first one is the main one (Google, social media); aim for at least 3 views.
+- **Variants** (size, color…): each one can have its own price and link. On the site, choosing a variant works without JavaScript.
+- **Google Shopping details**: brand, SKU, barcode (GTIN/EAN), condition (new, used, refurbished), digital product or service (no shipping).
+
+Below that, describe the product with the usual blocks, and file it in a **product category** (Categories › “It contains: Products (shop)”). The SEO analysis also checks the price, the payment link, the number of photos and the identifiers. To feature products on a page, add the **Products** block.
+
+With the AI assistant: attach a photo and ask “Create a product page from the attached photo. Price: €29.90.” It writes a complete draft, but **never makes up a price, a discount or a payment link**: you fill in whatever is missing.
+
+### Connect Stripe (Payment Links)
+
+1. In Stripe, open **Payment Links** and create a link: product, price, and shipping address collection if needed.
+2. In the **After the payment** tab, choose to redirect customers to your thank-you page (its URL is shown in Settings › Shop).
+3. In Stripe's settings (**Customer emails**), turn on receipts for successful payments.
+4. Copy the link and paste it into the product page. Éclair adds the product reference to it (`client_reference_id`): each payment shows what was bought.
+
+You receive each order in Stripe (and by email, if you've turned that on): you pack and ship, and Stripe handles refunds if needed. Another payment provider works too, as long as its payment link starts with `https://`.
+
+### What's built in for Google and AI
+
+- Product and Offer **structured data** on every product page (ProductGroup for variants): price, currency, stock, condition, brand, shipping cost and delivery time, and a **return policy** set for your whole business. This is the information Google shows in product results.
+- **Product feed** `/products.xml` in Google Merchant Center format: add it as a product source in Merchant Center to appear for free in the Shopping tab.
+- Product categories as pillar pages, a sitemap with every photo, breadcrumbs.
+- For AI: each product's price and availability in `llms.txt`, and in the Markdown version of each product page (add `.md` to its URL).
+
+### How much does it cost?
+
+Nothing on Éclair's side. Stripe charges no subscription or setup fee, and Payment Links are included: you only pay a fee per payment, for example **1.5% + €0.25** for a standard card from the European Economic Area (2.8% + €0.25 for a premium card, 3.15% + €0.25 for a card from outside the EEA, plus 2% if a currency conversion is needed). These are Stripe's prices in France, taken from [stripe.com/fr/pricing](https://stripe.com/fr/pricing) on October 30, 2026; they may change.
+
+### What the shop doesn't do
+
+No multi-product cart, discount codes, customer accounts or automatic inventory management: the idea is to keep things simple. If you sell hundreds of products or need those features, a full e-commerce platform (Shopify, WooCommerce, PrestaShop) will be a better fit. The prices shown are the ones you enter: display them with taxes included if you sell to consumers.
 
 ---
 
@@ -319,6 +395,7 @@ eclair/                  ← upload this to your hosting
 ├── app/lib/             code (Eclair\… classes): Content, Blocks, Seo, Analyzer, Media, Auth…
 ├── app/admin/views/     admin screens
 ├── app/theme/           public site templates + theme.css (inlined in every page)
+├── app/theme/themes/    the 5 optional themes (one CSS file each, added to theme.css)
 ├── app/lang/            admin translations (6 languages, compressed JSON) — the French text is the key
 ├── assets/admin/        admin CSS and JavaScript (no dependencies)
 ├── assets/site/site.js  the only public script (2.4 KB, 1.2 KB compressed)
@@ -328,19 +405,20 @@ eclair/                  ← upload this to your hosting
 i18n/                    human-readable translation sources (compiled by tools/i18n.php)
 tests/run.php            unit tests + HTTP integration (including the attacks from the security review)
 tests/fake-ai.php        fake AI providers (Claude, ChatGPT, images): the assistant is tested with no key and no spending
+tests/shop.php           themes and shop (product pages, Stripe, JSON-LD, Merchant Center feed)
 tools/router.php         router for PHP's built-in server (development)
-tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive
+tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 299 unit and HTTP checks
+php tests/run.php                                  # 367 unit and HTTP checks
 php tools/build.php                                # ready-to-ship archive
 ```
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-Customize the theme by editing `app/theme/*.php` and `app/theme/theme.css` (keep a backup: the integrity check will flag these files as modified, which is expected).
+Customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a backup: the integrity check will flag these files as modified, which is expected). In the archive, the PHP is compacted (`php -w`, comments removed) to stay under 1 MB: the commented sources are on GitHub.
 
 ---
 

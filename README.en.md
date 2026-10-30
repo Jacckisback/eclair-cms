@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip"><img src="https://img.shields.io/badge/download-v1.2.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.2.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip"><img src="https://img.shields.io/badge/download-v1.3.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.3.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -23,6 +23,7 @@
   <a href="#install-in-3-minutes"><b>Install</b></a> ·
   <a href="#why-éclair"><b>Why Éclair</b></a> ·
   <a href="#ai-assistant-ask-review-publish"><b>AI assistant</b></a> ·
+  <a href="#themes-and-shop"><b>Themes and shop</b></a> ·
   <a href="#preview"><b>Preview</b></a> ·
   <a href="#security"><b>Security</b></a> ·
   <a href="docs/GUIDE.en.md"><b>Full guide</b></a>
@@ -60,7 +61,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>402 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>415 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -115,13 +116,65 @@ Type what you need, as you would to a colleague: *“Write an article about choo
 
 5-minute setup and detailed pricing: see the [guide, AI assistant section](docs/GUIDE.en.md#ai-assistant).
 
+## Themes and shop
+
+<p align="center">
+  <img src="docs/images/en/themes.webp" alt="The same site in Éclair's 6 themes: Éclair, Editorial, Atelier, Studio, Shop and Contrast" width="100%">
+</p>
+
+**6 built-in themes**, to choose from in Settings › Appearance with a **live preview** of your real site, on desktop or mobile, before you save: Éclair, Editorial, Atelier, Studio, Shop and Contrast. Centered header or not, posts and products in a grid or a list, your choice of color and fonts. Each theme is just a 1.5 to 3 KB stylesheet: the HTML stays the same, and so do speed, accessibility and SEO.
+
+<p align="center">
+  <img src="docs/images/shop.webp" alt="An Éclair product page: photo gallery, strikethrough price, variants, Buy now button linked to Stripe, shipping and returns; on the right, the catalog on mobile" width="100%">
+</p>
+
+**Lightweight shop mode**: sell your products without the overhead of a full e-commerce platform. Each product gets its own page, with a **Buy now** button that leads to a **Stripe payment link**, and that's it: no cart, no database, no payment details on your server. The only cost: Stripe's fee, **1.5% + €0.25** per payment with a standard European card[^stripe].
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🛍️ Product pages that sell</h3>
+      Photo gallery, price and compare-at price, <b>variants without JavaScript</b> (size, color), stock, shipping costs and returns shown on the page, related products. A catalog with category filters and a <b>Products</b> block for your home page.
+    </td>
+    <td width="50%" valign="top">
+      <h3>💳 Paid via Stripe</h3>
+      One <b>Stripe payment link</b> per product (or per variant): Stripe collects payments, sends receipts and handles refunds. <b>No subscription</b>, neither with Éclair nor with Stripe.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🔎 Built for Google</h3>
+      <b>Product and Offer</b> structured data (price, stock, shipping, return policy), pillar categories, and a <b>Google Merchant Center feed</b> to appear for free in the Shopping tab.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🤖 Cited by AI</h3>
+      Price and availability in <code>llms.txt</code> and in the Markdown version of every product page. The AI assistant drafts a product page from your photo, without ever making up a price.
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/en/frame-appearance.webp" alt="Settings › Appearance: theme choice and live preview of the site">
+      <p align="center"><b>Live preview</b><br><sub>Try each theme on your real site: nothing is published until you save.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/images/en/frame-product.webp" alt="The product page editor: price, compare-at price, availability, Stripe payment link and photos">
+      <p align="center"><b>Product page</b><br><sub>Price, Stripe link, photos and variants, at the top of the editor.</sub></p>
+    </td>
+  </tr>
+</table>
+
+The shop only opens once your legal notice and terms of sale are published. Step-by-step instructions: see the [guide, Shop section](docs/GUIDE.en.md#shop).
+
 ## Éclair vs. WordPress
 
 | | Classic WordPress | ⚡ Éclair |
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 402 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 415 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -129,6 +182,8 @@ Type what you need, as you would to a colleague: *“Write an article about choo
 | **Two-factor authentication, brute-force protection** | Plugins | ✅ Built in |
 | **Plugin updates** | Frequent, the #1 source of vulnerabilities | ✅ No plugins to update |
 | **AI assistant (writing, images)** | Plugins, often with a subscription | ✅ Built in: Claude or ChatGPT, with your own key |
+| **Themes** | Installed separately, often heavy, sometimes paid | ✅ 6 built-in themes, live preview |
+| **Selling online** | WooCommerce: a plugin, a database, updates | ✅ Built-in lightweight shop, payment via Stripe link |
 
 ## Performance
 
@@ -227,7 +282,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.2.0.zip) archive (402 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) archive (415 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
@@ -243,6 +298,7 @@ The [full guide](docs/GUIDE.en.md) covers everything else:
 - [Installation](docs/GUIDE.en.md#installation): requirements, site types, first steps
 - [Features in detail](docs/GUIDE.en.md#features-in-detail): speed, SEO, GEO, block editor
 - [Everyday use](docs/GUIDE.en.md#everyday-use)
+- [Themes](docs/GUIDE.en.md#themes) and [Shop](docs/GUIDE.en.md#shop): live preview, product pages, Stripe, Google Shopping
 - [AI assistant](docs/GUIDE.en.md#ai-assistant): activation, editorial profile, costs, security
 - [Updating, backing up, moving](docs/GUIDE.en.md#updating-backing-up-moving)
 - [Troubleshooting](docs/GUIDE.en.md#troubleshooting): forgotten password, 404 or 500 errors, Nginx…
@@ -253,7 +309,7 @@ PHP 8.1+ with no framework and no Composer: plain classes in `eclair/app/lib/`, 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                                           # 299 unit and HTTP checks
+php tests/run.php                                                           # 367 unit and HTTP checks
 php tools/build.php                                                         # ready-to-ship archive
 ```
 
@@ -266,5 +322,7 @@ Project structure and theme customization: see [For developers](docs/GUIDE.en.md
 <br>
 
 <p align="center"><sub>⚡ Éclair, for freelancers and small businesses who want a fast, well-ranked, hassle-free website.</sub></p>
+
+[^stripe]: Stripe's pricing in France for a standard card from the European Economic Area (EEA); 2.8% + €0.25 for a premium card, 3.15% + €0.25 for a card from outside the EEA ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), checked on October 30, 2026). Payment Links are included at no extra cost.
 
 [^wp]: Official WordPress 7.1.4 archive: 37,239,942 bytes, i.e. 35.5 MB ([download link](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), checked on October 29, 2026).

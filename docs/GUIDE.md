@@ -405,8 +405,8 @@ eclair/                  ← à envoyer sur l'hébergement
 i18n/                    sources lisibles des traductions (compilées par tools/i18n.php)
 tests/run.php            tests unitaires + intégration HTTP (dont les attaques de la revue de sécurité)
 tests/fake-ai.php        faux fournisseurs d'IA (Claude, ChatGPT, images) : l'assistant est testé sans clé ni dépense
-tools/router.php         routeur pour le serveur PHP intégré (développement)
 tests/shop.php           thèmes et boutique (fiches, Stripe, JSON-LD, flux Merchant Center)
+tools/router.php         routeur pour le serveur PHP intégré (développement)
 tools/build.php          empreintes d'intégrité + archive dist/eclair-cms-<version>.zip (PHP compacté)
 ```
 
