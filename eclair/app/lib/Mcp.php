@@ -18,9 +18,10 @@ final class Mcp
     private const VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
     private const ACCESS = 3600;      // jeton d'accès : une heure
     private const REFRESH = 5184000;  // jeton de renouvellement : 60 jours, remplacé à chaque usage
-    private const MAX = 20;           // connexions gardées au plus
+    private const MAX = 50;           // connexions gardées au plus (5 par personne)
     private const DATA = 'ai/mcp';    // hors des sauvegardes, comme les conversations de l'assistant
-    private const KNOWN = ['claude.ai' => 'Claude', 'chatgpt.com' => 'ChatGPT'];
+    // Applications reconnues à leur adresse de retour exacte (et non au nom qu'elles se donnent).
+    private const KNOWN = ['Claude' => '~^https://claude\.ai/api/mcp/auth_callback$~', 'ChatGPT' => '~^https://chatgpt\.com/connector(_platform_oauth_redirect|/oauth/[\w-]+)$~'];
 
     public static function enabled(): bool
     {
@@ -47,6 +48,10 @@ final class Mcp
         };
         if ($route === '') {
             return;
+        }
+        // Mots de passe et jetons ne circulent jamais en clair quand le site est en HTTPS.
+        if (Security::httpsOnly() && !Req::isHttps()) {
+            Http::redirect('https://' . Req::host() . Req::base() . $path . (Req::queryString() !== '' ? '?' . Req::queryString() : ''), 308);
         }
         if ($route !== 'authorize') {
             // Outils web (MCP Inspector…) : lecture permise depuis un autre site, jamais avec un cookie.
@@ -79,7 +84,7 @@ final class Mcp
             'scopes_supported' => ['eclair'],
             'response_types_supported' => ['code'],
             'grant_types_supported' => ['authorization_code', 'refresh_token'],
-            'token_endpoint_auth_methods_supported' => ['none', 'client_secret_post', 'client_secret_basic'],
+            'token_endpoint_auth_methods_supported' => ['none'],
             'code_challenge_methods_supported' => ['S256'],
             'authorization_response_iss_parameter_supported' => true,
         ]);
@@ -108,6 +113,9 @@ final class Mcp
             Http::json(['jsonrpc' => '2.0', 'id' => null, 'error' => ['code' => -32700, 'message' => 'Parse error']], 400);
         }
         $batch = array_is_list($msg);
+        if ($batch && count($msg) > 20) {
+            Http::json(['jsonrpc' => '2.0', 'id' => null, 'error' => ['code' => -32600, 'message' => 'At most 20 messages per batch']], 400);
+        }
         $out = [];
         foreach ($batch ? $msg : [$msg] as $m) {
             if (($r = self::rpc(is_array($m) ? $m : [], $gid, $user)) !== null) {
@@ -153,11 +161,14 @@ final class Mcp
     private static function tools(): array
     {
         $out = [];
+        // Sans generate_image : les images coûtent sur la clé du site, ce connecteur ne dépense jamais rien.
         foreach (array_merge([['name' => 'get_site', 'schema' => ['type' => 'object', 'properties' => new \stdClass()],
             'description' => 'Start here: the site\'s content and categories with their ids, its editorial profile and the writing rules (SEO, GEO, Markdown) to follow.']], AiTools::definitions()) as $d) {
             $read = in_array($d['name'], ['get_site', 'search_content', 'get_content', 'find_media'], true);
-            $out[] = ['name' => $d['name'], 'description' => $d['description'], 'inputSchema' => $d['schema'],
-                'annotations' => ['readOnlyHint' => $read, 'destructiveHint' => false, 'idempotentHint' => $read, 'openWorldHint' => $d['name'] === 'generate_image']];
+            if ($d['name'] !== 'generate_image') {
+                $out[] = ['name' => $d['name'], 'description' => $d['description'], 'inputSchema' => $d['schema'],
+                    'annotations' => ['readOnlyHint' => $read, 'destructiveHint' => false, 'idempotentHint' => $read, 'openWorldHint' => false]];
+            }
         }
         return $out;
     }
@@ -263,26 +274,19 @@ final class Mcp
         }
         $in = Req::json();
         $uris = array_values(array_filter((array) ($in['redirect_uris'] ?? []), 'is_string'));
-        foreach ($uris as $u) {
-            $p = parse_url($u) ?: [];
-            $loop = ($p['scheme'] ?? '') === 'http' && in_array($p['host'] ?? '', ['localhost', '127.0.0.1', '[::1]'], true);
-            if (strlen($u) > 500 || isset($p['fragment']) || isset($p['user']) || empty($p['host']) || (($p['scheme'] ?? '') !== 'https' && !$loop)) {
-                $uris = [];
-            }
-        }
-        if (!$uris || count($uris) > 5) {
+        // https vers un nom d'hôte ordinaire, ou http en boucle locale ; ni identifiants, ni fragment, ni caractère exotique.
+        $ok = static fn (string $u): bool => strlen($u) <= 500
+            && preg_match('~^(https://([a-z0-9-]+\.)*[a-z0-9-]+|http://(localhost|127\.0\.0\.1|\[::1\]))(:\d{1,5})?(/[^\s#\\\\]*)?$~i', $u) === 1;
+        if (!$uris || count($uris) > 5 || count(array_filter($uris, $ok)) !== count($uris)) {
             self::fail('invalid_redirect_uri', 400, 'One to five https (or loopback http) redirect URIs.');
         }
-        $auth = in_array($in['token_endpoint_auth_method'] ?? '', ['client_secret_post', 'client_secret_basic'], true) ? (string) $in['token_endpoint_auth_method'] : 'none';
         $name = Sanitize::text((string) ($in['client_name'] ?? ''), 60) ?: (string) parse_url($uris[0], PHP_URL_HOST);
-        $payload = rtrim(strtr(base64_encode((string) json_encode([$name, $uris, $auth !== 'none'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)), '+/', '-_'), '=');
-        $id = $payload . '.' . substr(Keys::sign('mcp-client|' . $payload), 0, 32);
-        Http::json(['client_id' => $id, 'client_id_issued_at' => time(), 'client_name' => $name, 'redirect_uris' => $uris,
-            'grant_types' => ['authorization_code', 'refresh_token'], 'response_types' => ['code'], 'token_endpoint_auth_method' => $auth]
-            + ($auth !== 'none' ? ['client_secret' => self::secret($id), 'client_secret_expires_at' => 0] : []), 201);
+        $payload = rtrim(strtr(base64_encode((string) json_encode([$name, $uris], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)), '+/', '-_'), '=');
+        Http::json(['client_id' => $payload . '.' . substr(Keys::sign('mcp-client|' . $payload), 0, 32), 'client_id_issued_at' => time(), 'client_name' => $name,
+            'redirect_uris' => $uris, 'grant_types' => ['authorization_code', 'refresh_token'], 'response_types' => ['code'], 'token_endpoint_auth_method' => 'none'], 201);
     }
 
-    /** Application enregistrée : [nom, adresses de retour, secret exigé], ou null si ce site n'a pas signé l'identifiant. */
+    /** Application enregistrée : [nom, adresses de retour], ou null si ce site n'a pas signé l'identifiant. */
     private static function client(string $id): ?array
     {
         [$payload, $sig] = explode('.', $id, 2) + ['', ''];
@@ -290,12 +294,7 @@ final class Mcp
             return null;
         }
         $c = json_decode((string) base64_decode(strtr($payload, '-_', '+/')), true);
-        return is_array($c) && count($c) === 3 && is_array($c[1]) ? $c : null;
-    }
-
-    private static function secret(string $id): string
-    {
-        return Keys::sign('mcp-secret|' . $id);
+        return is_array($c) && count($c) === 2 && is_array($c[1]) ? $c : null;
     }
 
     /** Adresse de retour enregistrée ; en boucle locale (Claude Code…), le port peut changer (RFC 8252). */
@@ -320,20 +319,23 @@ final class Mcp
             self::page('error', ['message' => t('Lien d’autorisation invalide : relance la connexion depuis Claude ou ChatGPT.')], 400);
         }
         $host = (string) parse_url($to, PHP_URL_HOST);
+        $app = (string) array_key_first(array_filter(self::KNOWN, fn (string $re): bool => preg_match($re, $to) === 1));
         $back = static function (array $params) use ($to, $q): never {
             $params += ['state' => $q('state'), 'iss' => self::origin()];
             Http::redirect($to . (str_contains($to, '?') ? '&' : '?') . http_build_query(array_filter($params, 'strlen')), 303);
         };
+        // Avant le consentement, une erreur ne renvoie que vers une application reconnue (pas de redirection ouverte).
+        $bad = static fn (string $error) => $app !== '' ? $back(['error' => $error]) : self::page('error', ['message' => t('Lien d’autorisation invalide : relance la connexion depuis Claude ou ChatGPT.')], 400);
         if ($q('response_type') !== 'code') {
-            $back(['error' => 'unsupported_response_type']);
+            $bad('unsupported_response_type');
         }
         if ($q('code_challenge_method') !== 'S256' || !preg_match('/^[\w-]{43}$/', $q('code_challenge'))) {
-            $back(['error' => 'invalid_request', 'error_description' => 'PKCE with S256 is required.']);
+            $bad('invalid_request');
         }
         if ($q('resource') !== '' && rtrim($q('resource'), '/') !== self::url()) {
-            $back(['error' => 'invalid_target']);
+            $bad('invalid_target');
         }
-        $v = ['app' => self::KNOWN[$host] ?? $client[0], 'host' => $host, 'known' => isset(self::KNOWN[$host]), 'to' => $to,
+        $v = ['app' => $app ?: $host, 'host' => $host, 'known' => $app !== '', 'to' => $to,
             'here' => Req::base() . '/_eclair/oauth/authorize?' . Req::queryString(), 'error' => ''];
         // Arrivée depuis Claude ou ChatGPT : le cookie de session (SameSite=Strict) ne suit pas. Une page relais
         // recharge l'adresse depuis ce site : la session est alors reconnue, sans nouvelle connexion.
@@ -371,15 +373,20 @@ final class Mcp
         }
         if ($step === 'allow' || $step === 'deny') {
             if (!Security::checkCsrf()) {
-                self::page('consent', ['error' => t('Jeton de sécurité expiré : réessaie.')] + $v);
+                self::page('consent', ['error' => t('Jeton de sécurité expiré : réessaie.'), 'user' => $user] + $v);
             }
             if ($step === 'deny') {
                 $back(['error' => 'access_denied']);
+            }
+            // Ouvrir l'accès au site est une action sensible : mot de passe saisi il y a moins de 15 minutes, ou redemandé.
+            if (!Auth::confirmed($user)) {
+                self::page('consent', ['error' => t('Mot de passe incorrect.'), 'user' => $user] + $v, 401);
             }
             $code = bin2hex(random_bytes(32));
             self::change(function (array &$d) use ($code, $q, $to, $user, $v): void {
                 $d['codes'][hash('sha256', $code)] = ['cid' => substr(hash('sha256', $q('client_id')), 0, 32), 'uri' => $to, 'pkce' => $q('code_challenge'),
                     'user' => $user['id'], 'ver' => (int) ($user['ver'] ?? 1), 'client' => $v['app'], 'host' => $v['host'], 'exp' => time() + 120];
+                $d['codes'] = array_slice($d['codes'], -50, null, true);
             });
             Log::security('mcp_authorized', ['client' => $v['app'] . ' (' . $v['host'] . ')']);
             $back(['code' => $code]);
@@ -408,15 +415,13 @@ final class Mcp
         if (Req::method() !== 'POST') {
             self::fail('invalid_request', 405);
         }
+        if (!RateLimit::attempt('mcp-token:' . Req::ipPrefix(), 60, 600, 600)) {
+            self::fail('slow_down', 429);
+        }
         $in = $_POST ?: Req::json();
         $get = static fn (string $k): string => is_string($in[$k] ?? null) ? $in[$k] : '';
         $id = $get('client_id');
-        $secret = $get('client_secret');
-        if (preg_match('/^Basic\s+([\w+\/=]+)$/i', self::authorization(), $m)) {
-            [$id, $secret] = array_map('rawurldecode', explode(':', (string) base64_decode($m[1]), 2) + ['', '']);
-        }
-        $client = self::client($id);
-        if (!$client || ($client[2] && !hash_equals(self::secret($id), $secret))) {
+        if (!self::client($id)) {
             self::fail('invalid_client', 401);
         }
         $cid = substr(hash('sha256', $id), 0, 32);
@@ -440,8 +445,9 @@ final class Mcp
             $hash = hash('sha256', $get('refresh_token'));
             $tokens = self::change(function (array &$d) use ($hash, $cid): ?array {
                 foreach ($d['grants'] as $gid => $g) {
-                    if (hash_equals((string) $g['r'], $hash)) {
-                        if ($g['cid'] !== $cid || !self::owner($g)) {
+                    $reused = hash_equals((string) ($g['p'] ?? ''), $hash); // jeton déjà remplacé : il a fuité, la connexion est coupée
+                    if ($reused || hash_equals((string) $g['r'], $hash)) {
+                        if ($reused || $g['cid'] !== $cid || !self::owner($g)) {
                             unset($d['grants'][$gid]);
                             return null;
                         }
@@ -455,14 +461,22 @@ final class Mcp
         self::fail('unsupported_grant_type');
     }
 
-    /** Nouveaux jetons pour une connexion : seules leurs empreintes sont gardées. Au-delà de 20, la moins utilisée s'efface. */
+    /**
+     * Nouveaux jetons pour une connexion : seules leurs empreintes sont gardées, avec celle du jeton remplacé.
+     * Au-delà de 5 connexions par personne (50 en tout), les moins utilisées s'effacent.
+     */
     private static function rotate(array &$d, string $gid, array $g): array
     {
         $access = bin2hex(random_bytes(32));
         $refresh = bin2hex(random_bytes(32));
-        $d['grants'][$gid] = ['a' => hash('sha256', $access), 'ae' => time() + self::ACCESS, 'r' => hash('sha256', $refresh), 're' => time() + self::REFRESH, 'used' => time()] + $g;
+        // En tête de liste : à égalité de date d'usage, c'est toujours la connexion qui sert qui est gardée.
+        $d['grants'] = [$gid => ['a' => hash('sha256', $access), 'ae' => time() + self::ACCESS, 'r' => hash('sha256', $refresh), 're' => time() + self::REFRESH,
+            'p' => (string) ($g['r'] ?? ''), 'used' => time()] + $g] + $d['grants'];
         uasort($d['grants'], fn ($x, $y) => $y['used'] <=> $x['used']);
-        $d['grants'] = array_slice($d['grants'], 0, self::MAX, true);
+        $count = [];
+        $d['grants'] = array_slice(array_filter($d['grants'], function (array $x) use (&$count): bool {
+            return ($count[$x['user']] = ($count[$x['user']] ?? 0) + 1) <= 5;
+        }), 0, self::MAX, true);
         return ['access_token' => $access, 'token_type' => 'Bearer', 'expires_in' => self::ACCESS, 'refresh_token' => $refresh, 'scope' => 'eclair'];
     }
 
@@ -487,8 +501,11 @@ final class Mcp
     {
         return Store::locked(function () use ($fn): mixed {
             $d = self::data();
+            $before = $d;
             $r = $fn($d);
-            Store::write(self::DATA, $d);
+            if ($d !== $before || $d !== Store::read(self::DATA, [])) {
+                Store::write(self::DATA, $d);
+            }
             return $r;
         });
     }

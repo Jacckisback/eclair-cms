@@ -2,7 +2,7 @@
 /**
  * Autorisation d'une application MCP (Claude, ChatGPT) : relais, connexion, double authentification, consentement.
  * Page publique sans le JavaScript de l'administration : son adresse n'y apparaît jamais.
- * Variables : mode, app, host, known, here, error, user (consentement), message (erreur)
+ * Variables : mode, app (application reconnue, sinon domaine de retour), host, known, here, error, user (consentement), message (erreur)
  */
 defined('ECLAIR') || exit;
 
@@ -60,6 +60,10 @@ $mode = $v['mode'];
       </ul>
       <p class="small muted"><?= e(t('Retour vers {host}. Tu peux couper cet accès à tout moment dans Réglages › Assistant IA.', ['host' => $v['host']])) ?></p>
       <?= Security::csrfField() ?>
+      <?php if (!\Eclair\Auth::fresh()): ?>
+        <label class="field"><span class="label"><?= e(t('Confirme ton mot de passe pour autoriser cette application.')) ?></span>
+          <input type="password" name="confirm_password" autocomplete="current-password" required></label>
+      <?php endif ?>
       <div class="row">
         <button class="btn btn-lg" type="submit" name="step" value="deny"><?= e(t('Refuser')) ?></button>
         <button class="btn btn-primary btn-lg" type="submit" name="step" value="allow"><?= e(t('Autoriser')) ?></button>

@@ -318,7 +318,7 @@ Sources: [Claude help on custom connectors](https://support.claude.com/en/articl
 
 ### What the AI can do
 
-It starts with `get_site`, then uses the same tools as the built-in assistant:
+It starts with `get_site`, then uses the built-in assistant's tools, except image generation (paid with the site's key):
 
 | Tool | What it does |
 |---|---|
@@ -327,7 +327,6 @@ It starts with `get_site`, then uses the same tools as the built-in assistant:
 | `find_media` | search for an image in the media library |
 | `create_draft` | create a post, a page or a product page **as a draft** |
 | `update_content` | edit a draft; for published content, prepare a **suggestion** |
-| `generate_image` | create an image, only if a generator is set up (billed to your key, within your AI budget) |
 
 Each draft comes back with a link to **open it in Éclair**; each suggestion, with a link that **applies it in the editor** without saving it: you review it, then you save (or you close it, and nothing changes). Claude and ChatGPT also ask for your approval before each write action, depending on their own settings.
 
@@ -476,7 +475,7 @@ tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 435 unit and HTTP checks
+php tests/run.php                                  # 445 unit and HTTP checks
 php tools/build.php                                # ready-to-ship archive
 ```
 

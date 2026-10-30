@@ -57,7 +57,7 @@ final class AdminContent
                 $media[$mid] = AdminMedia::export($m);
             }
         }
-        return ['note' => $p['note'], 'media' => $media, 'patch' => ['title' => $d['title'], 'summary' => $d['summary'], 'image' => $d['image'],
+        return ['note' => implode(' · ', (array) $p['changes']), 'media' => $media, 'patch' => ['title' => $d['title'], 'summary' => $d['summary'], 'image' => $d['image'],
             'seo' => $d['seo'], 'blocks' => $d['blocks']] + (isset($d['product']) ? ['product' => $d['product']] : [])];
     }
 

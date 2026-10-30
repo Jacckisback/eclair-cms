@@ -318,7 +318,7 @@ Fuentes: [ayuda de Claude sobre los conectores personalizados](https://support.c
 
 ### Qué puede hacer la IA
 
-Empieza por `get_site` y después usa las mismas herramientas que el asistente integrado:
+Empieza por `get_site` y después usa las herramientas del asistente integrado, salvo la creación de imágenes (pagada con la clave del sitio):
 
 | Herramienta | Función |
 |---|---|
@@ -327,7 +327,6 @@ Empieza por `get_site` y después usa las mismas herramientas que el asistente i
 | `find_media` | buscar una imagen en la biblioteca de medios |
 | `create_draft` | crear un artículo, una página o una ficha de producto **como borrador** |
 | `update_content` | modificar un borrador; en un contenido publicado, preparar una **propuesta** |
-| `generate_image` | crear una imagen, solo si hay un generador configurado (se factura con tu clave, dentro de tu presupuesto de IA) |
 
 Cada borrador vuelve con un enlace para **abrirlo en Éclair**; cada propuesta, con un enlace que la **aplica en el editor** sin guardarla: la revisas y la guardas (o cierras, y no cambia nada). Además, Claude y ChatGPT te piden permiso antes de cada acción de escritura, según sus propios ajustes.
 
@@ -476,7 +475,7 @@ tools/build.php          huellas de integridad + archivo dist/eclair-cms-<versi�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desarrollo
-php tests/run.php                                  # 435 comprobaciones unitarias y HTTP
+php tests/run.php                                  # 445 comprobaciones unitarias y HTTP
 php tools/build.php                                # archivo listo para distribuir
 ```
 

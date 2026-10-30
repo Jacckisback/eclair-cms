@@ -321,7 +321,7 @@
 
 ### AI 能做什么
 
-它会先调用 `get_site`，然后使用与内置助手相同的工具：
+它会先调用 `get_site`，然后使用内置助手的工具，但不包括生成图片（图片费用由网站的密钥支付）：
 
 | 工具 | 作用 |
 |---|---|
@@ -330,7 +330,6 @@
 | `find_media` | 在媒体库中查找图片 |
 | `create_draft` | 以**草稿**形式创建文章、页面或商品详情页 |
 | `update_content` | 修改草稿；对于已发布的内容，则准备一条**修改建议** |
-| `generate_image` | 生成图片，仅在设置了图片生成器时可用（按你的密钥计费，计入你的 AI 预算） |
 
 每份草稿都会附带一个链接，用于**在 Éclair 中打开**；每条修改建议则附带一个链接，可以**在编辑器中应用**它，但不会保存：你检查之后再保存（或者直接关闭，什么都不会改变）。此外，Claude 和 ChatGPT 还会根据它们自己的设置，在每次写入操作之前征求你的同意。
 
@@ -479,7 +478,7 @@ tools/build.php          生成完整性指纹 + 安装包 dist/eclair-cms-<版�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                  # 435 项单元与 HTTP 检查
+php tests/run.php                                  # 445 项单元与 HTTP 检查
 php tools/build.php                                # 生成可发布的安装包
 ```
 

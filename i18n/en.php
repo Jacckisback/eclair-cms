@@ -282,6 +282,7 @@ return [
     'Conditions générales de vente' => 'Terms of sale',
     'Confirmation du mot de passe refusée' => 'Password confirmation rejected',
     'Confirme avec ton mot de passe' => 'Confirm with your password',
+    'Confirme ton mot de passe pour autoriser cette application.' => 'Confirm your password to authorize this app.',
     'Confirme ton mot de passe pour changer ton e-mail de connexion.' => 'Confirm your password to change your login email.',
     'Confirmer et activer' => 'Confirm and enable',
     'Connecte-toi pour donner ton accord.' => 'Sign in to give your approval.',

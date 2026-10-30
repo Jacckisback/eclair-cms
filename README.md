@@ -327,7 +327,7 @@ PHP 8.1+ sans framework ni Composer : des classes simples dans `eclair/app/lib/`
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # serveur de développement
-php tests/run.php                                                           # 435 vérifications unitaires et HTTP
+php tests/run.php                                                           # 445 vérifications unitaires et HTTP
 php tools/build.php                                                         # archive prête à distribuer
 ```
 

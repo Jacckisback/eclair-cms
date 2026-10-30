@@ -282,6 +282,7 @@ return [
     'Conditions générales de vente' => '销售条款',
     'Confirmation du mot de passe refusée' => '密码确认失败',
     'Confirme avec ton mot de passe' => '输入密码以确认',
+    'Confirme ton mot de passe pour autoriser cette application.' => '请确认密码以授权此应用。',
     'Confirme ton mot de passe pour changer ton e-mail de connexion.' => '修改登录邮箱前，请先确认密码。',
     'Confirmer et activer' => '确认并启用',
     'Connecte-toi pour donner ton accord.' => '登录后即可授权。',

@@ -327,7 +327,7 @@ PHP 8.1+，不依赖框架，也不需要 Composer：`eclair/app/lib/` 中是简
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                                           # 435 项单元与 HTTP 检查
+php tests/run.php                                                           # 445 项单元与 HTTP 检查
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 

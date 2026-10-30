@@ -318,7 +318,7 @@ Sources : [aide Claude sur les connecteurs personnalisés](https://support.claud
 
 ### Ce que l'IA peut faire
 
-Elle commence par `get_site`, puis utilise les mêmes outils que l'assistant intégré :
+Elle commence par `get_site`, puis utilise les outils de l'assistant intégré, sauf la création d'images (payée par la clé du site) :
 
 | Outil | Rôle |
 |---|---|
@@ -327,7 +327,6 @@ Elle commence par `get_site`, puis utilise les mêmes outils que l'assistant int
 | `find_media` | chercher une image dans la médiathèque |
 | `create_draft` | créer un article, une page ou une fiche produit **en brouillon** |
 | `update_content` | modifier un brouillon ; pour un contenu publié, préparer une **proposition** |
-| `generate_image` | créer une image, seulement si un générateur est réglé (facturée sur ta clé, dans ton budget IA) |
 
 Chaque brouillon revient avec un lien pour l'**ouvrir dans Éclair** ; chaque proposition, avec un lien qui l'**applique dans l'éditeur** sans l'enregistrer : tu vérifies, puis tu enregistres (ou tu fermes, et rien ne change). Claude et ChatGPT te demandent en plus ton accord avant chaque action d'écriture, selon leurs propres réglages.
 

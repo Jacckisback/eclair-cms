@@ -329,13 +329,16 @@ final class Auth
     private static function trustDevice(array $user): void
     {
         $id = self::device($user) ?: bin2hex(random_bytes(16));
-        setcookie(self::DEVICE, $id . '.' . self::deviceSig((string) $user['id'], $id), [
-            'expires' => time() + 31536000,
-            'path' => Req::base() . '/' . Settings::get('admin_path'),
-            'secure' => Req::isHttps(),
-            'httponly' => true,
-            'samesite' => 'Strict',
-        ]);
+        // Aussi sur la page d'autorisation du connecteur MCP, qui a sa propre connexion.
+        foreach (['/' . Settings::get('admin_path'), '/_eclair/oauth'] as $path) {
+            setcookie(self::DEVICE, $id . '.' . self::deviceSig((string) $user['id'], $id), [
+                'expires' => time() + 31536000,
+                'path' => Req::base() . $path,
+                'secure' => Req::isHttps(),
+                'httponly' => true,
+                'samesite' => 'Strict',
+            ]);
+        }
     }
 
     private static function deviceSig(string $uid, string $id): string

@@ -318,7 +318,7 @@ Quellen: [Claude-Hilfe zu benutzerdefinierten Connectors](https://support.claude
 
 ### Was die KI tun kann
 
-Sie beginnt mit `get_site` und nutzt dann dieselben Werkzeuge wie der integrierte Assistent:
+Sie beginnt mit `get_site` und nutzt dann die Werkzeuge des integrierten Assistenten, außer der Bilderstellung (bezahlt mit dem Schlüssel der Website):
 
 | Werkzeug | Aufgabe |
 |---|---|
@@ -327,7 +327,6 @@ Sie beginnt mit `get_site` und nutzt dann dieselben Werkzeuge wie der integriert
 | `find_media` | ein Bild in der Mediathek suchen |
 | `create_draft` | einen Beitrag, eine Seite oder eine Produktseite **als Entwurf** erstellen |
 | `update_content` | einen Entwurf ändern; bei einem veröffentlichten Inhalt einen **Vorschlag** vorbereiten |
-| `generate_image` | ein Bild erstellen, nur wenn ein Bildgenerator eingerichtet ist (abgerechnet über deinen Schlüssel, innerhalb deines KI-Budgets) |
 
 Jeder Entwurf kommt mit einem Link zurück, um ihn **in Éclair zu öffnen**; jeder Vorschlag mit einem Link, der ihn **im Editor übernimmt**, ohne ihn zu speichern: Du prüfst und speicherst dann (oder du schließt den Editor, und nichts ändert sich). Claude und ChatGPT fragen außerdem vor jeder Schreibaktion nach deiner Zustimmung, je nach ihren eigenen Einstellungen.
 
@@ -476,7 +475,7 @@ tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 435 Unit- und HTTP-Prüfungen
+php tests/run.php                                  # 445 Unit- und HTTP-Prüfungen
 php tools/build.php                                # Archiv zum Verteilen
 ```
 

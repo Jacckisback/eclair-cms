@@ -81,7 +81,11 @@ try {
     check('enregistrement : identifiant signé, client public', $r['status'] === 201 && $cid !== '' && ($client['token_endpoint_auth_method'] ?? '') === 'none' && !isset($client['client_secret']));
     check('enregistrement : adresses de retour dangereuses refusées', $reg(['redirect_uris' => ['http://evil.example/cb']])['status'] === 400
         && $reg(['redirect_uris' => ['javascript:alert(1)']])['status'] === 400 && $reg(['redirect_uris' => []])['status'] === 400
-        && $reg(['redirect_uris' => ['https://user:pass@evil.example/cb']])['status'] === 400);
+        && $reg(['redirect_uris' => ['https://user:pass@evil.example/cb']])['status'] === 400
+        && $reg(['redirect_uris' => ["https://x;sandbox allow-scripts;base-uri *;b/cb"]])['status'] === 400
+        && $reg(['redirect_uris' => ['https://evil.example/cb#frag']])['status'] === 400);
+    $conf = $json($reg(['redirect_uris' => ['https://claude.ai/api/mcp/auth_callback'], 'token_endpoint_auth_method' => 'client_secret_basic']));
+    check('enregistrement : toujours un client public (PKCE), jamais de secret', ($conf['token_endpoint_auth_method'] ?? '') === 'none' && !isset($conf['client_secret']));
 
     // Autorisation : PKCE S256, consentement explicite.
     $verifier = rtrim(strtr(base64_encode(random_bytes(40)), '+/', '-_'), '=');
@@ -100,6 +104,12 @@ try {
     $nopkce = $c->req('GET', $auth(['code_challenge_method' => 'plain']));
     check('PKCE S256 obligatoire', $nopkce['status'] === 303 && str_starts_with($nopkce['headers']['location'] ?? '', 'https://claude.ai/api/mcp/auth_callback?error=invalid_request')
         && str_contains($nopkce['headers']['location'] ?? '', 'state=etat-123'));
+    $spoof = (string) ($json($reg(['client_name' => 'Claude', 'redirect_uris' => ['https://evil.example/cb']]))['client_id'] ?? '');
+    $fake = $c->req('GET', $auth(['client_id' => $spoof, 'redirect_uri' => 'https://evil.example/cb']));
+    check('application inconnue : nommée par son domaine, avec un avertissement', str_contains($fake['body'], 'Connecter evil.example à ton site')
+        && !str_contains($fake['body'], 'Connecter Claude') && str_contains($fake['body'], 'Application inconnue'));
+    $open = $c->req('GET', $auth(['client_id' => $spoof, 'redirect_uri' => 'https://evil.example/cb', 'response_type' => 'token']));
+    check('application inconnue : erreur affichée, aucune redirection ouverte', $open['status'] === 400 && !isset($open['headers']['location']));
     $consent = $c->req('GET', $auth());
     check('connectée : consentement affiché', $consent['status'] === 200 && str_contains($consent['body'], 'Connecter Claude à ton site')
         && str_contains($consent['body'], 'claude.ai') && str_contains($consent['body'], 'value="allow"'));
@@ -110,6 +120,17 @@ try {
     check('accord : code, état et émetteur renvoyés', $allow['status'] === 303 && strlen($back['code'] ?? '') === 64 && ($back['state'] ?? '') === 'etat-123' && ($back['iss'] ?? '') === $base);
     $csrf = $c->req('POST', $auth(), ['step' => 'allow', '_csrf' => str_repeat('0', 64)]);
     check('accord sans jeton CSRF valide : refusé', $csrf['status'] === 200 && !isset($csrf['headers']['location']));
+    // Connexion vieille de plus de 15 minutes : le mot de passe est redemandé pour ouvrir l'accès.
+    preg_match('/eclair_sid\s+(\S+)/', (string) file_get_contents($c->jar), $sid);
+    $sessionFile = $copy . '/data/sessions/' . hash('sha256', $sid[1] ?? '') . '.php';
+    file_put_contents($sessionFile, (string) preg_replace('/sudo\|i:\d+;/', 'sudo|i:0;', (string) file_get_contents($sessionFile)));
+    $stale = $c->req('GET', $auth());
+    $nopass = $c->req('POST', $auth(), $c->token($stale['body']) + ['step' => 'allow']);
+    $wrongpass = $c->req('POST', $auth(), $c->token($stale['body']) + ['step' => 'allow', 'confirm_password' => 'pas-le-bon']);
+    check('connexion ancienne : mot de passe redemandé avant l’accord', str_contains($stale['body'], 'name="confirm_password"') && $nopass['status'] === 401
+        && !isset($nopass['headers']['location']) && $wrongpass['status'] === 401);
+    $repass = $c->req('POST', $auth(), $c->token($stale['body']) + ['step' => 'allow', 'confirm_password' => 'Un-mot-de-passe-solide']);
+    check('connexion ancienne : accord après le mot de passe', $repass['status'] === 303 && str_contains($repass['headers']['location'] ?? '', 'code='));
 
     // Connexion depuis la page d'autorisation, sans jamais montrer l'adresse de l'administration.
     $w = client($port);
@@ -161,6 +182,10 @@ try {
     };
     $site = $call('get_site');
     check('get_site : inventaire, profil et règles d’écriture', $site['error'] === false && str_contains($site['text'], 'Atelier Test') && str_contains($site['text'], '# Writing rules'));
+    $redirects = $c->req('GET', '/gestion/redirects');
+    $c->req('POST', '/gestion/redirects', $c->token($redirects['body']) + ['from' => '/ancienne-offre', 'to' => '/contact', 'code' => '301']);
+    $squat = $call('create_draft', ['type' => 'page', 'title' => 'Ancienne offre', 'slug' => 'ancienne-offre', 'body' => 'Texte en préparation.']);
+    check('brouillon à une adresse redirigée : redirection conservée', $squat['error'] === false && $v->req('GET', '/ancienne-offre')['status'] === 301);
     $draft = $call('create_draft', ['type' => 'post', 'title' => 'Bien choisir son bol en grès', 'body' => "## Pourquoi le grès ?\n\nIl est solide et passe au lave-vaisselle."]);
     $did = (string) ($draft['data']['id'] ?? '');
     check('create_draft : brouillon créé, lien pour le relire', $draft['error'] === false && $did !== '' && str_starts_with((string) ($draft['data']['edit_url'] ?? ''), $base . '/gestion/edit/' . $did), $draft['text']);
@@ -177,6 +202,7 @@ try {
     check('proposition : site public inchangé', !str_contains($v->req('GET', '/')['body'], 'Accueil de notre atelier'));
     $review = $c->req('GET', substr((string) ($prop['data']['review_url'] ?? ''), strlen($base)));
     check('proposition : ouverte dans l’éditeur pour être vérifiée', $review['status'] === 200 && str_contains($review['body'], '"proposal":{') && str_contains($review['body'], 'Accueil de notre atelier'));
+    check('proposition : changements listés par le serveur, pas par l’IA', str_contains($review['body'], '"note":"Titre"') && !str_contains($review['body'], 'Accroche plus directe'));
     $other = client($port)->req('GET', substr((string) ($prop['data']['review_url'] ?? ''), strlen($base)));
     check('proposition : réservée aux personnes connectées', $other['status'] === 302);
     $unknown = $json($rpc('tools/call', ['name' => 'delete_everything']));
@@ -185,6 +211,9 @@ try {
     $batch = $v->req('POST', '/_eclair/mcp', '[{"jsonrpc":"2.0","id":"a","method":"ping"},{"jsonrpc":"2.0","method":"notifications/initialized"},{"jsonrpc":"2.0","id":"b","method":"ping"}]',
         ['Content-Type: application/json', 'Authorization: Bearer ' . $tok['access_token']]);
     check('lot de messages : une réponse par requête', array_column((array) json_decode($batch['body'], true), 'id') === ['a', 'b']);
+    $big = $v->req('POST', '/_eclair/mcp', (string) json_encode(array_fill(0, 21, ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'ping'])),
+        ['Content-Type: application/json', 'Authorization: Bearer ' . $tok['access_token']]);
+    check('lot de plus de 20 messages : refusé', $big['status'] === 400);
     check('JSON illisible : erreur de syntaxe', $v->req('POST', '/_eclair/mcp', '{oops', ['Authorization: Bearer ' . $tok['access_token']])['status'] === 400);
 
     // Renouvellement : le nouveau jeton remplace l'ancien.
@@ -192,10 +221,26 @@ try {
     $ref = $token(['grant_type' => 'refresh_token', 'refresh_token' => $old['refresh_token'], 'client_id' => $cid]);
     $tok = $json($ref);
     check('renouvellement : nouveaux jetons', $ref['status'] === 200 && ($tok['access_token'] ?? '') !== $old['access_token'] && ($tok['refresh_token'] ?? '') !== $old['refresh_token']);
-    check('renouvellement : ancien jeton de renouvellement refusé', ($json($token(['grant_type' => 'refresh_token', 'refresh_token' => $old['refresh_token'], 'client_id' => $cid]))['error'] ?? '') === 'invalid_grant');
     check('renouvellement : ancien jeton d’accès refusé, nouveau accepté', $rpc('ping', [], $old['access_token'])['status'] === 401 && $rpc('ping')['status'] === 200);
+    check('renouvellement : ancien jeton réutilisé (volé), connexion coupée', ($json($token(['grant_type' => 'refresh_token', 'refresh_token' => $old['refresh_token'], 'client_id' => $cid]))['error'] ?? '') === 'invalid_grant'
+        && $rpc('ping')['status'] === 401 && ($json($token(['grant_type' => 'refresh_token', 'refresh_token' => $tok['refresh_token'], 'client_id' => $cid]))['error'] ?? '') === 'invalid_grant');
+    $allow = $c->req('POST', $auth(), $c->token($c->req('GET', $auth())['body']) + ['step' => 'allow']);
+    parse_str((string) parse_url($allow['headers']['location'] ?? '', PHP_URL_QUERY), $back);
+    $tok = $json($token(['code' => $back['code'] ?? ''] + $exchange));
     $expired = $rpc('ping', [], str_repeat('f', 64));
     check('jeton inconnu : 401 invalid_token', $expired['status'] === 401 && str_contains($expired['headers']['www-authenticate'] ?? '', 'error="invalid_token"'));
+
+    settings($copy, ['security' => ['https' => true]]);
+    $plain = $v->req('GET', '/_eclair/oauth/authorize?client_id=x');
+    check('site en HTTPS : autorisation jamais servie en clair', $plain['status'] === 308 && str_starts_with($plain['headers']['location'] ?? '', 'https://'));
+    settings($copy, ['security' => ['https' => false]]);
+    for ($i = 0; $i < 6; $i++) {
+        $allow = $c->req('POST', $auth(), $c->token($c->req('GET', $auth())['body']) + ['step' => 'allow']);
+        parse_str((string) parse_url($allow['headers']['location'] ?? '', PHP_URL_QUERY), $back);
+        $tok = $json($token(['code' => $back['code'] ?? ''] + $exchange));
+    }
+    $grants = json_decode(substr((string) file_get_contents($copy . '/data/ai/mcp.php'), strlen(Store::GUARD)), true)['grants'] ?? [];
+    check('5 connexions au plus par personne, les plus anciennes s’effacent', count($grants) === 5 && $rpc('ping')['status'] === 200, (string) count($grants));
 
     // Coupure : depuis les réglages, par la déconnexion générale, ou en désactivant le MCP.
     $page = $c->req('GET', '/gestion/settings?tab=ai');

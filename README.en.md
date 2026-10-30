@@ -327,7 +327,7 @@ PHP 8.1+ with no framework and no Composer: plain classes in `eclair/app/lib/`, 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                                           # 435 unit and HTTP checks
+php tests/run.php                                                           # 445 unit and HTTP checks
 php tools/build.php                                                         # ready-to-ship archive
 ```
 

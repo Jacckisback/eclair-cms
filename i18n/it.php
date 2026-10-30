@@ -282,6 +282,7 @@ return [
     'Conditions générales de vente' => 'Condizioni generali di vendita',
     'Confirmation du mot de passe refusée' => 'Conferma della password rifiutata',
     'Confirme avec ton mot de passe' => 'Conferma con la tua password',
+    'Confirme ton mot de passe pour autoriser cette application.' => 'Conferma la tua password per autorizzare questa app.',
     'Confirme ton mot de passe pour changer ton e-mail de connexion.' => 'Conferma la tua password per cambiare l’email di accesso.',
     'Confirmer et activer' => 'Conferma e attiva',
     'Connecte-toi pour donner ton accord.' => 'Accedi per dare il tuo consenso.',

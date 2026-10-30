@@ -282,6 +282,7 @@ return [
     'Conditions générales de vente' => 'Allgemeine Geschäftsbedingungen (AGB)',
     'Confirmation du mot de passe refusée' => 'Passwortbestätigung abgelehnt',
     'Confirme avec ton mot de passe' => 'Bestätige mit deinem Passwort',
+    'Confirme ton mot de passe pour autoriser cette application.' => 'Bestätige dein Passwort, um diese App zu autorisieren.',
     'Confirme ton mot de passe pour changer ton e-mail de connexion.' => 'Bestätige dein Passwort, um deine Anmelde-E-Mail zu ändern.',
     'Confirmer et activer' => 'Bestätigen und aktivieren',
     'Connecte-toi pour donner ton accord.' => 'Melde dich an, um zuzustimmen.',

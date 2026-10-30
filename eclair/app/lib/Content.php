@@ -185,7 +185,9 @@ final class Content
             Store::write('index', $index);
             self::$index = $index;
             self::storeSearchText($id, Blocks::text($item['blocks']));
-            Redirects::remove(self::path($index[$id]));
+            if ($item['status'] !== 'draft') {
+                Redirects::remove(self::path($index[$id]));
+            }
             return $item;
         });
         Cache::purge();
