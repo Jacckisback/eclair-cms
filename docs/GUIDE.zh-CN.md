@@ -479,7 +479,7 @@ tools/build.php          生成完整性指纹 + 安装包 dist/eclair-cms-<版�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                  # 374 项单元与 HTTP 检查
+php tests/run.php                                  # 435 项单元与 HTTP 检查
 php tools/build.php                                # 生成可发布的安装包
 ```
 
