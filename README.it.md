@@ -62,7 +62,7 @@ WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicur
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleggero</h3>
-      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>432 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
+      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>435 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Semplicissimo</h3>
@@ -190,7 +190,7 @@ Il negozio si apre solo quando le note legali e le condizioni generali di vendit
 |---|---|---|
 | **Installazione** | Creare un database MySQL, poi avviare la procedura guidata | ✅ Caricare la cartella, rispondere a 4 domande |
 | **Database** | MySQL obbligatorio | ✅ Nessuno (file protetti) |
-| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 432 KB |
+| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 435 KB |
 | **SEO, sitemap, dati strutturati** | Un plugin da installare e mantenere | ✅ Integrati |
 | **GEO: llms.txt, Markdown, bot IA** | Plugin, raramente completi | ✅ Integrato |
 | **Pagine pubbliche** | Generate a ogni visita, salvo con un plugin di cache | ✅ Servite da una cache statica |
@@ -299,7 +299,7 @@ Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.it.md#sicurezza).
   <img src="docs/images/it/install.webp" alt="Installazione in tre passaggi: carica la cartella, rispondi a quattro domande, il sito è online" width="100%">
 </p>
 
-1. **Scarica** l’archivio [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) ed estrailo.
+1. **Scarica** l’archivio [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (435 KB) ed estrailo.
 2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
 3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
 
@@ -327,7 +327,7 @@ PHP 8.1+ senza framework né Composer: classi semplici in `eclair/app/lib/`, vis
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
-php tests/run.php                                                           # 445 verifiche unitarie e HTTP
+php tests/run.php                                                           # 470 verifiche unitarie e HTTP
 php tools/build.php                                                         # archivio pronto da distribuire
 ```
 

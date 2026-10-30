@@ -137,6 +137,35 @@ try {
     check('thème enregistré : appliqué au site', preg_match('~<body class="[^"]*theme-studio hdr-center~', $home['body']) && $cspOk($home));
     check('thème : couleur du navigateur = accent', str_contains($home['body'], '<meta name="theme-color" content="#111111">'));
 
+    // CSS personnalisé (data/theme.css) : écrit depuis Réglages › Apparence ou déposé par FTP, il survit aux mises à jour.
+    $look = ['theme' => 'studio', 'header' => 'center', 'cards' => 'grid', 'accent' => '#111111', 'font_head' => 'grotesque', 'font_body' => 'grotesque', 'dark' => 'auto', 'credit' => '1'];
+    check('CSS personnalisé : champ dans Réglages › Apparence', str_contains($c->req('GET', '/gestion/settings?tab=appearance')['body'], 'name="custom_css"'));
+    $settingsForm('appearance', $look + ['custom_css' => ".site-header{outline:3px solid red}\r\n</style><script>alert(1)</script>"]);
+    $home = $v->req('GET', '/');
+    preg_match('~<style>(.*?)</style>~s', $home['body'], $st);
+    check('CSS personnalisé : enregistré dans data/theme.css, ajouté au style de la page', is_file($copy . '/data/theme.css')
+        && str_contains($st[1] ?? '', '}.site-header{outline:3px solid red}') && $cspOk($home));
+    check('CSS personnalisé : impossible de refermer la balise <style>', substr_count($home['body'], '</style>') === 1 && str_ends_with($st[1] ?? '', '<script>alert(1)<\/script>'));
+    $settingsForm('appearance', ['accent' => '#222222', 'custom_css' => str_repeat('p{color:red}', 6000)] + $look);
+    check('CSS personnalisé : plus de 64 Ko refusé, rien n’est enregistré', str_contains($c->req('GET', '/gestion/settings?tab=appearance')['body'], 'Le CSS personnalisé dépasse 64 Ko')
+        && $site()['appearance']['accent'] === '#111111' && !str_contains((string) file_get_contents($copy . '/data/theme.css'), 'p{color:red}'));
+    $v->req('GET', '/');
+    check('CSS personnalisé : page servie depuis le cache', ($v->req('GET', '/')['headers']['x-cache'] ?? '') === 'HIT');
+    file_put_contents($copy . '/data/theme.css', '.site-footer{outline:4px dashed blue}');
+    $ftp = $v->req('GET', '/');
+    $again = $v->req('GET', '/');
+    check('CSS déposé par FTP : cache vidé, pages régénérées avec lui', ($ftp['headers']['x-cache'] ?? '') !== 'HIT' && str_contains($ftp['body'], '}.site-footer{outline:4px dashed blue}</style>')
+        && !str_contains($ftp['body'], 'solid red') && $cspOk($ftp) && ($again['headers']['x-cache'] ?? '') === 'HIT' && $again['body'] === $ftp['body']);
+    $p = $c->req('GET', '/gestion/appearance/preview?theme=editorial&path=/');
+    $draft = $c->req('GET', '/gestion/appearance/preview?theme=editorial&custom=0&path=/');
+    check('aperçu : CSS personnalisé inclus, ou laissé au formulaire (saisie en cours)', str_contains($p['body'], 'dashed blue') && $cspOk($p)
+        && !str_contains($draft['body'], 'dashed blue') && str_contains($draft['body'], 'theme-editorial') && $cspOk($draft));
+    $settingsForm('appearance', $look);
+    check('formulaire sans le champ : feuille de style conservée', is_file($copy . '/data/theme.css'));
+    $settingsForm('appearance', $look + ['custom_css' => '']);
+    clearstatcache();
+    check('CSS personnalisé vidé : fichier supprimé, style d’origine', !is_file($copy . '/data/theme.css') && !str_contains($v->req('GET', '/')['body'], 'dashed blue'));
+
     // Boutique fermée : rien n'est publié.
     check('boutique fermée : catalogue et flux introuvables', $v->req('GET', '/boutique')['status'] === 404 && $v->req('GET', '/products.xml')['status'] === 404);
     check('éditeur de produit', str_contains($c->req('GET', '/gestion/new/product')['body'], 'id="product-box"'));

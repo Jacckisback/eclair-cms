@@ -24,6 +24,7 @@ require ECLAIR_ROOT . '/app/lib/helpers.php';
 
 use Eclair\Auth;
 use Eclair\Blocks;
+use Eclair\Integrity;
 use Eclair\Log;
 use Eclair\Media;
 use Eclair\RateLimit;
@@ -127,6 +128,54 @@ check('attributs, pre et style intacts', str_contains($typo, 'title="a : b"') &&
 check('autres langues intactes', Theme::typography('Hello : world', 'en') === 'Hello : world');
 check('minification sûre (calc)', Theme::minify("a { width : calc(100% - 2rem) ; }\n/* x */") === 'a{width:calc(100% - 2rem)}');
 check('contraste WCAG', Theme::contrast('#ffffff', '#000000') > 20 && Theme::contrast(Theme::readable('#ffd400', '#ffffff'), '#ffffff') >= 4.5);
+
+/* ─────────────────────── Feuille de style du site ─────────────────────── */
+section('Feuille de style du site (data/theme.css)');
+$custom = Theme::customFile();
+Store::ensureDir(ECLAIR_DATA);
+Theme::preview([]);
+$plain = Theme::css();
+Theme::preview(['theme' => 'editorial']);
+$editorial = Theme::css();
+check('emplacement : le dossier des données, que les mises à jour ne remplacent pas', $custom === ECLAIR_DATA . '/theme.css' && !is_file($custom));
+file_put_contents($custom, "/* Mon site */\n.site-header {\n  border-bottom : 3px solid var(--accent) ;\n}\n");
+Theme::preview(['theme' => 'editorial']);
+check('ajoutée après le thème actif, minifiée', Theme::css() === $editorial . '.site-header{border-bottom:3px solid var(--accent)}', substr(Theme::css(), -60));
+Theme::preview(['theme' => 'editorial'], false);
+check('aperçu : retirée sur demande (remplacée par la saisie en cours)', Theme::css() === $editorial);
+
+$evil = "\u{FEFF}<style media=\"screen\">a{color:red}</StYlE>\n.b::after{content:\"</style><script>alert(1)</script>\"}\n"
+    . "</*x*/style ><img src=x onerror=alert(1)>\0\xC3(";
+file_put_contents($custom, $evil);
+Theme::preview([]);
+$css = Theme::css();
+check('nettoyée : rien ne peut refermer la balise <style>', !str_contains($css, '</') && preg_match('~<style>(.*?)</style>~s', '<style>' . $css . '</style>', $m) && $m[1] === $css, substr($css, -120));
+check('nettoyée : ni octet nul, ni BOM, ni UTF-8 invalide (empreinte CSP exacte)', !str_contains($css, "\0") && !str_contains($css, "\u{FEFF}") && mb_check_encoding($css, 'UTF-8'));
+check('nettoyée : un bloc <style> collé tel quel garde ses règles', str_starts_with($css, $plain) && str_contains($css, '}a{color:red}') && !preg_match('~<style~i', $css));
+check('nettoyage stable : une feuille inchangée n’est pas réécrite', Theme::cleanCss(Theme::cleanCss($evil)) === Theme::cleanCss($evil));
+
+$size = static function () use ($custom): int {
+    clearstatcache();
+    return (int) @filesize($custom);
+};
+$rule = 'p{color:red}';
+$exact = '/*' . str_repeat('x', Theme::CUSTOM_MAX - strlen($rule) - 4) . '*/' . $rule;
+check('64 Ko pile : enregistrée', Theme::saveCustom($exact) === true && $size() === Theme::CUSTOM_MAX);
+Theme::preview([]);
+check('64 Ko pile : appliquée', Theme::css() === $plain . $rule);
+check('au-delà de 64 Ko : refusée, fichier intact', Theme::saveCustom($exact . 'a{}') === false && $size() === Theme::CUSTOM_MAX);
+file_put_contents($custom, $exact . 'a{}'); // déposée par FTP
+Theme::preview([]);
+check('au-delà de 64 Ko : ignorée par le site', Theme::css() === $plain);
+check('trop lourde mais inchangée : réglages enregistrables, fichier intact', Theme::saveCustom("\r\n" . $exact . "a{}\r\n") === true && $size() === Theme::CUSTOM_MAX + 3);
+
+$stamp = Theme::customStamp();
+file_put_contents($custom, '.a{color:red}');
+check('empreinte (date, taille) : change avec le fichier, le cache des pages est vidé', $stamp !== '' && Theme::customStamp() !== $stamp && Theme::customStamp() === filemtime($custom) . ':' . filesize($custom));
+$report = Integrity::check();
+check('contrôle d’intégrité : jamais signalée', !in_array('data/theme.css', array_merge($report['modified'], $report['missing'], $report['unknown'], $report['suspicious']), true));
+check('vidée dans l’administration : fichier supprimé', Theme::saveCustom(" \n ") === true && !is_file($custom) && Theme::customStamp() === '');
+Theme::preview([]);
 
 /* ─────────────────────────────── Blocs ─────────────────────────────── */
 section('Blocs');
@@ -507,6 +556,15 @@ if (!in_array('--unit', $argv, true)) {
         $go = $editor->req('GET', '/gestion/content');
         check('mot de passe provisoire : à changer avant tout', $go['status'] === 302 && str_contains($go['headers']['location'] ?? '', '/gestion/profile'),
             $go['status'] . ' ' . ($go['headers']['location'] ?? '') . ' | création ' . $created['status'] . ' | connexion ' . $in['status']);
+
+        // Réglages › Apparence, dont le CSS inséré dans chaque page : réservés aux administrateurs.
+        $accounts = json_decode(substr((string) file_get_contents($copy . '/data/users.php'), strlen(Store::GUARD)), true);
+        foreach ($accounts as $id => $account) {
+            $accounts[$id]['must_change'] = $account['email'] === 'redac@example.com' ? false : $account['must_change'];
+        }
+        file_put_contents($copy . '/data/users.php', Store::GUARD . json_encode($accounts));
+        $denied = $editor->req('POST', '/gestion/settings', $editor->token($editor->req('GET', '/gestion')['body']) + ['tab' => 'appearance', 'custom_css' => 'body{display:none}']);
+        check('CSS personnalisé : réservé aux administrateurs', $denied['status'] === 403 && !is_file($copy . '/data/theme.css'), (string) $denied['status']);
 
         // Secours FTP : appliqué seulement à la connexion faite avec ces identifiants.
         file_put_contents($copy . '/data/reset.php', "<?php exit; ?>\r\nadmin@example.com\r\nSecours-Par-FTP-2026\r\n");

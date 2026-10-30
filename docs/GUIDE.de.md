@@ -35,7 +35,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (435 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -115,6 +115,7 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Die KI um einen Beitrag, eine Seite oder ein Bild bitten | Feld **„Was möchtest du heute erstellen?“** im Dashboard oder **✨ KI-Assistent** (`Strg+J`) |
 | Eine Seite direkt auf der Website bearbeiten | Schaltfläche **✏️ Bearbeiten** (nur sichtbar, wenn du angemeldet bist) |
 | Theme, Logo, Farbe, Schriften ändern | Einstellungen › Design |
+| Eigenes CSS hinzufügen | Einstellungen › Design › **Eigenes CSS** (oder `data/theme.css` per FTP) |
 | Den Shop öffnen | Einstellungen › Shop |
 | Ein Produkt hinzufügen | Inhalte › **+ Produkt** |
 | Die Startseite festlegen | Einstellungen › Allgemein |
@@ -146,6 +147,16 @@ Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` L
 Wenn du ein Theme auswählst, werden seine Farbe und seine empfohlenen Schriftarten übernommen: Du kannst sie danach ändern. Zwei Layout-Einstellungen ergänzen das Theme: der **Header** (Logo links und Menü rechts oder alles zentriert) und die **Beitrags- und Produktlisten** (Kartenraster oder Liste mit dem Bild links).
 
 **Warum das leicht bleibt**: Ein Éclair-Theme ist nur ein Stylesheet von 1,5 bis 3 KB, das zum Basis-Stylesheet hinzukommt. Das HTML ändert sich von Theme zu Theme nicht: Geschwindigkeit, Barrierefreiheit, strukturierte Daten und SEO bleiben gleich. Nur das aktive Theme wird in die Seite eingefügt, und der automatische Dark Mode funktioniert mit jedem Theme.
+
+### Dein eigenes Stylesheet
+
+Wenn dir die Einstellungen nicht reichen, schreib eigene Regeln unter **Einstellungen › Design › Eigenes CSS**. Éclair speichert sie in **`data/theme.css`** und fügt sie **nach dem aktiven Theme** ein: Sie haben das letzte Wort, werden minifiziert und von der Content Security Policy (CSP) erlaubt wie der Rest des Stylesheets. Die Live-Vorschau übernimmt sie schon beim Tippen.
+
+- **Sie überstehen Updates**: `data/` wird nie ersetzt, und die Integritätsprüfung meldet diese Datei nicht. Du musst dein CSS nach einem Update nicht mehr ans Ende von `app/theme/theme.css` kopieren.
+- **Auch per FTP**: Lade `data/theme.css` direkt hoch oder bearbeite sie (bzw. `theme.css` in deinem Datenordner, falls du ihn mit `ECLAIR_DATA` verschoben hast). Der Seiten-Cache leert sich von selbst, sobald sich die Datei ändert.
+- **Höchstens 64 KB**, denn das Stylesheet wird in jede Seite eingefügt: Darüber wird es ignoriert, und unter Einstellungen › Design erscheint ein Hinweis.
+- **Ungefährlich für die Seite**: Alles, was das `<style>`-Tag schließen könnte, wird entschärft, und ein unverändert eingefügter `<style>…</style>`-Block behält seine Regeln.
+- **Tipps**: Nutze die Variablen des Themes (`var(--accent)`, `var(--font)`, `var(--font-head)` …), damit alles zu deinen Einstellungen passt. Bilder dürfen von jeder https-Adresse kommen, Schriften nur von deiner eigenen Website (CSP), und `@import` wird ignoriert.
 
 ---
 
@@ -390,7 +401,7 @@ Jeder Entwurf kommt mit einem Link zurück, um ihn **in Éclair zu öffnen**; je
 **Éclair aktualisieren**:
 1. Erstelle ein Backup.
 2. **Lösche** per FTP die Ordner `app/` und `assets/` und lade dann die der neuen Version zusammen mit `index.php` und `.htaccess` hoch (durch das vorherige Löschen bleiben keine alten Dateien zurück, die die Integritätsprüfung melden würde).
-3. **Lass** `data/` (Inhalte, Einstellungen, Konten) und `media/` (Bilder) **unverändert**.
+3. **Lass** `data/` (Inhalte, Einstellungen, Konten, dein Stylesheet `theme.css`) und `media/` (Bilder) **unverändert**.
 4. In der Verwaltung: Einstellungen › Erweitert › Cache leeren.
 
 **Zu einem anderen Hoster oder einer anderen Domain umziehen**: Kopiere den ganzen Ordner und ändere dann die Adresse unter Einstellungen › Allgemein. Interne Links passen sich automatisch an, auch in einem Unterordner.
@@ -461,7 +472,7 @@ eclair/                  ← das kommt auf den Webspace
 ├── app/lang/            Übersetzungen der Verwaltung (6 Sprachen, komprimiertes JSON); der französische Text dient als Schlüssel
 ├── assets/admin/        CSS und JavaScript der Verwaltung (keine Abhängigkeiten)
 ├── assets/site/site.js  das einzige öffentliche Skript (2,4 KB, 1,2 KB komprimiert)
-├── data/                Inhalte, Einstellungen, Konten (bei der Installation angelegt, nie öffentlich)
+├── data/                Inhalte, Einstellungen, Konten, theme.css der Website (bei der Installation angelegt, nie öffentlich)
 ├── cache/               erzeugte Seiten
 └── media/               hochgeladene Bilder
 i18n/                    lesbare Quellen der Übersetzungen (kompiliert von tools/i18n.php)
@@ -475,13 +486,13 @@ tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 445 Unit- und HTTP-Prüfungen
+php tests/run.php                                  # 470 Unit- und HTTP-Prüfungen
 php tools/build.php                                # Archiv zum Verteilen
 ```
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Das Theme passt du an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (mach vorher eine Sicherung: Die Integritätsprüfung meldet diese Dateien als geändert, das ist normal). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), damit es unter 1 MB bleibt: Die kommentierten Quellen liegen auf GitHub.
+Um eine Website umzugestalten, nimm lieber `data/theme.css` ([Dein eigenes Stylesheet](#dein-eigenes-stylesheet)): `Theme::css()` fügt es nach dem aktiven Theme ein, und es übersteht Updates. Die Templates `app/theme/*.php` und die Stylesheets `app/theme/theme.css` und `app/theme/themes/*.css` kannst du weiterhin bearbeiten, aber ein Update ersetzt sie: Mach eine Sicherung (die Integritätsprüfung meldet sie als geändert, das ist normal). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), damit es unter 1 MB bleibt: Die kommentierten Quellen liegen auf GitHub.
 
 ---
 

@@ -35,7 +35,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (432 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-1.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.4.0.zip) (435 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -115,6 +115,7 @@ Médiathèque (glisser-déposer, textes alternatifs, détection des images utili
 | Demander un article, une page, une image à l'IA | Champ **« Que veux-tu créer aujourd'hui ? »** du tableau de bord, ou **✨ Assistant IA** (`Ctrl+J`) |
 | Modifier une page depuis le site | Bouton **✏️ Modifier** (visible seulement quand tu es connecté) |
 | Changer de thème, logo, couleur, polices | Réglages › Apparence |
+| Ajouter mon propre CSS | Réglages › Apparence › **CSS personnalisé** (ou `data/theme.css` par FTP) |
 | Ouvrir la boutique | Réglages › Boutique |
 | Ajouter un produit | Contenus › **+ Produit** |
 | Choisir la page d'accueil | Réglages › Général |
@@ -146,6 +147,16 @@ Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl
 Choisir un thème applique sa couleur et ses polices conseillées : tu peux les changer ensuite. Deux réglages de mise en page complètent le thème : l'**en-tête** (logo à gauche et menu à droite, ou tout centré) et les **listes d'articles et de produits** (grille de cartes, ou liste avec l'image à gauche).
 
 **Pourquoi c'est léger** : un thème Éclair n'est qu'une feuille de style de 1,5 à 3 Ko, ajoutée à celle de base. Le HTML ne change pas d'un thème à l'autre : la vitesse, l'accessibilité, les données structurées et le référencement restent identiques. Seul le thème actif est inséré dans la page, et le mode sombre automatique fonctionne avec chacun.
+
+### Ta propre feuille de style
+
+Pour aller plus loin que les réglages, écris tes règles dans **Réglages › Apparence › CSS personnalisé**. Éclair les enregistre dans **`data/theme.css`** et les insère **après le thème actif** : elles ont le dernier mot, et sont minifiées et autorisées par la politique de sécurité (CSP) comme le reste du style. L'aperçu en direct les applique dès la saisie.
+
+- **Elles survivent aux mises à jour** : `data/` n'est jamais remplacé, et le contrôle d'intégrité ne signale pas ce fichier. Plus besoin de recopier ton CSS à la fin de `app/theme/theme.css` après chaque mise à jour.
+- **Par FTP aussi** : dépose ou modifie directement `data/theme.css` (ou `theme.css` dans ton dossier de données, si tu l'as déplacé avec `ECLAIR_DATA`). Le cache des pages se vide tout seul dès que le fichier change.
+- **64 Ko au maximum**, puisque la feuille est insérée dans chaque page : au-delà, elle est ignorée et l'onglet Apparence te prévient.
+- **Sans danger pour la page** : tout ce qui pourrait refermer la balise `<style>` est neutralisé, et un bloc `<style>…</style>` collé tel quel garde ses règles.
+- **Conseils** : appuie-toi sur les variables du thème (`var(--accent)`, `var(--font)`, `var(--font-head)`…) pour rester cohérent avec tes réglages. Les images peuvent venir de n'importe quelle adresse https, les polices seulement de ton propre site (CSP), et `@import` est ignoré.
 
 ---
 
@@ -390,7 +401,7 @@ Chaque brouillon revient avec un lien pour l'**ouvrir dans Éclair** ; chaque pr
 **Mettre à jour Éclair** :
 1. Fais une sauvegarde.
 2. Par FTP, **supprime** les dossiers `app/` et `assets/`, puis envoie ceux de la nouvelle version avec `index.php` et `.htaccess` (supprimer d'abord évite de garder d'anciens fichiers, que le contrôle d'intégrité signalerait).
-3. **Ne touche pas** à `data/` (contenus, réglages, comptes) ni à `media/` (images).
+3. **Ne touche pas** à `data/` (contenus, réglages, comptes, ta feuille de style `theme.css`) ni à `media/` (images).
 4. Dans l'administration : Réglages › Avancé › Vider le cache.
 
 **Déménager vers un autre hébergement ou domaine** : copie tout le dossier, puis change l'adresse dans Réglages › Général. Les liens internes s'adaptent automatiquement, y compris en sous-dossier.
@@ -461,7 +472,7 @@ eclair/                  ← à envoyer sur l'hébergement
 ├── app/lang/            traductions de l'administration (6 langues, JSON compressé) — le français sert de clé
 ├── assets/admin/        CSS et JavaScript de l'administration (aucune dépendance)
 ├── assets/site/site.js  le seul script public (2,4 Ko, 1,2 Ko compressé)
-├── data/                contenus, réglages, comptes (créé à l'installation, jamais public)
+├── data/                contenus, réglages, comptes, theme.css du site (créé à l'installation, jamais public)
 ├── cache/               pages générées
 └── media/               images envoyées
 i18n/                    sources lisibles des traductions (compilées par tools/i18n.php)
@@ -481,7 +492,7 @@ php tools/build.php                                # archive prête à distribue
 
 `PHP_CLI_SERVER_WORKERS` permet au site de s'appeler lui-même (vérification de son adresse) : avec un seul processus, la vérification échoue simplement et les redirections vers l'adresse officielle restent désactivées.
 
-Le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une sauvegarde : le contrôle d'intégrité signalera ces fichiers comme modifiés, c'est normal). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires) pour rester sous 1 Mo : les sources commentées sont sur GitHub.
+Pour habiller un site, préfère `data/theme.css` ([Ta propre feuille de style](#ta-propre-feuille-de-style)) : `Theme::css()` l'ajoute après le thème actif, et il survit aux mises à jour. Les gabarits `app/theme/*.php` et les feuilles `app/theme/theme.css` et `app/theme/themes/*.css` restent modifiables, mais une mise à jour les remplace : garde une sauvegarde (le contrôle d'intégrité les signalera comme modifiés, c'est normal). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires) pour rester sous 1 Mo : les sources commentées sont sur GitHub.
 
 ---
 

@@ -129,6 +129,18 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
       <option value="light"<?= $s['appearance']['dark'] === 'light' ? ' selected' : '' ?>><?= e(t('Toujours clair')) ?></option></select></label>
     <label class="field"><span class="label"><?= e(t('Texte du pied de page')) ?></span><textarea name="footer" rows="2"><?= e($s['appearance']['footer']) ?></textarea></label>
     <?= $sw('credit', (bool) $s['appearance']['credit'], t('Afficher « Propulsé par ⚡ Éclair »')) ?>
+    <?php $css = (string) $v['custom_css'];
+    // « data/theme.css », ou le chemin complet si les données sont ailleurs (ECLAIR_DATA).
+    $file = Theme::customFile();
+    $file = str_starts_with($file, ECLAIR_ROOT . '/') ? substr($file, strlen(ECLAIR_ROOT) + 1) : $file; ?>
+    <details id="custom-css"<?= $css !== '' ? ' open' : '' ?>><summary class="small"><?= e(t('CSS personnalisé')) ?></summary>
+      <?php if (strlen($css) > Theme::CUSTOM_MAX): ?>
+        <div class="notice warn"><span>⚠️</span><p><?= e(t('Cette feuille de style pèse {size} : au-delà de {max}, elle n’est pas appliquée au site. Allège-la.', ['size' => human_size(strlen($css)), 'max' => human_size(Theme::CUSTOM_MAX)])) ?></p></div>
+      <?php endif ?>
+      <label class="field"><span class="label"><?= e(t('Règles ajoutées après celles du thème')) ?></span>
+        <textarea name="custom_css" rows="12" class="mono" maxlength="<?= Theme::CUSTOM_MAX ?>" spellcheck="false" autocapitalize="off" placeholder=".site-header { border-bottom: 3px solid var(--accent); }"><?= e($css) ?></textarea>
+        <span class="hint"><?= e(t('Enregistrées dans {file}, un fichier que tu peux aussi modifier par FTP et que les mises à jour d’Éclair ne remplacent pas. {max} au maximum ; l’aperçu en direct les applique dès la saisie.', ['file' => $file, 'max' => human_size(Theme::CUSTOM_MAX)])) ?></span></label>
+    </details>
 
   <?php elseif ($tab === 'seo'): ?>
     <?= $sw('index', (bool) $s['seo']['index'], t('Visible par les moteurs de recherche'), t('Décoche pendant la construction du site : tout passe en noindex.')) ?>

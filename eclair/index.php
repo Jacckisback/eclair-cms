@@ -24,6 +24,12 @@ define('ECLAIR_ROOT', __DIR__);
     if (!is_array($rt) || empty($rt['on']) || (!empty($rt['expires']) && time() >= $rt['expires'])) {
         return;
     }
+    // Feuille de style du site (data/theme.css) modifiée, par FTP par exemple : l'application régénère les pages.
+    $css = (string) ($rt['css'][0] ?? '');
+    $stamp = $css !== '' && is_file($css) ? filemtime($css) . ':' . filesize($css) : '';
+    if ($stamp !== ($rt['css'][1] ?? '')) {
+        return;
+    }
     $https = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
         || (string) ($_SERVER['SERVER_PORT'] ?? '') === '443'
         || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https'
