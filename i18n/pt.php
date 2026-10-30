@@ -245,7 +245,7 @@ return [
     'Cite au moins une source externe fiable.' => 'Cite pelo menos uma fonte externa confiável.',
     'Clair, moderne et polyvalent : le thème d’origine.' => 'Claro, moderno e versátil: o tema original.',
     'Classement' => 'Classificação',
-    'Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (offres payantes, sur le web) : Paramètres › Applications › Paramètres avancés › Mode développeur, puis crée une application avec cette adresse et l’authentification OAuth.' => 'Claude: Personalizar › Conectores › Adicionar conector personalizado, cole o endereço e mantenha as configurações detectadas. ChatGPT (planos pagos, na web): Configurações › Aplicativos › Configurações avançadas › Modo de desenvolvedor e crie um aplicativo com este endereço e autenticação OAuth.',
+    'Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (sur le web) : Plugins › + › Ajouter un serveur MCP personnalisé, colle l’adresse et choisis l’authentification OAuth.' => 'Claude: Personalizar › Conectores › Adicionar conector personalizado, cole o endereço e mantenha as configurações detectadas. ChatGPT (na web): Plugins › + › Adicionar servidor MCP personalizado, cole o endereço e escolha a autenticação OAuth.',
     'Claude et ChatGPT n’acceptent que les adresses en https:// : active d’abord le HTTPS de ton site.' => 'O Claude e o ChatGPT só aceitam endereços https://: ative primeiro o HTTPS do seu site.',
     'Claude ou ChatGPT avec ton abonnement (MCP)' => 'Claude ou ChatGPT com a sua assinatura (MCP)',
     'Clé d’API Black Forest Labs' => 'Chave de API da Black Forest Labs',

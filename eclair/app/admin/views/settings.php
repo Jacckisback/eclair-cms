@@ -293,7 +293,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <?php if ($ai['mcp']): ?>
       <div class="field"><span class="label"><?= e(t('Adresse du connecteur')) ?></span>
         <span class="input-group"><input type="text" value="<?= e($state['mcp_url']) ?>" readonly aria-label="<?= e(t('Adresse du connecteur')) ?>"><button class="btn" type="button" data-copy="<?= e($state['mcp_url']) ?>"><?= e(t('Copier')) ?></button></span>
-        <span class="hint"><?= e(t('Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (offres payantes, sur le web) : Paramètres › Applications › Paramètres avancés › Mode développeur, puis crée une application avec cette adresse et l’authentification OAuth.')) ?></span></div>
+        <span class="hint"><?= e(t('Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (sur le web) : Plugins › + › Ajouter un serveur MCP personnalisé, colle l’adresse et choisis l’authentification OAuth.')) ?></span></div>
       <?php if (!str_starts_with($state['mcp_url'], 'https://')): ?><div class="notice bad"><span>⚠️</span><p><?= e(t('Claude et ChatGPT n’acceptent que les adresses en https:// : active d’abord le HTTPS de ton site.')) ?></p></div><?php endif ?>
       <?php if (\Eclair\Req::base() !== ''): ?><div class="notice warn"><span>⚠️</span><p><?= e(t('Éclair est installé dans un sous-dossier : certaines applications cherchent l’autorisation à la racine du domaine. Si la connexion échoue, installe Éclair sur un sous-domaine.')) ?></p></div><?php endif ?>
       <h3><?= e(t('Applications connectées')) ?></h3>

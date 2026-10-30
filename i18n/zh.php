@@ -245,7 +245,7 @@ return [
     'Cite au moins une source externe fiable.' => '至少引用一个可靠的外部来源。',
     'Clair, moderne et polyvalent : le thème d’origine.' => '清爽、现代、百搭：原版主题。',
     'Classement' => '归类',
-    'Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (offres payantes, sur le web) : Paramètres › Applications › Paramètres avancés › Mode développeur, puis crée une application avec cette adresse et l’authentification OAuth.' => 'Claude：自定义 › 连接器 › 添加自定义连接器，粘贴地址并保留检测到的设置。ChatGPT（付费方案，网页版）：设置 › 应用 › 高级设置 › 开发者模式，然后用此地址和 OAuth 认证创建应用。',
+    'Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (sur le web) : Plugins › + › Ajouter un serveur MCP personnalisé, colle l’adresse et choisis l’authentification OAuth.' => 'Claude：自定义 › 连接器 › 添加自定义连接器，粘贴地址并保留检测到的设置。ChatGPT（网页版）：插件 › + › 添加自定义 MCP 服务器，粘贴地址并选择 OAuth 认证。',
     'Claude et ChatGPT n’acceptent que les adresses en https:// : active d’abord le HTTPS de ton site.' => 'Claude 和 ChatGPT 只接受 https:// 地址：请先为你的网站启用 HTTPS。',
     'Claude ou ChatGPT avec ton abonnement (MCP)' => '用你的订阅使用 Claude 或 ChatGPT（MCP）',
     'Clé d’API Black Forest Labs' => 'Black Forest Labs API 密钥',
