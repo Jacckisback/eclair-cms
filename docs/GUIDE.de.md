@@ -17,7 +17,7 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 7. [Sicherheit](#sicherheit)
 8. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
 9. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
-10. [Für Entwickler](#für-entwickler)
+10. [Für Entwickler](#für-entwickler) (inklusive [Eigenes Theme](#eigenes-theme))
 
 ---
 
@@ -145,6 +145,8 @@ Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` L
 Wenn du ein Theme auswählst, werden seine Farbe und seine empfohlenen Schriftarten übernommen: Du kannst sie danach ändern. Zwei Layout-Einstellungen ergänzen das Theme: der **Header** (Logo links und Menü rechts oder alles zentriert) und die **Beitrags- und Produktlisten** (Kartenraster oder Liste mit dem Bild links).
 
 **Warum das leicht bleibt**: Ein Éclair-Theme ist nur ein Stylesheet von 1,5 bis 3 KB, das zum Basis-Stylesheet hinzukommt. Das HTML ändert sich von Theme zu Theme nicht: Geschwindigkeit, Barrierefreiheit, strukturierte Daten und SEO bleiben gleich. Nur das aktive Theme wird in die Seite eingefügt, und der automatische Dark Mode funktioniert mit jedem Theme.
+
+**Dein eigenes Theme**: Um weiterzugehen (Vorlagen, Styles, Skript), lege neben `index.php` einen Ordner `theme/` an: Seine Dateien haben Vorrang vor denen von Éclair, und kein Update rührt sie an. Siehe [Eigenes Theme](#eigenes-theme).
 
 ---
 
@@ -293,7 +295,7 @@ Ein Bild kostet etwa 0,05 $ (FLUX 3 mit 1 Megapixel: 0,048 $). Öffentliche Prei
 
 **Daten und Server**
 - **Keine Datenbank**: SQL-Injection ist unmöglich.
-- **Doppelt geschützte Daten**: Die Ordner `data/`, `app/` und `cache/` sind per `.htaccess` gesperrt; jede Datendatei beginnt mit `<?php exit; ?>` (selbst wenn ein Server `.htaccess`-Dateien ignorieren würde, wird nichts angezeigt), und keine `<?php`-Sequenz kann hineingeschrieben werden. Private Dateien (Rechte 0600), atomare Schreibvorgänge.
+- **Doppelt geschützte Daten**: Die Ordner `data/`, `app/`, `cache/` und `theme/` sind per `.htaccess` gesperrt; jede Datendatei beginnt mit `<?php exit; ?>` (selbst wenn ein Server `.htaccess`-Dateien ignorieren würde, wird nichts angezeigt), und keine `<?php`-Sequenz kann hineingeschrieben werden. Private Dateien (Rechte 0600), atomare Schreibvorgänge.
 - **Geschützte Installation**: Sie ist nur innerhalb von 2 Stunden nach dem ersten Aufruf möglich, und die Adresse der Website wird erst dann für Weiterleitungen genutzt, wenn sie **vom Server selbst geprüft** wurde (eine falsche oder manipulierte Adresse leitet nichts um).
 
 **Anmeldung**
@@ -316,20 +318,22 @@ Ein Bild kostet etwa 0,05 $ (FLUX 3 mit 1 Megapixel: 0,048 $). Öffentliche Prei
 - **Anpassbare Adresse der Verwaltung** (weniger Bots), Rollen Administrator / Redakteur; die Schaltfläche „Bearbeiten“ der Website verrät diese Adresse nicht.
 - **KI-Assistent mit festen Grenzen**: nur Entwürfe und Vorschläge, verschlüsselte API-Schlüssel, die von Backups ausgeschlossen sind, Monatsbudget und Tageslimit (Details im Abschnitt [KI-Assistent](#sicherheit-und-datenschutz)).
 - **Begrenzte Protokolle** (gekürzte Felder, maximal 1 MB): Sie lassen sich nicht aufblähen.
-- **Integritätsprüfung**: Vergleicht jede Datei mit ihrem ursprünglichen Fingerabdruck und erkennt verdächtige Dateien, auch eine `.php`-Datei ohne Schutzzeile in `data/` oder `cache/`.
+- **Integritätsprüfung**: Vergleicht jede Datei mit ihrem ursprünglichen Fingerabdruck und erkennt verdächtige Dateien, auch eine `.php`-Datei ohne Schutzzeile in `data/`, `cache/` oder im eigenen Theme.
 - **Live-Schutztest**: Die Seite „Sicherheit“ prüft aus deinem Browser heraus, ob interne Dateien wirklich unzugänglich sind und ob die Adresse der Website verifiziert ist.
 
 ---
 
 ## Aktualisieren, sichern, umziehen
 
-**Sichern**: Sicherheit › Backup herunterladen (ZIP-Archiv von `data/` und `media/`). Ohne die Erweiterung zip kopierst du diese beiden Ordner per FTP.
+**Sichern**: Sicherheit › Backup herunterladen (ZIP-Archiv von `data/`, `media/` und deinem eigenen Theme `theme/`). Ohne die Erweiterung zip kopierst du diese Ordner per FTP.
 
 **Éclair aktualisieren**:
 1. Erstelle ein Backup.
 2. **Lösche** per FTP die Ordner `app/` und `assets/` und lade dann die der neuen Version zusammen mit `index.php` und `.htaccess` hoch (durch das vorherige Löschen bleiben keine alten Dateien zurück, die die Integritätsprüfung melden würde).
-3. **Lass** `data/` (Inhalte, Einstellungen, Konten) und `media/` (Bilder) **unverändert**.
+3. **Lass** `data/` (Inhalte, Einstellungen, Konten), `media/` (Bilder) und `theme/` ([eigenes Theme](#eigenes-theme): kein Update ändert es) **unverändert**.
 4. In der Verwaltung: Einstellungen › Erweitert › Cache leeren.
+
+Hast du Dateien in `app/theme/` geändert (Éclair 1.3 oder älter)? Kopiere sie **vor Schritt 2** in einen Ordner `theme/` neben `index.php`: Sie bleiben erhalten und haben Vorrang vor den Originalen.
 
 **Zu einem anderen Hoster oder einer anderen Domain umziehen**: Kopiere den ganzen Ordner und ändere dann die Adresse unter Einstellungen › Allgemein. Interne Links passen sich automatisch an, auch in einem Unterordner.
 
@@ -367,14 +371,14 @@ Melde dich innerhalb von 24 Stunden **mit dieser E-Mail-Adresse und diesem neuen
 Unter Nginx braucht Éclair keine `.htaccess`, diese Regeln müssen aber nachgebildet werden:
 
 ```nginx
-location ~ ^/(app|data|cache)(/|$) { return 404; }
+location ~ ^/(app|data|cache|theme)(/|$) { return 404; }
 location ~ /\.(?!well-known/) { return 404; }
 location ^~ /media/ {
     location ~* \.(php\d?|phtml|phar|s?html?|svgz?|xml|js)$ { return 404; }
     add_header X-Content-Type-Options nosniff;
     expires 1y;
 }
-location ~* \.(webp|avif|jpe?g|png|gif|ico|css|js|woff2)$ { expires 1y; add_header Cache-Control "public, immutable"; }
+location ~* \.(webp|avif|jpe?g|png|gif|ico|css|js|woff2)$ { try_files $uri /index.php$is_args$args; expires 1y; add_header Cache-Control "public, immutable"; }
 location / { try_files $uri /index.php$is_args$args; }
 location = /index.php {
     include fastcgi_params;
@@ -383,6 +387,8 @@ location = /index.php {
 }
 location ~ \.php$ { return 404; }
 ```
+
+Die erste Regel schützt auch das [eigene Theme](#eigenes-theme); das `try_files` in der Regel für statische Dateien lässt Éclair die Dateien ausliefern, die es selbst erzeugt (`/favicon.ico`, das Theme-Skript).
 
 ---
 
@@ -394,14 +400,15 @@ eclair/                  ← das kommt auf den Webspace
 ├── .htaccess            Umschreibung, Schutzregeln, Komprimierung, Browser-Cache
 ├── app/lib/             Code (Klassen Eclair\…): Content, Blocks, Seo, Analyzer, Media, Auth …
 ├── app/admin/views/     Bildschirme der Verwaltung
-├── app/theme/           Vorlagen der öffentlichen Website + theme.css (in jede Seite eingefügt)
+├── app/theme/           Original-Vorlagen der öffentlichen Website + theme.css (in jede Seite eingefügt)
 ├── app/theme/themes/    die 5 optionalen Themes (je eine CSS-Datei, die theme.css ergänzt)
 ├── app/lang/            Übersetzungen der Verwaltung (6 Sprachen, komprimiertes JSON); der französische Text dient als Schlüssel
 ├── assets/admin/        CSS und JavaScript der Verwaltung (keine Abhängigkeiten)
 ├── assets/site/site.js  das einzige öffentliche Skript (2,4 KB, 1,2 KB komprimiert)
 ├── data/                Inhalte, Einstellungen, Konten (bei der Installation angelegt, nie öffentlich)
 ├── cache/               erzeugte Seiten
-└── media/               hochgeladene Bilder
+├── media/               hochgeladene Bilder
+└── theme/               dein eigenes Theme (optional): von Updates nie angetastet
 i18n/                    lesbare Quellen der Übersetzungen (kompiliert von tools/i18n.php)
 tests/run.php            Unit-Tests + HTTP-Integration (einschließlich der Angriffe aus dem Sicherheitsaudit)
 tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der Assistent wird ohne Schlüssel und ohne Kosten getestet
@@ -418,7 +425,28 @@ php tools/build.php                                # Archiv zum Verteilen
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Das Theme passt du an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (mach vorher eine Sicherung: Die Integritätsprüfung meldet diese Dateien als geändert, das ist normal). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), damit es unter 1 MB bleibt: Die kommentierten Quellen liegen auf GitHub.
+### Eigenes Theme
+
+Bearbeite `app/theme/` nicht: Jedes Update ersetzt den Ordner. Lege stattdessen neben `index.php` einen Ordner **`theme/`** an und lege dort nur die Dateien ab, die du änderst; für alle anderen nimmt Éclair die aus `app/theme/`.
+
+| Datei in `theme/` | Aufgabe |
+|---|---|
+| `layout.php` | gemeinsames Grundgerüst: `<head>`, Kopfbereich, Menü, Fußbereich |
+| `single.php` | Seite oder Beitrag |
+| `list.php`, `cards.php` | Listen (Blog, Kategorie, Autor, Suche) und Beitragskarten |
+| `product.php`, `products.php` | Produktseite und Shop-Karten |
+| `404.php` | Seite nicht gefunden |
+| `theme.css` | ersetzt den Basis-Stil; wird in jede Seite eingefügt, angeführt von den Variablen `--accent`, `--font`, `--font-head` … aus Einstellungen › Design |
+| `themes/<name>.css` | ersetzt das Stylesheet eines mitgelieferten Themes (`editorial`, `atelier` …), das nach `theme.css` hinzukommt, wenn dieses Theme gewählt ist |
+| `theme.js` | optional: öffentliches Skript, auf allen Seiten geladen |
+
+- **Zum Einstieg** kopierst du die zu ändernde Datei nach `theme/` und bearbeitest die Kopie. Nimm sie am besten aus den kommentierten Quellen auf GitHub (`eclair/app/theme/`): Im Archiv ist der PHP-Code kompaktiert (`php -w`). Wie die Originale beginnt jede `.php`-Vorlage mit `defined('ECLAIR') || exit;` (sonst meldet sie die Integritätsprüfung). Eigene Bausteine rufst du mit `Theme::partial('name', $v)` auf (Datei `theme/name.php`).
+- **Mit den mitgelieferten Themes**: Ist unter Einstellungen › Design ein anderes Theme als „Éclair“ gewählt, kommt sein Stylesheet `themes/<name>.css` nach deinem `theme.css` hinzu; ersetze es ebenfalls (gleicher Name in `theme/themes/`), wenn es nicht zu deinem Stil passt.
+- **Updates**: `theme/` wird nie ersetzt, und die Integritätsprüfung bleibt grün; dort sucht sie nur nach Eindringlingen (PHP ohne diese Schutzzeile, `.phtml`, HTML-Seiten …). Vergleiche nach einem Update deine Vorlagen mit denen in `app/theme/`, um Neuerungen zu übernehmen.
+- **Schutz**: Wie `app/` ist `theme/` nie aus dem Web erreichbar (`.htaccess`, [Nginx-Regel](#nginx)); der Ordner ist in den Backups enthalten.
+- **`theme.js`** liefert Éclair unter einer Adresse wie `/_eclair/theme-1a2b3c4d.js` aus: dieselbe Website, also von der CSP erlaubt (`script-src 'self'`, keine Inline-Skripte); der Fingerabdruck ändert sich bei jeder Bearbeitung. Ein eigenes `layout.php` lädt es mit `<?php if ($script = Theme::script()): ?><script src="<?= e($script) ?>" defer></script><?php endif ?>`.
+- **Anderswo**: Um das Theme außerhalb des öffentlichen Ordners abzulegen, trage seinen Pfad in `eclair-config.php` ein: `define('ECLAIR_THEME', '/home/meinkonto/eclair-theme');`. Im öffentlichen Ordner ist nur `theme/` geschützt.
+- **Nach jeder Änderung** leerst du den Cache (Einstellungen › Erweitert › Cache leeren); während der Entwicklung schaltet ihn der Debug-Modus ab.
 
 ---
 

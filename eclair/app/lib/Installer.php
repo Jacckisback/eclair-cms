@@ -132,7 +132,7 @@ final class Installer
             $e['user_pass'] = implode(' ', $issues);
         }
         $admin = Req::input('admin_path');
-        if (!preg_match('/^[a-z0-9-]{3,40}$/', $admin) || in_array($admin, ['app', 'data', 'cache', 'assets', 'media', 'blog', 'feed', 'sitemap'], true)) {
+        if (!preg_match('/^[a-z0-9-]{3,40}$/', $admin) || in_array($admin, ['app', 'data', 'cache', 'theme', 'assets', 'media', 'blog', 'feed', 'sitemap'], true)) {
             $e['admin_path'] = t('3 à 40 caractères : lettres minuscules, chiffres et tirets.');
         }
         return $e;

@@ -15,11 +15,12 @@ if (PHP_VERSION_ID < 80100) {
     exit;
 }
 
-// Réglages avancés facultatifs (emplacement des données, mode débogage…).
+// Réglages avancés facultatifs (emplacement des données, du thème, mode débogage…).
 if (is_file(ECLAIR_ROOT . '/eclair-config.php')) {
     require ECLAIR_ROOT . '/eclair-config.php';
 }
 defined('ECLAIR_DATA') || define('ECLAIR_DATA', ECLAIR_ROOT . '/data');
+defined('ECLAIR_THEME') || define('ECLAIR_THEME', ECLAIR_ROOT . '/theme');
 defined('ECLAIR_DEBUG') || define('ECLAIR_DEBUG', false);
 
 spl_autoload_register(static function (string $class): void {

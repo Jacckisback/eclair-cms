@@ -7,7 +7,7 @@ defined('ECLAIR') || exit;
 
 /**
  * Contrôle d'intégrité : compare les fichiers d'Éclair à leur empreinte d'origine
- * (app/manifest.php) et cherche des fichiers suspects, notamment dans les médias.
+ * (app/manifest.php) et cherche des fichiers suspects, notamment dans les médias et le thème personnalisé.
  * Indispensable sur un mutualisé, où les infections passent souvent inaperçues.
  */
 final class Integrity
@@ -52,6 +52,15 @@ final class Integrity
                 $result['suspicious'][] = $path;
             }
         }
+        // Thème personnalisé : jamais « inconnu » (il n'a pas d'empreinte d'origine), mais surveillé de près :
+        // aucun script exécutable, et chaque gabarit .php commence par sa ligne de protection.
+        foreach (self::scan(['theme']) as $path) {
+            if (preg_match('~\.(phtml|phar|php\d|inc|sh|cgi|pl|py|s?html?)$~i', $path) && basename($path) !== 'index.html') {
+                $result['suspicious'][] = $path;
+            } elseif (preg_match('~\.php$~i', $path) && !self::template(Theme::dir() . substr($path, 5))) {
+                $result['suspicious'][] = $path;
+            }
+        }
         return $result;
     }
 
@@ -62,12 +71,27 @@ final class Integrity
         return $head === Store::GUARD || ($path === 'data/reset.php' && str_starts_with($head, '<?php'));
     }
 
-    /** Liste récursive (chemins relatifs à la racine d'Éclair). */
+    /**
+     * Gabarit inerte s'il est appelé directement : sa première instruction (après d'éventuels commentaires)
+     * est « defined('ECLAIR') || exit; », comme dans app/theme.
+     */
+    private static function template(string $file): bool
+    {
+        $head = (string) @file_get_contents($file, false, null, 0, 8192);
+        return (bool) preg_match('~^(?:\xEF\xBB\xBF)?<\?php\s++(?:(?:/\*.*?\*/|(?://|#)[^\n]*+|declare\([^)]*+\)\s*+;)\s*+)*+'
+            . 'defined\(\s*+([\'"])ECLAIR\1\s*+\)\s*+(?:\|\||or)\s*+(?:exit|die)\b~s', $head);
+    }
+
+    /** Liste récursive (chemins relatifs à la racine d'Éclair ; « data » et « theme » peuvent être ailleurs). */
     public static function scan(array $dirs): array
     {
         $out = [];
         foreach ($dirs as $dir) {
-            $root = $dir === 'data' ? ECLAIR_DATA : ECLAIR_ROOT . '/' . $dir;
+            $root = match ($dir) {
+                'data' => ECLAIR_DATA,
+                'theme' => Theme::dir(),
+                default => ECLAIR_ROOT . '/' . $dir,
+            };
             if (!is_dir($root)) {
                 continue;
             }

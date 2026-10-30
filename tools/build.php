@@ -7,16 +7,13 @@
  * Son manifeste porte les empreintes de ces fichiers compactés ; celui du dépôt, les empreintes des sources.
  *
  *   php tools/build.php
+ *
+ * Inclus par un autre script (les tests), ce fichier fournit seulement ses fonctions.
  */
 declare(strict_types=1);
 
-$root = dirname(__DIR__) . '/eclair';
-$dist = dirname(__DIR__) . '/dist';
-preg_match("~define\('ECLAIR_VERSION', '([^']+)'\)~", (string) file_get_contents($root . '/index.php'), $m);
-$version = $m[1] ?? 'dev';
-
-/** Fichiers livrés : le code, sans les données d'une installation locale. */
-function distributable(string $root): array
+/** Fichiers livrés : le code, sans les données d'une installation locale ni un thème personnalisé (theme/). */
+function eclair_distributable(string $root): array
 {
     $files = [];
     $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
@@ -27,7 +24,7 @@ function distributable(string $root): array
         $rel = str_replace('\\', '/', substr((string) $path, strlen($root) + 1));
         $inStorage = preg_match('~^(data|cache|media)/~', $rel);
         $keep = !$inStorage || preg_match('~^(data|cache|media)/(\.htaccess|index\.html)$~', $rel) || $rel === 'cache/pages/index.html';
-        if ($keep && $rel !== 'app/manifest.php' && $rel !== 'eclair-config.php' && !str_ends_with($rel, '.DS_Store')) {
+        if ($keep && !str_starts_with($rel, 'theme/') && $rel !== 'app/manifest.php' && $rel !== 'eclair-config.php' && !str_ends_with($rel, '.DS_Store')) {
             $files[] = $rel;
         }
     }
@@ -35,18 +32,34 @@ function distributable(string $root): array
     return $files;
 }
 
+/** Écrit app/manifest.php (empreinte de chaque fichier livré, en source) et renvoie ce manifeste. */
+function eclair_manifest(string $root, string $version): array
+{
+    $hashes = [];
+    foreach (eclair_distributable($root) as $rel) {
+        $hashes[$rel] = hash_file('sha256', $root . '/' . $rel);
+    }
+    $manifest = ['version' => $version, 'generated' => gmdate('c'), 'files' => $hashes];
+    file_put_contents($root . '/app/manifest.php', "<?php exit; ?>\n" . json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+    return $manifest;
+}
+
+if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) !== __FILE__) {
+    return;
+}
+
+$root = dirname(__DIR__) . '/eclair';
+$dist = dirname(__DIR__) . '/dist';
+preg_match("~define\('ECLAIR_VERSION', '([^']+)'\)~", (string) file_get_contents($root . '/index.php'), $m);
+$version = $m[1] ?? 'dev';
+
 // Traductions de l'administration : les fichiers livrés sont recompilés depuis i18n/.
 require __DIR__ . '/i18n.php';
 echo '✓ Traductions : ' . count(eclair_i18n_build()) . " langues compilées (eclair/app/lang)\n";
 
-$files = distributable($root);
-$hashes = [];
-foreach ($files as $rel) {
-    $hashes[$rel] = hash_file('sha256', $root . '/' . $rel);
-}
-$manifest = ['version' => $version, 'generated' => gmdate('c'), 'files' => $hashes];
-file_put_contents($root . '/app/manifest.php', "<?php exit; ?>\n" . json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
-echo "✓ Empreintes : " . count($hashes) . " fichiers (app/manifest.php)\n";
+$manifest = eclair_manifest($root, $version);
+$files = array_keys($manifest['files']);
+echo "✓ Empreintes : " . count($files) . " fichiers (app/manifest.php)\n";
 
 if (!class_exists('ZipArchive')) {
     exit("⚠ Extension zip absente : archive non créée.\n");
@@ -83,6 +96,9 @@ $zip->addFromString('LISEZ-MOI.txt', <<<TXT
    Par sécurité, termine-le dans les 2 heures qui suivent la première visite
    (sinon : supprime data/install-window.php par FTP et recharge la page).
 3. C'est tout. Documentation complète : https://github.com/Jacckisback/eclair-cms
+
+Mise à jour d'un site existant : supprime app/ et assets/, envoie ceux de cette version avec
+index.php et .htaccess, puis vide le cache. Ne touche ni à data/, ni à media/, ni à ton thème (theme/).
 
 Mot de passe oublié et aucun autre administrateur ? Crée par FTP le fichier data/reset.php
 avec ces trois lignes, puis connecte-toi dans les 24 h avec cet e-mail et ce nouveau mot de passe :

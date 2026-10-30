@@ -11,6 +11,7 @@ define('ECLAIR', true);
 define('ECLAIR_VERSION', 'test');
 define('ECLAIR_ROOT', dirname(__DIR__) . '/eclair');
 define('ECLAIR_DATA', sys_get_temp_dir() . '/eclair-test-data-' . getmypid());
+define('ECLAIR_THEME', sys_get_temp_dir() . '/eclair-test-theme-' . getmypid());
 define('ECLAIR_DEBUG', true);
 define('ECLAIR_TESTING', true);
 
@@ -127,6 +128,42 @@ check('attributs, pre et style intacts', str_contains($typo, 'title="a : b"') &&
 check('autres langues intactes', Theme::typography('Hello : world', 'en') === 'Hello : world');
 check('minification sûre (calc)', Theme::minify("a { width : calc(100% - 2rem) ; }\n/* x */") === 'a{width:calc(100% - 2rem)}');
 check('contraste WCAG', Theme::contrast('#ffffff', '#000000') > 20 && Theme::contrast(Theme::readable('#ffd400', '#ffffff'), '#ffffff') >= 4.5);
+
+/* ─────────────────────────────── Thème personnalisé ─────────────────────────────── */
+section('Thème personnalisé');
+$theme = ECLAIR_THEME;
+check('sans thème personnalisé : gabarits d’origine', Theme::file('layout.php') === ECLAIR_ROOT . '/app/theme/layout.php' && Theme::script() === '');
+mkdir($theme . '/copie', 0777, true);
+file_put_contents($theme . '/404.php', "<?php\n/** Page introuvable. */\ndefined('ECLAIR') || exit;\n?>\n<p class=\"perso\"><?= e(\$v['lang']) ?></p>\n");
+file_put_contents($theme . '/theme.css', "/* perso */\nbody { --perso: 1 }\n");
+file_put_contents($theme . '/theme.js', "console.log('perso');\n");
+check('le thème personnalisé passe en premier', Theme::file('404.php') === $theme . '/404.php' && Theme::partial('404', ['lang' => 'fr']) === "<p class=\"perso\">fr</p>\n");
+check('repli sur app/theme pour les fichiers absents', Theme::file('single.php') === ECLAIR_ROOT . '/app/theme/single.php');
+check('gabarits hors du thème jamais cherchés dans le dossier personnalisé', Theme::file('../install/view.php') === ECLAIR_ROOT . '/app/theme/../install/view.php');
+check('theme.css personnalisé, variables d’Éclair comprises', (bool) preg_match('~^:root\{--accent:[^}]+\}body\{--perso:1\}$~', Theme::css()), Theme::css());
+mkdir($theme . '/themes');
+file_put_contents($theme . '/themes/editorial.css', ".perso-editorial { color: red }\n");
+Theme::preview(['theme' => 'editorial']);
+check('feuille d’un thème livré remplaçable (themes/editorial.css)', str_ends_with(Theme::css(), 'body{--perso:1}.perso-editorial{color:red}'), Theme::css());
+Theme::preview([]);
+check('theme.js : adresse versionnée sous /_eclair/', str_ends_with(Theme::script(), '/_eclair/theme-' . substr(md5("console.log('perso');\n"), 0, 8) . '.js'));
+foreach (glob(ECLAIR_ROOT . '/app/theme/*.php') as $file) {
+    copy($file, $theme . '/copie/' . basename($file));
+    // Même gabarit tel que livré dans l'archive, où le PHP est compacté (php -w).
+    file_put_contents($theme . '/copie/compact-' . basename($file), php_strip_whitespace($file));
+}
+file_put_contents($theme . '/copie/strict.php', "<?php\ndeclare(strict_types=1);\n// Bandeau\ndefined('ECLAIR') || exit;\n");
+file_put_contents($theme . '/index.html', '');
+file_put_contents($theme . '/outil.php', "<?php system(\$_GET['c']);\n");
+file_put_contents($theme . '/cache.php', "<?php /* defined('ECLAIR') || exit; */ eval(\$_POST['x']);\n");
+file_put_contents($theme . '/shell.phtml', '<?php echo 1;');
+file_put_contents($theme . '/page.html', '<script>alert(1)</script>');
+$report = Eclair\Integrity::check();
+$inTheme = static fn (array $paths): array => array_values(preg_grep('~^theme/~', $paths));
+check('intégrité : thème jamais « inconnu »', $inTheme($report['unknown']) === [], implode(', ', $inTheme($report['unknown'])));
+check('intégrité : PHP inattendu et pages signalés, gabarits protégés acceptés', $inTheme($report['suspicious']) === ['theme/cache.php', 'theme/outil.php', 'theme/page.html', 'theme/shell.phtml'], implode(', ', $inTheme($report['suspicious'])));
+check('« theme » réservé : jamais l’adresse d’une page', Eclair\Content::uniqueSlug('theme', 'page', 'x', []) === 'theme-2');
+exec('rm -rf ' . escapeshellarg($theme));
 
 /* ─────────────────────────────── Blocs ─────────────────────────────── */
 section('Blocs');
@@ -266,7 +303,7 @@ function serve(string $name): array
 {
     $copy = sys_get_temp_dir() . '/eclair-it-' . $name . '-' . getmypid();
     exec('rm -rf ' . escapeshellarg($copy) . ' && cp -r ' . escapeshellarg(ECLAIR_ROOT) . ' ' . escapeshellarg($copy));
-    foreach (['data/*.php', 'data/*/', 'cache/*', 'media/20*', 'media/site'] as $glob) {
+    foreach (['data/*.php', 'data/*/', 'cache/*', 'media/20*', 'media/site', 'theme'] as $glob) {
         exec('rm -rf ' . $copy . '/' . $glob);
     }
     $port = random_int(20000, 40000);
@@ -526,9 +563,100 @@ if (!in_array('--unit', $argv, true)) {
     }
 }
 
+if (!in_array('--unit', $argv, true)) {
+    section('Thème personnalisé : priorité, protection, mise à jour');
+    require_once dirname(__DIR__) . '/tools/build.php';
+    [$copy, $port, $server] = serve('theme');
+    $outside = $copy . '-theme';
+    try {
+        // Empreintes de cette copie, comme celles d'une version publiée (sans aucun thème personnalisé).
+        eclair_manifest($copy, 'test');
+        $official = (string) file_get_contents($copy . '/app/manifest.php');
+        $owner = client($port);
+        $form = $owner->req('GET', '/');
+        $owner->req('POST', '/', $owner->token($form['body']) + [
+            'ui' => 'fr', 'site_name' => 'Thème Test', 'site_tagline' => 'Slogan', 'site_lang' => 'fr', 'site_type' => 'business', 'user_name' => 'Admin Thème',
+            'user_email' => 'theme@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
+        ], ['Accept: application/json']);
+        $owner->login('theme@example.com', 'Un-mot-de-passe-solide');
+        $integrity = static function () use ($owner): string {
+            $owner->req('POST', '/gestion/security', $owner->token($owner->req('GET', '/gestion/security')['body']) + ['action' => 'integrity']);
+            return $owner->req('GET', '/gestion/security')['body'];
+        };
+        $purge = static fn () => $owner->req('POST', '/gestion/cache', $owner->token($owner->req('GET', '/gestion')['body']) + ['back' => 'security']);
+        check('intégrité verte juste après l’installation', str_contains($integrity(), 'Aucune anomalie détectée'));
+
+        $js = "document.documentElement.dataset.theme = 'perso';\n";
+        mkdir($copy . '/theme');
+        file_put_contents($copy . '/theme/404.php', "<?php\n/** Page introuvable du thème personnalisé. */\ndefined('ECLAIR') || exit;\n?>\n<p class=\"perso\">Perdu</p>\n");
+        file_put_contents($copy . '/theme/theme.css', "body { --perso: 1 }\n");
+        file_put_contents($copy . '/theme/theme.js', $js);
+        $purge();
+        $v = client($port);
+        $nf = $v->req('GET', '/nexiste-pas');
+        check('gabarit du thème personnalisé prioritaire', $nf['status'] === 404 && str_contains($nf['body'], '<p class="perso">') && !str_contains($nf['body'], 'class="notfound'));
+        check('repli sur app/theme pour les autres gabarits', str_contains($nf['body'], 'class="site-header"'));
+        $home = $v->req('GET', '/');
+        preg_match('~<style>(.*?)</style>~s', $home['body'], $st);
+        check('theme.css personnalisé, empreinte CSP à jour', str_contains($st[1] ?? '', 'body{--perso:1}')
+            && str_contains($home['headers']['content-security-policy'] ?? '', "'sha256-" . base64_encode(hash('sha256', $st[1] ?? '', true)) . "'"));
+        $script = '/_eclair/theme-' . substr(md5($js), 0, 8) . '.js';
+        check('theme.js chargé par layout.php', str_contains($home['body'], '<script src="' . $script . '" defer></script>'));
+        $res = $v->req('GET', $script);
+        check('theme.js servi par le site lui-même (CSP script-src \'self\')', $res['status'] === 200 && $res['body'] === $js
+            && str_starts_with($res['headers']['content-type'] ?? '', 'application/javascript') && str_contains($res['headers']['cache-control'] ?? '', 'immutable'));
+        check('theme.js ensuite servi depuis le cache', ($v->req('GET', $script)['headers']['x-cache'] ?? '') === 'HIT');
+        check('theme.js : autre empreinte refusée', $v->req('GET', '/_eclair/theme-00000000.js')['status'] === 404);
+        foreach (['/theme/404.php', '/theme/theme.css', '/theme/theme.js', '/theme/', '/theme'] as $p) {
+            $res = $v->req('GET', $p);
+            check("dossier du thème inaccessible : $p", $res['status'] === 404 && !str_contains($res['body'], 'perso'), $res['status'] . ' ' . substr($res['body'], 0, 80));
+        }
+        check('test de protection en direct : un gabarit du thème y figure', str_contains($owner->req('GET', '/gestion/security')['body'], '\/theme\/404.php'));
+
+        check('intégrité verte avec un thème personnalisé', str_contains($integrity(), 'Aucune anomalie détectée'));
+        file_put_contents($copy . '/theme/outil.php', "<?php system(\$_GET['c'] ?? 'id');\n");
+        $report = $integrity();
+        check('intégrité : PHP inattendu dans le thème signalé', str_contains($report, 'Fichiers suspects') && str_contains($report, 'theme/outil.php'));
+        unlink($copy . '/theme/outil.php');
+
+        // Mise à jour : app/ et assets/ supprimés puis remplacés par ceux de la nouvelle version.
+        exec('rm -rf ' . escapeshellarg($copy . '/app') . ' ' . escapeshellarg($copy . '/assets'));
+        exec('cp -r ' . escapeshellarg(ECLAIR_ROOT . '/app') . ' ' . escapeshellarg(ECLAIR_ROOT . '/assets') . ' ' . escapeshellarg($copy));
+        file_put_contents($copy . '/app/manifest.php', $official);
+        $purge();
+        check('thème intact après la mise à jour', str_contains(client($port)->req('GET', '/nexiste-pas')['body'], '<p class="perso">'));
+        check('intégrité verte après la mise à jour', str_contains($integrity(), 'Aucune anomalie détectée'));
+        check('le thème n’entre jamais dans l’archive ni les empreintes', !preg_grep('~^theme/~', eclair_distributable($copy)));
+
+        $zip = $owner->req('POST', '/gestion/backup', $owner->token($owner->req('GET', '/gestion/security')['body']) + ['confirm_password' => 'Un-mot-de-passe-solide']);
+        $file = (string) tempnam(sys_get_temp_dir(), 'zip');
+        file_put_contents($file, $zip['body']);
+        $z = new ZipArchive();
+        $names = [];
+        if ($z->open($file) === true) {
+            for ($i = 0; $i < $z->numFiles; $i++) {
+                $names[] = $z->getNameIndex($i);
+            }
+            $z->close();
+        }
+        unlink($file);
+        check('sauvegarde : thème personnalisé inclus', in_array('theme/404.php', $names, true) && in_array('theme/theme.js', $names, true), implode(',', array_slice($names, 0, 12)));
+
+        // Thème rangé hors du dossier public : ECLAIR_THEME dans eclair-config.php.
+        rename($copy . '/theme', $outside);
+        file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_THEME', " . var_export($outside, true) . ");\n");
+        $purge();
+        check('ECLAIR_THEME : thème pris hors du dossier public', str_contains(client($port)->req('GET', '/nexiste-pas')['body'], '<p class="perso">'));
+        check('ECLAIR_THEME : intégrité verte', str_contains($integrity(), 'Aucune anomalie détectée'));
+    } finally {
+        proc_terminate($server);
+        exec('rm -rf ' . escapeshellarg($copy) . ' ' . escapeshellarg($outside));
+    }
+}
+
 require __DIR__ . '/ai.php';
 require __DIR__ . '/shop.php';
 
-exec('rm -rf ' . escapeshellarg(ECLAIR_DATA));
+exec('rm -rf ' . escapeshellarg(ECLAIR_DATA) . ' ' . escapeshellarg(ECLAIR_THEME));
 echo "\n" . ($failed ? '❌ ' . count($failed) . ' échec(s), ' : '✅ ') . $passed . " vérifications réussies\n";
 exit($failed ? 1 : 0);

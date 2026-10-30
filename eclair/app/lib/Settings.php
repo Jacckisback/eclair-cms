@@ -198,7 +198,7 @@ final class Settings
     {
         $words = Theme::words();
         return array_values(array_filter([
-            'app', 'data', 'cache', 'assets', 'media', 'index', 'admin', '_eclair', '__eclair',
+            'app', 'data', 'cache', 'theme', 'assets', 'media', 'index', 'admin', '_eclair', '__eclair',
             'sitemap', 'robots', 'feed', 'llms', 'llms-full', 'favicon', 'wp-admin', 'wp-login',
             (string) self::get('admin_path'),
             (string) self::get('blog.base'),

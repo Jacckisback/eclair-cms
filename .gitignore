@@ -12,3 +12,4 @@ eclair/media/*
 !eclair/media/.htaccess
 !eclair/media/index.html
 eclair/eclair-config.php
+eclair/theme/

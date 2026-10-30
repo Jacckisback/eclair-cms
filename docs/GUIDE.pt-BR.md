@@ -17,7 +17,7 @@ Tudo o que você precisa saber para instalar, usar, proteger e manter o Éclair.
 7. [Segurança](#segurança)
 8. [Atualizar, fazer backup, mudar de hospedagem](#atualizar-fazer-backup-mudar-de-hospedagem)
 9. [Solução de problemas](#solução-de-problemas) (incluindo [Nginx](#nginx))
-10. [Para desenvolvedores](#para-desenvolvedores)
+10. [Para desenvolvedores](#para-desenvolvedores) (incluindo [Tema personalizado](#tema-personalizado))
 
 ---
 
@@ -145,6 +145,8 @@ O Éclair vem com **6 temas**. Escolha um em **Configurações › Aparência**:
 Escolher um tema aplica a cor e as fontes recomendadas dele: você pode alterá-las depois. Duas configurações de layout completam o tema: o **cabeçalho** (logo à esquerda e menu à direita, ou tudo centralizado) e as **listas de artigos e produtos** (grade de cards ou lista com a imagem à esquerda).
 
 **Por que é leve**: um tema do Éclair é só uma folha de estilo de 1,5 a 3 KB, somada à folha de estilo base. O HTML não muda de um tema para outro: a velocidade, a acessibilidade, os dados estruturados e o SEO continuam iguais. Só o tema ativo é inserido na página, e o modo escuro automático funciona com todos eles.
+
+**Seu próprio tema**: para ir além (templates, estilos, script), crie uma pasta `theme/` ao lado de `index.php`: os arquivos dela têm prioridade sobre os do Éclair e nenhuma atualização os altera. Veja [Tema personalizado](#tema-personalizado).
 
 ---
 
@@ -293,7 +295,7 @@ O Éclair foi feito para um ambiente hostil (hospedagem compartilhada, robôs te
 
 **Dados e servidor**
 - **Sem banco de dados**: nenhuma injeção de SQL é possível.
-- **Dados com dupla proteção**: as pastas `data/`, `app/` e `cache/` são bloqueadas pelo `.htaccess`; cada arquivo de dados começa com `<?php exit; ?>` (mesmo que um servidor ignorasse os `.htaccess`, nada seria exibido) e nenhuma sequência `<?php` pode ser gravada nele. Arquivos privados (permissões 0600), gravações atômicas.
+- **Dados com dupla proteção**: as pastas `data/`, `app/`, `cache/` e `theme/` são bloqueadas pelo `.htaccess`; cada arquivo de dados começa com `<?php exit; ?>` (mesmo que um servidor ignorasse os `.htaccess`, nada seria exibido) e nenhuma sequência `<?php` pode ser gravada nele. Arquivos privados (permissões 0600), gravações atômicas.
 - **Instalação protegida**: ela só é possível nas 2 horas seguintes à primeira visita, e o endereço do site só é usado para redirecionar os visitantes depois de ser **verificado pelo próprio servidor** (um endereço errado ou adulterado não desvia nada).
 
 **Login**
@@ -316,20 +318,22 @@ O Éclair foi feito para um ambiente hostil (hospedagem compartilhada, robôs te
 - **Endereço do painel personalizável** (menos robôs), papéis de administrador / redator; o botão “Editar” do site não revela esse endereço.
 - **Assistente de IA com limites**: só rascunhos e propostas, chaves de API criptografadas e excluídas dos backups, orçamento mensal e cota diária (detalhes em [Assistente de IA](#segurança-e-privacidade)).
 - **Registros limitados** (campos truncados, no máximo 1 MB): impossível inflá-los.
-- **Verificação de integridade**: compara cada arquivo com sua impressão digital original e aponta arquivos suspeitos, inclusive um `.php` sem a linha de proteção em `data/` ou `cache/`.
+- **Verificação de integridade**: compara cada arquivo com sua impressão digital original e aponta arquivos suspeitos, inclusive um `.php` sem a linha de proteção em `data/`, `cache/` ou no tema personalizado.
 - **Teste de proteção ao vivo**: a página Segurança verifica, a partir do seu navegador, se os arquivos internos estão mesmo inacessíveis e se o endereço do site está verificado.
 
 ---
 
 ## Atualizar, fazer backup, mudar de hospedagem
 
-**Fazer backup**: Segurança › Baixar backup (arquivo ZIP de `data/` e `media/`). Sem a extensão zip, copie essas duas pastas por FTP.
+**Fazer backup**: Segurança › Baixar backup (arquivo ZIP de `data/`, `media/` e do seu tema personalizado `theme/`). Sem a extensão zip, copie essas pastas por FTP.
 
 **Atualizar o Éclair**:
 1. Faça um backup.
 2. Por FTP, **apague** as pastas `app/` e `assets/` e depois envie as da nova versão, junto com `index.php` e `.htaccess` (apagar antes evita que sobrem arquivos antigos, que a verificação de integridade apontaria).
-3. **Não mexa** em `data/` (conteúdos, configurações, contas) nem em `media/` (imagens).
+3. **Não mexa** em `data/` (conteúdos, configurações, contas), em `media/` (imagens) nem em `theme/` ([tema personalizado](#tema-personalizado): nenhuma atualização o modifica).
 4. No painel: Configurações › Avançado › Limpar cache.
+
+Você tinha modificado arquivos de `app/theme/` (Éclair 1.3 ou anterior)? **Antes do passo 2**, copie-os para uma pasta `theme/` ao lado de `index.php`: eles são mantidos e têm prioridade sobre os originais.
 
 **Mudar de hospedagem ou de domínio**: copie a pasta inteira e depois troque o endereço em Configurações › Geral. Os links internos se adaptam automaticamente, inclusive em uma subpasta.
 
@@ -367,14 +371,14 @@ Em até 24 horas, **faça login com esse e-mail e essa nova senha**: a senha é 
 No Nginx, o Éclair não precisa de `.htaccess`, mas é preciso reproduzir estas regras:
 
 ```nginx
-location ~ ^/(app|data|cache)(/|$) { return 404; }
+location ~ ^/(app|data|cache|theme)(/|$) { return 404; }
 location ~ /\.(?!well-known/) { return 404; }
 location ^~ /media/ {
     location ~* \.(php\d?|phtml|phar|s?html?|svgz?|xml|js)$ { return 404; }
     add_header X-Content-Type-Options nosniff;
     expires 1y;
 }
-location ~* \.(webp|avif|jpe?g|png|gif|ico|css|js|woff2)$ { expires 1y; add_header Cache-Control "public, immutable"; }
+location ~* \.(webp|avif|jpe?g|png|gif|ico|css|js|woff2)$ { try_files $uri /index.php$is_args$args; expires 1y; add_header Cache-Control "public, immutable"; }
 location / { try_files $uri /index.php$is_args$args; }
 location = /index.php {
     include fastcgi_params;
@@ -383,6 +387,8 @@ location = /index.php {
 }
 location ~ \.php$ { return 404; }
 ```
+
+A primeira regra também protege o [tema personalizado](#tema-personalizado); o `try_files` da regra de arquivos estáticos deixa o Éclair servir os que ele gera (`/favicon.ico`, o script do tema).
 
 ---
 
@@ -394,14 +400,15 @@ eclair/                  ← o que vai para a hospedagem
 ├── .htaccess            reescrita, proteções, compressão, cache do navegador
 ├── app/lib/             código (classes Eclair\…): Content, Blocks, Seo, Analyzer, Media, Auth…
 ├── app/admin/views/     telas do painel
-├── app/theme/           templates do site público + theme.css (inserido em cada página)
+├── app/theme/           templates originais do site público + theme.css (inserido em cada página)
 ├── app/theme/themes/    os 5 temas opcionais (uma folha CSS cada, somada ao theme.css)
 ├── app/lang/            traduções do painel (6 idiomas, JSON comprimido); o texto em francês serve de chave
 ├── assets/admin/        CSS e JavaScript do painel (sem dependências)
 ├── assets/site/site.js  o único script público (2,4 KB, 1,2 KB comprimido)
 ├── data/                conteúdos, configurações, contas (criado na instalação, nunca público)
 ├── cache/               páginas geradas
-└── media/               imagens enviadas
+├── media/               imagens enviadas
+└── theme/               seu tema personalizado (opcional): nunca alterado por uma atualização
 i18n/                    arquivos-fonte legíveis das traduções (compilados por tools/i18n.php)
 tests/run.php            testes unitários + integração HTTP (incluindo os ataques da auditoria de segurança)
 tests/fake-ai.php        provedores de IA falsos (Claude, ChatGPT, imagens): o assistente é testado sem chave nem custo
@@ -418,7 +425,28 @@ php tools/build.php                                # arquivo pronto para distrib
 
 `PHP_CLI_SERVER_WORKERS` permite que o site chame a si mesmo (verificação do endereço): com um único processo, a verificação simplesmente falha e os redirecionamentos para o endereço oficial continuam desativados.
 
-O tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade vai apontar esses arquivos como modificados, é normal). No arquivo zip, o PHP é compactado (`php -w`, sem comentários) para ficar abaixo de 1 MB: o código-fonte comentado está no GitHub.
+### Tema personalizado
+
+Não edite `app/theme/`: cada atualização o substitui. Em vez disso, crie uma pasta **`theme/`** ao lado de `index.php` e coloque nela só os arquivos que você muda; para os demais, o Éclair usa os de `app/theme/`.
+
+| Arquivo em `theme/` | Função |
+|---|---|
+| `layout.php` | estrutura comum: `<head>`, cabeçalho, menu, rodapé |
+| `single.php` | página ou artigo |
+| `list.php`, `cards.php` | listas (blog, categoria, autor, busca) e cartões de artigos |
+| `product.php`, `products.php` | página de produto e cartões da loja |
+| `404.php` | página não encontrada |
+| `theme.css` | substitui o estilo base; inserido em cada página, precedido das variáveis `--accent`, `--font`, `--font-head`… de Configurações › Aparência |
+| `themes/<nome>.css` | substitui a folha de um tema incluído (`editorial`, `atelier`…), somada depois do `theme.css` quando esse tema está escolhido |
+| `theme.js` | opcional: script público carregado em todas as páginas |
+
+- **Para começar**, copie para `theme/` o arquivo que você quer mudar e edite a cópia. De preferência, pegue-o no código-fonte comentado no GitHub (`eclair/app/theme/`): no arquivo zip, o PHP é compactado (`php -w`). Como os originais, cada template `.php` começa com `defined('ECLAIR') || exit;` (senão a verificação de integridade o aponta). Seus próprios trechos são chamados com `Theme::partial('nome', $v)` (arquivo `theme/nome.php`).
+- **Com os temas incluídos**: se um tema diferente de “Éclair” estiver escolhido em Configurações › Aparência, a folha `themes/<nome>.css` dele é somada depois do seu `theme.css`; substitua-a também (mesmo nome em `theme/themes/`) se ela não combinar com o seu estilo.
+- **Atualizações**: `theme/` nunca é substituída e a verificação de integridade continua verde; ali ela só procura intrusos (PHP sem essa linha de proteção, `.phtml`, páginas HTML…). Depois de uma atualização, compare seus templates com os de `app/theme/` para aproveitar as novidades.
+- **Proteção**: como `app/`, `theme/` nunca é acessível pela web (`.htaccess`, [regra do Nginx](#nginx)); ela entra nos backups.
+- **`theme.js`** é servido pelo Éclair em um endereço como `/_eclair/theme-1a2b3c4d.js`: mesmo site, portanto a CSP o permite (`script-src 'self'`, nenhum script inline); a impressão digital muda a cada edição. Um `layout.php` personalizado o carrega com `<?php if ($script = Theme::script()): ?><script src="<?= e($script) ?>" defer></script><?php endif ?>`.
+- **Em outro lugar**: para guardar o tema fora da pasta pública, informe o caminho em `eclair-config.php`: `define('ECLAIR_THEME', '/home/minhaconta/eclair-theme');`. Dentro da pasta pública, só `theme/` é protegida.
+- **Depois de cada mudança**, limpe o cache (Configurações › Avançado › Limpar cache); durante o desenvolvimento, o modo de depuração o desativa.
 
 ---
 

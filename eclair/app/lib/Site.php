@@ -63,6 +63,10 @@ final class Site
         if (IndexNow::enabled() && $path === '/' . IndexNow::key() . '.txt') {
             self::file($path, IndexNow::key(), 'text/plain; charset=utf-8');
         }
+        // Script du thème personnalisé : seulement à l'adresse qui porte l'empreinte du fichier actuel.
+        if (str_starts_with($path, '/_eclair/theme-') && ($js = Theme::js()) !== '' && $path === Theme::scriptPath($js)) {
+            self::file($path, $js, 'application/javascript; charset=utf-8', ['Cache-Control: public, max-age=31536000, immutable']);
+        }
         if (str_ends_with($path, '.md') && Settings::get('geo.markdown')) {
             $target = substr($path, 0, -3);
             $entry = Content::findByPath($target === '/index' ? '/' : $target);

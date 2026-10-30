@@ -36,7 +36,7 @@ $events = [
     <section class="card">
       <h2><?= e(t('Test de protection des dossiers')) ?></h2>
       <p class="small muted"><?= e(t('Ton navigateur tente d’ouvrir des fichiers internes : ils doivent rester inaccessibles.')) ?></p>
-      <ul class="health" id="exposure" data-files="<?= e(json_encode(['/data/site.php', '/data/users.php', '/app/bootstrap.php', '/cache/runtime.php', '/data/.htaccess'])) ?>"></ul>
+      <ul class="health" id="exposure" data-files="<?= e(json_encode($v['exposure'])) ?>"></ul>
       <p class="small muted" id="rewrite-check" data-url="<?= e(path_to('/__eclair/ping')) ?>"></p>
     </section>
   </div>

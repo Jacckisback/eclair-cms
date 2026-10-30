@@ -20,7 +20,7 @@
 7. [安全](#安全)
 8. [更新、备份、迁移](#更新备份迁移)
 9. [故障排除](#故障排除)（包括 [Nginx](#nginx)）
-10. [开发者指南](#开发者指南)
+10. [开发者指南](#开发者指南)（包括 [自定义主题](#自定义主题)）
 
 ---
 
@@ -148,6 +148,8 @@
 选择主题会应用它推荐的主色和字体：之后你仍可以修改。另有两项布局设置与主题搭配：**页眉**（Logo 居左、菜单居右，或整体居中）和**文章和商品列表**（卡片网格，或图片居左的列表）。
 
 **为什么这么轻**：一个 Éclair 主题只是一个 1.5 至 3 KB 的样式表，叠加在基础样式表之上。不同主题之间 HTML 完全相同：速度、无障碍、结构化数据和 SEO 都保持不变。页面中只内联当前启用的主题，而且每个主题都支持自动深色模式。
+
+**你自己的主题**：如需更进一步（模板、样式、脚本），请在 `index.php` 旁边新建 `theme/` 目录：其中的文件优先于 Éclair 自带的文件，任何更新都不会改动它们。参见[自定义主题](#自定义主题)。
 
 ---
 
@@ -296,7 +298,7 @@
 
 **数据与服务器**
 - **没有数据库**：不可能发生 SQL 注入。
-- **数据双重保护**：`data/`、`app/` 和 `cache/` 目录由 `.htaccess` 禁止访问；每个数据文件都以 `<?php exit; ?>` 开头（即使服务器忽略 `.htaccess`，也不会显示任何内容），并且任何 `<?php` 序列都无法写入其中。文件权限私有（0600），以原子方式写入。
+- **数据双重保护**：`data/`、`app/`、`cache/` 和 `theme/` 目录由 `.htaccess` 禁止访问；每个数据文件都以 `<?php exit; ?>` 开头（即使服务器忽略 `.htaccess`，也不会显示任何内容），并且任何 `<?php` 序列都无法写入其中。文件权限私有（0600），以原子方式写入。
 - **受保护的安装过程**：只能在首次访问后的 2 小时内安装；网站地址在**由服务器自行验证**之后，才会用于重定向访客（错误或被篡改的地址无法劫持任何流量）。
 
 **登录**
@@ -319,20 +321,22 @@
 - **可自定义后台地址**（减少机器人骚扰），区分管理员和编辑角色；网站上的“Edit”按钮不会暴露后台地址。
 - **AI 助手权限受限**：只能生成草稿和修改建议，API 密钥加密存储且不纳入备份，并设有每月预算和每日配额（详见 AI 助手一章的[安全与隐私](#安全与隐私)）。
 - **日志有上限**（字段会截断，最大 1 MB）：无法被恶意撑大。
-- **完整性检查**：把每个文件与其原始指纹比对，找出可疑文件，包括 `data/` 或 `cache/` 中缺少保护行的 `.php` 文件。
+- **完整性检查**：把每个文件与其原始指纹比对，找出可疑文件，包括 `data/`、`cache/` 或自定义主题中缺少保护行的 `.php` 文件。
 - **实时防护测试**：安全页面会从你的浏览器检测内部文件是否确实无法访问，以及网站地址是否已通过验证。
 
 ---
 
 ## 更新、备份、迁移
 
-**备份**：安全 › 下载备份（`data/` 和 `media/` 的 ZIP 压缩包）。如果没有 zip 扩展，请通过 FTP 复制这两个目录。
+**备份**：安全 › 下载备份（`data/`、`media/` 和自定义主题 `theme/` 的 ZIP 压缩包）。如果没有 zip 扩展，请通过 FTP 复制这些目录。
 
 **更新 Éclair**：
 1. 先做一次备份。
 2. 通过 FTP **删除** `app/` 和 `assets/` 目录，然后上传新版本中的这两个目录，以及 `index.php` 和 `.htaccess`（先删除可以避免残留旧文件，否则完整性检查会把它们标记出来）。
-3. **不要改动** `data/`（内容、设置、账户）和 `media/`（图片）。
+3. **不要改动** `data/`（内容、设置、账户）、`media/`（图片）和 `theme/`（[自定义主题](#自定义主题)：任何更新都不会修改它）。
 4. 在后台执行：设置 › 高级 › 清除缓存。
+
+如果你修改过 `app/theme/` 中的文件（Éclair 1.3 或更早版本），请**在第 2 步之前**把它们复制到 `index.php` 旁边的 `theme/` 目录：这些文件会被保留，并优先于原始文件。
 
 **迁移到其他主机或域名**：复制整个目录，然后在 设置 › 常规 中修改网站地址。内部链接会自动适配，子目录也不例外。
 
@@ -370,14 +374,14 @@ YourNewPassword2026
 在 Nginx 下，Éclair 不需要 `.htaccess`，但必须复现以下规则：
 
 ```nginx
-location ~ ^/(app|data|cache)(/|$) { return 404; }
+location ~ ^/(app|data|cache|theme)(/|$) { return 404; }
 location ~ /\.(?!well-known/) { return 404; }
 location ^~ /media/ {
     location ~* \.(php\d?|phtml|phar|s?html?|svgz?|xml|js)$ { return 404; }
     add_header X-Content-Type-Options nosniff;
     expires 1y;
 }
-location ~* \.(webp|avif|jpe?g|png|gif|ico|css|js|woff2)$ { expires 1y; add_header Cache-Control "public, immutable"; }
+location ~* \.(webp|avif|jpe?g|png|gif|ico|css|js|woff2)$ { try_files $uri /index.php$is_args$args; expires 1y; add_header Cache-Control "public, immutable"; }
 location / { try_files $uri /index.php$is_args$args; }
 location = /index.php {
     include fastcgi_params;
@@ -386,6 +390,8 @@ location = /index.php {
 }
 location ~ \.php$ { return 404; }
 ```
+
+第一条规则同样保护[自定义主题](#自定义主题)；静态文件规则中的 `try_files` 让 Éclair 能够输出它自己生成的文件（`/favicon.ico`、主题脚本）。
 
 ---
 
@@ -397,14 +403,15 @@ eclair/                  ← 上传到主机的目录
 ├── .htaccess            网址重写、防护规则、压缩、浏览器缓存
 ├── app/lib/             代码（Eclair\… 类）：Content、Blocks、Seo、Analyzer、Media、Auth……
 ├── app/admin/views/     后台界面
-├── app/theme/           公开网站模板 + theme.css（内联到每个页面）
+├── app/theme/           公开网站的原始模板 + theme.css（内联到每个页面）
 ├── app/theme/themes/    5 个可选主题（每个主题一个 CSS 文件，追加在 theme.css 之后）
 ├── app/lang/            后台翻译（6 种语言，压缩 JSON），以法语原文作为键
 ├── assets/admin/        后台的 CSS 和 JavaScript（无任何依赖）
 ├── assets/site/site.js  唯一的公开脚本（2.4 KB，压缩后 1.2 KB）
 ├── data/                内容、设置、账户（安装时创建，永不公开）
 ├── cache/               生成的页面
-└── media/               上传的图片
+├── media/               上传的图片
+└── theme/               你的自定义主题（可选）：更新时绝不会被改动
 i18n/                    可读的翻译源文件（由 tools/i18n.php 编译）
 tests/run.php            单元测试 + HTTP 集成测试（包括安全审计中的攻击场景）
 tests/fake-ai.php        模拟的 AI 服务商（Claude、ChatGPT、图片）：测试助手无需密钥，也不产生费用
@@ -421,7 +428,28 @@ php tools/build.php                                # 生成可发布的安装包
 
 `PHP_CLI_SERVER_WORKERS` 让网站能够访问自身（用于验证网站地址）：如果只有一个进程，验证会直接失败，重定向到正式地址的功能将保持关闭。
 
-如需定制主题，请修改 `app/theme/*.php`、`app/theme/theme.css` 和 `app/theme/themes/*.css`（记得先备份：完整性检查会把这些文件标记为已修改，这是正常现象）。安装包中的 PHP 代码经过精简（`php -w`，去除了注释），以保持在 1 MB 以内：带注释的源代码在 GitHub 上。
+### 自定义主题
+
+不要修改 `app/theme/`：每次更新都会替换它。请在 `index.php` 旁边新建 **`theme/`** 目录，只放入你要修改的文件；其余文件，Éclair 会继续使用 `app/theme/` 中的版本。
+
+| `theme/` 中的文件 | 作用 |
+|---|---|
+| `layout.php` | 公共框架：`<head>`、页眉、菜单、页脚 |
+| `single.php` | 页面或文章 |
+| `list.php`、`cards.php` | 列表（博客、分类、作者、搜索）和文章卡片 |
+| `product.php`、`products.php` | 商品页和商店卡片 |
+| `404.php` | 页面不存在 |
+| `theme.css` | 取代基础样式；内联到每个页面，前面带有来自“设置 › 外观”的 `--accent`、`--font`、`--font-head` 等变量 |
+| `themes/<名称>.css` | 取代某个内置主题（`editorial`、`atelier`……）的样式表；选择该主题时，它会追加在 `theme.css` 之后 |
+| `theme.js` | 可选：在所有页面加载的公开脚本 |
+
+- **入门**：把要修改的文件复制到 `theme/`，然后编辑副本。最好从 GitHub 上带注释的源代码（`eclair/app/theme/`）中复制：安装包中的 PHP 代码经过精简（`php -w`）。与原始模板一样，每个 `.php` 模板都以 `defined('ECLAIR') || exit;` 开头（否则完整性检查会将其标记出来）。你自己的模板片段用 `Theme::partial('name', $v)` 调用（文件为 `theme/name.php`）。
+- **与内置主题一起使用**：如果在“设置 › 外观”中选择了“Éclair”以外的主题，它的样式表 `themes/<名称>.css` 会追加在你的 `theme.css` 之后；如果它与你的风格不搭，也请一并替换（在 `theme/themes/` 中使用相同的文件名）。
+- **更新**：`theme/` 永远不会被替换，完整性检查保持全绿；它只在其中查找入侵文件（缺少这行保护代码的 PHP、`.phtml`、HTML 页面……）。更新之后，把你的模板与 `app/theme/` 中的模板对比一下，以便用上新的改进。
+- **保护**：和 `app/` 一样，`theme/` 永远无法从网络访问（`.htaccess`、[Nginx 规则](#nginx)）；它也包含在备份中。
+- **`theme.js`** 由 Éclair 通过类似 `/_eclair/theme-1a2b3c4d.js` 的地址提供：同一站点，因此 CSP 允许（`script-src 'self'`，不允许内联脚本）；每次修改后指纹都会变化。自定义的 `layout.php` 用 `<?php if ($script = Theme::script()): ?><script src="<?= e($script) ?>" defer></script><?php endif ?>` 加载它。
+- **放在别处**：如需把主题放在公开目录之外，请在 `eclair-config.php` 中指定路径：`define('ECLAIR_THEME', '/home/account/eclair-theme');`。在公开目录中，只有 `theme/` 会受到保护。
+- **每次修改后**，请清除缓存（设置 › 高级 › 清除缓存）；开发期间，调试模式会关闭缓存。
 
 ---
 

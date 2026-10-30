@@ -120,7 +120,7 @@ final class AdminSettings
                     'search' => Req::bool('search'),
                     'blog' => [
                         'enabled' => Req::bool('blog_enabled'),
-                        'base' => in_array($base, [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'products', ltrim(Shop::path(), '/')], true) ? 'blog' : $base,
+                        'base' => in_array($base, [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'theme', 'products', ltrim(Shop::path(), '/')], true) ? 'blog' : $base,
                         'title' => $text('blog_title', 80) ?: 'Blog',
                         'description' => Sanitize::multiline(Req::input('blog_description'), 500),
                         'per_page' => max(1, min(48, (int) Req::input('per_page'))),
@@ -249,7 +249,7 @@ final class AdminSettings
                     Admin::back($redirect, t('Mot de passe incorrect.'), 'bad');
                 }
                 $admin = strtolower(trim(Req::input('admin_path')));
-                if (!preg_match('/^[a-z0-9-]{3,40}$/', $admin) || in_array($admin, ['app', 'data', 'cache', 'assets', 'media', $s['blog']['base']], true)) {
+                if (!preg_match('/^[a-z0-9-]{3,40}$/', $admin) || in_array($admin, ['app', 'data', 'cache', 'theme', 'assets', 'media', $s['blog']['base']], true)) {
                     Admin::back($redirect, t('Adresse d’administration invalide : 3 à 40 caractères (lettres, chiffres, tirets).'), 'bad');
                 }
                 $patch = [
@@ -294,7 +294,7 @@ final class AdminSettings
         $text = static fn (string $k, int $max = 200): string => Sanitize::text(Req::input($k), $max);
         $old = ltrim(Shop::path(), '/');
         $base = str_replace('/', '-', slugify(Req::input('shop_base'))) ?: Theme::words()['shop'];
-        $taken = [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'feed', $s['blog']['base'], Theme::words()['search']];
+        $taken = [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'theme', 'feed', $s['blog']['base'], Theme::words()['search']];
         foreach (Content::index() as $e) {
             if ($e['type'] === 'page') {
                 $taken[] = $e['slug'];

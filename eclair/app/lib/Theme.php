@@ -185,13 +185,34 @@ final class Theme
         ) ?? $html;
     }
 
+    /**
+     * Dossier du thème personnalisé : « theme/ » à côté de index.php, ou ECLAIR_THEME (eclair-config.php).
+     * Il est hors d'app/ : une mise à jour d'Éclair ne le touche pas.
+     */
+    public static function dir(): string
+    {
+        return rtrim((string) ECLAIR_THEME, '/\\');
+    }
+
+    /**
+     * Fichier du thème : celui du thème personnalisé s'il existe, sinon celui d'origine (app/theme).
+     * Un thème personnalisé peut donc ne remplacer que quelques gabarits ou feuilles de style (theme.css, themes/*.css).
+     */
+    public static function file(string $name): string
+    {
+        if (preg_match('~^[\w-]+(?:/[\w-]+)*\.\w+$~', $name) && is_file($custom = self::dir() . '/' . $name)) {
+            return $custom;
+        }
+        return ECLAIR_ROOT . '/app/theme/' . $name;
+    }
+
     public static function partial(string $name, array $v): string
     {
         ob_start();
         try {
             (static function (string $__file, array $v): void {
                 include $__file;
-            })(ECLAIR_ROOT . '/app/theme/' . $name . '.php', $v);
+            })(self::file($name . '.php'), $v);
         } catch (\Throwable $e) {
             ob_end_clean();
             throw $e;
@@ -209,6 +230,28 @@ final class Theme
     public static function products(array $entries, string $lang, int $level = 3): string
     {
         return self::partial('products', ['entries' => $entries, 'lang' => $lang, 'level' => $level]);
+    }
+
+    /** Adresse du script public du thème personnalisé (theme.js), ou '' s'il n'y en a pas. */
+    public static function script(): string
+    {
+        $js = self::js();
+        return $js === '' ? '' : path_to(self::scriptPath($js));
+    }
+
+    /** Contenu de theme.js dans le thème personnalisé ('' s'il n'existe pas). */
+    public static function js(): string
+    {
+        return (string) @file_get_contents(self::dir() . '/theme.js');
+    }
+
+    /**
+     * Chemin public de theme.js : servi par Éclair depuis le site lui-même (permis par « script-src 'self' »),
+     * avec une empreinte qui change à chaque modification (le navigateur le garde un an).
+     */
+    public static function scriptPath(string $js): string
+    {
+        return '/_eclair/theme-' . substr(md5($js), 0, 8) . '.js';
     }
 
     /* ─────────────────────────────── Styles ─────────────────────────────── */
@@ -260,9 +303,9 @@ final class Theme
             . ';--link-dark:' . self::readable($accent, '#121218')
             . ';--font:' . (self::FONTS[$a['font_body'] ?? 'system'][1] ?? self::FONTS['system'][1])
             . ';--font-head:' . (self::FONTS[$a['font_head'] ?? 'system'][1] ?? self::FONTS['system'][1]) . '}';
-        $css = (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css');
+        $css = (string) file_get_contents(self::file('theme.css'));
         if ($a['theme'] !== 'eclair') {
-            $css .= (string) @file_get_contents(ECLAIR_ROOT . '/app/theme/themes/' . $a['theme'] . '.css');
+            $css .= (string) @file_get_contents(self::file('themes/' . $a['theme'] . '.css'));
         }
         if (($a['dark'] ?? 'auto') !== 'auto') {
             $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', $css);

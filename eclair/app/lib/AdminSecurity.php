@@ -25,6 +25,12 @@ final class AdminSecurity
             ['ok' => defined('PASSWORD_ARGON2ID'), 'label' => t('Mots de passe chiffrés avec Argon2id')],
             ['ok' => (bool) Settings::get('security.hsts') && Security::httpsOnly(), 'label' => t('HSTS (navigateurs forcés en HTTPS)')],
         ];
+        // Fichiers internes que le navigateur tente d'ouvrir, dont un gabarit du thème personnalisé s'il est dans le dossier public.
+        $exposure = ['/data/site.php', '/data/users.php', '/app/bootstrap.php', '/cache/runtime.php', '/data/.htaccess'];
+        $templates = str_starts_with(Theme::dir(), ECLAIR_ROOT . '/') ? glob(Theme::dir() . '/*.php') : [];
+        if ($templates) {
+            $exposure[] = substr($templates[0], strlen(ECLAIR_ROOT));
+        }
         Admin::view('security', [
             'checks' => $checks,
             'score' => (int) round(count(array_filter($checks, fn ($c) => $c['ok'])) / count($checks) * 100),
@@ -32,6 +38,7 @@ final class AdminSecurity
             'log' => Log::read('security', 80),
             'errors' => Log::read('errors', 20),
             'integrity' => $integrity,
+            'exposure' => $exposure,
             'zip' => class_exists('ZipArchive'),
             'gd' => Media::gd(),
             'verified' => Settings::verified(),
@@ -74,7 +81,7 @@ final class AdminSecurity
         Admin::back(ltrim(Req::input('back'), '/'), t('Cache vidé : toutes les pages seront régénérées.'));
     }
 
-    /** Sauvegarde complète (contenus, réglages, médias) dans un fichier ZIP. */
+    /** Sauvegarde complète (contenus, réglages, médias, thème personnalisé) dans un fichier ZIP. */
     public static function backup(array $user): never
     {
         if (!Auth::confirmed($user)) {
@@ -89,7 +96,10 @@ final class AdminSecurity
         if ($zip->open($file, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
             Admin::back('security', t('Impossible de créer la sauvegarde.'), 'bad');
         }
-        foreach (['data' => ECLAIR_DATA, 'media' => ECLAIR_ROOT . '/media'] as $prefix => $dir) {
+        foreach (['data' => ECLAIR_DATA, 'media' => ECLAIR_ROOT . '/media', 'theme' => Theme::dir()] as $prefix => $dir) {
+            if (!is_dir($dir)) {
+                continue;
+            }
             $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
             foreach ($it as $path => $info) {
                 $rel = $prefix . '/' . str_replace('\\', '/', substr((string) $path, strlen($dir) + 1));
@@ -98,7 +108,7 @@ final class AdminSecurity
                 }
             }
         }
-        $zip->addFromString('LISEZ-MOI.txt', "Sauvegarde Éclair du " . date('Y-m-d H:i') . "\n\nPour restaurer : remplace les dossiers data/ et media/ de ton installation par ceux-ci (par FTP), puis vide le cache depuis l'administration.\n");
+        $zip->addFromString('LISEZ-MOI.txt', "Sauvegarde Éclair du " . date('Y-m-d H:i') . "\n\nPour restaurer : remplace les dossiers data/, media/ (et theme/ s'il y est) de ton installation par ceux-ci (par FTP), puis vide le cache depuis l'administration.\n");
         $zip->close();
         Log::security('backup_downloaded');
         $name = slugify((string) Settings::get('name')) ?: 'site';

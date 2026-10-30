@@ -8,8 +8,8 @@
     # Décommente et adapte si ton hébergeur l'exige (rare) :
     # RewriteBase /
 
-    # Dossiers internes jamais accessibles depuis le web
-    RewriteRule ^(app|data|cache)(/|$) - [R=404,L]
+    # Dossiers internes jamais accessibles depuis le web (theme : thème personnalisé)
+    RewriteRule ^(app|data|cache|theme)(/|$) - [R=404,L]
     # Fichiers cachés (.git, .env…) sauf .well-known
     RewriteRule (^|/)\.(?!well-known/) - [R=404,L]
     # Aucun script PHP exécutable en dehors d'index.php
