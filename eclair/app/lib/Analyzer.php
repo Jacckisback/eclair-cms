@@ -88,6 +88,10 @@ final class Analyzer
                 t('Prix indiqué : sans prix, Google n’affiche pas la fiche dans ses résultats produits.'), 3);
             $add('seo', array_filter(array_column($offers, 'link')) ? 'good' : 'bad',
                 t('Lien de paiement (Stripe Payment Links) : sans lui, le bouton « Acheter » reste désactivé.'), 2);
+            $orphans = count(array_filter($item['product']['variants'], fn ($v) => $v['link'] === '' && $v['price'] !== '' && $v['price'] !== $item['product']['price']));
+            if ($orphans) {
+                $add('seo', 'bad', t('{n} variante(s) à un autre prix sans lien de paiement : chacune a besoin de son propre lien Stripe.', ['n' => $orphans]), 2);
+            }
             $photos = Shop::images($item);
             $add('seo', count($photos) >= 3 ? 'good' : ($photos ? 'ok' : 'bad'),
                 t('{n} photo(s) du produit : vise au moins 3 vues.', ['n' => count($photos)]), 2);

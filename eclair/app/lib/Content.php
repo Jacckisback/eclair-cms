@@ -209,7 +209,10 @@ final class Content
 
         $slug = trim((string) ($data['slug'] ?? ''));
         $slug = $type === 'page' ? Sanitize::path($slug !== '' ? $slug : $title, $lang) : slugify($slug !== '' ? $slug : $title, $lang);
-        $slug = self::uniqueSlug($slug !== '' ? $slug : $id, $type, $id, $index);
+        // Un contenu existant garde son adresse tant qu'on ne la change pas, même si le mot est devenu réservé depuis.
+        if ($old === null || $slug !== $old['slug']) {
+            $slug = self::uniqueSlug($slug !== '' ? $slug : $id, $type, $id, $index);
+        }
 
         $date = (int) ($old['date'] ?? 0);
         if (!empty($data['date'])) {
@@ -295,13 +298,16 @@ final class Content
     /** Résumé d'un produit pour l'index : prix le plus bas (« à partir de » si les variantes diffèrent), disponibilité. */
     private static function productEntry(array $item): array
     {
-        $prices = array_values(array_unique(array_filter(array_column(Shop::offers($item), 'price'), fn ($p) => $p !== '')));
+        $offers = Shop::offers($item);
+        $prices = array_values(array_unique(array_filter(array_column($offers, 'price'), fn ($p) => $p !== '')));
         sort($prices, SORT_NUMERIC);
+        // Disponibilité affichée : la meilleure des offres (« En stock » dès qu'une variante l'est, « Épuisé » si toutes le sont).
+        $states = array_column($offers, 'availability');
         return [
             'price' => $prices[0] ?? '',
             'from' => count($prices) > 1,
             'compare' => $item['product']['compare'],
-            'availability' => $item['product']['availability'],
+            'availability' => in_array('in_stock', $states, true) ? 'in_stock' : (in_array('preorder', $states, true) ? 'preorder' : 'out_of_stock'),
         ];
     }
 

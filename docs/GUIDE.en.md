@@ -34,7 +34,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) archive (415 KB) and unzip it.
+1. Download the [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) archive (416 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -412,7 +412,7 @@ tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 367 unit and HTTP checks
+php tests/run.php                                  # 374 unit and HTTP checks
 php tools/build.php                                # ready-to-ship archive
 ```
 

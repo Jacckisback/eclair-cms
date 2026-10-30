@@ -61,7 +61,7 @@ WordPress sait tout faire, mais il lui faut une base de données, des extensions
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra léger</h3>
-      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>415 Ko</b>, zéro dépendance, zéro cookie sur le site public.
+      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>416 Ko</b>, zéro dépendance, zéro cookie sur le site public.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Simple comme bonjour</h3>
@@ -174,7 +174,7 @@ La boutique ne s'ouvre qu'avec des mentions légales et des conditions général
 |---|---|---|
 | **Installation** | Créer une base MySQL, puis lancer l'assistant | ✅ Envoyer le dossier, répondre à 4 questions |
 | **Base de données** | MySQL obligatoire | ✅ Aucune (fichiers protégés) |
-| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 415 Ko |
+| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 416 Ko |
 | **SEO, sitemap, données structurées** | Extension à installer et à maintenir | ✅ Intégré |
 | **GEO : llms.txt, Markdown, robots IA** | Extensions, rarement complet | ✅ Intégré |
 | **Pages publiques** | Générées à chaque visite, sauf extension de cache | ✅ Servies depuis un cache statique |
@@ -282,7 +282,7 @@ Détails complets dans le [guide, section Sécurité](docs/GUIDE.md#sécurité).
   <img src="docs/images/install.webp" alt="Installation en trois étapes : envoyer le dossier, répondre à quatre questions, le site est en ligne" width="100%">
 </p>
 
-1. **Télécharge** l'archive [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (415 Ko) et décompresse-la.
+1. **Télécharge** l'archive [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (416 Ko) et décompresse-la.
 2. **Envoie le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…), fichiers cachés `.htaccess` compris.
 3. **Ouvre l'adresse de ton site** : l'assistant démarre. Quatre questions, des confettis, et ton site est en ligne avec ses premières pages.
 
@@ -309,7 +309,7 @@ PHP 8.1+ sans framework ni Composer : des classes simples dans `eclair/app/lib/`
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # serveur de développement
-php tests/run.php                                                           # 367 vérifications unitaires et HTTP
+php tests/run.php                                                           # 374 vérifications unitaires et HTTP
 php tools/build.php                                                         # archive prête à distribuer
 ```
 

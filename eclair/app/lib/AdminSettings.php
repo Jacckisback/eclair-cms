@@ -294,18 +294,19 @@ final class AdminSettings
         $text = static fn (string $k, int $max = 200): string => Sanitize::text(Req::input($k), $max);
         $old = ltrim(Shop::path(), '/');
         $base = str_replace('/', '-', slugify(Req::input('shop_base'))) ?: Theme::words()['shop'];
-        $taken = [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'products', 'feed', $s['blog']['base'], Theme::words()['search']];
+        $taken = [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'feed', $s['blog']['base'], Theme::words()['search']];
         foreach (Content::index() as $e) {
             if ($e['type'] === 'page') {
                 $taken[] = $e['slug'];
             }
         }
-        if ($base !== $old && in_array($base, $taken, true)) {
+        $enabled = Req::bool('shop_enabled');
+        // Vérifiée aussi à l'ouverture : l'adresse par défaut (« boutique ») peut être celle d'une page existante.
+        if (($base !== $old || $enabled) && in_array($base, $taken, true)) {
             Admin::back($redirect, t('Cette adresse est déjà utilisée : choisis-en une autre.'), 'bad');
         }
         $legal = $page('legal');
         $terms = $page('terms');
-        $enabled = Req::bool('shop_enabled');
         if ($enabled && ($missing = Shop::missing($legal, $terms))) {
             $enabled = false;
             Session::flash('warn', t('La boutique reste fermée : publie d’abord ces pages, puis choisis-les ci-dessous : {pages}.', ['pages' => implode(', ', $missing)]));

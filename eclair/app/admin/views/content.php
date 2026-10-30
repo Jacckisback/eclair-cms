@@ -50,7 +50,8 @@ $home = (string) Settings::get('home');
             <a href="<?= e(admin_url('edit/' . $e['id'])) ?>"><?= e($e['title']) ?></a>
             <small><?= e($types[$e['type']] ?? t('Page')) ?><?= ($e['price'] ?? '') !== '' ? ' · ' . e(Shop::money((string) $e['price'], \Eclair\I18n::lang() === 'zh' ? 'en' : \Eclair\I18n::lang())) : '' ?><?= $e['id'] === $home ? ' · 🏠 ' . e(t('Accueil')) : '' ?> · <?= e($path) ?><?= $e['lang'] !== Settings::get('lang') ? ' · ' . e(strtoupper($e['lang'])) : '' ?><?= $e['noindex'] ? ' · noindex' : '' ?></small>
           </td>
-          <td><?= $visible ? '<span class="badge ok">' . e(t('Publié')) . '</span>' : ($e['status'] === 'published' ? '<span class="badge brand">' . e(t('Programmé')) . ' · ' . e(fmt_date((int) $e['date'], \Eclair\I18n::lang())) . '</span>' : '<span class="badge">' . e(t('Brouillon')) . '</span>') ?></td>
+          <td><?= $visible ? '<span class="badge ok">' . e(t('Publié')) . '</span>' : ($e['status'] !== 'published' ? '<span class="badge">' . e(t('Brouillon')) . '</span>'
+              : ((int) $e['date'] > time() ? '<span class="badge brand">' . e(t('Programmé')) . ' · ' . e(fmt_date((int) $e['date'], \Eclair\I18n::lang())) . '</span>' : '<span class="badge warn">' . e(t('Boutique fermée')) . '</span>')) ?></td>
           <td><span class="score <?= $cls((int) $e['score']['seo']) ?>"><?= (int) $e['score']['seo'] ?></span></td>
           <td><span class="score <?= $cls((int) $e['score']['geo']) ?>"><?= (int) $e['score']['geo'] ?></span></td>
           <td class="small muted"><?= e(ago((int) $e['updated'])) ?></td>

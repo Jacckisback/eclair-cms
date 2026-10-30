@@ -123,7 +123,8 @@ $cls = static fn (int $s): string => $s >= 80 ? 'good' : ($s >= 50 ? 'ok' : 'bad
       <?php foreach ($v['recent'] as $e): ?>
         <tr>
           <td class="title-cell"><a href="<?= e(admin_url('edit/' . $e['id'])) ?>"><?= e($e['title']) ?></a><small><?= e(['post' => t('Article'), 'product' => t('Produit')][$e['type']] ?? t('Page')) ?> · <?= e(ago((int) $e['updated'])) ?></small></td>
-          <td class="right"><?= Content::visible($e) ? '<span class="badge ok">' . e(t('Publié')) . '</span>' : ($e['status'] === 'published' ? '<span class="badge brand">' . e(t('Programmé')) . '</span>' : '<span class="badge">' . e(t('Brouillon')) . '</span>') ?></td>
+          <td class="right"><?= Content::visible($e) ? '<span class="badge ok">' . e(t('Publié')) . '</span>' : ($e['status'] !== 'published' ? '<span class="badge">' . e(t('Brouillon')) . '</span>'
+              : ((int) $e['date'] > time() ? '<span class="badge brand">' . e(t('Programmé')) . '</span>' : '<span class="badge warn">' . e(t('Boutique fermée')) . '</span>')) ?></td>
         </tr>
       <?php endforeach ?>
     </tbody></table>

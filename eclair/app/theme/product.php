@@ -56,7 +56,7 @@ $button = Shop::button($lang);
           <?php endif ?>
         </p>
       <?php endif ?>
-      <p class="stock stock-<?= e($p['availability']) ?>"><?= e(Theme::t($p['availability'], $lang)) ?></p>
+      <p class="stock stock-<?= e($entry['availability']) ?>"><?= e(Theme::t($entry['availability'], $lang)) ?></p>
       <?php if ($item['summary'] !== ''): ?><p class="product-lead"><?= nl2br(e($item['summary'])) ?></p><?php endif ?>
 
       <?php if (count($offers) > 1): ?>

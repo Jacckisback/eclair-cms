@@ -560,7 +560,7 @@ final class Seo
                 $lines[] = '  - ' . Blocks::mdText($o['label']) . ($o['price'] !== '' ? ' — ' . Shop::money($o['price'], $lang) : '') . ' · ' . Theme::t($o['availability'], $lang);
             }
         }
-        if (Shop::enabled() && $p['availability'] !== 'out_of_stock' && array_filter(array_column(Shop::offers($item), 'link'))) {
+        if (Shop::enabled() && $entry['availability'] !== 'out_of_stock' && array_filter(array_column(Shop::offers($item), 'link'))) {
             $lines[] = '- ' . Shop::button($lang) . ' : ' . $url;
         }
         return implode("\n", $lines) . "\n\n";

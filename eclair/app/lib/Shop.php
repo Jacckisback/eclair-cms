@@ -128,10 +128,11 @@ final class Shop
         if (!$p['variants']) {
             return [['label' => '', 'price' => $p['price'], 'link' => $p['link'], 'availability' => $p['availability']]];
         }
+        // Un lien Stripe encaisse un montant fixé dans Stripe : une variante à un autre prix n'hérite pas du lien du produit.
         return array_map(fn (array $v): array => [
             'label' => $v['label'],
             'price' => $v['price'] !== '' ? $v['price'] : $p['price'],
-            'link' => $v['link'] !== '' ? $v['link'] : $p['link'],
+            'link' => $v['link'] !== '' ? $v['link'] : ($v['price'] === '' || $v['price'] === $p['price'] ? $p['link'] : ''),
             'availability' => $p['availability'] === 'out_of_stock' ? 'out_of_stock' : $v['availability'],
         ], $p['variants']);
     }

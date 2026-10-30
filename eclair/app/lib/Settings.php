@@ -203,8 +203,8 @@ final class Settings
             (string) self::get('admin_path'),
             (string) self::get('blog.base'),
             $words['search'],
-            ltrim(Shop::path(), '/'),
-            'products',
+            // L'adresse de la boutique n'est réservée qu'une fois la boutique configurée : une page existante garde la sienne.
+            Shop::enabled() || (string) self::get('shop.base') !== '' ? ltrim(Shop::path(), '/') : '',
         ]));
     }
 }

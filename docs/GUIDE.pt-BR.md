@@ -34,7 +34,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (415 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) (416 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -412,7 +412,7 @@ tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<v
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 367 verificações unitárias e HTTP
+php tests/run.php                                  # 374 verificações unitárias e HTTP
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 

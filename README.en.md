@@ -61,7 +61,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>415 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>416 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -174,7 +174,7 @@ The shop only opens once your legal notice and terms of sale are published. Step
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 415 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 416 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -282,7 +282,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) archive (415 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.3.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.3.0.zip) archive (416 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
@@ -309,7 +309,7 @@ PHP 8.1+ with no framework and no Composer: plain classes in `eclair/app/lib/`, 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                                           # 367 unit and HTTP checks
+php tests/run.php                                                           # 374 unit and HTTP checks
 php tools/build.php                                                         # ready-to-ship archive
 ```
 

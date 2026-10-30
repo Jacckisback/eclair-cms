@@ -5,6 +5,7 @@
 declare(strict_types=1);
 
 use Eclair\AiTools;
+use Eclair\Content;
 use Eclair\Settings;
 use Eclair\Shop;
 use Eclair\Store;
@@ -58,6 +59,19 @@ $offers = Shop::offers(['product' => $n]);
 check('variantes : prix et lien hérités du produit', $offers[0]['price'] === '25.00' && $offers[1]['price'] === '29.90' && $offers[1]['link'] === 'https://buy.stripe.com/x');
 $out = Shop::offers(['product' => ['availability' => 'out_of_stock'] + $n]);
 check('produit épuisé : toutes les variantes épuisées', array_unique(array_column($out, 'availability')) === ['out_of_stock']);
+$v2 = Shop::offers(['product' => Shop::normalize(['price' => '25', 'link' => 'https://buy.stripe.com/p25',
+    'variants' => [['label' => 'M'], ['label' => 'L', 'price' => '25'], ['label' => 'XL', 'price' => '30']]])]);
+check('variante à un autre prix : jamais le lien du produit (Stripe encaisserait son prix)', $v2[0]['link'] === 'https://buy.stripe.com/p25'
+    && $v2[1]['link'] === 'https://buy.stripe.com/p25' && $v2[2]['link'] === '');
+check('adresse de la boutique libre tant qu’elle n’est pas configurée', !in_array('boutique', Settings::reserved(), true) && !in_array('products', Settings::reserved(), true));
+$page = ['type' => 'page', 'title' => 'Boutique', 'slug' => 'boutique', 'blocks' => []];
+$kept = Content::build($page, ['id' => 'u1']);
+Settings::save(['shop' => ['base' => 'boutique']]);
+$again = Content::build($page, ['id' => 'u1'], $kept);
+$fresh = Content::build($page, ['id' => 'u1']);
+check('mise à jour depuis la 1.2 : une page « boutique » garde son adresse', $kept['slug'] === 'boutique' && $again['slug'] === 'boutique' && $fresh['slug'] === 'boutique-2',
+    $kept['slug'] . ' ' . $again['slug'] . ' ' . $fresh['slug']);
+Settings::save(['shop' => ['base' => '']]);
 check('pays de livraison', Shop::parseCountries('fr, be;ch xx1 FR') === ['FR', 'BE', 'CH'] && Shop::parseCountries('CN，HK、TW') === ['CN', 'HK', 'TW']);
 $defs = (string) json_encode(AiTools::definitions());
 check('assistant : pas de fiche produit tant que la boutique est fermée', !str_contains($defs, '"enum":["post","page","product"]') && !str_contains($defs, '"product":{'));
@@ -129,6 +143,12 @@ try {
     $shopFields = ['shop_enabled' => '1', 'shop_base' => 'boutique', 'shop_title' => '', 'shop_description' => 'Pièces uniques tournées à Lyon.', 'currency' => 'EUR',
         'button' => '', 'shop_per_page' => '12', 'shipping_price' => '4,90', 'free_from' => '60', 'days_min' => '2', 'days_max' => '4', 'countries' => 'fr, be',
         'returns_days' => '14', 'legal' => '', 'terms' => '', 'delivery' => '', 'thanks' => ''];
+    // Une page existante à l'adresse de la boutique (site mis à jour depuis la 1.2) n'est ni renommée ni masquée.
+    $squat = $api('api/save', ['type' => 'page', 'title' => 'Notre boutique', 'slug' => 'boutique', 'status' => 'published', 'blocks' => [['type' => 'paragraph', 'text' => 'Ancienne page.']]]);
+    $settingsForm('shop', $shopFields);
+    check('page existante à l’adresse de la boutique : ouverture refusée, page intacte', ($squat['json']['item']['slug'] ?? '') === 'boutique'
+        && !$site()['shop']['enabled'] && str_contains($v->req('GET', '/boutique')['body'], 'Ancienne page.'));
+    $api('api/delete', ['id' => (string) ($squat['json']['item']['id'] ?? ''), 'redirect' => '']);
     $settingsForm('shop', $shopFields);
     check('boutique : ouverture refusée sans mentions légales ni CGV', !$site()['shop']['enabled'] && $v->req('GET', '/boutique')['status'] === 404);
     $legal = $api('api/save', ['type' => 'page', 'title' => 'Mentions légales', 'status' => 'published', 'blocks' => [['type' => 'paragraph', 'text' => 'Éditeur : Atelier Test.']]]);
@@ -183,15 +203,23 @@ try {
     // Variantes, et lien piégé.
     $tasse = $api('api/save', ['type' => 'product', 'title' => 'Tasse à café', 'status' => 'published', 'category' => $catId, 'blocks' => [['type' => 'paragraph', 'text' => 'Tasse de 12 cl.']],
         'product' => ['price' => '18', 'link' => 'https://buy.stripe.com/test_tasse', 'variants' => [
-            ['label' => 'Blanche'], ['label' => 'Noire', 'price' => '20', 'link' => 'https://buy.stripe.com/test_noire'], ['label' => 'Bleue', 'availability' => 'out_of_stock']]]]);
+            ['label' => 'Blanche'], ['label' => 'Noire', 'price' => '20', 'link' => 'https://buy.stripe.com/test_noire'], ['label' => 'Bleue', 'availability' => 'out_of_stock'],
+            ['label' => 'Géante', 'price' => '25']]]]);
     $tslug = (string) ($tasse['json']['item']['slug'] ?? '');
     $res = $v->req('GET', '/boutique/' . $tslug);
     $group = $ld($res['body'])['ProductGroup'] ?? [];
-    check('variantes : choix sans JavaScript', substr_count($res['body'], 'type="radio" name="variant"') === 3 && str_contains($res['body'], "À partir de 18\u{00A0}€")
+    check('variantes : choix sans JavaScript', substr_count($res['body'], 'type="radio" name="variant"') === 4 && str_contains($res['body'], "À partir de 18\u{00A0}€")
         && str_contains($res['body'], 'test_tasse?client_reference_id=' . $tslug . '-1') && str_contains($res['body'], 'test_noire?client_reference_id=' . $tslug . '-2')
         && str_contains($res['body'], 'Bleue · Épuisé'));
+    check('variante à un autre prix sans lien : bouton désactivé, signalée par l’analyse', str_contains($res['body'], 'Géante · Bientôt disponible')
+        && substr_count($res['body'], 'test_tasse?') === 1 && str_contains((string) json_encode($tasse['json']['analysis'] ?? []), 'autre prix sans lien'));
     check('variantes : JSON-LD ProductGroup', count($group['hasVariant'] ?? []) === 3 && ($group['hasVariant'][1]['offers']['price'] ?? '') === '20.00'
         && ($group['hasVariant'][2]['offers']['availability'] ?? '') === 'https://schema.org/OutOfStock', json_encode($group));
+    $pichet = $api('api/save', ['type' => 'product', 'title' => 'Pichet', 'status' => 'published', 'product' => ['price' => '35', 'link' => 'https://buy.stripe.com/test_pichet',
+        'variants' => [['label' => 'Petit', 'availability' => 'out_of_stock'], ['label' => 'Grand', 'availability' => 'out_of_stock']]]]);
+    $res = $v->req('GET', '/boutique/' . ($pichet['json']['item']['slug'] ?? 'x'));
+    check('toutes les variantes épuisées : produit affiché épuisé', str_contains($res['body'], 'class="stock stock-out_of_stock"')
+        && str_contains($v->req('GET', '/llms.txt')['body'], "35\u{00A0}€ · Épuisé"));
     $trap = $api('api/save', ['type' => 'product', 'title' => 'Vase', 'status' => 'published', 'product' => ['price' => '45', 'link' => 'javascript:alert(1)']]);
     $res = $v->req('GET', '/boutique/' . ($trap['json']['item']['slug'] ?? 'x'));
     check('lien de paiement piégé ignoré, bouton désactivé', $res['status'] === 200 && !str_contains($res['body'], 'javascript:') && str_contains($res['body'], 'Bientôt disponible')
@@ -220,7 +248,8 @@ try {
     foreach ($items as $it) {
         $byTitle[(string) $it->title] = $g($it);
     }
-    check('flux Google Merchant : XML valide, offres achetables seulement', $xml !== false && count($byTitle) === 4 && !isset($byTitle['Vase']), implode(' | ', array_keys($byTitle)));
+    check('flux Google Merchant : XML valide, offres achetables seulement', $xml !== false && count($byTitle) === 6 && !isset($byTitle['Vase']) && !isset($byTitle['Tasse à café — Géante']),
+        implode(' | ', array_keys($byTitle)));
     $gb = $byTitle['Bol en grès émaillé'] ?? null;
     check('flux : prix barré, promo, livraison', $gb && (string) $gb->price === '39.00 EUR' && (string) $gb->sale_price === '29.90 EUR' && (string) $gb->availability === 'in_stock'
         && count($gb->shipping) === 2 && (string) $gb->shipping[0]->price === '4.90 EUR' && (string) $gb->additional_image_link[1] !== '');
@@ -249,6 +278,8 @@ try {
     check('boutique fermée : fiches, catalogue et flux hors ligne', $v->req('GET', '/magasin')['status'] === 404 && $v->req('GET', '/magasin/' . $slug)['status'] === 404
         && $v->req('GET', '/products.xml')['status'] === 404 && !str_contains($v->req('GET', '/sitemap.xml')['body'], '/magasin'));
     check('boutique fermée : bloc Produits vide', !str_contains($v->req('GET', '/vitrine')['body'], 'class="card product-card"'));
+    $list = $c->req('GET', '/gestion/content?type=product')['body'];
+    check('boutique fermée : produits marqués comme tels dans l’administration', str_contains($list, 'badge warn">Boutique fermée') && !str_contains($list, 'badge brand">Programmé'));
 } finally {
     proc_terminate($server);
     exec('rm -rf ' . escapeshellarg($copy));
