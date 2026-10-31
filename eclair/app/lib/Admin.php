@@ -139,11 +139,21 @@ final class Admin
 
     public static function partial(string $name, array $v): string
     {
+        // Archive : vues compressées (gzip, lues par zlib) depuis la 1.8 ; une ancienne vue .php restée d'une mise à jour est ignorée.
+        $file = ECLAIR_ROOT . '/app/admin/views/' . $name . '.php';
+        if (is_file($file . '.gz')) {
+            if (!extension_loaded('zlib')) {
+                http_response_code(500);
+                header('Content-Type: text/plain; charset=utf-8');
+                exit("L'extension PHP zlib est indispensable à l'administration d'Éclair : active-la dans le panneau PHP de ton hébergeur.\n");
+            }
+            $file = 'compress.zlib://' . $file . '.gz';
+        }
         ob_start();
         try {
             (static function (string $__file, array $v): void {
                 include $__file;
-            })(ECLAIR_ROOT . '/app/admin/views/' . $name . '.php', $v);
+            })($file, $v);
         } catch (\Throwable $e) {
             ob_end_clean();
             throw $e;

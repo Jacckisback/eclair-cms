@@ -331,22 +331,25 @@
     const encode = (d) => btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(d)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     const fill = (d) => $$('[data-d]', box).forEach((el) => { if (d[el.dataset.d] !== undefined) el.value = d[el.dataset.d]; });
     // Vignette dessinée de la direction : couleurs, police (par famille), coins et composition de la bannière.
-    const FAMILY = { serif: 'Georgia,serif', slab: 'Rockwell,Georgia,serif', sans: '"Helvetica Neue",Arial,sans-serif', condensed: '"Arial Narrow",sans-serif', rounded: 'ui-rounded,"Arial Rounded MT",sans-serif' };
+    const FAMILY = { serif: 'Georgia,serif', slab: 'Rockwell,Georgia,serif', sans: "'Helvetica Neue',Arial,sans-serif", condensed: "'Arial Narrow',sans-serif", rounded: "ui-rounded,'Arial Rounded MT',sans-serif" };
     const SYSTEM = { serif: 'serif', oldstyle: 'serif', rounded: 'rounded' };
+    const tag = (name, a, inner) => '<' + name + Object.keys(a).map((k) => ' ' + k + '="' + a[k] + '"').join('') + (inner === undefined ? '/>' : '>' + inner + '</' + name + '>');
     const mock = (d) => {
       if (!['ground', 'surface', 'ink', 'muted', 'accent'].every((k) => hex.test(d[k] || ''))) return '';
       const [cat, weight] = fonts[d.display] || [SYSTEM[d.display] || 'sans', 700];
       const r = { none: 0, soft: 3, round: 7 }[d.radius] ?? 3;
       const on = hex.test(d.on_accent || '') ? d.on_accent : '#ffffff';
-      const word = d.case === 'upper' ? 'AG' : 'Ag';
-      const font = (x, y, size, fill, anchor = 'start') => `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" font-family='${FAMILY[cat]}' font-weight="${weight >= 600 ? 700 : 400}"${cat === 'condensed' ? ' font-stretch="condensed"' : ''}${d.case === 'upper' ? ' letter-spacing="1"' : ''}>${word}</text>`;
-      const bar = (x, y, w, fill, h = 3) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1" fill="${fill}"/>`;
-      const pic = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${d.surface}"/><path d="M${x + w * 0.12} ${y + h * 0.82}l${w * 0.26}-${h * 0.34} ${w * 0.18} ${h * 0.2} ${w * 0.16}-${h * 0.14} ${w * 0.16} ${h * 0.28}z" fill="${d.muted}" opacity=".35"/>`;
-      const btn = (x, y, w = 30, h = 9) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(r, h / 2)}" fill="${d.accent}"/><rect x="${x + w * 0.25}" y="${y + h / 2 - 0.8}" width="${w * 0.5}" height="1.6" fill="${on}"/>`;
-      let s = `<rect width="160" height="100" fill="${d.ground}"/>` + bar(10, 8, 22, d.ink, 4) + bar(104, 9, 12, d.muted, 2.5) + bar(122, 9, 12, d.muted, 2.5) + bar(140, 9, 10, d.muted, 2.5);
-      if (d.sections === 'bands' && ['split', 'editorial'].includes(d.hero)) s += `<rect y="88" width="160" height="12" fill="${d.surface}"/>`;
+      const font = (x, y, size, fill, anchor) => tag('text', Object.assign({ x, y, 'font-size': size, fill, 'text-anchor': anchor || 'start', 'font-family': FAMILY[cat], 'font-weight': weight >= 600 ? 700 : 400 },
+        cat === 'condensed' ? { 'font-stretch': 'condensed' } : {}, d.case === 'upper' ? { 'letter-spacing': 1 } : {}), d.case === 'upper' ? 'AG' : 'Ag');
+      const bar = (x, y, w, fill, h) => tag('rect', { x, y, width: w, height: h || 3, rx: 1, fill });
+      const pic = (x, y, w, h) => tag('rect', { x, y, width: w, height: h, rx: r, fill: d.surface }) + tag('path', { fill: d.muted, opacity: 0.35,
+        d: 'M' + (x + w * 0.12) + ' ' + (y + h * 0.82) + 'l' + w * 0.26 + ' ' + -h * 0.34 + ' ' + w * 0.18 + ' ' + h * 0.2 + ' ' + w * 0.16 + ' ' + -h * 0.14 + ' ' + w * 0.16 + ' ' + h * 0.28 + 'z' });
+      const btn = (x, y, w = 30, h = 9) => tag('rect', { x, y, width: w, height: h, rx: Math.min(r, h / 2), fill: d.accent })
+        + tag('rect', { x: x + w * 0.25, y: y + h / 2 - 0.8, width: w * 0.5, height: 1.6, fill: on });
+      let s = tag('rect', { width: 160, height: 100, fill: d.ground }) + bar(10, 8, 22, d.ink, 4) + bar(104, 9, 12, d.muted, 2.5) + bar(122, 9, 12, d.muted, 2.5) + bar(140, 9, 10, d.muted, 2.5);
+      if (d.sections === 'bands' && ['split', 'editorial'].includes(d.hero)) s += tag('rect', { y: 88, width: 160, height: 12, fill: d.surface });
       if (d.hero === 'fullbleed') {
-        s += pic(6, 20, 148, 74) + `<rect x="6" y="58" width="148" height="36" fill="#000" opacity=".5"/>` + font(14, 79, 20, '#ffffff') + btn(14, 83, 24, 7);
+        s += pic(6, 20, 148, 74) + tag('rect', { x: 6, y: 58, width: 148, height: 36, fill: '#000', opacity: 0.5 }) + font(14, 79, 20, '#ffffff') + btn(14, 83, 24, 7);
       } else if (d.hero === 'poster') {
         s += font(10, 50, 34, d.ink) + bar(10, 57, 92, d.muted) + bar(10, 63, 64, d.muted) + btn(10, 70) + pic(10, 84, 140, 14);
       } else if (d.hero === 'editorial') {
@@ -356,7 +359,7 @@
       } else {
         s += font(10, 44, 24, d.ink) + bar(10, 51, 60, d.muted) + bar(10, 57, 44, d.muted) + btn(10, 64) + pic(88, 20, 62, 56);
       }
-      return `<svg viewBox="0 0 160 100" aria-hidden="true">${s}</svg>`;
+      return tag('svg', { viewBox: '0 0 160 100', 'aria-hidden': 'true' }, s);
     };
     const draw = (input, d) => { input.parentNode.querySelector('.dir-mock').innerHTML = mock(d || JSON.parse(input.dataset.direction)); };
     $$('[name=direction_id]', grid).forEach((input) => draw(input));

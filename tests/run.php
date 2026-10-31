@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 define('ECLAIR', true);
 define('ECLAIR_VERSION', 'test');
-define('ECLAIR_ROOT', dirname(__DIR__) . '/eclair');
+define('ECLAIR_ROOT', getenv('ECLAIR_TEST_ROOT') ?: dirname(__DIR__) . '/eclair'); // ECLAIR_TEST_ROOT : tester une archive décompressée
 define('ECLAIR_DATA', sys_get_temp_dir() . '/eclair-test-data-' . getmypid());
 define('ECLAIR_DEBUG', true);
 define('ECLAIR_TESTING', true);

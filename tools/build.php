@@ -4,7 +4,8 @@
  *   1. calcule l'empreinte SHA-256 de chaque fichier (app/manifest.php, pour le contrôle d'intégrité) ;
  *   2. crée dist/eclair-cms-<version>.zip, prêt à téléverser sur un hébergement.
  * Dans l'archive, le PHP est compacté (php -w : ni commentaires ni espaces superflus), le HTML des vues de l'administration
- * perd son indentation et le JavaScript et le CSS de l'administration sont allégés (tools/minify.php) : même code, plus léger.
+ * perd son indentation puis ces vues sont compressées (app/admin/views/*.php.gz, lues par zlib), et le JavaScript et le CSS
+ * de l'administration sont allégés (tools/minify.php) : même code, plus léger.
  * Les fichiers publics du site (site.js, thèmes, gabarits) restent à l'octet près : le rendu public ne change jamais.
  * Son manifeste porte les empreintes de ces fichiers allégés ; celui du dépôt, les empreintes des sources
  * (128 premiers bits du SHA-256, en JSON compact).
@@ -96,6 +97,11 @@ $shipped = [];
 $size = 0;
 foreach ($files as $rel) {
     $body = shipped($root, $rel);
+    // Vues de l'administration compressées (gzip, lues par zlib) : un tiers de leur poids. Le site public et l'installateur n'en ont pas.
+    if (preg_match('~^app/admin/views/.+\.php$~', $rel)) {
+        $body = (string) gzencode($body, 9);
+        $rel .= '.gz';
+    }
     $shipped[$rel] = substr(hash('sha256', $body), 0, 32);
     $size += strlen($body);
     $zip->addFromString('eclair/' . $rel, $body);

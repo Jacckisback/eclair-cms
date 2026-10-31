@@ -1,7 +1,8 @@
 Éclair CMS inclut des éléments de tiers.
 
-Icônes de l’administration (eclair/app/lib/Icons.php) : une partie des tracés SVG
-est dérivée des icônes Lucide (https://lucide.dev), distribuées sous la licence suivante.
+Icônes de l’administration (eclair/app/lib/Icons.php) et icônes dessinées des directions
+artistiques (eclair/app/lib/Design.php) : une partie des tracés SVG est dérivée des icônes
+Lucide (https://lucide.dev), distribuées sous la licence suivante.
 
 ------------------------------------------------------------------------------
 
@@ -48,3 +49,35 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+==============================================================================
+
+Directions artistiques et Score Design (eclair/app/lib/Design.php, eclair/app/theme/directions.css,
+eclair/app/lib/Analyzer.php, eclair/app/lib/AdminAi.php) : la méthode (dériver un univers visuel
+du monde de l’activité, éviter le choix par défaut de la catégorie), les garde-fous de conception
+(contrastes, mesure du texte, surfaces du navigateur, tics du « design générique ») et plusieurs
+règles de détection sont adaptés d’Impeccable (https://github.com/pbakaus/impeccable), réécrits
+pour Éclair. Impeccable est distribué sous la licence Apache 2.0 :
+
+   Copyright 2025 Paul Bakaus
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+==============================================================================
+
+Polices des directions artistiques : elles ne sont pas incluses dans l’archive. Quand une
+direction est choisie, le serveur du site télécharge une seule fois la police de titre depuis
+Fontsource (https://fontsource.org), qui redistribue les polices de Google Fonts, puis la sert
+lui-même. Chacune est sous licence SIL Open Font License 1.1 (https://openfontlicense.org),
+qui en permet l’usage sur un site web, y compris commercial ; ses mentions de copyright et de
+licence restent dans le fichier de police.
