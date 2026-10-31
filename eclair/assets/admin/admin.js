@@ -307,22 +307,91 @@
     });
   }
 
-  /* ── Réglages › Apparence : thèmes et aperçu en direct ── */
+  /* ── Réglages › Apparence : directions artistiques, thèmes classiques et aperçu en direct ── */
   const look = $('#theme-preview');
   if (look) {
     const form = look.closest('form');
     const frame = $('iframe', look);
     const field = (name) => form.elements[name];
+    const box = $('#directions');
+    const grid = $('#dir-grid');
+    const fonts = JSON.parse(box.dataset.fonts || '{}');
+    const hex = /^#[0-9a-f]{6}$/i;
     let timer = 0;
+    const style = () => (form.querySelector('[name=style]:checked') || {}).value || 'classic';
+    const picked = () => form.querySelector('[name=direction_id]:checked');
+    // Direction en cours : la carte choisie, ajustée par le panneau « Ajuster ».
+    const current = () => {
+      const card = picked();
+      const d = card ? JSON.parse(card.dataset.direction) : {};
+      $$('[data-d]', box).forEach((el) => { d[el.dataset.d] = el.value; });
+      delete d.mine;
+      return d;
+    };
+    const encode = (d) => btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(d)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const fill = (d) => $$('[data-d]', box).forEach((el) => { if (d[el.dataset.d] !== undefined) el.value = d[el.dataset.d]; });
+    // Vignette dessinée de la direction : couleurs, police (par famille), coins et composition de la bannière.
+    const FAMILY = { serif: 'Georgia,serif', slab: 'Rockwell,Georgia,serif', sans: '"Helvetica Neue",Arial,sans-serif', condensed: '"Arial Narrow",sans-serif', rounded: 'ui-rounded,"Arial Rounded MT",sans-serif' };
+    const SYSTEM = { serif: 'serif', oldstyle: 'serif', rounded: 'rounded' };
+    const mock = (d) => {
+      if (!['ground', 'surface', 'ink', 'muted', 'accent'].every((k) => hex.test(d[k] || ''))) return '';
+      const [cat, weight] = fonts[d.display] || [SYSTEM[d.display] || 'sans', 700];
+      const r = { none: 0, soft: 3, round: 7 }[d.radius] ?? 3;
+      const on = hex.test(d.on_accent || '') ? d.on_accent : '#ffffff';
+      const word = d.case === 'upper' ? 'AG' : 'Ag';
+      const font = (x, y, size, fill, anchor = 'start') => `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" font-family='${FAMILY[cat]}' font-weight="${weight >= 600 ? 700 : 400}"${cat === 'condensed' ? ' font-stretch="condensed"' : ''}${d.case === 'upper' ? ' letter-spacing="1"' : ''}>${word}</text>`;
+      const bar = (x, y, w, fill, h = 3) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1" fill="${fill}"/>`;
+      const pic = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${d.surface}"/><path d="M${x + w * 0.12} ${y + h * 0.82}l${w * 0.26}-${h * 0.34} ${w * 0.18} ${h * 0.2} ${w * 0.16}-${h * 0.14} ${w * 0.16} ${h * 0.28}z" fill="${d.muted}" opacity=".35"/>`;
+      const btn = (x, y, w = 30, h = 9) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(r, h / 2)}" fill="${d.accent}"/><rect x="${x + w * 0.25}" y="${y + h / 2 - 0.8}" width="${w * 0.5}" height="1.6" fill="${on}"/>`;
+      let s = `<rect width="160" height="100" fill="${d.ground}"/>` + bar(10, 8, 22, d.ink, 4) + bar(104, 9, 12, d.muted, 2.5) + bar(122, 9, 12, d.muted, 2.5) + bar(140, 9, 10, d.muted, 2.5);
+      if (d.sections === 'bands' && ['split', 'editorial'].includes(d.hero)) s += `<rect y="88" width="160" height="12" fill="${d.surface}"/>`;
+      if (d.hero === 'fullbleed') {
+        s += pic(6, 20, 148, 74) + `<rect x="6" y="58" width="148" height="36" fill="#000" opacity=".5"/>` + font(14, 79, 20, '#ffffff') + btn(14, 83, 24, 7);
+      } else if (d.hero === 'poster') {
+        s += font(10, 50, 34, d.ink) + bar(10, 57, 92, d.muted) + bar(10, 63, 64, d.muted) + btn(10, 70) + pic(10, 84, 140, 14);
+      } else if (d.hero === 'editorial') {
+        s += pic(98, 18, 52, 68) + font(10, 66, 24, d.ink) + bar(10, 72, 62, d.muted) + bar(10, 78, 42, d.muted);
+      } else if (d.hero === 'centered') {
+        s += font(80, 42, 24, d.ink, 'middle') + bar(50, 49, 60, d.muted) + bar(58, 55, 44, d.muted) + btn(65, 62) + pic(26, 78, 108, 22);
+      } else {
+        s += font(10, 44, 24, d.ink) + bar(10, 51, 60, d.muted) + bar(10, 57, 44, d.muted) + btn(10, 64) + pic(88, 20, 62, 56);
+      }
+      return `<svg viewBox="0 0 160 100" aria-hidden="true">${s}</svg>`;
+    };
+    const draw = (input, d) => { input.parentNode.querySelector('.dir-mock').innerHTML = mock(d || JSON.parse(input.dataset.direction)); };
+    $$('[name=direction_id]', grid).forEach((input) => draw(input));
     const show = () => {
-      const q = new URLSearchParams({
-        theme: (form.querySelector('[name=theme]:checked') || {}).value || 'eclair',
-        accent: field('accent').value, font_head: field('font_head').value, font_body: field('font_body').value,
-        header: field('header').value, cards: field('cards').value, dark: field('dark').value, path: $('#preview-page').value,
-      });
+      const q = new URLSearchParams({ header: field('header').value, cards: field('cards').value, path: $('#preview-page').value });
+      if (style() === 'direction' && picked()) {
+        const d = current();
+        field('direction').value = encode(d);
+        q.set('direction', field('direction').value);
+        draw(picked(), d);
+      } else {
+        q.set('theme', (form.querySelector('[name=theme]:checked') || {}).value || 'eclair');
+        ['accent', 'font_head', 'font_body', 'dark'].forEach((name) => q.set(name, field(name).value));
+      }
       frame.src = look.dataset.src + '?' + q;
     };
     const refresh = () => { clearTimeout(timer); timer = setTimeout(show, 250); };
+    // Style : direction artistique ou thème classique (les réglages de l'autre restent enregistrés).
+    const toggle = () => {
+      const s = style();
+      $$('[data-style]', form).forEach((el) => { el.hidden = el.dataset.style !== s; });
+      if (s === 'direction' && !picked()) {
+        const first = $('[name=direction_id]', grid);
+        first.checked = true;
+        fill(JSON.parse(first.dataset.direction));
+      }
+    };
+    $$('[name=style]', form).forEach((radio) => radio.addEventListener('change', () => { toggle(); show(); }));
+    // Choisir une direction remplit le panneau « Ajuster » avec ses valeurs.
+    grid.addEventListener('change', (e) => {
+      if (e.target.name !== 'direction_id') return;
+      fill(JSON.parse(e.target.dataset.direction));
+      refresh();
+    });
+    $$('[data-d]', box).forEach((el) => { el.addEventListener('input', refresh); el.addEventListener('change', refresh); });
     // Choisir un thème applique ses réglages conseillés (modifiables ensuite).
     $$('[name=theme]', form).forEach((radio) => radio.addEventListener('change', () => {
       const d = radio.dataset;
@@ -337,11 +406,13 @@
       field(name).addEventListener('input', refresh);
       field(name).addEventListener('change', refresh);
     });
+    form.addEventListener('submit', () => { if (style() === 'direction' && picked()) field('direction').value = encode(current()); });
     $('#preview-page').addEventListener('change', show);
     $$('[data-device]', look).forEach((b) => b.addEventListener('click', () => {
       look.classList.toggle('mobile', b.dataset.device === 'mobile');
       $$('[data-device]', look).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     }));
+    toggle();
     show();
   }
 

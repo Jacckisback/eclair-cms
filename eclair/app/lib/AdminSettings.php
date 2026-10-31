@@ -77,6 +77,12 @@ final class AdminSettings
                 $look[$k] = $q($k);
             }
         }
+        // Direction artistique (valeurs du formulaire) ; absente, l'aperçu montre le thème classique choisi.
+        $d = Design::find($q('direction'));
+        $look['direction'] = $d ?? [];
+        if ($d) {
+            Design::fetchFont($d['display']);
+        }
         Theme::preview($look);
         $path = $q('path');
         Site::preview(preg_match('~^/[a-z0-9/_-]*$~', $path) ? $path : '/');
@@ -147,9 +153,23 @@ final class AdminSettings
                     'footer' => Sanitize::multiline(Req::input('footer'), 500),
                     'credit' => Req::bool('credit'),
                 ]];
+                // Direction artistique : les valeurs du formulaire (JavaScript), sinon la direction livrée cochée.
+                $d = [];
+                if (Req::input('style') === 'direction') {
+                    $d = Design::find(Req::input('direction')) ?? Design::find(Req::input('direction_id'));
+                    if ($d === null) {
+                        Admin::back($redirect, t('Choisis une direction artistique.'), 'bad');
+                    }
+                    if (isset(Design::FONTS[$d['display']]) && !Design::fetchFont($d['display'])) {
+                        Session::flash('warn', t('La police des titres n’a pas pu être téléchargée : le site utilise une police de secours. Réessaie plus tard en enregistrant à nouveau.'));
+                    }
+                }
+                $patch['appearance']['direction'] = $d;
+                $was = is_array($s['appearance']['direction'] ?? null) && $s['appearance']['direction'] ? (string) ($s['appearance']['direction']['accent'] ?? '') : $s['appearance']['accent'];
+                $now = $d ? $d['accent'] : $patch['appearance']['accent'];
                 $icon = Media::get($patch['appearance']['favicon']);
-                if ($patch['appearance']['favicon'] !== $s['appearance']['favicon'] || (!$icon && $patch['appearance']['accent'] !== $s['appearance']['accent'])) {
-                    Media::icons($icon, $patch['appearance']['accent']);
+                if ($patch['appearance']['favicon'] !== $s['appearance']['favicon'] || (!$icon && $now !== $was)) {
+                    Media::icons($icon, $now);
                 }
                 $custom = Req::input('custom_css');
                 if (strlen($custom) > Theme::CUSTOM_MAX) {

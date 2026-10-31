@@ -4,6 +4,7 @@ defined('ECLAIR') || exit;
 use Eclair\Admin;
 use Eclair\Ai;
 use Eclair\Content;
+use Eclair\Design;
 use Eclair\Icons;
 use Eclair\Security;
 use Eclair\Seo;
@@ -69,8 +70,81 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         'studio' => [t('Studio'), t('Portfolio minimaliste : noir et blanc, grands titres, images à vif.')],
         'boutique' => [t('Boutique'), t('Pensé pour vendre : photos carrées, en-tête fixe, boutons francs.')],
         'contraste' => [t('Contraste'), t('Lisibilité maximale : grand texte, contrastes forts, liens soulignés.')],
+    ];
+    $cur = $s['appearance']['direction'] ? Design::normalize($s['appearance']['direction']) : null;
+    $tune = $cur ?? Design::find(array_key_first(Design::DIRECTIONS));
+    $dirs = [];
+    if ($cur && !isset(Design::DIRECTIONS[$cur['id']])) {
+        $dirs[$cur['id']] = $cur + ['mine' => true];
+    }
+    foreach (array_keys(Design::DIRECTIONS) as $id) {
+        $dirs[$id] = Design::find($id);
+    }
+    $fonts = [];
+    foreach (Design::FONTS as $id => [, $weight, $cat]) {
+        $fonts[$id] = [$cat, $weight];
+    }
+    $labels = [
+        'case' => [t('Casse des titres'), ['normal' => t('Normale'), 'upper' => t('Capitales')]],
+        'scale' => [t('Taille des titres'), ['regular' => t('Équilibrée'), 'quiet' => t('Discrète'), 'bold' => t('Spectaculaire')]],
+        'radius' => [t('Coins'), ['soft' => t('Adoucis'), 'none' => t('Droits'), 'round' => t('Ronds')]],
+        'density' => [t('Espacement'), ['regular' => t('Normal'), 'compact' => t('Serré'), 'airy' => t('Aéré')]],
+        'surfaces' => [t('Cartes'), ['line' => t('Filet fin'), 'flat' => t('Aplat de couleur'), 'raised' => t('Ombre portée')]],
+        'hero' => [t('Bannière d’accueil'), ['split' => t('Texte et image côte à côte'), 'poster' => t('Affiche : très grand titre'), 'fullbleed' => t('Image plein cadre'), 'editorial' => t('Éditorial : image verticale'), 'centered' => t('Centrée')]],
+        'features' => [t('Bloc « Atouts »'), ['cards' => t('Cartes'), 'rows' => t('Rangées'), 'columns' => t('Colonnes à filet')]],
+        'sections' => [t('Sections'), ['plain' => t('Fond uni'), 'bands' => t('Bandes de couleur')]],
+        'icons' => [t('Icônes des atouts'), ['line' => t('Icônes dessinées'), 'none' => t('Sans icône'), 'emoji' => t('Émojis')]],
     ]; ?>
     <fieldset class="field">
+      <legend class="label"><?= e(t('Style du site')) ?></legend>
+      <div class="style-switch" role="radiogroup">
+        <label class="style-opt"><input type="radio" name="style" value="direction"<?= $cur ? ' checked' : '' ?>>
+          <strong><?= e(t('Direction artistique')) ?></strong><small><?= e(t('Un univers complet : couleurs, police de titre, mises en page. Ton site ne ressemble à aucun autre.')) ?></small></label>
+        <label class="style-opt"><input type="radio" name="style" value="classic"<?= $cur ? '' : ' checked' ?>>
+          <strong><?= e(t('Thème classique')) ?></strong><small><?= e(t('Sobre et polyvalent, polices du système : rien à télécharger.')) ?></small></label>
+      </div>
+    </fieldset>
+    <div data-style="direction" id="directions" data-fonts="<?= e((string) json_encode($fonts)) ?>">
+      <fieldset class="field">
+        <legend class="label"><?= e(t('Direction artistique')) ?></legend>
+        <div class="theme-grid dir-grid" id="dir-grid">
+          <?php foreach ($dirs as $id => $d): ?>
+            <label class="theme-card dir-card">
+              <input type="radio" name="direction_id" value="<?= e($id) ?>"<?= $cur && $cur['id'] === $id ? ' checked' : '' ?> data-direction="<?= e((string) json_encode($d, JSON_UNESCAPED_UNICODE)) ?>">
+              <span class="dir-mock" aria-hidden="true"></span>
+              <span class="theme-name"><?= e(isset($d['mine']) ? ($d['name'] !== '' ? $d['name'] : t('Ta direction')) : t($d['name'])) ?></span>
+              <span class="theme-desc"><?= e(isset($d['mine']) ? ($d['idea'] !== '' ? $d['idea'] : t('Ta direction actuelle, sur mesure.')) : t($d['idea'])) ?></span>
+            </label>
+          <?php endforeach ?>
+        </div>
+        <span class="hint"><?= e(t('Les couleurs sont vérifiées pour rester lisibles (normes WCAG). La police des titres est téléchargée une fois par ton serveur puis servie par ton site : aucun service tiers pour tes visiteurs.')) ?></span>
+      </fieldset>
+      <details class="dir-tune">
+        <summary><?= e(t('Ajuster la direction : couleurs, polices, mises en page')) ?></summary>
+        <div class="dir-colors">
+          <?php foreach (['ground' => t('Fond'), 'surface' => t('Bandes et cartes'), 'ink' => t('Texte'), 'muted' => t('Texte secondaire'), 'accent' => t('Accent')] as $k => $label): ?>
+            <label class="field"><span class="label"><?= e($label) ?></span><input type="color" name="d_<?= e($k) ?>" value="<?= e($tune[$k]) ?>" data-d="<?= e($k) ?>"></label>
+          <?php endforeach ?>
+        </div>
+        <div class="grid-2">
+          <label class="field"><span class="label"><?= e(t('Police des titres')) ?></span><select name="d_display" data-d="display">
+            <optgroup label="<?= e(t('Polices de caractère (téléchargées une fois)')) ?>">
+              <?php foreach (Design::FONTS as $id => [$family, , , $desc]): ?><option value="<?= e($id) ?>"<?= $tune['display'] === $id ? ' selected' : '' ?>><?= e($family . ' — ' . t($desc)) ?></option><?php endforeach ?>
+            </optgroup>
+            <optgroup label="<?= e(t('Polices système (zéro téléchargement)')) ?>">
+              <?php foreach (Design::TEXT as $id): ?><option value="<?= e($id) ?>"<?= $tune['display'] === $id ? ' selected' : '' ?>><?= e(t(Theme::FONTS[$id][0])) ?></option><?php endforeach ?>
+            </optgroup></select></label>
+          <label class="field"><span class="label"><?= e(t('Police du texte')) ?></span><select name="d_text" data-d="text">
+            <?php foreach (Design::TEXT as $id): ?><option value="<?= e($id) ?>"<?= $tune['text'] === $id ? ' selected' : '' ?>><?= e(t(Theme::FONTS[$id][0])) ?></option><?php endforeach ?></select></label>
+          <?php foreach ($labels as $k => [$label, $options]): ?>
+            <label class="field"><span class="label"><?= e($label) ?></span><select name="d_<?= e($k) ?>" data-d="<?= e($k) ?>">
+              <?php foreach ($options as $value => $text): ?><option value="<?= e($value) ?>"<?= $tune[$k] === $value ? ' selected' : '' ?>><?= e($text) ?></option><?php endforeach ?></select></label>
+          <?php endforeach ?>
+        </div>
+      </details>
+      <input type="hidden" name="direction" value="<?= e($cur ? rtrim(strtr(base64_encode((string) json_encode($cur, JSON_UNESCAPED_UNICODE)), '+/', '-_'), '=') : '') ?>">
+    </div>
+    <fieldset class="field" data-style="classic">
       <legend class="label"><?= e(t('Thème')) ?></legend>
       <div class="theme-grid">
         <?php foreach ($themes as $key => [$name, $desc]): $p = Theme::THEMES[$key]; ?>
@@ -111,22 +185,24 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     </div>
     <?= $media('logo', (string) $s['appearance']['logo'], t('Logo'), t('PNG ou WebP sur fond transparent, environ 400 px de large.')) ?>
     <?= $media('favicon', (string) $s['appearance']['favicon'], t('Icône du site (favicon)'), t('Image carrée d’au moins 512 px. Sans icône, un éclair à ta couleur est généré.')) ?>
-    <div class="field"><span class="label"><?= e(t('Couleur principale')) ?></span>
-      <div class="row"><input type="color" name="accent" value="<?= e($s['appearance']['accent']) ?>" id="accent">
-        <?php foreach (['#5b4cf0', '#2563eb', '#0f766e', '#16a34a', '#ea580c', '#dc2626', '#db2777', '#111827'] as $c): ?>
-          <button class="btn btn-sm btn-icon" type="button" data-color="<?= e($c) ?>" aria-label="<?= e($c) ?>"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="<?= e($c) ?>"/></svg></button>
-        <?php endforeach ?></div>
-      <span class="hint"><?= e(t('Le contraste des textes est ajusté automatiquement pour rester lisible (normes WCAG).')) ?></span></div>
-    <div class="grid-2">
-      <label class="field"><span class="label"><?= e(t('Police des titres')) ?></span><select name="font_head">
-        <?php foreach (Theme::FONTS as $key => [$label]): ?><option value="<?= e($key) ?>"<?= $s['appearance']['font_head'] === $key ? ' selected' : '' ?>><?= e(t($label)) ?></option><?php endforeach ?></select></label>
-      <label class="field"><span class="label"><?= e(t('Police du texte')) ?></span><select name="font_body">
-        <?php foreach (Theme::FONTS as $key => [$label]): ?><option value="<?= e($key) ?>"<?= $s['appearance']['font_body'] === $key ? ' selected' : '' ?>><?= e(t($label)) ?></option><?php endforeach ?></select></label>
+    <div data-style="classic">
+      <div class="field"><span class="label"><?= e(t('Couleur principale')) ?></span>
+        <div class="row"><input type="color" name="accent" value="<?= e($s['appearance']['accent']) ?>" id="accent">
+          <?php foreach (['#5b4cf0', '#2563eb', '#0f766e', '#16a34a', '#ea580c', '#dc2626', '#db2777', '#111827'] as $c): ?>
+            <button class="btn btn-sm btn-icon" type="button" data-color="<?= e($c) ?>" aria-label="<?= e($c) ?>"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="<?= e($c) ?>"/></svg></button>
+          <?php endforeach ?></div>
+        <span class="hint"><?= e(t('Le contraste des textes est ajusté automatiquement pour rester lisible (normes WCAG).')) ?></span></div>
+      <div class="grid-2">
+        <label class="field"><span class="label"><?= e(t('Police des titres')) ?></span><select name="font_head">
+          <?php foreach (Theme::FONTS as $key => [$label]): ?><option value="<?= e($key) ?>"<?= $s['appearance']['font_head'] === $key ? ' selected' : '' ?>><?= e(t($label)) ?></option><?php endforeach ?></select></label>
+        <label class="field"><span class="label"><?= e(t('Police du texte')) ?></span><select name="font_body">
+          <?php foreach (Theme::FONTS as $key => [$label]): ?><option value="<?= e($key) ?>"<?= $s['appearance']['font_body'] === $key ? ' selected' : '' ?>><?= e(t($label)) ?></option><?php endforeach ?></select></label>
+      </div>
+      <p class="hint"><?= e(t('Polices système : zéro téléchargement, affichage instantané.')) ?></p>
+      <label class="field"><span class="label"><?= e(t('Mode sombre')) ?></span><select name="dark">
+        <option value="auto"<?= $s['appearance']['dark'] === 'auto' ? ' selected' : '' ?>><?= e(t('Automatique (selon l’appareil du visiteur)')) ?></option>
+        <option value="light"<?= $s['appearance']['dark'] === 'light' ? ' selected' : '' ?>><?= e(t('Toujours clair')) ?></option></select></label>
     </div>
-    <p class="hint"><?= e(t('Polices système : zéro téléchargement, affichage instantané.')) ?></p>
-    <label class="field"><span class="label"><?= e(t('Mode sombre')) ?></span><select name="dark">
-      <option value="auto"<?= $s['appearance']['dark'] === 'auto' ? ' selected' : '' ?>><?= e(t('Automatique (selon l’appareil du visiteur)')) ?></option>
-      <option value="light"<?= $s['appearance']['dark'] === 'light' ? ' selected' : '' ?>><?= e(t('Toujours clair')) ?></option></select></label>
     <label class="field"><span class="label"><?= e(t('Texte du pied de page')) ?></span><textarea name="footer" rows="2"><?= e($s['appearance']['footer']) ?></textarea></label>
     <?= $sw('credit', (bool) $s['appearance']['credit'], t('Afficher « Propulsé par ⚡ Éclair »')) ?>
     <label class="field"><span class="label"><?= e(t('CSS personnalisé')) ?></span>
