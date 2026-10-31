@@ -602,3 +602,8 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .is-visual .side .h-title{font-size:1.15rem}
 .is-visual .block-tools{position:static;flex-direction:row;opacity:1;margin-bottom:.2rem}
 @media (max-width:900px){.is-visual .seg-w{display:none}}
+.compose{margin-bottom:1.6rem;padding:1rem 1.2rem}
+.compose summary{cursor:pointer;font-weight:650}
+.compose[open] summary{margin-bottom:.6rem}
+.compose-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:0 .9rem}
+.compose progress{display:block;width:100%;margin-top:.8rem}

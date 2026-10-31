@@ -360,6 +360,72 @@ final class AdminAi
         Http::json(['ok' => false, 'error' => t('Action inconnue.')], 400);
     }
 
+    /* ───────────────────────── Crée ta page avec l'IA ───────────────────────── */
+
+    /** Coût indicatif d'une composition (le contexte du site et une réponse de ~6 000 jetons). */
+    public static function composeCost(string $provider): string
+    {
+        return Ai::money(round(Ai::cost($provider, Ai::model($provider), ['in' => 9000, 'out' => 6000]), 3));
+    }
+
+    /**
+     * « Crée ta page avec l'IA » : un seul appel compose un brouillon complet (structure en sections, textes, SEO), dans
+     * le budget de l'assistant. Il s'ouvre ensuite dans l'éditeur, en mode Visuel ; rien n'est jamais publié.
+     */
+    public static function compose(array $user): never
+    {
+        self::guard($user);
+        $data = Req::json();
+        if (isset(Ai::providers()[(string) ($data['provider'] ?? '')])) {
+            Ai::choose((string) $data['provider']);
+        }
+        $types = array_merge(['page'], Settings::get('blog.enabled') ? ['post'] : [], Shop::enabled() ? ['product'] : []);
+        $type = in_array($data['type'] ?? '', $types, true) ? (string) $data['type'] : 'page';
+        $lang = isset(Content::LANGS[(string) ($data['lang'] ?? '')]) ? (string) $data['lang'] : (string) Settings::get('lang');
+        $field = static fn (string $k, int $max): string => Sanitize::multiline(is_string($data[$k] ?? null) ? $data[$k] : '', $max);
+        $brief = $field('brief', 3000);
+        if (mb_strlen($brief) < 10) {
+            Http::json(['ok' => false, 'error' => t('Décris ta page en une ou deux phrases.')], 422);
+        }
+        $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
+        session_write_close();
+        @set_time_limit(300);
+        $todo = Analyzer::TODO[$lang] ?? Analyzer::TODO['en'];
+        $kind = ['page' => 'website page', 'post' => 'blog article', 'product' => 'product sheet for the shop'][$type];
+        $task = "Compose a complete $kind for this website from the person's brief, as a sequence of layout sections, ready for them to review.\n"
+            . "- Exactly one H1: start with a \"hero\" section whose title is the main title of the page (it becomes the H1). Never use a second hero.\n"
+            . '- Adapt the structure to the goal: to get contacts, quotes or sales, a hero with a call-to-action button to an existing page, the offer (features), '
+            . 'reassurance, a FAQ and a contact form; to inform, H2 headings with short paragraphs, lists and a FAQ; an article reads as an article (introduction, '
+            . "H2 sections, some phrased as questions, lists, FAQ, a closing call to action). Follow the wished sections when given, in that order. 5 to 14 sections.\n"
+            . "- Links: only paths from the site inventory below; never invent a path or an external address. Images: only ids from the image list below, else leave media empty.\n"
+            . '- Never invent facts about the business (prices, figures, names, clients, testimonials, addresses, opening hours…): where one is needed, write the '
+            . "visible marker \"[$todo : what is missing]\" and go on.\n"
+            . '- Write in ' . Content::LANGS[$lang] . ", with the voice of the editorial profile and the tone asked. Text fields accept Markdown inline.\n"
+            . '- Also give: title (40-60 characters, with the key phrase), slug (short), seo_title (at most 60 characters), seo_description (120 to 155 characters, '
+            . 'the key phrase and a reason to click), summary («L’essentiel»: 2-3 sentences, 25-90 words, plain text) and keyword (2 to 4 words).';
+        $index = array_filter(Content::index(), [Content::class, 'visible']);
+        $list = static fn (string $t): string => implode("\n", array_map(fn ($e) => '- ' . $e['title'] . ' | ' . Content::path($e),
+            array_slice(array_filter($index, fn ($e) => $e['type'] === $t), 0, 60))) ?: '(none)';
+        $images = array_slice(Media::all(), 0, 30);
+        $input = "# Brief\n" . $brief . "\n\nGoal: " . ($field('goal', 300) ?: '(not given)') . "\nAudience: " . ($field('audience', 300) ?: '(not given)')
+            . "\nTone: " . ($field('tone', 200) ?: '(the editorial profile)') . "\nWished sections: " . ($field('sections', 500) ?: '(your choice)')
+            . "\nContent language: " . Content::LANGS[$lang] . "\n\n# Site inventory (internal links: these paths only)\n## Pages (title | path)\n" . $list('page')
+            . "\n## Articles (title | path)\n" . $list('post') . "\n\n# Images of the media library (id | description): the only images you may use\n"
+            . (implode("\n", array_map(fn ($m) => '- ' . $m['id'] . ' | ' . ($m['alt'] !== '' ? $m['alt'] : $m['name']), $images)) ?: '(none)');
+        $str = ['type' => 'string'];
+        $res = AiChat::ask($task, $input, ['type' => 'object', 'properties' => [
+            'title' => $str, 'slug' => $str, 'seo_title' => $str, 'seo_description' => $str, 'summary' => $str, 'keyword' => $str,
+            'sections' => ['type' => 'array', 'items' => AiTools::sectionSchema()],
+        ], 'required' => ['title', 'slug', 'seo_title', 'seo_description', 'summary', 'keyword', 'sections'], 'additionalProperties' => false]);
+        self::charged($user, $res);
+        $d = $res['data'];
+        $item = AiTools::draft(['type' => $type, 'lang' => $lang, 'body' => ''] + array_intersect_key($d, array_flip(['title', 'slug', 'seo_title', 'seo_description', 'summary', 'keyword', 'sections'])), $user);
+        if (is_string($item)) {
+            Http::json(['ok' => false, 'error' => t('Réponse inattendue de l’IA : réessaie.')], 502);
+        }
+        Http::json(['ok' => true, 'id' => $item['id'], 'edit' => admin_url('edit/' . $item['id']) . '?visual']);
+    }
+
     /** Compte la dépense d'une tâche ponctuelle ; renvoie l'erreur au navigateur si elle a échoué. */
     private static function charged(array $user, array $res): void
     {

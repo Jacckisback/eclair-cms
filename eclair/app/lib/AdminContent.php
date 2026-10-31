@@ -90,9 +90,16 @@ final class AdminContent
             }
         }
         $entry = $isNew ? null : Content::entry($item);
+        // « Crée ta page avec l'IA » : proposé pour un nouveau contenu, seulement si l'IA est active pour cette personne.
+        $compose = null;
+        if ($isNew && Ai::allowed($user)) {
+            Ai::choose((string) ($user['ai'] ?? ''));
+            $compose = ['provider' => Ai::provider(), 'providers' => Ai::providers()];
+        }
         Admin::view('editor', [
             'layout' => 'bare',
             'item' => $item,
+            'compose' => $compose,
             'js' => ['editor' => [
                 'item' => $item,
                 'isNew' => $isNew,

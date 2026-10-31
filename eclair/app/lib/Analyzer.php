@@ -11,6 +11,9 @@ defined('ECLAIR') || exit;
  */
 final class Analyzer
 {
+    /** Repère laissé là où une information manque (« [À compléter : prix] »), dans la langue du contenu. */
+    public const TODO = ['fr' => 'À compléter', 'es' => 'A completar', 'en' => 'To complete', 'de' => 'Zu ergänzen', 'it' => 'Da completare', 'pt' => 'A completar'];
+
     public static function run(array $item): array
     {
         $blocks = $item['blocks'] ?? [];
@@ -142,6 +145,12 @@ final class Analyzer
         $long = count(array_filter($paragraphs, fn ($b) => word_count(plain($b['text'])) > 120));
         $add('geo', $long === 0 ? 'good' : 'ok', $long === 0 ? t('Paragraphes courts et faciles à citer.')
             : t('{n} paragraphe(s) de plus de 120 mots : découpe-les.', ['n' => $long]));
+        // Passages laissés « [À compléter : …] » par l'IA : rien ne doit être publié en l'état.
+        $todo = preg_match_all('/\[(?:' . implode('|', array_map('preg_quote', array_unique(self::TODO))) . ')[\s\x{a0}\x{202f}]*:/iu',
+            $title . ' ' . ($item['summary'] ?? '') . ' ' . $desc . ' ' . $text);
+        if ($todo) {
+            $add('seo', 'bad', t('{n} passage(s) « [À compléter : …] » à remplir avant de publier.', ['n' => $todo]), 3);
+        }
         if (!empty($item['updated']) && !empty($item['date']) && $item['status'] === 'published') {
             $age = time() - (int) $item['date'];
             $add('geo', $age < 365 * 86400 ? 'good' : 'ok', t('Contenu récent ou mis à jour (les IA privilégient la fraîcheur).'));

@@ -61,7 +61,9 @@ final class AiTools
                 'schema' => ['type' => 'object', 'properties' => [
                     'type' => ['type' => 'string', 'enum' => $shop ? ['post', 'page', 'product'] : ['post', 'page'], 'description' => 'post = blog article, page = site page' . ($shop ? ', product = product sheet of the shop' : '')],
                     'title' => $str('Title shown on the page (H1)'),
-                    'body' => $str('Content in Markdown, without the title and without the FAQ'),
+                    'body' => $str('Content in Markdown, without the title and without the FAQ (optional when sections are given; it then follows them)'),
+                    'sections' => ['type' => 'array', 'items' => self::sectionSchema(), 'description' => 'Page layout made of sections (landing pages, home, services, about…), in order. '
+                        . 'A first "hero" becomes the H1 and replaces the title on the page.'],
                     'summary' => $str('« L’essentiel »: 2-3 sentences, 25-90 words, a direct answer AI engines can quote'),
                     'keyword' => $str('Main key phrase (2-4 words)'),
                     'seo_title' => $str('Max 60 characters'),
@@ -72,7 +74,7 @@ final class AiTools
                     'faq' => $qa,
                     'team' => ['type' => 'array', 'items' => $person, 'description' => 'Team members block (pages, optional)'],
                     'lang' => $str('Content language code if different from the site language (optional)'),
-                ] + ($shop ? ['product' => $product] : []), 'required' => ['type', 'title', 'body'], 'additionalProperties' => false],
+                ] + ($shop ? ['product' => $product] : []), 'required' => ['type', 'title'], 'additionalProperties' => false],
             ],
             [
                 'name' => 'update_content',
@@ -239,14 +241,37 @@ final class AiTools
         if (++$ctx['turn']['drafts'] > self::MAX_DRAFTS) {
             return self::fail('Limit reached: at most ' . self::MAX_DRAFTS . ' drafts per request. Tell the user and stop.');
         }
+        $item = self::draft($in, $ctx['user']);
+        if (is_string($item)) {
+            return self::fail($item);
+        }
+        $analysis = Analyzer::run($item);
+        $todo = array_values(array_map(fn ($c) => $c['label'], array_filter($analysis['checks'], fn ($c) => $c['status'] === 'bad')));
+        return [
+            'result' => [
+                'id' => $item['id'], 'status' => 'draft (not published)', 'words' => $analysis['words'],
+                'seo_score' => $analysis['seo'], 'geo_score' => $analysis['geo'], 'weak_points' => array_slice($todo, 0, 5),
+            ],
+            'card' => self::draftCard($item),
+            'error' => false,
+        ];
+    }
+
+    /**
+     * Enregistre un brouillon : outil create_draft (assistant, connecteur MCP) et « Crée ta page avec l'IA ».
+     * Renvoie le contenu enregistré, ou l'erreur à transmettre au modèle.
+     */
+    public static function draft(array $in, array $user): array|string
+    {
         $type = in_array($in['type'] ?? '', ['page', 'product'], true) ? $in['type'] : 'post';
         if ($type === 'product' && !Shop::enabled()) {
-            return self::fail('The shop is closed: no product can be created. Tell the user to open it in Settings › Shop first.');
+            return 'The shop is closed: no product can be created. Tell the user to open it in Settings › Shop first.';
         }
         $title = Sanitize::text($in['title'] ?? '', 200);
-        $blocks = Markdown::toBlocks((string) ($in['body'] ?? ''));
+        $layout = self::sections($in['sections'] ?? null);
+        $blocks = array_merge($layout, Markdown::toBlocks(is_string($in['body'] ?? null) ? $in['body'] : ''));
         if ($title === '' || !$blocks) {
-            return self::fail('A draft needs a title and a non-empty Markdown body.');
+            return 'A draft needs a title and content: a Markdown body or sections.';
         }
         // Le titre est déjà le H1 : un « # Titre » répété en tête de texte est retiré.
         if ($blocks[0]['type'] === 'heading' && mb_strtolower(plain($blocks[0]['text'])) === mb_strtolower($title)) {
@@ -261,7 +286,7 @@ final class AiTools
         $category = (string) ($in['category'] ?? '');
         $lang = (string) ($in['lang'] ?? '');
         $image = (string) ($in['image'] ?? '');
-        $item = Content::save([
+        return Content::save([
             'type' => $type,
             'status' => 'draft',
             'title' => $title,
@@ -271,21 +296,77 @@ final class AiTools
             'summary' => (string) ($in['summary'] ?? ''),
             'image' => Media::get($image) ? $image : '',
             'category' => $type !== 'page' && (Categories::get($category)['kind'] ?? '') === $type ? $category : '',
-            'author' => $ctx['user']['id'],
+            'author' => $user['id'],
             'seo' => ['title' => (string) ($in['seo_title'] ?? ''), 'description' => (string) ($in['seo_description'] ?? ''), 'keyword' => (string) ($in['keyword'] ?? '')],
-            'options' => ['toc' => 'auto'],
+            // Mise en page ouverte par un bandeau : son titre devient le seul H1.
+            'options' => ['toc' => 'auto', 'hide_title' => ($layout[0]['type'] ?? '') === 'hero' && $blocks[0] === $layout[0]],
             'product' => $type === 'product' && is_array($in['product'] ?? null) ? $in['product'] : [],
-        ], $ctx['user']);
-        $analysis = Analyzer::run($item);
-        $todo = array_values(array_map(fn ($c) => $c['label'], array_filter($analysis['checks'], fn ($c) => $c['status'] === 'bad')));
-        return [
-            'result' => [
-                'id' => $item['id'], 'status' => 'draft (not published)', 'words' => $analysis['words'],
-                'seo_score' => $analysis['seo'], 'geo_score' => $analysis['geo'], 'weak_points' => array_slice($todo, 0, 5),
-            ],
-            'card' => self::draftCard($item),
-            'error' => false,
-        ];
+        ], $user);
+    }
+
+    /**
+     * Schéma compact d'une section de mise en page, le même pour tous les types (accepté tel quel par Claude et ChatGPT,
+     * réponses structurées strictes comprises) : les champs inutiles restent vides.
+     */
+    public static function sectionSchema(): array
+    {
+        $str = static fn (string $d = ''): array => $d === '' ? ['type' => 'string'] : ['type' => 'string', 'description' => $d];
+        $obj = static fn (array $props, string $d = ''): array => ['type' => 'object', 'properties' => $props, 'required' => array_keys($props), 'additionalProperties' => false]
+            + ($d !== '' ? ['description' => $d] : []);
+        $types = array_merge(['hero', 'features', 'heading', 'paragraph', 'list', 'callout', 'faq', 'button', 'team', 'contact', 'posts'],
+            Shop::enabled() ? ['products'] : [], Media::all() ? ['image'] : []);
+        return $obj([
+            'type' => ['type' => 'string', 'enum' => $types],
+            'title' => $str('hero, features, faq, team, posts, products, contact: section title; heading: its text; callout: its title (optional); image: alternative text'),
+            'text' => $str('Markdown inline (**bold**, *italic*, [link](/path)). paragraph and callout: the text; hero: the lead sentence; image: the caption'),
+            'style' => $str('heading: "2" or "3"; list: "ul" or "ol"; callout: tip, info, warning, success or note; button: primary or secondary; else empty'),
+            'items' => ['type' => 'array', 'description' => 'features: title, text, icon (one emoji); faq: title = question, text = answer; list: text; team: title = name, role, text = short bio',
+                'items' => $obj(['title' => $str(), 'text' => $str(), 'icon' => $str(), 'role' => $str()])],
+            'button' => $str('hero, button, contact: button label'),
+            'url' => $str('hero, button: link, the path of an existing page (e.g. /contact)'),
+            'button2' => $str('hero: second button label'),
+            'url2' => $str('hero: second button link'),
+            'media' => $str('hero, image: media id received from the site, never invented; else empty'),
+        ], 'One section of the page');
+    }
+
+    /**
+     * Sections (venues du modèle) → blocs. Tout repasse par Blocks::normalize : image inconnue, lien dangereux,
+     * HTML non permis ou bloc vide sont écartés. Le texte est du Markdown en ligne : les balises éventuelles sont retirées.
+     */
+    public static function sections(mixed $sections): array
+    {
+        $plain = static fn (mixed $v): string => is_string($v) ? trim(strip_tags((string) preg_replace('~<(script|style)\b.*?</\1\s*>~is', '', $v))) : '';
+        $md = static fn (mixed $v): string => Markdown::inline($plain($v));
+        $out = [];
+        foreach (is_array($sections) ? array_slice($sections, 0, 40) : [] as $s) {
+            if (!is_array($s)) {
+                continue;
+            }
+            $f = static fn (string $k): string => $plain($s[$k] ?? '');
+            $media = Media::get($f('media')) ? $f('media') : '';
+            $items = array_values(array_filter(is_array($s['items'] ?? null) ? array_slice($s['items'], 0, 24) : [], 'is_array'));
+            $each = static fn (callable $fn): array => array_map($fn, $items);
+            $out[] = match ($f('type')) {
+                'hero' => ['type' => 'hero', 'title' => $f('title'), 'text' => $md($s['text'] ?? ''), 'button' => $f('button'), 'url' => $f('url'),
+                    'button2' => $f('button2'), 'url2' => $f('url2'), 'media' => $media],
+                'features' => ['type' => 'features', 'title' => $f('title'),
+                    'items' => $each(fn ($i) => ['icon' => $plain($i['icon'] ?? ''), 'title' => $plain($i['title'] ?? ''), 'text' => $md($i['text'] ?? '')])],
+                'heading' => ['type' => 'heading', 'level' => $f('style') === '3' ? 3 : 2, 'text' => $md(($s['title'] ?? '') ?: ($s['text'] ?? ''))],
+                'paragraph' => ['type' => 'paragraph', 'text' => $md($s['text'] ?? '')],
+                'list' => ['type' => 'list', 'style' => $f('style'), 'items' => $each(fn ($i) => $md(($i['text'] ?? '') ?: ($i['title'] ?? '')))],
+                'callout' => ['type' => 'callout', 'variant' => $f('style'), 'title' => $f('title'), 'text' => $md($s['text'] ?? '')],
+                'faq' => ['type' => 'faq', 'title' => $f('title'), 'items' => $each(fn ($i) => ['q' => $plain($i['title'] ?? ''), 'a' => $md($i['text'] ?? '')])],
+                'button' => ['type' => 'button', 'text' => $f('button') ?: $f('title'), 'url' => $f('url'), 'style' => $f('style'), 'align' => 'center'],
+                'team' => ['type' => 'team', 'title' => $f('title'), 'items' => $each(fn ($i) => ['name' => $plain($i['title'] ?? ''), 'role' => $plain($i['role'] ?? ''), 'bio' => $md($i['text'] ?? '')])],
+                'contact' => ['type' => 'contact', 'title' => $f('title'), 'button' => $f('button')],
+                'posts' => ['type' => 'posts', 'title' => $f('title')],
+                'products' => Shop::enabled() ? ['type' => 'products', 'title' => $f('title')] : [],
+                'image' => ['type' => 'image', 'media' => $media, 'alt' => $f('title'), 'caption' => $md($s['text'] ?? ''), 'size' => 'wide'],
+                default => [],
+            };
+        }
+        return Blocks::normalize($out);
     }
 
     /** Carte « brouillon » affichée dans la conversation. */

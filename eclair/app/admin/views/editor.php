@@ -39,6 +39,41 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
 
   <div class="canvas">
     <div class="doc">
+      <?php if ($v['compose']): ?>
+      <details class="card compose" open>
+        <summary>✨ <?= e(t('Créer avec l’IA')) ?></summary>
+        <form id="compose" data-wait="<?= e(t('L’IA compose ta page…')) ?>">
+          <p class="small muted"><?= e(t('Décris ce que tu veux : l’IA prépare un brouillon complet (structure, textes, SEO) que tu relis et retouches en mode Visuel. Rien n’est publié.')) ?></p>
+          <div class="compose-grid">
+            <label class="field"><span class="label"><?= e(t('Type')) ?></span><select name="type">
+              <?php foreach (array_filter(['page' => t('Page'), 'post' => Settings::get('blog.enabled') ? t('Article') : '', 'product' => Shop::enabled() ? t('Produit') : '']) as $k => $label): ?>
+                <option value="<?= $k ?>"<?= $item['type'] === $k ? ' selected' : '' ?>><?= e($label) ?></option>
+              <?php endforeach ?></select></label>
+            <label class="field"><span class="label"><?= e(t('Langue du contenu')) ?></span><select name="lang">
+              <?php foreach (Content::LANGS as $k => $label): ?><option value="<?= $k ?>"<?= $item['lang'] === $k ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach ?></select></label>
+            <?php if (count($v['compose']['providers']) > 1): ?>
+            <label class="field"><span class="label"><?= e(t('Choisir l’IA')) ?></span><select name="provider">
+              <?php foreach ($v['compose']['providers'] as $p => $model): ?><option value="<?= e($p) ?>"<?= $v['compose']['provider'] === $p ? ' selected' : '' ?>><?= e($model . ' · ≈ ' . \Eclair\AdminAi::composeCost($p)) ?></option><?php endforeach ?></select></label>
+            <?php endif ?>
+          </div>
+          <label class="field"><span class="label"><?= e(t('Description')) ?></span>
+            <textarea name="brief" rows="3" required minlength="10" maxlength="3000" placeholder="<?= e(t('ex. : présenter notre atelier de céramique et ses cours pour débutants, à Lyon')) ?>"></textarea></label>
+          <div class="compose-grid">
+            <label class="field"><span class="label"><?= e(t('Objectif')) ?></span><input type="text" name="goal" maxlength="300" placeholder="<?= e(t('ex. : obtenir des inscriptions')) ?>"></label>
+            <label class="field"><span class="label"><?= e(t('Public')) ?></span><input type="text" name="audience" maxlength="300" placeholder="<?= e(t('ex. : adultes débutants')) ?>"></label>
+            <label class="field"><span class="label"><?= e(t('Ton')) ?></span><input type="text" name="tone" maxlength="200" placeholder="<?= e(t('ex. : chaleureux et rassurant')) ?>"></label>
+          </div>
+          <label class="field"><span class="label"><?= e(t('Sections (facultatif)')) ?></span><input type="text" name="sections" maxlength="500" placeholder="<?= e(t('ex. : bannière, atouts, tarifs, FAQ, contact')) ?>"></label>
+          <div class="row wrap">
+            <button class="btn btn-primary" type="submit">✨ <?= e(t('Créer le brouillon')) ?></button>
+            <span class="small muted"><?= e(t('Coût estimé : ≈ {cost}, déduit du budget de l’assistant.', ['cost' => \Eclair\AdminAi::composeCost($v['compose']['provider'])])) ?></span>
+          </div>
+          <progress hidden></progress>
+          <p class="small" role="status" aria-live="polite"></p>
+        </form>
+      </details>
+      <script src="<?= e(asset('admin/compose.js')) ?>" defer></script>
+      <?php endif ?>
       <textarea class="doc-title" id="doc-title" rows="1" placeholder="<?= e($isProduct ? t('Nom du produit') : ($isPost ? t('Titre de l’article') : t('Titre de la page'))) ?>" aria-label="<?= e(t('Titre')) ?>"></textarea>
       <?php if ($isProduct): ?>
       <section class="card product-box" id="product-box" aria-label="<?= e(t('Fiche produit')) ?>">

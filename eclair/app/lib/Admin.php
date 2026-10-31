@@ -99,6 +99,7 @@ final class Admin
             'GET /api/ai/chat/([a-z0-9]+)' => [AdminAi::class, 'load', 'content'],
             'POST /api/ai/forget' => [AdminAi::class, 'forget', 'content'],
             'POST /api/ai/assist' => [AdminAi::class, 'assist', 'content'],
+            'POST /api/ai/compose' => [AdminAi::class, 'compose', 'content'],
             'POST /api/ai/apply' => [AdminAi::class, 'apply', 'content'],
             'GET /ai/preview/([a-z0-9]+)' => [AdminAi::class, 'preview', 'content'],
             'POST /api/ai/dismiss' => [AdminAi::class, 'dismiss', 'content'],
