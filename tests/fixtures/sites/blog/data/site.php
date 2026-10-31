@@ -1,0 +1,2 @@
+<?php exit; ?>
+{"name":"Site blog","tagline":"Référence blog","description":"Référence blog","url":"https://eclair.test","lang":"fr","timezone":"Europe/Paris","admin_path":"gestion","seo":{"index":true,"email":"","entity":"Organization","entity_name":""},"geo":{"ai":"open"},"security":{"https":false,"hsts":false,"verified":""},"indexnow":false,"installed":1793471103,"version":"1.6.0","home":"","blog":{"enabled":true,"base":"blog","title":"Blog","description":"Conseils, guides et actualités de Site blog."}}

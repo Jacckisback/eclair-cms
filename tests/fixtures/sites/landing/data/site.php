@@ -1,0 +1,2 @@
+<?php exit; ?>
+{"name":"Site landing","tagline":"Référence landing","description":"Référence landing","url":"https://eclair.test","lang":"fr","timezone":"Europe/Paris","admin_path":"gestion","seo":{"index":true,"email":"","entity":"Organization","entity_name":""},"geo":{"ai":"open"},"security":{"https":false,"hsts":false,"verified":""},"indexnow":false,"installed":1793471106,"version":"1.6.0","home":"974e1b0112","blog":{"enabled":false,"base":"blog","title":"Blog","description":"Conseils, guides et actualités de Site landing."}}

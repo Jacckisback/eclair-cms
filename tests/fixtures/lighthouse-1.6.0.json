@@ -1,0 +1,35 @@
+{
+    "business /": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 828,
+        "cls": 0,
+        "tbt_ms": 3
+    },
+    "business /blog/premiers-pas-avec-eclair": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 860,
+        "cls": 0,
+        "tbt_ms": 0
+    },
+    "landing /": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 838,
+        "cls": 0,
+        "tbt_ms": 1
+    }
+}

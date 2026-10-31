@@ -1,0 +1,2 @@
+<?php exit; ?>
+{"name":"Site freelance","tagline":"Référence freelance","description":"Référence freelance","url":"https://eclair.test","lang":"fr","timezone":"Europe/Paris","admin_path":"gestion","seo":{"index":true,"email":"","entity":"Person","entity_name":"Camille Martin"},"geo":{"ai":"open"},"security":{"https":false,"hsts":false,"verified":""},"indexnow":false,"installed":1793471105,"version":"1.6.0","home":"2aa2c9d19b","blog":{"enabled":true,"base":"blog","title":"Blog","description":"Conseils, guides et actualités de Site freelance."}}
