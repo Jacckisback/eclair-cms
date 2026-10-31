@@ -322,7 +322,8 @@ final class Site
         }
         $info = [];
         $links = array_filter(array_column(Shop::offers($item), 'link'));
-        $info[] = ['🔒', Theme::t($links && !array_filter($links, fn ($l) => !preg_match('~^https://buy\.stripe\.com/~i', $l)) ? 'secure_stripe' : 'secure_payment', $lang)];
+        $by = array_unique(array_map([Shop::class, 'provider'], $links));
+        $info[] = ['🔒', count($by) === 1 && reset($by) !== '' ? Theme::t('secure_by', $lang, ['name' => reset($by)]) : Theme::t('secure_payment', $lang)];
         if (!$p['digital']) {
             $shipping = (array) Settings::get('shop.shipping');
             $cost = Shop::amount($shipping['price'] ?? '');

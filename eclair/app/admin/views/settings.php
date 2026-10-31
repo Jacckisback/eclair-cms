@@ -323,7 +323,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         return $out . '</select>' . ($hint !== '' ? '<span class="hint">' . e($hint) . '</span>' : '') . '</label>';
     };
     $thanks = Shop::pageLink('thanks'); ?>
-    <div class="notice"><span>🛍️</span><p><?= e(t('Boutique légère : chaque produit a sa fiche, optimisée pour Google et les IA. Le paiement passe par un lien Stripe : pas de panier ni de base de données. Stripe encaisse, envoie les reçus et gère les remboursements.')) ?></p></div>
+    <div class="notice"><span>🛍️</span><p><?= e(t('Boutique légère : chaque produit a sa fiche, optimisée pour Google et les IA. Le paiement passe par un lien Stripe, PayPal ou Revolut Business : pas de panier ni de base de données. Ton prestataire encaisse, envoie les reçus et gère les remboursements.')) ?></p></div>
     <?= $sw('shop_enabled', (bool) $shop['enabled'], t('Boutique ouverte'), $missing ? t('Publie d’abord : {pages}.', ['pages' => implode(', ', $missing)]) : t('Catalogue, fiches produit et flux Google Shopping en ligne.')) ?>
     <div class="grid-2">
       <label class="field"><span class="label"><?= e(t('Adresse de la boutique')) ?></span><span class="input-group"><span>/</span><input type="text" name="shop_base" value="<?= e(ltrim(Shop::path(), '/')) ?>"></span>
@@ -377,6 +377,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
       <li><?= e(t('Dans les réglages de Stripe (E-mails clients), active les reçus des paiements réussis.')) ?></li>
       <li><?= e(t('Copie le lien (https://buy.stripe.com/…) et colle-le dans la fiche produit. Chaque paiement porte la référence du produit.')) ?></li>
     </ol>
+    <p class="small"><?= e(t('PayPal ou Revolut Business : crée un lien de paiement à prix fixe (PayPal : Liens et boutons de paiement ; Revolut Business : Marchand › Lien de paiement) et colle-le dans la fiche produit. Après le paiement, le client reste sur la page de confirmation du prestataire.')) ?></p>
     <?php if ($shop['enabled']): ?>
       <label class="field"><span class="label"><?= e(t('Flux produits (Google Merchant Center)')) ?></span><input type="text" readonly value="<?= e(absolute_url('/products.xml')) ?>" data-copy="<?= e(absolute_url('/products.xml')) ?>">
         <span class="hint"><?= e(t('Ajoute cette adresse comme source de produits dans Google Merchant Center : tes produits peuvent apparaître gratuitement dans l’onglet Shopping.')) ?></span></label>

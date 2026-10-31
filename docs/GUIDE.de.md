@@ -35,7 +35,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) (433 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -154,13 +154,13 @@ Wenn du ein Theme auswählst, werden seine Farbe und seine empfohlenen Schriftar
 
 ## Shop
 
-Der **schlanke Shop-Modus** ist dafür gedacht, ein paar Dutzend Produkte ohne den Ballast eines klassischen Onlineshops zu verkaufen: kein Warenkorb, keine Kundenkonten, keine Datenbank, keine Bankdaten auf deinem Server. Jedes Produkt hat seine eigene Seite, optimiert für Google und KI, und sein **Kauf-Button** führt zu einem **Stripe-Zahlungslink** (Payment Links): Stripe wickelt die Zahlung ab, verschickt die Belege und kümmert sich um Rückerstattungen.
+Der **schlanke Shop-Modus** ist dafür gedacht, ein paar Dutzend Produkte ohne den Ballast eines klassischen Onlineshops zu verkaufen: kein Warenkorb, keine Kundenkonten, keine Datenbank, keine Bankdaten auf deinem Server. Jedes Produkt hat seine eigene Seite, optimiert für Google und KI, und sein **Kauf-Button** führt zu einem **Zahlungslink von Stripe, PayPal oder Revolut Business**: Dein Zahlungsanbieter wickelt die Zahlung ab, verschickt die Belege und kümmert sich um Rückerstattungen.
 
 ### Shop öffnen
 
 1. **Veröffentliche dein Impressum** (die Installation hat dafür ein Gerüst angelegt, das du ergänzen musst) **und deine Allgemeinen Geschäftsbedingungen (AGB)**. Ohne sie lässt sich der Shop nicht öffnen: Lass sie prüfen, denn als Verkäufer haftest du für ihren Inhalt.
 2. Unter **Einstellungen › Shop**: Wähle diese beiden Seiten aus und lege die Währung, die Versandkosten und Lieferzeiten, die Lieferländer und die Rückgabefrist fest (beim Fernabsatz in der EU gilt ein Widerrufsrecht von mindestens 14 Tagen, mit Ausnahmen wie personalisierten Produkten).
-3. Klicke auf **Danke-Seite erstellen**: Dorthin leitet Stripe deine Kunden nach der Zahlung weiter.
+3. Klicke auf **Danke-Seite erstellen**: Dorthin kann Stripe deine Kunden nach der Zahlung weiterleiten.
 4. Aktiviere **Shop geöffnet**, speichere und füge den Shop dann zum Menü hinzu (Menüs › Shop).
 
 Der Katalog liegt unter der Adresse `/shop` (`/boutique`, `/tienda`, `/negozio` oder `/loja` je nach Sprache der Website) und lässt sich ändern; wenn du sie änderst, werden die alten Adressen weitergeleitet.
@@ -170,7 +170,7 @@ Der Katalog liegt unter der Adresse `/shop` (`/boutique`, `/tienda`, `/negozio` 
 Inhalte › **+ Produkt**. Ganz oben im Editor stehen die Angaben der Produktseite:
 
 - **Preis** und **Streichpreis** (optional: Der Rabatt wird in Prozent angezeigt), **Verfügbarkeit** (auf Lager, ausverkauft, Vorbestellung).
-- **Zahlungslink**: der Stripe-Link des Produkts (`https://buy.stripe.com/…`).
+- **Zahlungslink**: der Link des Produkts von Stripe, PayPal oder Revolut Business.
 - **Fotos**: Das erste ist das Hauptfoto (Google, soziale Netzwerke); Ziel sind mindestens 3 Ansichten.
 - **Varianten** (Größe, Farbe …): Jede Variante kann einen eigenen Preis und Link haben. Auf der Website funktioniert die Auswahl ohne JavaScript.
 - **Details für Google Shopping**: Marke, Artikelnummer, Barcode (GTIN/EAN), Zustand (neu, gebraucht, generalüberholt), digitales Produkt oder Dienstleistung (kein Versand).
@@ -188,6 +188,15 @@ Mit dem KI-Assistenten: Hänge ein Foto an und schreibe „Erstelle eine Produkt
 
 Jede Bestellung kommt in Stripe an (und per E-Mail, wenn du das aktiviert hast): Du verpackst und versendest, Stripe kümmert sich bei Bedarf um die Rückerstattung. Ein anderer Zahlungsanbieter funktioniert ebenfalls, solange sein Zahlungslink mit `https://` beginnt.
 
+### Oder PayPal bzw. Revolut Business verbinden
+
+Gleiches Prinzip: ein Zahlungslink mit festem Preis pro Produkt (oder pro Variante mit anderem Preis), eingefügt in die Produktseite. Éclair erkennt diese Links und zeigt unter dem Kauf-Button „Sichere Zahlung über PayPal“ bzw. „über Revolut“ an.
+
+- **PayPal**: Öffne in deinem Geschäftskonto **Zahlungslinks und -buttons**, erstelle für dein Produkt einen Link mit festem Preis und kopiere ihn (er beginnt mit `https://www.paypal.com/`). Deine Kunden zahlen mit ihrem PayPal-Konto oder per Karte.
+- **Revolut Business**: Du brauchst ein Händlerkonto. Erstelle unter **Händler › Zahlungslink** (Merchant › Payment link) einen Link mit dem Betrag des Produkts und kopiere ihn (`https://checkout.revolut.com/…`). Deine Kunden zahlen auf der Zahlungsseite von Revolut.
+
+Zwei Unterschiede zu Stripe: Nach der Zahlung bleibt der Kunde auf der Bestätigungsseite des Anbieters (keine automatische Rückkehr zu deiner Danke-Seite), und die Produktreferenz wird nicht an die Zahlung angehängt: Gib jedem Link einen eindeutigen Namen, damit du deine Bestellungen erkennst.
+
 ### Was Éclair für Google und KI tut
 
 - **Strukturierte Daten** Product und Offer auf jeder Produktseite (ProductGroup für Varianten): Preis, Währung, Lagerbestand, Zustand, Marke, Versandkosten und Lieferzeiten sowie die **Rückgabebedingungen** auf Ebene deines Unternehmens. Das sind die Informationen, die Google in seinen Produktergebnissen anzeigt.
@@ -198,6 +207,8 @@ Jede Bestellung kommt in Stripe an (und per E-Mail, wenn du das aktiviert hast):
 ### Was kostet das?
 
 Éclair selbst kostet nichts. Stripe verlangt weder ein Abo noch eine Einrichtungsgebühr, und Zahlungslinks sind inklusive: Du zahlst nur eine Gebühr pro Zahlung, zum Beispiel **1,5 % + 0,25 €** für eine Standardkarte aus dem Europäischen Wirtschaftsraum (2,8 % + 0,25 € für eine Premiumkarte, 3,15 % + 0,25 € für eine Karte von außerhalb des EWR, plus 2 % bei einer Währungsumrechnung). Das sind die Preise von Stripe in Frankreich laut [stripe.com/fr/pricing](https://stripe.com/fr/pricing), Stand: 30. Oktober 2026; sie können sich ändern.
+
+Mit **Revolut Business** beträgt die Gebühr **1 % + 0,20 €** für eine Privatkundenkarte aus dem Europäischen Wirtschaftsraum (2,8 % + 0,20 € für eine Karte von außerhalb des EWR), Zahlungslinks inklusive ([Revolut-Hilfe](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), [Revolut-Preise](https://www.revolut.com/en-IE/business/accept-payments-pricing/)). Mit **PayPal** in Frankreich sind es **1,2 % + 0,35 €** für eine Kartenzahlung und **2,9 % + 0,35 €** mit PayPal-Konto, plus 1,99 % außerhalb des EWR (1,29 % aus dem Vereinigten Königreich) ([PayPal-Gebühren](https://www.paypal.com/fr/business/paypal-business-fees), Stand: 15. Juli 2026). Preise geprüft am 31. Oktober 2026.
 
 ### Was der Shop nicht kann
 
@@ -470,7 +481,7 @@ eclair/                  ← das kommt auf den Webspace
 i18n/                    lesbare Quellen der Übersetzungen (kompiliert von tools/i18n.php)
 tests/run.php            Unit-Tests + HTTP-Integration (einschließlich der Angriffe aus dem Sicherheitsaudit)
 tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der Assistent wird ohne Schlüssel und ohne Kosten getestet
-tests/shop.php           Themes und Shop (Produktseiten, Stripe, JSON-LD, Merchant-Center-Feed)
+tests/shop.php           Themes und Shop (Produktseiten, Stripe, PayPal, Revolut, JSON-LD, Merchant-Center-Feed)
 tests/mcp.php            MCP-Connector (OAuth, PKCE, Protokoll, Widerruf) und Wahl der KI
 tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
 tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert)
@@ -478,7 +489,7 @@ tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 456 Unit- und HTTP-Prüfungen
+php tests/run.php                                  # 460 Unit- und HTTP-Prüfungen
 php tools/build.php                                # Archiv zum Verteilen
 ```
 

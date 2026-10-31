@@ -33,7 +33,7 @@ final class AiTools
             'price' => $str('Price given by the user, e.g. "29.90"'),
             'compare' => $str('Former price, only if the user mentions a discount'),
             'availability' => $availability,
-            'link' => $str('Payment link given by the user (https://buy.stripe.com/…)'),
+            'link' => $str('Payment link given by the user (Stripe, PayPal or Revolut Business)'),
             'brand' => $str(), 'sku' => $str('Reference'), 'gtin' => $str('Barcode (EAN, UPC)'),
             'condition' => ['type' => 'string', 'enum' => array_keys(Shop::CONDITIONS)],
             'digital' => ['type' => 'boolean', 'description' => 'Digital product or service: nothing to ship'],

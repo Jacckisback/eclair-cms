@@ -101,7 +101,7 @@ final class Theme
         'sale' => ['Promo', 'Oferta', 'Sale', 'Angebot', 'Offerta', 'Promoção'],
         'choose_option' => ['Choisissez une option', 'Elige una opción', 'Choose an option', 'Option wählen', 'Scegli un’opzione', 'Escolha uma opção'],
         'secure_payment' => ['Paiement sécurisé', 'Pago seguro', 'Secure payment', 'Sichere Zahlung', 'Pagamento sicuro', 'Pagamento seguro'],
-        'secure_stripe' => ['Paiement sécurisé par Stripe', 'Pago seguro con Stripe', 'Secure payment with Stripe', 'Sichere Zahlung über Stripe', 'Pagamento sicuro con Stripe', 'Pagamento seguro com Stripe'],
+        'secure_by' => ['Paiement sécurisé par {name}', 'Pago seguro con {name}', 'Secure payment with {name}', 'Sichere Zahlung über {name}', 'Pagamento sicuro con {name}', 'Pagamento seguro com {name}'],
         'shipping_cost' => ['Livraison : {price}', 'Envío: {price}', 'Shipping: {price}', 'Versand: {price}', 'Spedizione: {price}', 'Envio: {price}'],
         'shipping_free' => ['Livraison offerte', 'Envío gratis', 'Free shipping', 'Kostenloser Versand', 'Spedizione gratuita', 'Envio grátis'],
         'free_from' => ['offerte dès {price}', 'gratis desde {price}', 'free over {price}', 'kostenlos ab {price}', 'gratuita da {price}', 'grátis a partir de {price}'],

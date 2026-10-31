@@ -35,7 +35,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) (433 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -154,13 +154,13 @@ Choisir un thème applique sa couleur et ses polices conseillées : tu peux les 
 
 ## Boutique
 
-Le **mode boutique léger** sert à vendre quelques dizaines de produits sans la lourdeur d'un e-commerce : pas de panier, pas de comptes clients, pas de base de données, aucune donnée bancaire sur ton serveur. Chaque produit a sa fiche, optimisée pour Google et les IA, et son bouton **Acheter** mène à un **lien de paiement Stripe** (Payment Links) : Stripe encaisse, envoie les reçus et gère les remboursements.
+Le **mode boutique léger** sert à vendre quelques dizaines de produits sans la lourdeur d'un e-commerce : pas de panier, pas de comptes clients, pas de base de données, aucune donnée bancaire sur ton serveur. Chaque produit a sa fiche, optimisée pour Google et les IA, et son bouton **Acheter** mène à un **lien de paiement Stripe, PayPal ou Revolut Business** : ton prestataire encaisse, envoie les reçus et gère les remboursements.
 
 ### Ouvrir la boutique
 
 1. **Publie tes mentions légales** (l'installation en a créé un squelette à compléter) **et tes conditions générales de vente**. La boutique refuse de s'ouvrir sans elles : fais-les relire, elles engagent ta responsabilité de vendeur.
 2. Dans **Réglages › Boutique** : choisis ces deux pages, la devise, les frais et délais de livraison, les pays livrés et le délai de retour (dans l'UE, la vente à distance donne au moins 14 jours pour se rétracter, sauf exceptions comme un produit personnalisé).
-3. Clique sur **Créer la page de remerciement** : Stripe y renverra tes clients après le paiement.
+3. Clique sur **Créer la page de remerciement** : Stripe peut y renvoyer tes clients après le paiement.
 4. Active **Boutique ouverte**, enregistre, puis ajoute la boutique au menu (Menus › Boutique).
 
 Le catalogue est à l'adresse `/boutique` (`/tienda`, `/shop`, `/negozio` ou `/loja` selon la langue du site), modifiable ; si tu la changes, les anciennes adresses sont redirigées.
@@ -170,7 +170,7 @@ Le catalogue est à l'adresse `/boutique` (`/tienda`, `/shop`, `/negozio` ou `/l
 Contenus › **+ Produit**. En haut de l'éditeur, la fiche produit :
 
 - **Prix** et **prix barré** (facultatif : la remise s'affiche en pourcentage), **disponibilité** (en stock, épuisé, précommande).
-- **Lien de paiement** : le lien Stripe du produit (`https://buy.stripe.com/…`).
+- **Lien de paiement** : le lien Stripe, PayPal ou Revolut Business du produit.
 - **Photos** : la première est la principale (Google, réseaux sociaux) ; vise au moins 3 vues.
 - **Variantes** (taille, couleur…) : chacune peut avoir son prix et son lien. Sur le site, le choix se fait sans JavaScript.
 - **Détails pour Google Shopping** : marque, référence, code-barres (GTIN/EAN), état (neuf, occasion, reconditionné), produit numérique ou service (pas de livraison).
@@ -188,6 +188,15 @@ Avec l'assistant IA : joins une photo et demande « Crée la fiche produit de la
 
 Chaque commande t'arrive dans Stripe (et par e-mail si tu l'as activé) : tu prépares et expédies, Stripe gère le remboursement si besoin. Un autre prestataire fonctionne aussi, du moment que son lien de paiement commence par `https://`.
 
+### Ou relier PayPal ou Revolut Business
+
+Même principe : un lien de paiement à prix fixe par produit (ou par variante à un autre prix), collé dans la fiche produit. Éclair reconnaît ces liens et affiche « Paiement sécurisé par PayPal » ou « par Revolut » sous le bouton d'achat.
+
+- **PayPal** : dans ton compte professionnel, ouvre **Liens et boutons de paiement**, crée un lien à prix fixe pour ton produit, puis copie-le (il commence par `https://www.paypal.com/`). Ton client paie avec son compte PayPal ou par carte.
+- **Revolut Business** : il faut un compte marchand. Dans **Marchand › Lien de paiement** (Merchant › Payment link), crée un lien avec le montant du produit, puis copie-le (`https://checkout.revolut.com/…`). Ton client paie sur la page de paiement de Revolut.
+
+Deux différences avec Stripe : après le paiement, le client reste sur la page de confirmation du prestataire (pas de retour automatique vers ta page de remerciement), et la référence du produit n'est pas ajoutée au paiement : donne à chaque lien un nom clair pour reconnaître tes commandes.
+
 ### Ce qui est fait pour Google et les IA
 
 - **Données structurées** Product et Offer sur chaque fiche (ProductGroup pour les variantes) : prix, devise, stock, état, marque, frais et délais de livraison, et **politique de retour** au niveau de ton entreprise. Ce sont les informations que Google affiche dans les résultats produits.
@@ -198,6 +207,8 @@ Chaque commande t'arrive dans Stripe (et par e-mail si tu l'as activé) : tu pr�
 ### Combien ça coûte ?
 
 Rien côté Éclair. Stripe ne prend ni abonnement ni frais d'installation, et les liens de paiement sont inclus : tu paies seulement une commission par paiement, par exemple **1,5 % + 0,25 €** pour une carte standard de l'Espace économique européen (2,8 % + 0,25 € pour une carte premium, 3,15 % + 0,25 € pour une carte hors EEE, plus 2 % en cas de conversion de devise). Tarifs relevés le 30 octobre 2026 sur [stripe.com/fr/pricing](https://stripe.com/fr/pricing) ; ils peuvent évoluer.
+
+Avec **Revolut Business**, la commission est de **1 % + 0,20 €** pour une carte de particulier de l'Espace économique européen (2,8 % + 0,20 € pour une carte hors EEE), liens de paiement inclus ([aide Revolut](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), [tarifs Revolut](https://www.revolut.com/en-IE/business/accept-payments-pricing/)). Avec **PayPal** en France, elle est de **1,2 % + 0,35 €** pour un paiement par carte et de **2,9 % + 0,35 €** avec un compte PayPal, plus 1,99 % hors EEE (1,29 % depuis le Royaume-Uni) ([grille PayPal](https://www.paypal.com/fr/business/paypal-business-fees), mise à jour du 15 juillet 2026). Tarifs relevés le 31 octobre 2026.
 
 ### Ce que la boutique ne fait pas
 
@@ -470,7 +481,7 @@ eclair/                  ← à envoyer sur l'hébergement
 i18n/                    sources lisibles des traductions (compilées par tools/i18n.php)
 tests/run.php            tests unitaires + intégration HTTP (dont les attaques de la revue de sécurité)
 tests/fake-ai.php        faux fournisseurs d'IA (Claude, ChatGPT, images) : l'assistant est testé sans clé ni dépense
-tests/shop.php           thèmes et boutique (fiches, Stripe, JSON-LD, flux Merchant Center)
+tests/shop.php           thèmes et boutique (fiches, Stripe, PayPal, Revolut, JSON-LD, flux Merchant Center)
 tests/mcp.php            connecteur MCP (OAuth, PKCE, protocole, révocation) et choix de l'IA
 tools/router.php         routeur pour le serveur PHP intégré (développement)
 tools/build.php          empreintes d'intégrité + archive dist/eclair-cms-<version>.zip (PHP compacté)

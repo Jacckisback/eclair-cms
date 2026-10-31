@@ -387,7 +387,7 @@ PROMPT;
             Settings::get('blog.enabled') ? 'Blog: enabled, articles live under ' . Content::blogPath() . '/.' : 'Blog: disabled (create pages only).',
         ];
         if (Shop::enabled()) {
-            $lines[] = 'Shop: open, catalog at ' . Shop::path() . '/, products live under ' . Shop::path() . '/, prices in ' . Shop::currency() . ', payment by link (Stripe Payment Links).';
+            $lines[] = 'Shop: open, catalog at ' . Shop::path() . '/, products live under ' . Shop::path() . '/, prices in ' . Shop::currency() . ', payment by link (Stripe, PayPal or Revolut Business).';
         }
         foreach (['post' => 'Article categories', 'product' => 'Product categories'] as $kind => $label) {
             $cats = array_map(fn ($c) => $c['id'] . ' = ' . $c['name'], Categories::of($kind));

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip"><img src="https://img.shields.io/badge/download-v1.5.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.5.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip"><img src="https://img.shields.io/badge/download-v1.6.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.6.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -62,7 +62,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>433 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>434 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -144,7 +144,7 @@ Already working in Claude or ChatGPT? Connect them to your site with the built-i
   <img src="docs/images/shop.webp" alt="An Éclair product page: photo gallery, strikethrough price, variants, Buy now button linked to Stripe, shipping and returns; on the right, the catalog on mobile" width="100%">
 </p>
 
-**Lightweight shop mode**: sell your products without the overhead of a full e-commerce platform. Each product gets its own page, with a **Buy now** button that leads to a **Stripe payment link**, and that's it: no cart, no database, no payment details on your server. The only cost: Stripe's fee, **1.5% + €0.25** per payment with a standard European card[^stripe].
+**Lightweight shop mode**: sell your products without the overhead of a full e-commerce platform. Each product gets its own page, with a **Buy now** button that leads to a **Stripe, PayPal or Revolut Business payment link**, and that's it: no cart, no database, no payment details on your server. The only cost: your payment provider's fee, for example **1% + €0.20** with Revolut Business or **1.5% + €0.25** with Stripe for a standard European card[^stripe].
 
 <table>
   <tr>
@@ -153,8 +153,8 @@ Already working in Claude or ChatGPT? Connect them to your site with the built-i
       Photo gallery, price and compare-at price, <b>variants without JavaScript</b> (size, color), stock, shipping costs and returns shown on the page, related products. A catalog with category filters and a <b>Products</b> block for your home page.
     </td>
     <td width="50%" valign="top">
-      <h3>💳 Paid via Stripe</h3>
-      One <b>Stripe payment link</b> per product (or per variant): Stripe collects payments, sends receipts and handles refunds. <b>No subscription</b>, neither with Éclair nor with Stripe.
+      <h3>💳 Stripe, PayPal or Revolut</h3>
+      One <b>payment link</b> from Stripe, PayPal or Revolut Business per product (or per variant): your payment provider collects payments, sends receipts and handles refunds. <b>No subscription</b> with Éclair.
     </td>
   </tr>
   <tr>
@@ -190,7 +190,7 @@ The shop only opens once your legal notice and terms of sale are published. Step
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 433 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 434 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -199,7 +199,7 @@ The shop only opens once your legal notice and terms of sale are published. Step
 | **Plugin updates** | Frequent, the #1 source of vulnerabilities | ✅ No plugins to update |
 | **AI assistant (writing, images)** | Plugins, often with a subscription | ✅ Built in: Claude or ChatGPT, with your own key |
 | **Themes** | Installed separately, often heavy, sometimes paid | ✅ 6 built-in themes, live preview |
-| **Selling online** | WooCommerce: a plugin, a database, updates | ✅ Built-in lightweight shop, payment via Stripe link |
+| **Selling online** | WooCommerce: a plugin, a database, updates | ✅ Built-in lightweight shop, payment via Stripe, PayPal or Revolut link |
 
 ## Performance
 
@@ -299,7 +299,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) archive (433 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) archive (434 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
@@ -315,7 +315,7 @@ The [full guide](docs/GUIDE.en.md) covers everything else:
 - [Installation](docs/GUIDE.en.md#installation): requirements, site types, first steps
 - [Features in detail](docs/GUIDE.en.md#features-in-detail): speed, SEO, GEO, block editor
 - [Everyday use](docs/GUIDE.en.md#everyday-use)
-- [Themes](docs/GUIDE.en.md#themes) and [Shop](docs/GUIDE.en.md#shop): live preview, product pages, Stripe, Google Shopping
+- [Themes](docs/GUIDE.en.md#themes) and [Shop](docs/GUIDE.en.md#shop): live preview, product pages, Stripe, PayPal, Revolut, Google Shopping
 - [AI assistant](docs/GUIDE.en.md#ai-assistant): activation, editorial profile, costs, security
 - [MCP connector](docs/GUIDE.en.md#mcp-connector-claude-and-chatgpt): Claude and ChatGPT with your subscription
 - [Updating, backing up, moving](docs/GUIDE.en.md#updating-backing-up-moving)
@@ -327,7 +327,7 @@ PHP 8.1+ with no framework and no Composer: plain classes in `eclair/app/lib/`, 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                                           # 456 unit and HTTP checks
+php tests/run.php                                                           # 460 unit and HTTP checks
 php tools/build.php                                                         # ready-to-ship archive
 ```
 
@@ -341,6 +341,6 @@ Project structure and theme customization: see [For developers](docs/GUIDE.en.md
 
 <p align="center"><sub>⚡ Éclair, for freelancers and small businesses who want a fast, well-ranked, hassle-free website.</sub></p>
 
-[^stripe]: Stripe's pricing in France for a standard card from the European Economic Area (EEA); 2.8% + €0.25 for a premium card, 3.15% + €0.25 for a card from outside the EEA ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), checked on October 30, 2026). Payment Links are included at no extra cost.
+[^stripe]: For a standard card from the European Economic Area (EEA). Revolut Business: 1% + €0.20, 2.8% + €0.20 for a card from outside the EEA ([Revolut help](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), checked on October 31, 2026). Stripe in France: 1.5% + €0.25, 2.8% + €0.25 for a premium card, 3.15% + €0.25 for a card from outside the EEA ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), checked on October 30, 2026). PayPal in France: 1.2% + €0.35 by card, 2.9% + €0.35 with a PayPal account ([PayPal fees](https://www.paypal.com/fr/business/paypal-business-fees), checked on October 31, 2026). With Stripe and Revolut, payment links are included at no extra cost.
 
 [^wp]: Official WordPress 7.1.4 archive: 37,239,942 bytes, i.e. 35.5 MB ([download link](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), checked on October 29, 2026).

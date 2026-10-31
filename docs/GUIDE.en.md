@@ -35,7 +35,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) archive (433 KB) and unzip it.
+1. Download the [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) archive (434 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -154,13 +154,13 @@ Choosing a theme applies its recommended color and fonts: you can change them la
 
 ## Shop
 
-The **lightweight shop mode** lets you sell a few dozen products without the overhead of a full e-commerce platform: no cart, no customer accounts, no database, no payment details on your server. Each product gets its own page, optimized for Google and AI, and its **Buy now** button leads to a **Stripe payment link** (Payment Links): Stripe collects payments, sends receipts and handles refunds.
+The **lightweight shop mode** lets you sell a few dozen products without the overhead of a full e-commerce platform: no cart, no customer accounts, no database, no payment details on your server. Each product gets its own page, optimized for Google and AI, and its **Buy now** button leads to a **Stripe, PayPal or Revolut Business payment link**: your payment provider collects payments, sends receipts and handles refunds.
 
 ### Open the shop
 
 1. **Publish your legal notice** (the installation created an outline for you to complete) **and your terms of sale**. The shop won't open without them. Have them reviewed: as the seller, you're legally responsible for them.
 2. In **Settings › Shop**: select these two pages, then set the currency, the shipping cost and delivery time, the shipping countries and the return window (in the EU, distance selling comes with a withdrawal period of at least 14 days, with some exceptions such as personalized products).
-3. Click **Create the thank-you page**: Stripe will send your customers back there after payment.
+3. Click **Create the thank-you page**: Stripe can send your customers back there after payment.
 4. Turn on **Shop open**, save, then add the shop to the menu (Menus › Shop).
 
 The catalog is at `/shop` (`/boutique`, `/tienda`, `/negozio` or `/loja` depending on the site's language), and you can change it; if you do, old URLs are redirected.
@@ -170,7 +170,7 @@ The catalog is at `/shop` (`/boutique`, `/tienda`, `/negozio` or `/loja` dependi
 Content › **+ Product**. The product page fields are at the top of the editor:
 
 - **Price** and **compare-at price** (optional: the discount is shown as a percentage), **availability** (in stock, sold out, pre-order).
-- **Payment link**: the product's Stripe link (`https://buy.stripe.com/…`).
+- **Payment link**: the product's Stripe, PayPal or Revolut Business link.
 - **Photos**: the first one is the main one (Google, social media); aim for at least 3 views.
 - **Variants** (size, color…): each one can have its own price and link. On the site, choosing a variant works without JavaScript.
 - **Google Shopping details**: brand, SKU, barcode (GTIN/EAN), condition (new, used, refurbished), digital product or service (no shipping).
@@ -188,6 +188,15 @@ With the AI assistant: attach a photo and ask “Create a product page from the 
 
 You receive each order in Stripe (and by email, if you've turned that on): you pack and ship, and Stripe handles refunds if needed. Another payment provider works too, as long as its payment link starts with `https://`.
 
+### Or connect PayPal or Revolut Business
+
+Same idea: one fixed-price payment link per product (or per variant with a different price), pasted into the product page. Éclair recognizes these links and shows “Secure payment with PayPal” or “with Revolut” under the buy button.
+
+- **PayPal**: in your business account, open **Payment links and buttons**, create a fixed-price link for your product, then copy it (it starts with `https://www.paypal.com/`). Your customer pays with their PayPal account or by card.
+- **Revolut Business**: you need a merchant account. In **Merchant › Payment link**, create a link with the product's amount, then copy it (`https://checkout.revolut.com/…`). Your customer pays on Revolut's payment page.
+
+Two differences from Stripe: after paying, the customer stays on the provider's confirmation page (no automatic return to your thank-you page), and the product reference isn't added to the payment: give each link a clear name so you can recognize your orders.
+
 ### What's built in for Google and AI
 
 - Product and Offer **structured data** on every product page (ProductGroup for variants): price, currency, stock, condition, brand, shipping cost and delivery time, and a **return policy** set for your whole business. This is the information Google shows in product results.
@@ -198,6 +207,8 @@ You receive each order in Stripe (and by email, if you've turned that on): you p
 ### How much does it cost?
 
 Nothing on Éclair's side. Stripe charges no subscription or setup fee, and Payment Links are included: you only pay a fee per payment, for example **1.5% + €0.25** for a standard card from the European Economic Area (2.8% + €0.25 for a premium card, 3.15% + €0.25 for a card from outside the EEA, plus 2% if a currency conversion is needed). These are Stripe's prices in France, taken from [stripe.com/fr/pricing](https://stripe.com/fr/pricing) on October 30, 2026; they may change.
+
+With **Revolut Business**, the fee is **1% + €0.20** for a consumer card from the European Economic Area (2.8% + €0.20 for a card from outside the EEA), payment links included ([Revolut help](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), [Revolut pricing](https://www.revolut.com/en-IE/business/accept-payments-pricing/)). With **PayPal** in France, it's **1.2% + €0.35** for a card payment and **2.9% + €0.35** with a PayPal account, plus 1.99% outside the EEA (1.29% from the UK) ([PayPal fees](https://www.paypal.com/fr/business/paypal-business-fees), updated July 15, 2026). Prices checked on October 31, 2026.
 
 ### What the shop doesn't do
 
@@ -470,7 +481,7 @@ eclair/                  ← upload this to your hosting
 i18n/                    human-readable translation sources (compiled by tools/i18n.php)
 tests/run.php            unit tests + HTTP integration (including the attacks from the security review)
 tests/fake-ai.php        fake AI providers (Claude, ChatGPT, images): the assistant is tested with no key and no spending
-tests/shop.php           themes and shop (product pages, Stripe, JSON-LD, Merchant Center feed)
+tests/shop.php           themes and shop (product pages, Stripe, PayPal, Revolut, JSON-LD, Merchant Center feed)
 tests/mcp.php            MCP connector (OAuth, PKCE, protocol, revocation) and choosing the AI
 tools/router.php         router for PHP's built-in server (development)
 tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP)
@@ -478,7 +489,7 @@ tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 456 unit and HTTP checks
+php tests/run.php                                  # 460 unit and HTTP checks
 php tools/build.php                                # ready-to-ship archive
 ```
 

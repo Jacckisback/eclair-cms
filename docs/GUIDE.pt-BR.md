@@ -35,7 +35,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) (433 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -154,13 +154,13 @@ Escolher um tema aplica a cor e as fontes recomendadas dele: você pode alterá-
 
 ## Loja
 
-O **modo loja leve** serve para vender algumas dezenas de produtos sem o peso de um e-commerce: sem carrinho, sem contas de clientes, sem banco de dados, nenhum dado bancário no seu servidor. Cada produto tem sua própria página, otimizada para o Google e as IAs, com um botão **Comprar** que leva a um **link de pagamento da Stripe** (Payment Links): a Stripe recebe os pagamentos, envia os recibos e gerencia os reembolsos.
+O **modo loja leve** serve para vender algumas dezenas de produtos sem o peso de um e-commerce: sem carrinho, sem contas de clientes, sem banco de dados, nenhum dado bancário no seu servidor. Cada produto tem sua própria página, otimizada para o Google e as IAs, com um botão **Comprar** que leva a um **link de pagamento da Stripe, do PayPal ou do Revolut Business**: seu provedor de pagamentos recebe os pagamentos, envia os recibos e gerencia os reembolsos.
 
 ### Abrir a loja
 
 1. **Publique o seu aviso legal** (a instalação já criou uma estrutura para você completar) **e as suas condições gerais de venda**. A loja não abre sem essas páginas. Peça para alguém revisá-las: você responde por elas como vendedor.
 2. Em **Configurações › Loja**: escolha essas duas páginas, a moeda, o valor do frete e o prazo de entrega, os países de entrega e o prazo de devolução (na UE, a venda a distância dá ao cliente pelo menos 14 dias para desistir da compra, salvo exceções, como um produto personalizado).
-3. Clique em **Criar a página de agradecimento**: a Stripe vai redirecionar seus clientes para ela depois do pagamento.
+3. Clique em **Criar a página de agradecimento**: a Stripe pode redirecionar seus clientes para ela depois do pagamento.
 4. Ative **Loja aberta**, salve e depois adicione a loja ao menu (Menus › Loja).
 
 O catálogo fica no endereço `/loja` (`/boutique`, `/tienda`, `/shop` ou `/negozio`, conforme o idioma do site), que pode ser alterado; se você mudá-lo, os endereços antigos são redirecionados.
@@ -170,7 +170,7 @@ O catálogo fica no endereço `/loja` (`/boutique`, `/tienda`, `/shop` ou `/nego
 Conteúdos › **+ Produto**. No topo do editor ficam os campos da página de produto:
 
 - **Preço** e **preço riscado** (opcional: o desconto aparece em porcentagem), **disponibilidade** (em estoque, esgotado, pré-venda).
-- **Link de pagamento**: o link da Stripe do produto (`https://buy.stripe.com/…`).
+- **Link de pagamento**: o link da Stripe, do PayPal ou do Revolut Business do produto.
 - **Fotos**: a primeira é a principal (Google, redes sociais); tente mostrar pelo menos 3 ângulos.
 - **Variantes** (tamanho, cor…): cada uma pode ter seu próprio preço e link. No site, a escolha é feita sem JavaScript.
 - **Detalhes para o Google Shopping**: marca, referência, código de barras (GTIN/EAN), condição (novo, usado, recondicionado), produto digital ou serviço (sem entrega).
@@ -188,6 +188,15 @@ Com o assistente de IA: anexe uma foto e peça “Crie a página do produto da f
 
 Cada pedido chega para você na Stripe (e por e-mail, se você ativou essa opção): você prepara e envia, e a Stripe cuida do reembolso, se for preciso. Outro provedor de pagamento também funciona, desde que o link de pagamento dele comece com `https://`.
 
+### Ou conectar o PayPal ou o Revolut Business
+
+Mesmo princípio: um link de pagamento com preço fixo por produto (ou por variante com outro preço), colado na página do produto. O Éclair reconhece esses links e mostra “Pagamento seguro com PayPal” ou “com Revolut” abaixo do botão de compra.
+
+- **PayPal**: na sua conta empresarial, abra **Links e botões de pagamento**, crie um link com preço fixo para o seu produto e copie-o (ele começa com `https://www.paypal.com/`). Seu cliente paga com a conta PayPal ou com cartão.
+- **Revolut Business**: você precisa de uma conta de comerciante. Em **Comerciante › Link de pagamento** (Merchant › Payment link), crie um link com o valor do produto e copie-o (`https://checkout.revolut.com/…`). Seu cliente paga na página de pagamento do Revolut.
+
+Duas diferenças em relação à Stripe: depois do pagamento, o cliente fica na página de confirmação do provedor (sem voltar automaticamente para a sua página de agradecimento), e a referência do produto não é adicionada ao pagamento: dê a cada link um nome claro para reconhecer seus pedidos.
+
 ### O que já vem pronto para o Google e as IAs
 
 - **Dados estruturados** Product e Offer em cada página de produto (ProductGroup para as variantes): preço, moeda, estoque, condição, marca, valor do frete e prazo de entrega, e **política de devolução** no nível da sua empresa. São as informações que o Google exibe nos resultados de produtos.
@@ -198,6 +207,8 @@ Cada pedido chega para você na Stripe (e por e-mail, se você ativou essa opç�
 ### Quanto custa?
 
 Nada do lado do Éclair. A Stripe não cobra assinatura nem taxa de adesão, e os links de pagamento estão incluídos: você paga só uma taxa por pagamento, por exemplo **1,5% + € 0,25** para um cartão padrão do Espaço Econômico Europeu (2,8% + € 0,25 para um cartão premium, 3,15% + € 0,25 para um cartão de fora do EEE, mais 2% em caso de conversão de moeda). Tarifas da Stripe na França, consultadas em 30 de outubro de 2026 em [stripe.com/fr/pricing](https://stripe.com/fr/pricing); elas podem mudar.
+
+Com o **Revolut Business**, a taxa é de **1% + € 0,20** para um cartão de pessoa física do Espaço Econômico Europeu (2,8% + € 0,20 para um cartão de fora do EEE), com links de pagamento incluídos ([ajuda do Revolut](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), [tarifas do Revolut](https://www.revolut.com/en-IE/business/accept-payments-pricing/)). Com o **PayPal** na França, é de **1,2% + € 0,35** para um pagamento com cartão e de **2,9% + € 0,35** com uma conta PayPal, mais 1,99% fora do EEE (1,29% a partir do Reino Unido) ([tarifas do PayPal](https://www.paypal.com/fr/business/paypal-business-fees), atualizadas em 15 de julho de 2026). Tarifas consultadas em 31 de outubro de 2026.
 
 ### O que a loja não faz
 
@@ -470,7 +481,7 @@ eclair/                  ← o que vai para a hospedagem
 i18n/                    arquivos-fonte legíveis das traduções (compilados por tools/i18n.php)
 tests/run.php            testes unitários + integração HTTP (incluindo os ataques da auditoria de segurança)
 tests/fake-ai.php        provedores de IA falsos (Claude, ChatGPT, imagens): o assistente é testado sem chave nem custo
-tests/shop.php           temas e loja (páginas de produto, Stripe, JSON-LD, feed do Merchant Center)
+tests/shop.php           temas e loja (páginas de produto, Stripe, PayPal, Revolut, JSON-LD, feed do Merchant Center)
 tests/mcp.php            conector MCP (OAuth, PKCE, protocolo, revogação) e escolha da IA
 tools/router.php         roteador para o servidor embutido do PHP (desenvolvimento)
 tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<versão>.zip (PHP compactado)
@@ -478,7 +489,7 @@ tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<v
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 456 verificações unitárias e HTTP
+php tests/run.php                                  # 460 verificações unitárias e HTTP
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 

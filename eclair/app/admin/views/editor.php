@@ -45,8 +45,8 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
             <select id="p-availability"><option value="in_stock"><?= e(t('En stock')) ?></option><option value="out_of_stock"><?= e(t('Épuisé')) ?></option><option value="preorder"><?= e(t('Précommande')) ?></option></select></label>
         </div>
         <label class="field"><span class="label"><?= e(t('Lien de paiement')) ?></span>
-          <input type="url" id="p-link" placeholder="https://buy.stripe.com/…" spellcheck="false">
-          <span class="hint"><?= e(t('Crée le lien dans Stripe (« Liens de paiement »), puis colle-le ici. Stripe encaisse le paiement et gère les remboursements.')) ?></span></label>
+          <input type="url" id="p-link" placeholder="https://…" spellcheck="false">
+          <span class="hint"><?= e(t('Lien de paiement Stripe, PayPal ou Revolut Business, à prix fixe : crée-le chez ton prestataire, puis colle-le ici. Il encaisse le paiement et gère les remboursements.')) ?></span></label>
         <div class="field"><span class="label"><?= e(t('Photos')) ?></span>
           <div class="gallery-strip" id="p-gallery"></div>
           <span class="hint"><?= e(t('La première photo est la principale (Google, réseaux sociaux). Vise au moins 3 vues, sur fond neutre.')) ?></span></div>
@@ -54,7 +54,7 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
           <summary><?= e(t('Variantes (taille, couleur…)')) ?></summary>
           <div class="variant-rows" id="p-variants"></div>
           <button class="btn btn-sm" type="button" id="p-variant-add"><?= Icons::svg('plus') ?><?= e(t('Ajouter une variante')) ?></button>
-          <span class="hint"><?= e(t('Une variante sans prix ni lien reprend ceux du produit. Avec Stripe, crée un lien de paiement par variante.')) ?></span>
+          <span class="hint"><?= e(t('Une variante sans prix ni lien reprend ceux du produit. Une variante à un autre prix a besoin de son propre lien de paiement.')) ?></span>
         </details>
         <details class="product-more">
           <summary><?= e(t('Détails pour Google Shopping')) ?></summary>

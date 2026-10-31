@@ -65,6 +65,12 @@ check('lien de paiement : https seulement', Shop::link('javascript:alert(1)') ==
 check('référence du produit ajoutée aux liens Stripe', Shop::buyUrl('https://buy.stripe.com/test_abc', 'bol <x> 2') === 'https://buy.stripe.com/test_abc?client_reference_id=bol-x-2'
     && Shop::buyUrl('https://pay.example.com/p', 'a') === 'https://pay.example.com/p'
     && Shop::buyUrl('https://buy.stripe.com/t?client_reference_id=z', 'a') === 'https://buy.stripe.com/t?client_reference_id=z');
+check('prestataires reconnus : Stripe, PayPal, Revolut Business', Shop::provider('https://buy.stripe.com/test_abc') === 'Stripe'
+    && Shop::provider('https://www.paypal.com/ncp/payment/ABC123') === 'PayPal' && Shop::provider('https://paypal.me/atelier/25') === 'PayPal'
+    && Shop::provider('https://checkout.revolut.com/payment-link/0f7c') === 'Revolut' && Shop::provider('https://revolut.me/atelier') === 'Revolut'
+    && Shop::provider('https://revolut.com.evil.example/x') === '' && Shop::provider('https://pay.example.com/p') === '');
+check('liens PayPal et Revolut laissés tels quels', Shop::buyUrl('https://www.paypal.com/ncp/payment/ABC123', 'bol') === 'https://www.paypal.com/ncp/payment/ABC123'
+    && Shop::buyUrl('https://checkout.revolut.com/payment-link/0f7c', 'bol') === 'https://checkout.revolut.com/payment-link/0f7c');
 Store::write('media', ['gal1' => ['id' => 'gal1', 'file' => '2026/10/a', 'ext' => 'jpg', 'w' => 800, 'h' => 800, 'webp' => [], 'alt' => '', 'name' => 'a.jpg', 'created' => time()]]);
 $n = Shop::normalize(['price' => '29,90', 'compare' => '39', 'availability' => 'nope', 'link' => 'https://buy.stripe.com/x', 'gtin' => '978-2-1234-5680-3',
     'condition' => 'broken', 'sku' => 'BOL 01', 'gallery' => ['gal1', 'gal1', '../x', 'absent'],
@@ -249,6 +255,17 @@ try {
     $res = $v->req('GET', '/boutique/' . ($pichet['json']['item']['slug'] ?? 'x'));
     check('toutes les variantes épuisées : produit affiché épuisé', str_contains($res['body'], 'class="stock stock-out_of_stock"')
         && str_contains($v->req('GET', '/llms.txt')['body'], "35\u{00A0}€ · Épuisé"));
+    $rev = $api('api/save', ['type' => 'product', 'title' => 'Plat à tarte', 'status' => 'published', 'product' => ['price' => '38', 'link' => 'https://checkout.revolut.com/payment-link/0f7c']]);
+    $res = $v->req('GET', '/boutique/' . ($rev['json']['item']['slug'] ?? 'x'));
+    check('lien Revolut Business : bouton d’achat et « Paiement sécurisé par Revolut »', str_contains($res['body'], 'href="https://checkout.revolut.com/payment-link/0f7c"')
+        && str_contains($res['body'], 'Paiement sécurisé par Revolut'));
+    $mix = $api('api/save', ['type' => 'product', 'title' => 'Saladier', 'status' => 'published', 'product' => ['price' => '40', 'link' => 'https://www.paypal.com/ncp/payment/SAL40',
+        'variants' => [['label' => 'Bleu'], ['label' => 'Vert', 'price' => '42', 'link' => 'https://buy.stripe.com/test_vert']]]]);
+    $res = $v->req('GET', '/boutique/' . ($mix['json']['item']['slug'] ?? 'x'));
+    check('prestataires mélangés : « Paiement sécurisé », sans nom', str_contains($res['body'], 'Paiement sécurisé<') && !str_contains($res['body'], 'Paiement sécurisé par'));
+    foreach ([$rev, $mix] as $tmp) {
+        $api('api/delete', ['id' => (string) ($tmp['json']['item']['id'] ?? ''), 'redirect' => '']);
+    }
     $trap = $api('api/save', ['type' => 'product', 'title' => 'Vase', 'status' => 'published', 'product' => ['price' => '45', 'link' => 'javascript:alert(1)']]);
     $res = $v->req('GET', '/boutique/' . ($trap['json']['item']['slug'] ?? 'x'));
     check('lien de paiement piégé ignoré, bouton désactivé', $res['status'] === 200 && !str_contains($res['body'], 'javascript:') && str_contains($res['body'], 'Bientôt disponible')

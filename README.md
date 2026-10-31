@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip"><img src="https://img.shields.io/badge/t%C3%A9l%C3%A9charger-v1.5.0-5b4cf0?style=for-the-badge" alt="Télécharger Éclair 1.5.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip"><img src="https://img.shields.io/badge/t%C3%A9l%C3%A9charger-v1.6.0-5b4cf0?style=for-the-badge" alt="Télécharger Éclair 1.6.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 ou plus">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_donn%C3%A9es-aucune-14122b?style=for-the-badge" alt="Aucune base de données">
@@ -62,7 +62,7 @@ WordPress sait tout faire, mais il lui faut une base de données, des extensions
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra léger</h3>
-      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>433 Ko</b>, zéro dépendance, zéro cookie sur le site public.
+      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>434 Ko</b>, zéro dépendance, zéro cookie sur le site public.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Simple comme bonjour</h3>
@@ -144,7 +144,7 @@ Mise en place en 3 minutes et offres compatibles : voir le [guide, section Conne
   <img src="docs/images/shop.webp" alt="Une fiche produit Éclair : galerie photo, prix barré, variantes, bouton Acheter relié à Stripe, livraison et retours ; à droite, le catalogue sur mobile" width="100%">
 </p>
 
-**Mode boutique léger** : vends tes produits sans la lourdeur d'un e-commerce. Chaque produit a sa fiche, son bouton **Acheter** mène à un **lien de paiement Stripe**, et c'est tout : pas de panier, pas de base de données, aucune donnée bancaire sur ton serveur. Seul coût : la commission Stripe, **1,5 % + 0,25 €** par paiement avec une carte européenne standard[^stripe].
+**Mode boutique léger** : vends tes produits sans la lourdeur d'un e-commerce. Chaque produit a sa fiche, son bouton **Acheter** mène à un **lien de paiement Stripe, PayPal ou Revolut Business**, et c'est tout : pas de panier, pas de base de données, aucune donnée bancaire sur ton serveur. Seul coût : la commission du prestataire, par exemple **1 % + 0,20 €** avec Revolut Business ou **1,5 % + 0,25 €** avec Stripe pour une carte européenne standard[^stripe].
 
 <table>
   <tr>
@@ -153,8 +153,8 @@ Mise en place en 3 minutes et offres compatibles : voir le [guide, section Conne
       Galerie photo, prix et prix barré, <b>variantes sans JavaScript</b> (taille, couleur), stock, frais de livraison et retours affichés, produits associés. Catalogue avec filtres par catégorie et bloc <b>Produits</b> pour ta page d'accueil.
     </td>
     <td width="50%" valign="top">
-      <h3>💳 Payé par Stripe</h3>
-      Un <b>lien de paiement Stripe</b> par produit (ou par variante) : Stripe encaisse, envoie les reçus et gère les remboursements. <b>Aucun abonnement</b>, ni chez Éclair ni chez Stripe.
+      <h3>💳 Stripe, PayPal ou Revolut</h3>
+      Un <b>lien de paiement</b> Stripe, PayPal ou Revolut Business par produit (ou par variante) : ton prestataire encaisse, envoie les reçus et gère les remboursements. <b>Aucun abonnement</b> chez Éclair.
     </td>
   </tr>
   <tr>
@@ -190,7 +190,7 @@ La boutique ne s'ouvre qu'avec des mentions légales et des conditions général
 |---|---|---|
 | **Installation** | Créer une base MySQL, puis lancer l'assistant | ✅ Envoyer le dossier, répondre à 4 questions |
 | **Base de données** | MySQL obligatoire | ✅ Aucune (fichiers protégés) |
-| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 433 Ko |
+| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 434 Ko |
 | **SEO, sitemap, données structurées** | Extension à installer et à maintenir | ✅ Intégré |
 | **GEO : llms.txt, Markdown, robots IA** | Extensions, rarement complet | ✅ Intégré |
 | **Pages publiques** | Générées à chaque visite, sauf extension de cache | ✅ Servies depuis un cache statique |
@@ -199,7 +199,7 @@ La boutique ne s'ouvre qu'avec des mentions légales et des conditions général
 | **Mises à jour d'extensions** | Régulières, première source de failles | ✅ Aucune extension à mettre à jour |
 | **Assistant IA (rédaction, images)** | Extensions, souvent avec abonnement | ✅ Intégré : Claude ou ChatGPT, avec ta clé |
 | **Thèmes** | À installer, souvent lourds, parfois payants | ✅ 6 thèmes intégrés, aperçu en direct |
-| **Vendre en ligne** | WooCommerce : extension, base de données, mises à jour | ✅ Boutique légère intégrée, paiement par lien Stripe |
+| **Vendre en ligne** | WooCommerce : extension, base de données, mises à jour | ✅ Boutique légère intégrée, paiement par lien Stripe, PayPal ou Revolut |
 
 ## Performances
 
@@ -299,7 +299,7 @@ Détails complets dans le [guide, section Sécurité](docs/GUIDE.md#sécurité).
   <img src="docs/images/install.webp" alt="Installation en trois étapes : envoyer le dossier, répondre à quatre questions, le site est en ligne" width="100%">
 </p>
 
-1. **Télécharge** l'archive [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) (433 Ko) et décompresse-la.
+1. **Télécharge** l'archive [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 Ko) et décompresse-la.
 2. **Envoie le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…), fichiers cachés `.htaccess` compris.
 3. **Ouvre l'adresse de ton site** : l'assistant démarre. Quatre questions, des confettis, et ton site est en ligne avec ses premières pages.
 
@@ -315,7 +315,7 @@ Le [guide complet](docs/GUIDE.md) détaille tout le reste :
 - [Installation](docs/GUIDE.md#installation) : prérequis, types de site, premiers pas
 - [Fonctionnalités en détail](docs/GUIDE.md#fonctionnalités-en-détail) : vitesse, SEO, GEO, éditeur de blocs
 - [Utiliser Éclair au quotidien](docs/GUIDE.md#utiliser-éclair-au-quotidien)
-- [Thèmes](docs/GUIDE.md#thèmes) et [Boutique](docs/GUIDE.md#boutique) : aperçu en direct, fiches produit, Stripe, Google Shopping
+- [Thèmes](docs/GUIDE.md#thèmes) et [Boutique](docs/GUIDE.md#boutique) : aperçu en direct, fiches produit, Stripe, PayPal, Revolut, Google Shopping
 - [Assistant IA](docs/GUIDE.md#assistant-ia) : activation, profil éditorial, coûts, sécurité
 - [Connecteur MCP](docs/GUIDE.md#connecteur-mcp-claude-et-chatgpt) : Claude et ChatGPT avec ton abonnement
 - [Mettre à jour, sauvegarder, déménager](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager)
@@ -327,7 +327,7 @@ PHP 8.1+ sans framework ni Composer : des classes simples dans `eclair/app/lib/`
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # serveur de développement
-php tests/run.php                                                           # 456 vérifications unitaires et HTTP
+php tests/run.php                                                           # 460 vérifications unitaires et HTTP
 php tools/build.php                                                         # archive prête à distribuer
 ```
 
@@ -341,6 +341,6 @@ Structure du projet et personnalisation du thème : voir [Pour les développeurs
 
 <p align="center"><sub>⚡ Éclair, pour les indépendants et les petites entreprises qui veulent un site rapide, bien référencé et tranquille.</sub></p>
 
-[^stripe]: Tarif Stripe en France pour une carte standard de l'Espace économique européen ; 2,8 % + 0,25 € pour une carte premium, 3,15 % + 0,25 € hors EEE ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), vérifié le 30 octobre 2026). Les liens de paiement sont inclus sans frais supplémentaires.
+[^stripe]: Pour une carte standard de l'Espace économique européen. Revolut Business : 1 % + 0,20 €, 2,8 % + 0,20 € hors EEE ([aide Revolut](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), vérifié le 31 octobre 2026). Stripe en France : 1,5 % + 0,25 €, 2,8 % + 0,25 € pour une carte premium, 3,15 % + 0,25 € hors EEE ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), vérifié le 30 octobre 2026). PayPal en France : 1,2 % + 0,35 € par carte, 2,9 % + 0,35 € avec un compte PayPal ([grille PayPal](https://www.paypal.com/fr/business/paypal-business-fees), vérifié le 31 octobre 2026). Chez Stripe et Revolut, les liens de paiement sont inclus sans frais supplémentaires.
 
 [^wp]: Archive officielle de WordPress 7.1.4 : 37 239 942 octets, soit 35,5 Mo ([lien de téléchargement](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), vérifié le 29 octobre 2026).

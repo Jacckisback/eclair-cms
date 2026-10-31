@@ -6,7 +6,7 @@ namespace Eclair;
 defined('ECLAIR') || exit;
 
 /**
- * Mode boutique léger : fiches produit, catalogue et paiement par lien (Stripe Payment Links ou autre).
+ * Mode boutique léger : fiches produit, catalogue et paiement par lien (Stripe, PayPal, Revolut Business ou autre).
  * Pas de panier, de commandes ni de base de données : le prestataire de paiement encaisse, envoie le reçu
  * et gère les remboursements ; Éclair publie des fiches produit rapides, balisées pour Google et les IA.
  */
@@ -114,11 +114,22 @@ final class Shop
         ];
     }
 
-    /** Lien de paiement : une adresse https seulement (Stripe Payment Links, ou un autre prestataire). */
+    /** Lien de paiement : une adresse https seulement (Stripe, PayPal, Revolut Business, ou un autre prestataire). */
     public static function link(mixed $url): string
     {
         $url = Sanitize::url((string) (is_scalar($url) ? $url : ''));
         return preg_match('~^https://[a-z0-9.-]+\.[a-z]{2,}(?:[/?#]|$)~i', $url) ? $url : '';
+    }
+
+    /** Prestataire d'un lien de paiement, reconnu à son adresse (« » pour un autre). */
+    public static function provider(string $link): string
+    {
+        foreach (['Stripe' => 'buy\.stripe\.com', 'PayPal' => '(www\.)?paypal\.(com|me)', 'Revolut' => '(checkout\.)?revolut\.(com|me)'] as $name => $host) {
+            if (preg_match('~^https://' . $host . '/~i', $link)) {
+                return $name;
+            }
+        }
+        return '';
     }
 
     /** Offres d'un produit : une par variante (prix et lien hérités du produit s'ils sont vides), ou une seule. */
@@ -128,7 +139,7 @@ final class Shop
         if (!$p['variants']) {
             return [['label' => '', 'price' => $p['price'], 'link' => $p['link'], 'availability' => $p['availability']]];
         }
-        // Un lien Stripe encaisse un montant fixé dans Stripe : une variante à un autre prix n'hérite pas du lien du produit.
+        // Un lien de paiement encaisse un montant fixé chez le prestataire : une variante à un autre prix n'hérite pas du lien du produit.
         return array_map(fn (array $v): array => [
             'label' => $v['label'],
             'price' => $v['price'] !== '' ? $v['price'] : $p['price'],

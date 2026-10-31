@@ -35,7 +35,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 
 ### Pasos
 
-1. Descarga el archivo [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip) (433 KB) y descomprímelo.
+1. Descarga el archivo [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
 3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
@@ -154,13 +154,13 @@ Al elegir un tema se aplican su color y sus fuentes recomendadas: puedes cambiar
 
 ## Tienda
 
-El **modo tienda ligera** sirve para vender unas decenas de productos sin el peso de un e-commerce: sin carrito, sin cuentas de cliente, sin base de datos, ningún dato bancario en tu servidor. Cada producto tiene su ficha, optimizada para Google y las IA, y su botón **Comprar** lleva a un **enlace de pago de Stripe** (Payment Links): Stripe cobra, envía los recibos y gestiona los reembolsos.
+El **modo tienda ligera** sirve para vender unas decenas de productos sin el peso de un e-commerce: sin carrito, sin cuentas de cliente, sin base de datos, ningún dato bancario en tu servidor. Cada producto tiene su ficha, optimizada para Google y las IA, y su botón **Comprar** lleva a un **enlace de pago de Stripe, PayPal o Revolut Business**: tu proveedor de pagos cobra, envía los recibos y gestiona los reembolsos.
 
 ### Abrir la tienda
 
 1. **Publica tu aviso legal** (la instalación creó un esqueleto que completar) **y tus condiciones generales de venta**. La tienda no se abre sin estas dos páginas: haz que las revisen, te comprometen legalmente como vendedor.
 2. En **Ajustes › Tienda**: elige esas dos páginas, la moneda, los gastos de envío y el plazo de entrega, los países de envío y el plazo de devolución (en la UE, la venta a distancia da un plazo de desistimiento de 14 días como mínimo, salvo excepciones como un producto personalizado).
-3. Haz clic en **Crear la página de agradecimiento**: Stripe redirigirá allí a tus clientes después del pago.
+3. Haz clic en **Crear la página de agradecimiento**: Stripe puede redirigir allí a tus clientes después del pago.
 4. Activa **Tienda abierta**, guarda y añade la tienda al menú (Menús › Tienda).
 
 El catálogo está en la dirección `/tienda` (`/boutique`, `/shop`, `/negozio` o `/loja` según el idioma del sitio), que puedes cambiar; si la cambias, las direcciones antiguas se redirigen.
@@ -170,7 +170,7 @@ El catálogo está en la dirección `/tienda` (`/boutique`, `/shop`, `/negozio` 
 Contenidos › **+ Producto**. En la parte superior del editor, la ficha de producto:
 
 - **Precio** y **precio tachado** (opcional: el descuento se muestra en porcentaje), **disponibilidad** (en stock, agotado, reserva).
-- **Enlace de pago**: el enlace de Stripe del producto (`https://buy.stripe.com/…`).
+- **Enlace de pago**: el enlace de Stripe, PayPal o Revolut Business del producto.
 - **Fotos**: la primera es la principal (Google, redes sociales); procura tener al menos 3 vistas.
 - **Variantes** (talla, color…): cada una puede tener su precio y su enlace. En el sitio, la elección se hace sin JavaScript.
 - **Detalles para Google Shopping**: marca, referencia, código de barras (GTIN/EAN), estado (nuevo, usado, reacondicionado), producto digital o servicio (sin envío).
@@ -188,6 +188,15 @@ Con el asistente IA: adjunta una foto y pide «Crea la ficha del producto de la 
 
 Cada pedido te llega a Stripe (y por correo electrónico si lo has activado): tú lo preparas y lo envías, y Stripe gestiona el reembolso si hace falta. Otro proveedor de pagos también sirve, siempre que su enlace de pago empiece por `https://`.
 
+### O conectar PayPal o Revolut Business
+
+El mismo principio: un enlace de pago con precio fijo por producto (o por variante con otro precio), pegado en la ficha del producto. Éclair reconoce estos enlaces y muestra «Pago seguro con PayPal» o «con Revolut» bajo el botón de compra.
+
+- **PayPal**: en tu cuenta profesional, abre **Enlaces y botones de pago**, crea un enlace con precio fijo para tu producto y cópialo (empieza por `https://www.paypal.com/`). Tu cliente paga con su cuenta PayPal o con tarjeta.
+- **Revolut Business**: necesitas una cuenta de comerciante. En **Comerciante › Enlace de pago** (Merchant › Payment link), crea un enlace con el importe del producto y cópialo (`https://checkout.revolut.com/…`). Tu cliente paga en la página de pago de Revolut.
+
+Dos diferencias con Stripe: tras el pago, el cliente se queda en la página de confirmación del proveedor (sin volver automáticamente a tu página de agradecimiento), y la referencia del producto no se añade al pago: pon a cada enlace un nombre claro para reconocer tus pedidos.
+
 ### Lo que Éclair hace para Google y las IA
 
 - **Datos estructurados** Product y Offer en cada ficha (ProductGroup para las variantes): precio, moneda, stock, estado, marca, gastos y plazos de envío, y una **política de devoluciones** común a toda tu empresa. Es la información que Google muestra en los resultados de productos.
@@ -198,6 +207,8 @@ Cada pedido te llega a Stripe (y por correo electrónico si lo has activado): t�
 ### ¿Cuánto cuesta?
 
 Nada por parte de Éclair. Stripe no cobra ni suscripción ni gastos de configuración, y los enlaces de pago están incluidos: solo pagas una comisión por cada pago, por ejemplo **1,5 % + 0,25 €** con una tarjeta estándar del Espacio Económico Europeo (2,8 % + 0,25 € con una tarjeta premium, 3,15 % + 0,25 € con una tarjeta de fuera del EEE, y un 2 % más si hay conversión de divisas). Tarifas de Stripe en España consultadas el 30 de octubre de 2026 en [stripe.com/es/pricing](https://stripe.com/es/pricing); pueden cambiar.
+
+Con **Revolut Business**, la comisión es de **1 % + 0,20 €** para una tarjeta de particular del Espacio Económico Europeo (2,8 % + 0,20 € para una tarjeta de fuera del EEE), enlaces de pago incluidos ([ayuda de Revolut](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), [tarifas de Revolut](https://www.revolut.com/en-IE/business/accept-payments-pricing/)). Con **PayPal** en Francia, es de **1,2 % + 0,35 €** para un pago con tarjeta y de **2,9 % + 0,35 €** con una cuenta PayPal, más un 1,99 % fuera del EEE (1,29 % desde el Reino Unido) ([tarifas de PayPal](https://www.paypal.com/fr/business/paypal-business-fees), actualizadas el 15 de julio de 2026). Tarifas consultadas el 31 de octubre de 2026.
 
 ### Lo que la tienda no hace
 
@@ -470,7 +481,7 @@ eclair/                  ← lo que se sube al hosting
 i18n/                    fuentes legibles de las traducciones (compiladas por tools/i18n.php)
 tests/run.php            pruebas unitarias + integración HTTP (incluidos los ataques de la auditoría de seguridad)
 tests/fake-ai.php        proveedores de IA simulados (Claude, ChatGPT, imágenes): el asistente se prueba sin clave ni gasto
-tests/shop.php           temas y tienda (fichas, Stripe, JSON-LD, feed de Merchant Center)
+tests/shop.php           temas y tienda (fichas, Stripe, PayPal, Revolut, JSON-LD, feed de Merchant Center)
 tests/mcp.php            conector MCP (OAuth, PKCE, protocolo, revocación) y elección de la IA
 tools/router.php         enrutador para el servidor integrado de PHP (desarrollo)
 tools/build.php          huellas de integridad + archivo dist/eclair-cms-<versión>.zip (PHP compactado)
@@ -478,7 +489,7 @@ tools/build.php          huellas de integridad + archivo dist/eclair-cms-<versi�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desarrollo
-php tests/run.php                                  # 456 comprobaciones unitarias y HTTP
+php tests/run.php                                  # 460 comprobaciones unitarias y HTTP
 php tools/build.php                                # archivo listo para distribuir
 ```
 

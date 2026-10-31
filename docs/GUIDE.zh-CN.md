@@ -38,7 +38,7 @@
 
 ### 安装步骤
 
-1. 下载安装包 [`eclair-cms-1.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.5.0.zip)（433 KB）并解压。
+1. 下载安装包 [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip)（434 KB）并解压。
 2. 使用 FTP 软件（如 FileZilla）或主机的文件管理器，把 **`eclair` 文件夹里的内容**上传到主机的公开目录（`public_html`、`www`……）。
    > ⚠️ `.htaccess` 是隐藏文件：请开启“显示隐藏文件”，确保它们也被上传。
 3. 打开你的网站地址：**安装向导随即启动**（支持 7 种语言，包括简体中文）。
@@ -157,13 +157,13 @@
 
 ## 商店
 
-**轻量商店模式**适合销售几十件商品，而不必承担一整套电商系统的负担：没有购物车，没有客户账户，没有数据库，你的服务器上也不保存任何银行卡数据。每件商品都有自己的详情页，并针对 Google 和 AI 优化；详情页上的**购买**按钮通向一个 **Stripe 付款链接**（Payment Links）：Stripe 负责收款、发送收据并处理退款。
+**轻量商店模式**适合销售几十件商品，而不必承担一整套电商系统的负担：没有购物车，没有客户账户，没有数据库，你的服务器上也不保存任何银行卡数据。每件商品都有自己的详情页，并针对 Google 和 AI 优化；详情页上的**购买**按钮通向一个 **Stripe、PayPal 或 Revolut Business 付款链接**：由你的支付服务商负责收款、发送收据并处理退款。
 
 ### 开放商店
 
 1. **发布你的法律声明**（安装时已为你创建了一个待完善的框架）**和销售条款**。缺少这两个页面，商店就无法开放：请找人审阅，它们关系到你作为卖家的法律责任。
 2. 在**设置 › 商店**中：选择这两个页面，设置货币、运费和配送时间、配送国家，以及退货期限（在欧盟，远程销售须提供至少 14 天的无理由退货期，定制商品等特殊情况除外）。
-3. 点击**创建感谢页面**：客户付款后，Stripe 会把他们带回这个页面。
+3. 点击**创建感谢页面**：客户付款后，Stripe 可以把他们带回这个页面。
 4. 打开**商店已开放**开关并保存，然后把商店添加到菜单中（菜单 › 商店）。
 
 商品目录的地址取决于网站语言：`/boutique`（法语）、`/tienda`（西班牙语）、`/shop`（英语、德语）、`/negozio`（意大利语）或 `/loja`（葡萄牙语）。这个地址可以修改；修改后，旧地址会自动重定向。
@@ -173,7 +173,7 @@
 内容 › **+ 商品**。编辑器顶部是商品详情：
 
 - **价格**和**划线价**（可选：折扣会以百分比显示），**库存状态**（有货、已售罄、预售）。
-- **付款链接**：该商品的 Stripe 链接（`https://buy.stripe.com/…`）。
+- **付款链接**：该商品的 Stripe、PayPal 或 Revolut Business 链接。
 - **照片**：第一张是主图（用于 Google 和社交媒体）；建议至少 3 个角度。
 - **规格**（尺码、颜色等）：每个规格都可以有自己的价格和链接。在网站上，选择规格无需 JavaScript。
 - **Google Shopping 详细信息**：品牌、货号、条形码（GTIN/EAN）、商品状况（全新、二手、翻新）、数字商品或服务（无需配送）。
@@ -191,6 +191,15 @@
 
 每笔订单都会出现在 Stripe 中（如果你启用了邮件通知，也会通过电子邮件发给你）：你负责备货和发货，需要退款时由 Stripe 处理。其他支付服务商也可以使用，只要它的付款链接以 `https://` 开头。
 
+### 或者关联 PayPal 或 Revolut Business
+
+原理相同：每件商品（或每个价格不同的规格）一个固定价格的付款链接，粘贴到商品详情中。Éclair 会识别这些链接，并在购买按钮下方注明付款由 PayPal 或 Revolut 安全处理。
+
+- **PayPal**：在你的商家账户中打开**付款链接和按钮**，为商品创建一个固定价格的链接，然后复制（链接以 `https://www.paypal.com/` 开头）。顾客可以用 PayPal 账户或银行卡付款。
+- **Revolut Business**：需要开通商户账户。在**商户 › 付款链接**（Merchant › Payment link）中按商品金额创建链接，然后复制（`https://checkout.revolut.com/…`）。顾客在 Revolut 的付款页面完成付款。
+
+与 Stripe 相比有两点不同：付款后，顾客会停留在服务商的确认页面（不会自动回到你的感谢页面）；商品编号也不会附加到付款中，请给每个链接起一个清楚的名称，方便识别订单。
+
 ### 为 Google 和 AI 所做的优化
 
 - 每个详情页都带有 Product 和 Offer **结构化数据**（有规格时使用 ProductGroup）：价格、货币、库存、商品状况、品牌、运费和配送时间，以及全店统一的**退货政策**。这些正是 Google 在商品搜索结果中展示的信息。
@@ -201,6 +210,8 @@
 ### 要花多少钱？
 
 Éclair 不收任何费用。Stripe 不收订阅费，也不收开通费，付款链接也已包含在内：你只需为每笔付款支付手续费。以 Stripe 在法国的价格为例，欧洲经济区标准卡为 **1.5% + €0.25**（高级卡为 2.8% + €0.25，欧洲经济区以外的卡为 3.15% + €0.25，涉及货币兑换时另加 2%）。以上为 2026 年 10 月 30 日在 [stripe.com/fr/pricing](https://stripe.com/fr/pricing) 查到的 Stripe 法国价格，今后可能会调整。
+
+使用 **Revolut Business** 时，欧洲经济区个人卡的手续费为 **1% + €0.20**（欧洲经济区以外的卡为 2.8% + €0.20），付款链接已包含在内（[Revolut 帮助中心](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/)、[Revolut 价格](https://www.revolut.com/en-IE/business/accept-payments-pricing/)）。在法国使用 **PayPal** 时，银行卡付款为 **1.2% + €0.35**，使用 PayPal 账户付款为 **2.9% + €0.35**，欧洲经济区以外另加 1.99%（来自英国为 1.29%）（[PayPal 收费标准](https://www.paypal.com/fr/business/paypal-business-fees)，2026 年 7 月 15 日更新）。以上价格于 2026 年 10 月 31 日核实。
 
 ### 商店不提供的功能
 
@@ -473,7 +484,7 @@ eclair/                  ← 上传到主机的目录
 i18n/                    可读的翻译源文件（由 tools/i18n.php 编译）
 tests/run.php            单元测试 + HTTP 集成测试（包括安全审计中的攻击场景）
 tests/fake-ai.php        模拟的 AI 服务商（Claude、ChatGPT、图片）：测试助手无需密钥，也不产生费用
-tests/shop.php           主题和商店测试（商品详情页、Stripe、JSON-LD、Merchant Center Feed）
+tests/shop.php           主题和商店测试（商品详情页、Stripe、PayPal、Revolut、JSON-LD、Merchant Center Feed）
 tests/mcp.php            MCP 连接器（OAuth、PKCE、协议、撤销）和 AI 选择测试
 tools/router.php         PHP 内置服务器的路由脚本（开发用）
 tools/build.php          生成完整性指纹 + 安装包 dist/eclair-cms-<版本>.zip（PHP 经过精简）
@@ -481,7 +492,7 @@ tools/build.php          生成完整性指纹 + 安装包 dist/eclair-cms-<版�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                  # 456 项单元与 HTTP 检查
+php tests/run.php                                  # 460 项单元与 HTTP 检查
 php tools/build.php                                # 生成可发布的安装包
 ```
 
