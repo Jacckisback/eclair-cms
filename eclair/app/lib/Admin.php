@@ -107,6 +107,7 @@ final class Admin
             'POST /api/ai/publish' => [AdminAi::class, 'publish', 'content'],
             'POST /api/ai/test' => [AdminAi::class, 'test', 'settings'],
             'POST /api/ai/profile' => [AdminAi::class, 'profile', 'settings'],
+            'POST /api/ai/directions' => [AdminAi::class, 'directions', 'settings'],
             'POST /cache' => [AdminSecurity::class, 'clearCache', 'content'],
         ];
         foreach ($routes as $pattern => [$class, $fn, $area]) {

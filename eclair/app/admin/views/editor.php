@@ -210,6 +210,7 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
       <div class="scores">
         <div class="ring" id="ring-seo"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15.9"/><circle class="val" cx="18" cy="18" r="15.9" stroke-dasharray="0 100"/></svg><div><b>–</b><small>SEO</small></div></div>
         <div class="ring" id="ring-geo"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15.9"/><circle class="val" cx="18" cy="18" r="15.9" stroke-dasharray="0 100"/></svg><div><b>–</b><small><?= e(t('GEO · IA')) ?></small></div></div>
+        <div class="ring" id="ring-design"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="15.9"/><circle class="val" cx="18" cy="18" r="15.9" stroke-dasharray="0 100"/></svg><div><b>–</b><small><?= e(t('Design')) ?></small></div></div>
       </div>
       <p class="small muted" id="words-info"></p>
       <h3 class="small muted">SEO</h3>
@@ -217,6 +218,8 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
       <h3 class="small muted"><?= e(t('GEO · moteurs de réponse IA')) ?></h3>
       <ul class="checklist" id="checks-geo"></ul>
       <p class="small muted"><?= e(t('Le GEO (Generative Engine Optimization) rend ton contenu facile à comprendre et à citer par ChatGPT, Perplexity, Gemini ou les AI Overviews de Google.')) ?></p>
+      <h3 class="small muted"><?= e(t('Design · une page qui a du caractère')) ?></h3>
+      <ul class="checklist" id="checks-design"></ul>
     </div>
   </aside>
 </div>

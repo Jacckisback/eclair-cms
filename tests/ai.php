@@ -188,7 +188,7 @@ try {
         && count($messagesCalls[0]['b']['tools']) === 6 && str_contains($messagesCalls[0]['b']['system'][0]['text'], 'Chaleureux, tutoiement'));
     check('consignes : contexte variable hors cache', !isset($messagesCalls[0]['b']['system'][1]['cache_control']) && str_contains($messagesCalls[0]['b']['system'][1]['text'], 'Atelier Test'));
     $usage = json_decode(substr((string) file_get_contents($copy . '/data/ai/usage.php'), strlen(Store::GUARD)), true);
-    $month = $usage['months'][date('Y-m')] ?? [];
+    $month = $usage['months'][array_key_last($usage['months'] ?? []) ?? ''] ?? []; // mois du site (son fuseau), pas celui du test
     check('dépenses comptées (texte + image)', ($month['cost'] ?? 0) > 0.01 && ($month['images'] ?? 0) === 1, json_encode($month));
 
     // Équipe : photo jointe, proposition sur une page publiée, aperçu, application, annulation.
@@ -362,7 +362,7 @@ try {
     // Budget et quotas : vérifié à l'entrée, puis avant chaque étape (la dépense est comptée étape par étape).
     $settingsAi(['provider' => 'anthropic', 'image' => '']);
     $usage = json_decode(substr((string) file_get_contents($copy . '/data/ai/usage.php'), strlen(Store::GUARD)), true);
-    settings($copy, ['ai' => ['budget' => (float) ($usage['months'][date('Y-m')]['cost'] ?? 0) + 0.01]]);
+    settings($copy, ['ai' => ['budget' => (float) ($usage['months'][array_key_last($usage['months'] ?? []) ?? '']['cost'] ?? 0) + 0.01]]);
     $r = $chat('Écris un ARTICLE malgré le budget');
     check('budget atteint pendant une demande : arrêt avant l’étape suivante', $r['tools'] === ['generate_image'] && str_contains($r['errors'][0] ?? '', 'Budget'), json_encode([$r['tools'], $r['errors']]));
     settings($copy, ['ai' => ['budget' => 0.001]]);

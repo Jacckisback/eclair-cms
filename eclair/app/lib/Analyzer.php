@@ -13,6 +13,15 @@ final class Analyzer
 {
     /** Repère laissé là où une information manque (« [À compléter : prix] »), dans la langue du contenu. */
     public const TODO = ['fr' => 'À compléter', 'es' => 'A completar', 'en' => 'To complete', 'de' => 'Zu ergänzen', 'it' => 'Da completare', 'pt' => 'A completar'];
+    /** Formules creuses du « design générique » (relevées par Impeccable), par langue : à remplacer par du concret. */
+    private const HOLLOW = [
+        'fr' => 'révolutionnaire|innovant(?:e|s|es)?|de pointe|à la pointe|leader du marché|incontournable|clé en main|synergie|disruptif|disruptive|sans compromis|expérience unique|n[’\']attendez plus|inégalé(?:e|s|es)?|boostez|propulsez',
+        'en' => 'seamless(?:ly)?|cutting-edge|revolutionary|game-?chang(?:er|ing)|unlock|elevate|empower|leverage|synergy|best-in-class|world-class|next-generation|innovative|supercharge|effortless(?:ly)?|delve|unleash',
+        'es' => 'revolucionari[oa]s?|innovador(?:a|es|as)?|de vanguardia|líder del sector|sin igual|llave en mano|sinergia|disruptiv[oa]s?|experiencia única|de primer nivel|potencia tu|impulsa tu',
+        'de' => 'revolutionär(?:e|en|er)?|innovativ(?:e|en|er)?|bahnbrechend(?:e|en|er)?|nahtlos(?:e|en|er)?|erstklassig(?:e|en|er)?|synergie|ganzheitlich(?:e|en|er)?|spitzenklasse|einzigartiges erlebnis|gamechanger',
+        'it' => 'rivoluzionari[oa]|innovativ[oaie]|all[’\']avanguardia|leader di settore|senza pari|chiavi in mano|sinergia|esperienza unica|di prim[’\']ordine|potenzia',
+        'pt' => 'revolucionári[oa]s?|inovador(?:a|es|as)?|de ponta|líder de mercado|sem igual|chave na mão|sinergia|experiência única|de primeira linha|potencialize|alavanque',
+    ];
 
     public static function run(array $item): array
     {
@@ -156,13 +165,133 @@ final class Analyzer
             $add('geo', $age < 365 * 86400 ? 'good' : 'ok', t('Contenu récent ou mis à jour (les IA privilégient la fraîcheur).'));
         }
 
+        self::design($item, $blocks, $text, $words, $add);
+
         return [
             'checks' => $checks,
             'seo' => self::score($checks, 'seo'),
             'geo' => self::score($checks, 'geo'),
+            'design' => self::score($checks, 'design'),
             'words' => $words,
             'reading' => Content::readingTime($words),
         ];
+    }
+
+    /**
+     * Score Design : la page tient-elle la route visuellement ? Vérifications déterministes adaptées des règles d'Impeccable
+     * (Paul Bakaus, Apache 2.0) aux blocs d'Éclair : hiérarchie, bannière, appels à l'action, rythme, tics du « design générique ».
+     */
+    private static function design(array $item, array $blocks, string $text, int $words, \Closure $add): void
+    {
+        $d = Theme::direction();
+        $plain = static fn (mixed $v): string => trim(plain(is_string($v) ? $v : ''));
+        $headings = array_values(array_filter($blocks, fn ($b) => $b['type'] === 'heading'));
+        $hero = array_values(array_filter($blocks, fn ($b) => $b['type'] === 'hero'))[0] ?? null;
+        $features = array_filter($blocks, fn ($b) => $b['type'] === 'features');
+
+        // Hiérarchie des titres : pas de saut de niveau (le titre de la page est le H1).
+        $skips = 0;
+        $prev = 1;
+        foreach ($headings as $h) {
+            $skips += (int) $h['level'] > $prev + 1 ? 1 : 0;
+            $prev = (int) $h['level'];
+        }
+        if ($headings) {
+            $add('design', $skips === 0 ? 'good' : 'bad', $skips === 0 ? t('Hiérarchie des intertitres sans saut (H2, puis H3, puis H4).')
+                : t('{n} saut(s) de niveau dans les intertitres (ex. : H2 puis H4) : garde l’ordre H2 → H3 → H4.', ['n' => $skips]), 2);
+            $long = count(array_filter($headings, fn ($h) => word_count($plain($h['text'])) > 12));
+            $add('design', $long === 0 ? 'good' : 'ok', $long === 0 ? t('Intertitres courts, lisibles d’un coup d’œil.')
+                : t('{n} intertitre(s) de plus de 12 mots : raccourcis-les.', ['n' => $long]));
+            $deco = count(array_filter($headings, fn ($h) => preg_match('/[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}]/u', $plain($h['text']))));
+            if ($deco) {
+                $add('design', 'ok', t('{n} intertitre(s) avec un émoji décoratif : le texte seul est plus net.', ['n' => $deco]));
+            }
+        }
+
+        // Bannière : un titre court, un bouton d'action, et l'image que demande la composition choisie.
+        if ($hero) {
+            $hw = word_count($plain($hero['title']));
+            $max = $d && $d['case'] === 'upper' ? 6 : 8;
+            $add('design', $hw <= $max ? 'good' : ($hw <= $max + 6 ? 'ok' : 'bad'), $hw <= $max ? t('Titre de bannière court et percutant.')
+                : t('Titre de bannière de {n} mots : vise {max} mots au plus pour qu’il frappe.', ['n' => $hw, 'max' => $max]));
+            $add('design', $hero['button'] !== '' ? 'good' : 'ok', $hero['button'] !== '' ? t('Bannière avec un bouton d’action.')
+                : t('Ajoute un bouton à la bannière : dis au visiteur quoi faire ensuite.'));
+            if ($d && in_array($d['hero'], ['fullbleed', 'editorial'], true)) {
+                $add('design', $hero['media'] !== '' ? 'good' : 'bad', $hero['media'] !== '' ? t('Bannière illustrée, comme le veut ta direction artistique.')
+                    : t('Ajoute une image à la bannière : la composition de ta direction artistique en a besoin.'), 2);
+            }
+        }
+
+        // Appels à l'action : un chemin principal clair plutôt qu'une forêt de boutons.
+        $buttons = count(array_filter($blocks, fn ($b) => $b['type'] === 'button')) + ($hero ? ($hero['button'] !== '' ? 1 : 0) + ($hero['button2'] !== '' ? 1 : 0) : 0);
+        $add('design', $buttons <= 3 ? 'good' : ($buttons <= 5 ? 'ok' : 'bad'), $buttons <= 3 ? t('Appels à l’action mesurés (3 boutons au plus).')
+            : t('{n} boutons sur la page : garde un appel à l’action principal, les autres diluent l’attention.', ['n' => $buttons]));
+
+        // Bloc « Atouts » : 3 à 6 éléments décrits, des icônes cohérentes.
+        foreach ($features as $f) {
+            $n = count($f['items']);
+            $bare = count(array_filter($f['items'], fn ($i) => trim(plain($i['text'])) === ''));
+            $add('design', $n >= 3 && $n <= 6 && $bare === 0 ? 'good' : ($n >= 2 && $n <= 8 ? 'ok' : 'bad'), $n < 3 || $n > 6
+                ? t('Bloc « Atouts » de {n} élément(s) : 3 à 6 se lisent le mieux.', ['n' => $n])
+                : ($bare ? t('{n} atout(s) sans description : une phrase concrète chacun.', ['n' => $bare]) : t('Bloc « Atouts » équilibré et décrit.')));
+            $emoji = array_filter(array_column($f['items'], 'icon'), fn ($i) => $i !== '');
+            if (!$emoji) {
+                continue;
+            }
+            $icons = $d['icons'] ?? 'emoji';
+            if ($icons === 'line') {
+                $missing = count(array_filter($emoji, fn ($i) => Design::icon($i) === ''));
+                $add('design', $missing === 0 ? 'good' : 'ok', $missing === 0 ? t('Icônes dessinées pour chaque atout.')
+                    : t('{n} émoji(s) sans icône dessinée correspondante (rien ne s’affiche) : essaie ✓ 🚀 ⏱ 🛡 ⭐ ❤ 💡 📞 📍 🚚.', ['n' => $missing]));
+            } elseif (!$d) {
+                $add('design', 'ok', t('Émojis en guise d’icônes : une direction artistique les remplace par des icônes dessinées.'));
+            }
+        }
+
+        // Tics du texte qui trahissent le « contenu générique ».
+        preg_match_all('/(?:(?<!\p{L})\p{Lu}{2,}(?!\p{L})[\s,’\'-]+){3,}\p{Lu}{2,}(?!\p{L})/u', $text, $caps);
+        $add('design', !$caps[0] ? 'good' : 'ok', !$caps[0] ? t('Pas de phrases en MAJUSCULES dans le texte.')
+            : t('{n} passage(s) en MAJUSCULES : écris en casse normale, la mise en forme s’occupe du reste.', ['n' => count($caps[0])]));
+        $lang = (string) ($item['lang'] ?? Settings::get('lang'));
+        if (isset(self::HOLLOW[$lang])) {
+            preg_match_all('/(?<![\p{L}\p{N}])(?:' . self::HOLLOW[$lang] . ')(?![\p{L}\p{N}])/iu', ($item['title'] ?? '') . ' ' . $text, $m);
+            $found = array_values(array_unique(array_map('mb_strtolower', $m[0])));
+            $add('design', !$found ? 'good' : (count($m[0]) >= 3 ? 'bad' : 'ok'), !$found ? t('Pas de formules creuses : du concret.')
+                : t('Formules creuses à remplacer par du concret : {list}.', ['list' => '« ' . implode(' », « ', array_slice($found, 0, 4)) . ' »']));
+        }
+        $dashes = substr_count($text, '—');
+        if ($words >= 150 && $dashes > max(2, intdiv($words, 150))) {
+            $add('design', 'ok', t('{n} tirets cadratins (—) : un tic d’écriture des IA, remplace-les par des virgules ou des points.', ['n' => $dashes]));
+        }
+        $seen = [];
+        $repeats = 0;
+        foreach ($blocks as $b) {
+            foreach (array_merge([$b['text'] ?? ''], array_column(($b['type'] ?? '') === 'features' ? $b['items'] : [], 'text')) as $t) {
+                $t = mb_strtolower($plain($t));
+                if (word_count($t) >= 6) {
+                    $repeats += isset($seen[$t]) ? 1 : 0;
+                    $seen[$t] = true;
+                }
+            }
+        }
+        $add('design', $repeats === 0 ? 'good' : 'bad', $repeats === 0 ? t('Aucun texte répété à l’identique.')
+            : t('{n} texte(s) répété(s) à l’identique : chaque passage doit apporter du neuf.', ['n' => $repeats]));
+
+        // Rythme : un long mur de paragraphes fatigue l'œil.
+        if ($words > 300) {
+            $run = 0;
+            $wall = 0;
+            foreach ($blocks as $b) {
+                $run = $b['type'] === 'paragraph' ? $run + word_count($plain($b['text'])) : 0;
+                $wall = max($wall, $run);
+            }
+            $add('design', $wall <= 350 ? 'good' : ($wall <= 600 ? 'ok' : 'bad'), $wall <= 350 ? t('Rythme varié : le texte respire.')
+                : t('Mur de texte de {n} mots : coupe-le avec un intertitre, une image ou une liste.', ['n' => $wall]));
+        }
+
+        // Le site lui-même : une direction artistique plutôt qu'un thème standard.
+        $add('design', $d ? 'good' : 'ok', $d ? t('Direction artistique : {name}.', ['name' => $d['name'] !== '' ? $d['name'] : $d['id']])
+            : t('Choisis une direction artistique (Réglages › Apparence) : ton site ne ressemblera à aucun autre.'));
     }
 
     private static function score(array $checks, string $group): int

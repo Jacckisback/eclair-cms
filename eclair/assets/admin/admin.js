@@ -360,6 +360,38 @@
     };
     const draw = (input, d) => { input.parentNode.querySelector('.dir-mock').innerHTML = mock(d || JSON.parse(input.dataset.direction)); };
     $$('[name=direction_id]', grid).forEach((input) => draw(input));
+    // « Imagine ma direction » : trois propositions de l'IA, ajoutées en tête des cartes (rien n'est enregistré avant « Enregistrer »).
+    const imagine = $('#dir-imagine');
+    if (imagine) {
+      const state = $('#dir-state');
+      $('#dir-brief').addEventListener('input', (e) => e.stopPropagation());
+      imagine.addEventListener('click', async () => {
+        if (imagine.disabled) return;
+        imagine.disabled = true;
+        const start = Date.now();
+        const tick = () => { state.textContent = imagine.dataset.wait + ' ' + Math.round((Date.now() - start) / 1000) + ' s'; };
+        tick();
+        const timer = setInterval(tick, 1000);
+        const res = await api('api/ai/directions', { brief: $('#dir-brief').value }).catch(() => null);
+        clearInterval(timer);
+        imagine.disabled = false;
+        state.textContent = '';
+        if (!res || !res.ok) return;
+        $$('.dir-ai-card', grid).forEach((c) => c.remove());
+        res.directions.slice().reverse().forEach((d) => {
+          const input = h('input', { type: 'radio', name: 'direction_id', value: d.id, 'data-direction': JSON.stringify(d) });
+          grid.prepend(h('label', { class: 'theme-card dir-card dir-ai-card' }, input, h('span', { class: 'dir-mock', 'aria-hidden': 'true' }),
+            h('span', { class: 'theme-name', text: d.name }), h('span', { class: 'theme-desc', text: d.idea })));
+          draw(input);
+        });
+        const first = $('[name=direction_id]', grid);
+        first.checked = true;
+        fill(JSON.parse(first.dataset.direction));
+        form.dispatchEvent(new Event('input'));
+        show();
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
     const show = () => {
       const q = new URLSearchParams({ header: field('header').value, cards: field('cards').value, path: $('#preview-page').value });
       if (style() === 'direction' && picked()) {

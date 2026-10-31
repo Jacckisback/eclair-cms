@@ -119,6 +119,16 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         </div>
         <span class="hint"><?= e(t('Les couleurs sont vérifiées pour rester lisibles (normes WCAG). La police des titres est téléchargée une fois par ton serveur puis servie par ton site : aucun service tiers pour tes visiteurs.')) ?></span>
       </fieldset>
+      <div class="dir-ai" id="dir-ai">
+        <?php if ($v['imagine'] !== ''): ?>
+          <label class="field"><span class="label"><?= e(t('Imagine ma direction avec l’IA')) ?></span>
+            <textarea id="dir-brief" rows="2" maxlength="1500" placeholder="<?= e(t('Ex. : boulangerie bio de quartier à Lyon, clientèle familiale, envie d’une ambiance chaleureuse mais moderne.')) ?>"></textarea>
+            <span class="hint"><?= e(t('L’IA lit aussi la présentation de ton site, puis propose 3 directions tirées de ton univers. Elle ne choisit que parmi les réglages d’Éclair : couleurs vérifiées, rien à installer. Coût indicatif : {cost}.', ['cost' => $v['imagine']])) ?></span></label>
+          <div class="row"><button class="btn" type="button" id="dir-imagine" data-wait="<?= e(t('L’IA imagine ton univers…')) ?>"><?= Icons::svg('sparkle') ?><?= e(t('Proposer 3 directions')) ?></button><span class="hint" role="status" id="dir-state"></span></div>
+        <?php else: ?>
+          <p class="hint"><?= e(t('Active l’assistant IA (onglet « Assistant IA ») pour que l’IA imagine des directions tirées de ton activité.')) ?></p>
+        <?php endif ?>
+      </div>
       <details class="dir-tune">
         <summary><?= e(t('Ajuster la direction : couleurs, polices, mises en page')) ?></summary>
         <div class="dir-colors">

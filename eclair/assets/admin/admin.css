@@ -413,16 +413,16 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .serp-title{color:#1a0dab;font-size:1.13rem;line-height:1.3;margin:0 0 .2rem}
 .serp-desc{color:#474747;font-size:.84rem;line-height:1.45;margin:0}
 @media (prefers-color-scheme:dark){.serp-title{color:#99c3ff}.serp-desc{color:#bdc1c6}}
-.scores{display:flex;gap:1rem;margin-bottom:1rem}
-.ring{display:flex;align-items:center;gap:.65rem;flex:1;padding:.7rem;border:1px solid var(--line);border-radius:12px}
-.ring svg{width:3.3rem;height:3.3rem;transform:rotate(-90deg);flex:none}
+.scores{display:flex;gap:.5rem;margin-bottom:1rem}
+.ring{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex:1;min-width:0;padding:.6rem .3rem;border:1px solid var(--line);border-radius:12px;text-align:center}
+.ring svg{width:3rem;height:3rem;transform:rotate(-90deg);flex:none}
 .ring circle{fill:none;stroke-width:4}
 .ring .track{stroke:var(--line)}
 .ring .val{stroke:var(--ok);stroke-linecap:round;transition:stroke-dasharray .5s}
 .ring.ok .val{stroke:var(--warn)}
 .ring.bad .val{stroke:var(--bad)}
 .ring b{display:block;font-size:1.3rem;line-height:1}
-.ring small{color:var(--muted);font-size:.78rem}
+.ring small{display:block;color:var(--muted);font-size:.78rem;white-space:nowrap}
 .checklist{list-style:none;margin:0 0 1rem;padding:0;display:grid;gap:.25rem}
 .checklist li{display:flex;gap:.55rem;align-items:flex-start;font-size:.86rem;padding:.3rem 0}
 .checklist .dot{margin-top:.38rem;flex:none}
@@ -580,6 +580,9 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .style-opt small{color:var(--muted);font-size:.8rem;line-height:1.35}
 .dir-mock{display:block;aspect-ratio:8/5;margin-bottom:.25rem;border-radius:9px;overflow:hidden;border:1px solid rgb(0 0 0 / .08);background:var(--line)}
 .dir-mock svg{display:block;width:100%;height:100%}
+.dir-ai{margin:0 0 1.2rem}
+.dir-ai .row{gap:.7rem;align-items:center}
+.dir-ai-card .theme-name::before{content:"✦ ";color:var(--brand)}
 .dir-tune{margin:0 0 1.2rem;padding:0 1rem;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
 .dir-tune summary{cursor:pointer;font-weight:650;padding:.7rem 0}
 .dir-tune[open] summary{margin-bottom:.4rem}

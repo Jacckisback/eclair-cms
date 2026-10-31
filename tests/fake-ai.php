@@ -74,6 +74,25 @@ function sample(array $schema, string $key = 'value', string $input = ''): mixed
 }
 
 /**
+ * « Imagine ma direction » : quatre propositions avec leurs pièges (texte trop pâle, couleur invalide, police inconnue,
+ * balise dans le nom). Éclair doit garder trois directions lisibles et jeter celle dont une couleur est invalide.
+ */
+function designed(): array
+{
+    $d = static fn (array $x): array => $x + ['name' => 'Atelier', 'idea' => 'Une idée.', 'ground' => '#f6f1e7', 'surface' => '#ebe2d2', 'ink' => '#2a1d14', 'muted' => '#5d4b3c',
+        'accent' => '#1f5f8b', 'display' => 'young-serif', 'text' => 'humanist', 'case' => 'normal', 'scale' => 'regular', 'radius' => 'soft', 'density' => 'regular',
+        'surfaces' => 'line', 'hero' => 'split', 'features' => 'cards', 'sections' => 'plain', 'icons' => 'line'];
+    return ['directions' => [
+        $d(['name' => 'Four à bois', 'idea' => 'Le fournil à l’aube : farine, braise et bleu d’émail.', 'hero' => 'editorial', 'features' => 'rows', 'sections' => 'bands']),
+        $d(['name' => '<b>Nuit</b> de cuisson', 'idea' => 'La cuisson de nuit.', 'ground' => '#14110f', 'surface' => '#1f1a17', 'ink' => '#2b2622', 'muted' => '#3a332d',
+            'accent' => '#ff8a3d', 'display' => 'police-inconnue', 'case' => 'upper', 'hero' => 'fullbleed']),
+        $d(['name' => 'Rouge', 'ground' => 'red']),
+        $d(['name' => 'Marché', 'idea' => 'Le marché du samedi : ardoise, craie et tomates.', 'ground' => '#f3f4ef', 'surface' => '#e3e6dc', 'ink' => '#1c211c',
+            'accent' => '#c8321e', 'display' => 'archivo-black', 'hero' => 'poster', 'features' => 'columns']),
+    ]];
+}
+
+/**
  * « Crée ta page avec l'IA » : une composition réaliste, avec ses pièges (image inconnue, lien javascript:,
  * HTML, type de section inconnu) et deux repères « [À compléter : …] ». La photo du bandeau est la première
  * image de la liste reçue, s'il y en a une.
@@ -114,6 +133,16 @@ if (preg_match('~^/v1/models/([\w.-]+)$~', $path, $m) && $method === 'GET') {
     }
     header('Content-Type: application/json');
     echo json_encode(['id' => $m[1], 'type' => 'model', 'display_name' => $m[1]]);
+    exit;
+}
+
+/* Polices (miroir de Fontsource) : une vraie signature WOFF2, sauf « syne » (page HTML) et « unbounded » (absente). */
+if (preg_match('~^/fonts/([a-z0-9-]+)@latest/latin-(\d+)-normal\.woff2$~', $path, $m)) {
+    if ($m[1] === 'unbounded') {
+        fail('not found', 404);
+    }
+    header('Content-Type: ' . ($m[1] === 'syne' ? 'text/html' : 'font/woff2'));
+    echo $m[1] === 'syne' ? '<!doctype html><title>Erreur</title>' . str_repeat(' ', 2000) : 'wOF2' . str_repeat(hash('sha256', $m[1] . $m[2], true), 64);
     exit;
 }
 
@@ -215,7 +244,7 @@ if ($path === '/v1/messages' && $method === 'POST') {
     $stop = 'end_turn';
     $first = $results ? json_decode((string) $results[0]['content'], true) : null;
     if ($structured) {
-        $text(json_encode(isset($structured['properties']['sections']) ? composed($userText) : sample($structured, 'value', $userText), JSON_UNESCAPED_UNICODE));
+        $text(json_encode(isset($structured['properties']['sections']) ? composed($userText) : (isset($structured['properties']['directions']) ? designed() : sample($structured, 'value', $userText)), JSON_UNESCAPED_UNICODE));
     } elseif (str_contains($userText, 'REFUS')) {
         $stop = 'refusal';
     } elseif (str_contains($userText, 'ARTICLE') && !$results) {
@@ -317,7 +346,7 @@ if ($path === '/v1/responses' && $method === 'POST') {
     $events = [['type' => 'response.created', 'response' => ['id' => 'resp_1', 'status' => 'in_progress']]];
     $structured = $body['text']['format']['schema'] ?? null;
     if ($structured) {
-        $answer = json_encode(isset($structured['properties']['sections']) ? composed($userText) : sample($structured, 'value', $userText), JSON_UNESCAPED_UNICODE);
+        $answer = json_encode(isset($structured['properties']['sections']) ? composed($userText) : (isset($structured['properties']['directions']) ? designed() : sample($structured, 'value', $userText)), JSON_UNESCAPED_UNICODE);
     } elseif (str_contains($userText, 'ARTICLE') && count($outputs) === 0) {
         $out[] = ['type' => 'function_call', 'id' => 'fc_1', 'call_id' => 'call_1', 'name' => 'create_draft', 'status' => 'completed', 'arguments' => json_encode([
             'type' => 'post', 'title' => 'Article écrit par GPT', 'body' => "Introduction.\n\n## Partie\n\nTexte.", 'summary' => 'Résumé.', 'keyword' => 'test',

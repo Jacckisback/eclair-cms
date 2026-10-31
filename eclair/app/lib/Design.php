@@ -81,7 +81,7 @@ final class Design
             'ground' => '#f3f1ec', 'surface' => '#e6e3dc', 'ink' => '#0d0d0d', 'muted' => '#4a4a4a', 'accent' => '#e04a00', 'display' => 'archivo-black', 'text' => 'system',
             'case' => 'upper', 'scale' => 'bold', 'radius' => 'none', 'density' => 'regular', 'surfaces' => 'flat', 'hero' => 'poster', 'features' => 'columns', 'sections' => 'plain', 'icons' => 'none'],
         'riviera' => ['name' => 'Riviera', 'idea' => 'Le bord de mer : bleu marine, ciel pâle, corail du soleil couchant.',
-            'ground' => '#f4f8fb', 'surface' => '#e1ecf5', 'ink' => '#0b2440', 'muted' => '#4b6178', 'accent' => '#c8553d', 'display' => 'gloock', 'text' => 'humanist',
+            'ground' => '#f4f8fb', 'surface' => '#e1ecf5', 'ink' => '#0b2440', 'muted' => '#4b6178', 'accent' => '#b04b36', 'display' => 'gloock', 'text' => 'humanist',
             'case' => 'normal', 'scale' => 'bold', 'radius' => 'round', 'density' => 'airy', 'surfaces' => 'raised', 'hero' => 'fullbleed', 'features' => 'rows', 'sections' => 'bands', 'icons' => 'line'],
         'cabinet' => ['name' => 'Cabinet', 'idea' => 'Le papier à en-tête : encre marine, bordeaux, Caslon et filets fins.',
             'ground' => '#fbfaf7', 'surface' => '#efebe3', 'ink' => '#1a1f2b', 'muted' => '#535a68', 'accent' => '#7a1f2b', 'display' => 'libre-caslon-display', 'text' => 'serif',
@@ -96,7 +96,7 @@ final class Design
             'ground' => '#e9e8e4', 'surface' => '#d8d6d0', 'ink' => '#1b1b19', 'muted' => '#4e4d49', 'accent' => '#ffcc00', 'display' => 'barlow-condensed', 'text' => 'system',
             'case' => 'upper', 'scale' => 'bold', 'radius' => 'none', 'density' => 'compact', 'surfaces' => 'line', 'hero' => 'fullbleed', 'features' => 'rows', 'sections' => 'bands', 'icons' => 'line'],
         'recreation' => ['name' => 'Récréation', 'idea' => 'La cour d’école : bleu ciel, rouge tomate, lettres rondes et joyeuses.',
-            'ground' => '#f2f7ff', 'surface' => '#dde9ff', 'ink' => '#1d2433', 'muted' => '#4e5871', 'accent' => '#e23d31', 'display' => 'fredoka', 'text' => 'rounded',
+            'ground' => '#f2f7ff', 'surface' => '#dde9ff', 'ink' => '#1d2433', 'muted' => '#4e5871', 'accent' => '#c7362b', 'display' => 'fredoka', 'text' => 'rounded',
             'case' => 'normal', 'scale' => 'bold', 'radius' => 'round', 'density' => 'regular', 'surfaces' => 'raised', 'hero' => 'split', 'features' => 'columns', 'sections' => 'bands', 'icons' => 'line'],
         'presse' => ['name' => 'Presse', 'idea' => 'Le quotidien du matin : papier journal, noir d’imprimerie, rouge de une.',
             'ground' => '#f7f6f2', 'surface' => '#eceae3', 'ink' => '#121212', 'muted' => '#555555', 'accent' => '#c1121f', 'display' => 'newsreader', 'text' => 'serif',
@@ -165,13 +165,16 @@ final class Design
         foreach (self::CHOICES as $k => $allowed) {
             $out[$k] = in_array($d[$k] ?? '', $allowed, true) ? $d[$k] : $allowed[0];
         }
-        // Fond et bandes du même côté (clair ou sombre), puis contrastes WCAG : texte ≥ 7:1, le reste ≥ 4,5:1, partout.
-        $dark = self::lum($out['ground']) < 0.2;
-        if ((self::lum($out['surface']) < 0.2) !== $dark) {
-            $out['surface'] = self::mix($out['ink'], $out['ground'], 0.06);
+        // Fond franchement clair ou sombre (un gris moyen ne peut porter aucun texte à 7:1), bandes du même côté,
+        // puis contrastes WCAG garantis quelles que soient les couleurs reçues : texte ≥ 7:1, le reste ≥ 4,5:1, partout.
+        $dark = Theme::contrast('#ffffff', $out['ground']) > Theme::contrast('#000000', $out['ground']);
+        $out['ground'] = self::settle($out['ground'], $dark, 7.5);
+        if (Theme::contrast('#ffffff', $out['surface']) > Theme::contrast('#000000', $out['surface']) !== $dark) {
+            $out['surface'] = self::mix($dark ? '#ffffff' : '#000000', $out['ground'], 0.06);
         }
+        $out['surface'] = self::settle($out['surface'], $dark, 6);
         foreach (['ink' => 7, 'muted' => 4.5] as $k => $ratio) {
-            $out[$k] = Theme::readable(Theme::readable($out[$k], $out['ground'], $ratio), $out['surface'], 4.5);
+            $out[$k] = self::fit(self::fit($out[$k], $out['ground'], $ratio), $out['surface'], 4.5);
         }
         foreach (['#ffffff', '#111111'] as $text) {
             if (Theme::contrast($out['accent'], $text) >= 4.5) {
@@ -183,7 +186,7 @@ final class Design
             $out['accent'] = Theme::readable($out['accent'], '#ffffff');
             $out['on_accent'] = '#ffffff';
         }
-        $out['link'] = Theme::readable(Theme::readable($out['accent'], $out['ground']), $out['surface']);
+        $out['link'] = self::fit(self::fit($out['accent'], $out['ground'], 4.5), $out['surface'], 4.5);
         $out['scheme'] = $dark ? 'dark' : 'light';
         return $out;
     }
@@ -302,10 +305,23 @@ final class Design
         return array_map('hexdec', str_split(ltrim($hex, '#'), 2));
     }
 
-    private static function lum(string $hex): float
+    /** Fond poussé vers le blanc (ou le noir) jusqu'à pouvoir porter un texte noir (ou blanc) à ce contraste. */
+    private static function settle(string $color, bool $dark, float $ratio): string
     {
-        [$r, $g, $b] = self::rgb($hex);
-        return (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) / 255;
+        for ($i = 0; $i < 60 && Theme::contrast($dark ? '#ffffff' : '#000000', $color) < $ratio; $i++) {
+            $color = self::mix($dark ? '#000000' : '#ffffff', $color, 0.1);
+        }
+        return $color;
+    }
+
+    /** Couleur rapprochée du noir ou du blanc (le côté qui contraste avec ce fond) jusqu'au rapport voulu. */
+    private static function fit(string $color, string $background, float $ratio): string
+    {
+        $to = Theme::contrast('#000000', $background) >= Theme::contrast('#ffffff', $background) ? '#000000' : '#ffffff';
+        for ($i = 0; $i < 40 && Theme::contrast($color, $background) < $ratio; $i++) {
+            $color = self::mix($to, $color, 0.12);
+        }
+        return Theme::contrast($color, $background) >= $ratio ? $color : $to;
     }
 
     /** Mélange de deux couleurs : $share de la première dans la seconde. */

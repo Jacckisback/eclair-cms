@@ -970,11 +970,12 @@
   const showAnalysis = (a) => {
     ring($('#ring-seo'), a.seo);
     ring($('#ring-geo'), a.geo);
-    const avg = Math.round((a.seo + a.geo) / 2);
+    ring($('#ring-design'), a.design);
+    const avg = Math.round((a.seo + a.geo + a.design) / 3);
     $('#tab-score').textContent = avg;
     $('#tab-score').className = 'score ' + (avg >= 80 ? 'good' : avg >= 50 ? 'ok' : 'bad');
     $('#words-info').textContent = a.words + ' ' + t('Mots').toLowerCase() + ' · ' + a.reading + ' ' + t('min de lecture');
-    ['seo', 'geo'].forEach((g) => {
+    ['seo', 'geo', 'design'].forEach((g) => {
       const list = $('#checks-' + g);
       list.textContent = '';
       a.checks.filter((c) => c.group === g).sort((x, y) => ({ bad: 0, ok: 1, good: 2 }[x.status] - { bad: 0, ok: 1, good: 2 }[y.status]))

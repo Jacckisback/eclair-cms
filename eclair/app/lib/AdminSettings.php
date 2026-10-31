@@ -29,6 +29,7 @@ final class AdminSettings
             'indexnow' => IndexNow::key(),
             'ai' => $tab === 'ai' ? self::aiState() : [],
             'previews' => $tab === 'appearance' ? self::previewPages() : [],
+            'imagine' => $tab === 'appearance' && Ai::allowed($user) ? AdminAi::directionsCost(Ai::provider()) : '',
         ], t('Réglages'));
     }
 
