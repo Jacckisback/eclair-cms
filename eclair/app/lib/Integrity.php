@@ -23,7 +23,8 @@ final class Integrity
                 $file = ECLAIR_ROOT . '/' . $path;
                 if (!is_file($file)) {
                     $result['missing'][] = $path;
-                } elseif (!hash_equals((string) $hash, hash_file('sha256', $file))) {
+                } elseif (strlen((string) $hash) < 32 || !hash_equals((string) $hash, substr((string) hash_file('sha256', $file), 0, strlen((string) $hash)))) {
+                    // Empreinte SHA-256 complète, ou ses 128 premiers bits (manifeste compact des archives depuis la 1.7).
                     $result['modified'][] = $path;
                 }
             }

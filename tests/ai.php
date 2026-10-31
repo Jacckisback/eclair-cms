@@ -131,6 +131,8 @@ try {
     $c->login('camille@example.com', 'Un-mot-de-passe-solide');
     $dash = $c->req('GET', '/gestion');
     check('IA désactivée : invitation à l’activer, aucun script', str_contains($dash['body'], 'settings?tab=ai') && !str_contains($dash['body'], 'assistant.js'));
+    $noAi = $c->req('GET', '/gestion/new/page')['body'];
+    check('IA désactivée : ni formulaire « Créer avec l’IA » ni son script', !str_contains($noAi, 'id="compose"') && !str_contains($noAi, 'compose.js'));
     preg_match('/"csrf":"([a-f0-9]+)"/', $dash['body'], $m);
     $csrf = $m[1] ?? '';
     $api = static function (string $method, string $path, ?array $data = null, array $headers = []) use ($c, &$csrf): array {
@@ -301,11 +303,42 @@ try {
     $api('POST', 'api/ai/forget', ['id' => $list[0]['id'] ?? '']);
     check('historique : conversation supprimée', count($api('GET', 'api/ai/chats')['json']['chats'] ?? []) === count($list) - 1);
 
+    // « Crée ta page avec l'IA » : un seul appel, tout repasse par Blocks::normalize, brouillon ouvert en mode Visuel.
+    $newPage = $c->req('GET', '/gestion/new/page')['body'];
+    check('composeur : proposé pour un nouveau contenu, avec son coût estimé', str_contains($newPage, 'id="compose"') && str_contains($newPage, 'compose.js') && str_contains($newPage, 'Coût estimé : ≈'));
+    check('composeur : absent d’un contenu existant', !str_contains($c->req('GET', '/gestion/edit/' . $draftId)['body'], 'compose.js'));
+    $brief = ['type' => 'page', 'lang' => 'fr', 'brief' => 'Présenter nos cours de céramique pour débutants à Lyon', 'goal' => 'obtenir des inscriptions',
+        'audience' => 'adultes débutants', 'tone' => 'chaleureux', 'sections' => 'bannière, atouts, FAQ, contact'];
+    check('composeur : description trop courte refusée', $api('POST', 'api/ai/compose', ['brief' => 'Trop'] + $brief)['status'] === 422);
+    $before = count($fakeLog());
+    $comp = $api('POST', 'api/ai/compose', $brief);
+    $calls = array_slice($fakeLog(), $before);
+    $sent = json_encode($calls[0]['b'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    check('composeur : un seul appel, avec profil éditorial, pages, articles et images du site', count($calls) === 1 && str_contains($sent, 'Chaleureux, tutoiement')
+        && str_contains($sent, '## Pages (title | path)') && str_contains($sent, '/contact') && str_contains($sent, 'Images of the media library') && str_contains($sent, 'obtenir des inscriptions'), count($calls) . ' ' . substr($sent, 0, 200));
+    check('composeur : brouillon ouvert en mode Visuel', ($comp['json']['ok'] ?? false) && str_ends_with((string) ($comp['json']['edit'] ?? ''), '/edit/' . ($comp['json']['id'] ?? '') . '?visual'), $comp['body']);
+    $made = $read((string) ($comp['json']['id'] ?? 'x'));
+    $types = array_column($made['blocks'] ?? [], 'type');
+    check('composeur : blocs valides ; section et image inconnues écartées', $types === ['hero', 'features', 'heading', 'paragraph', 'list', 'callout', 'faq', 'button', 'contact'], implode(',', $types));
+    $hero = $made['blocks'][0] ?? [];
+    $library = json_decode(substr((string) file_get_contents($copy . '/data/media.php'), strlen(Store::GUARD)), true) ?: [];
+    check('composeur : photo fournie gardée, lien javascript: retiré', isset($library[$hero['media'] ?? '']) && ($hero['url2'] ?? 'x') === '' && ($hero['url'] ?? '') === '/contact', json_encode($hero));
+    check('composeur : HTML non permis retiré', !preg_match('~<script|<img|onerror|javascript:~i', (string) json_encode($made['blocks'] ?? [])));
+    check('composeur : un seul H1 (le bandeau), toujours un brouillon', ($made['status'] ?? '') === 'draft' && ($made['options']['hide_title'] ?? false) === true
+        && ($made['seo']['keyword'] ?? '') === 'cours de céramique Lyon');
+    $checks = $api('POST', 'api/analyze', $made)['json']['analysis']['checks'] ?? [];
+    check('analyse : repères « [À compléter : …] » signalés', (bool) array_filter($checks, fn ($x) => $x['status'] === 'bad' && str_contains($x['label'], '2 passage(s) « [À compléter')), json_encode(array_column($checks, 'label')));
+    $page = $c->req('GET', '/gestion/preview/' . ($made['id'] ?? 'x'));
+    check('composeur : la page rendue a un seul H1, celui du bandeau', substr_count($page['body'], '<h1') === 1 && str_contains($page['body'], '<h1 class="hero-title">Cours de céramique à Lyon</h1>'));
+
     // Autres fournisseurs : ChatGPT (Responses API), FLUX, Ideogram.
     $settingsAi(['provider' => 'openai', 'key_ai_openai' => 'sk-test-openai-0123456789', 'model_openai' => 'gpt-6.1-sol', 'image' => 'bfl', 'key_image_bfl' => 'bfl-test-key-0123456789']);
     $r = $chat('Écris un ARTICLE avec GPT');
     $gpt = array_values(array_filter($r['cards'], fn ($x) => $x['kind'] === 'draft'))[0] ?? [];
     check('ChatGPT : brouillon créé via la Responses API', ($gpt['title'] ?? '') === 'Article écrit par GPT' && str_contains($r['text'], 'Brouillon prêt') && !$r['errors'], json_encode($r['errors']));
+    $before = count($fakeLog());
+    $comp = $api('POST', 'api/ai/compose', $brief);
+    check('composeur : fonctionne aussi avec ChatGPT', ($comp['json']['ok'] ?? false) && array_column(array_slice($fakeLog(), $before), 'p') === ['/v1/responses'], $comp['body']);
     $flux = $api('POST', 'api/ai/assist', ['task' => 'cover', 'item' => $doc])['json'];
     check('FLUX : image suivie puis téléchargée sans la clé', ($flux['ok'] ?? false) && in_array('/delivery/job1.jpg', array_column($fakeLog(), 'p'), true)
         && in_array('/v1/get_result', array_column($fakeLog(), 'p'), true), json_encode($flux));
@@ -335,6 +368,8 @@ try {
     settings($copy, ['ai' => ['budget' => 0.001]]);
     $over = $api('POST', 'api/ai/chat', ['message' => 'Bonjour']);
     check('budget du mois atteint : demande refusée', $over['status'] === 429 && str_contains((string) ($over['json']['error'] ?? ''), 'Budget'), $over['body']);
+    $over = $api('POST', 'api/ai/compose', $brief);
+    check('composeur : budget de l’assistant appliqué', $over['status'] === 429 && str_contains((string) ($over['json']['error'] ?? ''), 'Budget'), $over['body']);
     settings($copy, ['ai' => ['budget' => 10, 'daily' => 1]]);
     $quota = $api('POST', 'api/ai/chat', ['message' => 'Bonjour']);
     check('quota quotidien atteint : demande refusée', $quota['status'] === 429 && str_contains((string) ($quota['json']['error'] ?? ''), 'limite'), $quota['body']);

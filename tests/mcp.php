@@ -190,6 +190,23 @@ try {
     $did = (string) ($draft['data']['id'] ?? '');
     check('create_draft : brouillon créé, lien pour le relire', $draft['error'] === false && $did !== '' && str_starts_with((string) ($draft['data']['edit_url'] ?? ''), $base . '/gestion/edit/' . $did), $draft['text']);
     check('brouillon : invisible sur le site', $v->req('GET', '/blog/bien-choisir-son-bol-en-gres')['status'] === 404);
+    // Mise en page en sections (même outil que l'assistant) : tout repasse par Blocks::normalize.
+    $sec = static fn (array $x): array => $x + ['type' => '', 'title' => '', 'text' => '', 'style' => '', 'items' => [], 'button' => '', 'url' => '', 'button2' => '', 'url2' => '', 'media' => ''];
+    check('create_draft : paramètre « sections » proposé', isset($tools['create_draft']['inputSchema']['properties']['sections']['items']['properties']['items'])
+        && !in_array('body', $tools['create_draft']['inputSchema']['required'] ?? [], true));
+    $landing = $call('create_draft', ['type' => 'page', 'title' => 'Ateliers du samedi', 'sections' => [
+        $sec(['type' => 'hero', 'title' => 'Ateliers du samedi', 'text' => 'Trois heures **au tour**.', 'button' => 'Réserver', 'url' => '/contact', 'media' => 'inconnue']),
+        $sec(['type' => 'features', 'title' => 'Au programme', 'items' => [['title' => 'Tournage', 'text' => 'Centrer la terre.<script>x</script>', 'icon' => '🏺', 'role' => '']]]),
+        $sec(['type' => 'paragraph', 'text' => 'Tarif : [À compléter : prix].']),
+        $sec(['type' => 'button', 'button' => 'Piège', 'url' => 'javascript:alert(1)']),
+        $sec(['type' => 'faq', 'items' => [['title' => 'Combien de temps ?', 'text' => 'Trois heures.', 'icon' => '', 'role' => '']]]),
+    ]]);
+    $lid = (string) ($landing['data']['id'] ?? '');
+    $page = $lid !== '' ? json_decode(substr((string) file_get_contents($copy . '/data/content/' . $lid . '.php'), strlen(Store::GUARD)), true) : [];
+    check('create_draft avec sections : blocs valides, image inconnue et lien piégé écartés', $landing['error'] === false
+        && array_column($page['blocks'] ?? [], 'type') === ['hero', 'features', 'paragraph', 'faq'] && ($page['blocks'][0]['media'] ?? 'x') === ''
+        && !str_contains((string) json_encode($page['blocks'] ?? []), 'script') && ($page['options']['hide_title'] ?? false) === true, $landing['text']);
+    check('create_draft avec sections : repère « [À compléter : …] » signalé', in_array('1 passage(s) « [À compléter : …] » à remplir avant de publier.', (array) ($landing['data']['weak_points'] ?? []), true), $landing['text']);
     $home = '';
     foreach ($call('search_content', ['query' => '', 'type' => 'page'])['data']['results'] ?? [] as $row) {
         $home = $row['path'] === '/' && $row['status'] === 'published' ? $row['id'] : $home;

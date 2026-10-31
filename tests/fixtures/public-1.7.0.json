@@ -1,0 +1,318 @@
+{
+    "version": "1.7.0",
+    "normalized": [
+        "?v= des URL d’assets",
+        "année du pied de page"
+    ],
+    "sites": {
+        "blog": {
+            "visitor": {
+                "/": [
+                    200,
+                    20701,
+                    "33937699098a1e1325fc74c906dfa361d18d88dc6ef9ed23afa3ab5fdffa0f2a"
+                ],
+                "/a-propos": [
+                    200,
+                    21828,
+                    "4c822f717a896013e0902581a0cf965a86caab319a738a5a9f62a2bcf842483d"
+                ],
+                "/blog/auteur/camille-martin": [
+                    200,
+                    21431,
+                    "a23436e98465049f91ca63836f09f5fe0848e68e1bc4f9c79f5ec7d64f6c8ef4"
+                ],
+                "/blog/guides": [
+                    200,
+                    21527,
+                    "3bede16d1eba22568131e0ea51ac58882757b11961fd8e2c2b52014a0cd6352e"
+                ],
+                "/blog/premiers-pas-avec-eclair": [
+                    200,
+                    28643,
+                    "473ef148920bbdb3228f7087f57fa636af8dd87cffad528b9bbdbf34d3a568c2"
+                ],
+                "/contact": [
+                    200,
+                    22455,
+                    "48b1351ba92b65efe472f966156b09fbb8a536ad9db1ef254a72cb2d4812df23"
+                ],
+                "/mentions-legales": [
+                    200,
+                    21752,
+                    "b4e8102bb96344df3514ec287c25faec69783c6eb7321d4be4b01676911bcc01"
+                ],
+                "/page-introuvable-capture": [
+                    404,
+                    20469,
+                    "8df0be84eaf22028972313bcf03375bf7d4a7bc1ee0eeded0a07533be843c027"
+                ],
+                "/politique-de-confidentialite": [
+                    200,
+                    22211,
+                    "76edfa571065786e5cc290da1b2ffe5595343a71cfb12c71465b2b3c83129fdb"
+                ],
+                "/recherche": [
+                    200,
+                    20237,
+                    "8315ba49dc8a6d3eed266c9c103d388cd89640798524fb63a9b6a3eb8d1a0323"
+                ]
+            },
+            "admin_same": true
+        },
+        "business": {
+            "visitor": {
+                "/": [
+                    200,
+                    26527,
+                    "0c95475a674e49daefee85df57e73a4c4f3b0be695f194f568cbc99bc1a3e534"
+                ],
+                "/a-propos": [
+                    200,
+                    25902,
+                    "4f3a594f8e21987e082ce2dff26e61fe58f4a5d9f1077ac8366460f0bc4a3718"
+                ],
+                "/blog": [
+                    200,
+                    25492,
+                    "bafe0c6332cfdb1c559d36713c3a52b26bbabce9e2a3d59023add0772390c4d5"
+                ],
+                "/blog/auteur/camille-martin": [
+                    200,
+                    25689,
+                    "c9130221e5f0cf6934e8f0c1e417ec47e051db40a91286021528dbb90818b9e3"
+                ],
+                "/blog/guides": [
+                    200,
+                    25785,
+                    "9ebc4054d0b888c235f5c983776ea01ae6531f46e0a40886abfa2db2fe9fb56e"
+                ],
+                "/blog/premiers-pas-avec-eclair": [
+                    200,
+                    32901,
+                    "ee561342ddf6f197e91763141263c14a44bfae2798fe39740ac9525d367bdac1"
+                ],
+                "/boutique": [
+                    200,
+                    26320,
+                    "f49a406378eb4960e06e3a5ef444db491911a5a760dac06dd799833634038b1f"
+                ],
+                "/boutique/bol-en-gres-emaille": [
+                    200,
+                    29159,
+                    "281e43b18ef99f05f1dcc30764ace505dbd6a99d20b90f3e5477eb84698bf206"
+                ],
+                "/boutique/tasse-a-cafe": [
+                    200,
+                    29781,
+                    "2fec44ce3a1c5aa1ce1a7a44729101800fd441ddcfc507b1e183c8608781ac37"
+                ],
+                "/conditions-generales-de-vente": [
+                    200,
+                    25243,
+                    "96f9162aeee189620f4cecbcb4fa332e986cfff720ff57bd69cbdbf948b84439"
+                ],
+                "/contact": [
+                    200,
+                    26529,
+                    "167f0e3e21ab9cf79f79241d4ffb32f3ba764061c299f79afa947a288233e78d"
+                ],
+                "/mentions-legales": [
+                    200,
+                    25826,
+                    "c057d12a61afbf98ff74a93273fe12fe8e08202b264c5121cf8ca9f3c7ef784f"
+                ],
+                "/page-introuvable-capture": [
+                    404,
+                    24543,
+                    "96ec4ec379809ae23792d82df8967d16af8709381aaf7e7722ab63f7f8ef6fa0"
+                ],
+                "/politique-de-confidentialite": [
+                    200,
+                    26285,
+                    "7415ead1e2b6cd4c9be3692d56a7455cc7741442addb0c91828251039d72d203"
+                ],
+                "/recherche": [
+                    200,
+                    24311,
+                    "bcbef92ed12b9159f521daef30ca703c7ac1a752c14c737f0cdb672c5b8170db"
+                ],
+                "/services": [
+                    200,
+                    27366,
+                    "a1ab899ef811d7773c334348ed9cb3a6912fcfa1eb8a5c1341f7c7671a5a4d66"
+                ],
+                "/tous-les-blocs": [
+                    200,
+                    33145,
+                    "b198c20eda6315136dddc52ed9dae74d0f80529b269acc4ca78851220b1114a3"
+                ]
+            },
+            "admin_same": true
+        },
+        "freelance": {
+            "visitor": {
+                "/": [
+                    200,
+                    22557,
+                    "e5d5196abe328eb9ac5d531544cae4176e0a27e20d5c11d7b086158738d33ba3"
+                ],
+                "/a-propos": [
+                    200,
+                    21922,
+                    "539c3988107f69dc6323da4fabdad45d7b85ac2711c12ce0d90d1310353bc36e"
+                ],
+                "/blog": [
+                    200,
+                    21516,
+                    "bddba9ecae3da63a773941c5de7314f7c0cd4ff67e9c6ff7563255314f9f6de1"
+                ],
+                "/blog/auteur/camille-martin": [
+                    200,
+                    21709,
+                    "9bdda385d19485096be4ca23085584aa8a5310fde1eb1a6349bd74ba2af2167f"
+                ],
+                "/blog/guides": [
+                    200,
+                    21805,
+                    "dc0dfc97c6e0ea73706e88289d055c5ff361dc192edada49855f38e688c92c6b"
+                ],
+                "/blog/premiers-pas-avec-eclair": [
+                    200,
+                    28915,
+                    "25a21ee4621ba8012d601ce7df5432d284d222b930167e0036c6474c0c978c80"
+                ],
+                "/contact": [
+                    200,
+                    22549,
+                    "3f02daf1bbd7931661d61e81ed4f0e9c0d9a79eea4d997c631f53a1e69ac98e1"
+                ],
+                "/mentions-legales": [
+                    200,
+                    21846,
+                    "5a2f868ddef05af542734cad6fdc41f0ff05372819b40bd0420a0d70b50eea7e"
+                ],
+                "/page-introuvable-capture": [
+                    404,
+                    20563,
+                    "7149463a6e7f3b645c233e00d45d2f46366e06736a5ad2ef4d893fa153919ab6"
+                ],
+                "/politique-de-confidentialite": [
+                    200,
+                    22305,
+                    "f7bb7acd3d33066763c18f687774a40d6ceaef3a2d7aec931ee81c2a0e1f5edf"
+                ],
+                "/recherche": [
+                    200,
+                    20331,
+                    "a4da29f00a04c698be4d90a6c631d071be4b35faecd4e4d50bd3dca68223ecc4"
+                ]
+            },
+            "admin_same": true
+        },
+        "landing": {
+            "visitor": {
+                "/": [
+                    200,
+                    23520,
+                    "24400fa0e3874479e7c8010a3115fba1e86c79c510927759b25e649558af45b2"
+                ],
+                "/mentions-legales": [
+                    200,
+                    21581,
+                    "ddd2050ac311eacaa13a40e9292510ce4c25c894358bb055ec38d250659c039f"
+                ],
+                "/page-introuvable-capture": [
+                    404,
+                    20298,
+                    "455effcc3e7dc5c906f684f7959b6f3e32d1d9935a697434bc9d4ee79874b5ef"
+                ],
+                "/politique-de-confidentialite": [
+                    200,
+                    22040,
+                    "71b058d0a12461814adb2e605f6c57aff4adf29a2b289cdf52773a1305041ce0"
+                ],
+                "/recherche": [
+                    200,
+                    20066,
+                    "12ecbf4bb1bcc9eeb315fff129206d0c82cf3ce12a7c2b29d1485ace6d146e0a"
+                ]
+            },
+            "admin_same": true
+        }
+    },
+    "blocks": {
+        "0-hero": "<section class=\"hero hero-media\"><div class=\"hero-text\"><h2 class=\"hero-title\">Bandeau de démonstration</h2><p class=\"hero-lead\">Un <strong>texte</strong> d’accroche avec <a href=\"/contact\">un lien</a>.</p><p class=\"btns\"><a class=\"btn btn-primary btn-lg\" href=\"/contact\">Nous écrire</a><a class=\"btn btn-secondary btn-lg\" href=\"/a-propos\">En savoir plus</a></p></div><div class=\"hero-img\"><picture><source type=\"image/webp\" srcset=\"/media/2026/10/capture-480.webp 480w, /media/2026/10/capture-800.webp 800w, /media/2026/10/capture-1200.webp 1200w\" sizes=\"(min-width: 60rem) 34rem, 100vw\"><img src=\"/media/2026/10/capture.jpg\" alt=\"Image de démonstration\" width=\"1200\" height=\"800\" fetchpriority=\"high\" decoding=\"async\"></picture></div></section>\n",
+        "1-paragraph": "<p>Un paragraphe avec du <em>style</em>, <code>du code</code> et <a href=\"https://example.com\">un lien externe</a>.</p>\n",
+        "2-heading": "<h2 id=\"intertitre-de-niveau-deux\">Intertitre de niveau deux</h2>\n",
+        "3-heading": "<h3 id=\"ancre-perso\">Intertitre de niveau trois</h3>\n",
+        "4-list": "<ul><li>Premier point</li><li>Deuxième <strong>point</strong></li></ul>\n",
+        "5-list": "<ol><li>Étape une</li><li>Étape deux</li></ol>\n",
+        "6-quote": "<blockquote><p>Une citation marquante.</p><p class=\"cite\">— Quelqu’un</p></blockquote>\n",
+        "7-image": "<figure class=\"img img-wide\"><picture><source type=\"image/webp\" srcset=\"/media/2026/10/capture-480.webp 480w, /media/2026/10/capture-800.webp 800w, /media/2026/10/capture-1200.webp 1200w\" sizes=\"(min-width: 72rem) 68rem, 100vw\"><img src=\"/media/2026/10/capture.jpg\" alt=\"Texte alternatif\" width=\"1200\" height=\"800\" loading=\"lazy\" decoding=\"async\"></picture><figcaption>Une <em>légende</em></figcaption></figure>\n",
+        "8-callout": "<aside class=\"callout callout-tip\"><p class=\"callout-title\"><span aria-hidden=\"true\">💡</span> Astuce</p><p>Une astuce utile.</p></aside>\n",
+        "9-callout": "<aside class=\"callout callout-warning\"><p class=\"callout-title\"><span aria-hidden=\"true\">⚠️</span> Attention</p><p>Un avertissement.</p></aside>\n",
+        "10-faq": "<section class=\"faq\"><h2 id=\"faq\">Questions fréquentes</h2><details><summary>Première question ?</summary><div><p>Première réponse.</p></div></details><details><summary>Deuxième question ?</summary><div><p>Deuxième <strong>réponse</strong>.</p></div></details></section>\n",
+        "11-table": "<div class=\"table\"><table><caption>Un tableau</caption><thead><tr><th>Offre</th><th>Prix</th></tr></thead><tbody><tr><td>Essentiel</td><td>[À confirmer]</td></tr></tbody></table></div>\n",
+        "12-button": "<p class=\"btns center\"><a class=\"btn btn-secondary\" href=\"/contact\">Réserver</a></p>\n",
+        "13-video": "<figure class=\"video\"><a class=\"video-lite\" href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" data-embed=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&amp;rel=0\" target=\"_blank\" rel=\"noopener\"><span class=\"video-play\" aria-hidden=\"true\"></span><span class=\"video-label\">Lire la vidéo · Une vidéo</span></a><figcaption>Une vidéo</figcaption></figure>\n",
+        "14-code": "<pre class=\"code\"><code class=\"lang-php\">echo &apos;&lt;b&gt;bonjour&lt;/b&gt;&apos;;</code></pre>\n",
+        "15-divider": "<hr>\n",
+        "16-features": "<section class=\"features\"><h2 id=\"nos-atouts\">Nos atouts</h2><div class=\"grid\"><div class=\"feature\"><span class=\"feature-icon\" aria-hidden=\"true\">🚀</span><h3>Rapide</h3><p>Très <em>rapide</em>.</p></div><div class=\"feature\"><h3>Simple</h3></div></div></section>\n",
+        "17-team": "<section class=\"team\"><h2 id=\"team\">Notre équipe</h2><div class=\"grid\"><div class=\"feature member\"><picture><source type=\"image/webp\" srcset=\"/media/2026/10/capture-480.webp 480w, /media/2026/10/capture-800.webp 800w, /media/2026/10/capture-1200.webp 1200w\" sizes=\"8rem\"><img src=\"/media/2026/10/capture.jpg\" alt=\"Image de démonstration\" width=\"1200\" height=\"800\" loading=\"lazy\" decoding=\"async\"></picture><h3>Léa Martin</h3><p class=\"member-role\">Fondatrice</p><p>Une <strong>bio</strong>.</p><p class=\"member-link\"><a href=\"https://www.linkedin.com/in/lea\">linkedin.com ↗</a></p></div><div class=\"feature member\"><span class=\"member-initials\" aria-hidden=\"true\">JD</span><h3>Jean Dupont</h3></div></div></section>\n",
+        "18-posts": "<section class=\"posts-block\"><h2>Derniers articles</h2><div class=\"cards\">\n    <article class=\"card\">\n        <div class=\"card-body\">\n      <p class=\"card-meta\">\n        <a class=\"chip\" href=\"/blog/guides\">Guides</a>                  <time datetime=\"2026-10-31T18:25:04+00:00\">31 octobre 2026</time>\n              </p>\n      <h3 class=\"card-title\"><a href=\"/blog/premiers-pas-avec-eclair\">Premiers pas avec Éclair : le guide en 5 minutes</a></h3>\n      <p class=\"card-excerpt\">Découvre comment écrire, structurer et publier un contenu optimisé pour Google et les IA avec Éclair, le CMS ultra léger sans base de données.</p>    </div>\n  </article>\n</div>\n<p class=\"more\"><a href=\"/blog\">Voir tous les articles →</a></p></section>\n",
+        "19-products": "<section class=\"posts-block products-block\"><h2 id=\"boutique\">Boutique</h2><div class=\"cards products\">\n    <article class=\"card product-card\">\n          <div class=\"card-img\"><picture><source type=\"image/webp\" srcset=\"/media/2026/10/capture-480.webp 480w, /media/2026/10/capture-800.webp 800w, /media/2026/10/capture-1200.webp 1200w\" sizes=\"(min-width: 72rem) 17rem, (min-width: 40rem) 30vw, 50vw\"><img src=\"/media/2026/10/capture.jpg\" alt=\"\" width=\"1200\" height=\"800\" loading=\"lazy\" decoding=\"async\"></picture></div>\n        <div class=\"card-body\">\n      <h3 class=\"card-title\"><a href=\"/boutique/bol-en-gres-emaille\">Bol en grès émaillé</a></h3>\n      <p class=\"card-price\">\n        <span class=\"price-now\">29,90 €</span>        <s class=\"price-was\"><span class=\"sr-only\">Prix habituel : </span>39 €</s>        <span class=\"badge badge-sale\">Promo</span>      </p>\n    </div>\n  </article>\n    <article class=\"card product-card\">\n        <div class=\"card-body\">\n      <h3 class=\"card-title\"><a href=\"/boutique/tasse-a-cafe\">Tasse à café</a></h3>\n      <p class=\"card-price\">\n        <span class=\"price-now\">18 €</span>                      </p>\n    </div>\n  </article>\n</div>\n<p class=\"more\"><a href=\"/boutique\">Voir toute la boutique →</a></p></section>\n",
+        "20-contact": "<section class=\"contact-block\"><h2>Écrivez-nous</h2><form class=\"contact\" method=\"post\" action=\"/_eclair/contact\" data-k=\"0659ae02df80fd5fcb9b7a2d\" data-sending=\"Envoi…\" data-error=\"L’envoi a échoué. Vérifiez les champs et réessayez.\"><input type=\"hidden\" name=\"page\" value=\"583575f4d2\"><input type=\"hidden\" name=\"k\" value=\"\"><div class=\"hp\" aria-hidden=\"true\"><label>Website <input name=\"website\" tabindex=\"-1\" autocomplete=\"off\"></label></div><p><label for=\"cf-name\">Nom</label><input id=\"cf-name\" name=\"name\" required maxlength=\"100\" autocomplete=\"name\"></p><p><label for=\"cf-email\">E-mail</label><input id=\"cf-email\" type=\"email\" name=\"email\" required maxlength=\"190\" autocomplete=\"email\"></p><p><label for=\"cf-msg\">Message</label><textarea id=\"cf-msg\" name=\"message\" required rows=\"6\" maxlength=\"5000\"></textarea></p><p class=\"form-foot\"><button class=\"btn btn-primary\" type=\"submit\">Envoyer</button><span class=\"form-status\" role=\"status\" aria-live=\"polite\"></span></p><p class=\"form-notice\">Vos données servent uniquement à vous répondre. <a href=\"/politique-de-confidentialite\">Politique de confidentialité</a>.</p></form></section>\n"
+    },
+    "public_files": {
+        "eclair/app/theme/theme.css": "9c6c147ee3d73e8fba89fbbc1c16487deb2d104c9515e3441b25c4d1c6ce9319",
+        "eclair/app/theme/themes/atelier.css": "84c43bac2e8fb3e3cf466680790c2b6cfa4254540d03db034c426d5fac9a8d50",
+        "eclair/app/theme/themes/boutique.css": "e4d767752a63b1fa05e26c00b089555d064f341e3c6eaf97c5456b3e9df5c88b",
+        "eclair/app/theme/themes/contraste.css": "dd2034f3a2781eae45dd52c4c9686c9f1e77e76d8b031d40b6d894018ef7040d",
+        "eclair/app/theme/themes/editorial.css": "4f412a69801798712b3490cacb33c2398f48091701797d9d84b4101c18ac1332",
+        "eclair/app/theme/themes/studio.css": "6bf1f5bc881392b7c3938b14dd7f4e5e03ecf98b3e363c51b79c4223bb1f94fb",
+        "eclair/assets/site/site.js": "a0c255dc887afba38091dbccf98a855f7455afc57ab06d370554227e38609aed"
+    },
+    "admin_weights": {
+        "admin.css": {
+            "raw": 51059,
+            "gzip": 11325
+        },
+        "admin.js": {
+            "raw": 21725,
+            "gzip": 6783
+        },
+        "assistant.js": {
+            "raw": 24464,
+            "gzip": 8037
+        },
+        "compose.js": {
+            "raw": 1324,
+            "gzip": 722
+        },
+        "editor.js": {
+            "raw": 82593,
+            "gzip": 22793
+        },
+        "install.js": {
+            "raw": 7699,
+            "gzip": 2696
+        },
+        "theme-preview.js": {
+            "raw": 1062,
+            "gzip": 548
+        },
+        "visual.css": {
+            "raw": 1256,
+            "gzip": 652
+        },
+        "visual.js": {
+            "raw": 8998,
+            "gzip": 3332
+        }
+    },
+    "archive": {
+        "zip": 450624,
+        "unpacked": 996843
+    }
+}

@@ -2,10 +2,12 @@
 /**
  * Capture de référence du rendu public (outil de développement, jamais livré).
  *
- *   php tools/capture.php        installe les 4 sites de départ (+ une page avec chaque type de bloc), garde leurs données
- *                                dans tests/fixtures/sites/<type>/ et écrit tests/fixtures/public-<version>.json :
+ *   php tools/capture.php        écrit tests/fixtures/public-<version>.json pour les sites de référence de tests/fixtures/sites/ :
  *                                empreintes de chaque page (visiteur et session admin), HTML de chaque bloc, CSS/JS publics,
  *                                poids gzip de l'administration, taille de l'archive.
+ *   php tools/capture.php --reinstall
+ *                                réinstalle d'abord les 4 sites de départ (+ une page avec chaque type de bloc et une boutique
+ *                                ouverte) : nouvelles données, donc nouvelles empreintes ; les références existantes ne valent plus.
  *
  *   php tools/capture.php --lighthouse
  *                                Lighthouse mobile (médiane de 3 passages) sur l'accueil et un article du site « business » et sur
@@ -42,7 +44,7 @@ function capture_serve(string $root, ?string $fixture, string $name): array
         }
     }
     $port = random_int(41000, 49000);
-    $server = proc_open([PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $copy, $root . '/tools/router.php'],
+    $server = proc_open([PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $copy, __DIR__ . '/router.php'],
         [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']], $pipes, null,
         ['PHP_CLI_SERVER_WORKERS' => '4', 'PATH' => (string) getenv('PATH')]);
     usleep(600000);
@@ -355,9 +357,11 @@ if (PHP_SAPI === 'cli' && realpath($argv[0] ?? '') === __FILE__) {
         }
         exit(0);
     }
-    foreach (['blog', 'business', 'freelance', 'landing'] as $type) {
-        capture_install($root, $type, $fixtures);
-        echo "✓ Site de départ « $type » installé\n";
+    if (!is_dir($fixtures . '/sites') || in_array('--reinstall', $argv, true)) {
+        foreach (['blog', 'business', 'freelance', 'landing'] as $type) {
+            capture_install($root, $type, $fixtures);
+            echo "✓ Site de départ « $type » installé\n";
+        }
     }
     $zip = $root . '/dist/eclair-cms-' . $version . '.zip';
     $unpacked = 0;

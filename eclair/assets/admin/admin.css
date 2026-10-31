@@ -336,9 +336,9 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .block.drop-after{box-shadow:0 3px 0 0 var(--brand)}
 .block-tools{position:absolute;left:-2.6rem;top:.35rem;display:flex;flex-direction:column;gap:.15rem;opacity:0;transition:opacity .15s}
 .block:hover .block-tools,.block:focus-within .block-tools{opacity:1}
-.block-tools button,.block-bar button{display:grid;place-items:center;width:1.85rem;height:1.85rem;border:1px solid var(--line);background:var(--panel);border-radius:8px;cursor:pointer;color:var(--muted);padding:0}
-.block-tools button:hover,.block-bar button:hover{color:var(--brand);border-color:var(--brand)}
-.block-tools svg,.block-bar svg{width:1rem;height:1rem}
+.block-tools button,.block-bar button,.item-del button{display:grid;place-items:center;width:1.85rem;height:1.85rem;border:1px solid var(--line);background:var(--panel);border-radius:8px;cursor:pointer;color:var(--muted);padding:0}
+.block-tools button:hover,.block-bar button:hover,.item-del button:hover{color:var(--brand);border-color:var(--brand)}
+.block-tools svg,.block-bar svg,.item-del svg{width:1rem;height:1rem}
 .block-tools .grip{cursor:grab}
 .block-bar{position:absolute;right:.5rem;top:-1rem;display:none;gap:.2rem;padding:.2rem;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);z-index:5}
 .block:focus-within .block-bar,.block:hover .block-bar{display:flex}

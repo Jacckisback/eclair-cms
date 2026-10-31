@@ -526,6 +526,71 @@ if (!in_array('--unit', $argv, true)) {
     }
 }
 
+/* ──────────── Rendu public inchangé (référence 1.6.0) et mode Visuel jamais public ──────────── */
+if (!in_array('--unit', $argv, true)) {
+    require_once dirname(__DIR__) . '/tools/capture.php';
+    section('Rendu public identique à la référence 1.6.0 (4 sites de départ)');
+    $fixtures = __DIR__ . '/fixtures';
+    $ref = json_decode((string) file_get_contents($fixtures . '/public-1.6.0.json'), true);
+    $now = capture_all(dirname(__DIR__), $fixtures);
+    foreach ($ref['sites'] as $type => $site) {
+        $diff = array_keys(array_filter($site['visitor'], fn ($v, $u) => ($now[$type]['visitor'][$u] ?? null) !== $v, ARRAY_FILTER_USE_BOTH));
+        check("« $type » : " . count($site['visitor']) . ' pages identiques à l’octet', $diff === [] && count($now[$type]['visitor'] ?? []) === count($site['visitor']), implode(' ', $diff));
+        check("« $type » : identiques avec une session d’administration", ($now[$type]['admin_same'] ?? false) === true);
+    }
+    check('HTML de chaque type de bloc identique', capture_blocks(dirname(__DIR__), $fixtures . '/sites/business') === $ref['blocks']);
+    check('CSS et JS publics inchangés (sha256)', capture_public_files(dirname(__DIR__)) === $ref['public_files']);
+
+    section('Mode Visuel : seulement dans l’aperçu de l’administration');
+    [$vcopy, $vport, $vserver] = capture_serve(dirname(__DIR__), $fixtures . '/sites/business', 'visual');
+    try {
+        $marked = static fn (string $html): bool => (bool) preg_match('~data-e[bf]|data-rich|visual\.(js|css)~', $html);
+        $index = json_decode(substr((string) file_get_contents($vcopy . '/data/index.php'), strlen(Store::GUARD)), true);
+        $pid = (string) array_search('tous-les-blocs', array_column($index, 'slug', 'id'), true);
+        $item = json_decode(substr((string) file_get_contents($vcopy . '/data/content/' . $pid . '.php'), strlen(Store::GUARD)), true);
+        $form = ['data' => json_encode($item), 'edit' => '1'];
+        $anon = client($vport);
+        foreach (['/tous-les-blocs', '/tous-les-blocs?edit=1', '/'] as $path) {
+            $res = $anon->req('GET', $path);
+            check("public $path : aucun repère d’édition (visiteur)", $res['status'] === 200 && !$marked($res['body']));
+        }
+        $res = $anon->req('POST', '/gestion/preview', $form);
+        check('aperçu modifiable refusé sans session', $res['status'] === 302 && str_contains($res['headers']['location'] ?? '', '/gestion/login') && !$marked($res['body']));
+        $adm = client($vport);
+        $adm->login(CAPTURE_EMAIL, CAPTURE_PASS);
+        $token = $adm->token($adm->req('GET', '/gestion/edit/' . $pid)['body']);
+        $res = $adm->req('POST', '/gestion/preview', $form);
+        check('aperçu modifiable refusé sans jeton CSRF', $res['status'] === 302 && !$marked($res['body']));
+        $res = $adm->req('POST', '/gestion/preview', $form + ['_csrf' => str_repeat('0', 64)]);
+        check('aperçu modifiable refusé avec un faux jeton CSRF', $res['status'] === 302 && !$marked($res['body']));
+        check('aperçu modifiable réservé au droit « content » (route d’aperçu existante)',
+            str_contains((string) file_get_contents(ECLAIR_ROOT . '/app/lib/Admin.php'), "'POST /preview' => [AdminContent::class, 'preview', 'content']"));
+        $plain = $adm->req('POST', '/gestion/preview', $token + ['data' => $form['data']]);
+        check('aperçu ordinaire : aucun repère d’édition', $plain['status'] === 200 && !$marked($plain['body']));
+        $edit = $adm->req('POST', '/gestion/preview', $token + $form);
+        check('aperçu modifiable : repères, visual.js et visual.css à la place de theme-preview.js', $edit['status'] === 200 && substr_count($edit['body'], 'data-eb="') === count($item['blocks'])
+            && str_contains($edit['body'], '/assets/admin/visual.js') && str_contains($edit['body'], '/assets/admin/visual.css') && !str_contains($edit['body'], 'theme-preview.js'));
+        check('aperçu modifiable : noindex, jamais en cache, CSP inchangée', str_contains($edit['headers']['x-robots-tag'] ?? '', 'noindex') && ($edit['headers']['cache-control'] ?? '') === 'no-store'
+            && ($edit['headers']['content-security-policy'] ?? '') === ($plain['headers']['content-security-policy'] ?? '-') && !preg_match('~unsafe-(inline|eval)~', $edit['headers']['content-security-policy'] ?? ''));
+        $inline = static fn (string $html): int => (int) preg_match_all('~<script(?![^>]*\ssrc=)|<style~', $html);
+        check('aperçu modifiable : aucun script ni style en ligne ajouté', $inline($edit['body']) === $inline($plain['body']) && !preg_match('~\sstyle="~', $edit['body']));
+        foreach (['/tous-les-blocs', '/tous-les-blocs?edit=1', '/gestion/preview/' . $pid . '?edit=1'] as $path) {
+            $res = $adm->req('GET', $path);
+            check("$path avec une session d’administration : aucun repère d’édition", $res['status'] === 200 && !$marked($res['body']));
+        }
+        $leak = [];
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($vcopy . '/cache', FilesystemIterator::SKIP_DOTS)) as $file) {
+            if ($marked((string) file_get_contents((string) $file))) {
+                $leak[] = basename((string) $file);
+            }
+        }
+        check('cache des pages : aucun repère d’édition ni visual.js', $leak === [] && glob($vcopy . '/cache/pages/*') !== [], implode(' ', $leak));
+    } finally {
+        proc_terminate($vserver);
+        exec('rm -rf ' . escapeshellarg($vcopy));
+    }
+}
+
 require __DIR__ . '/ai.php';
 require __DIR__ . '/shop.php';
 require __DIR__ . '/mcp.php';

@@ -73,6 +73,38 @@ function sample(array $schema, string $key = 'value', string $input = ''): mixed
     };
 }
 
+/**
+ * « Crée ta page avec l'IA » : une composition réaliste, avec ses pièges (image inconnue, lien javascript:,
+ * HTML, type de section inconnu) et deux repères « [À compléter : …] ». La photo du bandeau est la première
+ * image de la liste reçue, s'il y en a une.
+ */
+function composed(string $input): array
+{
+    $s = static fn (array $x): array => $x + ['type' => '', 'title' => '', 'text' => '', 'style' => '', 'items' => [], 'button' => '', 'url' => '', 'button2' => '', 'url2' => '', 'media' => ''];
+    $i = static fn (string $title, string $text = '', string $icon = '', string $role = ''): array => compact('title', 'text', 'icon', 'role');
+    preg_match('/^# Images.*\n- ([a-z0-9]+) \|/m', $input, $m);
+    return [
+        'title' => 'Cours de céramique à Lyon pour débutants', 'slug' => 'cours-ceramique-lyon', 'seo_title' => 'Cours de céramique à Lyon pour débutants',
+        'seo_description' => 'Des cours de céramique à Lyon pour débutants : petits groupes, matériel fourni, horaires souples. Réserve ton premier atelier dès cette semaine.',
+        'summary' => 'Notre atelier lyonnais propose des cours de céramique pour débutants, en petits groupes, avec le matériel fourni. Tarif : [À compléter : prix d’un cours].',
+        'keyword' => 'cours de céramique Lyon',
+        'sections' => [
+            $s(['type' => 'hero', 'title' => 'Cours de céramique à Lyon', 'text' => 'Apprends le tour en **petits groupes**.', 'button' => 'Réserver', 'url' => '/contact',
+                'button2' => 'Piège', 'url2' => 'javascript:alert(1)', 'media' => $m[1] ?? '']),
+            $s(['type' => 'features', 'title' => 'Pourquoi nous', 'items' => [$i('Petits groupes', '6 élèves au plus.', '👥'), $i('Matériel fourni', 'Terre et émaux compris.<script>alert(1)</script>', '🏺')]]),
+            $s(['type' => 'heading', 'title' => 'Comment se passe un cours ?', 'style' => '2']),
+            $s(['type' => 'paragraph', 'text' => 'Chaque cours dure [À compléter : durée]. <img src=x onerror=alert(1)>Voir [nos ateliers](/services).']),
+            $s(['type' => 'list', 'style' => 'ol', 'items' => [$i('', 'Accueil et café'), $i('', 'Modelage au tour')]]),
+            $s(['type' => 'image', 'title' => 'Atelier', 'media' => 'inconnue456']),
+            $s(['type' => 'callout', 'style' => 'tip', 'text' => 'Viens avec des vêtements qui ne craignent rien.']),
+            $s(['type' => 'faq', 'items' => [$i('Faut-il savoir dessiner ?', 'Non, aucun prérequis.')]]),
+            $s(['type' => 'button', 'button' => 'Nous écrire', 'url' => '/contact']),
+            $s(['type' => 'contact', 'title' => 'Une question ?']),
+            $s(['type' => 'inconnu', 'title' => 'Ignoré']),
+        ],
+    ];
+}
+
 /* ───────────────────────────── Anthropic ───────────────────────────── */
 
 if (preg_match('~^/v1/models/([\w.-]+)$~', $path, $m) && $method === 'GET') {
@@ -183,7 +215,7 @@ if ($path === '/v1/messages' && $method === 'POST') {
     $stop = 'end_turn';
     $first = $results ? json_decode((string) $results[0]['content'], true) : null;
     if ($structured) {
-        $text(json_encode(sample($structured, 'value', $userText), JSON_UNESCAPED_UNICODE));
+        $text(json_encode(isset($structured['properties']['sections']) ? composed($userText) : sample($structured, 'value', $userText), JSON_UNESCAPED_UNICODE));
     } elseif (str_contains($userText, 'REFUS')) {
         $stop = 'refusal';
     } elseif (str_contains($userText, 'ARTICLE') && !$results) {
@@ -285,7 +317,7 @@ if ($path === '/v1/responses' && $method === 'POST') {
     $events = [['type' => 'response.created', 'response' => ['id' => 'resp_1', 'status' => 'in_progress']]];
     $structured = $body['text']['format']['schema'] ?? null;
     if ($structured) {
-        $answer = json_encode(sample($structured, 'value', $userText), JSON_UNESCAPED_UNICODE);
+        $answer = json_encode(isset($structured['properties']['sections']) ? composed($userText) : sample($structured, 'value', $userText), JSON_UNESCAPED_UNICODE);
     } elseif (str_contains($userText, 'ARTICLE') && count($outputs) === 0) {
         $out[] = ['type' => 'function_call', 'id' => 'fc_1', 'call_id' => 'call_1', 'name' => 'create_draft', 'status' => 'completed', 'arguments' => json_encode([
             'type' => 'post', 'title' => 'Article écrit par GPT', 'body' => "Introduction.\n\n## Partie\n\nTexte.", 'summary' => 'Résumé.', 'keyword' => 'test',

@@ -1396,7 +1396,7 @@
   const setMode = (on) => {
     root.classList.toggle('is-visual', on);
     $$('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.mode === 'visual') === on)));
-    if (on) { $('#side').prepend(doc); render(); } else { stage.before(doc); [frame, next].forEach((x) => x && x.remove()); frame = next = null; vSel = -1; mark(); }
+    if (on) { $('#side').prepend(doc); render(); } else { clearTimeout(vTimer); stage.before(doc); [frame, next].forEach((x) => x && x.remove()); frame = next = null; vSel = -1; mark(); }
     autosize();
     try { localStorage.setItem('eclair-mode', on ? 'visual' : 'blocks'); } catch (e) { /* stockage indisponible */ }
   };
