@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip"><img src="https://img.shields.io/badge/scarica-v1.6.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.6.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip"><img src="https://img.shields.io/badge/scarica-v1.7.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.7.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o successivo">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-nessuno-14122b?style=for-the-badge" alt="Nessun database">
@@ -62,11 +62,11 @@ WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicur
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleggero</h3>
-      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>434 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
+      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>440 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Semplicissimo</h3>
-      Installazione guidata in 4 domande, editor a blocchi con <code>/</code>, checklist per iniziare. Pannello in <b>7 lingue</b>, sito in 6 lingue (italiano compreso in entrambi).
+      Installazione guidata in 4 domande, editor a blocchi con <code>/</code> o <b>modalità Visuale</b> (la pagina così come appare), checklist per iniziare. Pannello in <b>7 lingue</b>, sito in 6 lingue (italiano compreso in entrambi).
     </td>
   </tr>
 </table>
@@ -132,6 +132,22 @@ Lavori già in Claude o ChatGPT? Collegali al tuo sito con il **connettore MCP**
 
 Configurazione in 3 minuti e piani compatibili: vedi la [guida, sezione Connettore MCP](docs/GUIDE.it.md#connettore-mcp-claude-e-chatgpt).
 
+## Modalità Visuale: modifica la tua pagina così come appare
+
+<p align="center">
+  <img src="docs/images/it/frame-visual.webp" alt="La modalità Visuale dell’editor: la pagina appare con il tema del sito, il blocco «Punti di forza» è selezionato con la sua barra degli strumenti (sposta su, sposta giù, duplica, elimina, aggiungi, ritocca con l’IA) e il suo modulo nel pannello a destra" width="100%">
+</p>
+
+Nell’editor, passa da **Blocchi** a **Visuale**: la tua pagina appare con il tuo tema, esattamente come la vedranno i tuoi visitatori, e la modifichi direttamente lì. Clicca su un titolo o un paragrafo per scriverci, su un’immagine per cambiarla. Una piccola barra sposta, duplica, elimina o aggiunge un blocco; ✨ ritocca il passaggio con l’IA. Controlla la resa in larghezza smartphone, tablet o computer, e annulla con Ctrl+Z.
+
+**Non sai da dove cominciare?** In un nuovo contenuto, apri **Crea con l’IA** e descrivi la tua pagina: il suo obiettivo, il suo pubblico, il suo tono, le sezioni che vuoi. L’IA compone una bozza completa (banner, punti di forza, FAQ, invito all’azione, titolo e descrizione per Google) con il tono del tuo sito, usando le tue vere pagine per i link e le tue immagini. Non inventa nulla: ciò che manca è segnato con «[Da completare: …]», e l’analisi te lo ricorda finché non lo compili. La bozza si apre direttamente in modalità Visuale.
+
+- **Impatto zero sul tuo sito**: la modalità Visuale esiste solo nell’anteprima del pannello. Le tue pagine pubbliche restano identiche fino all’ultimo byte, sempre 100/100 su Lighthouse.
+- **Leggera**: 3,3 KB compressi per la modalità Visuale, senza librerie.
+- **Con Claude o ChatGPT**: il costo è mostrato prima di ogni richiesta (≈ 0,08 $ a pagina con Claude Sonnet 5.5) e detratto dal budget dell’assistente. Anche il connettore MCP sa comporre una pagina in sezioni.
+
+Istruzioni: vedi la [guida, sezione Modalità Visuale](docs/GUIDE.it.md#modalità-visuale) e [Creare una pagina con l’IA](docs/GUIDE.it.md#creare-una-pagina-con-lia).
+
 ## Temi e negozio
 
 <p align="center">
@@ -190,7 +206,7 @@ Il negozio si apre solo quando le note legali e le condizioni generali di vendit
 |---|---|---|
 | **Installazione** | Creare un database MySQL, poi avviare la procedura guidata | ✅ Caricare la cartella, rispondere a 4 domande |
 | **Database** | MySQL obbligatorio | ✅ Nessuno (file protetti) |
-| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 434 KB |
+| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 440 KB |
 | **SEO, sitemap, dati strutturati** | Un plugin da installare e mantenere | ✅ Integrati |
 | **GEO: llms.txt, Markdown, bot IA** | Plugin, raramente completi | ✅ Integrato |
 | **Pagine pubbliche** | Generate a ogni visita, salvo con un plugin di cache | ✅ Servite da una cache statica |
@@ -299,7 +315,7 @@ Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.it.md#sicurezza).
   <img src="docs/images/it/install.webp" alt="Installazione in tre passaggi: carica la cartella, rispondi a quattro domande, il sito è online" width="100%">
 </p>
 
-1. **Scarica** l’archivio [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 KB) ed estrailo.
+1. **Scarica** l’archivio [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) (440 KB) ed estrailo.
 2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
 3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
 
@@ -314,9 +330,9 @@ La [guida completa](docs/GUIDE.it.md) spiega tutto il resto:
 
 - [Installazione](docs/GUIDE.it.md#installazione): requisiti, tipi di sito, primi passi
 - [Funzionalità in dettaglio](docs/GUIDE.it.md#funzionalità-in-dettaglio): velocità, SEO, GEO, editor a blocchi
-- [Uso quotidiano](docs/GUIDE.it.md#uso-quotidiano)
+- [Uso quotidiano](docs/GUIDE.it.md#uso-quotidiano) e la [modalità Visuale](docs/GUIDE.it.md#modalità-visuale)
 - [Temi](docs/GUIDE.it.md#temi) e [Negozio](docs/GUIDE.it.md#negozio): anteprima in tempo reale, schede prodotto, Stripe, PayPal, Revolut, Google Shopping
-- [Assistente IA](docs/GUIDE.it.md#assistente-ia): attivazione, profilo editoriale, costi, sicurezza
+- [Assistente IA](docs/GUIDE.it.md#assistente-ia): attivazione, profilo editoriale, creare una pagina con l’IA, costi, sicurezza
 - [Connettore MCP](docs/GUIDE.it.md#connettore-mcp-claude-e-chatgpt): Claude e ChatGPT con il tuo abbonamento
 - [Aggiornare, fare backup, traslocare](docs/GUIDE.it.md#aggiornare-fare-backup-traslocare)
 - [Risoluzione dei problemi](docs/GUIDE.it.md#risoluzione-dei-problemi): password dimenticata, errori 404 o 500, Nginx…
@@ -327,7 +343,7 @@ PHP 8.1+ senza framework né Composer: classi semplici in `eclair/app/lib/`, vis
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
-php tests/run.php                                                           # 460 verifiche unitarie e HTTP
+php tests/run.php                                                           # 502 verifiche unitarie e HTTP
 php tools/build.php                                                         # archivio pronto da distribuire
 ```
 

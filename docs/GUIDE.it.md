@@ -11,14 +11,15 @@ Tutto quello che c’è da sapere per installare, usare, proteggere e mantenere 
 1. [Installazione](#installazione)
 2. [Funzionalità in dettaglio](#funzionalità-in-dettaglio)
 3. [Uso quotidiano](#uso-quotidiano)
-4. [Temi](#temi)
-5. [Negozio](#negozio)
-6. [Assistente IA](#assistente-ia)
-7. [Connettore MCP (Claude e ChatGPT)](#connettore-mcp-claude-e-chatgpt)
-8. [Sicurezza](#sicurezza)
-9. [Aggiornare, fare backup, traslocare](#aggiornare-fare-backup-traslocare)
-10. [Risoluzione dei problemi](#risoluzione-dei-problemi) (compreso [Nginx](#nginx))
-11. [Per sviluppatori](#per-sviluppatori)
+4. [Modalità Visuale](#modalità-visuale)
+5. [Temi](#temi)
+6. [Negozio](#negozio)
+7. [Assistente IA](#assistente-ia) (compreso [Creare una pagina con l’IA](#creare-una-pagina-con-lia))
+8. [Connettore MCP (Claude e ChatGPT)](#connettore-mcp-claude-e-chatgpt)
+9. [Sicurezza](#sicurezza)
+10. [Aggiornare, fare backup, traslocare](#aggiornare-fare-backup-traslocare)
+11. [Risoluzione dei problemi](#risoluzione-dei-problemi) (compreso [Nginx](#nginx))
+12. [Per sviluppatori](#per-sviluppatori)
 
 ---
 
@@ -35,7 +36,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) (440 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
@@ -100,6 +101,7 @@ La bacheca mostra una checklist «Primi passi»: logo e colore, home page, primo
 - **Link interni assistiti**: mentre scrivi un link, l’editor ti propone le tue pagine e i tuoi articoli (link interni in 2 secondi).
 - **Incolla intelligente** da Word, Google Docs o una pagina web: titoli, elenchi, tabelle e grassetti diventano blocchi puliti.
 - Salvataggio con `Ctrl+S`, bozza locale di riserva (non si perde nulla se cade la connessione), anteprima reale prima della pubblicazione, **cronologia delle ultime 20 versioni**, pubblicazione programmata.
+- **Modalità Visuale**: la pagina così come appare con il tuo tema, modificabile direttamente lì ([dettagli](#modalità-visuale)).
 
 ### 🧩 Tutto il resto
 
@@ -113,6 +115,8 @@ Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagi
 |---|---|
 | Scrivere un articolo | Bacheca › **Scrivi un articolo** |
 | Chiedere all’IA un articolo, una pagina, un’immagine | Campo **«Cosa vuoi creare oggi?»** della bacheca, oppure **✨ Assistente IA** (`Ctrl+J`) |
+| Far comporre all’IA una pagina completa | Nuova pagina › **✨ Crea con l’IA** |
+| Modificare una pagina così come appare | Editor › **Visuale** |
 | Modificare una pagina dal sito | Pulsante **✏️ Modifica** (visibile solo quando hai effettuato l’accesso) |
 | Cambiare tema, logo, colore, font | Impostazioni › Aspetto |
 | Aggiungere il mio CSS | Impostazioni › Aspetto › CSS personalizzato |
@@ -128,6 +132,29 @@ Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagi
 | Scaricare un backup | Sicurezza › Backup |
 
 Scorciatoie dell’editor: `/` inserisci un blocco · `Ctrl+S` salva · `Ctrl+K` link · `Ctrl+B` grassetto · `Ctrl+I` corsivo · `Invio` nuovo paragrafo · `Maiusc+Invio` a capo · `Ctrl+J` assistente IA.
+
+---
+
+## Modalità Visuale
+
+<p align="center">
+  <img src="images/it/frame-visual.webp" alt="La modalità Visuale: la pagina con il tema del sito, un blocco selezionato, la sua barra degli strumenti e il suo modulo nel pannello a destra" width="100%">
+</p>
+
+La modalità Visuale mostra la tua pagina con il vero tema del sito, esattamente come la vedranno i tuoi visitatori, e ti permette di modificarla direttamente lì. Passa da **Blocchi** a **Visuale** (e viceversa) in cima all’editor: la tua scelta viene ricordata per la volta successiva.
+
+- **Scrivere**: clicca su un titolo, un paragrafo, una domanda delle FAQ, il testo di un pulsante… e scrivi. `Ctrl+B` grassetto, `Ctrl+I` corsivo, `Ctrl+K` link (si apre la ricerca delle pagine dell’editor). `Invio` conferma un campo di una sola riga; in un paragrafo, crea il paragrafo successivo (`Maiusc+Invio` per andare semplicemente a capo). Il testo incollato arriva sempre come testo semplice.
+- **Organizzare**: un clic su un blocco lo evidenzia con un bordo e mostra la sua barra: ↑ ↓ per spostarlo, ⧉ per duplicarlo, ✕ per eliminarlo, +↑ e +↓ per aggiungere un blocco sopra o sotto. La barra si usa anche da tastiera (`Tab`, poi `Invio`).
+- **Immagini**: clicca su un’immagine (banner, blocco immagine, ritratto del team, immagine in evidenza di un articolo) per sceglierne un’altra nella libreria media.
+- **Impostazioni del blocco**: il pannello a destra mostra il modulo del blocco scelto (link di un pulsante, numero di articoli, nuova domanda delle FAQ…), poi le schede Documento, SEO e Analisi.
+- **✨ Ritocchi con l’IA** (se l’assistente è attivo): migliorare, correggere, accorciare, sviluppare, semplificare, cambiare il tono o tradurre il testo del blocco.
+- **Annullare**: `Ctrl+Z` (`Cmd+Z` su Mac) torna indietro un passo alla volta (fino a 50 passi).
+- **Larghezza**: 📱 390 px, ▭ 768 px o 🖥 larghezza piena, per controllare la resa su smartphone e tablet.
+
+Tutto passa dall’editor di sempre: salvataggio (`Ctrl+S` funziona anche dentro la pagina), bozza locale di riserva, cronologia delle versioni, analisi SEO e GEO in tempo reale. Link, pulsanti e moduli della pagina non reagiscono durante la modifica. Un blocco invisibile sul sito (immagine non ancora scelta, negozio chiuso…) appare come una cornice tratteggiata, da completare dal pannello a destra.
+
+> [!NOTE]
+> La modalità Visuale esiste solo nell’anteprima del pannello: servono l’accesso, un token di sicurezza e il permesso di scrittura, e la pagina non viene mai messa in cache né indicizzata. Le tue pagine pubbliche non ne portano traccia: restano identiche fino all’ultimo byte.
 
 ---
 
@@ -256,7 +283,17 @@ Ogni azione produce una **card** sotto la risposta:
 | ✅ Nell’editor | Il contenuto aperto viene modificato nell’editor | Annulla (poi salvi tu) |
 | 🖼️ Immagine | Immagine creata, ottimizzata (WebP) e aggiunta alla libreria media | Immagine in evidenza (nell’editor) |
 
-Puoi usare «Annulla» finché nessuno ha ritoccato il contenuto nel frattempo; altrimenti, le sue versioni precedenti restano nella **cronologia delle versioni** dell’editor. La cronologia dell’assistente conserva le tue ultime 30 conversazioni. L’assistente non inventa mai fatti sulla tua attività (prezzi, orari, cifre, testimonianze): quando manca un’informazione, lascia un segnaposto ben visibile come **[prezzo da confermare]** e te lo segnala.
+Puoi usare «Annulla» finché nessuno ha ritoccato il contenuto nel frattempo; altrimenti, le sue versioni precedenti restano nella **cronologia delle versioni** dell’editor. La cronologia dell’assistente conserva le tue ultime 30 conversazioni. L’assistente non inventa mai fatti sulla tua attività (prezzi, orari, cifre, testimonianze): quando manca un’informazione, lascia un segnaposto ben visibile come **[Da completare: prezzo]** e te lo segnala; la scheda Analisi conta questi segnaposto finché ne restano.
+
+### Creare una pagina con l’IA
+
+In un nuovo contenuto (pagina, articolo o prodotto), il riquadro **✨ Crea con l’IA** compone una bozza completa con una sola chiamata:
+
+1. Scegli il tipo e la lingua, poi descrivi ciò che vuoi in una o due frasi. Facoltativamente, aggiungi l’**obiettivo** («ottenere richieste di preventivo»), il **pubblico**, il **tono** e le **sezioni** desiderate («banner, punti di forza, prezzi, FAQ, contatti»).
+2. Il **costo stimato** viene mostrato prima di avviare (≈ 0,08 $ con Claude Sonnet 5.5, ≈ 0,16 $ con Claude Opus 5.5) e viene detratto dal budget dell’assistente. Se hai salvato entrambe le chiavi, scegli tu tra Claude e ChatGPT.
+3. Dopo un’attesa da 20 a 60 secondi, la bozza si apre in **modalità Visuale**: titolo, indirizzo, titolo SEO e meta description, «L’essenziale», frase chiave e un’impaginazione in sezioni (banner, punti di forza, sottotitoli, elenchi, riquadri, FAQ, pulsanti, team, modulo di contatto, ultimi articoli o prodotti), con un solo H1: il titolo del banner.
+
+L’IA si basa sul tuo profilo editoriale, sull’elenco delle tue pagine e dei tuoi articoli pubblicati (per link che esistono davvero) e sulle tue 30 immagini più recenti. Non inventa alcun fatto: prezzi, cifre, nomi o orari mancanti restano nella forma **«[Da completare: …]»**, conteggiati dalla scheda Analisi finché non li compili. La bozza non viene mai pubblicata: rileggi, completa, poi pubblica.
 
 ### Ritocchi nell’editor
 
@@ -339,7 +376,7 @@ Inizia con `get_site`, poi usa gli strumenti dell’assistente integrato, tranne
 | `get_site` | inventario del sito (pagine, articoli, prodotti, categorie e i loro identificativi), profilo editoriale, regole SEO e GEO |
 | `search_content` · `get_content` | cercare un contenuto, leggerlo in Markdown |
 | `find_media` | cercare un’immagine nella libreria media |
-| `create_draft` | creare un articolo, una pagina o una scheda prodotto **in bozza** |
+| `create_draft` | creare un articolo, una pagina o una scheda prodotto **in bozza**, in Markdown o in sezioni di impaginazione (banner, punti di forza, FAQ…) |
 | `update_content` | modificare una bozza; per un contenuto pubblicato, preparare una **proposta** |
 
 Ogni bozza torna con un link per **aprirla in Éclair**; ogni proposta, con un link che la **applica nell’editor** senza salvarla: tu controlli, poi salvi (oppure chiudi, e non cambia nulla). Inoltre Claude e ChatGPT ti chiedono il consenso prima di ogni azione di scrittura, in base alle loro impostazioni.
@@ -483,19 +520,21 @@ tests/run.php            test unitari + integrazione HTTP (compresi gli attacchi
 tests/fake-ai.php        finti fornitori di IA (Claude, ChatGPT, immagini): l’assistente viene testato senza chiavi né spese
 tests/shop.php           temi e negozio (schede, Stripe, PayPal, Revolut, JSON-LD, feed Merchant Center)
 tests/mcp.php            connettore MCP (OAuth, PKCE, protocollo, revoca) e scelta dell’IA
+tests/fixtures/          siti di riferimento e impronta del loro rendering pubblico (una nuova versione non cambia un solo byte del sito)
 tools/router.php         router per il server integrato di PHP (sviluppo)
-tools/build.php          impronte di integrità + archivio dist/eclair-cms-<versione>.zip (PHP compattato)
+tools/capture.php        acquisizione di riferimento del rendering pubblico e misurazioni Lighthouse (--lighthouse)
+tools/build.php          impronte di integrità + archivio dist/eclair-cms-<versione>.zip (PHP compattato, JS e CSS del pannello alleggeriti)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
-php tests/run.php                                  # 460 verifiche unitarie e HTTP
+php tests/run.php                                  # 502 verifiche unitarie e HTTP
 php tools/build.php                                # archivio pronto da distribuire
 ```
 
 `PHP_CLI_SERVER_WORKERS` permette al sito di chiamare se stesso (verifica del suo indirizzo): con un solo processo, la verifica semplicemente fallisce e i reindirizzamenti all’indirizzo ufficiale restano disattivati.
 
-Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnalerà questi file come modificati, è normale). Nell’archivio, il PHP è compattato (`php -w`, senza commenti) per restare sotto 1 MB: i sorgenti commentati sono su GitHub.
+Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnalerà questi file come modificati, è normale). Nell’archivio, il PHP è compattato (`php -w`, senza commenti) e il JavaScript e il CSS del pannello sono alleggeriti per restare sotto 1 MB: i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
 
 ---
 

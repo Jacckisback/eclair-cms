@@ -11,14 +11,15 @@ Tudo o que você precisa saber para instalar, usar, proteger e manter o Éclair.
 1. [Instalação](#instalação)
 2. [Recursos em detalhe](#recursos-em-detalhe)
 3. [Uso no dia a dia](#uso-no-dia-a-dia)
-4. [Temas](#temas)
-5. [Loja](#loja)
-6. [Assistente de IA](#assistente-de-ia)
-7. [Conector MCP (Claude e ChatGPT)](#conector-mcp-claude-e-chatgpt)
-8. [Segurança](#segurança)
-9. [Atualizar, fazer backup, mudar de hospedagem](#atualizar-fazer-backup-mudar-de-hospedagem)
-10. [Solução de problemas](#solução-de-problemas) (incluindo [Nginx](#nginx))
-11. [Para desenvolvedores](#para-desenvolvedores)
+4. [Modo Visual](#modo-visual)
+5. [Temas](#temas)
+6. [Loja](#loja)
+7. [Assistente de IA](#assistente-de-ia) (incluindo [Criar uma página com IA](#criar-uma-página-com-ia))
+8. [Conector MCP (Claude e ChatGPT)](#conector-mcp-claude-e-chatgpt)
+9. [Segurança](#segurança)
+10. [Atualizar, fazer backup, mudar de hospedagem](#atualizar-fazer-backup-mudar-de-hospedagem)
+11. [Solução de problemas](#solução-de-problemas) (incluindo [Nginx](#nginx))
+12. [Para desenvolvedores](#para-desenvolvedores)
 
 ---
 
@@ -35,7 +36,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) (440 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -100,6 +101,7 @@ O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicia
 - **Links internos assistidos**: enquanto você digita um link, o editor sugere suas páginas e artigos (links internos em 2 segundos).
 - **Colagem inteligente** do Word, do Google Docs ou de uma página web: títulos, listas, tabelas e negritos viram blocos limpos.
 - Salvamento com `Ctrl+S`, rascunho local de segurança (nada se perde se a conexão cair), prévia real antes de publicar, **histórico das últimas 20 versões**, publicação agendada.
+- **Modo Visual**: a página do jeito que ela aparece com o seu tema, editável ali mesmo ([detalhes](#modo-visual)).
 
 ### 🧩 Todo o resto
 
@@ -113,6 +115,8 @@ Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das ima
 |---|---|
 | Escrever um artigo | Painel › **Escrever um artigo** |
 | Pedir à IA um artigo, uma página ou uma imagem | Campo **“O que você quer criar hoje?”** do painel ou **✨ Assistente de IA** (`Ctrl+J`) |
+| Fazer a IA montar uma página completa | Nova página › **✨ Criar com IA** |
+| Editar uma página do jeito que ela aparece | Editor › **Visual** |
 | Editar uma página a partir do site | Botão **✏️ Editar** (visível só quando você está logado) |
 | Mudar tema, logo, cor, fontes | Configurações › Aparência |
 | Adicionar meu próprio CSS | Configurações › Aparência › CSS personalizado |
@@ -128,6 +132,29 @@ Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das ima
 | Baixar um backup | Segurança › Backup |
 
 Atalhos do editor: `/` inserir um bloco · `Ctrl+S` salvar · `Ctrl+K` link · `Ctrl+B` negrito · `Ctrl+I` itálico · `Enter` novo parágrafo · `Shift+Enter` quebra de linha · `Ctrl+J` assistente de IA.
+
+---
+
+## Modo Visual
+
+<p align="center">
+  <img src="images/pt-BR/frame-visual.webp" alt="O modo Visual: a página com o tema do site, um bloco selecionado, a sua barra de ferramentas e o seu formulário no painel da direita" width="100%">
+</p>
+
+O modo Visual mostra a sua página com o tema real do site, exatamente como os seus visitantes vão vê-la, e deixa você editá-la ali mesmo. Alterne entre **Blocos** e **Visual** no topo do editor: a sua escolha fica guardada para a próxima vez.
+
+- **Escrever**: clique em um título, um parágrafo, uma pergunta do FAQ, o texto de um botão… e digite. `Ctrl+B` negrito, `Ctrl+I` itálico, `Ctrl+K` link (a busca de páginas do editor se abre). `Enter` confirma um campo de uma linha; em um parágrafo, cria o parágrafo seguinte (`Shift+Enter` para uma simples quebra de linha). O que você cola entra como texto simples.
+- **Organizar**: um clique em um bloco o destaca com um contorno e mostra a sua barra: ↑ ↓ para movê-lo, ⧉ para duplicá-lo, ✕ para excluí-lo, +↑ e +↓ para adicionar um bloco acima ou abaixo. A barra também funciona pelo teclado (`Tab` e depois `Enter`).
+- **Imagens**: clique em uma imagem (bloco de destaque, bloco de imagem, retrato da equipe, imagem destacada de um artigo) para escolher outra na biblioteca de mídia.
+- **Configurações do bloco**: o painel da direita mostra o formulário do bloco escolhido (link de um botão, número de artigos, nova pergunta do FAQ…) e, em seguida, as abas Documento, SEO e Análise.
+- **✨ Retoques com IA** (se o assistente estiver ativado): melhorar, corrigir, encurtar, desenvolver, simplificar, mudar o tom ou traduzir o texto do bloco.
+- **Desfazer**: `Ctrl+Z` (`Cmd+Z` no Mac) desfaz passo a passo (até 50 passos).
+- **Largura**: 📱 390 px, ▭ 768 px ou 🖥 largura total, para conferir o resultado no celular e no tablet.
+
+Tudo passa pelo editor de sempre: salvamento (`Ctrl+S` também funciona dentro da página), rascunho local de segurança, histórico de versões, análise de SEO e GEO em tempo real. Os links, botões e formulários da página não reagem durante a edição. Um bloco invisível no site (imagem ainda não escolhida, loja fechada…) aparece como uma moldura pontilhada, para você preencher pelo painel da direita.
+
+> [!NOTE]
+> O modo Visual só existe na pré-visualização do painel: exige login, token de segurança e permissão de escrita, e a página nunca é armazenada em cache nem indexada. As suas páginas públicas não carregam nenhum vestígio dele: continuam idênticas até o último byte.
 
 ---
 
@@ -256,7 +283,17 @@ Cada ação gera um **card** abaixo da resposta:
 | ✅ No editor | O conteúdo aberto é alterado no editor | Cancelar (depois você salva) |
 | 🖼️ Imagem | Imagem criada, otimizada (WebP) e guardada na biblioteca de mídia | Imagem destacada (no editor) |
 
-“Cancelar” funciona enquanto ninguém tiver mexido no conteúdo desde então; caso contrário, as versões anteriores continuam no **histórico de versões** do editor. O histórico do assistente guarda as suas 30 últimas conversas. O assistente nunca inventa fatos sobre o seu negócio (preços, horários, números, depoimentos): quando falta uma informação, ele deixa uma marcação visível, como **[preço a confirmar]**, e avisa você.
+“Cancelar” funciona enquanto ninguém tiver mexido no conteúdo desde então; caso contrário, as versões anteriores continuam no **histórico de versões** do editor. O histórico do assistente guarda as suas 30 últimas conversas. O assistente nunca inventa fatos sobre o seu negócio (preços, horários, números, depoimentos): quando falta uma informação, ele deixa uma marcação visível, como **[A completar: preço]**, e avisa você; a aba Análise conta essas marcações enquanto elas existirem.
+
+### Criar uma página com IA
+
+Em um conteúdo novo (página, artigo ou produto), a caixa **✨ Criar com IA** monta um rascunho completo em uma única chamada:
+
+1. Escolha o tipo e o idioma e descreva o que você quer em uma ou duas frases. Opcionalmente, acrescente o **objetivo** (“conseguir pedidos de orçamento”), o **público**, o **tom** e as **seções** desejadas (“banner, vantagens, preços, FAQ, contato”).
+2. O **custo estimado** aparece antes de começar (≈ US$ 0,08 com o Claude Sonnet 5.5, ≈ US$ 0,16 com o Claude Opus 5.5) e é descontado do orçamento do assistente. Com as duas chaves salvas, você escolhe entre o Claude e o ChatGPT.
+3. Depois de 20 a 60 segundos, o rascunho abre no **modo Visual**: título, endereço, título SEO e meta descrição, “O essencial”, frase-chave e um layout em seções (destaque, diferenciais, subtítulos, listas, quadros de destaque, FAQ, botões, equipe, formulário de contato, últimos artigos ou produtos), com um único H1: o título do bloco de destaque.
+
+A IA se baseia no seu perfil editorial, na lista das suas páginas e artigos publicados (para que os links levem a páginas que existem) e nas suas 30 imagens mais recentes. Ela não inventa nenhum fato: preços, números, nomes ou horários que faltam ficam no formato **“[A completar: …]”**, contados pela aba Análise até você preenchê-los. O rascunho nunca é publicado: revise, complete e depois publique.
 
 ### Retoques no editor
 
@@ -339,7 +376,7 @@ Ela começa por `get_site` e depois usa as ferramentas do assistente integrado, 
 | `get_site` | inventário do site (páginas, artigos, produtos, categorias e seus identificadores), perfil editorial, regras de SEO e GEO |
 | `search_content` · `get_content` | buscar um conteúdo e lê-lo em Markdown |
 | `find_media` | buscar uma imagem na biblioteca de mídia |
-| `create_draft` | criar um artigo, uma página ou uma página de produto **como rascunho** |
+| `create_draft` | criar um artigo, uma página ou uma página de produto **como rascunho**, em Markdown ou em seções de layout (destaque, diferenciais, FAQ…) |
 | `update_content` | alterar um rascunho; para um conteúdo publicado, preparar uma **proposta** |
 
 Cada rascunho volta com um link para **abri-lo no Éclair**; cada proposta, com um link que a **aplica no editor** sem salvá-la: você revisa e depois salva (ou fecha, e nada muda). Além disso, o Claude e o ChatGPT pedem a sua autorização antes de cada ação de escrita, conforme as configurações deles.
@@ -483,19 +520,21 @@ tests/run.php            testes unitários + integração HTTP (incluindo os ata
 tests/fake-ai.php        provedores de IA falsos (Claude, ChatGPT, imagens): o assistente é testado sem chave nem custo
 tests/shop.php           temas e loja (páginas de produto, Stripe, PayPal, Revolut, JSON-LD, feed do Merchant Center)
 tests/mcp.php            conector MCP (OAuth, PKCE, protocolo, revogação) e escolha da IA
+tests/fixtures/          sites de referência e a impressão digital da renderização pública deles (uma nova versão não muda nem um byte do site)
 tools/router.php         roteador para o servidor embutido do PHP (desenvolvimento)
-tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<versão>.zip (PHP compactado)
+tools/capture.php        captura de referência da renderização pública e medições do Lighthouse (--lighthouse)
+tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<versão>.zip (PHP compactado, JS e CSS do painel enxugados)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 460 verificações unitárias e HTTP
+php tests/run.php                                  # 502 verificações unitárias e HTTP
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 
 `PHP_CLI_SERVER_WORKERS` permite que o site chame a si mesmo (verificação do endereço): com um único processo, a verificação simplesmente falha e os redirecionamentos para o endereço oficial continuam desativados.
 
-Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade vai apontar esses arquivos como modificados, é normal). No arquivo zip, o PHP é compactado (`php -w`, sem comentários) para ficar abaixo de 1 MB: o código-fonte comentado está no GitHub.
+Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade vai apontar esses arquivos como modificados, é normal). No arquivo zip, o PHP é compactado (`php -w`, sem comentários) e o JavaScript e o CSS do painel são enxugados para ficar abaixo de 1 MB: o código-fonte comentado está no GitHub. Os arquivos do site público (temas, `site.js`) são entregues como estão.
 
 ---
 

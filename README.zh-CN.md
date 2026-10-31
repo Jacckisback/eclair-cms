@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip"><img src="https://img.shields.io/badge/download-v1.6.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.6.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip"><img src="https://img.shields.io/badge/download-v1.7.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.7.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -62,11 +62,11 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>434 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>440 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
-      4 个问题完成引导式安装，输入 <code>/</code> 即可插入区块，附带入门清单。后台支持<b>7 种语言</b>（含简体中文），网站前台支持 6 种语言（暂不支持中文）。
+      4 个问题完成引导式安装，输入 <code>/</code> 即可插入区块，也可切换到<b>可视化模式</b>（页面所见即所得），附带入门清单。后台支持<b>7 种语言</b>（含简体中文），网站前台支持 6 种语言（暂不支持中文）。
     </td>
   </tr>
 </table>
@@ -132,6 +132,22 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 
 3 分钟即可完成设置，支持的订阅方案请见[指南中的 MCP 连接器章节](docs/GUIDE.zh-CN.md#mcp-连接器claude-与-chatgpt)。
 
+## 可视化模式：所见即所得地编辑页面
+
+<p align="center">
+  <img src="docs/images/zh-CN/frame-visual.webp" alt="编辑器的可视化模式：页面以网站主题显示，“优势”区块处于选中状态，带有工具栏（上移、下移、创建副本、删除、添加、用 AI 修改），右侧面板中显示它的表单" width="100%">
+</p>
+
+在编辑器中，从**区块**切换到**可视化**：页面会以你的主题显示，和访客看到的完全一样，你可以直接在页面上修改。点击标题或段落即可输入文字，点击图片即可更换。一个小工具栏可以移动、复制、删除或添加区块；✨ 则用 AI 修改这段内容。你还可以按手机、平板或电脑的宽度检查显示效果，并用 Ctrl+Z 撤销。
+
+**不知从何下手？** 在新内容中打开**用 AI 生成**，描述你的页面：目标、受众、语气、想要的版块。AI 会按照你网站的语气编排一份完整的草稿（横幅、优势、FAQ、行动号召、用于 Google 的标题和描述），链接指向你真实存在的页面，并使用你自己的图片。它不会编造任何内容：缺失的信息会标记为“[To complete: …]”，在补全之前，分析会一直提醒你。草稿会直接在可视化模式中打开。
+
+- **对网站零影响**：可视化模式只存在于后台的预览中。你的公开页面逐字节保持不变，Lighthouse 依然是 100/100。
+- **轻量**：可视化模式压缩后仅 3.3 KB，不依赖任何库。
+- **支持 Claude 或 ChatGPT**：每次请求前都会显示费用（使用 Claude Sonnet 5.5 时每个页面约 $0.08），并从助手预算中扣除。MCP 连接器也能按版块编排页面。
+
+使用说明请见[指南中的可视化模式章节](docs/GUIDE.zh-CN.md#可视化模式)和[用 AI 生成页面](docs/GUIDE.zh-CN.md#用-ai-生成页面)一节。
+
 ## 主题与商店
 
 <p align="center">
@@ -190,7 +206,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 434 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 440 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -299,7 +315,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip)（434 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip)（440 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
@@ -314,9 +330,9 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 
 - [安装](docs/GUIDE.zh-CN.md#安装)：环境要求、网站类型、入门步骤
 - [功能详解](docs/GUIDE.zh-CN.md#功能详解)：速度、SEO、GEO、区块编辑器
-- [日常使用](docs/GUIDE.zh-CN.md#日常使用)
+- [日常使用](docs/GUIDE.zh-CN.md#日常使用)和[可视化模式](docs/GUIDE.zh-CN.md#可视化模式)
 - [主题](docs/GUIDE.zh-CN.md#主题)和[商店](docs/GUIDE.zh-CN.md#商店)：实时预览、商品详情页、Stripe、PayPal、Revolut、Google Shopping
-- [AI 助手](docs/GUIDE.zh-CN.md#ai-助手)：启用、编辑风格档案、费用、安全
+- [AI 助手](docs/GUIDE.zh-CN.md#ai-助手)：启用、编辑风格档案、用 AI 生成页面、费用、安全
 - [MCP 连接器](docs/GUIDE.zh-CN.md#mcp-连接器claude-与-chatgpt)：用你的订阅使用 Claude 和 ChatGPT
 - [更新、备份、迁移](docs/GUIDE.zh-CN.md#更新备份迁移)
 - [故障排除](docs/GUIDE.zh-CN.md#故障排除)：忘记密码、404 或 500 错误、Nginx……
@@ -327,7 +343,7 @@ PHP 8.1+，不依赖框架，也不需要 Composer：`eclair/app/lib/` 中是简
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                                           # 460 项单元与 HTTP 检查
+php tests/run.php                                                           # 502 项单元与 HTTP 检查
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 

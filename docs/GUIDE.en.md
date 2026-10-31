@@ -11,14 +11,15 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 1. [Installation](#installation)
 2. [Features in detail](#features-in-detail)
 3. [Everyday use](#everyday-use)
-4. [Themes](#themes)
-5. [Shop](#shop)
-6. [AI assistant](#ai-assistant)
-7. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
-8. [Security](#security)
-9. [Updating, backing up, moving](#updating-backing-up-moving)
-10. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
-11. [For developers](#for-developers)
+4. [Visual mode](#visual-mode)
+5. [Themes](#themes)
+6. [Shop](#shop)
+7. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai))
+8. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
+9. [Security](#security)
+10. [Updating, backing up, moving](#updating-backing-up-moving)
+11. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
+12. [For developers](#for-developers)
 
 ---
 
@@ -35,7 +36,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) archive (434 KB) and unzip it.
+1. Download the [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) archive (440 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -100,6 +101,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 - **Assisted internal links**: as you type a link, the editor suggests your pages and posts (internal linking in 2 seconds).
 - **Smart paste** from Word, Google Docs or a web page: headings, lists, tables and bold text become clean blocks.
 - `Ctrl+S` to save, local backup draft (nothing is lost if the connection drops), real preview before publishing, **history of the last 20 versions**, scheduled publishing.
+- **Visual mode**: the page as it actually looks with your theme, editable right there ([details](#visual-mode)).
 
 ### 🧩 Everything else
 
@@ -113,6 +115,8 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 |---|---|
 | Write a post | Dashboard › **Write a post** |
 | Ask the AI for a post, a page, an image | **“What do you want to create today?”** field on the dashboard, or **✨ AI assistant** (`Ctrl+J`) |
+| Have the AI compose a complete page | New page › **✨ Create with AI** |
+| Edit a page as it actually looks | Editor › **Visual** |
 | Edit a page from the site | **✏️ Edit** button (visible only when you're logged in) |
 | Change the theme, logo, color, fonts | Settings › Appearance |
 | Add my own CSS | Settings › Appearance › Custom CSS |
@@ -128,6 +132,29 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Download a backup | Security › Backup |
 
 Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+B` bold · `Ctrl+I` italic · `Enter` new paragraph · `Shift+Enter` line break · `Ctrl+J` AI assistant.
+
+---
+
+## Visual mode
+
+<p align="center">
+  <img src="images/en/frame-visual.webp" alt="Visual mode: the page with the site's theme, a selected block, its toolbar and its form in the right-hand panel" width="100%">
+</p>
+
+Visual mode displays your page with the site's real theme, exactly as your visitors will see it, and lets you edit it right there. Switch between **Blocks** and **Visual** at the top of the editor: your choice is remembered for next time.
+
+- **Write**: click a heading, a paragraph, a FAQ question, a button's text… and type. `Ctrl+B` bold, `Ctrl+I` italic, `Ctrl+K` link (the editor's page search opens). `Enter` confirms a single-line field; in a paragraph, it creates the next paragraph (`Shift+Enter` for a simple line break). Pasted content comes in as plain text.
+- **Arrange**: clicking a block outlines it and shows its toolbar: ↑ ↓ to move it, ⧉ to duplicate it, ✕ to delete it, +↑ and +↓ to add a block above or below. The toolbar also works with the keyboard (`Tab`, then `Enter`).
+- **Images**: click an image (hero, image block, team portrait, a post's featured image) to choose another one from the media library.
+- **Block settings**: the right-hand panel shows the selected block's form (a button's link, number of posts, new FAQ question…), followed by the Document, SEO and Analysis tabs.
+- **✨ AI touch-ups** (if the assistant is turned on): improve, fix, shorten, expand, simplify, change the tone or translate the block's text.
+- **Undo**: `Ctrl+Z` (`Cmd+Z` on a Mac) goes back one step at a time (up to 50 steps).
+- **Width**: 📱 390 px, ▭ 768 px or 🖥 full width, to check how it looks on mobile and tablet.
+
+Everything goes through the usual editor: saving (`Ctrl+S` also works inside the page), local backup draft, version history, live SEO and GEO analysis. The page's links, buttons and forms don't respond while you're editing. A block that's invisible on the site (image not chosen yet, shop closed…) appears as a dotted frame, which you fill in from the panel.
+
+> [!NOTE]
+> Visual mode only exists in the admin preview: login, security token and write permission required, and the page is never cached or indexed. Your public pages bear no trace of it: they stay identical down to the byte.
 
 ---
 
@@ -256,7 +283,17 @@ Each action produces a **card** below the reply:
 | ✅ Changed in the editor | The content you have open is changed in the editor | Cancel (then you save) |
 | 🖼️ Image | Image created, optimized (WebP) and added to the media library | Featured image (in the editor) |
 
-“Cancel” works as long as nobody has edited the content since; otherwise, its earlier versions are still in the editor's **Version history**. The assistant's history keeps your last 30 conversations. The assistant never makes up facts about your business (prices, opening hours, figures, testimonials): when information is missing, it leaves a visible placeholder such as **[price to confirm]** and points it out to you.
+“Cancel” works as long as nobody has edited the content since; otherwise, its earlier versions are still in the editor's **Version history**. The assistant's history keeps your last 30 conversations. The assistant never makes up facts about your business (prices, opening hours, figures, testimonials): when information is missing, it leaves a visible placeholder such as **[To complete: price]** and points it out to you; the Analysis tab counts them as long as any remain.
+
+### Create a page with AI
+
+In a new piece of content (page, post or product), the **✨ Create with AI** box composes a complete draft in a single call:
+
+1. Choose the type and the language, then describe what you want in one or two sentences. If you like, add the **goal** (“get quote requests”), the **audience**, the **tone** and the **sections** you want (“banner, benefits, pricing, FAQ, contact”).
+2. The **estimated cost** is shown before you start (≈ $0.08 with Claude Sonnet 5.5, ≈ $0.16 with Claude Opus 5.5); it's taken from the assistant's budget. If you've saved both keys, you choose Claude or ChatGPT.
+3. After 20 to 60 seconds, the draft opens in **Visual mode**: title, URL, SEO title and meta description, “Key takeaways”, focus keyphrase and a layout in sections (hero, features, subheadings, lists, callouts, FAQ, buttons, team, contact form, latest posts or products), with a single H1: the hero's title.
+
+The AI relies on your editorial profile, the list of your published pages and posts (so that links point to pages that exist) and your 30 latest images. It makes up no facts: missing prices, figures, names or opening hours stay in the form **“[To complete: …]”**, counted by the Analysis tab until you fill them in. The draft is never published: review it, complete it, then publish it.
 
 ### Touch-ups in the editor
 
@@ -339,7 +376,7 @@ It starts with `get_site`, then uses the built-in assistant's tools, except imag
 | `get_site` | site inventory (pages, posts, products, categories and their IDs), editorial profile, SEO and GEO rules |
 | `search_content` · `get_content` | search for content, read it in Markdown |
 | `find_media` | search for an image in the media library |
-| `create_draft` | create a post, a page or a product page **as a draft** |
+| `create_draft` | create a post, a page or a product page **as a draft**, in Markdown or in layout sections (hero, features, FAQ…) |
 | `update_content` | edit a draft; for published content, prepare a **suggestion** |
 
 Each draft comes back with a link to **open it in Éclair**; each suggestion, with a link that **applies it in the editor** without saving it: you review it, then you save (or you close it, and nothing changes). Claude and ChatGPT also ask for your approval before each write action, depending on their own settings.
@@ -483,19 +520,21 @@ tests/run.php            unit tests + HTTP integration (including the attacks fr
 tests/fake-ai.php        fake AI providers (Claude, ChatGPT, images): the assistant is tested with no key and no spending
 tests/shop.php           themes and shop (product pages, Stripe, PayPal, Revolut, JSON-LD, Merchant Center feed)
 tests/mcp.php            MCP connector (OAuth, PKCE, protocol, revocation) and choosing the AI
+tests/fixtures/          reference sites and a fingerprint of their public rendering (a new version doesn't change a single byte of the site)
 tools/router.php         router for PHP's built-in server (development)
-tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP)
+tools/capture.php        reference capture of the public rendering, and Lighthouse measurements (--lighthouse)
+tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP, minified admin JS and CSS)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 460 unit and HTTP checks
+php tests/run.php                                  # 502 unit and HTTP checks
 php tools/build.php                                # ready-to-ship archive
 ```
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a backup: the integrity check will flag these files as modified, which is expected). In the archive, the PHP is compacted (`php -w`, comments removed) to stay under 1 MB: the commented sources are on GitHub.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a backup: the integrity check will flag these files as modified, which is expected). In the archive, the PHP is compacted (`php -w`, comments removed) and the admin JavaScript and CSS are minified to stay under 1 MB: the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

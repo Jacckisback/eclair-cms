@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip"><img src="https://img.shields.io/badge/download-v1.6.0-5b4cf0?style=for-the-badge" alt="Éclair 1.6.0 herunterladen"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip"><img src="https://img.shields.io/badge/download-v1.7.0-5b4cf0?style=for-the-badge" alt="Éclair 1.7.0 herunterladen"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 oder neuer">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/Datenbank-keine-14122b?style=for-the-badge" alt="Keine Datenbank">
@@ -62,11 +62,11 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleicht</h3>
-      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>434 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
+      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>440 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
-      Geführte Installation mit 4 Fragen, Block-Editor mit <code>/</code>, Checkliste für den Start. Verwaltung in <b>7 Sprachen</b>, Website in 6 Sprachen (jeweils auch auf Deutsch).
+      Geführte Installation mit 4 Fragen, Block-Editor mit <code>/</code> oder <b>visueller Modus</b> (die Seite so, wie sie wirklich aussieht), Checkliste für den Start. Verwaltung in <b>7 Sprachen</b>, Website in 6 Sprachen (jeweils auch auf Deutsch).
     </td>
   </tr>
 </table>
@@ -132,6 +132,22 @@ Du arbeitest schon mit Claude oder ChatGPT? Verbinde sie über den integrierten 
 
 Einrichtung in 3 Minuten und kompatible Tarife: siehe [Handbuch, Abschnitt MCP-Connector](docs/GUIDE.de.md#mcp-connector-claude-und-chatgpt).
 
+## Visueller Modus: Bearbeite deine Seite so, wie sie aussieht
+
+<p align="center">
+  <img src="docs/images/de/frame-visual.webp" alt="Der visuelle Modus des Editors: Die Seite wird im Theme der Website angezeigt, der Block „Vorteile“ ist ausgewählt, mit seiner Werkzeugleiste (nach oben, nach unten, duplizieren, löschen, hinzufügen, mit KI überarbeiten) und seinem Formular im rechten Bereich" width="100%">
+</p>
+
+Wechsle im Editor von **Blöcke** zu **Visuell**: Deine Seite erscheint in deinem Theme, genau so, wie deine Besucher sie sehen werden, und du bearbeitest sie direkt dort. Klicke auf eine Überschrift oder einen Absatz, um darin zu schreiben, oder auf ein Bild, um es auszutauschen. Eine kleine Leiste verschiebt, dupliziert, löscht oder ergänzt Blöcke; ✨ überarbeitet die Textstelle mit KI. Prüfe die Darstellung in Mobil-, Tablet- oder Desktop-Breite und mach Änderungen mit Strg+Z rückgängig.
+
+**Keine Idee für den Anfang?** Öffne in einem neuen Inhalt **Mit KI erstellen** und beschreibe deine Seite: ihr Ziel, ihre Zielgruppe, ihren Tonfall, die gewünschten Abschnitte. Die KI stellt im Ton deiner Website einen vollständigen Entwurf zusammen (Hero, Vorteile, FAQ, Call-to-Action, Titel und Beschreibung für Google), verlinkt dabei deine echten Seiten und nutzt deine Bilder. Sie erfindet nichts: Was fehlt, wird mit „[Zu ergänzen: …]“ markiert, und die Analyse erinnert dich daran, solange es nicht ausgefüllt ist. Der Entwurf öffnet sich direkt im visuellen Modus.
+
+- **Keinerlei Auswirkung auf deine Website**: Den visuellen Modus gibt es nur in der Vorschau der Verwaltung. Deine öffentlichen Seiten bleiben bis aufs Byte identisch, weiterhin mit 100/100 bei Lighthouse.
+- **Leichtgewichtig**: 3,3 KB komprimiert für den visuellen Modus, ganz ohne Bibliotheken.
+- **Mit Claude oder ChatGPT**: Die Kosten werden vor jeder Anfrage angezeigt (≈ 0,08 $ pro Seite mit Claude Sonnet 5.5) und vom Budget des Assistenten abgezogen. Auch der MCP-Connector kann eine Seite in Abschnitten aufbauen.
+
+Anleitung: siehe [Handbuch, Abschnitt Visueller Modus](docs/GUIDE.de.md#visueller-modus) und [Eine Seite mit KI erstellen](docs/GUIDE.de.md#eine-seite-mit-ki-erstellen).
+
 ## Themes und Shop
 
 <p align="center">
@@ -190,7 +206,7 @@ Der Shop lässt sich erst öffnen, wenn Impressum und Allgemeine Geschäftsbedin
 |---|---|---|
 | **Installation** | MySQL-Datenbank anlegen, dann den Assistenten starten | ✅ Ordner hochladen, 4 Fragen beantworten |
 | **Datenbank** | MySQL erforderlich | ✅ Keine (geschützte Dateien) |
-| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 434 KB |
+| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 440 KB |
 | **SEO, Sitemap, strukturierte Daten** | Ein Plugin, das installiert und gepflegt werden muss | ✅ Integriert |
 | **GEO: llms.txt, Markdown, KI-Bots** | Plugins, selten vollständig | ✅ Integriert |
 | **Öffentliche Seiten** | Bei jedem Aufruf neu erzeugt, außer mit Cache-Plugin | ✅ Aus einem statischen Cache ausgeliefert |
@@ -299,7 +315,7 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
   <img src="docs/images/de/install.webp" alt="Installation in drei Schritten: Ordner hochladen, vier Fragen beantworten, die Website ist online" width="100%">
 </p>
 
-1. **Lade** das Archiv [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 KB) **herunter** und entpacke es.
+1. **Lade** das Archiv [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) (440 KB) **herunter** und entpacke es.
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 
@@ -314,9 +330,9 @@ Das [vollständige Handbuch](docs/GUIDE.de.md) erklärt alles Weitere:
 
 - [Installation](docs/GUIDE.de.md#installation): Voraussetzungen, Website-Typen, erste Schritte
 - [Funktionen im Detail](docs/GUIDE.de.md#funktionen-im-detail): Geschwindigkeit, SEO, GEO, Block-Editor
-- [Éclair im Alltag](docs/GUIDE.de.md#éclair-im-alltag)
+- [Éclair im Alltag](docs/GUIDE.de.md#éclair-im-alltag) und der [visuelle Modus](docs/GUIDE.de.md#visueller-modus)
 - [Themes](docs/GUIDE.de.md#themes) und [Shop](docs/GUIDE.de.md#shop): Live-Vorschau, Produktseiten, Stripe, PayPal, Revolut, Google Shopping
-- [KI-Assistent](docs/GUIDE.de.md#ki-assistent): Aktivierung, Redaktionsprofil, Kosten, Sicherheit
+- [KI-Assistent](docs/GUIDE.de.md#ki-assistent): Aktivierung, Redaktionsprofil, eine Seite mit KI erstellen, Kosten, Sicherheit
 - [MCP-Connector](docs/GUIDE.de.md#mcp-connector-claude-und-chatgpt): Claude und ChatGPT mit deinem Abo
 - [Aktualisieren, sichern, umziehen](docs/GUIDE.de.md#aktualisieren-sichern-umziehen)
 - [Fehlerbehebung](docs/GUIDE.de.md#fehlerbehebung): Passwort vergessen, Fehler 404 oder 500, Nginx …
@@ -327,7 +343,7 @@ PHP 8.1+ ohne Framework und ohne Composer: einfache Klassen in `eclair/app/lib/`
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                                           # 460 Unit- und HTTP-Prüfungen
+php tests/run.php                                                           # 502 Unit- und HTTP-Prüfungen
 php tools/build.php                                                         # Archiv zum Verteilen
 ```
 

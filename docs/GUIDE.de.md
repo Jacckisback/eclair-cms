@@ -11,14 +11,15 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 1. [Installation](#installation)
 2. [Funktionen im Detail](#funktionen-im-detail)
 3. [Éclair im Alltag](#éclair-im-alltag)
-4. [Themes](#themes)
-5. [Shop](#shop)
-6. [KI-Assistent](#ki-assistent)
-7. [MCP-Connector (Claude und ChatGPT)](#mcp-connector-claude-und-chatgpt)
-8. [Sicherheit](#sicherheit)
-9. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
-10. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
-11. [Für Entwickler](#für-entwickler)
+4. [Visueller Modus](#visueller-modus)
+5. [Themes](#themes)
+6. [Shop](#shop)
+7. [KI-Assistent](#ki-assistent) (inklusive [Eine Seite mit KI erstellen](#eine-seite-mit-ki-erstellen))
+8. [MCP-Connector (Claude und ChatGPT)](#mcp-connector-claude-und-chatgpt)
+9. [Sicherheit](#sicherheit)
+10. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
+11. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
+12. [Für Entwickler](#für-entwickler)
 
 ---
 
@@ -35,7 +36,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.6.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.6.0.zip) (434 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) (440 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -100,6 +101,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 - **Unterstützte interne Links**: Während du einen Link eingibst, schlägt der Editor deine Seiten und Artikel vor (interne Verlinkung in 2 Sekunden).
 - **Intelligentes Einfügen** aus Word, Google Docs oder einer Webseite: Überschriften, Listen, Tabellen und Fettdruck werden zu sauberen Blöcken.
 - Speichern mit `Strg+S`, lokaler Sicherungsentwurf (nichts geht verloren, wenn die Verbindung abbricht), echte Vorschau vor dem Veröffentlichen, **Verlauf der letzten 20 Versionen**, geplante Veröffentlichung.
+- **Visueller Modus**: die Seite so, wie sie in deinem Theme aussieht, direkt dort bearbeitbar ([Details](#visueller-modus)).
 
 ### 🧩 Alles Weitere
 
@@ -113,6 +115,8 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 |---|---|
 | Einen Beitrag schreiben | Dashboard › **Beitrag schreiben** |
 | Die KI um einen Beitrag, eine Seite oder ein Bild bitten | Feld **„Was möchtest du heute erstellen?“** im Dashboard oder **✨ KI-Assistent** (`Strg+J`) |
+| Die KI eine komplette Seite gestalten lassen | Neue Seite › **✨ Mit KI erstellen** |
+| Eine Seite so bearbeiten, wie sie aussieht | Editor › **Visuell** |
 | Eine Seite direkt auf der Website bearbeiten | Schaltfläche **✏️ Bearbeiten** (nur sichtbar, wenn du angemeldet bist) |
 | Theme, Logo, Farbe, Schriften ändern | Einstellungen › Design |
 | Eigenes CSS hinzufügen | Einstellungen › Design › Eigenes CSS |
@@ -128,6 +132,29 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Ein Backup herunterladen | Sicherheit › Backup |
 
 Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` Link · `Strg+B` fett · `Strg+I` kursiv · `Enter` neuer Absatz · `Umschalt+Enter` Zeilenumbruch · `Strg+J` KI-Assistent.
+
+---
+
+## Visueller Modus
+
+<p align="center">
+  <img src="images/de/frame-visual.webp" alt="Der visuelle Modus: die Seite im Theme der Website, ein ausgewählter Block, seine Werkzeugleiste und sein Formular im rechten Bereich" width="100%">
+</p>
+
+Der visuelle Modus zeigt deine Seite im echten Theme der Website, genau so, wie deine Besucher sie sehen werden, und du bearbeitest sie direkt dort. Wechsle oben im Editor zwischen **Blöcke** und **Visuell**: Deine Wahl wird für das nächste Mal gespeichert.
+
+- **Schreiben**: Klicke auf eine Überschrift, einen Absatz, eine FAQ-Frage, den Text eines Buttons … und tippe los. `Strg+B` fett, `Strg+I` kursiv, `Strg+K` Link (die Seitensuche des Editors öffnet sich). `Enter` bestätigt ein einzeiliges Feld; in einem Absatz legt es den nächsten Absatz an (`Umschalt+Enter` für einen einfachen Zeilenumbruch). Eingefügt wird immer als reiner Text.
+- **Anordnen**: Ein Klick auf einen Block umrahmt ihn und zeigt seine Leiste: ↑ ↓ zum Verschieben, ⧉ zum Duplizieren, ✕ zum Löschen, +↑ und +↓, um einen Block darüber oder darunter hinzuzufügen. Die Leiste lässt sich auch per Tastatur bedienen (`Tab`, dann `Enter`).
+- **Bilder**: Klicke auf ein Bild (Hero, Bildblock, Teamporträt, Beitragsbild), um in der Mediathek ein anderes auszuwählen.
+- **Block-Einstellungen**: Der rechte Bereich zeigt das Formular des ausgewählten Blocks (Link eines Buttons, Anzahl der Beiträge, neue FAQ-Frage …), darunter die Tabs „Dokument“, „SEO“ und „Analyse“.
+- **✨ Feinschliff mit KI** (wenn der Assistent aktiviert ist): den Text des Blocks verbessern, korrigieren, kürzen, ausbauen, vereinfachen, im Tonfall anpassen oder übersetzen.
+- **Rückgängig**: `Strg+Z` (`Cmd+Z` auf dem Mac) geht Schritt für Schritt zurück (bis zu 50 Schritte).
+- **Breite**: 📱 390 px, ▭ 768 px oder 🖥 volle Breite, um die Darstellung auf Smartphone und Tablet zu prüfen.
+
+Alles läuft über den gewohnten Editor: Speichern (`Strg+S` funktioniert auch in der Seite), lokaler Sicherungsentwurf, Versionsverlauf, SEO- und GEO-Analyse in Echtzeit. Links, Buttons und Formulare der Seite reagieren während der Bearbeitung nicht. Ein Block, der auf der Website unsichtbar ist (Bild noch nicht ausgewählt, Shop geschlossen …), erscheint als gestrichelter Rahmen, den du im rechten Bereich ausfüllst.
+
+> [!NOTE]
+> Den visuellen Modus gibt es nur in der Vorschau der Verwaltung: Anmeldung, Sicherheitstoken und Schreibrecht sind erforderlich, und die Seite wird nie gecacht oder indexiert. Deine öffentlichen Seiten tragen keine Spur davon: Sie bleiben bis aufs Byte identisch.
 
 ---
 
@@ -256,7 +283,17 @@ Jede Aktion erzeugt unter der Antwort eine **Karte**:
 | ✅ Im Editor geändert | Der geöffnete Inhalt wurde im Editor geändert | Abbrechen (danach speicherst du) |
 | 🖼️ Bild | Bild erstellt, optimiert (WebP) und in der Mediathek abgelegt | Beitragsbild (im Editor) |
 
-„Abbrechen“ macht eine Änderung rückgängig, solange niemand den Inhalt seitdem bearbeitet hat; andernfalls findest du frühere Versionen im **Versionsverlauf** des Editors. Der Assistent bewahrt deine letzten 30 Unterhaltungen auf. Er erfindet nie Fakten über dein Unternehmen (Preise, Öffnungszeiten, Zahlen, Kundenstimmen): Fehlt eine Information, setzt er einen sichtbaren Platzhalter wie **[Preis zu bestätigen]** und weist dich darauf hin.
+„Abbrechen“ macht eine Änderung rückgängig, solange niemand den Inhalt seitdem bearbeitet hat; andernfalls findest du frühere Versionen im **Versionsverlauf** des Editors. Der Assistent bewahrt deine letzten 30 Unterhaltungen auf. Er erfindet nie Fakten über dein Unternehmen (Preise, Öffnungszeiten, Zahlen, Kundenstimmen): Fehlt eine Information, setzt er einen sichtbaren Platzhalter wie **[Zu ergänzen: Preis]** und weist dich darauf hin; der Tab „Analyse“ zählt diese Platzhalter, solange noch welche übrig sind.
+
+### Eine Seite mit KI erstellen
+
+In einem neuen Inhalt (Seite, Beitrag oder Produkt) stellt der Bereich **✨ Mit KI erstellen** mit einem einzigen Aufruf einen vollständigen Entwurf zusammen:
+
+1. Wähle Typ und Sprache und beschreibe dann in ein oder zwei Sätzen, was du möchtest. Wenn du willst, ergänze das **Ziel** („Angebotsanfragen gewinnen“), die **Zielgruppe**, den **Tonfall** und die gewünschten **Abschnitte** („Banner, Vorteile, Preise, FAQ, Kontakt“).
+2. Die **geschätzten Kosten** werden vor dem Start angezeigt (≈ 0,08 $ mit Claude Sonnet 5.5, ≈ 0,16 $ mit Claude Opus 5.5); sie werden vom Budget des Assistenten abgezogen. Wenn du beide Schlüssel gespeichert hast, wählst du Claude oder ChatGPT.
+3. Nach 20 bis 60 Sekunden öffnet sich der Entwurf im **visuellen Modus**: Titel, Adresse, SEO-Titel und Meta-Beschreibung, „Das Wichtigste“, Fokus-Keyphrase und ein Layout aus Abschnitten (Hero, Vorteile, Zwischenüberschriften, Listen, Hinweisboxen, FAQ, Buttons, Team, Kontaktformular, neueste Beiträge oder Produkte), mit einer einzigen H1: dem Titel des Hero-Blocks.
+
+Die KI stützt sich auf dein Redaktionsprofil, die Liste deiner veröffentlichten Seiten und Beiträge (damit die Links auf Seiten zeigen, die es wirklich gibt) und deine 30 neuesten Bilder. Sie erfindet keine Fakten: Fehlende Preise, Zahlen, Namen oder Öffnungszeiten bleiben als **„[Zu ergänzen: …]“** stehen und werden vom Tab „Analyse“ gezählt, bis du sie ausfüllst. Der Entwurf wird nie veröffentlicht: Lies ihn durch, ergänze ihn und veröffentliche ihn dann.
 
 ### Feinschliff im Editor
 
@@ -339,7 +376,7 @@ Sie beginnt mit `get_site` und nutzt dann die Werkzeuge des integrierten Assiste
 | `get_site` | Inventar der Website (Seiten, Beiträge, Produkte, Kategorien und ihre IDs), Redaktionsprofil, SEO- und GEO-Regeln |
 | `search_content` · `get_content` | einen Inhalt suchen und als Markdown lesen |
 | `find_media` | ein Bild in der Mediathek suchen |
-| `create_draft` | einen Beitrag, eine Seite oder eine Produktseite **als Entwurf** erstellen |
+| `create_draft` | einen Beitrag, eine Seite oder eine Produktseite **als Entwurf** erstellen, in Markdown oder in Layout-Abschnitten (Hero, Vorteile, FAQ …) |
 | `update_content` | einen Entwurf ändern; bei einem veröffentlichten Inhalt einen **Vorschlag** vorbereiten |
 
 Jeder Entwurf kommt mit einem Link zurück, um ihn **in Éclair zu öffnen**; jeder Vorschlag mit einem Link, der ihn **im Editor übernimmt**, ohne ihn zu speichern: Du prüfst und speicherst dann (oder du schließt den Editor, und nichts ändert sich). Claude und ChatGPT fragen außerdem vor jeder Schreibaktion nach deiner Zustimmung, je nach ihren eigenen Einstellungen.
@@ -483,19 +520,21 @@ tests/run.php            Unit-Tests + HTTP-Integration (einschließlich der Angr
 tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der Assistent wird ohne Schlüssel und ohne Kosten getestet
 tests/shop.php           Themes und Shop (Produktseiten, Stripe, PayPal, Revolut, JSON-LD, Merchant-Center-Feed)
 tests/mcp.php            MCP-Connector (OAuth, PKCE, Protokoll, Widerruf) und Wahl der KI
+tests/fixtures/          Referenz-Websites und Fingerabdruck ihrer öffentlichen Ausgabe (eine neue Version ändert kein einziges Byte der Website)
 tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
-tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert)
+tools/capture.php        Referenzaufnahme der öffentlichen Ausgabe und Lighthouse-Messungen (--lighthouse)
+tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert, JS und CSS der Verwaltung verschlankt)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 460 Unit- und HTTP-Prüfungen
+php tests/run.php                                  # 502 Unit- und HTTP-Prüfungen
 php tools/build.php                                # Archiv zum Verteilen
 ```
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (mach vorher eine Sicherung: Die Integritätsprüfung meldet diese Dateien als geändert, das ist normal). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), damit es unter 1 MB bleibt: Die kommentierten Quellen liegen auf GitHub.
+Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (mach vorher eine Sicherung: Die Integritätsprüfung meldet diese Dateien als geändert, das ist normal). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), und JavaScript und CSS der Verwaltung sind verschlankt, damit es unter 1 MB bleibt: Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
 
 ---
 
