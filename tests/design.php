@@ -169,6 +169,22 @@ if (!in_array('--unit', $argv, true)) {
         $file = $c->req('GET', '/media/fonts/big-shoulders-display-800.woff2');
         check('fichier de police servi', $file['status'] === 200 && str_starts_with($file['body'], 'wOF2'));
 
+        // Archive : une vue compressée (.php.gz) l'emporte sur l'ancienne vue .php d'une mise à jour, qui n'est pas signalée.
+        $view = $copy . '/app/admin/views/login.php';
+        $source = is_file($view . '.gz') ? (string) gzdecode((string) file_get_contents($view . '.gz')) : (string) file_get_contents($view); // archive ou dépôt
+        file_put_contents($view . '.gz', (string) gzencode(str_replace('</form>', '</form><!-- vue-gz -->', $source), 9));
+        file_put_contents($view, str_replace('</form>', '</form><!-- vue-perimee -->', $source));
+        $manifest = json_decode(Store::strip((string) file_get_contents($copy . '/app/manifest.php')), true);
+        $manifest['files']['app/admin/views/login.php.gz'] = substr((string) hash_file('sha256', $view . '.gz'), 0, 32);
+        unset($manifest['files']['app/admin/views/login.php']);
+        file_put_contents($copy . '/app/manifest.php', Store::GUARD . json_encode($manifest, JSON_UNESCAPED_SLASHES));
+        $login = client($port)->req('GET', '/gestion/login')['body'];
+        check('vue compressée lue à la place de l’ancienne vue .php', str_contains($login, '<!-- vue-gz -->') && !str_contains($login, 'vue-perimee'));
+        $c->req('POST', '/gestion/security', $c->token($c->req('GET', '/gestion/security')['body']) + ['action' => 'integrity']);
+        $sec = $c->req('GET', '/gestion/security')['body'];
+        check('contrôle d’intégrité : ni la police ni l’ancienne vue signalées', str_contains($sec, 'id="integrite"') && !str_contains($sec, 'media/fonts/') && !str_contains($sec, 'views/login.php'),
+            (string) preg_replace('/\s+/', ' ', strip_tags(substr($sec, (int) strpos($sec, 'id="integrite"'), 1500))));
+
         // Valeurs du formulaire (JavaScript) : valides, ajustées ; piégées, refusées.
         $tuned = Design::DIRECTIONS['argile'];
         $tuned['hero'] = 'centered';

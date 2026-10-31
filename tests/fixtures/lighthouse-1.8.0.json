@@ -1,0 +1,90 @@
+{
+    "business /": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 823,
+        "cls": 0,
+        "tbt_ms": 5
+    },
+    "business /blog/premiers-pas-avec-eclair": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 852,
+        "cls": 0,
+        "tbt_ms": 0
+    },
+    "landing /": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 826,
+        "cls": 0,
+        "tbt_ms": 3
+    },
+    "business / \u00b7 nocturne": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 818,
+        "cls": 0,
+        "tbt_ms": 3
+    },
+    "business /blog/premiers-pas-avec-eclair \u00b7 nocturne": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 885,
+        "cls": 0,
+        "tbt_ms": 17
+    },
+    "business / \u00b7 riviera": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 786,
+        "cls": 0,
+        "tbt_ms": 6
+    },
+    "business / \u00b7 presse": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 862,
+        "cls": 0,
+        "tbt_ms": 0
+    },
+    "business / \u00b7 affiche": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 779,
+        "cls": 0,
+        "tbt_ms": 7
+    }
+}

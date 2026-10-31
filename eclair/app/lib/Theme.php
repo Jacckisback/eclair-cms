@@ -394,12 +394,12 @@ final class Theme
         return (max($l1, $l2) + 0.05) / (min($l1, $l2) + 0.05);
     }
 
-    /** Version de la couleur assez contrastée (≥ 4,5:1 par défaut) sur le fond donné. */
-    public static function readable(string $color, string $background, float $ratio = 4.5): string
+    /** Version de la couleur assez contrastée (≥ 4,5:1) sur le fond donné. */
+    public static function readable(string $color, string $background): string
     {
         $towards = self::luminance($background) > 0.5 ? 0 : 255;
         $rgb = self::rgb($color);
-        for ($i = 0; $i < 20 && self::contrast(self::hex($rgb), $background) < $ratio; $i++) {
+        for ($i = 0; $i < 20 && self::contrast(self::hex($rgb), $background) < 4.5; $i++) {
             $rgb = array_map(fn ($v) => (int) round($v + ($towards - $v) * 0.12), $rgb);
         }
         return self::hex($rgb);
