@@ -13,13 +13,27 @@ use Eclair\Theme;
 
 /* ─────────────────────────── Contrastes garantis ─────────────────────────── */
 section('Directions artistiques : couleurs et contrastes');
-$meets = static function (?array $d): bool {
-    return $d !== null && Theme::contrast($d['ink'], $d['ground']) >= 7 && Theme::contrast($d['ink'], $d['surface']) >= 4.5
-        && Theme::contrast($d['muted'], $d['ground']) >= 4.5 && Theme::contrast($d['muted'], $d['surface']) >= 4.5
-        && Theme::contrast($d['on_accent'], $d['accent']) >= 4.5 && Theme::contrast($d['link'], $d['ground']) >= 4.5 && Theme::contrast($d['link'], $d['surface']) >= 4.5;
+// Fonds teintés d'accent du thème (color-mix en sRGB) : encadré 7 %, succès 9 %, variante 10 %, pastille 13 %, initiales 14 %, surlignage 22 %.
+$mix = static function (string $a, string $b, float $share): string {
+    [$x, $y] = [array_map('hexdec', str_split(ltrim($a, '#'), 2)), array_map('hexdec', str_split(ltrim($b, '#'), 2))];
+    return sprintf('#%02x%02x%02x', ...array_map(fn ($i) => (int) round($x[$i] * $share + $y[$i] * (1 - $share)), [0, 1, 2]));
+};
+$meets = static function (?array $d) use ($mix): bool {
+    if ($d === null || Theme::contrast($d['ink'], $d['ground']) < 7 || Theme::contrast($d['on_accent'], $d['accent']) < 4.5) {
+        return false;
+    }
+    foreach (['ground', 'surface'] as $b) {
+        foreach ([0, 0.07, 0.09, 0.1, 0.13, 0.14, 0.22] as $t) {
+            $bg = $t ? $mix($d['accent'], $d[$b], $t) : $d[$b];
+            if (Theme::contrast($d['ink'], $bg) < 4.5 || Theme::contrast($d['link'], $bg) < 4.5 || ($t <= 0.1 && Theme::contrast($d['muted'], $bg) < 4.5)) {
+                return false;
+            }
+        }
+    }
+    return true;
 };
 $curated = array_keys(Design::DIRECTIONS);
-check('12 directions livrées, toutes lisibles (texte ≥ 7:1, le reste ≥ 4,5:1)', count($curated) === 12 && !array_filter($curated, fn ($id) => !$meets(Design::find($id))));
+check('12 directions livrées, toutes lisibles (texte ≥ 7:1, le reste ≥ 4,5:1, fonds teintés compris)', count($curated) === 12 && !array_filter($curated, fn ($id) => !$meets(Design::find($id))));
 check('directions livrées utilisées telles quelles (aucune couleur corrigée)', !array_filter($curated, function ($id) {
     $d = Design::find($id);
     return array_filter(['ground', 'surface', 'ink', 'muted', 'accent'], fn ($k) => $d[$k] !== Design::DIRECTIONS[$id][$k]) !== [];

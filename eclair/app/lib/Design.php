@@ -173,9 +173,6 @@ final class Design
             $out['surface'] = self::mix($dark ? '#ffffff' : '#000000', $out['ground'], 0.06);
         }
         $out['surface'] = self::settle($out['surface'], $dark, 6);
-        foreach (['ink' => 7, 'muted' => 4.5] as $k => $ratio) {
-            $out[$k] = self::fit(self::fit($out[$k], $out['ground'], $ratio), $out['surface'], 4.5);
-        }
         foreach (['#ffffff', '#111111'] as $text) {
             if (Theme::contrast($out['accent'], $text) >= 4.5) {
                 $out['on_accent'] = $text;
@@ -186,7 +183,26 @@ final class Design
             $out['accent'] = Theme::readable($out['accent'], '#ffffff');
             $out['on_accent'] = '#ffffff';
         }
-        $out['link'] = self::fit(self::fit($out['accent'], $out['ground'], 4.5), $out['surface'], 4.5);
+        // Fonds teintés d'accent du thème (encadré 7 %, succès 9 %, variante 10 %, pastille et menu 13 %, initiales 14 %,
+        // surlignage 22 %) : le fond est éclairci (ou assombri) s'il le faut pour qu'ils portent encore du texte, puis chaque
+        // couleur de texte est rapprochée du noir (ou du blanc) jusqu'au contraste voulu sur tous ces fonds. Toujours dans le
+        // même sens : ça converge. Un mélange peut être plus sombre que ses deux couleurs : chaque niveau est donc vérifié.
+        $text = $dark ? '#ffffff' : '#000000';
+        $tints = static fn (array $levels): array => array_merge([$out['ground'], $out['surface']], ...array_map(fn ($t) => [self::mix($out['accent'], $out['ground'], $t), self::mix($out['accent'], $out['surface'], $t)], $levels));
+        foreach (['ground', 'surface'] as $k) {
+            foreach ([0.07, 0.09, 0.1, 0.13, 0.14, 0.22] as $t) {
+                for ($i = 0; $i < 60 && Theme::contrast($text, self::mix($out['accent'], $out[$k], $t)) < 4.7; $i++) {
+                    $out[$k] = self::mix($dark ? '#000000' : '#ffffff', $out[$k], 0.1);
+                }
+            }
+        }
+        foreach (['ink' => [7, [0.07, 0.09, 0.1, 0.13, 0.14, 0.22]], 'muted' => [4.5, [0.07, 0.09, 0.1]], 'link' => [4.5, [0.07, 0.09, 0.1, 0.13, 0.14, 0.22]]] as $k => [$ratio, $levels]) {
+            $color = $k === 'link' ? $out['accent'] : $out[$k];
+            foreach ($tints($levels) as $i => $bg) {
+                $color = self::fit($color, $bg, $i === 0 ? $ratio : ($i === 1 ? 4.5 : 4.55), $dark);
+            }
+            $out[$k] = $color;
+        }
         $out['scheme'] = $dark ? 'dark' : 'light';
         return $out;
     }
@@ -314,10 +330,10 @@ final class Design
         return $color;
     }
 
-    /** Couleur rapprochée du noir ou du blanc (le côté qui contraste avec ce fond) jusqu'au rapport voulu. */
-    private static function fit(string $color, string $background, float $ratio): string
+    /** Couleur de texte rapprochée du noir (thème clair) ou du blanc (thème sombre) jusqu'au rapport voulu sur ce fond. */
+    private static function fit(string $color, string $background, float $ratio, bool $dark): string
     {
-        $to = Theme::contrast('#000000', $background) >= Theme::contrast('#ffffff', $background) ? '#000000' : '#ffffff';
+        $to = $dark ? '#ffffff' : '#000000';
         for ($i = 0; $i < 40 && Theme::contrast($color, $background) < $ratio; $i++) {
             $color = self::mix($to, $color, 0.12);
         }

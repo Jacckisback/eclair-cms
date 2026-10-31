@@ -11,7 +11,8 @@
  *
  *   php tools/capture.php --lighthouse
  *                                Lighthouse mobile (médiane de 3 passages) sur l'accueil et un article du site « business » et sur
- *                                la landing, avec le code courant → tests/fixtures/lighthouse-<version>.json.
+ *                                la landing, puis sur le site « business » habillé de quatre directions artistiques (police de titre
+ *                                téléchargée depuis Fontsource), avec le code courant → tests/fixtures/lighthouse-<version>.json.
  *                                Variables : LIGHTHOUSE (commande, défaut « lighthouse »), CHROME_PATH (navigateur).
  *
  * tests/run.php s'en sert pour vérifier qu'une nouvelle version ne change pas un octet du site public.
@@ -304,14 +305,49 @@ function capture_all(string $root, string $fixtures): array
     return $sites;
 }
 
-/** Lighthouse mobile sur des pages des sites de référence : scores des 4 catégories, LCP, CLS, TBT (médiane de 3 passages). */
+/**
+ * Direction artistique livrée appliquée à une copie servie, avec sa police de titre : téléchargée ici depuis Fontsource
+ * (comme le ferait le site à l'enregistrement) puis servie par la copie. Le site normalise lui-même la direction.
+ */
+function capture_direction(string $root, string $copy, string $id): void
+{
+    defined('ECLAIR') || define('ECLAIR', true);
+    require_once $root . '/eclair/app/lib/Design.php';
+    $d = ['id' => $id] + Eclair\Design::DIRECTIONS[$id];
+    [, $weight] = Eclair\Design::FONTS[$d['display']];
+    $font = $copy . '/media/fonts/' . $d['display'] . '-' . $weight . '.woff2';
+    @mkdir(dirname($font), 0755, true);
+    $ch = curl_init('https://cdn.jsdelivr.net/fontsource/fonts/' . $d['display'] . '@latest/latin-' . $weight . '-normal.woff2');
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 30]);
+    $body = (string) curl_exec($ch);
+    if (!str_starts_with($body, 'wOF2')) {
+        throw new RuntimeException('Police introuvable : ' . $d['display']);
+    }
+    file_put_contents($font, $body);
+    $file = $copy . '/data/site.php';
+    $guard = "<?php exit; ?>\n";
+    $site = json_decode(substr((string) file_get_contents($file), strlen($guard)), true);
+    $site['appearance']['direction'] = $d;
+    file_put_contents($file, $guard . json_encode($site, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    exec('rm -rf ' . escapeshellarg($copy) . '/cache/runtime.php ' . escapeshellarg($copy) . '/cache/pages/*');
+}
+
+/**
+ * Lighthouse mobile sur des pages des sites de référence : scores des 4 catégories, LCP, CLS, TBT (médiane de 3 passages).
+ * Thèmes classiques, puis directions artistiques (police de titre préchargée) sur le site « business ».
+ */
 function capture_lighthouse(string $root, string $fixtures): array
 {
     $bin = (string) (getenv('LIGHTHOUSE') ?: 'lighthouse');
     $out = [];
-    foreach (['business' => ['/', '/blog/premiers-pas-avec-eclair'], 'landing' => ['/']] as $type => $paths) {
+    $sets = [['business', null, ['/', '/blog/premiers-pas-avec-eclair']], ['landing', null, ['/']],
+        ['business', 'nocturne', ['/', '/blog/premiers-pas-avec-eclair']], ['business', 'riviera', ['/']], ['business', 'presse', ['/']], ['business', 'affiche', ['/']]];
+    foreach ($sets as [$type, $direction, $paths]) {
         [$copy, $port, $server] = capture_serve($root, $fixtures . '/sites/' . $type, 'lh-' . $type);
         try {
+            if ($direction !== null) {
+                capture_direction($root, $copy, $direction);
+            }
             foreach ($paths as $path) {
                 $url = 'http://127.0.0.1:' . $port . $path;
                 capture_req($port, 'GET', $path);
@@ -322,7 +358,9 @@ function capture_lighthouse(string $root, string $fixtures): array
                         . ' --only-categories=performance,accessibility,best-practices,seo --chrome-flags="--headless=new --no-sandbox --no-proxy-server" 2>/dev/null');
                     $r = json_decode((string) @file_get_contents($json), true);
                     @unlink($json);
-                    if (is_array($r['categories'] ?? null)) {
+                    if (isset($r['runtimeError']['code']) || !isset($r['audits']['largest-contentful-paint']['numericValue'])) {
+                        fwrite(STDERR, "⚠ Lighthouse $type $path" . ($direction !== null ? " · $direction" : '') . ' : passage ignoré (' . ($r['runtimeError']['code'] ?? 'sans mesure') . ")\n");
+                    } elseif (is_array($r['categories'] ?? null)) {
                         $runs[] = ['scores' => array_map(fn ($c) => (int) round(($c['score'] ?? 0) * 100), $r['categories']),
                             'lcp_ms' => (int) round($r['audits']['largest-contentful-paint']['numericValue']),
                             'cls' => round((float) $r['audits']['cumulative-layout-shift']['numericValue'], 3),
@@ -330,7 +368,7 @@ function capture_lighthouse(string $root, string $fixtures): array
                     }
                 }
                 usort($runs, fn ($a, $b) => $a['lcp_ms'] <=> $b['lcp_ms']);
-                $out[$type . ' ' . $path] = $runs[intdiv(count($runs), 2)] ?? null;
+                $out[$type . ' ' . $path . ($direction !== null ? ' · ' . $direction : '')] = $runs[intdiv(count($runs), 2)] ?? null;
             }
         } finally {
             proc_terminate($server);

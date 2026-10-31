@@ -30,8 +30,8 @@ h1,h2,.hero-title{text-transform:uppercase;letter-spacing:.004em;line-height:1.0
 /*@hero:fullbleed*/
 .hero-media{grid-template-columns:1fr;min-height:min(78vh, 46rem);padding:0;align-items:end;border-radius:var(--radius);overflow:hidden}
 .hero-media>*{grid-area:1/1}
-.hero-media .hero-img,.hero-media picture{height:100%}
-.hero-media .hero-img img{width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none}
+.hero-media .hero-img{position:relative;align-self:stretch}
+.hero-media .hero-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none}
 .hero-media .hero-text{position:relative;z-index:1;padding:clamp(5rem, 3rem + 8vw, 9rem) clamp(1.5rem, 1rem + 4vw, 4rem) clamp(1.5rem, 1rem + 4vw, 4rem);background:linear-gradient(to top,rgb(0 0 0 / .82),rgb(0 0 0 / .62) 62%,transparent)}
 .hero-media .hero-title,.hero-media .hero-lead,.hero-media .hero-lead a{color:#fff}
 .hero-media .btn-secondary{color:#fff;border-color:#fff}
