@@ -583,4 +583,22 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .preview-frame iframe{position:absolute;inset:0 auto auto 0;width:200%;height:200%;border:0;transform:scale(.5);transform-origin:0 0}
 .theme-preview.mobile .preview-frame{width:min(100%, 24.5rem);margin-inline:auto;height:36rem;border-radius:22px}
 .theme-preview.mobile .preview-frame iframe{width:100%;height:100%;transform:none}
-
+/* Mode Visuel de l'éditeur */
+.seg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.seg button{border:0;background:none;padding:.28rem .6rem;border-radius:8px;font:inherit;font-size:.85rem;color:var(--muted);cursor:pointer}
+.seg [aria-pressed=true]{background:var(--brand-soft);color:var(--brand-strong);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.seg-w,.visual{display:none}
+.is-visual .seg-w{display:inline-flex}
+.is-visual .canvas{padding:0;background:var(--bg)}
+.is-visual .visual{display:flex;justify-content:center;position:relative;height:calc(100vh - 3.3rem)}
+.visual iframe{width:100%;height:100%;border:0;background:#fff}
+.visual[data-w="390"] iframe{width:390px}.visual[data-w="768"] iframe{width:768px}
+.visual:not([data-w=""]) iframe{box-shadow:var(--shadow)}
+.visual .ev-next{position:absolute;visibility:hidden}
+.is-visual #blocks>.block:not(.is-sel),.is-visual .doc>p.center{display:none}
+.is-visual .side .doc{padding:1rem 1rem 0}
+.is-visual .side .doc-title{font-size:1.3rem}
+.is-visual .side .h-title{font-size:1.15rem}
+.is-visual .block-tools{position:static;flex-direction:row;opacity:1;margin-bottom:.2rem}
+@media (max-width:900px){.is-visual .seg-w{display:none}}

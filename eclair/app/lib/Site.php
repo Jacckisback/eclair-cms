@@ -10,6 +10,8 @@ final class Site
 {
     /** Aperçu de l'apparence en cours (Réglages › Apparence) : rien n'est mis en cache. */
     private static bool $preview = false;
+    /** Mode Visuel de l'éditeur : aperçu d'un contenu modifiable sur place, servi seulement par la route d'aperçu de l'administration. */
+    private static bool $edit = false;
 
     /**
      * Aperçu de l'apparence : la page demandée du site, rendue avec l'apparence essayée (Theme::preview),
@@ -186,8 +188,9 @@ final class Site
 
     /* ───────────────────────────── Page / article ───────────────────────────── */
 
-    public static function single(array $entry, bool $preview = false, ?array $item = null): never
+    public static function single(array $entry, bool $preview = false, ?array $item = null, bool $edit = false): never
     {
+        self::$edit = $edit && $preview;
         $item ??= Content::get($entry['id']);
         if (!$item) {
             self::notFound();
@@ -203,7 +206,7 @@ final class Site
         $category = $isPost ? Categories::get($item['category']) : null;
         $featured = $isPost ? Media::get($item['image']) : null;
         $h1InContent = ($blocks[0]['type'] ?? '') === 'hero' && $item['options']['hide_title'];
-        $html = Blocks::html($blocks, ['lang' => $lang, 'h1' => $h1InContent, 'eager' => !$featured, 'page' => $item['id']]);
+        $html = Blocks::html($blocks, ['lang' => $lang, 'h1' => $h1InContent, 'eager' => !$featured, 'page' => $item['id'], 'edit' => self::$edit]);
         $toc = Blocks::toc($blocks, $lang);
         $tocMode = $item['options']['toc'];
         $showToc = $tocMode === 'on' ? (bool) $toc : ($tocMode === 'auto' && $isPost && count($toc) >= 3);
@@ -287,6 +290,7 @@ final class Site
             'featured' => $featured,
             'words' => $words,
             'h1_in_content' => $h1InContent,
+            'edit' => self::$edit,
         ]);
         self::html($page, 200, $preview ? null : $path);
     }
@@ -303,7 +307,7 @@ final class Site
         $category = Categories::get($item['category']);
         $images = Shop::images($item);
         $blocks = $item['blocks'];
-        $html = Blocks::html($blocks, ['lang' => $lang, 'h1' => false, 'eager' => !$images, 'page' => $item['id']]);
+        $html = Blocks::html($blocks, ['lang' => $lang, 'h1' => false, 'eager' => !$images, 'page' => $item['id'], 'edit' => self::$edit]);
         $crumbs = [['name' => (string) Settings::get('name'), 'path' => '/'], ['name' => Shop::title($lang), 'path' => Shop::path()]];
         if ($category) {
             $crumbs[] = ['name' => $category['name'], 'path' => Categories::path($category)];
@@ -639,9 +643,16 @@ final class Site
             $cachePath = null;
             $html = str_replace('</body>', '<script src="' . e(asset('admin/theme-preview.js')) . '" data-base="' . e(Req::base()) . '" defer></script></body>', $html);
         }
+        if (self::$edit) {
+            // Mode Visuel : ses deux fichiers à la place de theme-preview.js ; jamais en cache ni indexé.
+            $cachePath = null;
+            $html = str_replace(['</head>', '</body>'], ['<link rel="stylesheet" href="' . e(asset('admin/visual.css')) . '"></head>',
+                '<script src="' . e(asset('admin/visual.js')) . '" defer></script></body>'], $html);
+        }
         $headers = array_merge(
             ['Content-Type: text/html; charset=utf-8', 'Cache-Control: ' . ($cachePath !== null ? 'public, max-age=0, must-revalidate' : 'no-store')],
-            Security::headers('site', Theme::hash(Theme::css()))
+            Security::headers('site', Theme::hash(Theme::css())),
+            self::$edit ? ['X-Robots-Tag: noindex, nofollow'] : []
         );
         if ($status === 200 && $cachePath !== null) {
             Cache::put($cachePath, $html, $headers);

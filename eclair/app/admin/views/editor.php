@@ -18,6 +18,15 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
     <span class="badge" id="status-badge"></span>
     <span class="status" id="save-status" aria-live="polite"></span>
     <span class="spacer"></span>
+    <div class="seg" role="group" aria-label="<?= e(t('Mode d’édition')) ?>">
+      <button type="button" data-mode="blocks" aria-pressed="true"><?= e(t('Blocs')) ?></button>
+      <button type="button" data-mode="visual" aria-pressed="false"><?= e(t('Visuel')) ?></button>
+    </div>
+    <div class="seg seg-w" role="group" aria-label="<?= e(t('Largeur de l’aperçu')) ?>">
+      <?php foreach (['390' => ['📱', t('Mobile')], '768' => ['▭', t('Tablette')], '' => ['🖥', t('Ordinateur')]] as $w => [$icon, $label]): ?>
+        <button type="button" data-w="<?= $w ?>" aria-pressed="<?= $w === '' ? 'true' : 'false' ?>" title="<?= e($label) ?>" aria-label="<?= e($label) ?>"><?= $icon ?></button>
+      <?php endforeach ?>
+    </div>
     <a class="btn btn-ghost btn-sm" id="view-link" href="#" target="_blank" rel="noopener" hidden><?= Icons::svg('external') ?><span><?= e(t('Voir')) ?></span></a>
     <?php if (\Eclair\Ai::allowed(\Eclair\Auth::user())): ?>
       <button class="btn btn-sm" type="button" data-ai-open title="<?= e(t('Assistant IA')) ?> (Ctrl+J)"><?= Icons::svg('spark') ?><span><?= e(t('Assistant')) ?></span></button>
@@ -80,6 +89,7 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
       <div class="add-block"><button class="btn" type="button" id="add-end"><?= Icons::svg('plus') ?><?= e(t('Ajouter un bloc')) ?></button></div>
       <p class="center small muted"><?= e(t('Astuce : tape « / » sur une ligne vide pour insérer un bloc · Ctrl+S pour enregistrer · Ctrl+K pour un lien')) ?></p>
     </div>
+    <div class="visual" id="visual" data-w=""></div>
   </div>
 
   <aside class="side" id="side" aria-label="<?= e(t('Réglages du contenu')) ?>">

@@ -182,7 +182,7 @@ try {
     $squat = $api('api/save', ['type' => 'page', 'title' => 'Notre boutique', 'slug' => 'boutique', 'status' => 'published', 'blocks' => [['type' => 'paragraph', 'text' => 'Ancienne page.']]]);
     $settingsForm('shop', $shopFields);
     check('page existante à l’adresse de la boutique : ouverture refusée, page intacte', ($squat['json']['item']['slug'] ?? '') === 'boutique'
-        && !$site()['shop']['enabled'] && str_contains($v->req('GET', '/boutique')['body'], 'Ancienne page.'));
+        && !($site()['shop']['enabled'] ?? false) && str_contains($v->req('GET', '/boutique')['body'], 'Ancienne page.'));
     $api('api/delete', ['id' => (string) ($squat['json']['item']['id'] ?? ''), 'redirect' => '']);
     $settingsForm('shop', $shopFields);
     check('boutique : ouverture refusée sans mentions légales ni CGV', !$site()['shop']['enabled'] && $v->req('GET', '/boutique')['status'] === 404);

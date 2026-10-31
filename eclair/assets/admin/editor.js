@@ -590,7 +590,7 @@
 
   /* ───────────── Sélecteur de bloc (bouton + ou « / ») ───────────── */
   let inserter = null;
-  function openInserter(anchorEl, block, replace) {
+  function openInserter(anchorEl, block, replace, first) {
     closeInserter();
     const searchBox = h('input', { type: 'search', placeholder: t('Rechercher un bloc…'), 'aria-label': t('Rechercher un bloc…') });
     const list = h('div', { role: 'listbox' });
@@ -609,8 +609,9 @@
     };
     const choose = (type) => {
       const data = TYPES[type][3]();
-      if (replace && block) replaceBlock(block, data);
-      else insertBlock(data, block || null);
+      const el = replace && block ? replaceBlock(block, data) : insertBlock(data, block || null);
+      if (first) container.prepend(el);
+      vNew(el);
       closeInserter();
     };
     searchBox.addEventListener('input', () => { active = 0; draw(); });
@@ -667,14 +668,26 @@
     bar.style.left = Math.min(Math.max(8, r.left + r.width / 2 - bar.offsetWidth / 2), window.innerWidth - bar.offsetWidth - 8) + 'px';
   };
   document.addEventListener('selectionchange', () => requestAnimationFrame(showBar));
-  function startLink() {
-    const sel = window.getSelection();
-    if (!sel.rangeCount || sel.isCollapsed) return;
-    savedRange = sel.getRangeAt(0).cloneRange();
-    const existing = sel.anchorNode.parentElement.closest('a');
-    linkInput.value = existing ? existing.getAttribute('href') : '';
+  // En mode Visuel (at = position dans l'aperçu), l'adresse choisie est renvoyée à l'aperçu au lieu d'être posée ici.
+  let vLink = false;
+  function startLink(href, at) {
+    vLink = !!at;
+    if (!at) {
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) return;
+      savedRange = sel.getRangeAt(0).cloneRange();
+      const existing = sel.anchorNode.parentElement.closest('a');
+      href = existing ? existing.getAttribute('href') : '';
+    }
+    linkInput.value = href || '';
     $$('button', bar).forEach((b) => { b.hidden = true; });
     linkInput.hidden = false;
+    if (at) {
+      const r = at.getBoundingClientRect();
+      bar.hidden = false;
+      bar.style.top = Math.max(8, r.top - bar.offsetHeight - 8) + 'px';
+      bar.style.left = Math.max(8, Math.min(r.left, innerWidth - bar.offsetWidth - 8)) + 'px';
+    }
     linkInput.focus();
     linkInput.select();
     searchLinks();
@@ -685,15 +698,16 @@
     suggest.hidden = true;
     $$('button', bar).forEach((b) => { b.hidden = false; });
     bar.hidden = true;
+    let url = value;
+    if (url && !/^(https?:|mailto:|tel:|\/|#)/i.test(url)) url = /^[\w-]+(\.[\w-]+)+/.test(url) ? 'https://' + url : '/' + url.replace(/^\/+/, '');
+    if (vLink) { vLink = false; frame?.contentWindow.postMessage({ op: 'link', value: apply ? url : null }, location.origin); return; }
     if (!savedRange) return;
     const sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(savedRange);
     savedRange = null;
     if (!apply) return;
-    if (!value) { document.execCommand('unlink'); changed(); return; }
-    let url = value;
-    if (!/^(https?:|mailto:|tel:|\/|#)/i.test(url)) url = /^[\w-]+(\.[\w-]+)+/.test(url) ? 'https://' + url : '/' + url.replace(/^\/+/, '');
+    if (!url) { document.execCommand('unlink'); changed(); return; }
     document.execCommand('createLink', false, url);
     changed();
   };
@@ -985,9 +999,11 @@
   let localTimer = null;
   const isDirty = () => JSON.stringify(serialize()) !== saved;
   const status = (text) => { $('#save-status').textContent = text; };
+  let vQuiet = false;
   function changed() {
     serp();
     analyze();
+    if (!vQuiet && root.classList.contains('is-visual')) rerender();
     status(isDirty() ? '● ' + t('Modifications non enregistrées') : '');
     clearTimeout(localTimer);
     localTimer = setTimeout(() => {
@@ -1039,6 +1055,7 @@
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(false); }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && document.activeElement?.isContentEditable) { e.preventDefault(); startLink(); }
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && root.classList.contains('is-visual') && !e.target.closest('input, textarea, select, [contenteditable]')) { e.preventDefault(); undo(); }
   });
   window.addEventListener('beforeunload', (e) => { if (isDirty()) { e.preventDefault(); e.returnValue = ''; } });
   root.addEventListener('input', changed);
@@ -1104,6 +1121,7 @@
       return () => { load({ ...item, ...before, date_local: before.date }); changed(); };
     },
   };
+  let aiMenu = null;
   if (D.ai) {
     const assist = async (task, extra = {}, btn = null) => {
       if (btn) btn.setAttribute('aria-busy', 'true');
@@ -1138,24 +1156,28 @@
       changed();
       toast(t('Passage réécrit.'), 'ok', { label: t('Annuler'), run: () => { ed.innerHTML = before; changed(); } });
     };
+    // Menu des retouches, ouvert sous un passage (r : sa position) ; run(mode, langue) fait la retouche.
+    aiMenu = (r, run) => {
+      closeMenu();
+      const choice = (label, fn) => h('button', { type: 'button', role: 'menuitem', onmousedown: keep, onclick: fn }, label);
+      const go = (mode, lang) => () => { closeMenu(); run(mode, lang); };
+      const modes = [['improve', '✨ ' + t('Améliorer')], ['fix', '✔️ ' + t('Corriger les fautes')], ['shorten', '✂️ ' + t('Raccourcir')], ['expand', '➕ ' + t('Développer')],
+        ['simplify', '🧩 ' + t('Simplifier')], ['warmer', '🤝 ' + t('Plus chaleureux')], ['formal', '👔 ' + t('Plus professionnel')]];
+      menu = h('div', { class: 'ai-menu', role: 'menu', 'aria-label': t('Retoucher avec l’IA') },
+        modes.map(([mode, label]) => choice(label, go(mode, ''))), h('hr'),
+        choice('🌍 ' + t('Traduire…'), () => menu.replaceChildren(...Object.entries(cfg.langs).map(([code, name]) => choice(name, go('translate', code))))));
+      document.body.append(menu);
+      menu.querySelector('button').focus();
+      menu.style.top = Math.max(8, Math.min(r.bottom + 10, innerHeight - menu.offsetHeight - 8)) + 'px';
+      menu.style.left = Math.max(8, Math.min(r.left, innerWidth - menu.offsetWidth - 8)) + 'px';
+    };
     const openMenu = () => {
       const sel = window.getSelection();
       if (!sel.rangeCount || sel.isCollapsed) return;
       const range = sel.getRangeAt(0).cloneRange();
       const node = range.commonAncestorContainer;
       const ed = (node.nodeType === 1 ? node : node.parentElement).closest('#blocks [contenteditable]');
-      if (!ed) return;
-      closeMenu();
-      const choice = (label, run) => h('button', { type: 'button', role: 'menuitem', onmousedown: keep, onclick: run }, label);
-      const modes = [['improve', '✨ ' + t('Améliorer')], ['fix', '✔️ ' + t('Corriger les fautes')], ['shorten', '✂️ ' + t('Raccourcir')], ['expand', '➕ ' + t('Développer')],
-        ['simplify', '🧩 ' + t('Simplifier')], ['warmer', '🤝 ' + t('Plus chaleureux')], ['formal', '👔 ' + t('Plus professionnel')]];
-      menu = h('div', { class: 'ai-menu', role: 'menu', 'aria-label': t('Retoucher avec l’IA') },
-        modes.map(([mode, label]) => choice(label, () => rewrite(mode, '', range, ed))), h('hr'),
-        choice('🌍 ' + t('Traduire…'), () => menu.replaceChildren(...Object.entries(cfg.langs).map(([code, name]) => choice(name, () => rewrite('translate', code, range, ed))))));
-      document.body.append(menu);
-      const r = range.getBoundingClientRect();
-      menu.style.top = Math.max(8, Math.min(r.bottom + 10, innerHeight - menu.offsetHeight - 8)) + 'px';
-      menu.style.left = Math.max(8, Math.min(r.left, innerWidth - menu.offsetWidth - 8)) + 'px';
+      if (ed) aiMenu(range.getBoundingClientRect(), (mode, lang) => rewrite(mode, lang, range, ed));
     };
     bar.append(cmd('ai', '✨', t('Retoucher avec l’IA'), openMenu));
     // Le clic qui ouvre le menu (bouton ✨) ne doit pas le refermer aussitôt.
@@ -1225,6 +1247,165 @@
     }
   }
 
+  /* ───────────── Mode Visuel : le rendu réel du thème, modifiable sur place ───────────── */
+  // L'aperçu d'édition (assets/admin/visual.js) n'envoie que des intentions { op, block, field, value } : elles passent par les
+  // fonctions ci-dessus (sauvegarde, brouillon local, révisions et analyse SEO/GEO inchangées) et chaque étape s'annule (Ctrl+Z).
+  const stage = $('#visual');
+  const doc = $('.doc');
+  const stack = [];
+  let frame = null;
+  let next = null;
+  let vSel = -1;
+  let fresh = false;
+  let lastKey = '';
+  let vTimer = 0;
+  const snap = () => { stack.push(JSON.stringify(serialize())); if (stack.length > 50) stack.shift(); lastKey = ''; };
+  function undo() {
+    const s = stack.pop();
+    if (!s) return;
+    const d = JSON.parse(s);
+    load({ ...item, ...d, date_local: d.date });
+    changed();
+  }
+  const mark = () => blocks().forEach((b, i) => b.classList.toggle('is-sel', i === vSel));
+  function vNew(el) { if (root.classList.contains('is-visual')) { vSel = blocks().indexOf(el); fresh = true; } }
+  // Nouveau rendu dans une iframe neuve, montrée une fois prête (ni clignotement, ni entrée d'historique).
+  const render = () => {
+    clearTimeout(vTimer);
+    if (next) next.remove();
+    const fr = next = h('iframe', { name: 'ev' + Date.now(), class: 'ev-next', title: t('Aperçu modifiable') });
+    stage.append(fr);
+    const form = $('#preview-form');
+    const flag = h('input', { type: 'hidden', name: 'edit', value: '1' });
+    form.elements.data.value = JSON.stringify(serialize());
+    form.append(flag);
+    form.target = fr.name;
+    form.submit();
+    form.target = 'eclair-preview';
+    flag.remove();
+    fr.addEventListener('load', () => setTimeout(() => { if (next === fr) show(); }, 1500));
+    mark();
+  };
+  const show = () => { if (frame) frame.remove(); frame = next; next = null; frame.classList.remove('ev-next'); fresh = false; };
+  function rerender() { clearTimeout(vTimer); vTimer = setTimeout(render, 400); }
+  const labels = () => ({
+    up: t('Monter'), down: t('Descendre'), dup: t('Dupliquer'), del: t('Supprimer'), above: t('Ajouter un bloc au-dessus'),
+    below: t('Ajouter un bloc en dessous'), ai: D.ai ? t('Retoucher avec l’IA') : '', bar: t('Outils du bloc'), write: t('Écris ici…'),
+    types: Object.fromEntries(Object.entries(TYPES).map(([k, v]) => [k, v[0] + ' ' + v[1]])),
+  });
+  // Position (dans l'aperçu) d'un bouton ou d'une sélection → position dans l'éditeur.
+  const at = (r) => {
+    const box = (frame || stage).getBoundingClientRect();
+    const [x, y, w, hh] = Array.isArray(r) && r.length === 4 && r.every(Number.isFinite) ? r : [0, 0, 0, 0];
+    return { getBoundingClientRect: () => ({ left: box.left + x, top: box.top + y, right: box.left + x + w, bottom: box.top + y + hh, width: w, height: hh }) };
+  };
+  // Champs enrichis (gras, italique, liens) ; tous les autres sont du texte brut.
+  const isRichF = (type, path) => /^(text|caption|items\.\d+(\.(a|text|bio))?|rows\.\d+\.\d+)$/.test(path) && !(type === 'button' && path === 'text') && !(path === 'caption' && type !== 'image');
+  const get = (o, path) => path.split('.').reduce((a, k) => (a !== null && typeof a === 'object' && Object.hasOwn(a, k) ? a[k] : undefined), o);
+  const put = (o, path, v) => {
+    const keys = path.split('.');
+    const k = keys.pop();
+    const box = keys.length ? get(o, keys.join('.')) : o;
+    if (!box || typeof box !== 'object' || !Object.hasOwn(box, k) || typeof box[k] !== 'string') return false;
+    box[k] = v;
+    return true;
+  };
+  // Texte enrichi reçu de l'aperçu : analysé hors du document, puis réduit aux balises permises (comme un collage).
+  const tidy = (type, path, v) => {
+    if (!isRichF(type, path)) return v;
+    const html = inlineClean(new DOMParser().parseFromString(v, 'text/html').body).trim();
+    return D.base ? html.split(' href="' + D.base + '/').join(' href="/') : html;
+  };
+  const swap = (el, d) => { const n = makeBlock(d); el.replaceWith(n); mark(); return n; };
+  const setText = (el, i, path, v) => {
+    const key = i + ':' + path;
+    if (i < 0) {
+      const field = { title: titleEl, summary: summaryEl }[path];
+      if (!field || field.value === v) return;
+      if (key !== lastKey) { snap(); lastKey = key; }
+      field.value = v;
+      vQuiet = true;
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      if (!el) return;
+      const d = el._read();
+      const val = tidy(d.type, path, v);
+      if (get(d, path) === val) return;
+      if (key !== lastKey) { snap(); lastKey = key; }
+      if (!put(d, path, val)) return;
+      swap(el, d);
+      vQuiet = true;
+      changed();
+    }
+    vQuiet = false;
+  };
+  const pickFor = async (el, i, path) => {
+    const x = await pickMedia();
+    if (!x) return;
+    media[x.id] = x;
+    snap();
+    if (i < 0 && path === 'image' && f('f-image-pick')) { item.image = x.id; drawImage(); } else if (el) { const d = el._read(); if (put(d, path, x.id)) swap(el, d); }
+    changed();
+  };
+  // ✨ : les retouches de l'IA (assist → rewrite) sur le champ enrichi choisi ; annulables.
+  const vAi = (el, i, path, anchor) => {
+    const d = el._read();
+    const html = get(d, path);
+    if (!aiMenu || typeof html !== 'string' || !html || !isRichF(d.type, path)) return;
+    aiMenu(anchor.getBoundingClientRect(), async (mode, lang) => {
+      toast(t('L’IA retravaille le passage…'));
+      const res = await api('api/ai/assist', { task: 'rewrite', mode, lang, html, item: { id: item.id, type: item.type, title: titleEl.value } }).catch(() => ({}));
+      const now = blocks()[i];
+      if (!res.ok || !res.html || !now) return;
+      const nd = now._read();
+      snap();
+      if (nd.type === d.type && put(nd, path, tidy(nd.type, path, res.html))) swap(now, nd);
+      changed();
+      toast(t('Passage réécrit.'), 'ok', { label: t('Annuler'), run: undo });
+    });
+  };
+  addEventListener('message', (e) => {
+    const m = e.data;
+    if (e.origin !== location.origin || !m || typeof m !== 'object' || typeof m.op !== 'string') return;
+    const i = Number.isInteger(m.block) ? m.block : -1;
+    const path = typeof m.field === 'string' && /^[a-z0-9.]{1,40}$/i.test(m.field) ? m.field : '';
+    const v = typeof m.value === 'string' ? m.value.slice(0, 100000) : m.value;
+    const w = e.source;
+    if (m.op === 'hello' && w && (w === next?.contentWindow || w === frame?.contentWindow)) {
+      let scroll = 0;
+      try { scroll = frame && frame.contentWindow !== w ? frame.contentWindow.scrollY : 0; } catch (x) { /* rien */ }
+      w.postMessage({ op: 'init', block: vSel, focus: fresh, scroll, labels: labels() }, location.origin);
+      return;
+    }
+    if (next && w === next.contentWindow) { if (m.op === 'ready') show(); return; }
+    if (!frame || w !== frame.contentWindow) return;
+    const el = blocks()[i];
+    const op = m.op;
+    if (op === 'select') { vSel = el ? i : -1; mark(); } else if (op === 'set') { if (path && typeof v === 'string') setText(el, i, path, v); } else if (op === 'undo') undo();
+    else if (op === 'save') save(false);
+    else if (op === 'pick') { if (path) pickFor(el, i, path); } else if (op === 'link') startLink(typeof v === 'string' ? v : '', at(m.rect));
+    else if (op === 'ai') { if (el && path) vAi(el, i, path, at(m.rect)); } else if (el && ['move', 'dup', 'del', 'enter', 'add'].includes(op)) {
+      snap();
+      if (op === 'move') { move(el, v < 0 ? -1 : 1); vSel = blocks().indexOf(el); }
+      if (op === 'dup') { el.after(makeBlock(el._read())); vSel = i + 1; changed(); }
+      if (op === 'del') { vSel = -1; removeBlock(el); }
+      if (op === 'enter') { el.after(makeBlock(TYPES.paragraph[3]())); vSel = i + 1; fresh = true; changed(); }
+      if (op === 'add') openInserter(at(m.rect), v ? el : el.previousElementSibling, false, !v && !el.previousElementSibling);
+    }
+  });
+  const setMode = (on) => {
+    root.classList.toggle('is-visual', on);
+    $$('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.mode === 'visual') === on)));
+    if (on) { $('#side').prepend(doc); render(); } else { stage.before(doc); [frame, next].forEach((x) => x && x.remove()); frame = next = null; vSel = -1; mark(); }
+    autosize();
+    try { localStorage.setItem('eclair-mode', on ? 'visual' : 'blocks'); } catch (e) { /* stockage indisponible */ }
+  };
+  $$('[data-mode]').forEach((b) => b.addEventListener('click', () => { if ((b.dataset.mode === 'visual') !== root.classList.contains('is-visual')) setMode(!root.classList.contains('is-visual')); }));
+  $$('[data-w]').forEach((b) => b.addEventListener('click', () => {
+    stage.dataset.w = b.dataset.w;
+    $$('[data-w]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+
   /* ───────────── Démarrage ───────────── */
   load(item);
   saved = JSON.stringify(serialize());
@@ -1249,5 +1430,8 @@
       } });
     }
   } catch (e) { /* stockage indisponible */ }
-  if (!item.id) titleEl.focus();
+  let mode = '';
+  try { mode = localStorage.getItem('eclair-mode') || ''; } catch (e) { /* stockage indisponible */ }
+  if (/[?&]visual\b/.test(location.search) || mode === 'visual') setMode(true);
+  else if (!item.id) titleEl.focus();
 })();

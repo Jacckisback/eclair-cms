@@ -169,7 +169,13 @@ final class AdminContent
         }
         $old = ($data['id'] ?? '') !== '' ? Content::get((string) $data['id']) : null;
         $item = Content::build($data, $user, $old);
-        Site::single(Content::entry($item), true, $item);
+        $entry = Content::entry($item);
+        // Mode Visuel : même route (session, jeton CSRF, droit « content »), rendu modifiable sur place.
+        $edit = Req::input('edit') === '1';
+        if ($edit) {
+            $item['blocks'] = Blocks::edit($data['blocks'] ?? []);
+        }
+        Site::single($entry, true, $item, $edit);
     }
 
     public static function previewSaved(array $user, string $id): never

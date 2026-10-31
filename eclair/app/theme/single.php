@@ -5,6 +5,7 @@
  */
 defined('ECLAIR') || exit;
 
+use Eclair\Blocks;
 use Eclair\Categories;
 use Eclair\Content;
 use Eclair\Media;
@@ -15,6 +16,7 @@ $lang = $v['lang'];
 $isPost = $item['type'] === 'post';
 $author = $v['author'];
 $category = $v['category'];
+$edit = !empty($v['edit']);
 ?>
 <article class="content <?= $isPost ? 'post' : 'page' ?>">
   <header class="entry-header">
@@ -35,7 +37,7 @@ $category = $v['category'];
       <p><a class="chip" href="<?= e(path_to(Categories::path($category))) ?>"><?= e($category['name']) ?></a></p>
     <?php endif ?>
     <?php if (!$v['h1_in_content']): ?>
-      <h1<?= $item['options']['hide_title'] ? ' class="sr-only"' : '' ?>><?= e($item['title']) ?></h1>
+      <h1<?= $item['options']['hide_title'] ? ' class="sr-only"' : '' ?><?= Blocks::ea('ef', 'title', $edit) ?>><?= e($item['title']) ?></h1>
     <?php endif ?>
     <?php if ($isPost): ?>
       <p class="meta">
@@ -65,13 +67,13 @@ $category = $v['category'];
   </header>
 
   <?php if ($v['featured']): ?>
-    <figure class="featured"><?= Media::picture($v['featured'], (string) $v['featured']['alt'], '(min-width: 72rem) 68rem, 100vw', true) ?></figure>
+    <figure class="featured"<?= Blocks::ea('ef', 'image', $edit) ?>><?= Media::picture($v['featured'], (string) $v['featured']['alt'], '(min-width: 72rem) 68rem, 100vw', true) ?></figure>
   <?php endif ?>
 
   <?php if ($item['summary'] !== ''): ?>
     <aside class="key" aria-label="<?= e(Theme::t('key_points', $lang)) ?>">
       <p class="key-title"><?= e(Theme::t('key_points', $lang)) ?></p>
-      <p><?= nl2br(e($item['summary'])) ?></p>
+      <p<?= Blocks::ea('ef', 'summary', $edit) ?>><?= nl2br(e($item['summary'])) ?></p>
     </aside>
   <?php endif ?>
 

@@ -17,6 +17,8 @@ final class Blocks
     ];
     private const CALLOUTS = ['info' => 'ℹ️', 'tip' => '💡', 'warning' => '⚠️', 'success' => '✅', 'note' => '📝'];
     private const RESERVED_IDS = ['main', 'top', 'toc', 'menu', 'contenu', 'content', 'search', 'site-nav'];
+    /** Rendu du mode Visuel en cours (aperçu d'édition de l'administration). */
+    private static bool $edit = false;
 
     /* ───────────────────────────── Validation ───────────────────────────── */
 
@@ -196,10 +198,27 @@ final class Blocks
         return null;
     }
 
+    /**
+     * Mode Visuel : les blocs envoyés par l'éditeur, alignés un pour un sur les siens. Un bloc encore incomplet
+     * (paragraphe vide, image à choisir…) reste à sa place sous la forme d'un repère, pour être rempli sur place.
+     */
+    public static function edit(mixed $raw): array
+    {
+        $out = [];
+        foreach (is_array($raw) ? array_slice($raw, 0, 2000) : [] as $b) {
+            $b = is_array($b) ? $b : [];
+            $level = (int) ($b['level'] ?? 2);
+            $out[] = self::one($b) ?? ['type' => 'empty', 'of' => in_array($b['type'] ?? '', self::TYPES, true) ? $b['type'] : 'paragraph',
+                'level' => in_array($level, [2, 3, 4], true) ? $level : 2];
+        }
+        return $out;
+    }
+
     /* ─────────────────────────────── Rendu HTML ────────────────────────────── */
 
     /**
-     * @param array $ctx lang, h1 (le premier bandeau porte le H1), eager (première image prioritaire), page (id)
+     * @param array $ctx lang, h1 (le premier bandeau porte le H1), eager (première image prioritaire), page (id),
+     *                   edit (mode Visuel de l'administration : repères data-eb / data-ef, jamais dans le rendu public)
      */
     public static function html(array $blocks, array $ctx = []): string
     {
@@ -207,24 +226,26 @@ final class Blocks
         $anchors = self::anchors($blocks);
         $eager = (bool) ($ctx['eager'] ?? false);
         $h1 = (bool) ($ctx['h1'] ?? false);
+        $edit = self::$edit = !empty($ctx['edit']);
         $out = '';
         foreach ($blocks as $i => $b) {
-            $out .= match ($b['type']) {
-                'paragraph' => '<p>' . self::rich($b['text']) . "</p>\n",
-                'heading' => sprintf("<h%d id=\"%s\">%s</h%1\$d>\n", $b['level'], e($anchors[$i]), self::rich($b['text'])),
-                'list' => '<' . $b['style'] . '>' . implode('', array_map(fn ($li) => '<li>' . self::rich($li) . '</li>', $b['items'])) . '</' . $b['style'] . ">\n",
-                'quote' => '<blockquote><p>' . self::rich($b['text']) . '</p>'
+            $html = match ($b['type']) {
+                'paragraph' => '<p' . self::ef('text', true) . '>' . self::rich($b['text']) . "</p>\n",
+                'heading' => '<h' . $b['level'] . ' id="' . e($anchors[$i]) . '"' . self::ef('text', true) . '>' . self::rich($b['text']) . '</h' . $b['level'] . ">\n",
+                'list' => '<' . $b['style'] . '>' . implode('', array_map(fn ($li, $n) => '<li' . self::ef('items.' . $n, true) . '>' . self::rich($li) . '</li>', $b['items'], array_keys($b['items'])))
+                    . '</' . $b['style'] . ">\n",
+                'quote' => '<blockquote><p' . self::ef('text', true) . '>' . self::rich($b['text']) . '</p>'
                     . ($b['cite'] !== '' ? '<p class="cite">— ' . e($b['cite']) . '</p>' : '') . "</blockquote>\n",
                 'image' => self::image($b, $eager && $i < 2),
                 'callout' => '<aside class="callout callout-' . $b['variant'] . '"><p class="callout-title"><span aria-hidden="true">'
                     . self::CALLOUTS[$b['variant']] . '</span> ' . e($b['title'] !== '' ? $b['title'] : Theme::t('callout_' . $b['variant'], $lang))
-                    . '</p><p>' . self::rich($b['text']) . "</p></aside>\n",
+                    . '</p><p' . self::ef('text', true) . '>' . self::rich($b['text']) . "</p></aside>\n",
                 'faq' => self::faqHtml($b, $anchors[$i] ?? '', $lang),
                 'table' => self::table($b),
                 'button' => '<p class="btns' . ($b['align'] === 'center' ? ' center' : '') . '"><a class="btn btn-' . $b['style']
-                    . '" href="' . e(self::href($b['url'])) . '">' . e($b['text']) . "</a></p>\n",
+                    . '" href="' . e(self::href($b['url'])) . '"' . self::ef('text') . '>' . e($b['text']) . "</a></p>\n",
                 'video' => self::videoHtml($b, $lang),
-                'code' => '<pre class="code"><code' . ($b['lang'] !== '' ? ' class="lang-' . e($b['lang']) . '"' : '') . '>'
+                'code' => '<pre class="code"><code' . ($b['lang'] !== '' ? ' class="lang-' . e($b['lang']) . '"' : '') . self::ef('code') . '>'
                     . e($b['code']) . "</code></pre>\n",
                 'divider' => "<hr>\n",
                 'hero' => self::hero($b, $h1 && $i === 0, $lang),
@@ -235,8 +256,43 @@ final class Blocks
                 'contact' => self::contactHtml($b, (string) ($ctx['page'] ?? ''), $lang),
                 default => '',
             };
+            $out .= $edit ? self::tag($html !== '' ? $html : self::placeholder($b), 'eb', (string) $i) : $html;
         }
+        self::$edit = false;
         return $out;
+    }
+
+    /**
+     * Mode Visuel : attribut « data-{k} » d'un élément modifiable sur place. Hors de l'aperçu d'édition de
+     * l'administration, renvoie toujours « '' » : le rendu public ne change pas d'un octet.
+     */
+    public static function ea(string $k, string $v = '', ?bool $on = null): string
+    {
+        return ($on ?? self::$edit) ? ' data-' . $k . ($v !== '' ? '="' . e($v) . '"' : '') : '';
+    }
+
+    /** Champ modifiable sur place : son chemin dans le bloc (« items.2.q »), et s'il accepte le texte enrichi. */
+    private static function ef(string $path, bool $rich = false): string
+    {
+        return self::ea('ef', $path) . ($rich ? self::ea('rich') : '');
+    }
+
+    /** Mode Visuel : ajoute l'attribut à la première balise d'un fragment (racine d'un bloc, photo). */
+    private static function tag(string $html, string $k, string $v): string
+    {
+        return self::$edit ? (string) preg_replace('/^<([a-z0-9]+)/', '<$1' . self::ea($k, $v), $html, 1) : $html;
+    }
+
+    /** Mode Visuel : repère d'un bloc incomplet ou invisible (boutique fermée, image à choisir…). */
+    private static function placeholder(array $b): string
+    {
+        $type = (string) ($b['of'] ?? $b['type']);
+        $level = (int) ($b['level'] ?? 2);
+        return match ($type) {
+            'paragraph' => '<p' . self::ef('text', true) . '></p>',
+            'heading' => '<h' . $level . self::ef('text', true) . '></h' . $level . '>',
+            default => '<div class="eb-empty" data-et="' . e($type) . '"' . ($type === 'image' ? self::ef('media') : '') . '></div>',
+        } . "\n";
     }
 
     /** Préfixe les liens internes (« /contact ») du dossier d'installation. */
@@ -263,16 +319,18 @@ final class Blocks
         if ($b['link'] !== '') {
             $img = '<a href="' . e(self::href($b['link'])) . '">' . $img . '</a>';
         }
-        $caption = $b['caption'] !== '' ? '<figcaption>' . self::rich($b['caption']) . '</figcaption>' : '';
+        $img = self::tag($img, 'ef', 'media');
+        $caption = $b['caption'] !== '' ? '<figcaption' . self::ef('caption', true) . '>' . self::rich($b['caption']) . '</figcaption>' : '';
         return '<figure class="img img-' . $b['size'] . '">' . $img . $caption . "</figure>\n";
     }
 
     private static function faqHtml(array $b, string $anchor, string $lang): string
     {
         $title = $b['title'] !== '' ? $b['title'] : Theme::t('faq', $lang);
-        $out = '<section class="faq"><h2 id="' . e($anchor) . '">' . e($title) . '</h2>';
-        foreach ($b['items'] as $item) {
-            $out .= '<details><summary>' . e($item['q']) . '</summary><div><p>' . self::rich($item['a']) . '</p></div></details>';
+        $out = '<section class="faq"><h2 id="' . e($anchor) . '"' . self::ef('title') . '>' . e($title) . '</h2>';
+        foreach ($b['items'] as $n => $item) {
+            $out .= '<details><summary' . self::ef('items.' . $n . '.q') . '>' . e($item['q']) . '</summary><div><p' . self::ef('items.' . $n . '.a', true) . '>'
+                . self::rich($item['a']) . '</p></div></details>';
         }
         return $out . "</section>\n";
     }
@@ -281,18 +339,18 @@ final class Blocks
     {
         $rows = $b['rows'];
         $cols = max(array_map('count', $rows));
-        $cell = static function (array $row, string $tag) use ($cols): string {
+        $cell = static function (array $row, string $tag, int $r) use ($cols): string {
             $html = '';
             for ($c = 0; $c < $cols; $c++) {
-                $html .= "<$tag>" . self::rich($row[$c] ?? '') . "</$tag>";
+                $html .= "<$tag" . self::ef('rows.' . $r . '.' . $c, true) . '>' . self::rich($row[$c] ?? '') . "</$tag>";
             }
             return '<tr>' . $html . '</tr>';
         };
-        $out = '<div class="table"><table>' . ($b['caption'] !== '' ? '<caption>' . e($b['caption']) . '</caption>' : '');
+        $out = '<div class="table"><table>' . ($b['caption'] !== '' ? '<caption' . self::ef('caption') . '>' . e($b['caption']) . '</caption>' : '');
         if ($b['head']) {
-            $out .= '<thead>' . $cell(array_shift($rows), 'th') . '</thead>';
+            $out .= '<thead>' . $cell(array_shift($rows), 'th', 0) . '</thead>';
         }
-        $out .= '<tbody>' . implode('', array_map(fn ($r) => $cell($r, 'td'), $rows)) . '</tbody>';
+        $out .= '<tbody>' . implode('', array_map(fn ($r, $n) => $cell($r, 'td', $n + ($b['head'] ? 1 : 0)), $rows, array_keys($rows))) . '</tbody>';
         return $out . "</table></div>\n";
     }
 
@@ -306,7 +364,7 @@ final class Blocks
         return '<figure class="video"><a class="video-lite" href="' . e($v['watch']) . '" data-embed="' . e($v['embed'])
             . '" target="_blank" rel="noopener"><span class="video-play" aria-hidden="true"></span><span class="video-label">'
             . e(Theme::t('play_video', $lang)) . ' · ' . e($label) . '</span></a>'
-            . ($b['caption'] !== '' ? '<figcaption>' . e($b['caption']) . '</figcaption>' : '') . "</figure>\n";
+            . ($b['caption'] !== '' ? '<figcaption' . self::ef('caption') . '>' . e($b['caption']) . '</figcaption>' : '') . "</figure>\n";
     }
 
     private static function hero(array $b, bool $isH1, string $lang): string
@@ -314,27 +372,27 @@ final class Blocks
         $tag = $isH1 ? 'h1' : 'h2';
         $buttons = '';
         if ($b['button'] !== '' && $b['url'] !== '') {
-            $buttons .= '<a class="btn btn-primary btn-lg" href="' . e(self::href($b['url'])) . '">' . e($b['button']) . '</a>';
+            $buttons .= '<a class="btn btn-primary btn-lg" href="' . e(self::href($b['url'])) . '"' . self::ef('button') . '>' . e($b['button']) . '</a>';
         }
         if ($b['button2'] !== '' && $b['url2'] !== '') {
-            $buttons .= '<a class="btn btn-secondary btn-lg" href="' . e(self::href($b['url2'])) . '">' . e($b['button2']) . '</a>';
+            $buttons .= '<a class="btn btn-secondary btn-lg" href="' . e(self::href($b['url2'])) . '"' . self::ef('button2') . '>' . e($b['button2']) . '</a>';
         }
         $media = $b['media'] !== '' ? Media::get($b['media']) : null;
         return '<section class="hero' . ($media ? ' hero-media' : '') . '"><div class="hero-text">'
-            . "<$tag class=\"hero-title\">" . e($b['title']) . "</$tag>"
-            . ($b['text'] !== '' ? '<p class="hero-lead">' . self::rich($b['text']) . '</p>' : '')
+            . "<$tag class=\"hero-title\"" . self::ef('title') . '>' . e($b['title']) . "</$tag>"
+            . ($b['text'] !== '' ? '<p class="hero-lead"' . self::ef('text', true) . '>' . self::rich($b['text']) . '</p>' : '')
             . ($buttons !== '' ? '<p class="btns">' . $buttons . '</p>' : '') . '</div>'
-            . ($media ? '<div class="hero-img">' . Media::picture($media, (string) $media['alt'], '(min-width: 60rem) 34rem, 100vw', true) . '</div>' : '')
+            . ($media ? '<div class="hero-img"' . self::ef('media') . '>' . Media::picture($media, (string) $media['alt'], '(min-width: 60rem) 34rem, 100vw', true) . '</div>' : '')
             . "</section>\n";
     }
 
     private static function features(array $b, string $anchor): string
     {
-        $out = '<section class="features">' . ($b['title'] !== '' ? '<h2 id="' . e($anchor) . '">' . e($b['title']) . '</h2>' : '') . '<div class="grid">';
-        foreach ($b['items'] as $item) {
-            $out .= '<div class="feature">' . ($item['icon'] !== '' ? '<span class="feature-icon" aria-hidden="true">' . e($item['icon']) . '</span>' : '')
-                . ($item['title'] !== '' ? '<h3>' . e($item['title']) . '</h3>' : '')
-                . ($item['text'] !== '' ? '<p>' . self::rich($item['text']) . '</p>' : '') . '</div>';
+        $out = '<section class="features">' . ($b['title'] !== '' ? '<h2 id="' . e($anchor) . '"' . self::ef('title') . '>' . e($b['title']) . '</h2>' : '') . '<div class="grid">';
+        foreach ($b['items'] as $n => $item) {
+            $out .= '<div class="feature">' . ($item['icon'] !== '' ? '<span class="feature-icon" aria-hidden="true"' . self::ef('items.' . $n . '.icon') . '>' . e($item['icon']) . '</span>' : '')
+                . ($item['title'] !== '' ? '<h3' . self::ef('items.' . $n . '.title') . '>' . e($item['title']) . '</h3>' : '')
+                . ($item['text'] !== '' ? '<p' . self::ef('items.' . $n . '.text', true) . '>' . self::rich($item['text']) . '</p>' : '') . '</div>';
         }
         return $out . "</div></section>\n";
     }
@@ -342,15 +400,15 @@ final class Blocks
     /** Équipe : portraits ronds (ou initiales), nom, fonction, présentation et lien de profil. */
     private static function team(array $b, string $anchor, string $lang): string
     {
-        $out = '<section class="team"><h2 id="' . e($anchor) . '">' . e($b['title'] !== '' ? $b['title'] : Theme::t('team', $lang)) . '</h2><div class="grid">';
-        foreach ($b['items'] as $p) {
+        $out = '<section class="team"><h2 id="' . e($anchor) . '"' . self::ef('title') . '>' . e($b['title'] !== '' ? $b['title'] : Theme::t('team', $lang)) . '</h2><div class="grid">';
+        foreach ($b['items'] as $n => $p) {
             $m = $p['media'] !== '' ? Media::get($p['media']) : null;
             $initials = mb_strtoupper(implode('', array_map(fn ($w) => mb_substr($w, 0, 1), array_slice(preg_split('/\s+/u', $p['name']) ?: [], 0, 2))));
             $out .= '<div class="feature member">'
-                . ($m ? Media::picture($m, (string) ($m['alt'] !== '' ? $m['alt'] : $p['name']), '8rem') : '<span class="member-initials" aria-hidden="true">' . e($initials) . '</span>')
-                . '<h3>' . e($p['name']) . '</h3>'
-                . ($p['role'] !== '' ? '<p class="member-role">' . e($p['role']) . '</p>' : '')
-                . ($p['bio'] !== '' ? '<p>' . self::rich($p['bio']) . '</p>' : '')
+                . self::tag($m ? Media::picture($m, (string) ($m['alt'] !== '' ? $m['alt'] : $p['name']), '8rem') : '<span class="member-initials" aria-hidden="true">' . e($initials) . '</span>', 'ef', 'items.' . $n . '.media')
+                . '<h3' . self::ef('items.' . $n . '.name') . '>' . e($p['name']) . '</h3>'
+                . ($p['role'] !== '' ? '<p class="member-role"' . self::ef('items.' . $n . '.role') . '>' . e($p['role']) . '</p>' : '')
+                . ($p['bio'] !== '' ? '<p' . self::ef('items.' . $n . '.bio', true) . '>' . self::rich($p['bio']) . '</p>' : '')
                 . ($p['link'] !== '' ? '<p class="member-link"><a href="' . e(self::href($p['link'])) . '">'
                     . e((string) preg_replace('/^www\./', '', (string) (parse_url($p['link'], PHP_URL_HOST) ?: $p['link']))) . ' ↗</a></p>' : '')
                 . '</div>';
@@ -368,7 +426,7 @@ final class Blocks
             return '';
         }
         $title = $b['title'] !== '' ? $b['title'] : Theme::t('latest_posts', $lang);
-        return '<section class="posts-block"><h2' . ($anchor !== '' ? ' id="' . e($anchor) . '"' : '') . '>' . e($title) . '</h2>'
+        return '<section class="posts-block"><h2' . ($anchor !== '' ? ' id="' . e($anchor) . '"' : '') . self::ef('title') . '>' . e($title) . '</h2>'
             . Theme::cards($posts, $lang)
             . '<p class="more"><a href="' . e(path_to(Content::blogPath())) . '">' . e(Theme::t('all_posts', $lang)) . " →</a></p></section>\n";
     }
@@ -390,7 +448,7 @@ final class Blocks
             return '';
         }
         $title = $b['title'] !== '' ? $b['title'] : Theme::t('products', $lang);
-        return '<section class="posts-block products-block"><h2' . ($anchor !== '' ? ' id="' . e($anchor) . '"' : '') . '>' . e($title) . '</h2>'
+        return '<section class="posts-block products-block"><h2' . ($anchor !== '' ? ' id="' . e($anchor) . '"' : '') . self::ef('title') . '>' . e($title) . '</h2>'
             . Theme::products($products, $lang)
             . '<p class="more"><a href="' . e(path_to(Shop::path())) . '">' . e(Theme::t('all_products', $lang)) . " →</a></p></section>\n";
     }
@@ -398,7 +456,7 @@ final class Blocks
     private static function contactHtml(array $b, string $page, string $lang): string
     {
         $t = static fn (string $k): string => e(Theme::t($k, $lang));
-        $title = $b['title'] !== '' ? '<h2>' . e($b['title']) . '</h2>' : '';
+        $title = $b['title'] !== '' ? '<h2' . self::ef('title') . '>' . e($b['title']) . '</h2>' : '';
         $privacy = Content::findBySlugAny(['politique-de-confidentialite', 'confidentialite', 'politica-de-privacidad', 'privacy-policy', 'privacy']);
         $notice = $t('form_notice') . ($privacy ? ' <a href="' . e(path_to(Content::path($privacy))) . '">' . $t('privacy') . '</a>.' : '');
         return '<section class="contact-block">' . $title

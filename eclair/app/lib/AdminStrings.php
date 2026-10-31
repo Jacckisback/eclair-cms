@@ -71,6 +71,8 @@ final class AdminStrings
             // Choix de l'IA, connecteur MCP
             'Choisir l’IA', 'Modification proposée par l’IA : vérifie-la, puis enregistre pour l’appliquer.',
             'Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.',
+            // Mode Visuel
+            'Aperçu modifiable', 'Ajouter un bloc au-dessus', 'Ajouter un bloc en dessous', 'Outils du bloc',
         ];
         $out = [];
         foreach ($keys as $k) {
