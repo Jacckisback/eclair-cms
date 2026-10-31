@@ -44,6 +44,7 @@
 <IfModule mod_mime.c>
     AddType image/webp .webp
     AddType image/avif .avif
+    AddType font/woff2 .woff2
     AddType application/javascript .js
     AddCharset utf-8 .css .js
 </IfModule>

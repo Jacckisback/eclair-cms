@@ -1,0 +1,91 @@
+/* ⚡ Éclair — directions artistiques. Ajouté au thème de base quand une direction est choisie, morceau par morceau :
+   seuls « base » et les morceaux des choix de la direction sont insérés dans la page (app/lib/Design.php). */
+
+/*@base*/
+::selection{background:var(--accent);color:var(--on-accent)}
+html{accent-color:var(--accent);caret-color:var(--accent);scrollbar-color:color-mix(in srgb,var(--text) 32%,transparent) var(--bg)}
+h1,h2,h3,.hero-title{font-weight:var(--hw);overflow-wrap:break-word;hyphens:auto}
+h2,h3,h4{margin-top:calc(2.2em * var(--dn))}
+h1{font-size:calc(var(--hs) * clamp(2rem, 1.45rem + 2.4vw, 3.15rem))}
+h2{font-size:calc(var(--hs) * clamp(1.45rem, 1.25rem + .9vw, 1.9rem))}
+.hero{padding:calc(var(--dn) * clamp(2.5rem, 1.5rem + 5vw, 5.5rem)) 0 calc(var(--dn) * clamp(1.5rem, 1rem + 3vw, 3.5rem))}
+.hero-title{font-size:calc(var(--hs) * clamp(2rem, 1.2rem + 3.6vw, 3.9rem))}
+.hero-img img{border-radius:var(--radius)}
+.btn{border-radius:var(--btn-r)}
+.callout,.faq details{border-radius:var(--radius)}
+.key{background:var(--bg-soft);border-color:var(--line)}
+td,th{font-variant-numeric:tabular-nums}
+/*@*/
+
+/*@case:upper*/
+h1,h2,.hero-title{text-transform:uppercase;letter-spacing:.004em;line-height:1.02}
+/*@*/
+
+/*@hero:poster*/
+.hero,.hero-media{grid-template-columns:1fr}
+.hero-title{font-size:calc(var(--hs) * clamp(2.1rem, .8rem + 6.4vw, 5.4rem));line-height:.98;max-width:15ch}
+.hero-img img{aspect-ratio:21/9;object-fit:cover}
+/*@*/
+
+/*@hero:fullbleed*/
+.hero-media{grid-template-columns:1fr;min-height:min(78vh, 46rem);padding:0;align-items:end;border-radius:var(--radius);overflow:hidden}
+.hero-media>*{grid-area:1/1}
+.hero-media .hero-img,.hero-media picture{height:100%}
+.hero-media .hero-img img{width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none}
+.hero-media .hero-text{position:relative;z-index:1;padding:clamp(5rem, 3rem + 8vw, 9rem) clamp(1.5rem, 1rem + 4vw, 4rem) clamp(1.5rem, 1rem + 4vw, 4rem);background:linear-gradient(to top,rgb(0 0 0 / .82),rgb(0 0 0 / .62) 62%,transparent)}
+.hero-media .hero-title,.hero-media .hero-lead,.hero-media .hero-lead a{color:#fff}
+.hero-media .btn-secondary{color:#fff;border-color:#fff}
+/*@*/
+
+/*@hero:editorial*/
+.hero-media{grid-template-columns:1.3fr 1fr;align-items:end;gap:clamp(1.5rem, 4vw, 4rem)}
+.hero-title{max-width:14ch}
+.hero-media .hero-img img{aspect-ratio:4/5;object-fit:cover}
+.hero{border-bottom:1px solid var(--line)}
+@media (max-width:52rem){.hero-media{grid-template-columns:1fr}.hero-media .hero-img img{aspect-ratio:4/3}}
+/*@*/
+
+/*@hero:centered*/
+.hero,.hero-media{grid-template-columns:1fr;text-align:center;justify-items:center}
+.hero-lead{margin-inline:auto}
+.hero .btns{justify-content:center}
+.hero-img img{aspect-ratio:16/9;object-fit:cover}
+/*@*/
+
+/*@features:rows*/
+.features .grid{display:block}
+.feature{background:none;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none}
+.features .feature{display:grid;grid-template-columns:2.2rem 1fr;column-gap:1.25rem;padding:1.4rem 0}
+.features .feature>*{grid-column:2}
+.features .feature>.feature-icon{grid-column:1;grid-row:1 / span 3}
+.feature h3{margin-top:0}
+/*@*/
+
+/*@features:columns*/
+.features .grid{grid-template-columns:repeat(auto-fit, minmax(14rem, 1fr));gap:2rem 2.5rem}
+.feature{background:none;border:0;border-top:2px solid var(--text);border-radius:0;box-shadow:none;padding:1.2rem 0 0}
+/*@*/
+
+/*@sections:bands*/
+.content>:is(.features,.faq,.team,.posts-block,.contact-block){--band:calc(var(--dn) * 2.5rem);background:var(--bg-soft);box-shadow:0 0 0 100vmax var(--bg-soft);clip-path:inset(calc(-1 * var(--band)) -100vmax);padding-block:calc(var(--dn) * clamp(1rem, .5rem + 2vw, 2.5rem));margin-block:var(--band)}
+.content>:is(.features,.faq,.team,.posts-block,.contact-block)+:is(.features,.faq,.team,.posts-block,.contact-block){margin-top:calc(-1 * var(--band))}
+.content>* .card,.content>.faq details,:where(.content>*) .feature{background:var(--bg)}
+/*@*/
+
+/*@surfaces:flat*/
+.card,.faq details,.callout{border-color:transparent}
+/*@*/
+
+/*@surfaces:raised*/
+.card{border-color:transparent;box-shadow:var(--shadow)}
+/*@*/
+
+/*@icons:none*/
+.features .feature{grid-template-columns:1fr}
+.features .feature>*{grid-column:auto}
+/*@*/
+
+/*@icons:line*/
+.feature-icon{width:auto;height:auto;background:none;border-radius:0;margin:0 0 .6rem}
+.feature-icon svg{width:1.7rem;height:1.7rem;fill:none;stroke:var(--link-c);stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+/*@*/

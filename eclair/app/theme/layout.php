@@ -28,7 +28,7 @@ $hasIcon = is_file(ECLAIR_ROOT . '/media/site/icon-32.png');
 <link rel="icon" type="image/png" sizes="32x32" href="<?= e(path_to('/media/site/icon-32.png')) ?>">
 <link rel="apple-touch-icon" href="<?= e(path_to('/media/site/icon-180.png')) ?>">
 <?php endif ?>
-<style><?= $v['css'] ?></style>
+<?= Theme::preload() ?><style><?= $v['css'] ?></style>
 <script src="<?= e(asset('site/site.js')) ?>" defer></script>
 </head>
 <body class="<?= e(trim(($v['class'] ?? '') . ' ' . Theme::bodyClass())) ?>"<?= !empty($v['id']) ? ' data-id="' . e($v['id']) . '"' : '' ?> data-edit="<?= e(Theme::t('edit', $lang)) ?>">

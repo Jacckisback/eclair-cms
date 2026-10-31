@@ -382,15 +382,29 @@ final class Blocks
             . "<$tag class=\"hero-title\"" . self::ef('title') . '>' . e($b['title']) . "</$tag>"
             . ($b['text'] !== '' ? '<p class="hero-lead"' . self::ef('text', true) . '>' . self::rich($b['text']) . '</p>' : '')
             . ($buttons !== '' ? '<p class="btns">' . $buttons . '</p>' : '') . '</div>'
-            . ($media ? '<div class="hero-img"' . self::ef('media') . '>' . Media::picture($media, (string) $media['alt'], '(min-width: 60rem) 34rem, 100vw', true) . '</div>' : '')
+            . ($media ? '<div class="hero-img"' . self::ef('media') . '>' . Media::picture($media, (string) $media['alt'], self::heroSizes(), true) . '</div>' : '')
             . "</section>\n";
+    }
+
+    /** Largeur affichée de l'image du bandeau, selon sa composition (pleine largeur dans certaines directions). */
+    private static function heroSizes(): string
+    {
+        return match (Theme::direction()['hero'] ?? 'split') {
+            'poster', 'fullbleed', 'centered' => '(min-width: 72rem) 68rem, 100vw',
+            'editorial' => '(min-width: 60rem) 28rem, 100vw',
+            default => '(min-width: 60rem) 34rem, 100vw',
+        };
     }
 
     private static function features(array $b, string $anchor): string
     {
         $out = '<section class="features">' . ($b['title'] !== '' ? '<h2 id="' . e($anchor) . '"' . self::ef('title') . '>' . e($b['title']) . '</h2>' : '') . '<div class="grid">';
+        // Direction artistique : icônes dessinées à la place des émojis, ou aucune icône.
+        $icons = Theme::direction()['icons'] ?? 'emoji';
         foreach ($b['items'] as $n => $item) {
-            $out .= '<div class="feature">' . ($item['icon'] !== '' ? '<span class="feature-icon" aria-hidden="true"' . self::ef('items.' . $n . '.icon') . '>' . e($item['icon']) . '</span>' : '')
+            $icon = $icons === 'emoji' || $item['icon'] === '' ? '' : ($icons === 'line' ? Design::icon($item['icon']) : '');
+            $out .= '<div class="feature">' . ($icons !== 'emoji' ? ($icon !== '' ? '<span class="feature-icon" aria-hidden="true">' . $icon . '</span>' : '')
+                : ($item['icon'] !== '' ? '<span class="feature-icon" aria-hidden="true"' . self::ef('items.' . $n . '.icon') . '>' . e($item['icon']) . '</span>' : ''))
                 . ($item['title'] !== '' ? '<h3' . self::ef('items.' . $n . '.title') . '>' . e($item['title']) . '</h3>' : '')
                 . ($item['text'] !== '' ? '<p' . self::ef('items.' . $n . '.text', true) . '>' . self::rich($item['text']) . '</p>' : '') . '</div>';
         }

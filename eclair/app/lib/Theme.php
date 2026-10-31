@@ -135,6 +135,8 @@ final class Theme
     /** Apparence essayée dans l'aperçu des réglages (jamais enregistrée ni mise en cache). */
     private static ?array $preview = null;
     private static bool $shop = false;
+    /** Direction artistique en vigueur (false : pas encore calculée). */
+    private static array|false|null $direction = false;
 
     public static function t(string $key, ?string $lang = null, array $vars = []): string
     {
@@ -224,7 +226,27 @@ final class Theme
         $a['theme'] = isset(self::THEMES[$a['theme'] ?? '']) ? $a['theme'] : 'eclair';
         $a['header'] = ($a['header'] ?? '') === 'center' ? 'center' : 'left';
         $a['cards'] = ($a['cards'] ?? '') === 'list' ? 'list' : 'grid';
+        if ($d = self::direction()) {
+            $a['accent'] = $d['accent'];
+        }
         return $a;
+    }
+
+    /** Direction artistique choisie (Réglages › Apparence) ou essayée dans l'aperçu ; null : thème classique. */
+    public static function direction(): ?array
+    {
+        if (self::$direction === false) {
+            $d = self::$preview['direction'] ?? Settings::get('appearance.direction');
+            self::$direction = is_array($d) && $d !== [] ? Design::normalize($d) : null;
+        }
+        return self::$direction;
+    }
+
+    /** Préchargement de la police de titre de la direction (« » pour un thème classique). */
+    public static function preload(): string
+    {
+        $d = self::direction();
+        return $d ? Design::preload($d) : '';
     }
 
     /** Essaie une apparence pour l'aperçu en direct (valeurs déjà vérifiées par l'appelant). */
@@ -232,6 +254,7 @@ final class Theme
     {
         self::$preview = $look;
         self::$css = null;
+        self::$direction = false;
     }
 
     /** Styles de la boutique pour cette page, même boutique fermée (aperçu d'une fiche produit dans l'éditeur). */
@@ -257,6 +280,16 @@ final class Theme
             return self::$css;
         }
         $a = self::look();
+        if ($d = self::direction()) {
+            // Direction artistique : thème de base sans son mode sombre automatique (la direction choisit clair ou sombre).
+            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css')) . Design::css($d);
+            $custom = self::custom();
+            $css .= $custom !== '' ? "\n" . $custom : '';
+            if (!self::$shop && !Shop::enabled()) {
+                $css = (string) preg_replace('~/\*shop\*/.*?/\*/shop\*/~s', '', $css);
+            }
+            return self::$css = self::minify($css);
+        }
         $accent = Sanitize::color($a['accent'] ?? '', '#5b4cf0');
         $vars = ':root{--accent:' . $accent
             . ';--on-accent:' . (self::contrast($accent, '#ffffff') >= 4.5 ? '#ffffff' : '#111111')
@@ -361,12 +394,12 @@ final class Theme
         return (max($l1, $l2) + 0.05) / (min($l1, $l2) + 0.05);
     }
 
-    /** Version de la couleur assez contrastée (≥ 4,5:1) sur le fond donné. */
-    public static function readable(string $color, string $background): string
+    /** Version de la couleur assez contrastée (≥ 4,5:1 par défaut) sur le fond donné. */
+    public static function readable(string $color, string $background, float $ratio = 4.5): string
     {
         $towards = self::luminance($background) > 0.5 ? 0 : 255;
         $rgb = self::rgb($color);
-        for ($i = 0; $i < 20 && self::contrast(self::hex($rgb), $background) < 4.5; $i++) {
+        for ($i = 0; $i < 20 && self::contrast(self::hex($rgb), $background) < $ratio; $i++) {
             $rgb = array_map(fn ($v) => (int) round($v + ($towards - $v) * 0.12), $rgb);
         }
         return self::hex($rgb);

@@ -37,6 +37,7 @@ final class Settings
             'dark' => 'auto',
             'footer' => '',
             'credit' => true,
+            'direction' => [],
         ],
         'seo' => [
             'title_format' => '{title} · {site}',

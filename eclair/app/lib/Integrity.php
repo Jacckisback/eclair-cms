@@ -41,7 +41,7 @@ final class Integrity
             }
         }
         foreach (self::scan(['media']) as $path) {
-            if (!preg_match('~\.(jpe?g|png|gif|webp|avif)$~i', $path) && !in_array(basename($path), ['index.html', '.htaccess'], true)) {
+            if (!preg_match('~\.(jpe?g|png|gif|webp|avif)$~i', $path) && !preg_match('~^media/fonts/[a-z0-9-]+\.woff2$~', $path) && !in_array(basename($path), ['index.html', '.htaccess'], true)) {
                 $result['suspicious'][] = $path;
             }
         }
