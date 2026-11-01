@@ -12,14 +12,15 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 2. [Features in detail](#features-in-detail)
 3. [Everyday use](#everyday-use)
 4. [Visual mode](#visual-mode)
-5. [Themes](#themes)
-6. [Shop](#shop)
-7. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai))
-8. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
-9. [Security](#security)
-10. [Updating, backing up, moving](#updating-backing-up-moving)
-11. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
-12. [For developers](#for-developers)
+5. [Art directions](#art-directions) (including [Imagine my direction with AI](#imagine-my-direction-with-ai) and the [Design score](#design-score))
+6. [Themes](#themes)
+7. [Shop](#shop)
+8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai))
+9. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
+10. [Security](#security)
+11. [Updating, backing up, moving](#updating-backing-up-moving)
+12. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
+13. [For developers](#for-developers)
 
 ---
 
@@ -27,8 +28,8 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 
 ### Requirements
 
-- **PHP 8.1 or later** (8.3 recommended), with the `mbstring`, `json`, `dom` and `session` extensions (enabled by default almost everywhere).
-- Recommended: `gd` (WebP images), `zip` (one-click backups), `curl` (IndexNow).
+- **PHP 8.1 or later** (8.3 recommended), with the `mbstring`, `json`, `dom`, `session` and `zlib` extensions (enabled by default almost everywhere).
+- Recommended: `gd` (WebP images), `zip` (one-click backups), `curl` (IndexNow, AI assistant, art direction fonts).
 - An **Apache or LiteSpeed** server (virtually every shared host: Hostinger, IONOS, OVHcloud…). For Nginx, see [below](#nginx).
 - An HTTPS certificate (free with Let's Encrypt at almost every host).
 
@@ -36,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) archive (440 KB) and unzip it.
+1. Download the [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) archive (480 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -68,7 +69,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 ### ⚡ Speed
 
 - **Automatic static cache**: each page is generated once, then served without loading the application. The cache clears itself on every change (and at the scheduled time for a scheduled post).
-- **CSS inlined in the page** (17 to 23 KB depending on the theme and whether the shop is open, 5 to 6 KB compressed), system fonts: no render-blocking requests, no layout shift.
+- **CSS inlined in the page** (17 to 23 KB depending on the theme and whether the shop is open, 5 to 6 KB compressed), system fonts: no render-blocking requests, no layout shift. With an art direction, a single heading font is added on top (12 to 27 KB), served by your site and preloaded.
 - **Images optimized on upload**: resized (2000 px max), available as **responsive WebP** (480, 800, 1200, 1600 px), explicit dimensions, lazy loading, priority given to the main image.
 - ETag and `304 Not Modified` responses, Brotli/Gzip compression and one-year browser caching for static files (via `.htaccess`).
 
@@ -105,7 +106,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 
 ### 🧩 Everything else
 
-Media library (drag and drop, alt text, detection of images in use), drag-and-drop menus (header and footer), “pillar” categories for a topic cluster, site search, spam-proof contact form **without a captcha** (honeypot field, token, limits per network and per day) with an inbox, administrator and editor accounts, 6 themes with live preview, automatic dark mode, 6 system font stacks, main color with guaranteed WCAG contrast, admin in 7 languages (English, French, Spanish, German, Italian, Portuguese, Chinese), public site in 6 languages (fr, es, en, de, it, pt).
+Media library (drag and drop, alt text, detection of images in use), drag-and-drop menus (header and footer), “pillar” categories for a topic cluster, site search, spam-proof contact form **without a captcha** (honeypot field, token, limits per network and per day) with an inbox, administrator and editor accounts, 6 themes and 12 art directions with live preview, automatic dark mode, 6 system font stacks, main color with guaranteed WCAG contrast, admin in 7 languages (English, French, Spanish, German, Italian, Portuguese, Chinese), public site in 6 languages (fr, es, en, de, it, pt).
 
 ---
 
@@ -155,6 +156,77 @@ Everything goes through the usual editor: saving (`Ctrl+S` also works inside the
 
 > [!NOTE]
 > Visual mode only exists in the admin preview: login, security token and write permission required, and the page is never cached or indexed. Your public pages bear no trace of it: they stay identical down to the byte.
+
+---
+
+## Art directions
+
+<p align="center">
+  <img src="images/en/directions.webp" alt="The same ceramics site in six art directions: Nocturne, Gallery, Clay, Riviera, Playtime and Press" width="100%">
+</p>
+
+A theme changes colors; an **art direction** changes the site's entire visual world, starting from a concrete idea: the city at night, the ceramics studio, the morning paper. In **Settings › Appearance**, choose **Art direction** (instead of **Classic theme**), click one of the 12 cards and watch the live preview: your real site, on desktop or mobile. Nothing is published until you save.
+
+| Direction | Visual world | Heading typeface |
+|---|---|---|
+| **Nocturne** | The city at night: deep blue, amber light | Big Shoulders Display, all caps |
+| **Gallery** | White walls, black labels, a signage red | Familjen Grotesk |
+| **Clay** | The ceramics studio: sand, terracotta, soft shapes | Young Serif |
+| **Botanical** | The herbarium and the greenhouse: deep green, sage paper | DM Serif Display |
+| **Poster** | The Swiss poster: black on off-white, bright orange | Archivo Black, all caps |
+| **Riviera** | The seaside: navy blue, pale sky, coral | Gloock |
+| **Chambers** | The letterhead: navy ink, burgundy, fine rules | Libre Caslon Display |
+| **Neon** | The creative screen at night: near-black, lime green | Unbounded |
+| **Gentle** | The treatment room: powder pink, plum, plenty of air | Cormorant Garamond |
+| **Worksite** | Concrete, safety yellow, condensed signage | Barlow Condensed, all caps |
+| **Playtime** | The schoolyard: sky blue, tomato red, round letters | Fredoka |
+| **Press** | The morning paper: newsprint, front-page red | Newsreader |
+
+**Adjust**: below the cards, **Adjust the direction** opens every setting, to mix and match freely:
+
+- **5 colors**: background, bands and cards, text, secondary text, accent (buttons and links).
+- **Heading font**: 18 typefaces chosen for their personality (none of the ones you see everywhere), or a system font. **Body font**: a system font, nothing to download.
+- **Heading case** (normal or capitals), **heading size** (subtle, balanced, dramatic), **corners** (square, softened, round), **spacing** (compact, normal, airy).
+- **Cards**: thin border, flat color or drop shadow.
+- **Home banner**: text and image side by side, poster (very large title), full-bleed image (the title over the photo), editorial (portrait image) or centered.
+- **“Features” block**: cards, rows or ruled columns. **Sections**: plain background or color bands. **Feature icons**: line icons (emoji are swapped for line-drawn icons), no icon, or emoji.
+
+The header, post lists, logo, site icon, footer and Custom CSS are set just as before. To go back to the classic theme, choose **Classic theme** and save: its settings are waiting for you, untouched.
+
+**Always readable**: whatever colors you choose, Éclair automatically adjusts the text (**7:1** contrast against the background), the secondary text, links and buttons (4.5:1), including on backgrounds tinted with the accent color (badges, menu, highlighting). So a color that's too pale for text on a light background gets darkened just enough.
+
+**Always fast**: the heading font is **downloaded only once, by your server** (from Fontsource, under the SIL Open Font License), stored in `media/fonts/`, then served by your site and preloaded with `font-display: optional`: no requests to a third-party service for your visitors, no layout shift. Only the CSS rules your direction needs are inlined in the page, and the automatic dark mode gives way to the direction's own light or dark choice. Measured with Lighthouse: 100 in all four categories with Nocturne, Riviera, Press and Poster.
+
+> [!TIP]
+> If your host blocks outgoing connections, the font can't be downloaded: a message lets you know, and in the meantime the site uses a fallback font from the same family (serif, condensed…). Try again later by saving again.
+
+### Imagine my direction with AI
+
+<p align="center">
+  <img src="images/en/frame-directions.webp" alt="Settings › Appearance: the choice between art direction and classic theme, then the cards of the 12 directions" width="80%">
+</p>
+
+When the [AI assistant](#ai-assistant) is turned on, **Imagine my direction with AI** appears below the cards. Describe your business, your audience and the mood you're after in one or two sentences (“organic neighborhood bakery in Lyon, family customers, warm but modern”), then click **Suggest 3 directions**. The AI also reads your site's description and your editorial profile, and follows the method of [Impeccable](https://github.com/pbakaus/impeccable):
+
+1. start from the concrete world of the business (places, materials, objects, light) rather than from adjectives;
+2. give each suggestion **a precise reference** (“the enamel signs of a 1950s bakery”) and derive the colors, typeface and layouts from it;
+3. suggest three **genuinely different** directions (light or dark, warm or cool, serif or sans serif);
+4. avoid the category's default choice (navy and gold for a lawyer…), its predictable opposite and the tics of “AI-generated design”.
+
+The three suggestions appear first among the cards, marked ✦: click one to see it in the preview, adjust it, then save the one you like. The AI only picks from Éclair's settings (colors, fonts from the list, layouts) and never writes CSS: each suggestion is checked and its contrast corrected before it reaches your site. The estimated cost is shown below the button (≈ $0.03 with Claude Sonnet 5.5) and is taken from the assistant's budget. Administrators only.
+
+### Design score
+
+In the editor, the **Analysis** tab shows a third ring, **Design**, next to SEO and GEO. It checks that the page holds up visually:
+
+- **subheadings**: a hierarchy without gaps (H2, then H3, then H4), short, no decorative emoji;
+- **banner**: a short title (8 words at most, 6 in all caps), a call-to-action button, an image if your direction requires one (full-bleed, editorial);
+- measured **calls to action** (3 buttons at most);
+- a **“Features” block** with 3 to 6 described items, and icons that have a line-drawn equivalent;
+- **text**: no sentences in ALL CAPS, no empty buzzwords (“seamless”, “cutting-edge”, “clé en main”… depending on the page's language), no overuse of em dashes, no passage repeated word for word, no wall of more than 350 words without a subheading, image or list;
+- an **art direction** chosen for the site.
+
+The Analysis tab's score is now the average of the three rings.
 
 ---
 
@@ -506,35 +578,37 @@ eclair/                  ← upload this to your hosting
 ├── index.php            front controller (serves the cache without loading the application)
 ├── .htaccess            rewriting, protections, compression, browser caching
 ├── app/lib/             code (Eclair\… classes): Content, Blocks, Seo, Analyzer, Media, Auth…
-├── app/admin/views/     admin screens
+├── app/admin/views/     admin screens (compressed as .php.gz in the archive)
 ├── app/theme/           public site templates + theme.css (inlined in every page)
 ├── app/theme/themes/    the 5 optional themes (one CSS file each, added to theme.css)
+├── app/theme/directions.css  art direction CSS snippets (only those of the chosen direction go into the page)
 ├── app/lang/            admin translations (6 languages, compressed JSON) — the French text is the key
 ├── assets/admin/        admin CSS and JavaScript (no dependencies)
 ├── assets/site/site.js  the only public script (2.4 KB, 1.2 KB compressed)
 ├── data/                content, settings, accounts (created at installation, never public)
 ├── cache/               generated pages
-└── media/               uploaded images
+└── media/               uploaded images (and media/fonts/: the art direction's font)
 i18n/                    human-readable translation sources (compiled by tools/i18n.php)
 tests/run.php            unit tests + HTTP integration (including the attacks from the security review)
 tests/fake-ai.php        fake AI providers (Claude, ChatGPT, images): the assistant is tested with no key and no spending
 tests/shop.php           themes and shop (product pages, Stripe, PayPal, Revolut, JSON-LD, Merchant Center feed)
 tests/mcp.php            MCP connector (OAuth, PKCE, protocol, revocation) and choosing the AI
+tests/design.php         art directions (contrast, CSS, fonts, booby-trapped settings, AI) and Design score
 tests/fixtures/          reference sites and a fingerprint of their public rendering (a new version doesn't change a single byte of the site)
 tools/router.php         router for PHP's built-in server (development)
 tools/capture.php        reference capture of the public rendering, and Lighthouse measurements (--lighthouse)
-tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP, minified admin JS and CSS)
+tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP, compressed admin views, minified admin JS and CSS)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 502 unit and HTTP checks
+php tests/run.php                                  # 550 unit and HTTP checks; ECLAIR_TEST_ROOT=… to test an unzipped archive
 php tools/build.php                                # ready-to-ship archive
 ```
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a backup: the integrity check will flag these files as modified, which is expected). In the archive, the PHP is compacted (`php -w`, comments removed) and the admin JavaScript and CSS are minified to stay under 1 MB: the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a backup: the integrity check will flag these files as modified, which is expected). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified to stay under 1 MB: the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

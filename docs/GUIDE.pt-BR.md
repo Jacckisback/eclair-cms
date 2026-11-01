@@ -12,14 +12,15 @@ Tudo o que você precisa saber para instalar, usar, proteger e manter o Éclair.
 2. [Recursos em detalhe](#recursos-em-detalhe)
 3. [Uso no dia a dia](#uso-no-dia-a-dia)
 4. [Modo Visual](#modo-visual)
-5. [Temas](#temas)
-6. [Loja](#loja)
-7. [Assistente de IA](#assistente-de-ia) (incluindo [Criar uma página com IA](#criar-uma-página-com-ia))
-8. [Conector MCP (Claude e ChatGPT)](#conector-mcp-claude-e-chatgpt)
-9. [Segurança](#segurança)
-10. [Atualizar, fazer backup, mudar de hospedagem](#atualizar-fazer-backup-mudar-de-hospedagem)
-11. [Solução de problemas](#solução-de-problemas) (incluindo [Nginx](#nginx))
-12. [Para desenvolvedores](#para-desenvolvedores)
+5. [Direções de arte](#direções-de-arte) (incluindo [Imagine minha direção com a IA](#imagine-minha-direção-com-a-ia) e a [Pontuação de design](#pontuação-de-design))
+6. [Temas](#temas)
+7. [Loja](#loja)
+8. [Assistente de IA](#assistente-de-ia) (incluindo [Criar uma página com IA](#criar-uma-página-com-ia))
+9. [Conector MCP (Claude e ChatGPT)](#conector-mcp-claude-e-chatgpt)
+10. [Segurança](#segurança)
+11. [Atualizar, fazer backup, mudar de hospedagem](#atualizar-fazer-backup-mudar-de-hospedagem)
+12. [Solução de problemas](#solução-de-problemas) (incluindo [Nginx](#nginx))
+13. [Para desenvolvedores](#para-desenvolvedores)
 
 ---
 
@@ -27,8 +28,8 @@ Tudo o que você precisa saber para instalar, usar, proteger e manter o Éclair.
 
 ### Requisitos
 
-- **PHP 8.1 ou superior** (8.3 recomendado), com as extensões `mbstring`, `json`, `dom` e `session` (ativas por padrão em quase todo lugar).
-- Recomendado: `gd` (imagens WebP), `zip` (backup em um clique), `curl` (IndexNow).
+- **PHP 8.1 ou superior** (8.3 recomendado), com as extensões `mbstring`, `json`, `dom`, `session` e `zlib` (ativas por padrão em quase todo lugar).
+- Recomendado: `gd` (imagens WebP), `zip` (backup em um clique), `curl` (IndexNow, assistente de IA, fonte das direções de arte).
 - Um servidor **Apache ou LiteSpeed** (praticamente todas as hospedagens compartilhadas: Hostinger, IONOS, OVHcloud…). Para Nginx, veja [mais abaixo](#nginx).
 - Um certificado HTTPS (gratuito com Let's Encrypt em quase todas as hospedagens).
 
@@ -36,7 +37,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) (440 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -68,7 +69,7 @@ O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicia
 ### ⚡ Velocidade
 
 - **Cache estático automático**: cada página é gerada uma vez e depois servida sem carregar a aplicação. O cache se limpa sozinho a cada alteração (e no horário previsto para um artigo agendado).
-- **CSS embutido na página** (de 17 a 23 KB conforme o tema e a loja, de 5 a 6 KB comprimido), fontes do sistema: nenhuma requisição bloqueante, nenhum deslocamento de layout.
+- **CSS embutido na página** (de 17 a 23 KB conforme o tema e a loja, de 5 a 6 KB comprimido), fontes do sistema: nenhuma requisição bloqueante, nenhum deslocamento de layout. Com uma direção de arte, soma-se uma única fonte de títulos (de 12 a 27 KB), servida pelo seu site e pré-carregada.
 - **Imagens otimizadas no envio**: redimensionadas (no máximo 2000 px), disponíveis em **WebP responsivo** (480, 800, 1200, 1600 px), dimensões explícitas, carregamento lento e prioridade para a imagem principal.
 - ETag e respostas `304 Not Modified`, compressão Brotli/Gzip e cache do navegador de um ano para os arquivos estáticos (via `.htaccess`).
 
@@ -105,7 +106,7 @@ O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicia
 
 ### 🧩 Todo o resto
 
-Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das imagens em uso), menus com arrastar e soltar (cabeçalho e rodapé), categorias “pilar” para um cluster de conteúdo, busca no site, formulário de contato antispam **sem captcha** (campo isca, token, limites por rede e por dia) com caixa de entrada, contas de administrador e redator, 6 temas com pré-visualização ao vivo, modo escuro automático, 6 fontes do sistema, cor principal com contraste WCAG garantido, painel em 7 idiomas (português, inglês, francês, espanhol, alemão, italiano, chinês), site público em 6 idiomas (fr, es, en, de, it, pt).
+Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das imagens em uso), menus com arrastar e soltar (cabeçalho e rodapé), categorias “pilar” para um cluster de conteúdo, busca no site, formulário de contato antispam **sem captcha** (campo isca, token, limites por rede e por dia) com caixa de entrada, contas de administrador e redator, 6 temas e 12 direções de arte com pré-visualização ao vivo, modo escuro automático, 6 fontes do sistema, cor principal com contraste WCAG garantido, painel em 7 idiomas (português, inglês, francês, espanhol, alemão, italiano, chinês), site público em 6 idiomas (fr, es, en, de, it, pt).
 
 ---
 
@@ -155,6 +156,77 @@ Tudo passa pelo editor de sempre: salvamento (`Ctrl+S` também funciona dentro d
 
 > [!NOTE]
 > O modo Visual só existe na pré-visualização do painel: exige login, token de segurança e permissão de escrita, e a página nunca é armazenada em cache nem indexada. As suas páginas públicas não carregam nenhum vestígio dele: continuam idênticas até o último byte.
+
+---
+
+## Direções de arte
+
+<p align="center">
+  <img src="images/pt-BR/directions.webp" alt="O mesmo site de cerâmica em seis direções de arte: Noturno, Galeria, Argila, Riviera, Recreio e Imprensa" width="100%">
+</p>
+
+Um tema muda as cores; uma **direção de arte** muda o universo inteiro do site, a partir de uma ideia concreta: a cidade à noite, o ateliê de cerâmica, o jornal da manhã. Em **Configurações › Aparência**, escolha **Direção de arte** (em vez de **Tema clássico**), clique em um dos 12 cartões e veja a pré-visualização ao vivo: o seu site de verdade, no computador ou no celular. Nada é publicado antes de você salvar.
+
+| Direção | Universo | Fonte dos títulos |
+|---|---|---|
+| **Noturno** | A cidade à noite: azul profundo, luz âmbar | Big Shoulders Display, em maiúsculas |
+| **Galeria** | Paredes brancas, legendas pretas, um vermelho de sinalização | Familjen Grotesk |
+| **Argila** | O ateliê de cerâmica: areia, terracota, formas suaves | Young Serif |
+| **Botânica** | O herbário e a estufa: verde profundo, papel sálvia | DM Serif Display |
+| **Cartaz** | O cartaz suíço: preto sobre branco gelo, laranja vivo | Archivo Black, em maiúsculas |
+| **Riviera** | A beira-mar: azul-marinho, céu pálido, coral | Gloock |
+| **Escritório** | O papel timbrado: tinta azul-marinho, bordô, fios finos | Libre Caslon Display |
+| **Neon** | A tela de criação à noite: quase preto, verde-limão | Unbounded |
+| **Delicadeza** | O consultório de cuidados: rosa empoado, ameixa, muito espaço | Cormorant Garamond |
+| **Obra** | Concreto, amarelo de segurança, sinalização condensada | Barlow Condensed, em maiúsculas |
+| **Recreio** | O pátio da escola: azul-celeste, vermelho-tomate, letras redondas | Fredoka |
+| **Imprensa** | O jornal da manhã: papel-jornal, vermelho de capa | Newsreader |
+
+**Ajustar**: abaixo dos cartões, **Ajustar a direção** abre todos os ajustes, para combinar à vontade:
+
+- **5 cores**: fundo, faixas e cartões, texto, texto secundário, destaque (botões e links).
+- **Fonte dos títulos**: 18 fontes tipográficas escolhidas pela personalidade (nenhuma daquelas que se veem em todo lugar) ou uma fonte do sistema. **Fonte do texto**: uma fonte do sistema, sem download.
+- **Caixa dos títulos** (normal ou maiúsculas), **tamanho dos títulos** (discreto, equilibrado, impactante), **cantos** (retos, suavizados, arredondados), **espaçamento** (compacto, normal, arejado).
+- **Cartões**: borda fina, cor sólida ou sombra projetada.
+- **Banner de abertura**: texto e imagem lado a lado, cartaz (título muito grande), imagem de ponta a ponta (o título sobre a foto), editorial (imagem vertical) ou centralizado.
+- **Bloco “Diferenciais”**: cartões, linhas ou colunas com fio. **Seções**: fundo liso ou faixas de cor. **Ícones dos diferenciais**: ícones desenhados (os emojis são trocados por ícones de traço), sem ícone ou emojis.
+
+Cabeçalho, listas de artigos, logo, ícone, rodapé e CSS personalizado se configuram como antes. Para voltar ao tema clássico, escolha **Tema clássico** e salve: as configurações dele esperam por você, intactas.
+
+**Sempre legível**: sejam quais forem as cores escolhidas, o Éclair ajusta automaticamente o texto (contraste de **7:1** sobre o fundo), o texto secundário, os links e os botões (4,5:1), inclusive sobre os fundos tingidos com a cor de destaque (selos, menu, realce). Assim, uma cor clara demais para um texto sobre fundo claro é escurecida só o necessário.
+
+**Sempre rápido**: a fonte dos títulos é **baixada uma única vez pelo seu servidor** (do Fontsource, licença SIL Open Font License), guardada em `media/fonts/` e depois servida pelo seu site e pré-carregada com `font-display: optional`: nenhuma requisição a um serviço de terceiros para os seus visitantes, nenhum deslocamento de layout. Só as regras CSS que a sua direção usa são inseridas na página, e o modo escuro automático dá lugar à escolha clara ou escura da direção. Medido com o Lighthouse: 100 nas quatro categorias com Noturno, Riviera, Imprensa e Cartaz.
+
+> [!TIP]
+> Se a sua hospedagem bloqueia as conexões de saída, a fonte não pode ser baixada: uma mensagem avisa você e, enquanto isso, o site usa uma fonte de reserva da mesma família (serifada, condensada…). Tente de novo mais tarde salvando outra vez.
+
+### Imagine minha direção com a IA
+
+<p align="center">
+  <img src="images/pt-BR/frame-directions.webp" alt="Configurações › Aparência: escolha entre direção de arte e tema clássico e, abaixo, os cartões das 12 direções" width="80%">
+</p>
+
+Quando o [assistente de IA](#assistente-de-ia) está ativado, **Imagine minha direção com a IA** aparece abaixo dos cartões. Descreva a sua atividade, o seu público e o clima que você quer em uma ou duas frases (“padaria orgânica de bairro em Curitiba, clientela familiar, acolhedora mas moderna”) e clique em **Propor 3 direções**. A IA também lê a apresentação do seu site e o seu perfil editorial, e segue o método do [Impeccable](https://github.com/pbakaus/impeccable):
+
+1. partir do mundo concreto da atividade (lugares, materiais, objetos, luz) em vez de adjetivos;
+2. dar a cada proposta **uma referência precisa** (“as placas esmaltadas de uma padaria dos anos 50”) e tirar dela as cores, a fonte e as composições;
+3. propor três direções **realmente diferentes** (clara ou escura, quente ou fria, com ou sem serifa);
+4. evitar a escolha padrão do segmento (azul-marinho e dourado para um advogado…), o seu oposto previsível e os tiques do “design gerado por IA”.
+
+As três propostas entram no início dos cartões, marcadas com ✦: clique em uma para vê-la na pré-visualização, ajuste e salve a que você preferir. A IA só escolhe entre os ajustes do Éclair (cores, fontes da lista, composições) e nunca escreve CSS: cada proposta é verificada e tem os contrastes corrigidos antes de chegar ao seu site. O custo estimado aparece abaixo do botão (≈ US$ 0,03 com o Claude Sonnet 5.5) e é descontado do orçamento do assistente. Exclusivo para administradores.
+
+### Pontuação de design
+
+No editor, a aba **Análise** mostra um terceiro anel, **Design**, ao lado do SEO e do GEO. Ele verifica se a página se sustenta visualmente:
+
+- **subtítulos**: hierarquia sem saltos (H2, depois H3, depois H4), curtos, sem emoji decorativo;
+- **banner**: título curto (no máximo 8 palavras, 6 em maiúsculas), botão de ação, imagem se a sua direção exigir (de ponta a ponta, editorial);
+- **chamadas para ação** na medida (no máximo 3 botões);
+- **bloco “Diferenciais”** com 3 a 6 itens descritos, com ícones que tenham o seu equivalente desenhado;
+- **texto**: nada de frases em MAIÚSCULAS, de fórmulas vazias (“revolucionário”, “chave na mão”, “seamless”… conforme o idioma da página), de abuso de travessões, de trechos repetidos de forma idêntica nem de muros de mais de 350 palavras sem subtítulo, imagem ou lista;
+- **direção de arte** escolhida para o site.
+
+A nota da aba Análise agora é a média dos três anéis.
 
 ---
 
@@ -506,35 +578,37 @@ eclair/                  ← o que vai para a hospedagem
 ├── index.php            front controller (serve o cache sem carregar a aplicação)
 ├── .htaccess            reescrita, proteções, compressão, cache do navegador
 ├── app/lib/             código (classes Eclair\…): Content, Blocks, Seo, Analyzer, Media, Auth…
-├── app/admin/views/     telas do painel
+├── app/admin/views/     telas do painel (comprimidas em .php.gz no arquivo zip)
 ├── app/theme/           templates do site público + theme.css (inserido em cada página)
 ├── app/theme/themes/    os 5 temas opcionais (uma folha CSS cada, somada ao theme.css)
+├── app/theme/directions.css  trechos de CSS das direções de arte (só os da direção escolhida vão para a página)
 ├── app/lang/            traduções do painel (6 idiomas, JSON comprimido); o texto em francês serve de chave
 ├── assets/admin/        CSS e JavaScript do painel (sem dependências)
 ├── assets/site/site.js  o único script público (2,4 KB, 1,2 KB comprimido)
 ├── data/                conteúdos, configurações, contas (criado na instalação, nunca público)
 ├── cache/               páginas geradas
-└── media/               imagens enviadas
+└── media/               imagens enviadas (e media/fonts/: a fonte da direção de arte)
 i18n/                    arquivos-fonte legíveis das traduções (compilados por tools/i18n.php)
 tests/run.php            testes unitários + integração HTTP (incluindo os ataques da auditoria de segurança)
 tests/fake-ai.php        provedores de IA falsos (Claude, ChatGPT, imagens): o assistente é testado sem chave nem custo
 tests/shop.php           temas e loja (páginas de produto, Stripe, PayPal, Revolut, JSON-LD, feed do Merchant Center)
 tests/mcp.php            conector MCP (OAuth, PKCE, protocolo, revogação) e escolha da IA
+tests/design.php         direções de arte (contrastes, CSS, fontes, configurações maliciosas, IA) e pontuação de design
 tests/fixtures/          sites de referência e a impressão digital da renderização pública deles (uma nova versão não muda nem um byte do site)
 tools/router.php         roteador para o servidor embutido do PHP (desenvolvimento)
 tools/capture.php        captura de referência da renderização pública e medições do Lighthouse (--lighthouse)
-tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<versão>.zip (PHP compactado, JS e CSS do painel enxugados)
+tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<versão>.zip (PHP compactado, telas do painel comprimidas, JS e CSS do painel enxugados)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 502 verificações unitárias e HTTP
+php tests/run.php                                  # 550 verificações unitárias e HTTP; ECLAIR_TEST_ROOT=… para testar um arquivo zip descompactado
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 
 `PHP_CLI_SERVER_WORKERS` permite que o site chame a si mesmo (verificação do endereço): com um único processo, a verificação simplesmente falha e os redirecionamentos para o endereço oficial continuam desativados.
 
-Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade vai apontar esses arquivos como modificados, é normal). No arquivo zip, o PHP é compactado (`php -w`, sem comentários) e o JavaScript e o CSS do painel são enxugados para ficar abaixo de 1 MB: o código-fonte comentado está no GitHub. Os arquivos do site público (temas, `site.js`) são entregues como estão.
+Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade vai apontar esses arquivos como modificados, é normal). No arquivo zip, o PHP é compactado (`php -w`, sem comentários), as telas do painel são comprimidas (lidas via zlib) e o JavaScript e o CSS do painel são enxugados para ficar abaixo de 1 MB: o código-fonte comentado está no GitHub. Os arquivos do site público (temas, `site.js`) são entregues como estão.
 
 ---
 

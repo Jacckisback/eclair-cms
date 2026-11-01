@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip"><img src="https://img.shields.io/badge/descargar-v1.7.0-5b4cf0?style=for-the-badge" alt="Descargar Éclair 1.7.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip"><img src="https://img.shields.io/badge/descargar-v1.8.0-5b4cf0?style=for-the-badge" alt="Descargar Éclair 1.8.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_datos-ninguna-14122b?style=for-the-badge" alt="Sin base de datos">
@@ -24,6 +24,7 @@
   <a href="#por-qué-éclair"><b>Por qué Éclair</b></a> ·
   <a href="#asistente-ia-pide-revisa-publica"><b>Asistente IA</b></a> ·
   <a href="#claude-y-chatgpt-con-tu-suscripción"><b>Claude y ChatGPT</b></a> ·
+  <a href="#direcciones-de-arte-un-sitio-que-no-se-parece-a-ningún-otro"><b>Direcciones de arte</b></a> ·
   <a href="#temas-y-tienda"><b>Temas y tienda</b></a> ·
   <a href="#vista-previa"><b>Vista previa</b></a> ·
   <a href="#seguridad"><b>Seguridad</b></a> ·
@@ -62,7 +63,7 @@ WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraligero</h3>
-      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>440 KB</b>, cero dependencias, cero cookies en el sitio público.
+      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>480 KB</b>, cero dependencias, cero cookies en el sitio público.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facilísimo</h3>
@@ -148,6 +149,45 @@ En el editor, pasa de **Bloques** a **Visual**: tu página aparece con tu tema, 
 
 Instrucciones de uso: consulta la [guía, sección Modo Visual](docs/GUIDE.es.md#modo-visual) y [Crear una página con IA](docs/GUIDE.es.md#crear-una-página-con-ia).
 
+## Direcciones de arte: un sitio que no se parece a ningún otro
+
+<p align="center">
+  <img src="docs/images/es/directions.webp" alt="El mismo sitio de cerámica con seis direcciones de arte: Nocturno, Galería, Arcilla, Riviera, Recreo y Prensa" width="100%">
+</p>
+
+Un tema cambia los colores; una **dirección de arte** cambia todo el universo: paleta, tipografía de los títulos, tamaño de los títulos, esquinas, espaciado, composición del banner, maquetación de los puntos fuertes, franjas de color e iconos. Elige una entre **12 direcciones**, cada una pensada para un mundo (la ciudad de noche, el taller de cerámica, el diario de la mañana, el patio del colegio…), ajusta lo que quieras y mira el resultado en directo en tu sitio real.
+
+**Imagina mi dirección con la IA**: describe tu actividad en una frase. La IA lee también la presentación de tu sitio, parte de cosas concretas (tus lugares, tus materiales, tu luz) y propone **3 direcciones realmente distintas**, evitando los clichés de tu sector y los tics del «diseño generado por IA». Solo elige entre los ajustes de Éclair y nunca escribe CSS: los colores, la tipografía y las composiciones se comprueban antes de llegar a tu sitio. Coste orientativo: ≈ 0,03 $ por las tres propuestas con Claude Sonnet 5.5.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>♿ Legible, garantizado</h3>
+      Sean cuales sean los colores, elegidos por ti o por la IA, Éclair garantiza los contrastes WCAG: texto a <b>7:1</b>, texto secundario, enlaces y botones a 4,5:1, también sobre fondos tintados. Comprobado con 20.000 paletas generadas al azar.
+    </td>
+    <td width="50%" valign="top">
+      <h3>⚡ Siempre 100/100</h3>
+      Una sola tipografía para los títulos (de 12 a 27 KB), <b>descargada una vez por tu servidor</b> y servida después por tu sitio, precargada: ningún servicio de terceros para tus visitantes, ningún salto de diseño. Solo se envían las reglas que necesita tu dirección.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🎯 Puntuación de diseño</h3>
+      Una tercera puntuación en el análisis del editor, junto al SEO y al GEO: jerarquía de los títulos, banner, llamadas a la acción, ritmo del texto, mayúsculas, fórmulas huecas («revolucionario», «llave en mano»…) y textos repetidos.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🔒 Nada se rompe</h3>
+      El HTML no cambia: el SEO, los datos estructurados y la accesibilidad siguen idénticos. Los 6 temas clásicos siguen ahí, sin cambiar ni un byte, y puedes volver a ellos cuando quieras.
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/images/es/frame-directions.webp" alt="Ajustes › Apariencia: elección entre dirección de arte y tema clásico y, debajo, las tarjetas de las 12 direcciones" width="80%">
+</p>
+
+El método y sus salvaguardas están adaptados de [Impeccable](https://github.com/pbakaus/impeccable), de Paul Bakaus (licencia Apache 2.0). Instrucciones de uso: [guía, sección Direcciones de arte](docs/GUIDE.es.md#direcciones-de-arte).
+
 ## Temas y tienda
 
 <p align="center">
@@ -206,7 +246,7 @@ La tienda solo se abre cuando el aviso legal y las condiciones generales de vent
 |---|---|---|
 | **Instalación** | Crear una base de datos MySQL y luego lanzar el asistente | ✅ Subir la carpeta y responder 4 preguntas |
 | **Base de datos** | MySQL obligatorio | ✅ Ninguna (archivos protegidos) |
-| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 440 KB |
+| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 480 KB |
 | **SEO, sitemap, datos estructurados** | Un plugin que instalar y mantener | ✅ Integrado |
 | **GEO: llms.txt, Markdown, robots de IA** | Plugins, rara vez completos | ✅ Integrado |
 | **Páginas públicas** | Generadas en cada visita, salvo con un plugin de caché | ✅ Servidas desde una caché estática |
@@ -214,7 +254,7 @@ La tienda solo se abre cuando el aviso legal y las condiciones generales de vent
 | **Verificación en dos pasos, protección contra fuerza bruta** | Plugins | ✅ Integradas |
 | **Actualizaciones de plugins** | Constantes, la principal fuente de vulnerabilidades | ✅ Ningún plugin que actualizar |
 | **Asistente IA (redacción, imágenes)** | Plugins, a menudo con suscripción | ✅ Integrado: Claude o ChatGPT, con tu clave |
-| **Temas** | Hay que instalarlos; a menudo pesados, a veces de pago | ✅ 6 temas integrados, vista previa en directo |
+| **Temas y diseño** | Hay que instalarlos; a menudo pesados, a veces de pago | ✅ 6 temas y 12 direcciones de arte integrados, propuestas a medida de la IA, vista previa en directo |
 | **Vender en línea** | WooCommerce: plugin, base de datos, actualizaciones | ✅ Tienda ligera integrada, pago mediante enlace de Stripe, PayPal o Revolut |
 
 ## Rendimiento
@@ -227,7 +267,7 @@ La tienda solo se abre cuando el aviso legal y las condiciones generales de vent
 Medido en local en el sitio de demostración (PHP 8.3, página de inicio con imágenes y artículo de 600 palabras), con Lighthouse 12 en móvil y escritorio; una puntuación puede variar un punto de una pasada a otra. Cómo se consigue:
 
 - **Caché estática automática**: cada página se genera una vez y después la sirve directamente `index.php`. La caché se vacía sola con cada cambio.
-- **CSS integrado en la página**, fuentes del sistema: ninguna petición bloqueante, ningún salto de diseño.
+- **CSS integrado en la página**, fuentes del sistema o una sola tipografía de títulos alojada en tu servidor y precargada (direcciones de arte): ninguna petición bloqueante, ningún salto de diseño.
 - **Imágenes optimizadas al subirlas**: redimensionadas, convertidas a **WebP adaptable** (de 480 a 1600 px), dimensiones explícitas y carga diferida.
 - **Un único script público**, diferido, de 1,2 KB comprimido. Compresión Brotli o Gzip y caché del navegador de un año mediante `.htaccess`.
 
@@ -315,7 +355,7 @@ Todos los detalles en la [guía, sección Seguridad](docs/GUIDE.es.md#seguridad)
   <img src="docs/images/es/install.webp" alt="Instalación en tres pasos: subir la carpeta, responder cuatro preguntas, el sitio está en línea" width="100%">
 </p>
 
-1. **Descarga** el archivo [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) (440 KB) y descomprímelo.
+1. **Descarga** el archivo [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) y descomprímelo.
 2. **Sube el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…), incluidos los archivos ocultos `.htaccess`.
 3. **Abre la dirección de tu sitio**: arranca el asistente. Cuatro preguntas, un poco de confeti, y tu sitio está en línea con sus primeras páginas.
 
@@ -331,7 +371,7 @@ La [guía completa](docs/GUIDE.es.md) detalla todo lo demás:
 - [Instalación](docs/GUIDE.es.md#instalación): requisitos, tipos de sitio, primeros pasos
 - [Funciones en detalle](docs/GUIDE.es.md#funciones-en-detalle): velocidad, SEO, GEO, editor de bloques
 - [Uso diario](docs/GUIDE.es.md#uso-diario) y el [modo Visual](docs/GUIDE.es.md#modo-visual)
-- [Temas](docs/GUIDE.es.md#temas) y [Tienda](docs/GUIDE.es.md#tienda): vista previa en directo, fichas de producto, Stripe, PayPal, Revolut, Google Shopping
+- [Direcciones de arte](docs/GUIDE.es.md#direcciones-de-arte), [Temas](docs/GUIDE.es.md#temas) y [Tienda](docs/GUIDE.es.md#tienda): universos a medida con la IA, puntuación de diseño, vista previa en directo, fichas de producto, Stripe, PayPal, Revolut, Google Shopping
 - [Asistente IA](docs/GUIDE.es.md#asistente-ia): activación, perfil editorial, crear una página con IA, costes, seguridad
 - [Conector MCP](docs/GUIDE.es.md#conector-mcp-claude-y-chatgpt): Claude y ChatGPT con tu suscripción
 - [Actualizar, hacer copias de seguridad, mudarse](docs/GUIDE.es.md#actualizar-hacer-copias-de-seguridad-mudarse)
@@ -343,7 +383,7 @@ PHP 8.1+ sin framework ni Composer: clases sencillas en `eclair/app/lib/`, vista
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desarrollo
-php tests/run.php                                                           # 502 comprobaciones unitarias y HTTP
+php tests/run.php                                                           # 550 comprobaciones unitarias y HTTP
 php tools/build.php                                                         # archivo listo para distribuir
 ```
 
@@ -351,7 +391,7 @@ Estructura del proyecto y personalización del tema: consulta [Para desarrollado
 
 ## Licencia
 
-Éclair se distribuye con **licencia MIT** ([`LICENSE`](LICENSE)): úsalo, modifícalo y redistribúyelo libremente, también con fines comerciales, siempre que conserves el aviso de copyright. Parte de los iconos del panel deriva de [Lucide](https://lucide.dev) (licencia ISC, consulta [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)).
+Éclair se distribuye con **licencia MIT** ([`LICENSE`](LICENSE)): úsalo, modifícalo y redistribúyelo libremente, también con fines comerciales, siempre que conserves el aviso de copyright. Parte de los iconos deriva de [Lucide](https://lucide.dev) (licencia ISC) y las direcciones de arte se inspiran en el método de [Impeccable](https://github.com/pbakaus/impeccable) (licencia Apache 2.0): consulta [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
 
 <br>
 

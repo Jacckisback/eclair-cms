@@ -12,14 +12,15 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 2. [Funktionen im Detail](#funktionen-im-detail)
 3. [Éclair im Alltag](#éclair-im-alltag)
 4. [Visueller Modus](#visueller-modus)
-5. [Themes](#themes)
-6. [Shop](#shop)
-7. [KI-Assistent](#ki-assistent) (inklusive [Eine Seite mit KI erstellen](#eine-seite-mit-ki-erstellen))
-8. [MCP-Connector (Claude und ChatGPT)](#mcp-connector-claude-und-chatgpt)
-9. [Sicherheit](#sicherheit)
-10. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
-11. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
-12. [Für Entwickler](#für-entwickler)
+5. [Art Directions](#art-directions) (inklusive [Meine Richtung mit KI entwerfen](#meine-richtung-mit-ki-entwerfen) und dem [Design-Score](#design-score))
+6. [Themes](#themes)
+7. [Shop](#shop)
+8. [KI-Assistent](#ki-assistent) (inklusive [Eine Seite mit KI erstellen](#eine-seite-mit-ki-erstellen))
+9. [MCP-Connector (Claude und ChatGPT)](#mcp-connector-claude-und-chatgpt)
+10. [Sicherheit](#sicherheit)
+11. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen)
+12. [Fehlerbehebung](#fehlerbehebung) (inklusive [Nginx](#nginx))
+13. [Für Entwickler](#für-entwickler)
 
 ---
 
@@ -27,8 +28,8 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 
 ### Voraussetzungen
 
-- **PHP 8.1 oder neuer** (8.3 empfohlen) mit den Erweiterungen `mbstring`, `json`, `dom` und `session` (fast überall standardmäßig aktiv).
-- Empfohlen: `gd` (WebP-Bilder), `zip` (Backups mit einem Klick), `curl` (IndexNow).
+- **PHP 8.1 oder neuer** (8.3 empfohlen) mit den Erweiterungen `mbstring`, `json`, `dom`, `session` und `zlib` (fast überall standardmäßig aktiv).
+- Empfohlen: `gd` (WebP-Bilder), `zip` (Backups mit einem Klick), `curl` (IndexNow, KI-Assistent, Schrift der Art Directions).
 - Ein **Apache- oder LiteSpeed-Server** (praktisch jedes Shared Hosting: Hostinger, IONOS, OVHcloud …). Für Nginx siehe [weiter unten](#nginx).
 - Ein HTTPS-Zertifikat (bei fast allen Hostern kostenlos über Let's Encrypt).
 
@@ -36,7 +37,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) (440 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -68,7 +69,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 ### ⚡ Geschwindigkeit
 
 - **Automatischer statischer Cache**: Jede Seite wird einmal erzeugt und dann ausgeliefert, ohne die Anwendung zu laden. Bei jeder Änderung leert sich der Cache von selbst (und zum geplanten Zeitpunkt eines geplanten Artikels).
-- **CSS direkt in der Seite** (17 bis 23 KB je nach Theme und Shop, 5 bis 6 KB komprimiert), Systemschriften: keine blockierenden Anfragen, keine Layoutverschiebungen.
+- **CSS direkt in der Seite** (17 bis 23 KB je nach Theme und Shop, 5 bis 6 KB komprimiert), Systemschriften: keine blockierenden Anfragen, keine Layoutverschiebungen. Mit einer Art Direction kommt eine einzige Titelschrift hinzu (12 bis 27 KB), von deiner Website ausgeliefert und vorab geladen.
 - **Bilder beim Hochladen optimiert**: verkleinert (maximal 2000 px), als **responsives WebP** bereitgestellt (480, 800, 1200, 1600 px), feste Abmessungen, Lazy Loading, Priorität für das Hauptbild.
 - ETag und `304 Not Modified`-Antworten, Brotli-/Gzip-Komprimierung und ein Jahr Browser-Cache für statische Dateien (per `.htaccess`).
 
@@ -105,7 +106,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 
 ### 🧩 Alles Weitere
 
-Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs per Drag-and-drop (Kopf- und Fußzeile), „Säulen“-Kategorien für ein Themencluster, Suche auf der Website, Kontaktformular gegen Spam **ohne Captcha** (Honeypot-Feld, Token, Limits pro Netzwerk und pro Tag) mit Posteingang, Konten für Administratoren und Redakteure, 6 Themes mit Live-Vorschau, automatischer Dark Mode, 6 Systemschriften, Hauptfarbe mit garantiertem WCAG-Kontrast, Verwaltung in 7 Sprachen (Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Chinesisch), öffentliche Website in 6 Sprachen (fr, es, en, de, it, pt).
+Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs per Drag-and-drop (Kopf- und Fußzeile), „Säulen“-Kategorien für ein Themencluster, Suche auf der Website, Kontaktformular gegen Spam **ohne Captcha** (Honeypot-Feld, Token, Limits pro Netzwerk und pro Tag) mit Posteingang, Konten für Administratoren und Redakteure, 6 Themes und 12 Art Directions mit Live-Vorschau, automatischer Dark Mode, 6 Systemschriften, Hauptfarbe mit garantiertem WCAG-Kontrast, Verwaltung in 7 Sprachen (Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Chinesisch), öffentliche Website in 6 Sprachen (fr, es, en, de, it, pt).
 
 ---
 
@@ -155,6 +156,77 @@ Alles läuft über den gewohnten Editor: Speichern (`Strg+S` funktioniert auch i
 
 > [!NOTE]
 > Den visuellen Modus gibt es nur in der Vorschau der Verwaltung: Anmeldung, Sicherheitstoken und Schreibrecht sind erforderlich, und die Seite wird nie gecacht oder indexiert. Deine öffentlichen Seiten tragen keine Spur davon: Sie bleiben bis aufs Byte identisch.
+
+---
+
+## Art Directions
+
+<p align="center">
+  <img src="images/de/directions.webp" alt="Dieselbe Keramik-Website in sechs Art Directions: Nocturne, Galerie, Ton, Riviera, Pausenhof und Presse" width="100%">
+</p>
+
+Ein Theme ändert die Farben; eine **Art Direction** verändert die ganze Bildwelt der Website, ausgehend von einer konkreten Idee: die Stadt bei Nacht, die Keramikwerkstatt, die Morgenzeitung. Wähle unter **Einstellungen › Design** die Option **Art Direction** (statt **Klassisches Theme**), klicke auf eine der 12 Karten und sieh dir die Live-Vorschau an: deine echte Website, in der Desktop- oder Mobilansicht. Nichts wird veröffentlicht, bevor du speicherst.
+
+| Richtung | Bildwelt | Titelschrift |
+|---|---|---|
+| **Nocturne** | Die Stadt bei Nacht: tiefes Blau, bernsteinfarbenes Licht | Big Shoulders Display, in Großbuchstaben |
+| **Galerie** | Weiße Wände, schwarze Werkschilder, ein Signalrot | Familjen Grotesk |
+| **Ton** | Die Keramikwerkstatt: Sand, Terrakotta, weiche Formen | Young Serif |
+| **Botanik** | Herbarium und Gewächshaus: tiefes Grün, salbeifarbenes Papier | DM Serif Display |
+| **Plakat** | Das Schweizer Plakat: Schwarz auf gebrochenem Weiß, leuchtendes Orange | Archivo Black, in Großbuchstaben |
+| **Riviera** | Am Meer: Marineblau, blasser Himmel, Koralle | Gloock |
+| **Kanzlei** | Das Briefpapier: marineblaue Tinte, Bordeaux, feine Linien | Libre Caslon Display |
+| **Neon** | Der Kreativbildschirm bei Nacht: fast Schwarz, Limettengrün | Unbounded |
+| **Sanftheit** | Die Praxis: Puderrosa, Pflaume, viel Luft | Cormorant Garamond |
+| **Baustelle** | Beton, Sicherheitsgelb, schmale Beschilderung | Barlow Condensed, in Großbuchstaben |
+| **Pausenhof** | Der Schulhof: Himmelblau, Tomatenrot, runde Buchstaben | Fredoka |
+| **Presse** | Die Morgenzeitung: Zeitungspapier, Titelseitenrot | Newsreader |
+
+**Anpassen**: Unter den Karten öffnet **Richtung anpassen** alle Einstellungen, frei kombinierbar:
+
+- **5 Farben**: Hintergrund, Bänder und Karten, Text, Sekundärtext, Akzent (Buttons und Links).
+- **Schriftart für Überschriften**: 18 Schriften, ausgewählt wegen ihres Charakters (keine von denen, die man überall sieht), oder eine Systemschrift. **Schriftart für Fließtext**: eine Systemschrift, ohne Download.
+- **Schreibweise der Überschriften** (normal oder Großbuchstaben), **Größe der Überschriften** (dezent, ausgewogen, spektakulär), **Ecken** (eckig, abgerundet, rund), **Abstände** (kompakt, normal, luftig).
+- **Karten**: feine Linie, Farbfläche oder Schlagschatten.
+- **Startbanner**: Text und Bild nebeneinander, Plakat (sehr großer Titel), randloses Vollbild (der Titel auf dem Foto), Editorial (Hochformatbild) oder zentriert.
+- **Block „Vorteile“**: Karten, Zeilen oder Spalten mit Linie. **Abschnitte**: einfarbiger Hintergrund oder Farbbänder. **Symbole der Vorteile**: gezeichnete Symbole (Emojis werden durch Liniensymbole ersetzt), ohne Symbol oder Emojis.
+
+Header, Beitragslisten, Logo, Website-Icon, Fußzeile und eigenes CSS stellst du wie bisher ein. Um zum klassischen Theme zurückzukehren, wähle **Klassisches Theme** und speichere: Seine Einstellungen warten unverändert auf dich.
+
+**Immer lesbar**: Ganz gleich, welche Farben du wählst, Éclair passt automatisch den Text (Kontrast **7:1** zum Hintergrund), den Sekundärtext, die Links und die Buttons (4,5:1) an, auch auf Hintergründen, die mit der Akzentfarbe getönt sind (Badges, Menü, Hervorhebungen). Eine Farbe, die für Text auf hellem Hintergrund zu blass ist, wird also genau so weit abgedunkelt wie nötig.
+
+**Immer schnell**: Die Titelschrift wird **nur einmal von deinem Server heruntergeladen** (von Fontsource, unter der SIL Open Font License), in `media/fonts/` abgelegt, dann von deiner Website ausgeliefert und mit `font-display: optional` vorab geladen: keine Anfragen an Drittanbieter für deine Besucher, keine Layoutverschiebungen. Nur die CSS-Regeln, die deine Richtung braucht, werden in die Seite eingefügt, und der automatische Dark Mode überlässt der hellen oder dunklen Wahl der Richtung das Feld. Mit Lighthouse gemessen: 100 in allen vier Kategorien mit Nocturne, Riviera, Presse und Plakat.
+
+> [!TIP]
+> Wenn dein Hoster ausgehende Verbindungen blockiert, kann die Schrift nicht heruntergeladen werden: Eine Meldung weist dich darauf hin, und bis dahin nutzt die Website eine Ersatzschrift aus derselben Familie (mit Serifen, schmal …). Versuche es später erneut, indem du noch einmal speicherst.
+
+### Meine Richtung mit KI entwerfen
+
+<p align="center">
+  <img src="images/de/frame-directions.webp" alt="Einstellungen › Design: Auswahl zwischen Art Direction und klassischem Theme, darunter die Karten der 12 Richtungen" width="80%">
+</p>
+
+Wenn der [KI-Assistent](#ki-assistent) aktiviert ist, erscheint unter den Karten **Meine Richtung mit KI entwerfen**. Beschreibe in ein oder zwei Sätzen dein Geschäft, deine Zielgruppe und die gewünschte Stimmung („Bio-Bäckerei im Viertel in Freiburg, Familien als Kundschaft, warm, aber modern“) und klicke dann auf **3 Richtungen vorschlagen**. Die KI liest auch die Beschreibung deiner Website und dein Redaktionsprofil und folgt der Methode von [Impeccable](https://github.com/pbakaus/impeccable):
+
+1. von der konkreten Welt des Geschäfts ausgehen (Orte, Materialien, Gegenstände, Licht) statt von Adjektiven;
+2. jedem Vorschlag **eine präzise Referenz** geben („die Emailleschilder einer Bäckerei aus den 50er-Jahren“) und daraus Farben, Schrift und Layouts ableiten;
+3. drei **wirklich unterschiedliche** Richtungen vorschlagen (hell oder dunkel, warm oder kühl, mit oder ohne Serifen);
+4. die Standardwahl der Branche vermeiden (Marineblau und Gold für eine Anwaltskanzlei …), ebenso ihr vorhersehbares Gegenteil und die Marotten von „KI-generiertem Design“.
+
+Die drei Vorschläge erscheinen vor den Karten, mit ✦ markiert: Klicke auf einen, um ihn in der Vorschau zu sehen, passe ihn an und speichere den, der dir gefällt. Die KI wählt nur aus den Einstellungen von Éclair (Farben, Schriften aus der Liste, Layouts) und schreibt nie CSS: Jeder Vorschlag wird geprüft und seine Kontraste werden korrigiert, bevor er auf deiner Website landet. Die geschätzten Kosten stehen unter dem Button (≈ 0,03 $ mit Claude Sonnet 5.5) und werden vom Budget des Assistenten abgezogen. Nur für Administratoren.
+
+### Design-Score
+
+Im Editor zeigt der Tab **Analyse** einen dritten Ring, **Design**, neben SEO und GEO. Er prüft, ob die Seite optisch überzeugt:
+
+- **Zwischenüberschriften**: Hierarchie ohne Sprünge (H2, dann H3, dann H4), kurz, ohne dekoratives Emoji;
+- **Banner**: kurzer Titel (höchstens 8 Wörter, 6 in Großbuchstaben), Aktionsbutton, Bild, wenn deine Richtung es verlangt (randloses Vollbild, Editorial);
+- maßvolle **Handlungsaufforderungen** (höchstens 3 Buttons);
+- **Block „Vorteile“** mit 3 bis 6 beschriebenen Elementen und Symbolen, die eine gezeichnete Entsprechung haben;
+- **Text**: keine Sätze in GROSSBUCHSTABEN, keine hohlen Floskeln („revolutionär“, „bahnbrechend“, „seamless“ … je nach Sprache der Seite), keine gehäuften Geviertstriche, keine wortgleich wiederholten Passagen, keine Textwand mit mehr als 350 Wörtern ohne Zwischenüberschrift, Bild oder Liste;
+- eine für die Website gewählte **Art Direction**.
+
+Der Wert am Tab „Analyse“ ist jetzt der Durchschnitt der drei Ringe.
 
 ---
 
@@ -506,35 +578,37 @@ eclair/                  ← das kommt auf den Webspace
 ├── index.php            Front Controller (liefert den Cache aus, ohne die Anwendung zu laden)
 ├── .htaccess            Umschreibung, Schutzregeln, Komprimierung, Browser-Cache
 ├── app/lib/             Code (Klassen Eclair\…): Content, Blocks, Seo, Analyzer, Media, Auth …
-├── app/admin/views/     Bildschirme der Verwaltung
+├── app/admin/views/     Bildschirme der Verwaltung (im Archiv als .php.gz komprimiert)
 ├── app/theme/           Vorlagen der öffentlichen Website + theme.css (in jede Seite eingefügt)
 ├── app/theme/themes/    die 5 optionalen Themes (je eine CSS-Datei, die theme.css ergänzt)
+├── app/theme/directions.css  CSS-Bausteine der Art Directions (nur die der gewählten Richtung kommen in die Seite)
 ├── app/lang/            Übersetzungen der Verwaltung (6 Sprachen, komprimiertes JSON); der französische Text dient als Schlüssel
 ├── assets/admin/        CSS und JavaScript der Verwaltung (keine Abhängigkeiten)
 ├── assets/site/site.js  das einzige öffentliche Skript (2,4 KB, 1,2 KB komprimiert)
 ├── data/                Inhalte, Einstellungen, Konten (bei der Installation angelegt, nie öffentlich)
 ├── cache/               erzeugte Seiten
-└── media/               hochgeladene Bilder
+└── media/               hochgeladene Bilder (und media/fonts/: die Schrift der Art Direction)
 i18n/                    lesbare Quellen der Übersetzungen (kompiliert von tools/i18n.php)
 tests/run.php            Unit-Tests + HTTP-Integration (einschließlich der Angriffe aus dem Sicherheitsaudit)
 tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der Assistent wird ohne Schlüssel und ohne Kosten getestet
 tests/shop.php           Themes und Shop (Produktseiten, Stripe, PayPal, Revolut, JSON-LD, Merchant-Center-Feed)
 tests/mcp.php            MCP-Connector (OAuth, PKCE, Protokoll, Widerruf) und Wahl der KI
+tests/design.php         Art Directions (Kontraste, CSS, Schriften, präparierte Einstellungen, KI) und Design-Score
 tests/fixtures/          Referenz-Websites und Fingerabdruck ihrer öffentlichen Ausgabe (eine neue Version ändert kein einziges Byte der Website)
 tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
 tools/capture.php        Referenzaufnahme der öffentlichen Ausgabe und Lighthouse-Messungen (--lighthouse)
-tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert, JS und CSS der Verwaltung verschlankt)
+tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert, Views der Verwaltung komprimiert, JS und CSS der Verwaltung verschlankt)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 502 Unit- und HTTP-Prüfungen
+php tests/run.php                                  # 550 Unit- und HTTP-Prüfungen; ECLAIR_TEST_ROOT=… zum Testen eines entpackten Archivs
 php tools/build.php                                # Archiv zum Verteilen
 ```
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (mach vorher eine Sicherung: Die Integritätsprüfung meldet diese Dateien als geändert, das ist normal). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), und JavaScript und CSS der Verwaltung sind verschlankt, damit es unter 1 MB bleibt: Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
+Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (mach vorher eine Sicherung: Die Integritätsprüfung meldet diese Dateien als geändert, das ist normal). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt, damit es unter 1 MB bleibt: Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
 
 ---
 

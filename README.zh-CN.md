@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip"><img src="https://img.shields.io/badge/download-v1.7.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.7.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip"><img src="https://img.shields.io/badge/download-v1.8.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.8.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -24,6 +24,7 @@
   <a href="#为什么选择-éclair"><b>为什么选择 Éclair</b></a> ·
   <a href="#ai-助手提需求审阅发布"><b>AI 助手</b></a> ·
   <a href="#claude-与-chatgpt用你的订阅"><b>Claude 与 ChatGPT</b></a> ·
+  <a href="#艺术风格让你的网站与众不同"><b>艺术风格</b></a> ·
   <a href="#主题与商店"><b>主题与商店</b></a> ·
   <a href="#界面预览"><b>界面预览</b></a> ·
   <a href="#安全"><b>安全</b></a> ·
@@ -62,7 +63,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>440 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>480 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -148,6 +149,45 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 
 使用说明请见[指南中的可视化模式章节](docs/GUIDE.zh-CN.md#可视化模式)和[用 AI 生成页面](docs/GUIDE.zh-CN.md#用-ai-生成页面)一节。
 
+## 艺术风格：让你的网站与众不同
+
+<p align="center">
+  <img src="docs/images/zh-CN/directions.webp" alt="同一个陶艺网站的六种艺术风格：夜曲、画廊、陶土、海滨、课间和报刊" width="100%">
+</p>
+
+主题改变的只是配色；**艺术风格**则改变整个视觉世界：调色板、标题字体、标题大小、圆角、间距、横幅构图、优势区块的版式、色带和图标。从 **12 种风格**中选择一种，每种都围绕一个世界设计（夜晚的城市、陶艺工作室、晨报、校园操场……），按需调整，并在你的真实网站上实时查看效果。
+
+**用 AI 构想我的风格**：用一句话描述你的业务。AI 还会阅读你网站的介绍，从具体事物出发（你的场所、你的材料、你的光线），提出 **3 种真正不同的风格**，避开你所在行业的陈词滥调和“AI 生成设计”的套路。它只在 Éclair 的设置中选择，从不编写 CSS：配色、字体和版式在应用到你的网站之前都会经过检查。预估费用：使用 Claude Sonnet 5.5 生成三个方案约 $0.03。
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>♿ 清晰易读，有保证</h3>
+      无论配色由你还是由 AI 选择，Éclair 都保证符合 WCAG 对比度：正文 <b>7:1</b>，次要文字、链接和按钮 4.5:1，带色调的背景上也不例外。已用 20,000 组随机生成的配色验证。
+    </td>
+    <td width="50%" valign="top">
+      <h3>⚡ 始终 100/100</h3>
+      只用一种标题字体（12 至 27 KB），<b>由你的服务器下载一次</b>，之后由你的网站自行提供并预加载：访客无需连接任何第三方服务，也没有布局偏移。只发送你的风格用到的规则。
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🎯 设计评分</h3>
+      编辑器分析中的第三项评分，与 SEO 和 GEO 并列：标题层级、横幅、行动号召、文字节奏、全大写、空洞套话（如“seamless”“cutting-edge”……）和重复文字。
+    </td>
+    <td width="50%" valign="top">
+      <h3>🔒 不会破坏任何功能</h3>
+      HTML 保持不变：SEO、结构化数据和无障碍完全一致。6 个经典主题依然保留，逐字节不变，你随时可以切换回去。
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/images/zh-CN/frame-directions.webp" alt="设置 › 外观：在艺术风格与经典主题之间选择，下方是 12 种风格的卡片" width="80%">
+</p>
+
+这套方法和防护规则改编自 Paul Bakaus 的 [Impeccable](https://github.com/pbakaus/impeccable)（Apache 2.0 许可证）。使用说明请见[指南中的艺术风格章节](docs/GUIDE.zh-CN.md#艺术风格)。
+
 ## 主题与商店
 
 <p align="center">
@@ -206,7 +246,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 440 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 480 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -214,7 +254,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 | **双重认证、防暴力破解** | 需要插件 | ✅ 内置 |
 | **插件更新** | 频繁，是安全漏洞的头号来源 | ✅ 没有插件需要更新 |
 | **AI 助手（写作、配图）** | 依赖插件，往往还要订阅 | ✅ 内置：Claude 或 ChatGPT，使用你自己的密钥 |
-| **主题** | 需要另行安装，往往很臃肿，有时还要付费 | ✅ 内置 6 个主题，支持实时预览 |
+| **主题与设计** | 需要另行安装，往往很臃肿，有时还要付费 | ✅ 内置 6 个主题和 12 种艺术风格，AI 可量身推荐，支持实时预览 |
 | **在线销售** | WooCommerce：插件、数据库、更新 | ✅ 内置轻量商店，通过 Stripe、PayPal 或 Revolut 付款链接收款 |
 
 ## 性能
@@ -227,7 +267,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 以上数据在本地演示网站上测得（PHP 8.3，带插图的首页和一篇 600 词的文章），使用 Lighthouse 12 分别测试移动端和桌面端；不同轮次之间分数可能相差 1 分。实现方式：
 
 - **自动静态缓存**：每个页面只生成一次，之后由 `index.php` 直接输出。每次修改后缓存会自动清空。
-- **CSS 内联在页面中**，使用系统字体：没有阻塞渲染的请求，也没有布局偏移。
+- **CSS 内联在页面中**，使用系统字体，或一种自托管并预加载的标题字体（艺术风格）：没有阻塞渲染的请求，也没有布局偏移。
 - **上传时自动优化图片**：缩放尺寸，转换为**响应式 WebP**（480 至 1600 px），写明宽高并延迟加载。
 - **公开网站只有一个脚本**，延迟加载，压缩后仅 1.2 KB。通过 `.htaccess` 启用 Brotli 或 Gzip 压缩和一年的浏览器缓存。
 
@@ -315,7 +355,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip)（440 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip)（480 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
@@ -331,7 +371,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 - [安装](docs/GUIDE.zh-CN.md#安装)：环境要求、网站类型、入门步骤
 - [功能详解](docs/GUIDE.zh-CN.md#功能详解)：速度、SEO、GEO、区块编辑器
 - [日常使用](docs/GUIDE.zh-CN.md#日常使用)和[可视化模式](docs/GUIDE.zh-CN.md#可视化模式)
-- [主题](docs/GUIDE.zh-CN.md#主题)和[商店](docs/GUIDE.zh-CN.md#商店)：实时预览、商品详情页、Stripe、PayPal、Revolut、Google Shopping
+- [艺术风格](docs/GUIDE.zh-CN.md#艺术风格)、[主题](docs/GUIDE.zh-CN.md#主题)和[商店](docs/GUIDE.zh-CN.md#商店)：用 AI 量身定制视觉风格、设计评分、实时预览、商品详情页、Stripe、PayPal、Revolut、Google Shopping
 - [AI 助手](docs/GUIDE.zh-CN.md#ai-助手)：启用、编辑风格档案、用 AI 生成页面、费用、安全
 - [MCP 连接器](docs/GUIDE.zh-CN.md#mcp-连接器claude-与-chatgpt)：用你的订阅使用 Claude 和 ChatGPT
 - [更新、备份、迁移](docs/GUIDE.zh-CN.md#更新备份迁移)
@@ -343,7 +383,7 @@ PHP 8.1+，不依赖框架，也不需要 Composer：`eclair/app/lib/` 中是简
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                                           # 502 项单元与 HTTP 检查
+php tests/run.php                                                           # 550 项单元与 HTTP 检查
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 
@@ -351,7 +391,7 @@ php tools/build.php                                                         # �
 
 ## 许可证
 
-Éclair 以 **MIT 许可证**发布（[`LICENSE`](LICENSE)）：你可以自由使用、修改和再分发，包括用于商业用途，只需保留版权声明。后台的部分图标源自 [Lucide](https://lucide.dev)（ISC 许可证，见 [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)）。
+Éclair 以 **MIT 许可证**发布（[`LICENSE`](LICENSE)）：你可以自由使用、修改和再分发，包括用于商业用途，只需保留版权声明。部分图标源自 [Lucide](https://lucide.dev)（ISC 许可证），艺术风格则借鉴了 [Impeccable](https://github.com/pbakaus/impeccable) 的方法（Apache 2.0 许可证）：见 [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)。
 
 <br>
 

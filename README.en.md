@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip"><img src="https://img.shields.io/badge/download-v1.7.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.7.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip"><img src="https://img.shields.io/badge/download-v1.8.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.8.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -24,6 +24,7 @@
   <a href="#why-éclair"><b>Why Éclair</b></a> ·
   <a href="#ai-assistant-ask-review-publish"><b>AI assistant</b></a> ·
   <a href="#claude-and-chatgpt-with-your-subscription"><b>Claude and ChatGPT</b></a> ·
+  <a href="#art-directions-a-site-that-looks-like-no-other"><b>Art directions</b></a> ·
   <a href="#themes-and-shop"><b>Themes and shop</b></a> ·
   <a href="#preview"><b>Preview</b></a> ·
   <a href="#security"><b>Security</b></a> ·
@@ -62,7 +63,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>440 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>480 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -148,6 +149,45 @@ In the editor, switch from **Blocks** to **Visual**: your page appears with your
 
 How to use it: see the [guide, Visual mode section](docs/GUIDE.en.md#visual-mode) and [Create a page with AI](docs/GUIDE.en.md#create-a-page-with-ai).
 
+## Art directions: a site that looks like no other
+
+<p align="center">
+  <img src="docs/images/en/directions.webp" alt="The same ceramics site in six art directions: Nocturne, Gallery, Clay, Riviera, Playtime and Press" width="100%">
+</p>
+
+A theme changes colors; an **art direction** changes the entire visual world: palette, heading typeface, heading size, corners, spacing, banner composition, features layout, color bands and icons. Pick one of **12 directions**, each designed around a world of its own (the city at night, the ceramics studio, the morning paper, the schoolyard…), adjust whatever you like and see the result live on your real site.
+
+**Imagine my direction with AI**: describe your business in one sentence. The AI also reads your site's description, starts from concrete things (your places, your materials, your light) and suggests **3 genuinely different directions**, steering clear of your category's clichés and the tics of “AI-generated design”. It only picks from Éclair's settings and never writes CSS: colors, typeface and layouts are checked before they reach your site. Estimated cost: ≈ $0.03 for all three suggestions with Claude Sonnet 5.5.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>♿ Readable, guaranteed</h3>
+      Whatever the colors, chosen by you or by the AI, Éclair guarantees WCAG contrast: text at <b>7:1</b>, secondary text, links and buttons at 4.5:1, tinted backgrounds included. Tested on 20,000 randomly generated palettes.
+    </td>
+    <td width="50%" valign="top">
+      <h3>⚡ Always 100/100</h3>
+      A single heading font (12 to 27 KB), <b>downloaded once by your server</b>, then served by your site and preloaded: no third-party service for your visitors, no layout shift. Only the rules your direction needs are sent.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🎯 Design score</h3>
+      A third score in the editor's analysis, next to SEO and GEO: heading hierarchy, banner, calls to action, text rhythm, all caps, empty buzzwords (“revolutionary”, “seamless”…) and repeated text.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🔒 Nothing breaks</h3>
+      The HTML doesn't change: SEO, structured data and accessibility stay exactly the same. The 6 classic themes are still there, down to the byte, and you can switch back whenever you like.
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/images/en/frame-directions.webp" alt="Settings › Appearance: the choice between art direction and classic theme, then the cards of the 12 directions" width="80%">
+</p>
+
+The method and its safeguards are adapted from [Impeccable](https://github.com/pbakaus/impeccable), by Paul Bakaus (Apache 2.0 license). How to use it: [guide, Art directions section](docs/GUIDE.en.md#art-directions).
+
 ## Themes and shop
 
 <p align="center">
@@ -206,7 +246,7 @@ The shop only opens once your legal notice and terms of sale are published. Step
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 440 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 480 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -214,7 +254,7 @@ The shop only opens once your legal notice and terms of sale are published. Step
 | **Two-factor authentication, brute-force protection** | Plugins | ✅ Built in |
 | **Plugin updates** | Frequent, the #1 source of vulnerabilities | ✅ No plugins to update |
 | **AI assistant (writing, images)** | Plugins, often with a subscription | ✅ Built in: Claude or ChatGPT, with your own key |
-| **Themes** | Installed separately, often heavy, sometimes paid | ✅ 6 built-in themes, live preview |
+| **Themes and design** | Installed separately, often heavy, sometimes paid | ✅ 6 themes and 12 art directions built in, tailor-made suggestions from AI, live preview |
 | **Selling online** | WooCommerce: a plugin, a database, updates | ✅ Built-in lightweight shop, payment via Stripe, PayPal or Revolut link |
 
 ## Performance
@@ -227,7 +267,7 @@ The shop only opens once your legal notice and terms of sale are published. Step
 Measured locally on the demo site (PHP 8.3, illustrated home page and a 600-word article), with Lighthouse 12 on mobile and desktop; a score can vary by one point from one run to the next. How it works:
 
 - **Automatic static cache**: each page is generated once, then served directly by `index.php`. The cache clears itself whenever you change something.
-- **CSS inlined in the page**, system fonts: no render-blocking requests, no layout shift.
+- **CSS inlined in the page**, system fonts or a single self-hosted, preloaded heading font (art directions): no render-blocking requests, no layout shift.
 - **Images optimized on upload**: resized, converted to **responsive WebP** (480 to 1600 px), explicit dimensions and lazy loading.
 - **A single public script**, deferred, 1.2 KB compressed. Brotli or Gzip compression and one-year browser caching via `.htaccess`.
 
@@ -315,7 +355,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.7.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.7.0.zip) archive (440 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) archive (480 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
@@ -331,7 +371,7 @@ The [full guide](docs/GUIDE.en.md) covers everything else:
 - [Installation](docs/GUIDE.en.md#installation): requirements, site types, first steps
 - [Features in detail](docs/GUIDE.en.md#features-in-detail): speed, SEO, GEO, block editor
 - [Everyday use](docs/GUIDE.en.md#everyday-use) and [Visual mode](docs/GUIDE.en.md#visual-mode)
-- [Themes](docs/GUIDE.en.md#themes) and [Shop](docs/GUIDE.en.md#shop): live preview, product pages, Stripe, PayPal, Revolut, Google Shopping
+- [Art directions](docs/GUIDE.en.md#art-directions), [Themes](docs/GUIDE.en.md#themes) and [Shop](docs/GUIDE.en.md#shop): tailor-made visual worlds with AI, Design score, live preview, product pages, Stripe, PayPal, Revolut, Google Shopping
 - [AI assistant](docs/GUIDE.en.md#ai-assistant): activation, editorial profile, creating a page with AI, costs, security
 - [MCP connector](docs/GUIDE.en.md#mcp-connector-claude-and-chatgpt): Claude and ChatGPT with your subscription
 - [Updating, backing up, moving](docs/GUIDE.en.md#updating-backing-up-moving)
@@ -343,7 +383,7 @@ PHP 8.1+ with no framework and no Composer: plain classes in `eclair/app/lib/`, 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                                           # 502 unit and HTTP checks
+php tests/run.php                                                           # 550 unit and HTTP checks
 php tools/build.php                                                         # ready-to-ship archive
 ```
 
@@ -351,7 +391,7 @@ Project structure and theme customization: see [For developers](docs/GUIDE.en.md
 
 ## License
 
-Éclair is released under the **MIT license** ([`LICENSE`](LICENSE)): use it, modify it and redistribute it freely, including for commercial use, as long as you keep the copyright notice. Some admin icons are derived from [Lucide](https://lucide.dev) (ISC license, see [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)).
+Éclair is released under the **MIT license** ([`LICENSE`](LICENSE)): use it, modify it and redistribute it freely, including for commercial use, as long as you keep the copyright notice. Some icons are derived from [Lucide](https://lucide.dev) (ISC license) and the art directions build on the method of [Impeccable](https://github.com/pbakaus/impeccable) (Apache 2.0 license): see [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
 
 <br>
 
