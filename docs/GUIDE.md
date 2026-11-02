@@ -37,7 +37,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -683,13 +683,13 @@ php tests/run.php                                  # tests (unitaires + HTTP) ; 
 php tools/build.php                                # archive prête à distribuer
 ```
 
-**Publier une version.** `tools/build.php` signe l'annonce `dist/latest.json` (version, adresse, taille et SHA-256 de l'archive) avec la clé privée Ed25519 du mainteneur, lue dans la variable d'environnement `ECLAIR_SIGNING_KEY` (base64, 64 octets) ; il refuse une clé qui ne correspond pas à la clé publique d'`app/lib/Update.php`. Les identifiants de l'application Google des sauvegardes sont posés dans l'archive depuis `ECLAIR_GOOGLE_CLIENT_ID` et `ECLAIR_GOOGLE_CLIENT_SECRET` (client « TV et appareils à saisie limitée », autorisation `drive.file`). Aucune de ces valeurs n'est dans le dépôt.
+**Publier une version.** `tools/build.php` signe l'annonce `dist/latest.json` (version, adresse, taille et SHA-256 de l'archive) avec la clé privée Ed25519 du mainteneur, lue dans la variable d'environnement `ECLAIR_SIGNING_KEY` (base64, 64 octets) ; il refuse une clé qui ne correspond pas à la clé publique d'`app/lib/Update.php`. Les identifiants de l'application Google des sauvegardes sont posés dans l'archive depuis `ECLAIR_GOOGLE_CLIENT_ID` et `ECLAIR_GOOGLE_CLIENT_SECRET` (type de client « TVs and Limited Input devices » dans la console Google Cloud, autorisation `drive.file`). Aucune de ces valeurs n'est dans le dépôt.
 
 **Fork ou installation autonome.** Dans `eclair-config.php` : `ECLAIR_UPDATE_URL` et `ECLAIR_UPDATE_KEY` (base64) pour ton propre canal de mises à jour signé ; `ECLAIR_GOOGLE_CLIENT_ID` et `ECLAIR_GOOGLE_CLIENT_SECRET` pour ta propre application Google.
 
 `PHP_CLI_SERVER_WORKERS` permet au site de s'appeler lui-même (vérification de son adresse) : avec un seul processus, la vérification échoue simplement et les redirections vers l'adresse officielle restent désactivées.
 
-Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une copie : le contrôle d'intégrité signale ces fichiers comme modifiés, et une mise à jour les remplace ; la page Mises à jour les liste avant de le faire). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 500 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
+Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une copie : le contrôle d'intégrité signale ces fichiers comme modifiés, et une mise à jour les remplace ; la page Mises à jour les liste avant de le faire). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 530 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
 
 ---
 

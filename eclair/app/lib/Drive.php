@@ -260,7 +260,7 @@ final class Drive
             return ['status' => 'idle', 'percent' => 0];
         }
         // Durée d'exécution imposée par l'hébergeur : on s'arrête avant elle (le travail reprendra au passage suivant).
-        if (!(function_exists('set_time_limit') && @set_time_limit($budget + 60)) && ($max = (int) ini_get('max_execution_time')) > 0) {
+        if (!extend_time($budget + 60) && ($max = (int) ini_get('max_execution_time')) > 0) {
             $budget = max(5, min($budget, $max - 10));
         }
         if (function_exists('ignore_user_abort')) {

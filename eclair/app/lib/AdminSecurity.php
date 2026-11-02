@@ -82,9 +82,7 @@ final class AdminSecurity
         if (!Auth::confirmed($user)) {
             Admin::back($back, t('Mot de passe incorrect.'), 'bad');
         }
-        if (function_exists('set_time_limit')) {
-            @set_time_limit(300);
-        }
+        extend_time(300);
         $file = ECLAIR_ROOT . '/cache/backup-' . bin2hex(random_bytes(8)) . '.zip';
         try {
             Backup::create($file);

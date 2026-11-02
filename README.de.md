@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/download-v1.9.0-5b4cf0?style=for-the-badge" alt="Éclair 1.9.0 herunterladen"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip"><img src="https://img.shields.io/badge/download-v1.10.0-5b4cf0?style=for-the-badge" alt="Éclair 1.10.0 herunterladen"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 oder neuer">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/Datenbank-keine-14122b?style=for-the-badge" alt="Keine Datenbank">
@@ -39,7 +39,7 @@
 
 ## Warum Éclair
 
-WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sicherheit und Caching … und endlose Updates. Éclair vereint das Wesentliche in einem CMS mit **unter 1 MB**, gemacht für Selbstständige, Handwerksbetriebe und kleine Unternehmen.
+WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sicherheit und Caching … und endlose Updates. Éclair vereint das Wesentliche in einem CMS mit **etwa 1 MB**, gemacht für Selbstständige, Handwerksbetriebe und kleine Unternehmen.
 
 <table>
   <tr>
@@ -63,7 +63,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleicht</h3>
-      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>485 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
+      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>528 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
@@ -246,19 +246,32 @@ Methode und Leitplanken stammen aus [Impeccable](https://github.com/pbakaus/impe
 
 Der Shop lässt sich erst öffnen, wenn Impressum und Allgemeine Geschäftsbedingungen veröffentlicht sind. Vollständige Anleitung: [Handbuch, Abschnitt Shop](docs/GUIDE.de.md#shop).
 
+## Updates mit einem Klick, Backups auf Google Drive
+
+Wenn eine neue Version von Éclair erscheint, sagt dir dein Dashboard Bescheid. Du bestimmst den Zeitpunkt: eine Erinnerung ans Backup, ein Häkchen, ein Klick.
+
+- **Signiert und geprüft**: Die Ankündigung jeder Version ist vom Maintainer signiert (Ed25519), danach prüft Éclair das Archiv, jede Datei und ihre Kompatibilität mit deiner PHP-Version, **bevor es irgendetwas anrührt**.
+- **Kein Risiko für deine Inhalte**: Nur der Code ändert sich. Inhalte, Bilder, Konten, Einstellungen und eigenes CSS bleiben unangetastet, und eine angepasste `.htaccess` bleibt erhalten.
+- **Automatische Rückkehr**: Nach der Installation prüft Éclair, ob deine Website und deine Verwaltung wie vorher antworten; falls nicht, kehrt es von selbst zur alten Version zurück. Über eine Schaltfläche kannst du außerdem jederzeit selbst zurückwechseln.
+
+**Backups auf Google Drive**: Verbinde Google Drive mit einem einfachen Code (google.com/device), wähle „täglich“ oder „wöchentlich“, und Éclair legt dort eine vollständige Kopie deiner Website ab. Es hat nur Zugriff auf die Dateien, die es selbst erstellt, behält die letzten Backups (standardmäßig 8) und lädt große Websites in Teilen hoch, wobei unterbrochene Uploads fortgesetzt werden. Die API-Schlüssel verlassen nie deinen Server.
+
+Anleitung: [Handbuch, Abschnitt Aktualisieren, sichern, umziehen](docs/GUIDE.de.md#aktualisieren-sichern-umziehen).
+
 ## Éclair im Vergleich zu WordPress
 
 | | Klassisches WordPress | ⚡ Éclair |
 |---|---|---|
 | **Installation** | MySQL-Datenbank anlegen, dann den Assistenten starten | ✅ Ordner hochladen, 4 Fragen beantworten |
 | **Datenbank** | MySQL erforderlich | ✅ Keine (geschützte Dateien) |
-| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 485 KB |
+| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 528 KB |
 | **SEO, Sitemap, strukturierte Daten** | Ein Plugin, das installiert und gepflegt werden muss | ✅ Integriert |
 | **GEO: llms.txt, Markdown, KI-Bots** | Plugins, selten vollständig | ✅ Integriert |
 | **Öffentliche Seiten** | Bei jedem Aufruf neu erzeugt, außer mit Cache-Plugin | ✅ Aus einem statischen Cache ausgeliefert |
 | **Cookies auf der öffentlichen Website** | Oft viele | ✅ Keine |
 | **Zwei-Faktor-Authentifizierung, Brute-Force-Schutz** | Plugins | ✅ Integriert |
 | **Plugin-Updates** | Ständig, die häufigste Ursache für Sicherheitslücken | ✅ Keine Plugins zu aktualisieren |
+| **Automatische Backups** | Ein Plugin, das installiert werden muss (UpdraftPlus …) | ✅ Integriert: täglich oder wöchentlich auf Google Drive, oder als Download |
 | **KI-Assistent (Texte, Bilder)** | Plugins, oft mit Abo | ✅ Integriert: Claude oder ChatGPT, mit deinem Schlüssel |
 | **Themes und Design** | Müssen installiert werden, oft schwergewichtig, manchmal kostenpflichtig | ✅ 6 Themes und 12 Art Directions integriert, maßgeschneiderte Vorschläge der KI, Live-Vorschau |
 | **Online verkaufen** | WooCommerce: Plugin, Datenbank, Updates | ✅ Schlanker Shop integriert, Bezahlung per Zahlungslink von Stripe, PayPal oder Revolut |
@@ -347,7 +360,8 @@ Auf echtem Shared Hosting kommen die Netzwerklatenz und der PHP-Start deines Hos
 - **Erneute Passwortabfrage** bei sensiblen Aktionen, vorläufige Passwörter, die geändert werden müssen, kurze und widerrufbare Sitzungen.
 - **Abgeriegelte öffentliche Website**: strenge Content-Security-Policy, Inhaltsbereinigung per Allowlist, keine offenen Weiterleitungen, neu kodierte Bilder.
 - **Geschützte Installation**: ein Zeitfenster von 2 Stunden, und die Adresse der Website wird vom Server selbst geprüft, bevor weitergeleitet wird.
-- **Seite „Sicherheit“**: Integritätsprüfung der Dateien, Test des Ordnerschutzes, Sicherheitsprotokoll, Backup mit einem Klick.
+- **Signierte Updates**: Jede Version wird mit einer Ed25519-Signatur des Maintainers angekündigt, die deine Website vor jeder Installation prüft; ein gehacktes GitHub-Repository reicht nicht aus, um Code in deine Website einzuschleusen.
+- **Seite „Sicherheit“**: Integritätsprüfung der Dateien, Test des Ordnerschutzes, Sicherheitsprotokoll, Backup mit einem Klick oder auf Google Drive.
 - **MCP-Connector standardmäßig deaktiviert**: Ist er aktiviert, gelten OAuth 2.1 mit PKCE, Zustimmung nach der Anmeldung sowie gehashte und widerrufbare Tokens; Veröffentlichen und Löschen sind nicht möglich.
 
 > [!NOTE]
@@ -361,7 +375,7 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
   <img src="docs/images/de/install.webp" alt="Installation in drei Schritten: Ordner hochladen, vier Fragen beantworten, die Website ist online" width="100%">
 </p>
 
-1. **Lade** das Archiv [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) **herunter** und entpacke es.
+1. **Lade** das Archiv [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 KB) **herunter** und entpacke es.
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 
@@ -380,7 +394,7 @@ Das [vollständige Handbuch](docs/GUIDE.de.md) erklärt alles Weitere:
 - [Art Directions](docs/GUIDE.de.md#art-directions), [Themes](docs/GUIDE.de.md#themes) und [Shop](docs/GUIDE.de.md#shop): maßgeschneiderte Bildwelten mit KI, Design-Score, Live-Vorschau, Produktseiten, Stripe, PayPal, Revolut, Google Shopping
 - [KI-Assistent](docs/GUIDE.de.md#ki-assistent): Aktivierung, Redaktionsprofil, eine Seite mit KI erstellen, Kosten, Sicherheit
 - [MCP-Connector](docs/GUIDE.de.md#mcp-connector-claude-und-chatgpt): Claude und ChatGPT mit deinem Abo
-- [Aktualisieren, sichern, umziehen](docs/GUIDE.de.md#aktualisieren-sichern-umziehen)
+- [Aktualisieren, sichern, umziehen](docs/GUIDE.de.md#aktualisieren-sichern-umziehen): Update mit einem Klick, Backups auf Google Drive, Wiederherstellung
 - [Fehlerbehebung](docs/GUIDE.de.md#fehlerbehebung): Passwort vergessen, Fehler 404 oder 500, Nginx …
 
 ## Für Entwickler
@@ -389,7 +403,7 @@ PHP 8.1+ ohne Framework und ohne Composer: einfache Klassen in `eclair/app/lib/`
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                                           # 556 Unit- und HTTP-Prüfungen
+php tests/run.php                                                           # 609 Unit- und HTTP-Prüfungen
 php tools/build.php                                                         # Archiv zum Verteilen
 ```
 

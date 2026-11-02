@@ -148,6 +148,15 @@ function ago(int $ts): string
     };
 }
 
+/**
+ * Allonge la durée d'exécution permise, si l'hébergeur le permet. Une fonction désactivée par l'hébergeur n'existe plus
+ * depuis PHP 8 : l'appeler directement arrêterait tout.
+ */
+function extend_time(int $seconds): bool
+{
+    return function_exists('set_time_limit') && @set_time_limit($seconds);
+}
+
 /** Taille de fichier lisible (Mo/Ko en français, MB/KB ailleurs). */
 function human_size(int $bytes): string
 {

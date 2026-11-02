@@ -1,0 +1,4 @@
+{
+    "payload": "{\"version\":\"1.10.0\",\"date\":\"2026-11-02\",\"url\":\"https://raw.githubusercontent.com/Jacckisback/eclair-cms/main/dist/eclair-cms-1.10.0.zip\",\"sha256\":\"a5d56bc03b0d7249671cb46da931fc58e85e4ea442555dcbde1ee1f9954401cb\",\"size\":540912,\"php\":\"8.1\",\"notes\":\"https://github.com/Jacckisback/eclair-cms/releases/tag/1.10.0\"}",
+    "signature": "Nn+KK1giqLBcyWqrTJVTKWJNxUQxh1Oi5Fpx5I+Li5GxtyP0+pNL6t4OowsiLsNsqnsJQQHqeVkU9sTOXbLMCQ=="
+}

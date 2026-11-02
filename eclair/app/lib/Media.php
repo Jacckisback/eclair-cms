@@ -177,7 +177,7 @@ final class Media
 
     private static function process(string $tmp, int $type, string $target, array $record): array
     {
-        @set_time_limit(120);
+        extend_time(120);
         self::memory((int) $record['w'], (int) $record['h']);
         $src = match ($type) {
             IMAGETYPE_JPEG => @imagecreatefromjpeg($tmp),

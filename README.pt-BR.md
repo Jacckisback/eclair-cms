@@ -63,7 +63,7 @@ O WordPress faz de tudo, mas precisa de um banco de dados, de plugins para SEO, 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleve</h3>
-      Sem banco de dados: seu conteúdo fica em arquivos protegidos. Um arquivo de <b>506 KB</b>, zero dependências, zero cookies no site público.
+      Sem banco de dados: seu conteúdo fica em arquivos protegidos. Um arquivo de <b>528 KB</b>, zero dependências, zero cookies no site público.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facílimo</h3>
@@ -254,7 +254,7 @@ Quando sai uma nova versão do Éclair, o seu painel avisa você. Você escolhe 
 - **Sem risco para o seu conteúdo**: só o código muda. Conteúdos, imagens, contas, configurações e CSS personalizado continuam como estão, e um `.htaccess` ajustado por você é mantido.
 - **Volta automática**: depois da instalação, o Éclair verifica se o seu site e o seu painel respondem como antes; se não, ele volta sozinho para a versão anterior. Um botão também permite voltar a ela quando você quiser.
 
-**Backups no Google Drive**: conecte o seu Drive com um simples código (google.com/device), escolha “todo dia” ou “toda semana”, e o Éclair envia para lá uma cópia completa do seu site. Ele só tem acesso aos arquivos que ele mesmo cria, guarda os últimos backups (8 por padrão) e envia os sites grandes em partes, retomando de onde parou. As chaves de API nunca saem do seu servidor.
+**Backups no Google Drive**: conecte o seu Drive com um simples código (google.com/device), escolha “todos os dias” ou “todas as semanas”, e o Éclair envia para lá uma cópia completa do seu site. Ele só tem acesso aos arquivos que ele mesmo cria, guarda os últimos backups (8 por padrão) e envia os sites grandes em partes, retomando de onde parou. As chaves de API nunca saem do seu servidor.
 
 Como usar: [guia, seção Atualizar, fazer backup, mudar de hospedagem](docs/GUIDE.pt-BR.md#atualizar-fazer-backup-mudar-de-hospedagem).
 
@@ -264,14 +264,14 @@ Como usar: [guia, seção Atualizar, fazer backup, mudar de hospedagem](docs/GUI
 |---|---|---|
 | **Instalação** | Criar um banco de dados MySQL e depois rodar o assistente | ✅ Enviar a pasta e responder a 4 perguntas |
 | **Banco de dados** | MySQL obrigatório | ✅ Nenhum (arquivos protegidos) |
-| **Arquivo para baixar** | ≈ 35 MB[^wp] | ✅ 506 KB |
+| **Arquivo para baixar** | ≈ 35 MB[^wp] | ✅ 528 KB |
 | **SEO, sitemap, dados estruturados** | Um plugin para instalar e manter | ✅ Integrado |
 | **GEO: llms.txt, Markdown, robôs de IA** | Plugins, raramente completos | ✅ Integrado |
 | **Páginas públicas** | Geradas a cada visita, a menos que você use um plugin de cache | ✅ Servidas a partir de um cache estático |
 | **Cookies no site público** | Muitas vezes, vários | ✅ Nenhum |
 | **Autenticação em dois fatores, proteção contra força bruta** | Plugins | ✅ Integradas |
 | **Atualizações de plugins** | Constantes, a principal fonte de falhas | ✅ Nenhum plugin para atualizar |
-| **Backups automáticos** | Um plugin para instalar (UpdraftPlus…) | ✅ Integrados: Google Drive todo dia ou toda semana, ou download |
+| **Backups automáticos** | Um plugin para instalar (UpdraftPlus…) | ✅ Integrados: Google Drive todos os dias ou todas as semanas, ou download |
 | **Assistente de IA (textos, imagens)** | Plugins, muitas vezes com assinatura | ✅ Integrado: Claude ou ChatGPT, com a sua chave |
 | **Temas e design** | Instalados à parte, muitas vezes pesados, às vezes pagos | ✅ 6 temas e 12 direções de arte integrados, propostas sob medida pela IA, pré-visualização ao vivo |
 | **Vender online** | WooCommerce: plugin, banco de dados, atualizações | ✅ Loja leve integrada, pagamento por link da Stripe, do PayPal ou do Revolut |
@@ -375,7 +375,7 @@ Todos os detalhes no [guia, seção Segurança](docs/GUIDE.pt-BR.md#segurança).
   <img src="docs/images/pt-BR/install.webp" alt="Instalação em três etapas: enviar a pasta, responder a quatro perguntas, o site está no ar" width="100%">
 </p>
 
-1. **Baixe** o arquivo [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (506 KB) e descompacte-o.
+1. **Baixe** o arquivo [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 KB) e descompacte-o.
 2. **Envie o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…), incluindo os arquivos ocultos `.htaccess`.
 3. **Abra o endereço do seu site**: o assistente começa. Quatro perguntas, um pouco de confete, e seu site está no ar com as primeiras páginas.
 
@@ -403,7 +403,7 @@ PHP 8.1+ sem framework nem Composer: classes simples em `eclair/app/lib/`, views
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                                           # 556 verificações unitárias e HTTP
+php tests/run.php                                                           # 609 verificações unitárias e HTTP
 php tools/build.php                                                         # arquivo pronto para distribuir
 ```
 

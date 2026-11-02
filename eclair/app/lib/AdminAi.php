@@ -92,7 +92,7 @@ final class AdminAi
     {
         session_write_close();
         ignore_user_abort(true);
-        @set_time_limit(600);
+        extend_time(600);
         @ini_set('zlib.output_compression', '0');
         if (function_exists('apache_setenv')) {
             @apache_setenv('no-gzip', '1');
@@ -262,7 +262,7 @@ final class AdminAi
         $task = (string) ($data['task'] ?? '');
         $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
-        @set_time_limit(300);
+        extend_time(300);
         $str = ['type' => 'string'];
         $obj = static fn (array $props): array => ['type' => 'object', 'properties' => $props, 'required' => array_keys($props), 'additionalProperties' => false];
         $item = is_array($data['item'] ?? null) ? Content::build($data['item'], $user, Content::get((string) ($data['item']['id'] ?? ''))) : null;
@@ -389,7 +389,7 @@ final class AdminAi
         }
         $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
-        @set_time_limit(300);
+        extend_time(300);
         $todo = Analyzer::TODO[$lang] ?? Analyzer::TODO['en'];
         $kind = ['page' => 'website page', 'post' => 'blog article', 'product' => 'product sheet for the shop'][$type];
         $task = "Compose a complete $kind for this website from the person's brief, as a sequence of layout sections, ready for them to review.\n"
@@ -451,7 +451,7 @@ final class AdminAi
         }
         $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
-        @set_time_limit(300);
+        extend_time(300);
         $fonts = implode("\n", array_map(fn ($id, $f) => "- $id: {$f[0]} ({$f[2]}) — {$f[3]}", array_keys(Design::FONTS), Design::FONTS));
         $lang = Content::LANGS[I18n::lang()] ?? 'French';
         $task = "Imagine three art directions for this website, so that it looks like no other site: each one a complete visual world drawn from the business itself, never a template.\n"
@@ -543,7 +543,7 @@ final class AdminAi
         }
         $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
-        @set_time_limit(300);
+        extend_time(300);
         $s = Settings::all();
         $parts = ['Site: ' . $s['name'] . "\nTagline: " . $s['tagline'] . "\nDescription: " . $s['description']
             . "\nPresentation for AI engines: " . $s['geo']['about'] . "\nOrganisation: " . ($s['seo']['entity_name'] ?: $s['name']) . ' (' . $s['seo']['entity'] . ')'

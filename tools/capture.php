@@ -44,12 +44,23 @@ function capture_serve(string $root, ?string $fixture, string $name): array
             exec('cp -r ' . escapeshellarg($fixture) . '/media/. ' . escapeshellarg($copy . '/media/'));
         }
     }
-    $port = random_int(41000, 49000);
-    $server = proc_open([PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $copy, __DIR__ . '/router.php'],
-        [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']], $pipes, null,
-        ['PHP_CLI_SERVER_WORKERS' => '4', 'PATH' => (string) getenv('PATH')]);
-    usleep(600000);
-    return [$copy, $port, $server];
+    // Port libre et serveur prêt (nouvel essai sur un autre port s'il n'a pas pu démarrer).
+    for ($try = 0; $try < 6; $try++) {
+        $port = random_int(41000, 49000);
+        $server = proc_open([PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $copy, __DIR__ . '/router.php'],
+            [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']], $pipes, null,
+            ['PHP_CLI_SERVER_WORKERS' => '4', 'PATH' => (string) getenv('PATH')]);
+        for ($i = 0; $i < 50 && proc_get_status($server)['running']; $i++) {
+            $sock = @fsockopen('127.0.0.1', $port, $errno, $errstr, 0.2);
+            if ($sock) {
+                fclose($sock);
+                return [$copy, $port, $server];
+            }
+            usleep(100000);
+        }
+        proc_terminate($server);
+    }
+    throw new RuntimeException('Serveur de capture impossible à démarrer.');
 }
 
 function capture_req(int $port, string $method, string $path, array|string $data = [], array $headers = [], ?string $jar = null): array

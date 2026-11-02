@@ -139,7 +139,7 @@ final class Installer
 
     private static function install(): void
     {
-        @set_time_limit(120);
+        extend_time(120);
         foreach (['content', 'revisions', 'sessions', 'limits', 'logs', 'messages'] as $dir) {
             Store::ensureDir(ECLAIR_DATA . '/' . $dir);
         }

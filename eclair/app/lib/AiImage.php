@@ -34,7 +34,7 @@ final class AiImage
         }
         $size = self::FORMATS[$format] ?? self::FORMATS['landscape'];
         $key = Ai::imageKey($provider);
-        @set_time_limit(300);
+        extend_time(300);
         try {
             [$bytes, $cost] = match ($provider) {
                 'openai' => self::openai($key, $model, $prompt, $size[0]),

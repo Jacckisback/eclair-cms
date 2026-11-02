@@ -261,6 +261,32 @@ check('GIF nettoyé : animation conservée', is_string($cleaned) && str_contains
 check('GIF tronqué refusé', $clean->invoke(null, substr($gif, 0, 40)) === null);
 
 /* ─────────────────────────── Intégration HTTP ─────────────────────────── */
+/**
+ * Serveur PHP intégré sur un port libre : on attend qu'il accepte une connexion, et on change de port s'il n'a pas pu
+ * démarrer (port déjà pris), au lieu d'une attente fixe qui échouait parfois sur une machine chargée.
+ */
+function start_server(array $args, array $env = [], int $from = 20000, int $to = 30000): array
+{
+    for ($try = 0; $try < 6; $try++) {
+        $port = random_int($from, $to);
+        $server = proc_open(array_merge([PHP_BINARY, '-S', '127.0.0.1:' . $port], $args), [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']],
+            $pipes, null, $env + ['PATH' => (string) getenv('PATH')]);
+        for ($i = 0; $i < 50; $i++) {
+            if (!proc_get_status($server)['running']) {
+                break; // port pris : le serveur s'est arrêté aussitôt
+            }
+            $sock = @fsockopen('127.0.0.1', $port, $errno, $errstr, 0.2);
+            if ($sock) {
+                fclose($sock);
+                return [$port, $server];
+            }
+            usleep(100000);
+        }
+        proc_terminate($server);
+    }
+    throw new RuntimeException('Serveur de test impossible à démarrer.');
+}
+
 /** Lance une copie d'Éclair sur le serveur intégré (4 processus : le site peut s'appeler lui-même). */
 function serve(string $name): array
 {
@@ -269,16 +295,7 @@ function serve(string $name): array
     foreach (['data/*.php', 'data/*/', 'cache/*', 'media/20*', 'media/site'] as $glob) {
         exec('rm -rf ' . $copy . '/' . $glob);
     }
-    $port = random_int(20000, 40000);
-    $env = ['PHP_CLI_SERVER_WORKERS' => '4', 'PATH' => (string) getenv('PATH')];
-    $server = proc_open(
-        [PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $copy, dirname(__DIR__) . '/tools/router.php'],
-        [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']],
-        $pipes,
-        null,
-        $env
-    );
-    usleep(600000);
+    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4']);
     return [$copy, $port, $server];
 }
 

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/scarica-v1.9.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.9.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip"><img src="https://img.shields.io/badge/scarica-v1.10.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.10.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o successivo">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-nessuno-14122b?style=for-the-badge" alt="Nessun database">
@@ -39,7 +39,7 @@
 
 ## Perché Éclair
 
-WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicurezza e la cache… e di aggiornamenti continui. Éclair riunisce l’essenziale in un CMS di **meno di 1 MB**, pensato per liberi professionisti, artigiani e piccole imprese.
+WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicurezza e la cache… e di aggiornamenti continui. Éclair riunisce l’essenziale in un CMS di **circa 1 MB**, pensato per liberi professionisti, artigiani e piccole imprese.
 
 <table>
   <tr>
@@ -63,7 +63,7 @@ WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicur
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleggero</h3>
-      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>485 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
+      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>528 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Semplicissimo</h3>
@@ -246,19 +246,32 @@ Il metodo e le salvaguardie sono adattati da [Impeccable](https://github.com/pba
 
 Il negozio si apre solo quando le note legali e le condizioni generali di vendita sono pubblicate. Istruzioni complete: vedi la [guida, sezione Negozio](docs/GUIDE.it.md#negozio).
 
+## Aggiornamenti in un clic, backup su Google Drive
+
+Quando esce una nuova versione di Éclair, la tua bacheca ti avvisa. Il momento lo scegli tu: un promemoria per il backup, una casella da spuntare, un clic.
+
+- **Firmato e verificato**: l’annuncio di ogni versione è firmato dal manutentore (Ed25519), poi Éclair controlla l’archivio, ogni file e la sua compatibilità con la tua versione di PHP **prima di toccare qualsiasi cosa**.
+- **Nessun rischio per i tuoi contenuti**: cambia solo il codice. Contenuti, immagini, account, impostazioni e CSS personalizzato restano invariati, e un `.htaccess` ritoccato viene conservato.
+- **Ritorno automatico**: dopo l’installazione, Éclair verifica che il tuo sito e il tuo pannello rispondano come prima; altrimenti torna da solo alla versione precedente. Con un pulsante puoi anche tornarci quando vuoi.
+
+**Backup su Google Drive**: collega il tuo Drive con un semplice codice (google.com/device), scegli «ogni giorno» o «ogni settimana», ed Éclair ci invia una copia completa del tuo sito. Ha accesso solo ai file che crea, conserva gli ultimi backup (8 di default) e invia i siti più grandi a blocchi, con ripresa in caso di interruzione. Le chiavi API non lasciano mai il tuo server.
+
+Istruzioni: [guida, sezione Aggiornare, fare backup, traslocare](docs/GUIDE.it.md#aggiornare-fare-backup-traslocare).
+
 ## Éclair a confronto con WordPress
 
 | | WordPress classico | ⚡ Éclair |
 |---|---|---|
 | **Installazione** | Creare un database MySQL, poi avviare la procedura guidata | ✅ Caricare la cartella, rispondere a 4 domande |
 | **Database** | MySQL obbligatorio | ✅ Nessuno (file protetti) |
-| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 485 KB |
+| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 528 KB |
 | **SEO, sitemap, dati strutturati** | Un plugin da installare e mantenere | ✅ Integrati |
 | **GEO: llms.txt, Markdown, bot IA** | Plugin, raramente completi | ✅ Integrato |
 | **Pagine pubbliche** | Generate a ogni visita, salvo con un plugin di cache | ✅ Servite da una cache statica |
 | **Cookie sul sito pubblico** | Spesso tanti | ✅ Nessuno |
 | **Autenticazione a due fattori, anti brute force** | Plugin | ✅ Integrate |
 | **Aggiornamenti dei plugin** | Continui, la prima fonte di vulnerabilità | ✅ Nessun plugin da aggiornare |
+| **Backup automatici** | Un plugin da installare (UpdraftPlus…) | ✅ Integrati: su Google Drive ogni giorno o ogni settimana, oppure da scaricare |
 | **Assistente IA (scrittura, immagini)** | Plugin, spesso in abbonamento | ✅ Integrato: Claude o ChatGPT, con la tua chiave |
 | **Temi e design** | Da installare, spesso pesanti, a volte a pagamento | ✅ 6 temi e 12 direzioni artistiche integrati, proposte su misura dall’IA, anteprima in tempo reale |
 | **Vendere online** | WooCommerce: plugin, database, aggiornamenti | ✅ Negozio leggero integrato, pagamento tramite link Stripe, PayPal o Revolut |
@@ -347,7 +360,8 @@ Su un vero hosting condiviso, aggiungi la latenza di rete e l’avvio di PHP del
 - **Password richiesta di nuovo** per le azioni sensibili, password provvisorie da cambiare, sessioni brevi e revocabili.
 - **Sito pubblico blindato**: Content-Security-Policy rigorosa, contenuti sanificati tramite lista bianca, nessun reindirizzamento aperto, immagini ricodificate.
 - **Installazione protetta**: una finestra di 2 ore, e l’indirizzo del sito verificato dal server stesso prima di qualsiasi reindirizzamento.
-- **Pagina Sicurezza**: controllo di integrità dei file, test di protezione delle cartelle, registro, backup in un clic.
+- **Aggiornamenti firmati**: ogni versione viene annunciata con una firma Ed25519 del manutentore, verificata dal tuo sito prima di qualsiasi installazione; un repository GitHub violato non basta per introdurre codice nel tuo sito.
+- **Pagina Sicurezza**: controllo di integrità dei file, test di protezione delle cartelle, registro, backup in un clic o su Google Drive.
 - **Connettore MCP disattivato di default**: una volta attivato, OAuth 2.1 con PKCE, consenso dopo l’accesso, token salvati come hash e revocabili, nessuna pubblicazione né eliminazione possibile.
 
 > [!NOTE]
@@ -361,7 +375,7 @@ Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.it.md#sicurezza).
   <img src="docs/images/it/install.webp" alt="Installazione in tre passaggi: carica la cartella, rispondi a quattro domande, il sito è online" width="100%">
 </p>
 
-1. **Scarica** l’archivio [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) ed estrailo.
+1. **Scarica** l’archivio [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 KB) ed estrailo.
 2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
 3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
 
@@ -380,7 +394,7 @@ La [guida completa](docs/GUIDE.it.md) spiega tutto il resto:
 - [Direzioni artistiche](docs/GUIDE.it.md#direzioni-artistiche), [Temi](docs/GUIDE.it.md#temi) e [Negozio](docs/GUIDE.it.md#negozio): universi su misura con l’IA, punteggio Design, anteprima in tempo reale, schede prodotto, Stripe, PayPal, Revolut, Google Shopping
 - [Assistente IA](docs/GUIDE.it.md#assistente-ia): attivazione, profilo editoriale, creare una pagina con l’IA, costi, sicurezza
 - [Connettore MCP](docs/GUIDE.it.md#connettore-mcp-claude-e-chatgpt): Claude e ChatGPT con il tuo abbonamento
-- [Aggiornare, fare backup, traslocare](docs/GUIDE.it.md#aggiornare-fare-backup-traslocare)
+- [Aggiornare, fare backup, traslocare](docs/GUIDE.it.md#aggiornare-fare-backup-traslocare): aggiornamento in un clic, backup su Google Drive, ripristino
 - [Risoluzione dei problemi](docs/GUIDE.it.md#risoluzione-dei-problemi): password dimenticata, errori 404 o 500, Nginx…
 
 ## Per sviluppatori
@@ -389,7 +403,7 @@ PHP 8.1+ senza framework né Composer: classi semplici in `eclair/app/lib/`, vis
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
-php tests/run.php                                                           # 556 verifiche unitarie e HTTP
+php tests/run.php                                                           # 609 verifiche unitarie e HTTP
 php tools/build.php                                                         # archivio pronto da distribuire
 ```
 

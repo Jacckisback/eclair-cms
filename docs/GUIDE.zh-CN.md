@@ -40,7 +40,7 @@
 
 ### 安装步骤
 
-1. 下载安装包 [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip)（485 KB）并解压。
+1. 下载安装包 [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip)（528 KB）并解压。
 2. 使用 FTP 软件（如 FileZilla）或主机的文件管理器，把 **`eclair` 文件夹里的内容**上传到主机的公开目录（`public_html`、`www`……）。
    > ⚠️ `.htaccess` 是隐藏文件：请开启“显示隐藏文件”，确保它们也被上传。
 3. 打开你的网站地址：**安装向导随即启动**（支持 7 种语言，包括简体中文）。
@@ -533,15 +533,62 @@ AI 会参考你的编辑风格档案、已发布页面和文章的列表（确�
 
 ## 更新、备份、迁移
 
-**备份**：安全 › 下载备份（`data/` 和 `media/` 的 ZIP 压缩包）。如果没有 zip 扩展，请通过 FTP 复制这两个目录。
+### 一键更新
 
-**更新 Éclair**：
+从 1.10 版开始，Éclair 每天两次在 GitHub 上检查是否有新版本。有新版本时，仪表盘上会出现一条提示，菜单中的**更新**旁也会出现一个标记（仅管理员可见）。未经你同意，不会安装任何东西。
+
+1. 打开**更新**：你可以看到可用的版本，以及查看新功能的链接。
+2. **先做一次备份**：可以使用同一页面上的按钮；如果已连接 Google Drive，也可以备份到 Google Drive。
+3. 勾选“我有一份近期的网站备份”，如果系统要求，请确认密码，然后点击**更新到……**。整个过程大约需要十秒钟。
+
+在此期间，Éclair 会：
+
+- 从 GitHub 下载安装包，并验证其发布公告的**签名**：每个版本都用维护者的私钥（Ed25519）签名，而这个私钥从不存放在 GitHub 上。因此，即使仓库被入侵，也无法把代码推送到你的网站；
+- **在改动任何东西之前**，先检查安装包的指纹和每个文件，并确认你的 PHP 版本能够读取每个 PHP 文件；
+- 把旧版本保存在一旁（`cache/update/previous`），然后瞬间装好新版本：只有 `app/`、`assets/`、`index.php` 和 `.htaccess` 会改变。你的内容、图片、账户、设置和自定义 CSS（`data/`、`media/`）都保持不变；
+- 检查你的网站、后台和新版本是否像以前一样正常响应；如果不正常，**它会自动回退**到旧版本。
+
+之后，同一页面上的**回退到上一版本**可以一键换回旧版本。
+
+须知：
+
+- 你修改过（或主机商补充过）的 `.htaccess` 会被**保留**；新的模板保存在 `cache/update/htaccess-<version>.txt` 中，方便你对比。
+- 手动修改过的 Éclair 文件（主题……）会被替换为新版本：更新页面会在安装前列出这些文件。如需长期保留的调整，请使用**自定义 CSS**（设置 › 外观）。
+- 如果你的主机商不允许服务器访问自身，Éclair 会在无法检查的情况下安装更新，并告诉你这一点：请打开你的网站检查，必要时回退到旧版本。
+- 一键更新需要 PHP 的 `sodium`、`zip` 和 `curl` 扩展，以及 PHP 可写入的目录。否则，页面会说明需要修正什么，你仍然可以通过 FTP 更新。
+- 可以在 设置 › 高级 中关闭自动检查（“立即检查”按钮仍然可用）。
+
+**通过 FTP 更新**（服务器不支持一键更新，或者从 1.10 之前的版本升级）：
 1. 先做一次备份。
 2. 通过 FTP **删除** `app/` 和 `assets/` 目录，然后上传新版本中的这两个目录，以及 `index.php` 和 `.htaccess`（先删除可以避免残留旧文件，否则完整性检查会把它们标记出来）。
 3. **不要改动** `data/`（内容、设置、账户、自定义 CSS）和 `media/`（图片）。
-4. 在后台执行：设置 › 高级 › 清除缓存。
+4. 首次访问时缓存会自动清空（否则请执行：设置 › 高级 › 清除缓存）。
 
-**迁移到其他主机或域名**：复制整个目录，然后在 设置 › 常规 中修改网站地址。内部链接会自动适配，子目录也不例外。
+### 备份
+
+**下载备份**：安全 › 下载备份，或者在更新页面下载。ZIP 压缩包包含 `data/`（内容、设置、账户、消息）和 `media/`（图片）。API 密钥和 Google Drive 连接信息绝不会包含在其中。如果没有 zip 扩展，请通过 FTP 复制这两个目录。
+
+### Google Drive 备份
+
+在**安全 › Google Drive 备份**中，可以把网站的副本发送到你的 Google Drive：每天、每周，或者随时手动备份。
+
+1. 点击**连接 Google Drive**（可能需要再次输入密码）。
+2. Éclair 会显示一个代码。在电脑或手机上打开 **google.com/device**，输入代码，选择你的 Google 账户并授权 Éclair。
+3. 页面会自动更新：连接完成。选择备份频率（每天、每周或关闭）以及要保留的备份数量。
+
+- Éclair **只能访问它自己创建的文件**（Google 的“drive.file”权限）：你 Drive 中的其他内容它一概看不到。备份会存放在名为“Éclair – 网站名称”的文件夹中。
+- 超过所选数量（默认 8 份）后，最旧的备份会被移到你 Drive 的**回收站**。
+- **立即备份**会马上开始上传。大型网站会分成 4 MB 的块上传：如果主机限制了执行时间，上传会从中断的地方继续（请保持页面打开，它会自动继续）。
+- 自动备份会在管理员打开后台时发送。如果希望没有人访问时也能发送，请复制**计划任务地址**（安全 › Google Drive 备份 › 定时备份），把它填入主机的计划任务（cron）或 [cron-job.org](https://cron-job.org)，每小时调用一次：只有到了该备份的时候，它才会启动备份。请不要把这个地址告诉别人。
+- 访问令牌在你的服务器上加密保存。**断开 Google Drive 连接**会撤销该令牌；你也可以在 Google 账户中撤销访问权限（[myaccount.google.com/connections](https://myaccount.google.com/connections)）。已经上传的备份仍会保留在你的 Drive 中。
+
+### 恢复备份
+
+解压备份压缩包，然后通过 FTP，用压缩包中的 `data/` 和 `media/` 目录替换你安装中的这两个目录。重新输入你的 API 密钥（AI 助手）；如果之前使用了 Google Drive，请重新连接。
+
+### 迁移
+
+迁移到其他主机或域名：复制整个目录，然后在 设置 › 常规 中修改网站地址。内部链接会自动适配，子目录也不例外。
 
 ---
 
@@ -557,6 +604,12 @@ YourNewPassword2026
 ```
 
 在 24 小时内，**用这个邮箱和新密码登录**：密码会被替换，该账户的双重认证会被关闭，你的其他会话会被注销，文件也会被自动删除。其他人无法触发此操作（必须知道文件内容）；缺少第一行的文件会被拒绝并删除。
+
+**更新后后台无法显示**（很少见：只要能检查网站，Éclair 就会自动回退）：通过 FTP，用 `cache/update/previous/` 中的 `app/` 和 `assets/` 目录替换现有的这两个目录，然后把 `cache/update/previous/index.php.txt` 复制到根目录，并命名为 `index.php`。
+
+**“此服务器无法使用一键更新”**：更新页面会说明原因（缺少 PHP 扩展、目录不可写、PHP 版本过旧）。请在主机商那里解决这个问题，或者通过 FTP 更新。
+
+**Google Drive：“Google Drive 访问权限已撤销”**：授权已在 Google 账户中被撤销（或已过期）。点击**连接 Google Drive**：会继续使用原来的文件夹。
 
 **“安装已锁定”**：首次访问后的 2 小时安装时限已过。通过 FTP 删除 `data/install-window.php` 并刷新页面。
 
@@ -619,21 +672,27 @@ tests/fake-ai.php        模拟的 AI 服务商（Claude、ChatGPT、图片）�
 tests/shop.php           主题和商店测试（商品详情页、Stripe、PayPal、Revolut、JSON-LD、Merchant Center Feed）
 tests/mcp.php            MCP 连接器（OAuth、PKCE、协议、撤销）和 AI 选择测试
 tests/design.php         艺术风格（对比度、CSS、字体、恶意设置、AI）和设计评分测试
+tests/update.php         一键更新测试（模拟的签名发布渠道：签名、恶意安装包、语法、自动和手动回退）
+tests/drive.php          Google Drive 备份测试（tests/fake-google.php：模拟的 OAuth 和 Drive、分块上传、断点续传）
 tests/fixtures/          参考网站及其公开页面渲染结果的指纹（新版本不会改动网站的任何一个字节）
 tools/router.php         PHP 内置服务器的路由脚本（开发用）
 tools/capture.php        公开页面渲染结果的参考快照，以及 Lighthouse 测量（--lighthouse）
-tools/build.php          生成完整性指纹 + 安装包 dist/eclair-cms-<版本>.zip（PHP 经过精简，后台视图经过压缩，后台的 JS 和 CSS 也经过精简）
+tools/build.php          生成完整性指纹 + 安装包 dist/eclair-cms-<版本>.zip（PHP 经过精简，后台视图经过压缩，后台的 JS 和 CSS 也经过精简）+ 签名的发布公告 dist/latest.json
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                  # 556 项单元与 HTTP 检查；ECLAIR_TEST_ROOT=… 可测试解压后的安装包
+php tests/run.php                                  # 609 项单元与 HTTP 检查；ECLAIR_TEST_ROOT=… 可测试解压后的安装包
 php tools/build.php                                # 生成可发布的安装包
 ```
 
+**发布新版本。** `tools/build.php` 用维护者的 Ed25519 私钥为发布公告 `dist/latest.json`（版本、地址、安装包的大小和 SHA-256）签名，私钥从环境变量 `ECLAIR_SIGNING_KEY`（base64，64 字节）中读取；如果私钥与 `app/lib/Update.php` 中的公钥不匹配，它会拒绝该密钥。备份功能所用 Google 应用的凭据，会在构建时从 `ECLAIR_GOOGLE_CLIENT_ID` 和 `ECLAIR_GOOGLE_CLIENT_SECRET` 写入安装包（Google Cloud 控制台中的客户端类型为“TVs and Limited Input devices”，授权范围为 `drive.file`）。这些值都不在代码仓库中。
+
+**Fork 或独立安装。** 在 `eclair-config.php` 中：`ECLAIR_UPDATE_URL` 和 `ECLAIR_UPDATE_KEY`（base64）用于你自己的签名更新渠道；`ECLAIR_GOOGLE_CLIENT_ID` 和 `ECLAIR_GOOGLE_CLIENT_SECRET` 用于你自己的 Google 应用。
+
 `PHP_CLI_SERVER_WORKERS` 让网站能够访问自身（用于验证网站地址）：如果只有一个进程，验证会直接失败，重定向到正式地址的功能将保持关闭。
 
-如果只是调整样式，建议使用**自定义 CSS**（设置 › 外观）：它在更新后依然保留。如需更深入地定制主题，请修改 `app/theme/*.php`、`app/theme/theme.css` 和 `app/theme/themes/*.css`（记得先备份：完整性检查会把这些文件标记为已修改，这是正常现象）。安装包中的 PHP 代码经过精简（`php -w`，去除了注释），后台视图经过压缩（通过 zlib 读取），后台的 JavaScript 和 CSS 也经过精简，以保持在 1 MB 以内：带注释的源代码在 GitHub 上。公开网站的文件（主题、`site.js`）则原样发布。
+如果只是调整样式，建议使用**自定义 CSS**（设置 › 外观）：它在更新后依然保留。如需更深入地定制主题，请修改 `app/theme/*.php`、`app/theme/theme.css` 和 `app/theme/themes/*.css`（记得保留一份副本：完整性检查会把这些文件标记为已修改，而且更新时它们会被替换；更新页面会在替换之前列出这些文件）。安装包中的 PHP 代码经过精简（`php -w`，去除了注释），后台视图经过压缩（通过 zlib 读取），后台的 JavaScript 和 CSS 也经过精简（安装包约 530 KB）：带注释的源代码在 GitHub 上。公开网站的文件（主题、`site.js`）则原样发布。
 
 ---
 

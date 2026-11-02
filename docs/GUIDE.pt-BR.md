@@ -37,7 +37,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -536,7 +536,7 @@ Desde a versão 1.10, o Éclair confere duas vezes por dia no GitHub se existe u
 
 1. Abra **Atualizações**: ali você vê a versão disponível e o link para as novidades dela.
 2. **Faça um backup**: com o botão na mesma página, ou no Google Drive, se você o conectou.
-3. Marque “Tenho um backup recente do meu site”, confirme a sua senha se ela for pedida e clique em **Atualizar para…**. Leva uns dez segundos.
+3. Marque “Tenho um backup recente do meu site”, confirme a sua senha se ela for pedida e clique em **Atualizar para a versão…**. Leva uns dez segundos.
 
 Enquanto isso, o Éclair:
 
@@ -559,7 +559,7 @@ Bom saber:
 1. Faça um backup.
 2. Por FTP, **apague** as pastas `app/` e `assets/` e depois envie as da nova versão, junto com `index.php` e `.htaccess` (apagar antes evita que sobrem arquivos antigos, que a verificação de integridade apontaria).
 3. **Não mexa** em `data/` (conteúdos, configurações, contas, CSS personalizado) nem em `media/` (imagens).
-4. O cache se limpa sozinho na primeira visita (se não: Configurações › Avançado › Limpar cache).
+4. O cache se limpa sozinho na primeira visita (caso contrário: Configurações › Avançado › Limpar cache).
 
 ### Fazer backup
 
@@ -567,16 +567,16 @@ Bom saber:
 
 ### Backups no Google Drive
 
-Segurança › **Backups no Google Drive** envia uma cópia do seu site para o seu Google Drive, todo dia, toda semana ou quando você quiser.
+Segurança › **Backups no Google Drive** envia uma cópia do seu site para o seu Google Drive, todos os dias, todas as semanas ou quando você quiser.
 
 1. Clique em **Conectar o Google Drive** (a sua senha pode ser pedida de novo).
 2. O Éclair mostra um código. Abra **google.com/device** no computador ou no celular, digite o código, escolha a sua conta Google e autorize o Éclair.
-3. A página se atualiza sozinha: está conectado. Escolha a frequência (todo dia, toda semana ou desativados) e quantos backups guardar.
+3. A página se atualiza sozinha: está conectado. Escolha a frequência (todos os dias, todas as semanas ou desativados) e quantos backups guardar.
 
-- O Éclair só tem acesso **aos arquivos que ele mesmo cria** (permissão “drive.file” do Google): ele não vê mais nada do seu Drive. Os backups chegam a uma pasta “Éclair – nome do site”.
-- Acima do número escolhido (8 por padrão), os mais antigos vão para a **lixeira** do seu Drive.
+- O Éclair só tem acesso **aos arquivos que ele mesmo cria** (permissão “drive.file” do Google): ele não vê mais nada do seu Drive. Os backups ficam em uma pasta “Éclair – nome do site”.
+- Quando o número escolhido (8 por padrão) é ultrapassado, os mais antigos vão para a **lixeira** do seu Drive.
 - **Fazer backup agora** inicia um envio imediato. Os sites grandes são enviados em partes de 4 MB: se a hospedagem limita o tempo de execução, o envio continua de onde parou (deixe a página aberta: ela continua sozinha).
-- Os backups automáticos são enviados quando um administrador abre o painel. Para que sejam enviados mesmo sem visitas, copie o **endereço da tarefa agendada** (Segurança › Backups no Google Drive › Backups em horário fixo) e cole-o na tarefa agendada (cron) da sua hospedagem ou no [cron-job.org](https://cron-job.org), a cada hora: ele só inicia um backup quando chega a hora de fazê-lo. Não compartilhe esse endereço.
+- Os backups automáticos são enviados quando um administrador abre o painel. Para que sejam enviados mesmo sem visitas, copie o **endereço da tarefa agendada** (Segurança › Backups no Google Drive › Backups em horário fixo) e cole-o na tarefa agendada (cron) da sua hospedagem ou no [cron-job.org](https://cron-job.org), para ser chamado a cada hora: ele só inicia um backup quando é o momento de fazer um. Não compartilhe esse endereço.
 - O token de acesso fica criptografado no seu servidor. **Desconectar o Google Drive** revoga esse token; você também pode retirar o acesso pela sua conta Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Os backups já enviados continuam no seu Drive.
 
 ### Restaurar um backup
@@ -604,7 +604,7 @@ Em até 24 horas, **faça login com esse e-mail e essa nova senha**: a senha é 
 
 **O painel não aparece mais depois de uma atualização** (raro: o Éclair volta sozinho à versão anterior quando consegue conferir o site): por FTP, substitua as pastas `app/` e `assets/` pelas de `cache/update/previous/` e depois copie `cache/update/previous/index.php.txt` para a raiz com o nome `index.php`.
 
-**“Atualização em um clique impossível neste servidor”**: a página Atualizações diz o motivo (extensão PHP ausente, pasta sem permissão de escrita, versão do PHP antiga demais). Corrija isso com a sua hospedagem ou atualize por FTP.
+**“Não é possível atualizar com um clique neste servidor”**: a página Atualizações diz o motivo (extensão PHP ausente, pasta sem permissão de escrita, versão do PHP antiga demais). Corrija isso com a sua hospedagem ou atualize por FTP.
 
 **Google Drive: “Acesso ao Google Drive revogado”**: a autorização foi retirada pela conta Google (ou expirou). Clique em **Conectar o Google Drive**: a mesma pasta é reutilizada.
 
@@ -679,17 +679,17 @@ tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<v
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 556 verificações unitárias e HTTP; ECLAIR_TEST_ROOT=… para testar um arquivo zip descompactado
+php tests/run.php                                  # 609 verificações unitárias e HTTP; ECLAIR_TEST_ROOT=… para testar um arquivo zip descompactado
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 
-**Publicar uma versão.** O `tools/build.php` assina o anúncio `dist/latest.json` (versão, endereço, tamanho e SHA-256 do arquivo zip) com a chave privada Ed25519 do mantenedor, lida da variável de ambiente `ECLAIR_SIGNING_KEY` (base64, 64 bytes); ele recusa uma chave que não corresponda à chave pública de `app/lib/Update.php`. As credenciais do aplicativo Google dos backups são gravadas no arquivo zip a partir de `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` (cliente “TVs e dispositivos de entrada limitada”, permissão `drive.file`). Nenhum desses valores está no repositório.
+**Publicar uma versão.** O `tools/build.php` assina o anúncio `dist/latest.json` (versão, endereço, tamanho e SHA-256 do arquivo zip) com a chave privada Ed25519 do mantenedor, lida da variável de ambiente `ECLAIR_SIGNING_KEY` (base64, 64 bytes); ele recusa uma chave que não corresponda à chave pública de `app/lib/Update.php`. As credenciais do aplicativo Google dos backups são gravadas no arquivo zip a partir de `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` (tipo de cliente “TVs and Limited Input devices” no console do Google Cloud, permissão `drive.file`). Nenhum desses valores está no repositório.
 
 **Fork ou instalação independente.** Em `eclair-config.php`: `ECLAIR_UPDATE_URL` e `ECLAIR_UPDATE_KEY` (base64) para o seu próprio canal de atualizações assinado; `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` para o seu próprio aplicativo Google.
 
 `PHP_CLI_SERVER_WORKERS` permite que o site chame a si mesmo (verificação do endereço): com um único processo, a verificação simplesmente falha e os redirecionamentos para o endereço oficial continuam desativados.
 
-Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade aponta esses arquivos como modificados, e uma atualização os substitui; a página Atualizações lista esses arquivos antes de fazer isso). No arquivo zip, o PHP é compactado (`php -w`, sem comentários), as telas do painel são comprimidas (lidas via zlib) e o JavaScript e o CSS do painel são enxugados (o arquivo zip tem cerca de 500 KB): o código-fonte comentado está no GitHub. Os arquivos do site público (temas, `site.js`) são entregues como estão.
+Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade aponta esses arquivos como modificados, e uma atualização os substitui; a página Atualizações lista esses arquivos antes de fazer isso). No arquivo zip, o PHP é compactado (`php -w`, sem comentários), as telas do painel são comprimidas (lidas via zlib) e o JavaScript e o CSS do painel são enxugados (o arquivo zip tem cerca de 530 KB): o código-fonte comentado está no GitHub. Os arquivos do site público (temas, `site.js`) são entregues como estão.
 
 ---
 

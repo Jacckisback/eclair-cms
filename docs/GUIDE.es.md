@@ -37,7 +37,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 
 ### Pasos
 
-1. Descarga el archivo [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) y descomprímelo.
+1. Descarga el archivo [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
 3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
@@ -575,8 +575,8 @@ Seguridad › **Copias de seguridad en Google Drive** envía una copia de tu sit
 
 - Éclair solo tiene acceso **a los archivos que crea** (permiso de Google «drive.file»): no ve nada más de tu Drive. Las copias se guardan en una carpeta «Éclair – nombre del sitio».
 - Por encima del número elegido (8 por defecto), las más antiguas van a la **papelera** de tu Drive.
-- **Hacer copia ahora** lanza un envío inmediato. Los sitios grandes se envían en partes de 4 MB: si tu proveedor limita el tiempo de ejecución, el envío se retoma donde se quedó (deja la página abierta, sigue sola).
-- Las copias automáticas se hacen cuando un administrador abre el panel. Para que se hagan aunque nadie entre, copia la **dirección de la tarea programada** (Seguridad › Copias de seguridad en Google Drive › Copias a hora fija) en la tarea programada (cron) de tu proveedor o en [cron-job.org](https://cron-job.org), cada hora: solo lanza una copia cuando toca. No compartas esta dirección.
+- **Hacer copia de seguridad ahora** lanza un envío inmediato. Los sitios grandes se envían en partes de 4 MB: si tu proveedor limita el tiempo de ejecución, el envío se retoma donde se quedó (deja la página abierta, sigue sola).
+- Las copias automáticas se hacen cuando un administrador abre el panel. Para que se hagan aunque nadie entre, copia la **dirección de la tarea programada** (Seguridad › Copias de seguridad en Google Drive › Copias de seguridad a hora fija) en la tarea programada (cron) de tu proveedor o en [cron-job.org](https://cron-job.org), cada hora: solo lanza una copia cuando toca. No compartas esta dirección.
 - El token de acceso está cifrado en tu servidor. **Desconectar Google Drive** lo revoca; también puedes retirar el acceso desde tu cuenta de Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Las copias ya enviadas se quedan en tu Drive.
 
 ### Restaurar una copia de seguridad
@@ -604,7 +604,7 @@ En las 24 horas siguientes, **inicia sesión con ese correo y esa nueva contrase
 
 **El panel ya no se muestra después de una actualización** (poco habitual: Éclair vuelve atrás solo cuando puede comprobar el sitio): por FTP, sustituye las carpetas `app/` y `assets/` por las de `cache/update/previous/` y después copia `cache/update/previous/index.php.txt` en la raíz con el nombre `index.php`.
 
-**«Actualización en un clic no disponible en este servidor»**: la página Actualizaciones explica por qué (falta una extensión PHP, una carpeta no se puede modificar, la versión de PHP es demasiado antigua). Corrígelo con tu proveedor o actualiza por FTP.
+**«La actualización en un clic no es posible en este servidor»**: la página Actualizaciones explica por qué (falta una extensión PHP, una carpeta no se puede modificar, la versión de PHP es demasiado antigua). Corrígelo con tu proveedor o actualiza por FTP.
 
 **Google Drive: «Acceso a Google Drive revocado»**: la autorización se retiró desde la cuenta de Google (o ha caducado). Haz clic en **Conectar Google Drive**: se reutiliza la misma carpeta.
 
@@ -679,13 +679,17 @@ tools/build.php          huellas de integridad + archivo dist/eclair-cms-<versi�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desarrollo
-php tests/run.php                                  # 556 comprobaciones unitarias y HTTP; ECLAIR_TEST_ROOT=… para probar un archivo descomprimido
+php tests/run.php                                  # 609 comprobaciones unitarias y HTTP; ECLAIR_TEST_ROOT=… para probar un archivo descomprimido
 php tools/build.php                                # archivo listo para distribuir
 ```
 
+**Publicar una versión.** `tools/build.php` firma el anuncio `dist/latest.json` (versión, dirección, tamaño y SHA-256 del archivo) con la clave privada Ed25519 del mantenedor, que lee de la variable de entorno `ECLAIR_SIGNING_KEY` (base64, 64 bytes); rechaza una clave que no corresponda a la clave pública de `app/lib/Update.php`. Las credenciales de la aplicación de Google para las copias de seguridad se incorporan al archivo desde `ECLAIR_GOOGLE_CLIENT_ID` y `ECLAIR_GOOGLE_CLIENT_SECRET` (tipo de cliente «TVs and Limited Input devices» en la consola de Google Cloud, permiso `drive.file`). Ninguno de estos valores está en el repositorio.
+
+**Fork o instalación independiente.** En `eclair-config.php`: `ECLAIR_UPDATE_URL` y `ECLAIR_UPDATE_KEY` (base64) para tu propio canal de actualizaciones firmado; `ECLAIR_GOOGLE_CLIENT_ID` y `ECLAIR_GOOGLE_CLIENT_SECRET` para tu propia aplicación de Google.
+
 `PHP_CLI_SERVER_WORKERS` permite que el sitio se llame a sí mismo (verificación de su dirección): con un solo proceso, la verificación simplemente falla y las redirecciones a la dirección oficial siguen desactivadas.
 
-Para un cambio de estilo, mejor el **CSS personalizado** (Ajustes › Apariencia): sobrevive a las actualizaciones. Para ir más allá, el tema se personaliza modificando `app/theme/*.php`, `app/theme/theme.css` y `app/theme/themes/*.css` (guarda una copia: el control de integridad marcará esos archivos como modificados, es normal). En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios), las vistas del panel están comprimidas (se leen con zlib) y el JavaScript y el CSS del panel están aligerados para quedarse por debajo de 1 MB: el código fuente comentado está en GitHub. Los archivos del sitio público (temas, `site.js`) se entregan tal cual.
+Para un cambio de estilo, mejor el **CSS personalizado** (Ajustes › Apariencia): sobrevive a las actualizaciones. Para ir más allá, el tema se personaliza modificando `app/theme/*.php`, `app/theme/theme.css` y `app/theme/themes/*.css` (guarda una copia: el control de integridad marca esos archivos como modificados, y una actualización los sustituye; la página Actualizaciones los enumera antes de hacerlo). En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios), las vistas del panel están comprimidas (se leen con zlib) y el JavaScript y el CSS del panel están aligerados (el archivo ocupa unos 530 KB): el código fuente comentado está en GitHub. Los archivos del sitio público (temas, `site.js`) se entregan tal cual.
 
 ---
 

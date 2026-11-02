@@ -252,9 +252,7 @@ final class Update
         if ($lock === false || !flock($lock, LOCK_EX | LOCK_NB)) {
             return ['ok' => false, 'error' => t('Une mise à jour est déjà en cours.')];
         }
-        if (function_exists('set_time_limit')) {
-            @set_time_limit(300);
-        }
+        extend_time(300);
         if (function_exists('ignore_user_abort')) {
             @ignore_user_abort(true);
         }

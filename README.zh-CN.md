@@ -63,7 +63,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>506 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>528 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -252,7 +252,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 
 - **签名并经过验证**：每个版本的发布公告都由维护者签名（Ed25519），随后 Éclair 会**在改动任何东西之前**检查安装包、每个文件，以及它们与你的 PHP 版本是否兼容。
 - **内容毫无风险**：只有代码会改变。内容、图片、账户、设置和自定义 CSS 都保持不变，你修改过的 `.htaccess` 也会保留。
-- **自动回退**：安装完成后，Éclair 会检查你的网站和后台是否像以前一样正常响应；如果不正常，它会自动退回旧版本。你也可以随时点一个按钮退回旧版本。
+- **自动回退**：安装完成后，Éclair 会检查你的网站和后台是否像以前一样正常响应；如果不正常，它会自动回退到旧版本。你也可以随时点一个按钮回退到旧版本。
 
 **备份到 Google Drive**：只需一个简单的代码（google.com/device）就能连接你的 Drive，选择“每天”或“每周”，Éclair 就会把网站的完整副本发送到那里。它只能访问自己创建的文件，保留最近的备份（默认 8 份），大型网站会分块上传，并支持断点续传。API 密钥永远不会离开你的服务器。
 
@@ -264,7 +264,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 506 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 528 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -375,7 +375,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip)（506 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip)（528 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
@@ -403,7 +403,7 @@ PHP 8.1+，不依赖框架，也不需要 Composer：`eclair/app/lib/` 中是简
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                                           # 556 项单元与 HTTP 检查
+php tests/run.php                                                           # 609 项单元与 HTTP 检查
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 
