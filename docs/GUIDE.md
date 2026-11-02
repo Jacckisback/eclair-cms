@@ -12,7 +12,7 @@ Tout ce qu'il faut savoir pour installer, utiliser, sécuriser et maintenir Écl
 2. [Fonctionnalités en détail](#fonctionnalités-en-détail)
 3. [Utiliser Éclair au quotidien](#utiliser-éclair-au-quotidien)
 4. [Mode Visuel](#mode-visuel)
-5. [Directions artistiques](#directions-artistiques) (dont [Imagine ma direction avec l'IA](#imagine-ma-direction-avec-lia) et le [Score Design](#score-design))
+5. [Directions artistiques](#directions-artistiques) (dont les [Retouches en un clic](#retouches-en-un-clic), [Imagine ma direction avec l'IA](#imagine-ma-direction-avec-lia) et le [Score Design](#score-design))
 6. [Thèmes](#thèmes)
 7. [Boutique](#boutique)
 8. [Assistant IA](#assistant-ia) (dont [Créer une page avec l'IA](#créer-une-page-avec-lia))
@@ -37,7 +37,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -188,8 +188,9 @@ Un thème change des couleurs ; une **direction artistique** change tout l'unive
 - **Police des titres** : 18 polices de caractère choisies pour leur personnalité (aucune de celles qu'on voit partout), ou une police système. **Police du texte** : une police système, sans téléchargement.
 - **Casse** (normale ou capitales), **taille des titres** (discrète, équilibrée, spectaculaire), **coins** (droits, adoucis, ronds), **espacement** (serré, normal, aéré).
 - **Cartes** : filet fin, aplat de couleur ou ombre portée.
-- **Bannière d'accueil** : texte et image côte à côte, affiche (très grand titre), image plein cadre (le titre sur la photo), éditorial (image verticale) ou centrée.
-- **Bloc « Atouts »** : cartes, rangées ou colonnes à filet. **Sections** : fond uni ou bandes de couleur. **Icônes des atouts** : icônes dessinées (les émojis sont remplacés par des icônes au trait), sans icône, ou émojis.
+- **Bannière d'accueil** : texte et image côte à côte, image à gauche, affiche (très grand titre), image plein cadre (le titre sur la photo), éditorial (image verticale), centrée ou encadrée (texte et image dans un panneau de couleur).
+- **Bloc « Atouts »** : cartes, rangées, colonnes à filet ou numérotés (01, 02…). **Sections** : fond uni, bandes de couleur ou filets entre les sections. **Icônes des atouts** : icônes dessinées (65 icônes au trait, reconnues à partir des émojis courants : ☕ 🚗 🐶 ✂️ 🎓 💼 🌸…), sans icône, ou émojis.
+- **Boutons** : pleins, à contour ou en liens soulignés (avec une flèche).
 
 En-tête, listes d'articles, logo, icône, pied de page et CSS personnalisé se règlent comme avant. Pour revenir au thème classique, choisis **Thème classique** et enregistre : ses réglages t'attendent, intacts.
 
@@ -199,6 +200,25 @@ En-tête, listes d'articles, logo, icône, pied de page et CSS personnalisé se 
 
 > [!TIP]
 > Si ton hébergeur bloque les connexions sortantes, la police ne peut pas être téléchargée : un message te prévient, et le site utilise une police de secours de la même famille (avec empattements, condensée…) en attendant. Réessaie plus tard en enregistrant de nouveau.
+
+### Retouches en un clic
+
+<p align="center">
+  <img src="images/retouches.webp" alt="La direction Argile, puis la même page après chaque retouche : plus audacieux, plus coloré, clair ↔ sombre, épurer, autre police" width="100%">
+</p>
+
+Sous les cartes, six boutons transforment la direction choisie d'un seul clic, et l'aperçu suit aussitôt :
+
+| Retouche | Ce qui change |
+|---|---|
+| **Plus audacieux** | titres plus grands, plus d'air, bannière plus spectaculaire (affiche, puis plein cadre), bandes de couleur, accent plus vif, boutons pleins |
+| **Plus sobre** | titres plus discrets, casse normale, filets fins au lieu des ombres, bannière plus calme, accent adouci |
+| **Plus coloré** | fond et bandes teintés de la couleur d'accent, bandes de couleur, accent plus vif |
+| **Épurer** | filets fins, aucune icône, fond uni, plus d'air, coins plus droits, atouts en colonnes |
+| **Clair ↔ sombre** | inverse la luminosité du fond, des bandes et du texte, en gardant leurs teintes |
+| **Autre police** | passe à la police de titre suivante, en alternant les familles (empattements, grotesque, condensée…) |
+
+Les retouches s'enchaînent ; **Annuler la retouche** revient en arrière, une étape à la fois. Les contrastes restent garantis à chaque étape, et rien n'est publié avant d'enregistrer.
 
 ### Imagine ma direction avec l'IA
 
