@@ -342,7 +342,7 @@ function capture_lighthouse(string $root, string $fixtures): array
     $out = [];
     $sets = [['business', null, ['/', '/blog/premiers-pas-avec-eclair']], ['landing', null, ['/']],
         ['business', 'nocturne', ['/', '/blog/premiers-pas-avec-eclair']], ['business', 'riviera', ['/']], ['business', 'presse', ['/']], ['business', 'affiche', ['/']],
-        // Compositions de la 1.9 : bannière à gauche, atouts numérotés, filets, boutons à contour ; plein cadre avec liens soulignés.
+        // Compositions de la 1.9 : bannière à gauche, atouts numérotés, filets, boutons à contour ; bannière encadrée et liens soulignés (sombre).
         ['business', 'argile', ['/'], ['hero' => 'reverse', 'features' => 'numbers', 'sections' => 'rules', 'buttons' => 'outline']],
         ['business', 'nocturne', ['/'], ['buttons' => 'underline', 'hero' => 'framed']]];
     foreach ($sets as $set) {
