@@ -179,6 +179,36 @@ check('date française', fmt_date(mktime(12, 0, 0, 10, 1, 2026), 'fr') === '1er 
 check('date espagnole', fmt_date(mktime(12, 0, 0, 10, 28, 2026), 'es') === '28 de octubre de 2026');
 check('date chinoise', fmt_date(mktime(12, 0, 0, 10, 28, 2026), 'zh') === '2026年10月28日');
 
+/* ──────────── Antivirus des hébergeurs : aucun faux positif connu ──────────── */
+section('Antivirus des hébergeurs (o2switch) : aucun faux positif connu');
+// L'antivirus d'o2switch (signatures Malware.Expert) refuse un fichier PHP où se suivent, dans cet ordre,
+// unlink, 3 × file_get_contents, chmod, unlink, file_put_contents, chmod : l'archive 1.10.0 était bloquée à cause
+// de Update.php. Chaque fichier livré (code compressé compris) est lu tel quel, commentaires inclus.
+$avSequence = ['unlink', 'file_get_contents', 'file_get_contents', 'file_get_contents', 'chmod', 'unlink', 'file_put_contents', 'chmod'];
+$avWorst = ['', 0];
+$avFiles = 0;
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ECLAIR_ROOT . '/app', FilesystemIterator::SKIP_DOTS)) as $path => $info) {
+    if (!$info->isFile() || !preg_match('~\.php(\.gz)?$~', (string) $path)) {
+        continue;
+    }
+    $code = (string) file_get_contents((string) $path);
+    $code = str_ends_with((string) $path, '.gz') ? (string) gzdecode($code) : $code;
+    preg_match_all('~\b(unlink|file_get_contents|chmod|file_put_contents)\b~', $code, $calls);
+    $step = 0;
+    foreach ($calls[1] as $call) {
+        $step += $step < count($avSequence) && $call === $avSequence[$step] ? 1 : 0;
+    }
+    $avFiles++;
+    if ($step > $avWorst[1]) {
+        $avWorst = [substr((string) $path, strlen(ECLAIR_ROOT) + 1), $step];
+    }
+}
+check('aucun fichier ne contient la suite d’appels refusée par l’antivirus', $avFiles > 50 && $avWorst[1] < count($avSequence), $avWorst[0] . ' : ' . $avWorst[1] . '/8');
+check('marge confortable : au plus la moitié de la suite dans un même fichier', $avWorst[1] <= 4, $avWorst[0] . ' : ' . $avWorst[1] . '/8');
+$updateCode = (string) @file_get_contents(ECLAIR_ROOT . '/app/lib/Update.php');
+check('mise à jour en un clic : les opérations sur les fichiers passent par Disk', $updateCode !== '' && !preg_match('~\b(unlink|chmod|file_put_contents|file_get_contents)\b~', $updateCode)
+    && str_contains($updateCode, 'Disk::put('));
+
 /* ───────────────────── Traductions de l'administration ───────────────────── */
 section('Traductions de l’administration');
 require_once dirname(__DIR__) . '/tools/i18n.php';

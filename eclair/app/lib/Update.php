@@ -246,7 +246,7 @@ final class Update
         }
         try {
             Store::ensureDir(self::dir());
-            @file_put_contents(self::dir() . '/index.html', '');
+            Disk::write(self::dir() . '/index.html', '');
         } catch (\Throwable) {
             return ['ok' => false, 'error' => t('Écriture impossible dans {p} : donne les droits d’écriture (755 pour les dossiers, 644 pour les fichiers) via ton FTP.', ['p' => '/cache'])];
         }
@@ -270,7 +270,7 @@ final class Update
         } finally {
             self::remove(self::dir() . '/stage');
             foreach (glob(self::dir() . '/*.zip') ?: [] as $zip) {
-                @unlink($zip);
+                Disk::delete($zip);
             }
             flock($lock, LOCK_UN);
             fclose($lock);
@@ -346,20 +346,20 @@ final class Update
                 return ['ok' => false, 'error' => t('Impossible de remplacer {p} : rien n’a été modifié.', ['p' => '/' . $dir])];
             }
         }
-        if (!self::put(ECLAIR_ROOT . '/index.php', $roots['index.php'])) {
+        if (!Disk::put(ECLAIR_ROOT . '/index.php', $roots['index.php'])) {
             self::restore();
             return ['ok' => false, 'error' => t('Impossible de remplacer {p} : rien n’a été modifié.', ['p' => '/index.php'])];
         }
         foreach ($extras as $path) {
-            if (!self::put(ECLAIR_ROOT . '/' . $path, $roots[$path])) {
+            if (!Disk::put(ECLAIR_ROOT . '/' . $path, $roots[$path])) {
                 $kept[] = $path;
             }
         }
         if (in_array('.htaccess', $kept, true)) {
             foreach (glob(self::dir() . '/htaccess-*.txt') ?: [] as $file) {
-                @unlink($file);
+                Disk::delete($file);
             }
-            @file_put_contents(self::dir() . '/htaccess-' . $version . '.txt', $roots['.htaccess']);
+            Disk::write(self::dir() . '/htaccess-' . $version . '.txt', $roots['.htaccess']);
         }
         self::fresh();
 
@@ -452,7 +452,7 @@ final class Update
             }
             if ($added) {
                 Store::ensureDir($prev . '/extra');
-                return @file_put_contents($prev . '/extra/new.txt', implode("\n", $added)) !== false;
+                return Disk::write($prev . '/extra/new.txt', implode("\n", $added));
             }
         } catch (\Throwable) {
             return false;
@@ -490,22 +490,22 @@ final class Update
             $ok = @rename($prev . '/' . $dir, ECLAIR_ROOT . '/' . $dir) && $ok;
         }
         foreach (['index.php.txt' => 'index.php', 'htaccess.txt' => '.htaccess'] as $saved => $name) {
-            $content = @file_get_contents($prev . '/' . $saved);
+            $content = Disk::read($prev . '/' . $saved);
             if (is_string($content)) {
-                $ok = self::put(ECLAIR_ROOT . '/' . $name, $content) && $ok;
+                $ok = Disk::put(ECLAIR_ROOT . '/' . $name, $content) && $ok;
             }
         }
         // Fichiers hors code remplacés par l'échange : remis comme avant ; ceux qu'il a ajoutés sont retirés.
         foreach (glob($prev . '/extra/*.txt') ?: [] as $file) {
             $path = str_replace('~', '/', substr(basename($file), 0, -4));
             if (basename($file) !== 'new.txt' && self::extra($path)) {
-                $content = @file_get_contents($file);
-                $ok = is_string($content) && self::put(ECLAIR_ROOT . '/' . $path, $content) && $ok;
+                $content = Disk::read($file);
+                $ok = is_string($content) && Disk::put(ECLAIR_ROOT . '/' . $path, $content) && $ok;
             }
         }
-        foreach (explode("\n", (string) @file_get_contents($prev . '/extra/new.txt')) as $path) {
+        foreach (explode("\n", (string) Disk::read($prev . '/extra/new.txt')) as $path) {
             if (self::extra($path) && is_file(ECLAIR_ROOT . '/' . $path)) {
-                $ok = @unlink(ECLAIR_ROOT . '/' . $path) && $ok;
+                $ok = Disk::delete(ECLAIR_ROOT . '/' . $path) && $ok;
             }
         }
         // Retour vers une version qui ne gardait pas ces fichiers (avant la 1.10.1) : seul l'en-tête de licence ajouté par la
@@ -515,9 +515,9 @@ final class Update
             if (!self::extra((string) $path) || is_file($prev . '/extra/' . str_replace('/', '~', (string) $path) . '.txt') || !is_file($here) || self::same($here, (string) $hash)) {
                 continue;
             }
-            $original = (string) preg_replace('~^(<\?php\R)// SPDX-License-Identifier: [^\r\n]*\R// Copyright [^\r\n]*\R~', '$1', (string) file_get_contents($here), 1);
+            $original = (string) preg_replace('~^(<\?php\R)// SPDX-License-Identifier: [^\r\n]*\R// Copyright [^\r\n]*\R~', '$1', (string) Disk::read($here), 1);
             if (self::same(null, (string) $hash, $original)) {
-                $ok = self::put($here, $original) && $ok;
+                $ok = Disk::put($here, $original) && $ok;
             }
         }
         self::fresh();
@@ -564,11 +564,9 @@ final class Update
                     $roots[$rel] = $data;
                     continue;
                 }
-                $target = $stage . '/' . $rel;
-                if ((!is_dir(dirname($target)) && !@mkdir(dirname($target), 0755, true)) || @file_put_contents($target, $data) !== strlen($data)) {
+                if (!Disk::place($stage . '/' . $rel, $data)) {
                     return t('Décompression impossible : espace disque ou droits insuffisants. Rien n’a été modifié.');
                 }
-                @chmod($target, 0644);
                 $staged[$rel] = true;
             }
         } finally {
@@ -577,7 +575,7 @@ final class Update
         // Dossiers lisibles par le serveur web (fichiers statiques d'assets/), quel que soit le masque de l'hébergeur.
         foreach (array_keys($staged) as $rel) {
             for ($dir = dirname($rel); $dir !== '.'; $dir = dirname($dir)) {
-                @chmod($stage . '/' . $dir, 0755);
+                Disk::mode($stage . '/' . $dir, 0755);
             }
         }
         $manifest = self::manifest($stage . '/app/manifest.php');
@@ -606,7 +604,7 @@ final class Update
                 if (!preg_match('~\.php(\.gz)?$~', $path)) {
                     continue;
                 }
-                $code = $roots[$path] ?? (string) file_get_contents($stage . '/' . $path);
+                $code = $roots[$path] ?? (string) Disk::read($stage . '/' . $path);
                 $code = str_ends_with($path, '.gz') ? (string) @gzdecode($code) : $code;
                 try {
                     token_get_all($code, TOKEN_PARSE);
@@ -663,7 +661,7 @@ final class Update
     /** Charge depuis l'ancien code les classes dont la fin de la requête aura besoin (le dossier app/ va changer). */
     private static function preload(): void
     {
-        foreach ([Loopback::class, Keys::class, Log::class, Store::class, Settings::class, Session::class, Http::class, Req::class, I18n::class, Auth::class, Admin::class] as $class) {
+        foreach ([Disk::class, Loopback::class, Keys::class, Log::class, Store::class, Settings::class, Session::class, Http::class, Req::class, I18n::class, Auth::class, Admin::class] as $class) {
             class_exists($class);
         }
         t('Mises à jour');
@@ -674,10 +672,10 @@ final class Update
     {
         foreach (glob(ECLAIR_ROOT . '/cache/pages/*') ?: [] as $file) {
             if (preg_match('~/[a-f0-9]{32}$~', $file)) {
-                @unlink($file);
+                Disk::delete($file);
             }
         }
-        @unlink(ECLAIR_ROOT . '/cache/runtime.php');
+        Disk::delete(ECLAIR_ROOT . '/cache/runtime.php');
         if (function_exists('opcache_invalidate') && is_dir(ECLAIR_ROOT . '/app')) {
             @opcache_invalidate(ECLAIR_ROOT . '/index.php', true);
             try {
@@ -696,25 +694,9 @@ final class Update
         }
     }
 
-    /** Écrit un fichier de code de façon atomique, lisible par le serveur web (644). */
-    private static function put(string $file, string $content): bool
-    {
-        $tmp = $file . '.' . bin2hex(random_bytes(4)) . '.tmp';
-        if (@file_put_contents($tmp, $content) !== strlen($content)) {
-            @unlink($tmp);
-            return false;
-        }
-        @chmod($tmp, 0644);
-        if (!@rename($tmp, $file)) {
-            @unlink($tmp);
-            return false;
-        }
-        return true;
-    }
-
     private static function manifest(string $file): array
     {
-        $raw = @file_get_contents($file);
+        $raw = Disk::read($file);
         $m = $raw === false ? null : json_decode(Store::strip($raw), true);
         return is_array($m) ? $m : [];
     }
@@ -743,7 +725,7 @@ final class Update
             }
             @rmdir($path);
         } else {
-            @unlink($path);
+            Disk::delete($path);
         }
     }
 }
