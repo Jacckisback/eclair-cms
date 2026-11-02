@@ -411,7 +411,17 @@ Estrutura do projeto e personalização do tema: veja [Para desenvolvedores](doc
 
 ## Licença
 
-O Éclair é distribuído sob a **licença AGPL-3.0-only** ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)). Parte dos ícones é derivada do [Lucide](https://lucide.dev) (licença ISC) e as direções de arte se inspiram no método do [Impeccable](https://github.com/pbakaus/impeccable) (licença Apache 2.0): veja [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
+O Éclair CMS é software livre distribuído sob a **licença GNU AGPL v3 somente** (AGPL-3.0-only, veja [`LICENSE`](LICENSE)). O que isso muda para você:
+
+- **Instalar e usar o Éclair, nos seus próprios sites ou nos dos seus clientes, continua livre e gratuito**, inclusive para fins comerciais.
+- **Modificá-lo também.** Há uma única obrigação: se você disponibilizar uma **versão modificada** do Éclair para outras pessoas, distribuindo-a ou por meio de uma rede (um site no ar, por exemplo), deve oferecer a elas o código-fonte dessa versão, sob a mesma licença. Seus conteúdos, suas imagens e seu CSS personalizado não são afetados: são seus dados, não o código do Éclair.
+- As versões publicadas até a 1.10.0, inclusive, continuam disponíveis sob a licença original: veja [`NOTICE`](NOTICE).
+
+**Licença comercial:** para integrar o Éclair a um produto ou serviço sem as obrigações da AGPL, há uma licença comercial disponível (thierry.gustin@gmail.com).
+
+**Marca:** a licença cobre o código, não o nome nem o logotipo. “Éclair CMS” é uma marca: veja [`TRADEMARK.md`](TRADEMARK.md). Para contribuir, veja [`CONTRIBUTING.md`](CONTRIBUTING.md) (assinatura de um [CLA](CLA.md)).
+
+Parte dos ícones é derivada do [Lucide](https://lucide.dev) (licença ISC) e as direções de arte se inspiram no método do [Impeccable](https://github.com/pbakaus/impeccable) (licença Apache 2.0): veja [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
 
 <br>
 
