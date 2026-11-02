@@ -35,6 +35,6 @@ use Eclair\Security;
     </table>
   </div>
   <?php else: ?>
-    <div class="card empty-state"><span class="emoji">🔀</span><p><?= e(t('Aucune redirection pour l’instant.')) ?></p></div>
+    <div class="card empty-state"><span class="ico"><?= Icons::svg('redirect') ?></span><p><?= e(t('Aucune redirection pour l’instant.')) ?></p></div>
   <?php endif ?>
 </div>

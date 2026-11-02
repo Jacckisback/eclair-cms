@@ -46,7 +46,7 @@ final class AdminDrive
             case 'now':
                 $r = Drive::run(20, true);
                 match ($r['status']) {
-                    'done' => Admin::back(self::BACK, t('Sauvegarde envoyée sur Google Drive ✅')),
+                    'done' => Admin::back(self::BACK, t('Sauvegarde envoyée sur Google Drive.')),
                     'progress', 'busy' => Admin::back(self::BACK, t('Sauvegarde en cours d’envoi : garde cette page ouverte, elle continue toute seule.')),
                     default => Admin::back(self::BACK, (string) ($r['error'] ?? t('Sauvegarde impossible.')), 'bad'),
                 };
@@ -74,13 +74,13 @@ final class AdminDrive
         session_write_close();
         $r = Drive::run(20, !empty($body['now']));
         Http::json(['ok' => $r['status'] !== 'error', 'status' => $r['status'], 'percent' => $r['percent'], 'error' => $r['error'] ?? '',
-            'text' => $r['status'] === 'done' ? t('Sauvegarde envoyée sur Google Drive ✅') : ($r['status'] === 'progress' ? t('Envoi de la sauvegarde : {n} %', ['n' => $r['percent']]) : '')]);
+            'text' => $r['status'] === 'done' ? t('Sauvegarde envoyée sur Google Drive.') : ($r['status'] === 'progress' ? t('Envoi de la sauvegarde : {n} %', ['n' => $r['percent']]) : '')]);
     }
 
     private static function polled(string $state): array
     {
         return match ($state) {
-            'connected' => [t('Google Drive connecté ✅ Choisis maintenant la fréquence des sauvegardes.'), 'ok'],
+            'connected' => [t('Google Drive connecté. Choisis maintenant la fréquence des sauvegardes.'), 'ok'],
             'pending' => [t('Google attend encore ton autorisation : saisis le code sur la page Google, puis réessaie.'), 'warn'],
             'denied' => [t('Autorisation refusée sur Google : rien n’a été connecté.'), 'warn'],
             'expired' => [t('Le code a expiré : recommence la connexion.'), 'warn'],

@@ -304,16 +304,16 @@ final class Admin
         $todo = [
             ['done' => true, 'label' => t('Installer Éclair'), 'url' => ''],
             ['done' => Settings::get('appearance.logo') !== '' || Settings::get('appearance.accent') !== Settings::DEFAULTS['appearance']['accent'],
-                'label' => t('Ajouter ton logo et ta couleur'), 'url' => admin_url('settings?tab=appearance')],
-            ['done' => !$home || (int) $home['updated'] > $installed + 120, 'label' => t('Personnaliser la page d’accueil'),
+                'label' => t('Ajouter ton logo et ta couleur'), 'hint' => t('Ton site te ressemble dès la première visite.'), 'url' => admin_url('settings?tab=appearance')],
+            ['done' => !$home || (int) $home['updated'] > $installed + 120, 'label' => t('Personnaliser la page d’accueil'), 'hint' => t('C’est la première page que voient tes visiteurs.'),
                 'url' => $home ? admin_url('edit/' . $home['id']) : admin_url('settings')],
             ['done' => (bool) array_filter($index, fn ($e) => $e['type'] === 'post' && (int) $e['created'] > $installed + 120),
-                'label' => t('Écrire ton premier article'), 'url' => admin_url('new/post')],
-            ['done' => mb_strlen((string) ($user['bio'] ?? '')) >= 40, 'label' => t('Compléter ton profil d’auteur (bio, photo)'), 'url' => admin_url('profile')],
-            ['done' => !empty($user['totp']['on']), 'label' => t('Activer la double authentification'), 'url' => admin_url('profile#securite')],
-            ['done' => !$legal || (int) $legal['updated'] > $installed + 120, 'label' => t('Compléter les mentions légales'),
+                'label' => t('Écrire ton premier article'), 'hint' => t('Un article utile attire des visiteurs depuis Google et les IA.'), 'url' => admin_url('new/post')],
+            ['done' => mb_strlen((string) ($user['bio'] ?? '')) >= 40, 'label' => t('Compléter ton profil d’auteur (bio, photo)'), 'hint' => t('Un auteur présenté inspire confiance à tes lecteurs.'), 'url' => admin_url('profile')],
+            ['done' => !empty($user['totp']['on']), 'label' => t('Activer la double authentification'), 'hint' => t('Ton compte reste protégé, même si ton mot de passe fuite.'), 'url' => admin_url('profile#securite')],
+            ['done' => !$legal || (int) $legal['updated'] > $installed + 120, 'label' => t('Compléter les mentions légales'), 'hint' => t('Indique qui édite ton site et qui l’héberge.'),
                 'url' => $legal ? admin_url('edit/' . $legal['id']) : ''],
-            ['done' => Settings::get('seo.google') !== '', 'label' => t('Relier ton site à Google Search Console'), 'url' => admin_url('settings?tab=seo')],
+            ['done' => Settings::get('seo.google') !== '', 'label' => t('Relier ton site à Google Search Console'), 'hint' => t('Suis tes clics et tes positions dans Google.'), 'url' => admin_url('settings?tab=seo')],
         ];
         $recent = $index;
         uasort($recent, fn ($a, $b) => $b['updated'] <=> $a['updated']);
@@ -358,6 +358,6 @@ final class Admin
     public static function onboardingDone(array $user): never
     {
         Settings::save(['onboarding' => ['done' => true]]);
-        self::back('', t('Bravo, ton site est prêt à briller ⚡'));
+        self::back('', t('Bravo, ton site est prêt à briller !'));
     }
 }

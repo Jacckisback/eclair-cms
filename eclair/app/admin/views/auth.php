@@ -13,14 +13,14 @@ use Eclair\Settings;
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title><?= e($v['page_title']) ?> · <?= e(Settings::get('name')) ?></title>
-<link rel="stylesheet" href="<?= e(asset('admin/admin.css')) ?>">
+<?= admin_css() ?>
 <link rel="icon" href="<?= e(asset('admin/favicon.svg')) ?>" type="image/svg+xml">
 <script src="<?= e(asset('admin/admin.js')) ?>" defer></script>
 </head>
 <body>
 <div class="auth">
 <?php foreach ($v['flash'] as [$type, $message]): ?>
-  <div class="notice <?= e($type) ?>" role="status"><p><?= e($message) ?></p></div>
+  <div class="notice <?= e($type) ?>" role="status"><span><?= \Eclair\Icons::svg(in_array($type, ['bad', 'warn'], true) ? 'alert' : 'circle-check') ?></span><p><?= e($message) ?></p></div>
 <?php endforeach ?>
 <?= $v['content'] ?>
 </div>

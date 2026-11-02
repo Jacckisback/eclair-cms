@@ -33,7 +33,7 @@ $kind = $edit['kind'] ?? $v['kind'];
     </section>
     <section>
       <?php if (!$v['categories']): ?>
-        <div class="card empty-state"><span class="emoji">🏷️</span><p><?= e(t('Aucune catégorie pour l’instant.')) ?></p></div>
+        <div class="card empty-state"><span class="ico"><?= Icons::svg('tag') ?></span><p><?= e(t('Aucune catégorie pour l’instant.')) ?></p></div>
       <?php else: ?>
       <div class="table-wrap"><table class="list"><tbody>
         <?php foreach ($v['categories'] as $c): ?>

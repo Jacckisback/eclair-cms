@@ -9,7 +9,7 @@ use Eclair\Security;
 <div class="page-narrow">
   <div class="topbar"><div><h1><?= e(t('Messages')) ?></h1><p><?= e(t('Les messages du formulaire de contact. Ils sont aussi envoyés par e-mail (voir Réglages › Contact).')) ?></p></div></div>
   <?php if (!$v['messages']): ?>
-    <div class="card empty-state"><span class="emoji">📭</span><p><?= e(t('Aucun message pour l’instant. Ajoute un bloc « Formulaire de contact » à une page pour en recevoir.')) ?></p></div>
+    <div class="card empty-state"><span class="ico"><?= Icons::svg('inbox') ?></span><p><?= e(t('Aucun message pour l’instant. Ajoute un bloc « Formulaire de contact » à une page pour en recevoir.')) ?></p></div>
   <?php endif ?>
   <?php foreach ($v['messages'] as $id => $m): ?>
     <article class="message<?= empty($m['read']) ? ' unread' : '' ?><?= !empty($m['suspect']) ? ' suspect' : '' ?>">

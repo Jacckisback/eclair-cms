@@ -13,7 +13,7 @@ use Eclair\Settings;
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title><?= e($v['page_title']) ?> · <?= e(Settings::get('name')) ?></title>
-<link rel="stylesheet" href="<?= e(asset('admin/admin.css')) ?>">
+<?= admin_css() ?>
 <link rel="icon" href="<?= e(asset('admin/favicon.svg')) ?>" type="image/svg+xml">
 <script src="<?= e(asset('admin/admin.js')) ?>" defer></script>
 <script src="<?= e(asset('admin/editor.js')) ?>" defer></script>

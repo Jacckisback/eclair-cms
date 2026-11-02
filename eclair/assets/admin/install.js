@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Thierry Gustin
-/* ⚡ Éclair — assistant d'installation */
+/* Éclair — assistant d'installation */
 (() => {
   const form = document.getElementById('wizard');
   if (!form) return;
   const data = JSON.parse(document.getElementById('install-data').textContent);
   const steps = [...form.querySelectorAll('[data-step]')];
-  const bars = [...form.querySelectorAll('.steps i')];
+  const bars = [...document.querySelectorAll('.stepper li')];
   let current = 0;
 
   const show = (index) => {
     steps.forEach((s, i) => { s.hidden = i !== index; });
-    bars.forEach((b, i) => b.classList.toggle('on', i <= index));
+    bars.forEach((b, i) => {
+      b.classList.toggle('on', i < index);
+      if (i === index) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    });
     current = index;
     if (index === 4) recap();
     const first = steps[index].querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]), select');
@@ -95,7 +98,7 @@
       .catch(() => false)
       .then((ok) => {
         rewrite.className = ok ? 'ok' : 'warn';
-        rewrite.querySelector('.ico').textContent = ok ? '✓' : '!';
+        if (ok) rewrite.querySelector('.ico').innerHTML = document.getElementById('recap').dataset.ico;
         const small = rewrite.querySelector('small');
         small.textContent = ok ? small.dataset.ok : small.dataset.ko;
       });
@@ -118,7 +121,7 @@
     rows.forEach(([label, value]) => {
       const li = document.createElement('li');
       li.className = 'ok';
-      li.innerHTML = '<span class="ico">✓</span><span><b></b><small></small></span>';
+      li.innerHTML = '<span class="ico">' + list.dataset.ico + '</span><span><b></b><small></small></span>';
       li.querySelector('b').textContent = label;
       li.querySelector('small').textContent = value;
       list.appendChild(li);
@@ -128,8 +131,8 @@
   const confetti = () => {
     const box = document.createElement('div');
     box.className = 'confetti';
-    const colors = ['#5b4cf0', '#9b5cff', '#ffc928', '#ff6b8b', '#3ccf8a', '#38bdf8'];
-    for (let i = 0; i < 140; i++) {
+    const colors = ['#5a37c4', '#fdce3e', '#201e3c', '#ada3ff', '#0b7643', '#fff0bb'];
+    for (let i = 0; i < 90; i++) {
       const piece = document.createElement('i');
       piece.style.left = Math.random() * 100 + 'vw';
       piece.style.background = colors[i % colors.length];
@@ -167,7 +170,7 @@
         return;
       }
       steps.forEach((s) => { s.hidden = true; });
-      bars.forEach((b) => b.classList.add('on'));
+      bars.forEach((b) => { b.classList.add('on'); b.removeAttribute('aria-current'); });
       document.getElementById('success').hidden = false;
       document.getElementById('go-site').href = result.site;
       document.getElementById('go-admin').href = result.admin;

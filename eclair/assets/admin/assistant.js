@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Thierry Gustin
-/* ⚡ Éclair — assistant IA : tiroir de conversation (réponses en flux, cartes d'action, sans dépendance). */
+/* Éclair — assistant IA : tiroir de conversation (réponses en flux, cartes d'action, sans dépendance). */
 (() => {
   const E = window.Eclair;
   if (!E || !E.D.ai) return;
@@ -21,11 +21,24 @@
     send: '<path d="M12 19V5M5 12l7-7 7 7"/>',
     stop: '<rect x="7" y="7" width="10" height="10" rx="2"/>',
     trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+    pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',
+    bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    home: '<path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M10 20v-6h4v6"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+    image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>',
+    file: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    scissors: '<circle cx="6" cy="6" r="3"/><path d="M8.1 8.1 12 12"/><path d="M20 4 8.1 15.9"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
   };
   const icon = (name) => {
     const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     el.setAttribute('viewBox', '0 0 24 24');
     el.setAttribute('aria-hidden', 'true');
+    el.setAttribute('width', '1em');
+    el.setAttribute('height', '1em');
     el.innerHTML = PATHS[name];
     return el;
   };
@@ -147,18 +160,18 @@
     log.textContent = '';
     // [icône, libellé, demande, à compléter par la personne ?]
     const ideas = editor
-      ? [['❓', t('Ajouter une FAQ'), t('Ajoute une FAQ à ce contenu.')], ['✂️', t('Introduction plus percutante'), t('Rends l’introduction plus percutante.')],
-        ['🔎', t('Optimiser pour Google et les IA'), t('Optimise ce contenu pour Google et les IA (titre, L’essentiel, méta-description).')],
-        ['🖼️', t('Créer l’image à la une'), t('Crée une image à la une pour ce contenu.')]]
-      : [['✍️', t('Écrire un article'), t('Écris un article sur '), true], ['👥', t('Ajouter un membre à l’équipe'), t('Ajoute à la page équipe : Prénom Nom, fonction, avec la photo jointe.'), true],
-        ['💡', t('5 idées d’articles'), t('Propose-moi 5 idées d’articles pour attirer de nouveaux clients.')], ['🚀', t('Améliorer ma page d’accueil'), t('Relis ma page d’accueil et propose des améliorations.')]];
+      ? [['help', t('Ajouter une FAQ'), t('Ajoute une FAQ à ce contenu.')], ['scissors', t('Introduction plus percutante'), t('Rends l’introduction plus percutante.')],
+        ['search', t('Optimiser pour Google et les IA'), t('Optimise ce contenu pour Google et les IA (titre, L’essentiel, méta-description).')],
+        ['image', t('Créer l’image à la une'), t('Crée une image à la une pour ce contenu.')]]
+      : [['pen', t('Écrire un article'), t('Écris un article sur '), true], ['users', t('Ajouter un membre à l’équipe'), t('Ajoute à la page équipe : Prénom Nom, fonction, avec la photo jointe.'), true],
+        ['bulb', t('5 idées d’articles'), t('Propose-moi 5 idées d’articles pour attirer de nouveaux clients.')], ['home', t('Améliorer ma page d’accueil'), t('Relis ma page d’accueil et propose des améliorations.')]];
     log.append(h('div', { class: 'ai-empty' },
       h('div', { class: 'ai-hello' }, icon('spark')),
       h('h3', { text: t('Bonjour {name} ! Que préparons-nous aujourd’hui ?').replace('{name}', AI.name) }),
       h('p', { class: 'muted', text: t('J’écris dans le ton de ton site et je prépare des brouillons : tu relis, tu publies.') }),
-      h('div', { class: 'ai-chips' }, ideas.map(([emoji, label, text, fill]) => h('button', {
+      h('div', { class: 'ai-chips' }, ideas.map(([name, label, text, fill]) => h('button', {
         type: 'button', class: 'ai-chip', title: text, onclick: () => (fill ? prefill(text) : send(text)),
-      }, emoji + ' ' + label + (fill ? '…' : ''))))));
+      }, icon(name), label + (fill ? '…' : ''))))));
   };
   const prefill = (text) => { input.value = text; autosize(); input.focus(); input.setSelectionRange(text.length, text.length); };
 
@@ -244,7 +257,7 @@
         old ? old.replaceWith(el) : cards.append(el);
         scroll();
       },
-      error(msg) { status.hidden = true; el.append(h('p', { class: 'ai-error', role: 'alert', text: '⚠️ ' + msg })); scroll(); },
+      error(msg) { status.hidden = true; el.append(h('p', { class: 'ai-error', role: 'alert' }, icon('alert'), msg)); scroll(); },
       end() { status.hidden = true; el.removeAttribute('aria-busy'); if (frame) { cancelAnimationFrame(frame); draw(); } if (!text.trim() && !cards.childElementCount && !el.querySelector('.ai-error')) body.append(h('p', { class: 'muted', text: '…' })); },
     };
   };
@@ -268,13 +281,13 @@
     const card = h('div', { class: 'ai-card ai-card-' + c.kind, 'data-key': c.key || null });
     const actions = h('div', { class: 'ai-card-actions' });
     if (c.gone) {
-      card.append(h('p', { class: 'small muted', text: '🗑️ ' + t('Supprimé depuis.') + ' ' + (c.title || '') }));
+      card.append(h('p', { class: 'small muted ai-gone' }, icon('trash'), t('Supprimé depuis.') + ' ' + (c.title || '')));
       return card;
     }
     if (c.kind === 'draft') {
       const meta = [typeLabel(c), stateLabel(c.state), c.words + ' ' + t('mots'), 'SEO ' + c.seo, 'GEO ' + c.geo].join(' · ');
       card.append(
-        c.thumb ? h('img', { class: 'ai-card-thumb', src: c.thumb, alt: '' }) : h('span', { class: 'ai-card-icon', text: '📝' }),
+        c.thumb ? h('img', { class: 'ai-card-thumb', src: c.thumb, alt: '' }) : h('span', { class: 'ai-card-icon' }, icon('file')),
         h('div', { class: 'ai-card-main' }, h('b', { text: c.title }), h('small', { text: meta })), actions);
       actions.append(link(t('Ouvrir'), c.edit, 'btn btn-sm btn-primary'), link(t('Aperçu'), c.preview, 'btn btn-sm', true));
       if (c.state === 'draft') actions.append(btn(t('Publier…'), () => publishPanel(c, card)));
@@ -284,9 +297,9 @@
         h('div', { class: 'ai-card-main' }, h('b', { text: t('Image ajoutée à la médiathèque') }), h('small', { text: m.alt || m.name })), actions);
       if (editor) actions.append(btn(t('Image à la une'), () => { editor.apply({ image: m.id }, { [m.id]: m }); toast(t('Image à la une mise à jour.'), 'ok'); }));
     } else if (c.kind === 'proposal') {
-      card.append(h('span', { class: 'ai-card-icon', text: '✏️' }),
+      card.append(h('span', { class: 'ai-card-icon' }, icon('pen')),
         h('div', { class: 'ai-card-main' }, h('b', { text: t('Modification proposée : « {title} »').replace('{title}', c.title) }), h('small', { text: c.note || '' }), changesList(c)), actions);
-      if (c.applied) actions.append(...[h('span', { class: 'ai-ok', text: '✅ ' + t('Appliquée') }), c.undo && undoBtn(c.undo, card)].filter(Boolean));
+      if (c.applied) actions.append(...[h('span', { class: 'ai-ok' }, icon('check'), t('Appliquée')), c.undo && undoBtn(c.undo, card)].filter(Boolean));
       else if (c.dismissed) actions.append(h('span', { class: 'small muted', text: t('Ignorée') }));
       else if (c.expired) actions.append(h('span', { class: 'small muted', text: t('Proposition expirée') }));
       else {
@@ -295,16 +308,16 @@
             e.target.disabled = true;
             const res = await api('api/ai/apply', { pid: c.pid });
             if (!res.ok) { e.target.disabled = false; return; }
-            actions.replaceChildren(h('span', { class: 'ai-ok', text: '✅ ' + t('Appliquée') }), link(t('Voir'), res.url, 'btn btn-sm', true), undoBtn(res.undo, card));
+            actions.replaceChildren(h('span', { class: 'ai-ok' }, icon('check'), t('Appliquée')), link(t('Voir'), res.url, 'btn btn-sm', true), undoBtn(res.undo, card));
           }, 'btn btn-sm btn-primary'),
           btn(t('Ignorer'), async () => { await api('api/ai/dismiss', { pid: c.pid }); actions.replaceChildren(h('span', { class: 'small muted', text: t('Ignorée') })); }));
       }
     } else if (c.kind === 'updated') {
-      card.append(h('span', { class: 'ai-card-icon', text: '✅' }),
+      card.append(h('span', { class: 'ai-card-icon' }, icon('check')),
         h('div', { class: 'ai-card-main' }, h('b', { text: t('« {title} » mis à jour').replace('{title}', c.title) }), h('small', { text: c.note || '' }), changesList(c)), actions);
       actions.append(...[link(t('Ouvrir'), c.edit, 'btn btn-sm btn-primary'), link(t('Aperçu'), c.preview, 'btn btn-sm', true), c.undo && undoBtn(c.undo, card)].filter(Boolean));
     } else if (c.kind === 'editor') {
-      card.append(h('span', { class: 'ai-card-icon', text: '✅' }),
+      card.append(h('span', { class: 'ai-card-icon' }, icon('check')),
         h('div', { class: 'ai-card-main' }, h('b', { text: t('Modifié dans l’éditeur : pense à enregistrer') }), h('small', { text: c.note || '' }), changesList(c)), actions);
       if (c.patch && editor) {
         const undo = editor.apply(c.patch, c.media || {});

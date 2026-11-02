@@ -29,10 +29,10 @@ $events = [
     <section class="card">
       <div class="card-head"><h2><?= e(t('Niveau de protection')) ?></h2><span class="score <?= $v['score'] >= 80 ? 'good' : ($v['score'] >= 50 ? 'ok' : 'bad') ?>"><?= (int) $v['score'] ?> %</span></div>
       <ul class="health">
-        <?php foreach ($v['checks'] as $c): ?><li><span class="dot <?= $c['ok'] ? 'ok' : 'warn' ?>"></span><?= e($c['label']) ?></li><?php endforeach ?>
-        <li><span class="dot ok"></span><?= e(t('Aucune base de données : pas d’injection SQL possible')) ?></li>
-        <li><span class="dot ok"></span><?= e(t('En-têtes de sécurité stricts (CSP, anti-clickjacking…)')) ?></li>
-        <li><span class="dot <?= $v['gd'] ? 'ok' : 'warn' ?>"></span><?= e($v['gd'] ? t('Images ré-encodées à l’envoi, scripts interdits dans /media') : t('Images contrôlées à l’envoi (sans GD, elles ne sont pas ré-encodées), scripts interdits dans /media')) ?></li>
+        <?php foreach ($v['checks'] as $c): ?><li class="<?= $c['ok'] ? 'ok' : 'warn' ?>"><?= Icons::svg($c['ok'] ? 'circle-check' : 'alert') ?><span><?= e($c['label']) ?></span></li><?php endforeach ?>
+        <li class="ok"><?= Icons::svg('circle-check') ?><span><?= e(t('Aucune base de données : pas d’injection SQL possible')) ?></span></li>
+        <li class="ok"><?= Icons::svg('circle-check') ?><span><?= e(t('En-têtes de sécurité stricts (CSP, anti-clickjacking…)')) ?></span></li>
+        <li class="<?= $v['gd'] ? 'ok' : 'warn' ?>"><?= Icons::svg($v['gd'] ? 'circle-check' : 'alert') ?><span><?= e($v['gd'] ? t('Images ré-encodées à l’envoi, scripts interdits dans /media') : t('Images contrôlées à l’envoi (sans GD, elles ne sont pas ré-encodées), scripts interdits dans /media')) ?></span></li>
       </ul>
       <?php if (!$v['verified']): ?>
         <form method="post" action="<?= e(admin_url('security')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="verify-url">
@@ -58,7 +58,7 @@ $events = [
         <div class="notice warn"><p><?= e(t('Empreintes de référence absentes (app/manifest.php) : seule la recherche de fichiers suspects a été faite.')) ?></p></div>
       <?php endif ?>
       <?php $clean = !$i['modified'] && !$i['missing'] && !$i['unknown'] && !$i['suspicious']; ?>
-      <div class="notice <?= $clean ? 'ok' : 'bad' ?>"><p><?= e($clean ? t('Aucune anomalie détectée. ✅') : t('Des différences ont été trouvées : vérifie-les ci-dessous.')) ?></p></div>
+      <div class="notice <?= $clean ? 'ok' : 'bad' ?>"><p><?= e($clean ? t('Aucune anomalie détectée.') : t('Des différences ont été trouvées : vérifie-les ci-dessous.')) ?></p></div>
       <?php foreach (['modified' => t('Fichiers modifiés'), 'missing' => t('Fichiers manquants'), 'unknown' => t('Fichiers inconnus'), 'suspicious' => t('Fichiers suspects')] as $k => $label): ?>
         <?php if ($i[$k]): ?><h3><?= e($label) ?> (<?= count($i[$k]) ?>)</h3><ul class="small mono"><?php foreach (array_slice($i[$k], 0, 50) as $f): ?><li><?= e($f) ?></li><?php endforeach ?></ul><?php endif ?>
       <?php endforeach ?>
@@ -110,7 +110,7 @@ $events = [
       </div>
     <?php elseif (!$d['connected']): ?>
       <p class="small muted"><?= e(t('Envoie automatiquement une copie de ton site (contenus, réglages, comptes, images) dans ton Google Drive, chaque jour ou chaque semaine, ou quand tu veux. Éclair n’a accès qu’aux fichiers qu’il crée : il ne voit rien d’autre de ton Drive.')) ?></p>
-      <?php if ($d['error'] !== ''): ?><div class="notice warn"><span>⚠️</span><p><?= e($d['error']) ?></p></div><?php endif ?>
+      <?php if ($d['error'] !== ''): ?><div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e($d['error']) ?></p></div><?php endif ?>
       <form method="post" action="<?= e(admin_url('drive')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="connect">
         <?= \Eclair\Admin::partial('partials/confirm', []) ?>
         <button class="btn btn-primary" type="submit"><?= Icons::svg('link') ?><?= e(t('Connecter Google Drive')) ?></button></form>

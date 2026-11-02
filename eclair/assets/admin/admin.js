@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Thierry Gustin
-/* ⚡ Éclair — interface d'administration (sans dépendance, sans script en ligne). */
+/* Éclair — interface d'administration (sans dépendance, sans script en ligne). */
 (() => {
   const dataEl = document.getElementById('eclair-data');
   const D = dataEl ? JSON.parse(dataEl.textContent) : { i18n: {} };
@@ -18,6 +18,19 @@
     children.flat().forEach((c) => c != null && el.append(c));
     return el;
   };
+
+  /* Icônes dessinées (les mêmes que celles des pages, voir Icons.php) */
+  const ICO = {
+    'zap': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',
+    'arrow': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>',
+    'circle-check': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+    'alert': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+    'image': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>',
+    'spark': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>',
+  };
+  const icon = (name, cls = '') => { const el = h('span', cls ? { class: cls } : {}); el.innerHTML = ICO[name]; return el; };
+  /* Ligne d'état (réussite ou problème) : icône + texte, couleur portée par data-state. */
+  const state = (el, ok, text) => { el.dataset.state = ok ? 'ok' : 'bad'; el.replaceChildren(icon(ok ? 'circle-check' : 'alert'), document.createTextNode(text)); };
 
   /* ── Notifications ── */
   const toast = (message, type = '', action = null) => {
@@ -76,7 +89,7 @@
     const grid = h('div', { class: 'media-grid' });
     const search = h('input', { type: 'search', placeholder: t('Rechercher une image…'), 'aria-label': t('Rechercher une image…') });
     const input = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/gif', multiple: true, hidden: true });
-    const drop = h('label', { class: 'dropzone' }, h('span', { class: 'emoji', text: '🖼️' }), h('b', { text: t('Glisse tes images ici ou clique pour choisir') }), input);
+    const drop = h('label', { class: 'dropzone' }, icon('image', 'ico'), h('b', { text: t('Glisse tes images ici ou clique pour choisir') }), input);
     const dialog = h('dialog', {},
       h('div', { class: 'dialog-head' }, h('h2', { text: t('Médiathèque') }), h('button', { class: 'btn btn-ghost', type: 'button', text: t('Fermer'), onclick: () => dialog.close() })),
       h('div', { class: 'dialog-body' }, drop, h('p', {}, search), grid));
@@ -178,8 +191,9 @@
       if (link && !$('.count', link)) link.append(h('span', { class: 'count', title: json.text, text: '1' }));
       const hello = $('.page > .hello');
       if (hello && !$('[data-update-banner]')) {
-        hello.after(h('div', { class: 'notice', 'data-update-banner': true }, h('span', { text: '⚡' }),
-          h('p', {}, json.text + ' ', h('a', { href: D.admin + '/update', text: t('Voir la mise à jour') + ' →' }))));
+        const more = h('a', { href: D.admin + '/update', text: t('Voir la mise à jour') });
+        more.insertAdjacentHTML('beforeend', ICO.arrow);
+        hello.after(h('div', { class: 'notice', 'data-update-banner': true }, icon('zap'), h('p', {}, json.text + ' ', more)));
       }
     }).catch(() => {});
   }
@@ -262,7 +276,7 @@
     });
     $('#md-copy').addEventListener('click', () => navigator.clipboard.writeText($('#md-url').value).then(() => toast(t('Lien copié !'), 'ok')));
     if (D.ai) {
-      const gen = h('button', { class: 'ai-mini', type: 'button', text: '✨ ' + t('Décrire avec l’IA') });
+      const gen = h('button', { class: 'ai-mini', type: 'button' }, icon('spark'), t('Décrire avec l’IA'));
       gen.addEventListener('click', async () => {
         if (gen.hasAttribute('aria-busy')) return;
         gen.setAttribute('aria-busy', 'true');
@@ -581,7 +595,7 @@
       out.textContent = t('Vérification…');
       const res = await api('api/ai/test', { provider: btn.dataset.aiTest, key: $('input[type=password]', box).value.trim(), model: $('select', box).value }, { quiet: true }).catch(() => ({}));
       btn.disabled = false;
-      out.textContent = res.ok ? '✅ ' + res.message : '⚠️ ' + (res.error || t('Erreur réseau : vérifie ta connexion.'));
+      state(out, res.ok, res.ok ? res.message : (res.error || t('Erreur réseau : vérifie ta connexion.')));
     }));
     const profile = $('[data-ai-profile]', aiSettings);
     if (profile) profile.addEventListener('click', async () => {
@@ -592,10 +606,10 @@
       status.textContent = t('L’IA lit ton site… (20 à 60 secondes)');
       const res = await api('api/ai/profile', {}, { quiet: true }).catch(() => ({}));
       profile.disabled = false;
-      if (!res.ok) { status.textContent = '⚠️ ' + (res.error || t('Erreur réseau : vérifie ta connexion.')); return; }
+      if (!res.ok) { state(status, false, res.error || t('Erreur réseau : vérifie ta connexion.')); return; }
       fields.forEach((x) => { const k = x.name.slice(8); if (res.profile[k] != null) x.value = res.profile[k]; });
       aiSettings.closest('form').dispatchEvent(new Event('input', { bubbles: true }));
-      status.textContent = '✅ ' + t('Profil rédigé : relis-le, ajuste-le, puis enregistre.');
+      state(status, true, t('Profil rédigé : relis-le, ajuste-le, puis enregistre.'));
     });
   }
 
@@ -619,6 +633,6 @@
   const rewrite = $('#rewrite-check');
   if (rewrite) {
     fetch(rewrite.dataset.url, { cache: 'no-store' }).then((r) => r.text()).then((x) => x.trim() === 'ok').catch(() => false)
-      .then((ok) => { rewrite.textContent = (ok ? '✅ ' : '⚠️ ') + (ok ? t('Réécriture d’URL active') : t('Réécriture d’URL inactive')); });
+      .then((ok) => state(rewrite, ok, ok ? t('Réécriture d’URL active') : t('Réécriture d’URL inactive')));
   }
 })();

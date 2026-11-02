@@ -12,10 +12,10 @@ use Eclair\Media;
     <div><h1><?= e(t('Médias')) ?></h1><p><?= e(t('Tes images sont optimisées automatiquement : redimensionnées, converties en WebP et débarrassées des données EXIF.')) ?></p></div>
   </div>
   <?php if (!Media::gd()): ?>
-    <div class="notice warn"><span>⚠️</span><p><?= e(t('L’extension GD est absente sur ton hébergement : les images sont gardées telles quelles. Pense à les compresser avant envoi.')) ?></p></div>
+    <div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('L’extension GD est absente sur ton hébergement : les images sont gardées telles quelles. Pense à les compresser avant envoi.')) ?></p></div>
   <?php endif ?>
   <label class="dropzone" id="media-drop">
-    <span class="emoji">🖼️</span>
+    <span class="ico"><?= Icons::svg('image') ?></span>
     <b><?= e(t('Glisse tes images ici ou clique pour choisir')) ?></b>
     <span class="small muted"><?= e(t('JPG, PNG, WebP ou GIF · 20 Mo maximum · max. {max} par envoi sur ton hébergement', ['max' => ini_get('upload_max_filesize')])) ?></span>
     <input type="file" id="media-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>

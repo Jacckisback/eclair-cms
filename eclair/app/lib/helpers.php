@@ -49,6 +49,13 @@ function asset(string $file): string
     return Req::base() . '/assets/' . $file . '?v=' . substr(md5(ECLAIR_VERSION . $mtime), 0, 8);
 }
 
+/** Feuille de style de l'administration, précédée du préchargement de sa police (même adresse que dans la CSS). */
+function admin_css(): string
+{
+    return '<link rel="preload" href="' . e(Req::base() . '/assets/admin/schibsted-grotesk.woff2') . '" as="font" type="font/woff2" crossorigin>'
+        . "\n" . '<link rel="stylesheet" href="' . e(asset('admin/admin.css')) . '">';
+}
+
 /** Identifiant aléatoire court (10 caractères hexadécimaux). */
 function random_id(): string
 {

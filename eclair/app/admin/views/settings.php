@@ -276,16 +276,16 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <?= $sw('indexnow', (bool) $s['indexnow'], t('IndexNow : signaler chaque publication à Bing, Yandex… instantanément'), t('Bing alimente aussi Copilot et la recherche de ChatGPT. Clé : {key}', ['key' => $v['indexnow']])) ?>
 
   <?php elseif ($tab === 'geo'): ?>
-    <div class="notice"><span>🤖</span><p><?= e(t('Le GEO (Generative Engine Optimization) aide les moteurs de réponse — ChatGPT, Perplexity, Gemini, Claude, les AI Overviews de Google — à comprendre ton site et à le citer comme source.')) ?></p></div>
+    <div class="notice"><span><?= Icons::svg('bot') ?></span><p><?= e(t('Le GEO (Generative Engine Optimization) aide les moteurs de réponse — ChatGPT, Perplexity, Gemini, Claude, les AI Overviews de Google — à comprendre ton site et à le citer comme source.')) ?></p></div>
     <div class="field"><span class="label"><?= e(t('Robots des intelligences artificielles')) ?></span>
       <div class="choices">
         <?php foreach ([
-            'open' => ['🌍', t('Ouvert'), t('Toutes les IA peuvent lire et citer ton site. Visibilité maximale.'), t('Recommandé')],
-            'search' => ['🔎', t('Citations seulement'), t('Les moteurs de réponse peuvent te citer, mais pas entraîner leurs modèles sur tes textes.'), ''],
-            'closed' => ['🔒', t('Fermé'), t('Aucun robot IA connu n’est autorisé. Tu disparais des réponses des IA.'), ''],
+            'open' => ['globe', t('Ouvert'), t('Toutes les IA peuvent lire et citer ton site. Visibilité maximale.'), t('Recommandé')],
+            'search' => ['search', t('Citations seulement'), t('Les moteurs de réponse peuvent te citer, mais pas entraîner leurs modèles sur tes textes.'), ''],
+            'closed' => ['lock', t('Fermé'), t('Aucun robot IA connu n’est autorisé. Tu disparais des réponses des IA.'), ''],
         ] as $k => [$emoji, $label, $desc, $tag]): ?>
           <label class="choice"><input type="radio" name="ai" value="<?= e($k) ?>"<?= $s['geo']['ai'] === $k ? ' checked' : '' ?>>
-            <span><?= $tag !== '' ? '<em class="tag">' . e($tag) . '</em>' : '' ?><span class="emoji"><?= $emoji ?></span><b><?= e($label) ?></b><small><?= e($desc) ?></small></span></label>
+            <span><?= $tag !== '' ? '<em class="tag">' . e($tag) . '</em>' : '' ?><span class="ico"><?= Icons::svg($emoji) ?></span><b><?= e($label) ?></b><small><?= e($desc) ?></small></span></label>
         <?php endforeach ?>
       </div>
       <span class="hint"><?= e(t('Robots gérés : {list}…', ['list' => implode(', ', array_slice(array_merge(Seo::AI_SEARCH, Seo::AI_TRAINING), 0, 10))])) ?></span></div>
@@ -317,18 +317,18 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     ];
   ?>
     <div id="ai-settings">
-    <div class="notice"><span>✨</span><p><?= e(t('L’assistant rédige des brouillons, améliore tes textes et crée des images, dans le ton de ton site. Tu gardes la main : rien n’est publié sans ton clic.')) ?></p></div>
-    <?php if (!$state['crypto']): ?><div class="notice bad"><span>⚠️</span><p><?= e(t('Chiffrement indisponible sur ce serveur (extensions sodium et openssl absentes) : impossible d’enregistrer la clé.')) ?></p></div><?php endif ?>
+    <div class="notice"><span><?= Icons::svg('spark') ?></span><p><?= e(t('L’assistant rédige des brouillons, améliore tes textes et crée des images, dans le ton de ton site. Tu gardes la main : rien n’est publié sans ton clic.')) ?></p></div>
+    <?php if (!$state['crypto']): ?><div class="notice bad"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Chiffrement indisponible sur ce serveur (extensions sodium et openssl absentes) : impossible d’enregistrer la clé.')) ?></p></div><?php endif ?>
     <h2><?= e(t('Intelligence artificielle')) ?></h2>
     <div class="field"><span class="label"><?= e(t('Fournisseur')) ?></span>
       <div class="choices">
         <?php foreach ([
-            '' => ['⏸️', t('Désactivé'), t('Aucune donnée n’est envoyée à une IA.'), ''],
-            'anthropic' => ['✳️', 'Claude', t('Par Anthropic. Excellent en rédaction, nuance et respect des consignes.'), t('Recommandé')],
-            'openai' => ['🤖', 'ChatGPT', t('Par OpenAI. Polyvalent ; sa clé sert aussi aux images GPT Image.'), ''],
+            '' => ['pause', t('Désactivé'), t('Aucune donnée n’est envoyée à une IA.'), ''],
+            'anthropic' => ['spark', 'Claude', t('Par Anthropic. Excellent en rédaction, nuance et respect des consignes.'), t('Recommandé')],
+            'openai' => ['bot', 'ChatGPT', t('Par OpenAI. Polyvalent ; sa clé sert aussi aux images GPT Image.'), ''],
         ] as $k => [$emoji, $label, $desc, $tag]): ?>
           <label class="choice"><input type="radio" name="provider" value="<?= e($k) ?>" data-ai-provider<?= $ai['provider'] === $k ? ' checked' : '' ?>>
-            <span><?= $tag !== '' ? '<em class="tag">' . e($tag) . '</em>' : '' ?><span class="emoji"><?= $emoji ?></span><b><?= e($label) ?></b><small><?= e($desc) ?></small></span></label>
+            <span><?= $tag !== '' ? '<em class="tag">' . e($tag) . '</em>' : '' ?><span class="ico"><?= Icons::svg($emoji) ?></span><b><?= e($label) ?></b><small><?= e($desc) ?></small></span></label>
         <?php endforeach ?>
       </div><span class="hint"><?= e(t('IA par défaut. Avec les deux clés, tu passes de Claude à ChatGPT dans l’assistant, à chaque conversation.')) ?></span></div>
     <?php foreach (Ai::PROVIDERS as $p => $name): ?>
@@ -348,13 +348,13 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <div class="field"><span class="label"><?= e(t('Générateur d’images')) ?></span>
       <div class="choices">
         <?php foreach ([
-            '' => ['🖼️', t('Aucun'), t('L’assistant puise dans ta médiathèque et dans les photos que tu lui joins.')],
-            'openai' => ['🎨', 'GPT Image 2.5', t('Par OpenAI. Polyvalent, suit très bien les consignes.')],
-            'bfl' => ['📸', 'FLUX 3', t('Par Black Forest Labs. Photos très réalistes.')],
-            'ideogram' => ['🔤', 'Ideogram 3', t('Idéal pour les visuels avec du texte (affiches, bannières).')],
+            '' => ['image', t('Aucun'), t('L’assistant puise dans ta médiathèque et dans les photos que tu lui joins.')],
+            'openai' => ['palette', 'GPT Image 2.5', t('Par OpenAI. Polyvalent, suit très bien les consignes.')],
+            'bfl' => ['camera', 'FLUX 3', t('Par Black Forest Labs. Photos très réalistes.')],
+            'ideogram' => ['type', 'Ideogram 3', t('Idéal pour les visuels avec du texte (affiches, bannières).')],
         ] as $k => [$emoji, $label, $desc]): ?>
           <label class="choice"><input type="radio" name="image" value="<?= e($k) ?>" data-ai-image<?= $ai['image'] === $k ? ' checked' : '' ?>>
-            <span><span class="emoji"><?= $emoji ?></span><b><?= e($label) ?></b><small><?= e($desc) ?><?= $k !== '' ? ' ' . e(t('≈ {cost} l’image.', ['cost' => Ai::money(Ai::IMAGES[$k][2])])) : '' ?></small></span></label>
+            <span><span class="ico"><?= Icons::svg($emoji) ?></span><b><?= e($label) ?></b><small><?= e($desc) ?><?= $k !== '' ? ' ' . e(t('≈ {cost} l’image.', ['cost' => Ai::money(Ai::IMAGES[$k][2])])) : '' ?></small></span></label>
         <?php endforeach ?>
       </div></div>
     <div class="ai-box" data-ai-image-for="openai"<?= $ai['image'] === 'openai' ? '' : ' hidden' ?>>
@@ -366,7 +366,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <hr>
     <h2><?= e(t('Profil éditorial')) ?></h2>
     <p class="hint"><?= e(t('Ce que l’IA doit savoir pour écrire comme toi. Laisse-la le rédiger à partir de ton site, puis ajuste-le.')) ?></p>
-    <p class="row"><button class="btn" type="button" data-ai-profile<?= Ai::enabled() ? '' : ' disabled' ?>>✨ <?= e(t('Rédiger mon profil à partir de mon site')) ?></button>
+    <p class="row"><button class="btn" type="button" data-ai-profile<?= Ai::enabled() ? '' : ' disabled' ?>><?= Icons::svg('spark') ?><?= e(t('Rédiger mon profil à partir de mon site')) ?></button>
       <span class="small muted" data-ai-profile-status role="status"><?= Ai::enabled() ? '' : e(t('Enregistre d’abord un fournisseur d’IA et sa clé.')) ?></span></p>
     <?php foreach ([
         'about' => [t('Qui tu es et ce que tu proposes'), t('Atelier de céramique à Lyon depuis 2012 : cours pour adultes, stages d’été, pièces sur commande.')],
@@ -388,7 +388,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     </div>
     <?php if ((float) $ai['budget'] > 0): ?><?php $pct = (int) min(100, round((float) $usage['cost'] / (float) $ai['budget'] * 100)) ?><div class="progress" role="progressbar" aria-label="<?= e(t('Budget utilisé ce mois-ci')) ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<?= $pct ?>"><i data-width="<?= $pct ?>"></i></div><?php endif ?>
     <?= $sw('editors', (bool) $ai['editors'], t('Les rédacteurs peuvent utiliser l’assistant'), t('Les administrateurs y ont toujours accès.')) ?>
-    <div class="notice"><span>🔒</span><p><?= e(t('Tes clés sont chiffrées sur ton serveur : elles ne sont jamais envoyées au navigateur ni incluses dans les sauvegardes. Les textes confiés à l’assistant sont transmis au fournisseur choisi pour être traités : n’y mets pas de données sensibles.')) ?></p></div>
+    <div class="notice"><span><?= Icons::svg('lock') ?></span><p><?= e(t('Tes clés sont chiffrées sur ton serveur : elles ne sont jamais envoyées au navigateur ni incluses dans les sauvegardes. Les textes confiés à l’assistant sont transmis au fournisseur choisi pour être traités : n’y mets pas de données sensibles.')) ?></p></div>
     <hr>
     <h2 id="mcp"><?= e(t('Claude ou ChatGPT avec ton abonnement (MCP)')) ?></h2>
     <p class="hint"><?= e(t('Le connecteur MCP laisse Claude ou ChatGPT lire ton site, rédiger des brouillons et proposer des modifications depuis leur propre application : aucune clé d’API, aucun coût pour le site. Ils ne peuvent ni publier, ni supprimer, ni toucher aux réglages.')) ?></p>
@@ -397,8 +397,8 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
       <div class="field"><span class="label"><?= e(t('Adresse du connecteur')) ?></span>
         <span class="input-group"><input type="text" value="<?= e($state['mcp_url']) ?>" readonly aria-label="<?= e(t('Adresse du connecteur')) ?>"><button class="btn" type="button" data-copy="<?= e($state['mcp_url']) ?>"><?= e(t('Copier')) ?></button></span>
         <span class="hint"><?= e(t('Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (sur le web) : Plugins › + › Ajouter un serveur MCP personnalisé, colle l’adresse et choisis l’authentification OAuth.')) ?></span></div>
-      <?php if (!str_starts_with($state['mcp_url'], 'https://')): ?><div class="notice bad"><span>⚠️</span><p><?= e(t('Claude et ChatGPT n’acceptent que les adresses en https:// : active d’abord le HTTPS de ton site.')) ?></p></div><?php endif ?>
-      <?php if (\Eclair\Req::base() !== ''): ?><div class="notice warn"><span>⚠️</span><p><?= e(t('Éclair est installé dans un sous-dossier : certaines applications cherchent l’autorisation à la racine du domaine. Si la connexion échoue, installe Éclair sur un sous-domaine.')) ?></p></div><?php endif ?>
+      <?php if (!str_starts_with($state['mcp_url'], 'https://')): ?><div class="notice bad"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Claude et ChatGPT n’acceptent que les adresses en https:// : active d’abord le HTTPS de ton site.')) ?></p></div><?php endif ?>
+      <?php if (\Eclair\Req::base() !== ''): ?><div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Éclair est installé dans un sous-dossier : certaines applications cherchent l’autorisation à la racine du domaine. Si la connexion échoue, installe Éclair sur un sous-domaine.')) ?></p></div><?php endif ?>
       <h3><?= e(t('Applications connectées')) ?></h3>
       <?php if (!$state['mcp']): ?><p class="muted small"><?= e(t('Aucune application connectée pour l’instant.')) ?></p><?php endif ?>
       <ul class="mcp-list">
@@ -423,7 +423,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         return $out . '</select>' . ($hint !== '' ? '<span class="hint">' . e($hint) . '</span>' : '') . '</label>';
     };
     $thanks = Shop::pageLink('thanks'); ?>
-    <div class="notice"><span>🛍️</span><p><?= e(t('Boutique légère : chaque produit a sa fiche, optimisée pour Google et les IA. Le paiement passe par un lien Stripe, PayPal ou Revolut Business : pas de panier ni de base de données. Ton prestataire encaisse, envoie les reçus et gère les remboursements.')) ?></p></div>
+    <div class="notice"><span><?= Icons::svg('bag') ?></span><p><?= e(t('Boutique légère : chaque produit a sa fiche, optimisée pour Google et les IA. Le paiement passe par un lien Stripe, PayPal ou Revolut Business : pas de panier ni de base de données. Ton prestataire encaisse, envoie les reçus et gère les remboursements.')) ?></p></div>
     <?= $sw('shop_enabled', (bool) $shop['enabled'], t('Boutique ouverte'), $missing ? t('Publie d’abord : {pages}.', ['pages' => implode(', ', $missing)]) : t('Catalogue, fiches produit et flux Google Shopping en ligne.')) ?>
     <div class="grid-2">
       <label class="field"><span class="label"><?= e(t('Adresse de la boutique')) ?></span><span class="input-group"><span>/</span><input type="text" name="shop_base" value="<?= e(ltrim(Shop::path(), '/')) ?>"></span>
@@ -490,7 +490,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <p class="hint"><?= e(t('Protection anti-spam sans captcha : champ piège invisible, jeton vérifié, limite de 5 messages par 10 minutes et par visiteur.')) ?></p>
 
   <?php else: ?>
-    <div class="notice warn"><span>⚠️</span><p><?= e(t('Réglages techniques : modifie-les seulement si tu sais pourquoi.')) ?></p></div>
+    <div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Réglages techniques : modifie-les seulement si tu sais pourquoi.')) ?></p></div>
     <?= \Eclair\Admin::partial('partials/confirm', []) ?>
     <label class="field"><span class="label"><?= e(t('Adresse de l’administration')) ?></span>
       <span class="input-group"><span><?= e(rtrim((string) $s['url'], '/')) ?>/</span><input type="text" name="admin_path" value="<?= e($s['admin_path']) ?>" pattern="[a-z0-9\-]{3,40}" required></span>

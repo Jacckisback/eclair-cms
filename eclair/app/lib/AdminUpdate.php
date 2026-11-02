@@ -57,7 +57,7 @@ final class AdminUpdate
                 if (!$result['checked']) {
                     Session::flash('warn', t('Ton hébergeur empêche Éclair de contrôler le site lui-même : ouvre-le pour vérifier que tout va bien. En cas de souci, reviens à la version précédente ci-dessous.'));
                 }
-                Admin::back('update', t('Éclair est passé à la version {v} ✅ Tes contenus, images et réglages n’ont pas bougé.', ['v' => $result['version']]));
+                Admin::back('update', t('Éclair est passé à la version {v}. Tes contenus, images et réglages n’ont pas bougé.', ['v' => $result['version']]));
             case 'rollback':
                 if (!Auth::confirmed($user)) {
                     Admin::back('update', t('Mot de passe incorrect.'), 'bad');

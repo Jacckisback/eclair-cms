@@ -322,7 +322,7 @@ final class AdminSettings
             Session::flash('ok', t('Nouvelle adresse de l’administration enregistrée : pense à mettre à jour tes favoris.'));
             Http::redirect(Req::base() . '/' . $patch['admin_path'] . '/settings?tab=advanced');
         }
-        Admin::back($redirect, t('Réglages enregistrés. Le site est déjà à jour ⚡'));
+        Admin::back($redirect, t('Réglages enregistrés. Le site est déjà à jour.'));
     }
 
     /**

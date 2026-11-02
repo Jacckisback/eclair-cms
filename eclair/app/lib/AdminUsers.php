@@ -170,7 +170,7 @@ final class AdminUsers
                 unset($_SESSION['totp_setup']);
                 $_SESSION['recovery_show'] = $codes;
                 Log::security('2fa_enabled');
-                Session::flash('ok', t('Double authentification activée 🎉 Garde précieusement tes codes de secours.'));
+                Session::flash('ok', t('Double authentification activée. Garde précieusement tes codes de secours.'));
                 Http::redirect(admin_url('profile#securite'));
             case '2fa-disable':
                 if (!password_verify(Req::input('current'), (string) $user['pass'])) {

@@ -22,7 +22,7 @@ $mode = $v['mode'];
 <meta name="robots" content="noindex, nofollow">
 <?php if ($mode === 'relay'): ?><meta http-equiv="refresh" content="0;url=<?= e($v['here']) ?>"><?php endif ?>
 <title><?= e(t('Autoriser une application')) ?> · <?= e(Settings::get('name')) ?></title>
-<link rel="stylesheet" href="<?= e(asset('admin/admin.css')) ?>">
+<?= admin_css() ?>
 <link rel="icon" href="<?= e(asset('admin/favicon.svg')) ?>" type="image/svg+xml">
 </head>
 <body>
@@ -53,12 +53,12 @@ $mode = $v['mode'];
       <button class="btn btn-primary btn-lg btn-block" type="submit"><?= e(t('Vérifier')) ?></button>
     <?php else: ?>
       <p class="sub"><?= e(t('{app} demande à travailler sur « {site} » en ton nom ({name}).', ['app' => $v['app'], 'site' => Settings::get('name'), 'name' => $v['user']['name']])) ?></p>
-      <?php if (!$v['known']): ?><div class="notice warn"><span>⚠️</span><p><?= e(t('Application inconnue : n’accepte que si tu viens de l’ajouter toi-même.')) ?></p></div><?php endif ?>
+      <?php if (!$v['known']): ?><div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Application inconnue : n’accepte que si tu viens de l’ajouter toi-même.')) ?></p></div><?php endif ?>
       <ul class="grant">
-        <li>✅ <?= e(t('Lire tes pages, articles, produits et ta médiathèque')) ?></li>
-        <li>✅ <?= e(t('Créer des brouillons et modifier tes brouillons')) ?></li>
-        <li>✅ <?= e(t('Proposer des modifications de tes contenus publiés, que tu vérifies et enregistres')) ?></li>
-        <li>🚫 <?= e(t('Jamais publier, supprimer, ni toucher aux réglages et aux comptes')) ?></li>
+        <li><?= Icons::svg('check') ?><?= e(t('Lire tes pages, articles, produits et ta médiathèque')) ?></li>
+        <li><?= Icons::svg('check') ?><?= e(t('Créer des brouillons et modifier tes brouillons')) ?></li>
+        <li><?= Icons::svg('check') ?><?= e(t('Proposer des modifications de tes contenus publiés, que tu vérifies et enregistres')) ?></li>
+        <li class="no"><?= Icons::svg('ban') ?><?= e(t('Jamais publier, supprimer, ni toucher aux réglages et aux comptes')) ?></li>
       </ul>
       <p class="small muted"><?= e(t('Retour vers {host}. Tu peux couper cet accès à tout moment dans Réglages › Assistant IA.', ['host' => $v['host']])) ?></p>
       <?= Security::csrfField() ?>

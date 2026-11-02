@@ -34,7 +34,7 @@ $on = !empty($me['totp']['on']);
     <?= Security::csrfField() ?><input type="hidden" name="action" value="password">
     <h2><?= e(t('Mot de passe')) ?></h2>
     <?php if (!empty($me['must_change'])): ?>
-      <div class="notice warn" role="alert"><span>🔑</span><p><?= e(t('Tu utilises un mot de passe provisoire : choisis ton mot de passe personnel ci-dessous pour accéder au reste de l’administration.')) ?></p></div>
+      <div class="notice warn" role="alert"><span><?= Icons::svg('key') ?></span><p><?= e(t('Tu utilises un mot de passe provisoire : choisis ton mot de passe personnel ci-dessous pour accéder au reste de l’administration.')) ?></p></div>
     <?php endif ?>
     <label class="field"><span class="label"><?= e(t('Mot de passe actuel')) ?></span><input type="password" name="current" autocomplete="current-password" required></label>
     <label class="field"><span class="label"><?= e(t('Nouveau mot de passe')) ?></span>
@@ -47,7 +47,7 @@ $on = !empty($me['totp']['on']);
   <section class="card" id="securite">
     <div class="card-head"><h2><?= e(t('Double authentification (2FA)')) ?></h2><?= $on ? '<span class="badge ok">' . e(t('Activée')) . '</span>' : '<span class="badge warn">' . e(t('Désactivée')) . '</span>' ?></div>
     <?php if ($v['recovery']): ?>
-      <div class="notice warn"><span>🔑</span><div><p><b><?= e(t('Tes codes de secours (affichés une seule fois)')) ?></b></p><p><?= e(t('Chaque code fonctionne une fois si tu perds ton téléphone. Imprime-les ou range-les dans ton gestionnaire de mots de passe.')) ?></p></div></div>
+      <div class="notice warn"><span><?= Icons::svg('key') ?></span><div><p><b><?= e(t('Tes codes de secours (affichés une seule fois)')) ?></b></p><p><?= e(t('Chaque code fonctionne une fois si tu perds ton téléphone. Imprime-les ou range-les dans ton gestionnaire de mots de passe.')) ?></p></div></div>
       <div class="recovery"><?php foreach ($v['recovery'] as $code): ?><span><?= e($code) ?></span><?php endforeach ?></div>
       <p><button class="btn btn-sm" type="button" data-copy="<?= e(implode("\n", $v['recovery'])) ?>"><?= Icons::svg('copy') ?><?= e(t('Copier les codes')) ?></button></p>
     <?php endif ?>

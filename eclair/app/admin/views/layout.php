@@ -40,7 +40,7 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title><?= e($v['page_title'] ?: 'Éclair') ?> · <?= e(Settings::get('name')) ?></title>
-<link rel="stylesheet" href="<?= e(asset('admin/admin.css')) ?>">
+<?= admin_css() ?>
 <link rel="icon" href="<?= e(asset('admin/favicon.svg')) ?>" type="image/svg+xml">
 <script src="<?= e(asset('admin/admin.js')) ?>" defer></script>
 <?php if (\Eclair\Ai::allowed($user)): ?><script src="<?= e(asset('admin/assistant.js')) ?>" defer></script><?php endif ?>
@@ -88,9 +88,9 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
     <button class="btn btn-sm menu-toggle" type="button" data-toggle-nav><?= Icons::svg('menu') ?><?= e(t('Menu')) ?></button>
     <?php foreach ($v['flash'] as [$type, $message]): ?>
       <?php if ($type === 'secret'): ?>
-        <div class="notice warn" role="alert"><span>🔑</span><p><?= e($message) ?></p></div>
+        <div class="notice warn" role="alert"><span><?= Icons::svg('key') ?></span><p><?= e($message) ?></p></div>
       <?php else: ?>
-        <div class="notice <?= e($type) ?>" role="status" data-flash><span><?= $type === 'bad' ? '⚠️' : ($type === 'warn' ? '⚠️' : '✅') ?></span><p><?= e($message) ?></p></div>
+        <div class="notice <?= e($type) ?>" role="status" data-flash><span><?= Icons::svg(in_array($type, ['bad', 'warn'], true) ? 'alert' : 'circle-check') ?></span><p><?= e($message) ?></p></div>
       <?php endif ?>
     <?php endforeach ?>
     <?= $v['content'] ?>

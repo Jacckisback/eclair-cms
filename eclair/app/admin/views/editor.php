@@ -25,8 +25,8 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
       <button type="button" data-mode="visual" aria-pressed="false"><?= e(t('Visuel')) ?></button>
     </div>
     <div class="seg seg-w" role="group" aria-label="<?= e(t('Largeur de l’aperçu')) ?>">
-      <?php foreach (['390' => ['📱', t('Mobile')], '768' => ['▭', t('Tablette')], '' => ['🖥', t('Ordinateur')]] as $w => [$icon, $label]): ?>
-        <button type="button" data-w="<?= $w ?>" aria-pressed="<?= $w === '' ? 'true' : 'false' ?>" title="<?= e($label) ?>" aria-label="<?= e($label) ?>"><?= $icon ?></button>
+      <?php foreach (['390' => ['smartphone', t('Mobile')], '768' => ['tablet', t('Tablette')], '' => ['monitor', t('Ordinateur')]] as $w => [$icon, $label]): ?>
+        <button type="button" data-w="<?= $w ?>" aria-pressed="<?= $w === '' ? 'true' : 'false' ?>" title="<?= e($label) ?>" aria-label="<?= e($label) ?>"><?= Icons::svg($icon) ?></button>
       <?php endforeach ?>
     </div>
     <a class="btn btn-ghost btn-sm" id="view-link" href="#" target="_blank" rel="noopener" hidden><?= Icons::svg('external') ?><span><?= e(t('Voir')) ?></span></a>
@@ -43,7 +43,7 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
     <div class="doc">
       <?php if ($v['compose']): ?>
       <details class="card compose" open>
-        <summary>✨ <?= e(t('Créer avec l’IA')) ?></summary>
+        <summary><?= Icons::svg('spark') ?><?= e(t('Créer avec l’IA')) ?></summary>
         <form id="compose" data-wait="<?= e(t('L’IA compose ta page…')) ?>">
           <p class="small muted"><?= e(t('Décris ce que tu veux : l’IA prépare un brouillon complet (structure, textes, SEO) que tu relis et retouches en mode Visuel. Rien n’est publié.')) ?></p>
           <div class="compose-grid">
@@ -67,7 +67,7 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
           </div>
           <label class="field"><span class="label"><?= e(t('Sections (facultatif)')) ?></span><input type="text" name="sections" maxlength="500" placeholder="<?= e(t('ex. : bannière, atouts, tarifs, FAQ, contact')) ?>"></label>
           <div class="row wrap">
-            <button class="btn btn-primary" type="submit">✨ <?= e(t('Créer le brouillon')) ?></button>
+            <button class="btn btn-primary" type="submit"><?= Icons::svg('spark') ?><?= e(t('Créer le brouillon')) ?></button>
             <span class="small muted"><?= e(t('Coût estimé : ≈ {cost}, déduit du budget de l’assistant.', ['cost' => \Eclair\AdminAi::composeCost($v['compose']['provider'])])) ?></span>
           </div>
           <progress hidden></progress>
@@ -80,7 +80,7 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
       <?php if ($isProduct): ?>
       <section class="card product-box" id="product-box" aria-label="<?= e(t('Fiche produit')) ?>">
         <?php if (!Shop::enabled()): ?>
-          <p class="notice small"><span>🛍️</span><span><?= e(t('La boutique est fermée : ce produit restera invisible jusqu’à son ouverture.')) ?> <a href="<?= e(admin_url('settings?tab=shop')) ?>"><?= e(t('Ouvrir la boutique')) ?> →</a></span></p>
+          <p class="notice small"><span><?= Icons::svg('bag') ?></span><span><?= e(t('La boutique est fermée : ce produit restera invisible jusqu’à son ouverture.')) ?> <a href="<?= e(admin_url('settings?tab=shop')) ?>"><?= e(t('Ouvrir la boutique')) ?> →</a></span></p>
         <?php endif ?>
         <div class="product-fields">
           <label class="field"><span class="label"><?= e(t('Prix')) ?></span>
@@ -116,9 +116,9 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
       </section>
       <?php endif ?>
       <div class="key-box" id="summary-box">
-        <button class="link-btn small" type="button" id="summary-add">✨ <?= e(t('Ajouter « L’essentiel » : le résumé que Google et les IA adorent citer')) ?></button>
+        <button class="link-btn small" type="button" id="summary-add"><?= Icons::svg('spark') ?><?= e(t('Ajouter « L’essentiel » : le résumé que Google et les IA adorent citer')) ?></button>
         <div class="card" id="summary-card" hidden>
-          <div class="row between"><label class="label" for="doc-summary">✨ <?= e(t('L’essentiel')) ?></label><span class="counter" id="summary-count"></span></div>
+          <div class="row between"><label class="label" for="doc-summary"><?= Icons::svg('spark') ?><?= e(t('L’essentiel')) ?></label><span class="counter" id="summary-count"></span></div>
           <textarea id="doc-summary" rows="3" placeholder="<?= e(t('En 2-3 phrases : la réponse directe à la question que se pose ton lecteur.')) ?>"></textarea>
         </div>
       </div>

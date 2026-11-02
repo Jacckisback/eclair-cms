@@ -38,7 +38,7 @@ $home = (string) Settings::get('home');
     </form>
   </div>
   <?php if (!$v['entries']): ?>
-    <div class="card empty-state"><span class="emoji">✍️</span><p><?= e(t('Rien par ici pour l’instant.')) ?></p>
+    <div class="card empty-state"><span class="ico"><?= Icons::svg('pen') ?></span><p><?= e(t('Rien par ici pour l’instant.')) ?></p>
       <a class="btn btn-primary" href="<?= e(admin_url('new/' . (Settings::get('blog.enabled') ? 'post' : 'page'))) ?>"><?= e(t('Créer un contenu')) ?></a></div>
   <?php else: ?>
   <div class="table-wrap">
@@ -50,7 +50,7 @@ $home = (string) Settings::get('home');
         <tr data-row="<?= e($e['id']) ?>">
           <td class="title-cell">
             <a href="<?= e(admin_url('edit/' . $e['id'])) ?>"><?= e($e['title']) ?></a>
-            <small><?= e($types[$e['type']] ?? t('Page')) ?><?= ($e['price'] ?? '') !== '' ? ' · ' . e(Shop::money((string) $e['price'], \Eclair\I18n::lang() === 'zh' ? 'en' : \Eclair\I18n::lang())) : '' ?><?= $e['id'] === $home ? ' · 🏠 ' . e(t('Accueil')) : '' ?> · <?= e($path) ?><?= $e['lang'] !== Settings::get('lang') ? ' · ' . e(strtoupper($e['lang'])) : '' ?><?= $e['noindex'] ? ' · noindex' : '' ?></small>
+            <small><?= e($types[$e['type']] ?? t('Page')) ?><?= ($e['price'] ?? '') !== '' ? ' · ' . e(Shop::money((string) $e['price'], \Eclair\I18n::lang() === 'zh' ? 'en' : \Eclair\I18n::lang())) : '' ?><?= $e['id'] === $home ? ' · ' . Icons::svg('home') . e(t('Accueil')) : '' ?> · <?= e($path) ?><?= $e['lang'] !== Settings::get('lang') ? ' · ' . e(strtoupper($e['lang'])) : '' ?><?= $e['noindex'] ? ' · noindex' : '' ?></small>
           </td>
           <td><?= $visible ? '<span class="badge ok">' . e(t('Publié')) . '</span>' : ($e['status'] !== 'published' ? '<span class="badge">' . e(t('Brouillon')) . '</span>'
               : ((int) $e['date'] > time() ? '<span class="badge brand">' . e(t('Programmé')) . ' · ' . e(fmt_date((int) $e['date'], \Eclair\I18n::lang())) . '</span>' : '<span class="badge warn">' . e(t('Boutique fermée')) . '</span>')) ?></td>
