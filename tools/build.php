@@ -46,6 +46,9 @@ function shipped(string $root, string $rel): string
         str_ends_with($rel, '.php') => php_strip_whitespace($path),
         $admin && str_ends_with($rel, '.js') => eclair_minify_js((string) file_get_contents($path)),
         $admin && str_ends_with($rel, '.css') => eclair_minify_css((string) file_get_contents($path)),
+        // Morceaux des directions artistiques : chacun allégé, leurs repères gardés (Design::css les découpe).
+        $rel === 'app/theme/directions.css' => implode('', array_map(static fn (string $part): string => str_starts_with($part, '/*@') ? $part : eclair_minify_css($part),
+            preg_split('~(/\*@(?:[a-z]+(?::[a-z]+)?)?\*/)~', (string) file_get_contents($path), -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY))),
         default => (string) file_get_contents($path),
     };
 }
@@ -97,8 +100,8 @@ $shipped = [];
 $size = 0;
 foreach ($files as $rel) {
     $body = shipped($root, $rel);
-    // Vues de l'administration compressées (gzip, lues par zlib) : un tiers de leur poids. Le site public et l'installateur n'en ont pas.
-    if (preg_match('~^app/admin/views/.+\.php$~', $rel)) {
+    // Vues de l'administration et de l'installation compressées (gzip, lues par zlib) : un tiers de leur poids. Le site public n'en a pas.
+    if (preg_match('~^app/(admin/views/.+|install/view)\.php$~', $rel)) {
         $body = (string) gzencode($body, 9);
         $rel .= '.gz';
     }

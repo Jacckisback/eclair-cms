@@ -193,11 +193,21 @@ final class Theme
 
     public static function partial(string $name, array $v): string
     {
+        // Archive : la vue de l'installation est compressée (gzip, lue par zlib) ; les gabarits du site, jamais.
+        $file = ECLAIR_ROOT . '/app/theme/' . $name . '.php';
+        if (is_file($file . '.gz')) {
+            if (!extension_loaded('zlib')) {
+                http_response_code(500);
+                header('Content-Type: text/plain; charset=utf-8');
+                exit("L'extension PHP zlib est indispensable à Éclair : active-la dans le panneau PHP de ton hébergeur.\n");
+            }
+            $file = 'compress.zlib://' . $file . '.gz';
+        }
         ob_start();
         try {
             (static function (string $__file, array $v): void {
                 include $__file;
-            })(ECLAIR_ROOT . '/app/theme/' . $name . '.php', $v);
+            })($file, $v);
         } catch (\Throwable $e) {
             ob_end_clean();
             throw $e;

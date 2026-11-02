@@ -29,8 +29,8 @@ final class Integrity
                 }
             }
             foreach (self::scan(['app', 'assets']) as $path) {
-                // Vue .php d'avant la 1.8, restée lors d'une mise à jour : jamais lue (sa version compressée l'emporte).
-                $stale = str_starts_with($path, 'app/admin/views/') && isset($manifest['files'][$path . '.gz']);
+                // Ancienne vue .php restée lors d'une mise à jour : jamais lue, sa version compressée (.gz) l'emporte.
+                $stale = isset($manifest['files'][$path . '.gz']);
                 if (!isset($manifest['files'][$path]) && $path !== 'app/manifest.php' && !$stale) {
                     $result['unknown'][] = $path;
                 }

@@ -63,12 +63,13 @@ check('direction transmise par l’aperçu (JSON en base64url)', (Design::find($
 
 /* ─────────────────────────── CSS et icônes ─────────────────────────── */
 section('Directions artistiques : CSS envoyé, icônes');
+$has = static fn (string $css, string $needle): bool => str_contains(Theme::minify($css), Theme::minify($needle)); // l'archive livre directions.css minifié
 $css = Design::css(Design::find('nocturne'));
-check('variables de la direction', str_contains($css, ':root{--bg:#0f1724;--bg-soft:#182235;') && str_contains($css, '--font-head:"Big Shoulders Display",') && str_contains($css, 'color-scheme:dark'));
-check('seuls les morceaux des choix de la direction', str_contains($css, 'text-transform:uppercase') && str_contains($css, 'min-height:min(78vh, 46rem)')
-    && !str_contains($css, 'max-width:15ch') && !str_contains($css, 'aspect-ratio:4/5') && !str_contains($css, '/*@'));
+check('variables de la direction', $has($css, ':root{--bg:#0f1724;--bg-soft:#182235;') && $has($css, '--font-head:"Big Shoulders Display",') && $has($css, 'color-scheme:dark'));
+check('seuls les morceaux des choix de la direction', $has($css, 'text-transform:uppercase') && $has($css, 'min-height:min(78vh, 46rem)')
+    && !$has($css, 'max-width:15ch') && !$has($css, 'aspect-ratio:4/5') && !str_contains($css, '/*@'));
 $cssPresse = Design::css(Design::find('presse'));
-check('autre direction, autres morceaux', str_contains($cssPresse, 'aspect-ratio:4/5') && !str_contains($cssPresse, 'text-transform:uppercase') && !str_contains($cssPresse, 'box-shadow:0 0 0 100vmax'));
+check('autre direction, autres morceaux', $has($cssPresse, 'aspect-ratio:4/5') && !$has($cssPresse, 'text-transform:uppercase') && !$has($cssPresse, 'box-shadow:0 0 0 100vmax'));
 check('police absente : ni @font-face ni préchargement (police de secours)', Design::fontFile('gloock') === '' && !str_contains(Design::css(Design::find('riviera')), '@font-face')
     && Design::preload(Design::find('riviera')) === '' && Design::fontFile('inconnue') === '' && !Design::fetchFont('../../x'));
 check('icône dessinée pour un émoji connu, rien pour un inconnu', str_starts_with(Design::icon('🚀'), '<svg viewBox="0 0 24 24" aria-hidden="true">')
@@ -76,11 +77,11 @@ check('icône dessinée pour un émoji connu, rien pour un inconnu', str_starts_
 // 1.9 : nouvelles compositions (bannière inversée ou encadrée, atouts numérotés, filets, boutons) et leurs morceaux.
 $combo = Design::normalize(['hero' => 'reverse', 'features' => 'numbers', 'sections' => 'rules', 'buttons' => 'outline'] + Design::DIRECTIONS['argile']);
 $cssCombo = Design::css($combo);
-check('1.9 : bannière à gauche, atouts numérotés, filets et boutons à contour', str_contains($cssCombo, '.hero-media .hero-img{order:-1}') && str_contains($cssCombo, 'counter(feat, decimal-leading-zero)')
-    && str_contains($cssCombo, '.btns .btn-primary{background:transparent') && str_contains($cssCombo, 'border-top:1px solid var(--line);padding-top') && !str_contains($cssCombo, 'box-shadow:0 0 0 100vmax'));
+check('1.9 : bannière à gauche, atouts numérotés, filets et boutons à contour', $has($cssCombo, '.hero-media .hero-img{order:-1}') && $has($cssCombo, 'counter(feat, decimal-leading-zero)')
+    && $has($cssCombo, '.btns .btn-primary{background:transparent') && $has($cssCombo, 'border-top:1px solid var(--line);padding-top') && !$has($cssCombo, 'box-shadow:0 0 0 100vmax'));
 $over = '.hero-media .btns .btn,.hero-media .btns .btn:hover{background:transparent;color:#fff';
 check('1.9 : boutons sans fond restés blancs sur une bannière plein cadre, seulement là', str_contains(Design::css(Design::normalize(['buttons' => 'underline'] + Design::DIRECTIONS['nocturne'])), $over)
-    && !str_contains(Design::css(Design::find('nocturne')), $over) && !str_contains($cssCombo, $over) && str_contains(Design::css(Design::normalize(['hero' => 'framed'] + Design::DIRECTIONS['galerie'])), 'background:var(--bg-soft);border-radius:var(--radius);padding'));
+    && !str_contains(Design::css(Design::find('nocturne')), $over) && !$has($cssCombo, $over) && str_contains(Design::css(Design::normalize(['hero' => 'framed'] + Design::DIRECTIONS['galerie'])), 'background:var(--bg-soft);border-radius:var(--radius);padding'));
 check('1.9 : direction enregistrée avant la 1.9 (sans boutons) : boutons pleins par défaut', Design::normalize(Design::DIRECTIONS['presse'])['buttons'] === 'solid'
     && Design::normalize(['buttons' => 'neon'] + Design::DIRECTIONS['presse'])['buttons'] === 'solid');
 $icons = (new ReflectionClass(Design::class))->getConstant('ICONS');

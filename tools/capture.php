@@ -309,11 +309,11 @@ function capture_all(string $root, string $fixtures): array
  * Direction artistique livrée appliquée à une copie servie, avec sa police de titre : téléchargée ici depuis Fontsource
  * (comme le ferait le site à l'enregistrement) puis servie par la copie. Le site normalise lui-même la direction.
  */
-function capture_direction(string $root, string $copy, string $id): void
+function capture_direction(string $root, string $copy, string $id, array $override = []): void
 {
     defined('ECLAIR') || define('ECLAIR', true);
     require_once $root . '/eclair/app/lib/Design.php';
-    $d = ['id' => $id] + Eclair\Design::DIRECTIONS[$id];
+    $d = $override + ['id' => $id] + Eclair\Design::DIRECTIONS[$id];
     [, $weight] = Eclair\Design::FONTS[$d['display']];
     $font = $copy . '/media/fonts/' . $d['display'] . '-' . $weight . '.woff2';
     @mkdir(dirname($font), 0755, true);
@@ -341,12 +341,17 @@ function capture_lighthouse(string $root, string $fixtures): array
     $bin = (string) (getenv('LIGHTHOUSE') ?: 'lighthouse');
     $out = [];
     $sets = [['business', null, ['/', '/blog/premiers-pas-avec-eclair']], ['landing', null, ['/']],
-        ['business', 'nocturne', ['/', '/blog/premiers-pas-avec-eclair']], ['business', 'riviera', ['/']], ['business', 'presse', ['/']], ['business', 'affiche', ['/']]];
-    foreach ($sets as [$type, $direction, $paths]) {
+        ['business', 'nocturne', ['/', '/blog/premiers-pas-avec-eclair']], ['business', 'riviera', ['/']], ['business', 'presse', ['/']], ['business', 'affiche', ['/']],
+        // Compositions de la 1.9 : bannière à gauche, atouts numérotés, filets, boutons à contour ; plein cadre avec liens soulignés.
+        ['business', 'argile', ['/'], ['hero' => 'reverse', 'features' => 'numbers', 'sections' => 'rules', 'buttons' => 'outline']],
+        ['business', 'nocturne', ['/'], ['buttons' => 'underline', 'hero' => 'framed']]];
+    foreach ($sets as $set) {
+        [$type, $direction, $paths] = $set;
+        $override = $set[3] ?? [];
         [$copy, $port, $server] = capture_serve($root, $fixtures . '/sites/' . $type, 'lh-' . $type);
         try {
             if ($direction !== null) {
-                capture_direction($root, $copy, $direction);
+                capture_direction($root, $copy, $direction, $override);
             }
             foreach ($paths as $path) {
                 $url = 'http://127.0.0.1:' . $port . $path;
@@ -368,7 +373,7 @@ function capture_lighthouse(string $root, string $fixtures): array
                     }
                 }
                 usort($runs, fn ($a, $b) => $a['lcp_ms'] <=> $b['lcp_ms']);
-                $out[$type . ' ' . $path . ($direction !== null ? ' · ' . $direction : '')] = $runs[intdiv(count($runs), 2)] ?? null;
+                $out[$type . ' ' . $path . ($direction !== null ? ' · ' . $direction . ($override ? ' (' . implode(', ', $override) . ')' : '') : '')] = $runs[intdiv(count($runs), 2)] ?? null;
             }
         } finally {
             proc_terminate($server);
