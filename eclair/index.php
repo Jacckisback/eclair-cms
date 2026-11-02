@@ -8,7 +8,7 @@
 declare(strict_types=1);
 
 define('ECLAIR', true);
-define('ECLAIR_VERSION', '1.9.0');
+define('ECLAIR_VERSION', '1.10.0');
 define('ECLAIR_ROOT', __DIR__);
 
 (static function (): void {
@@ -21,7 +21,8 @@ define('ECLAIR_ROOT', __DIR__);
         return;
     }
     $rt = json_decode(substr($raw, (int) strpos($raw, "\n") + 1), true);
-    if (!is_array($rt) || empty($rt['on']) || (!empty($rt['expires']) && time() >= $rt['expires'])) {
+    // Cache d'une autre version (mise à jour par FTP) : l'application le vide et le régénère.
+    if (!is_array($rt) || empty($rt['on']) || ($rt['v'] ?? '') !== ECLAIR_VERSION || (!empty($rt['expires']) && time() >= $rt['expires'])) {
         return;
     }
     $https = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')

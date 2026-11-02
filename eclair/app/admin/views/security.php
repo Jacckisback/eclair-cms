@@ -14,6 +14,9 @@ $events = [
     'sessions_revoked' => t('Sessions fermées'), 'backup_downloaded' => t('Sauvegarde téléchargée'), 'install' => t('Installation'),
     'ftp_reset' => t('Mot de passe réinitialisé par FTP'), 'ftp_reset_refused' => t('Réinitialisation par FTP refusée'),
     'totp_locked' => t('2FA bloquée (trop de codes faux)'), 'sudo_failed' => t('Confirmation du mot de passe refusée'),
+    'update_installed' => t('Mise à jour d’Éclair installée'), 'update_rolled_back' => t('Retour à la version précédente d’Éclair'),
+    'update_rejected' => t('Annonce de mise à jour refusée (signature)'), 'update_download_failed' => t('Archive de mise à jour altérée'),
+    'update_archive_rejected' => t('Archive de mise à jour refusée'),
 ];
 ?>
 <div class="page">

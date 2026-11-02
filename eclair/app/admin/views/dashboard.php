@@ -32,6 +32,11 @@ $cls = static fn (int $s): string => $s >= 80 ? 'good' : ($s >= 50 ? 'ok' : 'bad
     </div>
   </div>
 
+  <?php if ($user['role'] === 'admin' && ($update = \Eclair\Update::pending())): ?>
+  <div class="notice" data-update-banner><span>⚡</span><p><?= e(t('Éclair {v} est disponible (tu as la {current}).', ['v' => $update['version'], 'current' => ECLAIR_VERSION])) ?>
+    <a href="<?= e(admin_url('update')) ?>"><?= e(t('Voir la mise à jour')) ?> →</a></p></div>
+  <?php endif ?>
+
   <?php if (\Eclair\Ai::allowed($user)): ?>
   <form class="card ai-prompt" data-ai-prompt>
     <label class="ai-prompt-title" for="ai-quick"><?= Icons::svg('spark') ?><?= e(t('Que veux-tu créer aujourd’hui ?')) ?></label>

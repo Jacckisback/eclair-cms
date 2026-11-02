@@ -293,6 +293,7 @@ final class AdminSettings
                 $patch = [
                     'admin_path' => $admin,
                     'cache' => Req::bool('cache'),
+                    'updates' => ['check' => Req::bool('updates')],
                     'security' => [
                         'https' => Req::bool('https'),
                         'canonical' => Req::bool('canonical'),

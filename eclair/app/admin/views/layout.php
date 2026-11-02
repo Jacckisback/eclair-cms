@@ -25,7 +25,9 @@ $adminNav = [
     ['settings', 'settings', 'settings', t('Réglages'), 'settings'],
     ['users', 'users', 'users', t('Utilisateurs'), 'users'],
     ['security', 'security', 'shield', t('Sécurité'), 'security'],
+    ['update', 'update', 'refresh', t('Mises à jour'), 'security'],
 ];
+$update = $user['role'] === 'admin' ? \Eclair\Update::pending() : null;
 $unread = Messages::unread();
 $avatar = Media::get((string) ($user['avatar'] ?? ''));
 $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((string) (explode(' ', (string) $user['name'])[1] ?? ''), 0, 1));
@@ -59,7 +61,8 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
       <?php if ($user['role'] === 'admin'): ?>
         <span class="nav-title"><?= e(t('Administration')) ?></span>
         <?php foreach ($adminNav as [$key, $path, $icon, $label]): ?>
-          <a href="<?= e(admin_url($path)) ?>"<?= $section === $key ? ' aria-current="page"' : '' ?>><?= Icons::svg($icon) ?><?= e($label) ?></a>
+          <a href="<?= e(admin_url($path)) ?>"<?= $section === $key ? ' aria-current="page"' : '' ?>><?= Icons::svg($icon) ?><?= e($label) ?>
+            <?php if ($key === 'update' && $update): ?><span class="count" title="<?= e(t('Éclair {v} est disponible.', ['v' => $update['version']])) ?>">1</span><?php endif ?></a>
         <?php endforeach ?>
       <?php endif ?>
       <span class="nav-title"><?= e(t('Raccourcis')) ?></span>
@@ -92,6 +95,6 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
   </main>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<?= \Eclair\Admin::jsData($v['js'] ?? []) ?>
+<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale()]) ?>
 </body>
 </html>

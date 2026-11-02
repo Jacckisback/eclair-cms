@@ -2,7 +2,8 @@
 /**
  * Prépare une version distribuable d'Éclair :
  *   1. calcule l'empreinte SHA-256 de chaque fichier (app/manifest.php, pour le contrôle d'intégrité) ;
- *   2. crée dist/eclair-cms-<version>.zip, prêt à téléverser sur un hébergement.
+ *   2. crée dist/eclair-cms-<version>.zip, prêt à téléverser sur un hébergement ;
+ *   3. signe l'annonce de mise à jour dist/latest.json (clé privée du mainteneur : variable ECLAIR_SIGNING_KEY).
  * Dans l'archive, le PHP est compacté (php -w : ni commentaires ni espaces superflus), le HTML des vues de l'administration
  * perd son indentation puis ces vues sont compressées (app/admin/views/*.php.gz, lues par zlib), et le JavaScript et le CSS
  * de l'administration sont allégés (tools/minify.php) : même code, plus léger.
@@ -11,6 +12,7 @@
  * (128 premiers bits du SHA-256, en JSON compact).
  *
  *   php tools/build.php
+ *   ECLAIR_SIGNING_KEY=… php tools/build.php      (version publiée : annonce signée pour la mise à jour en un clic)
  */
 declare(strict_types=1);
 
@@ -140,3 +142,39 @@ foreach (['LICENSE' => 'LICENSE.txt', 'THIRD-PARTY-NOTICES.txt' => 'THIRD-PARTY-
 }
 $zip->close();
 printf("✓ Archive : %s (%s Ko, %s octets une fois décompressée)\n", $zipFile, round(filesize($zipFile) / 1024), number_format($size, 0, ',', ' '));
+
+/*
+ * Annonce de la mise à jour en un clic (dist/latest.json), signée Ed25519 avec la clé privée du mainteneur.
+ * Cette clé n'est jamais dans le dépôt : variable d'environnement ECLAIR_SIGNING_KEY (base64, 64 octets).
+ * Les sites ne croient que la clé publique inscrite dans app/lib/Update.php : sans la clé privée, pas d'annonce.
+ */
+$secret = base64_decode((string) getenv('ECLAIR_SIGNING_KEY'), true);
+if (!function_exists('sodium_crypto_sign_detached')) {
+    echo "⚠ Extension sodium absente : dist/latest.json non signé.\n";
+} elseif (!is_string($secret) || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
+    echo "⚠ ECLAIR_SIGNING_KEY absente : dist/latest.json inchangé (les sites ne se verront pas proposer cette archive).\n";
+} else {
+    preg_match("~private const KEY = '([^']+)'~", (string) file_get_contents($root . '/app/lib/Update.php'), $k);
+    $public = base64_decode($k[1] ?? '', true);
+    if (!is_string($public) || !hash_equals($public, sodium_crypto_sign_publickey_from_secretkey($secret))) {
+        fwrite(STDERR, "✗ ECLAIR_SIGNING_KEY ne correspond pas à la clé publique d'app/lib/Update.php : annonce refusée.\n");
+        exit(1);
+    }
+    $payload = json_encode([
+        'version' => $version,
+        'date' => gmdate('Y-m-d'),
+        'url' => 'https://raw.githubusercontent.com/Jacckisback/eclair-cms/main/dist/eclair-cms-' . $version . '.zip',
+        'sha256' => hash_file('sha256', $zipFile),
+        'size' => filesize($zipFile),
+        'php' => '8.1',
+        'notes' => 'https://github.com/Jacckisback/eclair-cms/releases/tag/' . $version,
+    ], JSON_UNESCAPED_SLASHES);
+    $signature = sodium_crypto_sign_detached($payload, $secret);
+    sodium_memzero($secret);
+    if (!sodium_crypto_sign_verify_detached($signature, $payload, $public)) {
+        fwrite(STDERR, "✗ Signature invalide : annonce refusée.\n");
+        exit(1);
+    }
+    file_put_contents($dist . '/latest.json', json_encode(['payload' => $payload, 'signature' => base64_encode($signature)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+    echo "✓ Annonce signée : dist/latest.json (version {$version})\n";
+}

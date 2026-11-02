@@ -47,7 +47,21 @@ final class Integrity
                 $result['suspicious'][] = $path;
             }
         }
+        // Version gardée par la dernière mise à jour : chaque fichier doit correspondre à son propre manifeste.
+        $kept = 'cache/update/previous/';
+        $raw = @file_get_contents(ECLAIR_ROOT . '/' . $kept . 'app/manifest.php');
+        $previous = $raw === false ? [] : (array) (json_decode(Store::strip($raw), true)['files'] ?? []);
         foreach (self::scan(['data', 'cache']) as $path) {
+            if (str_starts_with($path, $kept)) {
+                $rel = substr($path, strlen($kept));
+                $hash = (string) ($previous[$rel] ?? '');
+                $known = $rel === 'app/manifest.php' || in_array($rel, ['index.php.txt', 'htaccess.txt'], true) || isset($previous[$rel . '.gz'])
+                    || (strlen($hash) >= 32 && hash_equals($hash, substr((string) hash_file('sha256', ECLAIR_ROOT . '/' . $path), 0, strlen($hash))));
+                if (!$known) {
+                    $result['unknown'][] = $path;
+                }
+                continue;
+            }
             if (preg_match('~\.(phtml|phar|php\d|sh|cgi|pl|py|html?)$~i', $path) && basename($path) !== 'index.html') {
                 $result['suspicious'][] = $path;
             } elseif (str_ends_with($path, '.php') && !self::guarded($path)) {

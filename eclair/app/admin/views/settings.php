@@ -497,6 +497,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <?= $sw('canonical', (bool) $s['security']['canonical'], t('Rediriger vers l’adresse officielle'), t('www / sans www et http / https : une seule version, pas de contenu dupliqué.') . ' ' . (\Eclair\Settings::verified() ? t('Adresse vérifiée ✓') : t('Active dès que l’adresse est vérifiée (page Sécurité).'))) ?>
     <?= $sw('hsts', (bool) $s['security']['hsts'], t('HSTS'), t('Les navigateurs n’utiliseront plus jamais http:// pour ton site (1 an). À activer quand HTTPS fonctionne parfaitement.')) ?>
     <?= $sw('cache', (bool) $s['cache'], t('Cache statique des pages'), t('Les pages sont servies en quelques millisecondes. Le cache se vide tout seul à chaque modification.')) ?>
+    <?= $sw('updates', (bool) ($s['updates']['check'] ?? true), t('Vérifier les mises à jour d’Éclair'), t('Deux fois par jour, Éclair regarde sur GitHub si une nouvelle version existe et te prévient. Rien n’est installé sans ton accord.')) ?>
     <div class="grid-2">
       <label class="field"><span class="label"><?= e(t('Déconnexion après inactivité (minutes)')) ?></span><input type="number" name="idle" min="15" max="1440" value="<?= (int) $s['security']['idle'] ?>"></label>
       <label class="field"><span class="label"><?= e(t('Site derrière un proxy / CDN')) ?></span><select name="proxy">

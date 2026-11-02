@@ -74,6 +74,7 @@ final class Cache
             }
         }
         $data = [
+            'v' => ECLAIR_VERSION,
             'on' => self::enabled(),
             'expires' => Content::nextScheduled(),
             'host' => $host,
@@ -87,12 +88,12 @@ final class Cache
         }
     }
 
-    /** Si un article programmé doit paraître, on vide le cache avant de servir. */
+    /** Article programmé qui doit paraître, ou Éclair mis à jour (pages rendues par l'ancien code) : cache vidé avant de servir. */
     public static function checkExpiry(): void
     {
         $raw = @file_get_contents(ECLAIR_ROOT . '/cache/runtime.php');
         $rt = $raw === false ? null : json_decode(Store::strip($raw), true);
-        if (!is_array($rt) || (!empty($rt['expires']) && time() >= (int) $rt['expires'])) {
+        if (!is_array($rt) || ($rt['v'] ?? '') !== ECLAIR_VERSION || (!empty($rt['expires']) && time() >= (int) $rt['expires'])) {
             self::purge();
         }
     }

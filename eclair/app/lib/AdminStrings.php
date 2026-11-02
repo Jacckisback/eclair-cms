@@ -73,6 +73,7 @@ final class AdminStrings
             'Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.',
             // Mode Visuel
             'Aperçu modifiable', 'Ajouter un bloc au-dessus', 'Ajouter un bloc en dessous', 'Outils du bloc',
+            'Voir la mise à jour',
         ];
         $out = [];
         foreach ($keys as $k) {

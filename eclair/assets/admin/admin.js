@@ -135,8 +135,25 @@
   // Confirmation avant une action irréversible (sur le formulaire, ou sur le bouton qui l'envoie).
   $$('form').forEach((form) => form.addEventListener('submit', (e) => {
     const text = (e.submitter && e.submitter.dataset.confirm) || form.dataset.confirm;
-    if (text && !confirm(text)) e.preventDefault();
+    if (text && !confirm(text)) { e.preventDefault(); return; }
+    // Opération longue (mise à jour) : bouton occupé, pas de second envoi.
+    const busy = e.submitter && e.submitter.dataset.busy;
+    if (busy) setTimeout(() => { e.submitter.disabled = true; e.submitter.textContent = busy; });
   }));
+
+  /* ── Nouvelle version d'Éclair : vérification discrète, deux fois par jour au plus (administrateurs) ── */
+  if (D.updateCheck) {
+    api('api/update/check', {}, { quiet: true }).then((json) => {
+      if (!json || !json.ok || !json.available) return;
+      const link = $('.nav a[href$="/update"]');
+      if (link && !$('.count', link)) link.append(h('span', { class: 'count', title: json.text, text: '1' }));
+      const hello = $('.page > .hello');
+      if (hello && !$('[data-update-banner]')) {
+        hello.after(h('div', { class: 'notice', 'data-update-banner': true }, h('span', { text: '⚡' }),
+          h('p', {}, json.text + ' ', h('a', { href: D.admin + '/update', text: t('Voir la mise à jour') + ' →' }))));
+      }
+    }).catch(() => {});
+  }
   $$('[data-width]').forEach((el) => requestAnimationFrame(() => { el.style.width = el.dataset.width + '%'; }));
   $$('[data-strength]').forEach((input) => input.addEventListener('input', () => {
     const v = input.value;

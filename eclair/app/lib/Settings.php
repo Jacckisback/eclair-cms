@@ -85,6 +85,7 @@ final class Settings
             'verified' => '',
         ],
         'cache' => true,
+        'updates' => ['check' => true],
         'shop' => [
             'enabled' => false,
             'base' => '',

@@ -77,17 +77,18 @@ final class AdminSecurity
     /** Sauvegarde complète (contenus, réglages, médias) dans un fichier ZIP. */
     public static function backup(array $user): never
     {
+        $back = Req::input('back') === 'update' ? 'update' : 'security';
         if (!Auth::confirmed($user)) {
-            Admin::back('security', t('Mot de passe incorrect.'), 'bad');
+            Admin::back($back, t('Mot de passe incorrect.'), 'bad');
         }
         if (!class_exists('ZipArchive')) {
-            Admin::back('security', t('L’extension zip n’est pas disponible : copie les dossiers data et media par FTP.'), 'bad');
+            Admin::back($back, t('L’extension zip n’est pas disponible : copie les dossiers data et media par FTP.'), 'bad');
         }
         @set_time_limit(300);
         $file = ECLAIR_ROOT . '/cache/backup-' . bin2hex(random_bytes(8)) . '.zip';
         $zip = new \ZipArchive();
         if ($zip->open($file, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-            Admin::back('security', t('Impossible de créer la sauvegarde.'), 'bad');
+            Admin::back($back, t('Impossible de créer la sauvegarde.'), 'bad');
         }
         foreach (['data' => ECLAIR_DATA, 'media' => ECLAIR_ROOT . '/media'] as $prefix => $dir) {
             $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));

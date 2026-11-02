@@ -626,3 +626,10 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .compose[open] summary{margin-bottom:.6rem}
 .compose-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:0 .9rem}
 .compose progress{display:block;width:100%;margin-top:.8rem}
+
+/* Mises à jour */
+.update-new{display:flex;flex-wrap:wrap;gap:.3rem .7rem;align-items:baseline;font-size:1.02rem}
+.update-how{margin-top:1rem}
+.update-how summary{cursor:pointer;color:var(--muted);font-weight:600}
+.update-how ol{margin:.6rem 0 0;padding-left:1.3rem;line-height:1.6}
+.notice ul{margin:.3rem 0 .5rem;padding-left:1.2rem}
