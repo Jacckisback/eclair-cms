@@ -693,4 +693,4 @@ Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações �
 
 ---
 
-O Éclair é distribuído sob a [licença MIT](../LICENSE). Parte dos ícones do painel é derivada do [Lucide](https://lucide.dev) (licença ISC): veja [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).
+O Éclair é distribuído sob a [licença AGPL-3.0-only](../LICENSE) (veja [`NOTICE`](../NOTICE)). Parte dos ícones do painel é derivada do [Lucide](https://lucide.dev) (licença ISC): veja [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).

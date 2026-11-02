@@ -1,0 +1,45 @@
+# CLA Assistant Lite: every contributor signs the Éclair CMS CLA (CLA.md) by commenting on their pull request.
+# Signatures are stored in this repository, in signatures/cla.json on the "cla-signatures" branch.
+#
+# The action is pinned to the exact commit of release v2.6.1. Its repository (contributor-assistant/github-action)
+# was archived on 23 March 2026 and is no longer maintained: check that it still runs after GitHub runner changes.
+name: CLA Assistant
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, closed, synchronize]
+
+# Explicit permissions, in case the repository's default GITHUB_TOKEN permissions are read-only.
+permissions:
+  actions: write
+  contents: write # commit signatures/cla.json on the signatures branch
+  pull-requests: write # comment on pull requests and lock them after merge
+  statuses: write # set the CLA commit status
+
+jobs:
+  cla:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CLA Assistant
+        if: (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA') || github.event_name == 'pull_request_target'
+        # v2.6.1, pinned by commit SHA: this third-party action runs with write access.
+        uses: contributor-assistant/github-action@ca4a40a7d1004f18d9960b404b97e5f30a505a08
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path-to-document: https://github.com/Jacckisback/eclair-cms/blob/main/CLA.md
+          path-to-signatures: signatures/cla.json
+          # This branch must exist and must not be protected: the bot commits each new signature to it.
+          branch: cla-signatures
+          # The maintainer and bots do not sign.
+          allowlist: Jacckisback,dependabot[bot],renovate[bot],github-actions[bot]
+          create-file-commit-message: "chore(cla): create the CLA signatures file"
+          signed-commit-message: "chore(cla): $contributorName signed the CLA in $owner/$repo#$pullRequestNo"
+          custom-notsigned-prcomment: >-
+            Thank you for your contribution to Éclair CMS! Before we can merge it, please read the
+            [Contributor License Agreement]($pathToCLADocument) and sign it by posting the comment below.
+            You sign once and it covers all your future contributions. You keep the copyright on your work.
+          custom-pr-sign-comment: I have read the CLA Document and I hereby sign the CLA
+          custom-allsigned-prcomment: All contributors have signed the Éclair CMS CLA. Thank you!

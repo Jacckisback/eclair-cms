@@ -693,4 +693,4 @@ Para un cambio de estilo, mejor el **CSS personalizado** (Ajustes › Apariencia
 
 ---
 
-Éclair se distribuye con [licencia MIT](../LICENSE). Parte de los iconos del panel deriva de [Lucide](https://lucide.dev) (licencia ISC): consulta [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).
+Éclair se distribuye con [licencia AGPL-3.0-only](../LICENSE) (consulta [`NOTICE`](../NOTICE)). Parte de los iconos del panel deriva de [Lucide](https://lucide.dev) (licencia ISC): consulta [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).

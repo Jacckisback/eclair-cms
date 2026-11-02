@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Listes : accueil du blog, catégorie, auteur, recherche, boutique.
  * Variables : title, description, entries, crumbs, page, pages, prev, next, query (recherche), lang, empty,

@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Prépare une version distribuable d'Éclair :
  *   1. calcule l'empreinte SHA-256 de chaque fichier (app/manifest.php, pour le contrôle d'intégrité) ;
@@ -161,6 +163,8 @@ $zip->addFromString('LISEZ-MOI.txt', <<<TXT
    (sinon : supprime data/install-window.php par FTP et recharge la page).
 3. C'est tout. Documentation complète : https://github.com/Jacckisback/eclair-cms
 
+Licence : GNU AGPL v3 seulement (LICENSE.txt). Historique de licence et licence commerciale : NOTICE.txt.
+
 Mot de passe oublié et aucun autre administrateur ? Crée par FTP le fichier data/reset.php
 avec ces trois lignes, puis connecte-toi dans les 24 h avec cet e-mail et ce nouveau mot de passe :
 <?php exit; ?>
@@ -168,8 +172,8 @@ ton-adresse@email.fr
 TonNouveauMotDePasse2026
 
 TXT);
-// Licence MIT et mentions des tiers : elles accompagnent chaque copie distribuée.
-foreach (['LICENSE' => 'LICENSE.txt', 'THIRD-PARTY-NOTICES.txt' => 'THIRD-PARTY-NOTICES.txt'] as $source => $target) {
+// Licence (AGPL-3.0-only), avis de licence et mentions des tiers : ils accompagnent chaque copie distribuée.
+foreach (['LICENSE' => 'LICENSE.txt', 'NOTICE' => 'NOTICE.txt', 'THIRD-PARTY-NOTICES.txt' => 'THIRD-PARTY-NOTICES.txt'] as $source => $target) {
     if (is_file(dirname(__DIR__) . '/' . $source)) {
         $zip->addFile(dirname(__DIR__) . '/' . $source, $target);
     }

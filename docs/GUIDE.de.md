@@ -693,4 +693,4 @@ Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design
 
 ---
 
-Éclair steht unter der [MIT-Lizenz](../LICENSE). Ein Teil der Icons der Verwaltung basiert auf [Lucide](https://lucide.dev) (ISC-Lizenz): siehe [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).
+Éclair steht unter der [Lizenz AGPL-3.0-only](../LICENSE) (siehe [`NOTICE`](../NOTICE)). Ein Teil der Icons der Verwaltung basiert auf [Lucide](https://lucide.dev) (ISC-Lizenz): siehe [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).

@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Tests de l'assistant IA, inclus par tests/run.php. Aucune clé réelle : les fournisseurs
  * (Claude, ChatGPT, GPT Image, FLUX, Ideogram) sont simulés par tests/fake-ai.php.

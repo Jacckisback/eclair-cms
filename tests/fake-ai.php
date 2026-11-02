@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Faux fournisseurs d'IA pour les tests (serveur intégré de PHP) : Messages API d'Anthropic,
  * Responses API d'OpenAI, images OpenAI, FLUX (Black Forest Labs) et Ideogram.

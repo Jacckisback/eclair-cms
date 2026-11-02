@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Tests des sauvegardes Google Drive (1.10), inclus par tests/run.php : connexion par code (OAuth « appareil »), envoi par
  * morceaux avec reprise, conservation des N dernières, tâche planifiée, accès retiré, déconnexion. Un faux Google

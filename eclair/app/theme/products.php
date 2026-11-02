@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /** Grille de cartes produit (photo, nom, prix). Variables : entries, lang, level (niveau de titre). */
 defined('ECLAIR') || exit;
 

@@ -693,4 +693,4 @@ Pour un changement de style, préfère le **CSS personnalisé** (Réglages › A
 
 ---
 
-Éclair est distribué sous [licence MIT](../LICENSE). Une partie des icônes de l'administration est dérivée de [Lucide](https://lucide.dev) (licence ISC) : voir [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).
+Éclair est distribué sous [licence AGPL-3.0-only](../LICENSE) (voir [`NOTICE`](../NOTICE)). Une partie des icônes de l'administration est dérivée de [Lucide](https://lucide.dev) (licence ISC) : voir [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).

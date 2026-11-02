@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Routeur pour le serveur de développement intégré de PHP (reproduit les règles du .htaccess) :
  *   php -S localhost:8000 -t eclair tools/router.php

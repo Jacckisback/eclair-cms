@@ -696,4 +696,4 @@ php tools/build.php                                # 生成可发布的安装包
 
 ---
 
-Éclair 以 [MIT 许可证](../LICENSE)发布。后台的部分图标源自 [Lucide](https://lucide.dev)（ISC 许可证）：见 [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt)。
+Éclair 以 [AGPL-3.0-only 许可证](../LICENSE)发布（见 [`NOTICE`](../NOTICE)）。后台的部分图标源自 [Lucide](https://lucide.dev)（ISC 许可证）：见 [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt)。

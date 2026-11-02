@@ -1,4 +1,7 @@
-<?php defined('ECLAIR') || exit; ?>
+<?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
+defined('ECLAIR') || exit; ?>
 <div class="page-narrow">
   <div class="card empty-state">
     <span class="emoji">🧭</span>

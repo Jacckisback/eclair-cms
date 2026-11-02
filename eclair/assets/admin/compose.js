@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /* ⚡ Éclair — « Crée ta page avec l'IA » : un brouillon complet (structure, textes, SEO), ouvert ensuite en mode Visuel.
    Chargé seulement pour un nouveau contenu, quand l'assistant IA est actif pour la personne. */
 (() => {

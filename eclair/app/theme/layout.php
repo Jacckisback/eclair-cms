@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Gabarit principal du site public.
  * Variables : $v['lang'], $v['head'], $v['css'], $v['content'], $v['current'], $v['id'], $v['class']

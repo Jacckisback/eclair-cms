@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /* ⚡ Éclair — aperçu de l'apparence (Réglages › Apparence) : les liens du site restent dans l'aperçu, avec l'apparence essayée. */
 (() => {
   const base = (document.currentScript || {}).dataset?.base || '';

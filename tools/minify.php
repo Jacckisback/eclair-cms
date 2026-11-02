@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Allègement du JavaScript et du CSS de l'administration dans l'archive (tools/build.php), sans dépendance.
  * Prudent par construction : chaînes et expressions régulières recopiées telles quelles, retours à la ligne gardés

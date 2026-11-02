@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
 /* ⚡ Éclair — thème Éditorial : un magazine, typographie à empattements, filets fins et article « à la une ». */
 :root{--bg:#fbfaf7;--bg-soft:#f3f0e8;--card:#fffefb;--text:#1c1a17;--muted:#5f5a51;--line:#e2ddd1;--code:#f0ece2;--radius:4px;--shadow:none;--text-w:40rem}
 /*dark*/@media (prefers-color-scheme:dark){:root{--bg:#15130f;--bg-soft:#1d1a15;--card:#1a1813;--text:#efe9de;--muted:#aca595;--line:#353128;--code:#221f19}}/*/dark*/

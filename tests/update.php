@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Tests de la mise à jour en un clic (1.10), inclus par tests/run.php : annonce signée (Ed25519), archive vérifiée
  * (empreinte, chemins, manifeste, syntaxe PHP), échange du code, contrôle de santé et retour automatique, retour manuel.

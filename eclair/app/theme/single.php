@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Page ou article.
  * Variables : item, html, toc, author, category, crumbs, related, translations, featured, words, h1_in_content, lang

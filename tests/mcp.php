@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Tests du connecteur MCP (Claude, ChatGPT) et du choix de l'IA, inclus par tests/run.php :
  * découverte OAuth, enregistrement, autorisation (connexion, consentement), jetons, outils, révocation.

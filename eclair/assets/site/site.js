@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /* ⚡ Éclair — le seul script du site public (≈ 1 Ko, chargé en différé). */
 (() => {
   const body = document.body;

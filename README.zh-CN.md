@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e?style=for-the-badge" alt="MIT 许可证"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-22c55e?style=for-the-badge" alt="AGPL-3.0 许可证"></a>
 </p>
 
 <h3 align="center">3 分钟搭建专业网站，任何虚拟主机都能用。<br>无需数据库，无需插件，无需维护。</h3>
@@ -411,7 +411,17 @@ php tools/build.php                                                         # �
 
 ## 许可证
 
-Éclair 以 **MIT 许可证**发布（[`LICENSE`](LICENSE)）：你可以自由使用、修改和再分发，包括用于商业用途，只需保留版权声明。部分图标源自 [Lucide](https://lucide.dev)（ISC 许可证），艺术风格则借鉴了 [Impeccable](https://github.com/pbakaus/impeccable) 的方法（Apache 2.0 许可证）：见 [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)。
+Éclair CMS 是自由软件，以 **GNU AGPL v3 only 许可证**（AGPL-3.0-only，见 [`LICENSE`](LICENSE)）发布。这对你意味着：
+
+- **安装和使用 Éclair，无论是用于你自己的网站还是客户的网站，依然自由、免费**，包括用于商业用途。
+- **修改它也一样。** 只有一项义务：如果你把 Éclair 的**修改版本**提供给他人使用，无论是分发给他们，还是通过网络（例如一个上线的网站）提供，你都必须以同样的许可证向他们提供该版本的源代码。你的内容、图片和自定义 CSS 不受影响：它们是你的数据，而不是 Éclair 的代码。
+- 1.10.0 及之前发布的版本仍按其原始许可证提供：见 [`NOTICE`](NOTICE)。
+
+**商业许可证**：如需在产品或服务中集成 Éclair 而不承担 AGPL 的义务，可获取商业许可证（thierry.gustin@gmail.com）。
+
+**商标**：许可证涵盖的是代码，而不是名称和标志。“Éclair CMS”是商标：见 [`TRADEMARK.md`](TRADEMARK.md)。如需参与贡献，见 [`CONTRIBUTING.md`](CONTRIBUTING.md)（需签署 [CLA](CLA.md)）。
+
+部分图标源自 [Lucide](https://lucide.dev)（ISC 许可证），艺术风格则借鉴了 [Impeccable](https://github.com/pbakaus/impeccable) 的方法（Apache 2.0 许可证）：见 [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)。
 
 <br>
 

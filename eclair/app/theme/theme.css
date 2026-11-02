@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
 /* ⚡ Éclair — thème par défaut. Ce fichier est minifié puis inséré dans chaque page (zéro requête bloquante). */
 :root{--bg:#fff;--bg-soft:#f5f6fa;--card:#fff;--text:#1b1c25;--muted:#5a5e6f;--line:#e4e6ee;--code:#f1f2f7;--radius:16px;--link-c:var(--link);
   --shadow:0 1px 2px rgb(20 20 40 / .06),0 12px 32px -20px rgb(20 20 40 / .3);--text-w:42rem;--wide-w:72rem;color-scheme:light}

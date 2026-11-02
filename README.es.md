@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_datos-ninguna-14122b?style=for-the-badge" alt="Sin base de datos">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-MIT-22c55e?style=for-the-badge" alt="Licencia MIT"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-AGPL--3.0-22c55e?style=for-the-badge" alt="Licencia AGPL-3.0"></a>
 </p>
 
 <h3 align="center">Una web profesional en 3 minutos, en cualquier hosting compartido.<br>Sin base de datos. Sin plugins. Sin mantenimiento.</h3>
@@ -411,7 +411,17 @@ Estructura del proyecto y personalización del tema: consulta [Para desarrollado
 
 ## Licencia
 
-Éclair se distribuye con **licencia MIT** ([`LICENSE`](LICENSE)): úsalo, modifícalo y redistribúyelo libremente, también con fines comerciales, siempre que conserves el aviso de copyright. Parte de los iconos deriva de [Lucide](https://lucide.dev) (licencia ISC) y las direcciones de arte se inspiran en el método de [Impeccable](https://github.com/pbakaus/impeccable) (licencia Apache 2.0): consulta [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
+Éclair CMS es software libre distribuido con **licencia GNU AGPL v3 únicamente** (AGPL-3.0-only, consulta [`LICENSE`](LICENSE)). Qué cambia para ti:
+
+- **Instalar y usar Éclair, para tus propios sitios o los de tus clientes, sigue siendo libre y gratuito**, también con fines comerciales.
+- **Modificarlo, también.** Solo hay una obligación: si pones una **versión modificada** de Éclair a disposición de otras personas, distribuyéndola o a través de una red (un sitio web en línea, por ejemplo), debes ofrecerles su código fuente con la misma licencia. Tus contenidos, tus imágenes y tu CSS personalizado no se ven afectados: son tus datos, no el código de Éclair.
+- Las versiones publicadas hasta la 1.10.0 incluida siguen disponibles con su licencia original: consulta [`NOTICE`](NOTICE).
+
+**Licencia comercial:** para integrar Éclair en un producto o servicio sin las obligaciones de la AGPL, hay una licencia comercial disponible (thierry.gustin@gmail.com).
+
+**Marca:** la licencia cubre el código, no el nombre ni el logotipo. «Éclair CMS» es una marca: consulta [`TRADEMARK.md`](TRADEMARK.md). Para contribuir, consulta [`CONTRIBUTING.md`](CONTRIBUTING.md) (firma de un [CLA](CLA.md)).
+
+Parte de los iconos deriva de [Lucide](https://lucide.dev) (licencia ISC) y las direcciones de arte se inspiran en el método de [Impeccable](https://github.com/pbakaus/impeccable) (licencia Apache 2.0): consulta [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
 
 <br>
 

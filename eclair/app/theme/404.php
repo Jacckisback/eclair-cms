@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /** Page introuvable (statut HTTP 404). */
 defined('ECLAIR') || exit;
 

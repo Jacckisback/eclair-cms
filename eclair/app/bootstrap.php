@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Éclair CMS — démarrage de l'application (requêtes non servies par le cache).
  * Ce fichier reste compatible avec les vieux PHP pour pouvoir afficher un message clair.

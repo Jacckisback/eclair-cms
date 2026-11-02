@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /** Mise en page centrée (connexion). */
 defined('ECLAIR') || exit;
 

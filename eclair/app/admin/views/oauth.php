@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Autorisation d'une application MCP (Claude, ChatGPT) : relais, connexion, double authentification, consentement.
  * Page publique sans le JavaScript de l'administration : son adresse n'y apparaît jamais.

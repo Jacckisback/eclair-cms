@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
 /* ⚡ Éclair — thème Boutique : pensé pour vendre, photos carrées, en-tête fixe, boutons francs. */
 :root{--bg:#fff;--bg-soft:#f4f6f5;--card:#fff;--text:#14201c;--muted:#56625e;--line:#e1e6e4;--code:#eff2f1;--radius:12px;--wide-w:76rem;
   --shadow:0 1px 2px rgb(16 24 20 / .05),0 12px 28px -18px rgb(16 24 20 / .32)}
