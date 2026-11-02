@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Faux Google (OAuth « appareil » + Drive v3) pour les tests des sauvegardes : aucun compte réel n'est utilisé.
  *   FAKE_GOOGLE_DIR=/tmp/x php -S 127.0.0.1:9999 tests/fake-google.php

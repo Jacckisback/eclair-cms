@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /* ⚡ Éclair — assistant IA : tiroir de conversation (réponses en flux, cartes d'action, sans dépendance). */
 (() => {
   const E = window.Eclair;

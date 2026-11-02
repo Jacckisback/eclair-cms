@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Tests des directions artistiques (1.8), inclus par tests/run.php : garanties de contraste, CSS envoyé, icônes,
  * polices auto-hébergées, réglages, aperçu, « Imagine ma direction » (faux fournisseur) et Score Design.

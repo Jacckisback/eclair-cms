@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /* ⚡ Éclair — interface d'administration (sans dépendance, sans script en ligne). */
 (() => {
   const dataEl = document.getElementById('eclair-data');

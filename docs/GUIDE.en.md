@@ -693,4 +693,4 @@ For a style change, prefer **Custom CSS** (Settings › Appearance): it survives
 
 ---
 
-Éclair is released under the [MIT license](../LICENSE). Some admin icons are derived from [Lucide](https://lucide.dev) (ISC license): see [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).
+Éclair is released under the [AGPL-3.0-only license](../LICENSE) (see [`NOTICE`](../NOTICE)). Some admin icons are derived from [Lucide](https://lucide.dev) (ISC license): see [`THIRD-PARTY-NOTICES.txt`](../THIRD-PARTY-NOTICES.txt).

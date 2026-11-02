@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 ou plus">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_donn%C3%A9es-aucune-14122b?style=for-the-badge" alt="Aucune base de données">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-MIT-22c55e?style=for-the-badge" alt="Licence MIT"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-AGPL--3.0-22c55e?style=for-the-badge" alt="Licence AGPL-3.0"></a>
 </p>
 
 <h3 align="center">Un site professionnel en 3 minutes, sur n'importe quel hébergement mutualisé.<br>Sans base de données. Sans extensions. Sans maintenance.</h3>
@@ -411,7 +411,7 @@ Structure du projet et personnalisation du thème : voir [Pour les développeurs
 
 ## Licence
 
-Éclair est distribué sous **licence MIT** ([`LICENSE`](LICENSE)) : utilise-le, modifie-le et redistribue-le librement, y compris pour un usage commercial, en conservant la mention de copyright. Une partie des icônes est dérivée de [Lucide](https://lucide.dev) (licence ISC) et les directions artistiques s'inspirent de la méthode d'[Impeccable](https://github.com/pbakaus/impeccable) (licence Apache 2.0) : voir [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
+Éclair est distribué sous **licence AGPL-3.0-only** ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)). Une partie des icônes est dérivée de [Lucide](https://lucide.dev) (licence ISC) et les directions artistiques s'inspirent de la méthode d'[Impeccable](https://github.com/pbakaus/impeccable) (licence Apache 2.0) : voir [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt).
 
 <br>
 

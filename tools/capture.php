@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Capture de référence du rendu public (outil de développement, jamais livré).
  *
@@ -134,7 +136,9 @@ function capture_public_files(string $root): array
     $out = [];
     foreach ($files as $f) {
         if (is_file($f) && basename($f) !== 'index.html') {
-            $out[substr($f, strlen($root) + 1)] = hash_file('sha256', $f);
+            // L'en-tête de licence (SPDX) ajouté en tête de fichier ne compte pas : seul le code doit rester identique.
+            $code = (string) preg_replace('~\A(?://[^\n]*SPDX-License-Identifier[^\n]*\n//[^\n]*Copyright[^\n]*\n|/\*\s*SPDX-License-Identifier[^*]*\*/\n)~', '', (string) file_get_contents($f));
+            $out[substr($f, strlen($root) + 1)] = hash('sha256', $code);
         }
     }
     ksort($out);

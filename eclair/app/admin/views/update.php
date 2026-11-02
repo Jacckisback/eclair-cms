@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /** Mises à jour : version disponible, sauvegarde conseillée, installation en un clic, retour à la version précédente. */
 defined('ECLAIR') || exit;
 

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /* ⚡ Éclair — mode Visuel : la page rendue par le vrai thème, modifiable sur place.
    Chargé seulement par l'aperçu d'édition de l'administration (POST /preview avec edit=1), jamais sur le site public.
    Il ne fait qu'envoyer des intentions à l'éditeur (postMessage { op, block, field, value }) : l'éditeur reste la seule

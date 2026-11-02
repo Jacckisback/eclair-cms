@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Mot de passe redemandé pour une action sensible, sauf s'il a été saisi il y a moins de 15 minutes.
  * Variables facultatives : required (bool), hint (texte).

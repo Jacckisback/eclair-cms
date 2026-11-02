@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Traductions de l'administration (portugais du Brésil). Clé : texte français d'origine.
  * Source lisible : `php tools/i18n.php` la compile en eclair/app/lang/pt.php.

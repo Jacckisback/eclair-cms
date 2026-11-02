@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
 /* ⚡ Éclair — interface d'administration */
 :root{--brand:#5b4cf0;--brand-strong:#4836e0;--brand-soft:#efedff;--bolt:#ffc928;--ink:#16152b;--muted:#646779;--faint:#9a9db0;
   --line:#e6e7ef;--bg:#f5f6fa;--panel:#fff;--panel-2:#fafbfd;--ok:#14975a;--ok-soft:#e5f6ed;--warn:#c46d00;--warn-soft:#fff3df;

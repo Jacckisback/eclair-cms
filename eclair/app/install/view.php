@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /** Assistant d'installation (5 étapes). Variables : checks, blocking, lang */
 defined('ECLAIR') || exit;
 

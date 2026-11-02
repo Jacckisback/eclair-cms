@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Fonctions utilitaires globales (utilisées partout, y compris dans les gabarits).
  */

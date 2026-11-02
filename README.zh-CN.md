@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e?style=for-the-badge" alt="MIT 许可证"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-22c55e?style=for-the-badge" alt="AGPL-3.0 许可证"></a>
 </p>
 
 <h3 align="center">3 分钟搭建专业网站，任何虚拟主机都能用。<br>无需数据库，无需插件，无需维护。</h3>
@@ -411,7 +411,7 @@ php tools/build.php                                                         # �
 
 ## 许可证
 
-Éclair 以 **MIT 许可证**发布（[`LICENSE`](LICENSE)）：你可以自由使用、修改和再分发，包括用于商业用途，只需保留版权声明。部分图标源自 [Lucide](https://lucide.dev)（ISC 许可证），艺术风格则借鉴了 [Impeccable](https://github.com/pbakaus/impeccable) 的方法（Apache 2.0 许可证）：见 [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)。
+Éclair 以 **AGPL-3.0-only 许可证**发布（[`LICENSE`](LICENSE)、[`NOTICE`](NOTICE)）。部分图标源自 [Lucide](https://lucide.dev)（ISC 许可证），艺术风格则借鉴了 [Impeccable](https://github.com/pbakaus/impeccable) 的方法（Apache 2.0 许可证）：见 [`THIRD-PARTY-NOTICES.txt`](THIRD-PARTY-NOTICES.txt)。
 
 <br>
 

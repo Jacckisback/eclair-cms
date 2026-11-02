@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
 /* ⚡ Éclair — directions artistiques. Ajouté au thème de base quand une direction est choisie, morceau par morceau :
    seuls « base » et les morceaux des choix de la direction sont insérés dans la page (app/lib/Design.php). */
 

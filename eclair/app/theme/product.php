@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (c) 2026 Thierry Gustin
 /**
  * Fiche produit : galerie, prix, variantes (sans JavaScript), bouton de paiement, réassurance, puis la description.
  * Variables : item, entry, html, images, offers, info, legal, category, crumbs, related, translations, lang

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
 /* ⚡ Éclair — thème Atelier : chaleureux et artisanal, tons crème et terre cuite, formes douces. */
 :root{--bg:#fbf6ee;--bg-soft:#f4eadb;--card:#fffaf2;--text:#2d2118;--muted:#6b5848;--line:#eadbc6;--code:#f3e7d6;--radius:22px;
   --shadow:0 2px 4px rgb(80 50 20 / .06),0 18px 40px -24px rgb(80 50 20 / .38)}
