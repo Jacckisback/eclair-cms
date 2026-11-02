@@ -235,8 +235,8 @@ final class Analyzer
                 ? t('Bloc « Atouts » de {n} élément(s) : 3 à 6 se lisent le mieux.', ['n' => $n])
                 : ($bare ? t('{n} atout(s) sans description : une phrase concrète chacun.', ['n' => $bare]) : t('Bloc « Atouts » équilibré et décrit.')));
             $emoji = array_filter(array_column($f['items'], 'icon'), fn ($i) => $i !== '');
-            if (!$emoji) {
-                continue;
+            if (!$emoji || ($d['features'] ?? '') === 'numbers') {
+                continue; // atouts numérotés : les icônes ne s'affichent pas
             }
             $icons = $d['icons'] ?? 'emoji';
             if ($icons === 'line') {
