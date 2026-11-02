@@ -508,6 +508,18 @@ final class Update
                 $ok = @unlink(ECLAIR_ROOT . '/' . $path) && $ok;
             }
         }
+        // Retour vers une version qui ne gardait pas ces fichiers (avant la 1.10.1) : seul l'en-tête de licence ajouté par la
+        // 1.10.1 sépare son modèle de configuration de l'original ; il est retiré si cela redonne exactement l'original.
+        foreach ((array) (self::manifest(ECLAIR_ROOT . '/app/manifest.php')['files'] ?? []) as $path => $hash) {
+            $here = ECLAIR_ROOT . '/' . $path;
+            if (!self::extra((string) $path) || is_file($prev . '/extra/' . str_replace('/', '~', (string) $path) . '.txt') || !is_file($here) || self::same($here, (string) $hash)) {
+                continue;
+            }
+            $original = (string) preg_replace('~^(<\?php\R)// SPDX-License-Identifier: [^\r\n]*\R// Copyright [^\r\n]*\R~', '$1', (string) file_get_contents($here), 1);
+            if (self::same(null, (string) $hash, $original)) {
+                $ok = self::put($here, $original) && $ok;
+            }
+        }
         self::fresh();
         self::remove($junk);
         if ($ok) {
