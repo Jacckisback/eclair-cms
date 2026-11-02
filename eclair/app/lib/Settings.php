@@ -86,6 +86,7 @@ final class Settings
         ],
         'cache' => true,
         'updates' => ['check' => true],
+        'backup' => ['schedule' => 'off', 'keep' => 8, 'chosen' => false],
         'shop' => [
             'enabled' => false,
             'base' => '',

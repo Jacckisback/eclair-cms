@@ -95,6 +95,6 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
   </main>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale()]) ?>
+<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale(), 'driveDue' => $user['role'] === 'admin' && \Eclair\Drive::due()]) ?>
 </body>
 </html>

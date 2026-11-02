@@ -36,6 +36,25 @@ function eclair_compact_view(string $code): string
     return $out;
 }
 
+/**
+ * Application Google d'Éclair (sauvegardes Drive, client « TV et appareils à saisie limitée ») : ses identifiants sont posés
+ * dans l'archive depuis l'environnement (ECLAIR_GOOGLE_CLIENT_ID, ECLAIR_GOOGLE_CLIENT_SECRET), jamais écrits dans le dépôt.
+ */
+function eclair_google(string $code): string
+{
+    $id = (string) getenv('ECLAIR_GOOGLE_CLIENT_ID');
+    $secret = (string) getenv('ECLAIR_GOOGLE_CLIENT_SECRET');
+    if (!preg_match('~^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$~', $id) || !preg_match('~^[A-Za-z0-9_-]{20,80}$~', $secret)) {
+        return $code;
+    }
+    $out = str_replace(["const CLIENT_ID = ''", "const CLIENT_SECRET = ''"], ["const CLIENT_ID = '$id'", "const CLIENT_SECRET = '$secret'"], $code, $count);
+    if ($count !== 2) {
+        fwrite(STDERR, "✗ Identifiants Google : emplacement introuvable dans app/lib/Drive.php.\n");
+        exit(1);
+    }
+    return $out;
+}
+
 /** Contenu livré d'un fichier de l'application. */
 function shipped(string $root, string $rel): string
 {
@@ -45,6 +64,7 @@ function shipped(string $root, string $rel): string
         // Le modèle de configuration reste lisible : ses commentaires sont son mode d'emploi.
         $rel === 'eclair-config.exemple.php' => (string) file_get_contents($path),
         str_starts_with($rel, 'app/admin/views/') || $rel === 'app/install/view.php' => eclair_compact_view(php_strip_whitespace($path)),
+        $rel === 'app/lib/Drive.php' => eclair_google(php_strip_whitespace($path)),
         str_ends_with($rel, '.php') => php_strip_whitespace($path),
         $admin && str_ends_with($rel, '.js') => eclair_minify_js((string) file_get_contents($path)),
         $admin && str_ends_with($rel, '.css') => eclair_minify_css((string) file_get_contents($path)),
@@ -142,6 +162,9 @@ foreach (['LICENSE' => 'LICENSE.txt', 'THIRD-PARTY-NOTICES.txt' => 'THIRD-PARTY-
 }
 $zip->close();
 printf("✓ Archive : %s (%s Ko, %s octets une fois décompressée)\n", $zipFile, round(filesize($zipFile) / 1024), number_format($size, 0, ',', ' '));
+echo str_contains(shipped($root, 'app/lib/Drive.php'), "CLIENT_ID = ''")
+    ? "⚠ ECLAIR_GOOGLE_CLIENT_ID / ECLAIR_GOOGLE_CLIENT_SECRET absents : sauvegarde Google Drive indisponible dans cette archive.\n"
+    : "✓ Application Google intégrée (sauvegardes Drive)\n";
 
 /*
  * Annonce de la mise à jour en un clic (dist/latest.json), signée Ed25519 avec la clé privée du mainteneur.

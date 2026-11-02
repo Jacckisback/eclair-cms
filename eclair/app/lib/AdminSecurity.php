@@ -35,6 +35,7 @@ final class AdminSecurity
             'zip' => class_exists('ZipArchive'),
             'gd' => Media::gd(),
             'verified' => Settings::verified(),
+            'drive' => Drive::status(),
         ], t('Sécurité'));
     }
 
@@ -81,30 +82,18 @@ final class AdminSecurity
         if (!Auth::confirmed($user)) {
             Admin::back($back, t('Mot de passe incorrect.'), 'bad');
         }
-        if (!class_exists('ZipArchive')) {
-            Admin::back($back, t('L’extension zip n’est pas disponible : copie les dossiers data et media par FTP.'), 'bad');
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(300);
         }
-        @set_time_limit(300);
         $file = ECLAIR_ROOT . '/cache/backup-' . bin2hex(random_bytes(8)) . '.zip';
-        $zip = new \ZipArchive();
-        if ($zip->open($file, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-            Admin::back($back, t('Impossible de créer la sauvegarde.'), 'bad');
+        try {
+            Backup::create($file);
+        } catch (\Throwable $e) {
+            Admin::back($back, $e->getMessage(), 'bad');
         }
-        foreach (['data' => ECLAIR_DATA, 'media' => ECLAIR_ROOT . '/media'] as $prefix => $dir) {
-            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
-            foreach ($it as $path => $info) {
-                $rel = $prefix . '/' . str_replace('\\', '/', substr((string) $path, strlen($dir) + 1));
-                if ($info->isFile() && !preg_match('~^data/(sessions/|limits/|ai/|reset\.php$|vault\.php$)~', $rel) && !str_ends_with($rel, '.lock')) {
-                    $zip->addFile((string) $path, $rel);
-                }
-            }
-        }
-        $zip->addFromString('LISEZ-MOI.txt', "Sauvegarde Éclair du " . date('Y-m-d H:i') . "\n\nPour restaurer : remplace les dossiers data/ et media/ de ton installation par ceux-ci (par FTP), puis vide le cache depuis l'administration.\n");
-        $zip->close();
         Log::security('backup_downloaded');
-        $name = slugify((string) Settings::get('name')) ?: 'site';
         header('Content-Type: application/zip');
-        header('Content-Disposition: attachment; filename="sauvegarde-' . $name . '-' . date('Y-m-d') . '.zip"');
+        header('Content-Disposition: attachment; filename="' . Backup::name() . '"');
         header('Content-Length: ' . filesize($file));
         readfile($file);
         @unlink($file);

@@ -633,3 +633,10 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .update-how summary{cursor:pointer;color:var(--muted);font-weight:600}
 .update-how ol{margin:.6rem 0 0;padding-left:1.3rem;line-height:1.6}
 .notice ul{margin:.3rem 0 .5rem;padding-left:1.2rem}
+.drive-steps{margin:.4rem 0 .8rem;padding-left:1.3rem;line-height:1.9}
+.drive-code{font:700 1.25rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;padding:.15rem .5rem;border-radius:8px;background:var(--panel-2);border:1px solid var(--line)}
+.drive-run{margin:.6rem 0 1rem}
+.drive-run progress{width:100%}
+.drive-settings{margin:1rem 0}
+.drive-more{margin:1rem 0}
+.drive-more summary{cursor:pointer;color:var(--muted);font-weight:600}

@@ -141,6 +141,33 @@
     if (busy) setTimeout(() => { e.submitter.disabled = true; e.submitter.textContent = busy; });
   }));
 
+  /* ── Sauvegardes Google Drive : autorisation par code, envoi qui avance tout seul ── */
+  const drivePoll = $('[data-drive-poll]');
+  if (drivePoll) {
+    const every = Math.max(5, Number(drivePoll.dataset.drivePoll) || 5) * 1000;
+    const ask = () => api('api/drive/poll', {}, { quiet: true })
+      .then((json) => (json && json.state && json.state !== 'pending' ? location.reload() : setTimeout(ask, every)))
+      .catch(() => setTimeout(ask, every * 2));
+    setTimeout(ask, every);
+  }
+  const driveRun = $('[data-drive-run]');
+  const driveTick = () => api('api/drive/tick', {}, { quiet: true });
+  if (driveRun) {
+    const bar = $('progress', driveRun);
+    const label = $('[data-drive-label]', driveRun);
+    const step = () => driveTick().then((json) => {
+      if (!json || json.status === 'idle') return;
+      if (json.status === 'done') { toast(json.text, 'ok'); setTimeout(() => location.reload(), 1500); return; }
+      if (json.status === 'error') { toast(json.error, 'bad'); return; }
+      if (bar) bar.value = json.percent;
+      if (label && json.text) label.textContent = json.text;
+      setTimeout(step, json.status === 'busy' ? 5000 : 300);
+    }).catch(() => setTimeout(step, 10000));
+    step();
+  } else if (D.driveDue) {
+    driveTick().catch(() => {});
+  }
+
   /* ── Nouvelle version d'Éclair : vérification discrète, deux fois par jour au plus (administrateurs) ── */
   if (D.updateCheck) {
     api('api/update/check', {}, { quiet: true }).then((json) => {

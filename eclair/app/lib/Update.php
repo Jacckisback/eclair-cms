@@ -239,8 +239,12 @@ final class Update
         if ($lock === false || !flock($lock, LOCK_EX | LOCK_NB)) {
             return ['ok' => false, 'error' => t('Une mise à jour est déjà en cours.')];
         }
-        @set_time_limit(300);
-        @ignore_user_abort(true);
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(300);
+        }
+        if (function_exists('ignore_user_abort')) {
+            @ignore_user_abort(true);
+        }
         try {
             // Sous verrou, la version sur le disque fait foi (un autre administrateur a pu mettre à jour entre-temps).
             if (!version_compare((string) $release['version'], self::installed(), '>')) {
@@ -370,7 +374,9 @@ final class Update
         if ($lock === false || !flock($lock, LOCK_EX | LOCK_NB)) {
             return ['ok' => false, 'error' => t('Une mise à jour est déjà en cours.')];
         }
-        @ignore_user_abort(true);
+        if (function_exists('ignore_user_abort')) {
+            @ignore_user_abort(true);
+        }
         try {
             self::preload();
             if (!self::restore()) {
