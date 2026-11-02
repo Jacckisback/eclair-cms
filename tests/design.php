@@ -73,6 +73,25 @@ check('police absente : ni @font-face ni préchargement (police de secours)', De
     && Design::preload(Design::find('riviera')) === '' && Design::fontFile('inconnue') === '' && !Design::fetchFont('../../x'));
 check('icône dessinée pour un émoji connu, rien pour un inconnu', str_starts_with(Design::icon('🚀'), '<svg viewBox="0 0 24 24" aria-hidden="true">')
     && Design::icon('❤️') !== '' && Design::icon('🦄') === '' && Design::icon('') === '' && Design::icon('<b>') === '');
+// 1.9 : nouvelles compositions (bannière inversée ou encadrée, atouts numérotés, filets, boutons) et leurs morceaux.
+$combo = Design::normalize(['hero' => 'reverse', 'features' => 'numbers', 'sections' => 'rules', 'buttons' => 'outline'] + Design::DIRECTIONS['argile']);
+$cssCombo = Design::css($combo);
+check('1.9 : bannière à gauche, atouts numérotés, filets et boutons à contour', str_contains($cssCombo, '.hero-media .hero-img{order:-1}') && str_contains($cssCombo, 'counter(feat, decimal-leading-zero)')
+    && str_contains($cssCombo, '.btns .btn-primary{background:transparent') && str_contains($cssCombo, 'border-top:1px solid var(--line);padding-top') && !str_contains($cssCombo, 'box-shadow:0 0 0 100vmax'));
+$over = '.hero-media .btns .btn,.hero-media .btns .btn:hover{background:transparent;color:#fff';
+check('1.9 : boutons sans fond restés blancs sur une bannière plein cadre, seulement là', str_contains(Design::css(Design::normalize(['buttons' => 'underline'] + Design::DIRECTIONS['nocturne'])), $over)
+    && !str_contains(Design::css(Design::find('nocturne')), $over) && !str_contains($cssCombo, $over) && str_contains(Design::css(Design::normalize(['hero' => 'framed'] + Design::DIRECTIONS['galerie'])), 'background:var(--bg-soft);border-radius:var(--radius);padding'));
+check('1.9 : direction enregistrée avant la 1.9 (sans boutons) : boutons pleins par défaut', Design::normalize(Design::DIRECTIONS['presse'])['buttons'] === 'solid'
+    && Design::normalize(['buttons' => 'neon'] + Design::DIRECTIONS['presse'])['buttons'] === 'solid');
+$icons = (new ReflectionClass(Design::class))->getConstant('ICONS');
+$emoji = (new ReflectionClass(Design::class))->getConstant('EMOJI');
+check('1.9 : 65 icônes dessinées, chacune reliée à des émojis, sans doublon', count($icons) === 65 && !array_diff_key($icons, $emoji) && !array_diff_key($emoji, $icons)
+    && count(preg_split('//u', implode('', $emoji), -1, PREG_SPLIT_NO_EMPTY)) === count(array_unique(preg_split('//u', implode('', $emoji), -1, PREG_SPLIT_NO_EMPTY))));
+check('1.9 : émojis précisés (café, cadenas, poignée de main…) vers leur propre icône', Design::icon('☕') !== Design::icon('🍽') && Design::icon('🔒') !== Design::icon('🛡')
+    && Design::icon('🤝') !== Design::icon('👥') && Design::icon('🐶') !== '' && Design::icon('✈️') !== '' && Design::icon('⚖️') !== '');
+Theme::preview(['direction' => $combo]);
+$numbered = Eclair\Blocks::html(Eclair\Blocks::normalize([['type' => 'features', 'title' => 'Atouts', 'items' => [['icon' => '🚀', 'title' => 'Rapide', 'text' => 'Oui.'], ['icon' => '⭐', 'title' => 'Noté', 'text' => 'Oui.']]]]));
+check('1.9 : atouts numérotés sans icône dans le HTML', str_contains($numbered, '<h3') && !str_contains($numbered, 'feature-icon'));
 Theme::preview(['direction' => Design::find('nocturne')]);
 $themed = Theme::css();
 Theme::preview(['direction' => []]);

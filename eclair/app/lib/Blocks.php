@@ -400,7 +400,8 @@ final class Blocks
     {
         $out = '<section class="features">' . ($b['title'] !== '' ? '<h2 id="' . e($anchor) . '"' . self::ef('title') . '>' . e($b['title']) . '</h2>' : '') . '<div class="grid">';
         // Direction artistique : icônes dessinées à la place des émojis, ou aucune icône.
-        $icons = Theme::direction()['icons'] ?? 'emoji';
+        $d = Theme::direction();
+        $icons = ($d['features'] ?? '') === 'numbers' ? 'none' : ($d['icons'] ?? 'emoji');
         foreach ($b['items'] as $n => $item) {
             $icon = $icons === 'emoji' || $item['icon'] === '' ? '' : ($icons === 'line' ? Design::icon($item['icon']) : '');
             $out .= '<div class="feature">' . ($icons !== 'emoji' ? ($icon !== '' ? '<span class="feature-icon" aria-hidden="true">' . $icon . '</span>' : '')

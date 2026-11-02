@@ -90,10 +90,12 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         'radius' => [t('Coins'), ['soft' => t('Adoucis'), 'none' => t('Droits'), 'round' => t('Ronds')]],
         'density' => [t('Espacement'), ['regular' => t('Normal'), 'compact' => t('Serré'), 'airy' => t('Aéré')]],
         'surfaces' => [t('Cartes'), ['line' => t('Filet fin'), 'flat' => t('Aplat de couleur'), 'raised' => t('Ombre portée')]],
-        'hero' => [t('Bannière d’accueil'), ['split' => t('Texte et image côte à côte'), 'poster' => t('Affiche : très grand titre'), 'fullbleed' => t('Image plein cadre'), 'editorial' => t('Éditorial : image verticale'), 'centered' => t('Centrée')]],
-        'features' => [t('Bloc « Atouts »'), ['cards' => t('Cartes'), 'rows' => t('Rangées'), 'columns' => t('Colonnes à filet')]],
-        'sections' => [t('Sections'), ['plain' => t('Fond uni'), 'bands' => t('Bandes de couleur')]],
+        'hero' => [t('Bannière d’accueil'), ['split' => t('Texte et image côte à côte'), 'reverse' => t('Image à gauche'), 'poster' => t('Affiche : très grand titre'),
+            'fullbleed' => t('Image plein cadre'), 'editorial' => t('Éditorial : image verticale'), 'centered' => t('Centrée'), 'framed' => t('Encadrée')]],
+        'features' => [t('Bloc « Atouts »'), ['cards' => t('Cartes'), 'rows' => t('Rangées'), 'columns' => t('Colonnes à filet'), 'numbers' => t('Numérotés')]],
+        'sections' => [t('Sections'), ['plain' => t('Fond uni'), 'bands' => t('Bandes de couleur'), 'rules' => t('Filets entre les sections')]],
         'icons' => [t('Icônes des atouts'), ['line' => t('Icônes dessinées'), 'none' => t('Sans icône'), 'emoji' => t('Émojis')]],
+        'buttons' => [t('Boutons'), ['solid' => t('Pleins'), 'outline' => t('Contour'), 'underline' => t('Liens soulignés')]],
     ]; ?>
     <fieldset class="field">
       <legend class="label"><?= e(t('Style du site')) ?></legend>
@@ -128,6 +130,16 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         <?php else: ?>
           <p class="hint"><?= e(t('Active l’assistant IA (onglet « Assistant IA ») pour que l’IA imagine des directions tirées de ton activité.')) ?></p>
         <?php endif ?>
+      </div>
+      <div class="dir-steer" id="dir-steer">
+        <span class="label"><?= e(t('Retouches en un clic')) ?></span>
+        <div class="row wrap">
+          <?php foreach (['bolder' => t('Plus audacieux'), 'quieter' => t('Plus sobre'), 'colorful' => t('Plus coloré'), 'distill' => t('Épurer'), 'invert' => t('Clair ↔ sombre'), 'typeset' => t('Autre police')] as $k => $label): ?>
+            <button class="btn btn-sm" type="button" data-steer="<?= e($k) ?>"><?= e($label) ?></button>
+          <?php endforeach ?>
+          <button class="btn btn-sm btn-ghost" type="button" data-steer="undo" disabled><?= Icons::svg('back') ?><?= e(t('Annuler la retouche')) ?></button>
+        </div>
+        <span class="hint"><?= e(t('Chaque clic transforme la direction choisie : regarde l’aperçu, enchaîne ou annule. Rien n’est publié avant d’enregistrer.')) ?></span>
       </div>
       <details class="dir-tune">
         <summary><?= e(t('Ajuster la direction : couleurs, polices, mises en page')) ?></summary>

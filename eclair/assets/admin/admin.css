@@ -581,6 +581,8 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .dir-mock{display:block;aspect-ratio:8/5;margin-bottom:.25rem;border-radius:9px;overflow:hidden;border:1px solid rgb(0 0 0 / .08);background:var(--line)}
 .dir-mock svg{display:block;width:100%;height:100%}
 .dir-ai{margin:0 0 1.2rem}
+.dir-steer{margin:0 0 1.2rem}
+.dir-steer .row{gap:.45rem;margin:.4rem 0}
 .dir-ai .row{gap:.7rem;align-items:center}
 .dir-ai-card .theme-name::before{content:"✦ ";color:var(--brand)}
 .dir-tune{margin:0 0 1.2rem;padding:0 1rem;border:1px solid var(--line);border-radius:12px;background:var(--panel)}

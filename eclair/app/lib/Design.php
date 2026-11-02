@@ -57,10 +57,11 @@ final class Design
         'radius' => ['soft', 'none', 'round'],
         'density' => ['regular', 'compact', 'airy'],
         'surfaces' => ['line', 'flat', 'raised'],
-        'hero' => ['split', 'poster', 'fullbleed', 'editorial', 'centered'],
-        'features' => ['cards', 'rows', 'columns'],
-        'sections' => ['plain', 'bands'],
+        'hero' => ['split', 'poster', 'fullbleed', 'editorial', 'centered', 'reverse', 'framed'],
+        'features' => ['cards', 'rows', 'columns', 'numbers'],
+        'sections' => ['plain', 'bands', 'rules'],
         'icons' => ['line', 'none', 'emoji'],
+        'buttons' => ['solid', 'outline', 'underline'],
     ];
 
     /** Directions livrées : couleurs, police de titre et compositions, pensées pour un univers chacune. */
@@ -103,7 +104,7 @@ final class Design
             'case' => 'normal', 'scale' => 'regular', 'radius' => 'none', 'density' => 'compact', 'surfaces' => 'line', 'hero' => 'editorial', 'features' => 'columns', 'sections' => 'plain', 'icons' => 'none'],
     ];
 
-    /** Icônes dessinées (tracés dérivés de Lucide, licence ISC) à la place des émojis des blocs « Atouts ». */
+    /** Icônes dessinées (tracés dérivés de Lucide, licence ISC) à la place des émojis des blocs « Atouts » : 65 icônes. */
     private const ICONS = [
         'check' => '<path d="M20 6 9 17l-5-5"/>',
         'rocket' => '<path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/>',
@@ -134,13 +135,55 @@ final class Design
         'award' => '<circle cx="12" cy="8" r="6"/><path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1"/>',
         'smile' => '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
         'palette' => '<path d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 4-4 4h-2a2 2 0 0 0-1.5 3.3A1.6 1.6 0 0 1 12 22z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="16" cy="9" r="1"/>',
+        'baby' => '<path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M15 12h.01"/><path d="M19.4 6.8A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/><path d="M9 12h.01"/>',
+        'bike' => '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+        'briefcase' => '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+        'building-2' => '<path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>',
+        'cake' => '<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3"/><path d="M12 8v3"/><path d="M17 8v3"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/>',
+        'car' => '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+        'carrot' => '<path d="M15 16a1 1 0 0 0-7-7q-4 4-6 12.4a.5.5 0 0 0 .6.6Q11 20 15 16l-3-3"/><path d="M15 9q4 4 7 0-3-4-7 0 4-4 0-7-4 3 0 7"/><path d="m8 15-2.6-2.6"/>',
+        'cloud' => '<path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9Z"/>',
+        'coffee' => '<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>',
+        'droplet' => '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+        'dumbbell' => '<path d="M17.6 12.8a2 2 0 1 0 2.8-2.8l-1.8-1.8a2 2 0 0 0 2.8-2.8l-2.8-2.8a2 2 0 0 0-2.8 2.8l-1.8-1.8a2 2 0 1 0-2.8 2.8z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.3 21.5a2 2 0 1 0 2.8-2.8l1.8 1.8a2 2 0 1 0 2.8-2.8l-6.4-6.4a2 2 0 1 0-2.8 2.8l1.8 1.8a2 2 0 0 0-2.8 2.8z"/><path d="m9.6 14.4 4.8-4.8"/>',
+        'fish' => '<path d="M6.5 12c.9-3.5 4.9-6 8.5-6 3.6 0 6.1 2.5 7 6-.9 3.5-3.4 6-7 6s-7.6-2.5-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.9a9.8 9.8 0 0 1 0-11.9"/><path d="M7 10.7C7 8 5.6 6 2.7 5.5c-1 1.5-1 5 .2 6.5-1.2 1.5-1.2 5-.2 6.5C5.6 18 7 16 7 13.3"/><path d="M10.5 7.3C10.2 5.9 9.2 4.2 8 3h5.8a2 2 0 0 1 2 1.7l.2 1.4"/><path d="m16 17.9-.2 1.4A2 2 0 0 1 13.8 21H9.5a6 6 0 0 0 1.5-4"/>',
+        'flame' => '<path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/>',
+        'flower' => '<circle cx="12" cy="12" r="3"/><path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/><path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/><path d="m8 8 1.9 1.9"/><path d="M14.1 9.9 16 8"/><path d="m8 16 1.9-1.9"/><path d="M14.1 14.1 16 16"/>',
+        'gem' => '<path d="M10.5 3 8 9l4 13 4-13-2.5-6"/><path d="M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .01 2.4l-8 11a2 2 0 0 1-3.2 0l-8-11A2 2 0 0 1 2.4 7.8l3-4A2 2 0 0 1 7 3z"/><path d="M2 9h20"/>',
+        'gift' => '<path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><rect x="3" y="7" width="18" height="4" rx="1"/>',
+        'graduation-cap' => '<path d="M21.4 10.9a1 1 0 0 0-.02-1.8L12.8 5.2a2 2 0 0 0-1.7 0L2.6 9.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.7 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+        'handshake' => '<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a3 3 0 0 0-4.2 0l-.9.9a1 1 0 1 1-3-3l2.8-2.8a5.8 5.8 0 0 1 7.1-.9l.5.3a2 2 0 0 0 1.4.2L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>',
+        'key' => '<path d="m2 21 9.6-9.6"/><path d="m7.5 15.5 2.3 2.3a1 1 0 0 1 0 1.4l-2.1 2.1a1 1 0 0 1-1.4 0L4 19"/><circle cx="15.5" cy="7.5" r="5.5"/>',
+        'laptop' => '<path d="M18 5a2 2 0 0 1 2 2v8.5a2 2 0 0 0 .2.9l1.1 2.1a1 1 0 0 1-.9 1.4H3.6a1 1 0 0 1-.9-1.4l1.1-2.1A2 2 0 0 0 4 15.5V7a2 2 0 0 1 2-2z"/><path d="M20.1 16H3.9"/>',
+        'lock' => '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+        'megaphone' => '<path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/>',
+        'mountain' => '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
+        'music' => '<path d="M21 16V3a1 1 0 0 0-1.3-1l-10 2.9a1 1 0 0 0-.71V19"/><circle cx="18" cy="16" r="3"/><circle cx="6" cy="19" r="3"/>',
+        'package' => '<path d="M11 21.7a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7z"/><path d="M12 22V12"/><polyline points="3.3 7 12 12 20.7 7"/><path d="m7.5 4.3 9 5.2"/>',
+        'paw-print' => '<circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.8 1Q6.5 17.5 4.5 16.8A3.5 3.5 0 0 1 5.5 10Z"/>',
+        'plane' => '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+        'recycle' => '<path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-.9 1.8 1.8 0 0 10-1.8L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-.9 1.8 1.8 0 0 0 0-1.8l-1.2-2.1"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7.2 9.5 3.1 10.6"/><path d="m9.3 5.8 1.1-1.9A1.8 1.8 0 0 1 12 3a1.8 1.8 0 0 1 1.5.9l3.9 6.8"/><path d="m13.4 9.6 4.1 1.1 1.1-4.1"/>',
+        'scale' => '<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>',
+        'scissors' => '<circle cx="6" cy="6" r="3"/><path d="M8.1 8.1 12 12"/><path d="M20 4 8.1 15.9"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
+        'shirt' => '<path d="M20.4 3.5 16 2a4 4 0 0 1-8 0L3.6 3.5a2 2 0 0 0-1.3 2.2l.6 3.5a1 1 0 0 0 1.8H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.1a1 1 0 0 0 1-.8l.6-3.5a2 2 0 0 0-1.3-2.2z"/>',
+        'shopping-bag' => '<path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.1 6h17.8"/><path d="M3.4 5.5a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.7a2 2 0 0 0-.4-1.2l-2-2.7A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/>',
+        'smartphone' => '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+        'stethoscope' => '<path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',
+        'waves' => '<path d="M2 12q2.5 2 5 0t5 0 5 0 5 0"/><path d="M2 19q2.5 2 5 0t5 0 5 0 5 0"/><path d="M2 5q2.5 2 5 0t5 0 5 0 5 0"/>',
+        'wine' => '<path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>',
     ];
     private const EMOJI = [
-        'check' => '✅✔☑✓👌', 'rocket' => '🚀', 'users' => '👥👤🤝🧑👨👩👪', 'clock' => '⏱⏰🕐⌛⏳', 'shield' => '🔒🛡🔐', 'star' => '⭐🌟✨💫',
-        'heart' => '❤💚💙💛🧡💜🤍💖', 'bulb' => '💡🧠', 'target' => '🎯', 'chat' => '💬🗣', 'phone' => '📞☎📱', 'pin' => '📍🗺🧭', 'truck' => '🚚📦🚛',
-        'wrench' => '🛠🔧🔨⚙🪛', 'leaf' => '🌱🌿🍃🌳🌻🌸', 'zap' => '⚡🔥', 'card' => '💶💰💸💳💵🏷', 'calendar' => '📅🗓', 'chart' => '📈📊',
-        'globe' => '🌍🌎🌏🌐', 'home' => '🏠🏡🏢', 'book' => '📚📖🎓✏📝', 'camera' => '📷📸🎬', 'food' => '🍽🍴☕🍷🥐🍰', 'sun' => '☀🌞', 'mail' => '✉📧📩',
+        'check' => '✅✔☑✓👌', 'rocket' => '🚀', 'users' => '👥👤🧑👨👩👪', 'clock' => '⏱⏰🕐⌛⏳', 'shield' => '🛡', 'star' => '⭐🌟✨💫',
+        'heart' => '❤💚💙💛🧡💜🤍💖', 'bulb' => '💡🧠', 'target' => '🎯', 'chat' => '💬🗣', 'phone' => '📞☎', 'pin' => '📍🗺🧭', 'truck' => '🚚🚛',
+        'wrench' => '🛠🔧🔨⚙🪛', 'leaf' => '🌱🌿🍃🌳', 'zap' => '⚡', 'card' => '💶💰💸💳💵🏷', 'calendar' => '📅🗓', 'chart' => '📈📊',
+        'globe' => '🌍🌎🌏🌐', 'home' => '🏠🏡', 'book' => '📚📖✏📝', 'camera' => '📷📸🎬', 'food' => '🍽🍴🥐', 'sun' => '☀🌞', 'mail' => '✉📧📩',
         'award' => '🏆🥇🏅🎖', 'smile' => '😊🙂😀😄', 'palette' => '🎨🖌🏺',
+        'gift' => '🎁🎀', 'music' => '🎵🎶🎸🎹🎻🎷', 'coffee' => '☕🍵', 'car' => '🚗🚙🚕🚘🏎', 'plane' => '✈🛫🛬🧳', 'bike' => '🚲🚴🛵',
+        'paw-print' => '🐾🐶🐱🐕🐈', 'baby' => '👶🍼🧸', 'scissors' => '✂💇💈', 'dumbbell' => '🏋💪🤸🧘', 'graduation-cap' => '🎓🏫', 'briefcase' => '💼👔',
+        'building-2' => '🏢🏬🏛', 'key' => '🔑🗝', 'lock' => '🔒🔐', 'cloud' => '☁🌥', 'recycle' => '♻', 'flower' => '🌸🌺🌷💐🌻🌼', 'wine' => '🍷🥂🍾',
+        'cake' => '🎂🍰🧁', 'stethoscope' => '🩺⚕🏥💊', 'shirt' => '👕👗👚🧥', 'shopping-bag' => '🛍🛒', 'package' => '📦', 'mountain' => '⛰🏔🗻',
+        'waves' => '🌊🏄🏊', 'handshake' => '🤝', 'laptop' => '💻🖥⌨', 'smartphone' => '📱📲', 'megaphone' => '📣📢', 'scale' => '⚖', 'gem' => '💎💍',
+        'flame' => '🔥', 'droplet' => '💧💦🚿', 'carrot' => '🥕🥗🥦🍅', 'fish' => '🐟🐠🎣🦐',
     ];
 
     private static array $files = [];
@@ -240,8 +283,12 @@ final class Design
             $chunks[$key] = $css;
         }
         $css = $chunks['base'] ?? '';
-        foreach (['case', 'hero', 'sections', 'features', 'surfaces', 'icons'] as $k) {
+        foreach (['case', 'hero', 'sections', 'features', 'surfaces', 'icons', 'buttons'] as $k) {
             $css .= $chunks[$k . ':' . $d[$k]] ?? '';
+        }
+        // Bannière plein cadre : les boutons sans fond restent blancs sur la photo assombrie.
+        if ($d['hero'] === 'fullbleed' && $d['buttons'] !== 'solid') {
+            $css .= $chunks['over:fullbleed'] ?? '';
         }
         return $face . $vars . $css;
     }

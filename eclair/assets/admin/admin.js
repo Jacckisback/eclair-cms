@@ -342,10 +342,13 @@
       const font = (x, y, size, fill, anchor) => tag('text', Object.assign({ x, y, 'font-size': size, fill, 'text-anchor': anchor || 'start', 'font-family': FAMILY[cat], 'font-weight': weight >= 600 ? 700 : 400 },
         cat === 'condensed' ? { 'font-stretch': 'condensed' } : {}, d.case === 'upper' ? { 'letter-spacing': 1 } : {}), d.case === 'upper' ? 'AG' : 'Ag');
       const bar = (x, y, w, fill, h) => tag('rect', { x, y, width: w, height: h || 3, rx: 1, fill });
-      const pic = (x, y, w, h) => tag('rect', { x, y, width: w, height: h, rx: r, fill: d.surface }) + tag('path', { fill: d.muted, opacity: 0.35,
+      const pic = (x, y, w, h, fill) => tag('rect', { x, y, width: w, height: h, rx: r, fill: fill || d.surface }) + tag('path', { fill: d.muted, opacity: 0.35,
         d: 'M' + (x + w * 0.12) + ' ' + (y + h * 0.82) + 'l' + w * 0.26 + ' ' + -h * 0.34 + ' ' + w * 0.18 + ' ' + h * 0.2 + ' ' + w * 0.16 + ' ' + -h * 0.14 + ' ' + w * 0.16 + ' ' + h * 0.28 + 'z' });
-      const btn = (x, y, w = 30, h = 9) => tag('rect', { x, y, width: w, height: h, rx: Math.min(r, h / 2), fill: d.accent })
-        + tag('rect', { x: x + w * 0.25, y: y + h / 2 - 0.8, width: w * 0.5, height: 1.6, fill: on });
+      const btn = (x, y, w = 30, h = 9) => (d.buttons === 'underline'
+        ? tag('rect', { x, y: y + h / 2 - 2.4, width: w * 0.7, height: 2.2, fill: d.ink }) + tag('rect', { x, y: y + h / 2 + 1.2, width: w * 0.7, height: 1.2, fill: d.accent })
+        : tag('rect', d.buttons === 'outline' ? { x: x + 0.6, y: y + 0.6, width: w - 1.2, height: h - 1.2, rx: Math.min(r, h / 2), fill: 'none', stroke: d.accent, 'stroke-width': 1.2 }
+          : { x, y, width: w, height: h, rx: Math.min(r, h / 2), fill: d.accent })
+          + tag('rect', { x: x + w * 0.25, y: y + h / 2 - 0.8, width: w * 0.5, height: 1.6, fill: d.buttons === 'outline' ? d.accent : on }));
       let s = tag('rect', { width: 160, height: 100, fill: d.ground }) + bar(10, 8, 22, d.ink, 4) + bar(104, 9, 12, d.muted, 2.5) + bar(122, 9, 12, d.muted, 2.5) + bar(140, 9, 10, d.muted, 2.5);
       if (d.sections === 'bands' && ['split', 'editorial'].includes(d.hero)) s += tag('rect', { y: 88, width: 160, height: 12, fill: d.surface });
       if (d.hero === 'fullbleed') {
@@ -354,6 +357,11 @@
         s += font(10, 50, 34, d.ink) + bar(10, 57, 92, d.muted) + bar(10, 63, 64, d.muted) + btn(10, 70) + pic(10, 84, 140, 14);
       } else if (d.hero === 'editorial') {
         s += pic(98, 18, 52, 68) + font(10, 66, 24, d.ink) + bar(10, 72, 62, d.muted) + bar(10, 78, 42, d.muted);
+      } else if (d.hero === 'reverse') {
+        s += pic(10, 20, 62, 56) + font(82, 44, 24, d.ink) + bar(82, 51, 60, d.muted) + bar(82, 57, 44, d.muted) + btn(82, 64);
+      } else if (d.hero === 'framed') {
+        s += tag('rect', { x: 6, y: 18, width: 148, height: 66, rx: Math.max(r, 2), fill: d.surface }) + font(14, 44, 22, d.ink) + bar(14, 51, 54, d.muted)
+          + bar(14, 57, 38, d.muted) + btn(14, 64) + pic(90, 25, 56, 52, d.ground);
       } else if (d.hero === 'centered') {
         s += font(80, 42, 24, d.ink, 'middle') + bar(50, 49, 60, d.muted) + bar(58, 55, 44, d.muted) + btn(65, 62) + pic(26, 78, 108, 22);
       } else {
@@ -363,6 +371,65 @@
     };
     const draw = (input, d) => { input.parentNode.querySelector('.dir-mock').innerHTML = mock(d || JSON.parse(input.dataset.direction)); };
     $$('[name=direction_id]', grid).forEach((input) => draw(input));
+    // Retouches en un clic : la direction choisie, transformée d'un coup (aperçu immédiat ; « Annuler la retouche » revient en arrière).
+    const steer = $('#dir-steer');
+    if (steer) {
+      const undo = [];
+      const back = $('[data-steer=undo]', steer);
+      const rgb = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+      const hsl = (c) => {
+        const [r, g, b] = rgb(c).map((v) => v / 255);
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const l = (max + min) / 2;
+        const k = max - min;
+        if (!k) return [0, 0, l];
+        const h = max === r ? ((g - b) / k + 6) % 6 : max === g ? (b - r) / k + 2 : (r - g) / k + 4;
+        return [h / 6, k / (1 - Math.abs(2 * l - 1)), l];
+      };
+      const toHex = ([h, s, l]) => {
+        const a = s * Math.min(l, 1 - l);
+        const f = (n) => { const k = (n + h * 12) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, '0'); };
+        return '#' + f(0) + f(8) + f(4);
+      };
+      const clamp = (v) => Math.min(1, Math.max(0, v));
+      const saturate = (c, n) => { const [h, s, l] = hsl(c); return toHex([h, clamp(s + n), l]); };
+      const blend = (a, b, t) => '#' + rgb(a).map((v, i) => Math.round(v * t + rgb(b)[i] * (1 - t)).toString(16).padStart(2, '0')).join('');
+      const step = (list, v, n) => list[Math.max(0, Math.min(list.length - 1, list.indexOf(v) + n))];
+      // Polices de titre dans un ordre qui alterne les familles (empattements, grotesque, condensée…) : chaque clic change de ton.
+      const groups = {};
+      Object.keys(fonts).forEach((id) => { (groups[fonts[id][0]] = groups[fonts[id][0]] || []).push(id); });
+      const cycle = [];
+      for (let i = 0; Object.values(groups).some((g) => g[i]); i++) Object.values(groups).forEach((g) => { if (g[i]) cycle.push(g[i]); });
+      const rules = {
+        bolder: (d) => ({ scale: step(['quiet', 'regular', 'bold'], d.scale, 1), density: step(['compact', 'regular', 'airy'], d.density, 1),
+          hero: { split: 'poster', reverse: 'poster', centered: 'poster', framed: 'poster', editorial: 'fullbleed', poster: 'fullbleed' }[d.hero] || d.hero,
+          sections: 'bands', buttons: 'solid', accent: saturate(d.accent, 0.15) }),
+        quieter: (d) => ({ scale: step(['quiet', 'regular', 'bold'], d.scale, -1), case: 'normal', surfaces: 'line', accent: saturate(d.accent, -0.25),
+          hero: { poster: 'split', fullbleed: 'editorial', framed: 'split' }[d.hero] || d.hero, sections: d.sections === 'bands' ? 'rules' : d.sections }),
+        colorful: (d) => ({ ground: blend(d.accent, d.ground, 0.08), surface: blend(d.accent, d.surface, 0.18), sections: 'bands', accent: saturate(d.accent, 0.1),
+          surfaces: d.surfaces === 'line' ? 'flat' : d.surfaces }),
+        distill: (d) => ({ surfaces: 'line', icons: 'none', sections: 'plain', density: 'airy', radius: d.radius === 'round' ? 'soft' : 'none',
+          features: d.features === 'cards' ? 'columns' : d.features, hero: d.hero === 'framed' ? 'split' : d.hero }),
+        invert: (d) => Object.fromEntries(['ground', 'surface', 'ink', 'muted'].map((k) => { const [h, s, l] = hsl(d[k]); return [k, toHex([h, s, 1 - l])]; })),
+        typeset: (d) => ({ display: cycle[(cycle.indexOf(d.display) + 1) % cycle.length] }),
+      };
+      steer.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-steer]');
+        if (!b || !picked()) return;
+        const d = current();
+        if (b.dataset.steer === 'undo') {
+          if (undo.length) fill(undo.pop());
+        } else {
+          undo.push(d);
+          fill(Object.assign({}, d, rules[b.dataset.steer](d)));
+        }
+        back.disabled = !undo.length;
+        form.dispatchEvent(new Event('input'));
+        show();
+      });
+      grid.addEventListener('change', () => { undo.length = 0; back.disabled = true; });
+    }
     // « Imagine ma direction » : trois propositions de l'IA, ajoutées en tête des cartes (rien n'est enregistré avant « Enregistrer »).
     const imagine = $('#dir-imagine');
     if (imagine) {

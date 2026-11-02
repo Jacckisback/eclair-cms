@@ -52,6 +52,16 @@ h1,h2,.hero-title{text-transform:uppercase;letter-spacing:.004em;line-height:1.0
 .hero-img img{aspect-ratio:16/9;object-fit:cover}
 /*@*/
 
+/*@hero:reverse*/
+.hero-media{grid-template-columns:.9fr 1.1fr}
+.hero-media .hero-img{order:-1}
+@media (max-width:52rem){.hero-media{grid-template-columns:1fr}.hero-media .hero-img{order:0}}
+/*@*/
+
+/*@hero:framed*/
+.hero{background:var(--bg-soft);border-radius:var(--radius);padding:calc(var(--dn) * clamp(2rem, 1rem + 4vw, 4.5rem)) clamp(1.25rem, .25rem + 4vw, 4rem);margin-block:calc(var(--dn) * 1.25rem) calc(var(--dn) * 2rem)}
+/*@*/
+
 /*@features:rows*/
 .features .grid{display:block}
 .feature{background:none;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none}
@@ -72,6 +82,16 @@ h1,h2,.hero-title{text-transform:uppercase;letter-spacing:.004em;line-height:1.0
 .content>* .card,.content>.faq details,:where(.content>*) .feature{background:var(--bg)}
 /*@*/
 
+/*@sections:rules*/
+.content>:is(.features,.faq,.team,.posts-block,.contact-block){border-top:1px solid var(--line);padding-top:calc(var(--dn) * 1.5rem);margin-top:calc(var(--dn) * 3rem)}
+/*@*/
+
+/*@features:numbers*/
+.features .grid{counter-reset:feat;grid-template-columns:repeat(auto-fit, minmax(14rem, 1fr));gap:2rem 2.5rem}
+.features .feature{counter-increment:feat;background:none;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:1.1rem 0 0}
+.features .feature::before{content:counter(feat, decimal-leading-zero);display:block;margin-bottom:.5rem;font:var(--hw) calc(var(--hs) * 2.6rem)/1 var(--font-head);color:var(--link-c)}
+/*@*/
+
 /*@surfaces:flat*/
 .card,.faq details,.callout{border-color:transparent}
 /*@*/
@@ -88,4 +108,20 @@ h1,h2,.hero-title{text-transform:uppercase;letter-spacing:.004em;line-height:1.0
 /*@icons:line*/
 .feature-icon{width:auto;height:auto;background:none;border-radius:0;margin:0 0 .6rem}
 .feature-icon svg{width:1.7rem;height:1.7rem;fill:none;stroke:var(--link-c);stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+/*@*/
+
+/*@buttons:outline*/
+.btns .btn-primary{background:transparent;color:var(--link-c)}
+.btns .btn-primary:hover{background:var(--accent);color:var(--on-accent)}
+/*@*/
+
+/*@buttons:underline*/
+.btns{gap:.5rem 2rem}
+.btns .btn{min-height:2.75rem;padding:.4rem 0;border:0;border-radius:0;background:none;box-shadow:none;transform:none;color:var(--link-c);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.35em}
+.btns .btn::after{content:"→"}
+.btns .btn:hover{text-decoration-thickness:3px}
+/*@*/
+
+/*@over:fullbleed*/
+.hero-media .btns .btn,.hero-media .btns .btn:hover{background:transparent;color:#fff;border-color:#fff}
 /*@*/
