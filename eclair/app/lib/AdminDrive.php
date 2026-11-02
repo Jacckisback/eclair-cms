@@ -29,6 +29,20 @@ final class AdminDrive
             case 'cancel':
                 Drive::cancel();
                 Admin::back(self::BACK);
+            case 'app':
+                // L'application Google décide où partent les sauvegardes : même exigence que pour connecter un compte.
+                if (!Auth::confirmed($user)) {
+                    Admin::back(self::BACK, t('Mot de passe incorrect.'), 'bad');
+                }
+                $error = Drive::setApp((string) Req::input('client_id'), (string) Req::input('client_secret'));
+                $error === '' ? Admin::back(self::BACK, t('Application Google enregistrée : tu peux maintenant connecter Google Drive.'))
+                    : Admin::back(self::BACK, $error, 'bad');
+            case 'app-remove':
+                if (!Auth::confirmed($user)) {
+                    Admin::back(self::BACK, t('Mot de passe incorrect.'), 'bad');
+                }
+                Drive::removeApp();
+                Admin::back(self::BACK, t('Application Google retirée de ce site.'));
             case 'disconnect':
                 if (!Auth::confirmed($user)) {
                     Admin::back(self::BACK, t('Mot de passe incorrect.'), 'bad');

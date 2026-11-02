@@ -557,6 +557,16 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .inserter button:hover,.inserter button.active{background:var(--brand-soft)}
 .inserter .ico{display:grid;place-items:center;width:2.1rem;height:2.1rem;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);font-size:var(--fs-5);flex:none}
 .inserter b{display:block;font-size:var(--fs-3)}
+.inserter .ico{color:var(--brand)}
+.inserter .ico svg{width:1.1rem;height:1.1rem}
+.format-bar button svg{width:1rem;height:1rem;vertical-align:-.18em}
+.ai-menu button svg{width:1rem;height:1rem;flex:none;color:var(--brand)}
+.img-empty b,.posts-box b,.contact-box b,.video-box b{display:inline-flex;align-items:center;gap:.45rem}
+.img-empty b svg,.posts-box b svg,.contact-box b svg,.video-box b svg{width:1.1em;height:1.1em;color:var(--brand)}
+.member-pic svg{width:1.4rem;height:1.4rem;color:var(--muted)}
+#save-status[data-kind=bad]{color:var(--bad);font-weight:600}
+#save-status svg{width:1em;height:1em;flex:none}
+#save-status[data-kind=ok] svg{color:var(--ok)}
 .inserter small{display:block;color:var(--muted);font-size:var(--fs-2)}
 .format-bar{position:fixed;z-index:70;display:flex;gap:.15rem;padding:.25rem;background:var(--ink);border-radius:10px;box-shadow:var(--shadow-lg)}
 .format-bar button{min-width:2rem;height:2rem;border:0;background:none;color:var(--panel);border-radius:7px;cursor:pointer;font:700 var(--fs-3) var(--font)}
@@ -803,6 +813,13 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .update-how ol{margin:.6rem 0 0;padding-left:1.3rem;line-height:1.6}
 .notice ul{margin:.3rem 0 .5rem;padding-left:1.2rem}
 .drive-steps{margin:.4rem 0 .8rem;padding-left:1.3rem;line-height:1.9}
+.drive-guide{line-height:1.55;margin:.9rem 0 1.1rem}
+.drive-guide li{margin:.45rem 0;padding-left:.2rem}
+.drive-guide li::marker{font-weight:650;color:var(--brand)}
+.drive-guide a{display:inline-flex;align-items:center;gap:.25rem;font-weight:600;white-space:nowrap}
+.drive-guide a svg{width:.9em;height:.9em}
+.drive-app{margin-top:.4rem;padding-top:1rem;border-top:1px solid var(--line)}
+.drive-more .drive-guide{margin-top:.6rem}
 .drive-code{font:700 1.25rem/1 var(--mono);letter-spacing:.08em;padding:.15rem .5rem;border-radius:8px;background:var(--panel-2);border:1px solid var(--line)}
 .drive-run{margin:.6rem 0 1rem}
 .drive-run progress{width:100%}

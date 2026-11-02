@@ -12,7 +12,9 @@
   const send = (m) => P.postMessage(m, O);
   // Champs simples : texte brut seulement (repli sur « true » + garde-fous si le navigateur ne connaît pas plaintext-only).
   const PT = (() => { const d = D.createElement('div'); try { d.contentEditable = 'plaintext-only'; } catch (e) { /* ancien navigateur */ } return d.contentEditable === 'plaintext-only' ? 'plaintext-only' : 'true'; })();
-  const OPS = [['up', '↑'], ['down', '↓'], ['dup', '⧉'], ['del', '✕'], ['above', '+↑'], ['below', '+↓'], ['ai', '✨']];
+  const OPS = [['up', '↑'], ['down', '↓'], ['dup', '⧉'], ['del', '✕'], ['above', '+↑'], ['below', '+↓'], ['ai', '']];
+  // Icône de l'assistant IA, dessinée comme dans l'administration.
+  const SPARK = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>';
   let L = {};
   let cur = null;
   let last = null;
@@ -149,7 +151,7 @@
       bar.replaceChildren(...OPS.filter(([op]) => op !== 'ai' || L.ai).map(([op, text]) => {
         const b = D.createElement('button');
         b.type = 'button';
-        b.textContent = text;
+        if (op === 'ai') b.innerHTML = SPARK; else b.textContent = text;
         b.dataset.op = op;
         b.title = String(L[op] || op);
         b.setAttribute('aria-label', b.title);

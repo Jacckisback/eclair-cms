@@ -37,8 +37,8 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         proc_terminate($google);
     }
     $g = 'http://127.0.0.1:' . $gport;
-    file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_GOOGLE_CLIENT_ID', '123-test.apps.googleusercontent.com');\n"
-        . "define('ECLAIR_GOOGLE_CLIENT_SECRET', 'secret-de-test');\n"
+    // Aucun identifiant Google dans la configuration ni dans l'archive : le site enregistre sa propre application.
+    file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\n"
         . "define('ECLAIR_GOOGLE_ENDPOINTS', ['device' => '$g/device/code', 'token' => '$g/token', 'revoke' => '$g/revoke', 'api' => '$g/drive/v3', 'upload' => '$g/upload/drive/v3']);\n");
     $gstate = static fn (): array => json_decode((string) @file_get_contents($gdir . '/state.json'), true) ?: [];
     $live = static fn (): array => array_values(array_filter($gstate()['files'] ?? [], static fn (array $f): bool => !$f['trashed']));
@@ -69,6 +69,17 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         $api = static fn (string $path, array $body = []): array => json_decode($c->req('POST', '/gestion/api/' . $path, (string) json_encode($body ?: new stdClass()),
             ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . $csrf()])['body'], true) ?: [];
 
+        // Sans application Google : guide pas à pas et formulaire, pas encore de connexion possible.
+        $page = $c->req('GET', '/gestion/security')['body'];
+        check('sans application Google : guide et formulaire proposés', str_contains($page, 'Sauvegardes sur Google Drive') && str_contains($page, 'Enregistrer l’application Google')
+            && str_contains($page, 'TVs and Limited Input devices') && str_contains($page, 'https://console.cloud.google.com/auth/clients') && !str_contains($page, 'Connecter Google Drive'));
+        $body = $post(['action' => 'app', 'client_id' => 'pas-un-identifiant', 'client_secret' => 'secret-de-test', 'confirm_password' => 'Un-mot-de-passe-solide']);
+        check('application Google : ID client invalide refusé', str_contains($body, 'Cet ID client ne ressemble pas') && !str_contains($body, 'Connecter Google Drive'));
+        $body = $post(['action' => 'app', 'client_id' => ' 123-test.apps.googleusercontent.com ', 'client_secret' => 'secret-de-test', 'confirm_password' => 'Un-mot-de-passe-solide']);
+        check('application Google enregistrée : connexion proposée, ID affiché', str_contains($body, 'Application Google enregistrée') && str_contains($body, 'Connecter Google Drive')
+            && str_contains($body, 'ID client : 123-test.apps.googleusercontent.com') && !str_contains($body, 'secret-de-test'));
+        check('code secret de l’application chiffré dans le coffre, jamais en clair', is_file($copy . '/data/vault.php')
+            && !str_contains((string) file_get_contents($copy . '/data/vault.php'), 'secret-de-test') && !str_contains((string) file_get_contents($copy . '/data/drive.php'), 'secret-de-test'));
         $page = $c->req('GET', '/gestion/security')['body'];
         check('Sécurité : carte Google Drive, connexion proposée', str_contains($page, 'Sauvegardes sur Google Drive') && str_contains($page, 'Connecter Google Drive'));
 
@@ -167,6 +178,10 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         $body = $post(['action' => 'disconnect']);
         check('déconnexion : jeton révoqué chez Google, sauvegardes conservées', str_contains($body, 'Google Drive déconnecté') && is_file($gdir . '/revoked')
             && str_contains($body, 'Connecter Google Drive') && count($live()) === 2);
+        // Application retirée : retour au guide (une reconnexion demanderait une nouvelle application).
+        $body = $post(['action' => 'app-remove', 'confirm_password' => 'Un-mot-de-passe-solide']);
+        check('application Google retirée : guide de nouveau proposé', str_contains($body, 'Application Google retirée de ce site') && str_contains($body, 'Enregistrer l’application Google')
+            && !str_contains($body, 'Connecter Google Drive') && !str_contains((string) file_get_contents($copy . '/data/vault.php'), 'google_app'));
 
         // Téléchargement : même archive, sans secrets.
         $sec = $c->req('GET', '/gestion/security');

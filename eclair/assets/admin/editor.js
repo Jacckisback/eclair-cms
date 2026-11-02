@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Thierry Gustin
-/* ⚡ Éclair — éditeur de blocs (aucune dépendance). */
+/* Éclair — éditeur de blocs (aucune dépendance). */
 (() => {
   const E = window.Eclair;
   const root = document.getElementById('editor');
@@ -39,25 +39,65 @@
   const iconBtn = (name, label, onclick) => h('button', { type: 'button', title: label, 'aria-label': label, onclick }, svg(ICON[name]));
 
   /* ───────────── Types de blocs ───────────── */
+  /* Icônes des blocs et des menus (tracés dérivés de Lucide, licence ISC), comme le reste de l'administration. */
+  Object.assign(ICON, {
+    pilcrow: '<path d="M13 4v16"/><path d="M17 4v16"/><path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H13"/>',
+    heading: '<path d="M6 12h12"/><path d="M6 20V4"/><path d="M18 20V4"/>',
+    list: '<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+    quote: '<path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/>',
+    image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>',
+    bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    table: '<path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>',
+    button: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="m12 16 4-4-4-4"/>',
+    video: '<path d="m16 13 5.2 3.5a.5.5 0 0 0 .8-.4V7.9a.5.5 0 0 0-.8-.4L16 11"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+    code: '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+    divider: '<path d="M3 12h18"/><path d="m8 8 4-4 4 4"/><path d="m16 16-4 4-4-4"/>',
+    hero: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M7 14h6"/>',
+    grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',
+    news: '<path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/>',
+    bag: '<path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.1 6h17.8"/><path d="M3.4 5.5a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.7a2 2 0 0 0-.4-1.2l-2-2.7A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+    camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+    highlighter: '<path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>',
+    spark: '<path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/>',
+    spellcheck: '<path d="m6 16 6-12 6 12"/><path d="M8 12h8"/><path d="m16 20 2 2 4-4"/>',
+    scissors: '<circle cx="6" cy="6" r="3"/><path d="M8.1 8.1 12 12"/><path d="M20 4 8.1 15.9"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
+    expand: '<path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/>',
+    shrink: '<path d="m15 15 6 6m-6-6v4.8m0-4.8h4.8"/><path d="M9 19.8V15m0 0H4.2M9 15l-6 6"/><path d="M15 4.2V9m0 0h4.8M15 9l6-6"/><path d="M9 4.2V9m0 0H4.2M9 9 3 3"/>',
+    smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>',
+    briefcase: '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+    languages: '<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  });
+  const ico = (name) => {
+    const el = svg(ICON[name] || '');
+    el.setAttribute('width', '1em');
+    el.setAttribute('height', '1em');
+    return el;
+  };
   const TYPES = {
-    paragraph: ['¶', t('Texte'), t('Paragraphe de texte'), () => ({ type: 'paragraph', text: '' })],
-    heading: ['H', t('Intertitre'), t('Titre de section (H2, H3, H4)'), () => ({ type: 'heading', level: 2, text: '', anchor: '' })],
-    list: ['•', t('Liste'), t('À puces ou numérotée'), () => ({ type: 'list', style: 'ul', items: [''] })],
-    quote: ['❝', t('Citation'), t('Une phrase mise en avant'), () => ({ type: 'quote', text: '', cite: '' })],
-    image: ['🖼', t('Image'), t('Depuis la médiathèque'), () => ({ type: 'image', media: '', alt: '', caption: '', link: '', size: 'normal' })],
-    callout: ['💡', t('Encadré'), t('Astuce, info, attention'), () => ({ type: 'callout', variant: 'tip', title: '', text: '' })],
-    faq: ['❓', t('FAQ'), t('Questions-réponses (FAQPage)'), () => ({ type: 'faq', title: '', items: [{ q: '', a: '' }] })],
-    table: ['▦', t('Tableau'), t('Données en lignes et colonnes'), () => ({ type: 'table', head: true, caption: '', rows: [['', ''], ['', '']] })],
-    button: ['➜', t('Bouton'), t('Appel à l’action'), () => ({ type: 'button', text: '', url: '', style: 'primary', align: 'left' })],
-    video: ['▶', t('Vidéo'), t('YouTube ou Vimeo, sans cookies'), () => ({ type: 'video', url: '', caption: '' })],
-    code: ['</>', t('Code'), t('Extrait de code source'), () => ({ type: 'code', code: '', lang: '' })],
-    divider: ['—', t('Séparateur'), t('Ligne de séparation'), () => ({ type: 'divider' })],
-    hero: ['★', t('Bannière'), t('Grand titre d’accueil avec boutons'), () => ({ type: 'hero', title: '', text: '', button: '', url: '', button2: '', url2: '', media: '' })],
-    features: ['▤', t('Atouts'), t('Grille de services ou d’avantages'), () => ({ type: 'features', title: '', items: [{ icon: '🚀', title: '', text: '' }, { icon: '🤝', title: '', text: '' }, { icon: '✅', title: '', text: '' }] })],
-    team: ['👥', t('Équipe'), t('Portraits, fonctions et présentations'), () => ({ type: 'team', title: '', items: [{ name: '', role: '', bio: '', media: '', link: '' }] })],
-    posts: ['📰', t('Derniers articles'), t('Liste automatique des articles'), () => ({ type: 'posts', title: '', count: 3, category: '' })],
-    products: ['🛍', t('Produits'), t('Vitrine automatique de la boutique'), () => ({ type: 'products', title: '', count: 4, category: '' })],
-    contact: ['✉', t('Formulaire de contact'), t('Formulaire anti-spam intégré'), () => ({ type: 'contact', title: '', button: '' })],
+    paragraph: ['pilcrow', t('Texte'), t('Paragraphe de texte'), () => ({ type: 'paragraph', text: '' })],
+    heading: ['heading', t('Intertitre'), t('Titre de section (H2, H3, H4)'), () => ({ type: 'heading', level: 2, text: '', anchor: '' })],
+    list: ['list', t('Liste'), t('À puces ou numérotée'), () => ({ type: 'list', style: 'ul', items: [''] })],
+    quote: ['quote', t('Citation'), t('Une phrase mise en avant'), () => ({ type: 'quote', text: '', cite: '' })],
+    image: ['image', t('Image'), t('Depuis la médiathèque'), () => ({ type: 'image', media: '', alt: '', caption: '', link: '', size: 'normal' })],
+    callout: ['bulb', t('Encadré'), t('Astuce, info, attention'), () => ({ type: 'callout', variant: 'tip', title: '', text: '' })],
+    faq: ['help', t('FAQ'), t('Questions-réponses (FAQPage)'), () => ({ type: 'faq', title: '', items: [{ q: '', a: '' }] })],
+    table: ['table', t('Tableau'), t('Données en lignes et colonnes'), () => ({ type: 'table', head: true, caption: '', rows: [['', ''], ['', '']] })],
+    button: ['button', t('Bouton'), t('Appel à l’action'), () => ({ type: 'button', text: '', url: '', style: 'primary', align: 'left' })],
+    video: ['video', t('Vidéo'), t('YouTube ou Vimeo, sans cookies'), () => ({ type: 'video', url: '', caption: '' })],
+    code: ['code', t('Code'), t('Extrait de code source'), () => ({ type: 'code', code: '', lang: '' })],
+    divider: ['divider', t('Séparateur'), t('Ligne de séparation'), () => ({ type: 'divider' })],
+    hero: ['hero', t('Bannière'), t('Grand titre d’accueil avec boutons'), () => ({ type: 'hero', title: '', text: '', button: '', url: '', button2: '', url2: '', media: '' })],
+    features: ['grid', t('Atouts'), t('Grille de services ou d’avantages'), () => ({ type: 'features', title: '', items: [{ icon: '🚀', title: '', text: '' }, { icon: '🤝', title: '', text: '' }, { icon: '✅', title: '', text: '' }] })],
+    team: ['users', t('Équipe'), t('Portraits, fonctions et présentations'), () => ({ type: 'team', title: '', items: [{ name: '', role: '', bio: '', media: '', link: '' }] })],
+    posts: ['news', t('Derniers articles'), t('Liste automatique des articles'), () => ({ type: 'posts', title: '', count: 3, category: '' })],
+    products: ['bag', t('Produits'), t('Vitrine automatique de la boutique'), () => ({ type: 'products', title: '', count: 4, category: '' })],
+    contact: ['mail', t('Formulaire de contact'), t('Formulaire anti-spam intégré'), () => ({ type: 'contact', title: '', button: '' })],
   };
   const RICH = ['paragraph', 'heading', 'quote'];
 
@@ -152,7 +192,7 @@
         body.textContent = '';
         const m = media[state.media];
         if (!state.media || !m) {
-          const empty = h('div', { class: 'img-empty', tabindex: '0', role: 'button' }, h('b', { text: '🖼️ ' + t('Ajouter une image') }), h('span', { class: 'small', text: t('Glisse une image ici ou clique pour choisir') }));
+          const empty = h('div', { class: 'img-empty', tabindex: '0', role: 'button' }, h('b', {}, ico('image'), t('Ajouter une image')), h('span', { class: 'small', text: t('Glisse une image ici ou clique pour choisir') }));
           empty.addEventListener('click', choose);
           empty.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); } });
           dropEvents(empty, async (files) => {
@@ -174,7 +214,7 @@
     },
     callout(el, body, d, extra) {
       el.dataset.variant = d.variant || 'tip';
-      const variant = select(d.variant || 'tip', { tip: '💡 ' + t('Astuce'), info: 'ℹ️ ' + t('Bon à savoir'), warning: '⚠️ ' + t('Attention'), success: '✅ ' + t('À retenir'), note: '📝 ' + t('Note') }, t('Encadré'));
+      const variant = select(d.variant || 'tip', { tip: t('Astuce'), info: t('Bon à savoir'), warning: t('Attention'), success: t('À retenir'), note: t('Note') }, t('Encadré'));
       variant.addEventListener('change', () => { el.dataset.variant = variant.value; changed(); });
       extra.append(variant);
       const title = input(d.title, t('Titre de l’encadré (facultatif)'));
@@ -242,11 +282,11 @@
       const hint = h('p', { class: 'small muted' });
       const check = () => {
         const ok = !url.value || /^(https?:\/\/)?(www\.|m\.)?(youtube\.com\/(watch\?(.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)[\w-]{11}|vimeo\.com\/(video\/)?\d+/.test(url.value);
-        hint.textContent = ok ? '' : '⚠️ ' + t('Lien vidéo non reconnu');
+        hint.textContent = ok ? '' : t('Lien vidéo non reconnu');
       };
       url.addEventListener('input', check);
       check();
-      body.append(h('div', { class: 'video-box' }, h('b', { text: '▶ ' + t('Vidéo') }), h('div', { class: 'sub-fields' }, url, caption), hint));
+      body.append(h('div', { class: 'video-box' }, h('b', {}, ico('video'), t('Vidéo')), h('div', { class: 'sub-fields' }, url, caption), hint));
       el._read = () => ({ type: 'video', url: url.value.trim(), caption: caption.value.trim() });
       el._focus = () => url.focus();
     },
@@ -280,7 +320,7 @@
         pic.textContent = '';
         const m = media[state.media];
         if (m) pic.append(h('img', { src: m.thumb, alt: '', class: 'thumb' }));
-        pic.append(h('button', { class: 'btn btn-sm', type: 'button', text: m ? t('Changer l’image') : '🖼️ ' + t('Ajouter une image'), onclick: async () => { const x = await pickMedia(); if (x) { media[x.id] = x; state.media = x.id; drawPic(); changed(); } } }));
+        pic.append(h('button', { class: 'btn btn-sm', type: 'button', text: m ? t('Changer l’image') : t('Ajouter une image'), onclick: async () => { const x = await pickMedia(); if (x) { media[x.id] = x; state.media = x.id; drawPic(); changed(); } } }));
         if (m) pic.append(h('button', { class: 'btn btn-sm btn-ghost', type: 'button', text: t('Retirer l’image'), onclick: () => { state.media = ''; drawPic(); changed(); } }));
       };
       drawPic();
@@ -318,7 +358,7 @@
         const drop = h('button', { type: 'button', class: 'link-btn small', text: t('Retirer la photo') });
         const drawPic = () => {
           const m = media[state.media];
-          pic.replaceChildren(m ? h('img', { src: m.thumb, alt: '' }) : h('span', { text: '📷' }));
+          pic.replaceChildren(m ? h('img', { src: m.thumb, alt: '' }) : ico('camera'));
           drop.hidden = !m;
         };
         pic.addEventListener('click', async () => { const x = await pickMedia(); if (x) { media[x.id] = x; state.media = x.id; drawPic(); changed(); } });
@@ -341,7 +381,7 @@
       const cats = { '': t('Toutes les catégories') };
       cfg.categories.filter((c) => c.kind !== 'product').forEach((c) => { cats[c.id] = c.name; });
       const category = select(d.category || '', cats, t('Catégorie'));
-      body.append(h('div', { class: 'posts-box' }, h('b', { text: '📰 ' + t('Derniers articles') }), h('div', { class: 'sub-fields' }, title, count, category)));
+      body.append(h('div', { class: 'posts-box' }, h('b', {}, ico('news'), t('Derniers articles')), h('div', { class: 'sub-fields' }, title, count, category)));
       el._read = () => ({ type: 'posts', title: title.value.trim(), count: +count.value || 3, category: category.value });
       el._focus = () => title.focus();
     },
@@ -351,7 +391,7 @@
       const cats = { '': t('Toutes les catégories') };
       cfg.categories.filter((c) => c.kind === 'product').forEach((c) => { cats[c.id] = c.name; });
       const category = select(d.category || '', cats, t('Catégorie'));
-      body.append(h('div', { class: 'posts-box' }, h('b', { text: '🛍️ ' + t('Produits') }), h('div', { class: 'sub-fields' }, title, count, category),
+      body.append(h('div', { class: 'posts-box' }, h('b', {}, ico('bag'), t('Produits')), h('div', { class: 'sub-fields' }, title, count, category),
         cfg.site.shopOn ? '' : h('p', { class: 'small muted', text: t('La boutique est fermée : ce bloc reste invisible.') })));
       el._read = () => ({ type: 'products', title: title.value.trim(), count: +count.value || 4, category: category.value });
       el._focus = () => title.focus();
@@ -359,7 +399,7 @@
     contact(el, body, d) {
       const title = input(d.title, t('Titre de la section (facultatif)'));
       const button = input(d.button, t('Texte du bouton (facultatif)'));
-      body.append(h('div', { class: 'contact-box' }, h('b', { text: '✉️ ' + t('Formulaire de contact') }),
+      body.append(h('div', { class: 'contact-box' }, h('b', {}, ico('mail'), t('Formulaire de contact')),
         h('p', { class: 'small muted', text: t('Le formulaire de contact s’affichera ici, avec protection anti-spam.') }), h('div', { class: 'sub-fields' }, title, button)));
       el._read = () => ({ type: 'contact', title: title.value.trim(), button: button.value.trim() });
       el._focus = () => title.focus();
@@ -607,7 +647,7 @@
       entries.forEach(([k, v], i) => list.append(h('button', {
         type: 'button', role: 'option', class: i === active ? 'active' : '', 'data-type': k,
         onclick: () => choose(k),
-      }, h('span', { class: 'ico', text: v[0] }), h('span', {}, h('b', { text: v[1] }), h('small', { text: v[2] })))));
+      }, h('span', { class: 'ico' }, ico(v[0])), h('span', {}, h('b', { text: v[1] }), h('small', { text: v[2] })))));
     };
     const choose = (type) => {
       const data = TYPES[type][3]();
@@ -641,7 +681,7 @@
   const linkInput = h('input', { type: 'text', placeholder: t('Coller une adresse ou chercher une page…'), 'aria-label': t('Lien'), hidden: true });
   const suggest = h('div', { class: 'link-suggest', hidden: true });
   let savedRange = null;
-  const cmd = (name, label, title, fn) => h('button', { type: 'button', title, 'aria-label': title, text: label, 'data-cmd': name, onmousedown: (e) => { e.preventDefault(); fn(); } });
+  const cmd = (name, label, title, fn) => h('button', { type: 'button', title, 'aria-label': title, 'data-cmd': name, onmousedown: (e) => { e.preventDefault(); fn(); } }, label);
   const wrap = (tag) => {
     const sel = window.getSelection();
     if (!sel.rangeCount || sel.isCollapsed) return;
@@ -652,9 +692,9 @@
   bar.append(
     cmd('bold', 'B', t('Gras') + ' (Ctrl+B)', () => document.execCommand('bold')),
     cmd('italic', 'I', t('Italique') + ' (Ctrl+I)', () => document.execCommand('italic')),
-    cmd('link', '🔗', t('Lien') + ' (Ctrl+K)', () => startLink()),
+    cmd('link', ico('link'), t('Lien') + ' (Ctrl+K)', () => startLink()),
     cmd('code', '</>', t('Code'), () => wrap('code')),
-    cmd('mark', '🖍', t('Surligner'), () => wrap('mark')),
+    cmd('mark', ico('highlighter'), t('Surligner'), () => wrap('mark')),
     cmd('unlink', '⨯', t('Retirer le lien'), () => { document.execCommand('unlink'); document.execCommand('removeFormat'); }),
     linkInput);
   document.body.append(bar, suggest);
@@ -1001,7 +1041,12 @@
   let saved = '';
   let localTimer = null;
   const isDirty = () => JSON.stringify(serialize()) !== saved;
-  const status = (text) => { $('#save-status').textContent = text; };
+  // Ligne d'état de l'enregistrement ; kind : '' (neutre), 'ok' ou 'bad' (avec une icône).
+  const status = (text, kind = '') => {
+    const el = $('#save-status');
+    el.dataset.kind = kind;
+    el.replaceChildren(...(kind ? [ico(kind === 'bad' ? 'alert' : 'check')] : []), text);
+  };
   let vQuiet = false;
   function changed() {
     serp();
@@ -1035,7 +1080,7 @@
     const res = await api('api/save', data).catch(() => null);
     saving = false;
     $('#btn-save').disabled = $('#btn-publish').disabled = false;
-    if (!res || !res.ok) { status('⚠️ ' + t('Modifications non enregistrées')); return; }
+    if (!res || !res.ok) { status(t('Modifications non enregistrées'), 'bad'); return; }
     const wasNew = !item.id;
     item = res.item;
     cfg.path = res.path;
@@ -1049,7 +1094,7 @@
     if (wasNew) history.replaceState(null, '', D.admin + '/edit/' + item.id);
     showAnalysis(res.analysis);
     updateBadge();
-    status('✓ ' + t('Enregistré') + ' · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    status(t('Enregistré') + ' · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 'ok');
     if (data.status === 'published') toast(item.date > Date.now() / 1000 ? t('Programmé ✓') : t('Publié ✓'), 'ok');
   }
   $('#btn-save').addEventListener('click', () => save(false));
@@ -1133,7 +1178,7 @@
       return res;
     };
     const mini = (label, run) => {
-      const b = h('button', { type: 'button', class: 'ai-mini', text: '✨ ' + label });
+      const b = h('button', { type: 'button', class: 'ai-mini' }, ico('spark'), label);
       b.addEventListener('click', () => { if (!b.hasAttribute('aria-busy')) run(b); });
       return b;
     };
@@ -1162,13 +1207,13 @@
     // Menu des retouches, ouvert sous un passage (r : sa position) ; run(mode, langue) fait la retouche.
     aiMenu = (r, run) => {
       closeMenu();
-      const choice = (label, fn) => h('button', { type: 'button', role: 'menuitem', onmousedown: keep, onclick: fn }, label);
+      const choice = (icon, label, fn) => h('button', { type: 'button', role: 'menuitem', onmousedown: keep, onclick: fn }, icon ? ico(icon) : null, label);
       const go = (mode, lang) => () => { closeMenu(); run(mode, lang); };
-      const modes = [['improve', '✨ ' + t('Améliorer')], ['fix', '✔️ ' + t('Corriger les fautes')], ['shorten', '✂️ ' + t('Raccourcir')], ['expand', '➕ ' + t('Développer')],
-        ['simplify', '🧩 ' + t('Simplifier')], ['warmer', '🤝 ' + t('Plus chaleureux')], ['formal', '👔 ' + t('Plus professionnel')]];
+      const modes = [['improve', 'spark', t('Améliorer')], ['fix', 'spellcheck', t('Corriger les fautes')], ['shorten', 'scissors', t('Raccourcir')], ['expand', 'expand', t('Développer')],
+        ['simplify', 'shrink', t('Simplifier')], ['warmer', 'smile', t('Plus chaleureux')], ['formal', 'briefcase', t('Plus professionnel')]];
       menu = h('div', { class: 'ai-menu', role: 'menu', 'aria-label': t('Retoucher avec l’IA') },
-        modes.map(([mode, label]) => choice(label, go(mode, ''))), h('hr'),
-        choice('🌍 ' + t('Traduire…'), () => menu.replaceChildren(...Object.entries(cfg.langs).map(([code, name]) => choice(name, go('translate', code))))));
+        modes.map(([mode, icon, label]) => choice(icon, label, go(mode, ''))), h('hr'),
+        choice('languages', t('Traduire…'), () => menu.replaceChildren(...Object.entries(cfg.langs).map(([code, name]) => choice(null, name, go('translate', code))))));
       document.body.append(menu);
       menu.querySelector('button').focus();
       menu.style.top = Math.max(8, Math.min(r.bottom + 10, innerHeight - menu.offsetHeight - 8)) + 'px';
@@ -1182,8 +1227,8 @@
       const ed = (node.nodeType === 1 ? node : node.parentElement).closest('#blocks [contenteditable]');
       if (ed) aiMenu(range.getBoundingClientRect(), (mode, lang) => rewrite(mode, lang, range, ed));
     };
-    bar.append(cmd('ai', '✨', t('Retoucher avec l’IA'), openMenu));
-    // Le clic qui ouvre le menu (bouton ✨) ne doit pas le refermer aussitôt.
+    bar.append(cmd('ai', ico('spark'), t('Retoucher avec l’IA'), openMenu));
+    // Le clic qui ouvre le menu (bouton IA) ne doit pas le refermer aussitôt.
     document.addEventListener('mousedown', (e) => { if (menu && !menu.contains(e.target) && !e.target.closest('[data-cmd=ai]')) closeMenu(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
@@ -1294,7 +1339,7 @@
   const labels = () => ({
     up: t('Monter'), down: t('Descendre'), dup: t('Dupliquer'), del: t('Supprimer'), above: t('Ajouter un bloc au-dessus'),
     below: t('Ajouter un bloc en dessous'), ai: D.ai ? t('Retoucher avec l’IA') : '', bar: t('Outils du bloc'), write: t('Écris ici…'),
-    types: Object.fromEntries(Object.entries(TYPES).map(([k, v]) => [k, v[0] + ' ' + v[1]])),
+    types: Object.fromEntries(Object.entries(TYPES).map(([k, v]) => [k, v[1]])),
   });
   // Position (dans l'aperçu) d'un bouton ou d'une sélection → position dans l'éditeur.
   const at = (r) => {
@@ -1350,7 +1395,7 @@
     if (i < 0 && path === 'image' && f('f-image-pick')) { item.image = x.id; drawImage(); } else if (el) { const d = el._read(); if (put(d, path, x.id)) swap(el, d); }
     changed();
   };
-  // ✨ : les retouches de l'IA (assist → rewrite) sur le champ enrichi choisi ; annulables.
+  // IA : les retouches de l’IA (assist → rewrite) sur le champ enrichi choisi ; annulables.
   const vAi = (el, i, path, anchor) => {
     const d = el._read();
     const html = get(d, path);

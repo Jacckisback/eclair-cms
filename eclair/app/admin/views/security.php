@@ -21,6 +21,7 @@ $events = [
     'update_archive_rejected' => t('Archive de mise à jour refusée'),
     'drive_connected' => t('Google Drive connecté'), 'drive_disconnected' => t('Google Drive déconnecté'),
     'drive_revoked' => t('Accès à Google Drive retiré'), 'drive_backup' => t('Sauvegarde envoyée sur Google Drive'),
+    'drive_app_saved' => t('Application Google enregistrée'), 'drive_app_removed' => t('Application Google retirée de ce site'),
 ];
 ?>
 <div class="page">
@@ -89,11 +90,37 @@ $events = [
   </div>
 
   <?php $d = $v['drive']; ?>
+  <?php ob_start(); ?>
+      <ol class="drive-steps drive-guide">
+        <li><?= e(t('Crée un projet dans la console Google Cloud, par exemple « Sauvegardes de mon site ».')) ?> <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener"><?= e(t('Ouvrir')) ?><?= Icons::svg('external') ?></a></li>
+        <li><?= e(t('Active l’API Google Drive pour ce projet.')) ?> <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener"><?= e(t('Ouvrir')) ?><?= Icons::svg('external') ?></a></li>
+        <li><?= e(t('Dans Google Auth Platform › Branding, clique sur « Get started » : nom de l’application, ton adresse e-mail, audience « External », puis valide.')) ?> <a href="https://console.cloud.google.com/auth/branding" target="_blank" rel="noopener"><?= e(t('Ouvrir')) ?><?= Icons::svg('external') ?></a></li>
+        <li><?= e(t('Dans « Data Access », ajoute le champ d’accès …/auth/drive.file, puis enregistre.')) ?> <a href="https://console.cloud.google.com/auth/scopes" target="_blank" rel="noopener"><?= e(t('Ouvrir')) ?><?= Icons::svg('external') ?></a></li>
+        <li><?= e(t('Dans « Audience », clique sur « Publish app » : en mode test, Google coupe l’accès au bout de 7 jours.')) ?> <a href="https://console.cloud.google.com/auth/audience" target="_blank" rel="noopener"><?= e(t('Ouvrir')) ?><?= Icons::svg('external') ?></a></li>
+        <li><?= e(t('Dans « Clients », clique sur « Create client », choisis le type « TVs and Limited Input devices », puis copie l’ID client et le code secret.')) ?> <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener"><?= e(t('Ouvrir')) ?><?= Icons::svg('external') ?></a></li>
+        <li><?= e(t('Colle-les ci-dessous. À la connexion, si Google indique qu’il n’a pas validé l’application, clique sur « Paramètres avancés » puis continue : c’est la tienne.')) ?></li>
+      </ol>
+      <form method="post" action="<?= e(admin_url('drive')) ?>" class="drive-app"><?= Security::csrfField() ?><input type="hidden" name="action" value="app">
+        <div class="grid-2">
+          <label class="field"><span class="label"><?= e(t('ID client')) ?></span>
+            <input type="text" name="client_id" required autocomplete="off" spellcheck="false" placeholder="1234567890-abc.apps.googleusercontent.com"></label>
+          <label class="field"><span class="label"><?= e(t('Code secret du client')) ?></span>
+            <input type="password" name="client_secret" required autocomplete="off" spellcheck="false"></label>
+        </div>
+        <p class="hint"><?= e(t('Le code secret est chiffré sur ton serveur et n’est plus jamais affiché.')) ?></p>
+        <?= \Eclair\Admin::partial('partials/confirm', []) ?>
+        <button class="btn btn-primary" type="submit"><?= Icons::svg('key') ?><?= e(t('Enregistrer l’application Google')) ?></button>
+      </form>
+  <?php $appSetup = (string) ob_get_clean(); ?>
   <section class="card" id="drive" aria-labelledby="drive-title">
     <div class="card-head"><h2 id="drive-title"><?= e(t('Sauvegardes sur Google Drive')) ?></h2>
       <?php if ($d['connected']): ?><span class="badge ok"><?= e(t('Connecté')) ?></span><?php endif ?></div>
-    <?php if (!$d['available'] && !$d['connected']): ?>
-      <p class="small muted"><?= e(t('Indisponible sur cette installation (application Google non configurée, ou extensions PHP curl, zip et sodium absentes). Le téléchargement de sauvegarde reste disponible ci-dessus.')) ?></p>
+    <?php if (!$d['ready'] && !$d['connected']): ?>
+      <p class="small muted"><?= e(t('Indisponible sur ce serveur : les extensions PHP curl, zip et sodium (ou openssl) sont nécessaires. Le téléchargement de sauvegarde reste disponible ci-dessus.')) ?></p>
+    <?php elseif (!$d['available'] && !$d['connected']): ?>
+      <p class="small muted"><?= e(t('Envoie automatiquement une copie de ton site (contenus, réglages, comptes, images) dans ton Google Drive, chaque jour ou chaque semaine, ou quand tu veux. Éclair n’a accès qu’aux fichiers qu’il crée : il ne voit rien d’autre de ton Drive.')) ?></p>
+      <div class="notice"><span><?= Icons::svg('key') ?></span><p><?= e(t('Pour se connecter à ton Drive, ton site a besoin d’une application Google à ton nom : gratuite, elle se crée une seule fois, en une dizaine de minutes. Seul ton site l’utilise.')) ?></p></div>
+      <?= $appSetup ?>
     <?php elseif ($d['pending']): ?>
       <ol class="drive-steps">
         <li><?= e(t('Ouvre cette page Google, sur ton ordinateur ou ton téléphone :')) ?> <a href="<?= e($d['pending']['url']) ?>" target="_blank" rel="noopener"><strong><?= e(preg_replace('~^https?://~', '', $d['pending']['url'])) ?></strong></a></li>
@@ -152,6 +179,18 @@ $events = [
       <form method="post" action="<?= e(admin_url('drive')) ?>" data-confirm="<?= e(t('Déconnecter Google Drive ? Les sauvegardes déjà envoyées restent dans ton Drive.')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="disconnect">
         <?= \Eclair\Admin::partial('partials/confirm', ['required' => false]) ?>
         <button class="btn btn-sm btn-ghost" type="submit"><?= Icons::svg('logout') ?><?= e(t('Déconnecter Google Drive')) ?></button></form>
+    <?php endif ?>
+    <?php if ($d['ready'] && $d['own'] !== ''): ?>
+      <details class="small drive-more"><summary><?= e(t('Application Google de ce site')) ?></summary>
+        <p class="muted"><?= e(t('ID client : {id}', ['id' => $d['own']])) ?></p>
+        <form method="post" action="<?= e(admin_url('drive')) ?>" data-confirm="<?= e(t('Retirer l’application Google ? Google Drive sera déconnecté ; les sauvegardes déjà envoyées restent dans ton Drive.')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="app-remove">
+          <?= \Eclair\Admin::partial('partials/confirm', ['required' => false]) ?>
+          <button class="btn btn-sm btn-ghost" type="submit"><?= Icons::svg('trash') ?><?= e(t('Retirer l’application Google')) ?></button></form>
+      </details>
+    <?php elseif ($d['ready'] && $d['available'] && $d['builtin']): ?>
+      <details class="small drive-more"><summary><?= e(t('Utiliser ta propre application Google (facultatif)')) ?></summary>
+        <?= $appSetup ?>
+      </details>
     <?php endif ?>
   </section>
 

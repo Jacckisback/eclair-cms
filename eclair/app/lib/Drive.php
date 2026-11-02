@@ -35,23 +35,89 @@ final class Drive
     private const CHUNK = 4194304;
     public const SCHEDULES = ['off' => 0, 'daily' => 86400, 'weekly' => 604800];
     private const VAULT = 'google_drive';
+    /** Application Google du site (ID et code secret), enregistrée dans l'administration quand l'archive n'en fournit pas. */
+    private const APP = 'google_app';
 
     /* ─────────────────────────────── État ─────────────────────────────── */
 
-    /** Identifiants OAuth : ceux d'eclair-config.php (fork, tests) ou ceux de l'application Éclair livrés dans l'archive. */
+    /**
+     * Identifiants OAuth, par ordre de priorité : ceux d'eclair-config.php (fork, tests), l'application Google du site
+     * (enregistrée dans l'administration), puis l'application Éclair livrée dans l'archive.
+     */
     private static function client(): array
     {
-        return [
-            defined('ECLAIR_GOOGLE_CLIENT_ID') ? (string) ECLAIR_GOOGLE_CLIENT_ID : self::CLIENT_ID,
-            defined('ECLAIR_GOOGLE_CLIENT_SECRET') ? (string) ECLAIR_GOOGLE_CLIENT_SECRET : self::CLIENT_SECRET,
-        ];
+        if (defined('ECLAIR_GOOGLE_CLIENT_ID')) {
+            return [(string) ECLAIR_GOOGLE_CLIENT_ID, defined('ECLAIR_GOOGLE_CLIENT_SECRET') ? (string) ECLAIR_GOOGLE_CLIENT_SECRET : ''];
+        }
+        $own = json_decode(Vault::get(self::APP), true);
+        if (is_array($own) && (string) ($own['id'] ?? '') !== '' && (string) ($own['secret'] ?? '') !== '') {
+            return [(string) $own['id'], (string) $own['secret']];
+        }
+        return [self::CLIENT_ID, self::CLIENT_SECRET];
     }
 
-    /** Fonction proposée sur ce serveur ? (application Google configurée, extensions nécessaires) */
+    /** Extensions nécessaires présentes (curl, zip, chiffrement du coffre) : la fonction peut être proposée. */
+    public static function ready(): bool
+    {
+        return function_exists('curl_init') && class_exists('ZipArchive') && Vault::available();
+    }
+
+    /** Fonction utilisable sur ce serveur ? (application Google connue, extensions nécessaires) */
     public static function available(): bool
     {
         [$id, $secret] = self::client();
-        return $id !== '' && $secret !== '' && function_exists('curl_init') && class_exists('ZipArchive') && Vault::available();
+        return $id !== '' && $secret !== '' && self::ready();
+    }
+
+    /** Application Google d'Éclair livrée dans l'archive (sans elle, chaque site enregistre la sienne). */
+    public static function builtIn(): bool
+    {
+        return self::CLIENT_ID !== '' && self::CLIENT_SECRET !== '';
+    }
+
+    /** ID client de l'application Google du site ('' si aucune) : affichable, contrairement au code secret. */
+    public static function ownApp(): string
+    {
+        $own = json_decode(Vault::get(self::APP), true);
+        return is_array($own) ? (string) ($own['id'] ?? '') : '';
+    }
+
+    /**
+     * Enregistre l'application Google du site (code secret chiffré dans le coffre). Renvoie un message d'erreur, ou ''.
+     * Un compte déjà connecté l'était avec une autre application : il est déconnecté, son jeton ne servirait plus.
+     */
+    public static function setApp(string $id, string $secret): string
+    {
+        $id = trim($id);
+        $secret = trim($secret);
+        if (!preg_match('~^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$~i', $id)) {
+            return t('Cet ID client ne ressemble pas à ceux de Google : il se termine par .apps.googleusercontent.com.');
+        }
+        if (!preg_match('~^[A-Za-z0-9_-]{10,100}$~', $secret)) {
+            return t('Code secret du client invalide : copie-le tel quel depuis la console Google.');
+        }
+        if (self::connected()) {
+            self::disconnect();
+        }
+        try {
+            Vault::set(self::APP, (string) json_encode(['id' => $id, 'secret' => $secret]));
+        } catch (\Throwable $e) {
+            return $e->getMessage();
+        }
+        self::save([], ['pending', 'error']);
+        Log::security('drive_app_saved');
+        return '';
+    }
+
+    /** Retire l'application Google du site (et déconnecte le compte qui l'utilisait). */
+    public static function removeApp(): void
+    {
+        if (self::connected()) {
+            self::disconnect();
+        }
+        Vault::set(self::APP, '');
+        self::save([], ['pending', 'error']);
+        Log::security('drive_app_removed');
     }
 
     public static function connected(): bool
@@ -82,7 +148,10 @@ final class Drive
         $job = is_array($s['job'] ?? null) ? $s['job'] : null;
         $pending = is_array($s['pending'] ?? null) && (int) $s['pending']['expires'] > time() ? $s['pending'] : null;
         return [
+            'ready' => self::ready(),
             'available' => self::available(),
+            'builtin' => self::builtIn(),
+            'own' => self::ownApp(),
             'connected' => self::connected(),
             'pending' => $pending,
             'email' => (string) ($s['email'] ?? ''),
