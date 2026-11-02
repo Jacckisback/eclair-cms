@@ -181,8 +181,8 @@ foreach (['LICENSE' => 'LICENSE.txt', 'NOTICE' => 'NOTICE.txt', 'THIRD-PARTY-NOT
 $zip->close();
 printf("✓ Archive : %s (%s Ko, %s octets une fois décompressée)\n", $zipFile, round(filesize($zipFile) / 1024), number_format($size, 0, ',', ' '));
 echo str_contains(shipped($root, 'app/lib/Drive.php'), "CLIENT_ID = ''")
-    ? "⚠ ECLAIR_GOOGLE_CLIENT_ID / ECLAIR_GOOGLE_CLIENT_SECRET absents : sauvegarde Google Drive indisponible dans cette archive.\n"
-    : "✓ Application Google intégrée (sauvegardes Drive)\n";
+    ? "ℹ ECLAIR_GOOGLE_CLIENT_ID / ECLAIR_GOOGLE_CLIENT_SECRET absents : pas d'application Google intégrée, chaque site crée la sienne (guide dans Sécurité › Google Drive).\n"
+    : "✓ Application Google intégrée : Google Drive se connecte en un clic, sans créer d'application\n";
 
 /*
  * Annonce de la mise à jour en un clic (dist/latest.json), signée Ed25519 avec la clé privée du mainteneur.

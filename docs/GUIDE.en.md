@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip) archive (594 KB) and unzip it.
+1. Download the [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip) archive (602 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -568,6 +568,14 @@ Good to know:
 ### Google Drive backups
 
 Security › **Google Drive backups** sends a copy of your site to your Google Drive, every day, every week or whenever you like.
+
+**The first time: your Google app.** To reach your Drive, your site needs a Google app in your name: it's free, takes about ten minutes to create, once, and only your site uses it. The Google Drive card shows the step-by-step guide, with a link to each screen:
+
+- Create a project in the [Google Cloud console](https://console.cloud.google.com/projectcreate) and enable the **Google Drive API**.
+- In **Google Auth Platform**: app name and your email address (audience “External”), the `…/auth/drive.file` scope, then **Publish app** (in testing mode, Google cuts off access after 7 days).
+- Create a client of type **TVs and Limited Input devices**, then paste its **client ID** and **client secret** into the card. The secret is encrypted on your server.
+
+Then, to connect your Drive:
 
 1. Click **Connect Google Drive** (you may be asked for your password again).
 2. Éclair shows a code. Open **google.com/device** on your computer or phone, enter the code, choose your Google account and authorize Éclair.

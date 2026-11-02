@@ -37,7 +37,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip) (594 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip) (602 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -568,6 +568,14 @@ Bon à savoir :
 ### Sauvegardes sur Google Drive
 
 Sécurité › **Sauvegardes sur Google Drive** envoie une copie de ton site dans ton Google Drive, chaque jour, chaque semaine ou quand tu veux.
+
+**La première fois : ton application Google.** Pour accéder à ton Drive, ton site a besoin d'une application Google à ton nom : gratuite, elle se crée une seule fois, en une dizaine de minutes, et seul ton site l'utilise. La carte Google Drive affiche le guide pas à pas, avec un lien vers chaque écran :
+
+- Crée un projet dans la [console Google Cloud](https://console.cloud.google.com/projectcreate) et active l'**API Google Drive**.
+- Dans **Google Auth Platform** : nom de l'application et ton e-mail (audience « External »), champ d'accès `…/auth/drive.file`, puis **Publish app** (en mode test, Google coupe l'accès au bout de 7 jours).
+- Crée un client de type **TVs and Limited Input devices**, puis colle son **ID client** et son **code secret** dans la carte. Le code secret est chiffré sur ton serveur.
+
+Ensuite, pour connecter ton Drive :
 
 1. Clique sur **Connecter Google Drive** (ton mot de passe peut être redemandé).
 2. Éclair affiche un code. Ouvre **google.com/device** sur ton ordinateur ou ton téléphone, saisis le code, choisis ton compte Google et autorise Éclair.

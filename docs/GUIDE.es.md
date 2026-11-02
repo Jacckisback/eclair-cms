@@ -37,7 +37,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 
 ### Pasos
 
-1. Descarga el archivo [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip) (594 KB) y descomprímelo.
+1. Descarga el archivo [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip) (602 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
 3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
@@ -568,6 +568,14 @@ Conviene saber:
 ### Copias de seguridad en Google Drive
 
 Seguridad › **Copias de seguridad en Google Drive** envía una copia de tu sitio a tu Google Drive cada día, cada semana o cuando quieras.
+
+**La primera vez: tu aplicación de Google.** Para acceder a tu Drive, tu sitio necesita una aplicación de Google a tu nombre: es gratuita, se crea una sola vez en unos diez minutos y solo la usa tu sitio. La tarjeta Google Drive muestra la guía paso a paso, con un enlace a cada pantalla:
+
+- Crea un proyecto en la [consola de Google Cloud](https://console.cloud.google.com/projectcreate) y activa la **API de Google Drive**.
+- En **Google Auth Platform**: nombre de la aplicación y tu correo electrónico (audiencia «External»), el permiso `…/auth/drive.file` y luego **Publish app** (en modo de prueba, Google corta el acceso a los 7 días).
+- Crea un cliente de tipo **TVs and Limited Input devices** y pega su **ID de cliente** y su **secreto** en la tarjeta. El secreto se cifra en tu servidor.
+
+Después, para conectar tu Drive:
 
 1. Haz clic en **Conectar Google Drive** (puede que se te vuelva a pedir la contraseña).
 2. Éclair muestra un código. Abre **google.com/device** en tu ordenador o en tu móvil, introduce el código, elige tu cuenta de Google y autoriza a Éclair.

@@ -37,7 +37,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip) (594 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip) (602 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -568,6 +568,14 @@ Gut zu wissen:
 ### Backups auf Google Drive
 
 Sicherheit › **Backups auf Google Drive** legt eine Kopie deiner Website in deinem Google Drive ab, täglich, wöchentlich oder wann immer du willst.
+
+**Beim ersten Mal: deine Google-App.** Um auf dein Drive zuzugreifen, braucht deine Website eine Google-App auf deinen Namen: kostenlos, einmalig in etwa zehn Minuten erstellt, und nur deine Website nutzt sie. Die Karte Google Drive zeigt die Schritt-für-Schritt-Anleitung mit einem Link zu jedem Bildschirm:
+
+- Erstelle ein Projekt in der [Google Cloud Console](https://console.cloud.google.com/projectcreate) und aktiviere die **Google Drive API**.
+- In **Google Auth Platform**: App-Name und deine E-Mail-Adresse (Zielgruppe „External“), der Bereich `…/auth/drive.file`, dann **Publish app** (im Testmodus sperrt Google den Zugriff nach 7 Tagen).
+- Erstelle einen Client vom Typ **TVs and Limited Input devices** und füge seine **Client-ID** und seinen **Clientschlüssel** in die Karte ein. Der Schlüssel wird auf deinem Server verschlüsselt.
+
+Danach verbindest du dein Drive so:
 
 1. Klicke auf **Google Drive verbinden** (eventuell wirst du erneut nach deinem Passwort gefragt).
 2. Éclair zeigt einen Code an. Öffne **google.com/device** auf deinem Computer oder Smartphone, gib den Code ein, wähle dein Google-Konto und erlaube Éclair den Zugriff.

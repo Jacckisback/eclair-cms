@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip"><img src="https://img.shields.io/badge/scarica-v1.10.1-5b3cbc?style=for-the-badge" alt="Scarica Éclair 1.10.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip"><img src="https://img.shields.io/badge/scarica-v1.10.2-5b3cbc?style=for-the-badge" alt="Scarica Éclair 1.10.2"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o successivo">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-nessuno-14122b?style=for-the-badge" alt="Nessun database">
@@ -63,7 +63,7 @@ WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicur
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleggero</h3>
-      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>594 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
+      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>602 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Semplicissimo</h3>
@@ -254,7 +254,7 @@ Quando esce una nuova versione di Éclair, la tua bacheca ti avvisa. Il momento 
 - **Nessun rischio per i tuoi contenuti**: cambia solo il codice. Contenuti, immagini, account, impostazioni e CSS personalizzato restano invariati, e un `.htaccess` ritoccato viene conservato.
 - **Ritorno automatico**: dopo l’installazione, Éclair verifica che il tuo sito e il tuo pannello rispondano come prima; altrimenti torna da solo alla versione precedente. Con un pulsante puoi anche tornarci quando vuoi.
 
-**Backup su Google Drive**: collega il tuo Drive con un semplice codice (google.com/device), scegli «ogni giorno» o «ogni settimana», ed Éclair ci invia una copia completa del tuo sito. Ha accesso solo ai file che crea, conserva gli ultimi backup (8 di default) e invia i siti più grandi a blocchi, con ripresa in caso di interruzione. Le chiavi API non lasciano mai il tuo server.
+**Backup su Google Drive**: collega il tuo Drive con un semplice codice (google.com/device), scegli «ogni giorno» o «ogni settimana», ed Éclair ci invia una copia completa del tuo sito. Ha accesso solo ai file che crea, conserva gli ultimi backup (8 di default) e invia i siti più grandi a blocchi, con ripresa in caso di interruzione. Le chiavi API non lasciano mai il tuo server. La prima volta, l’amministrazione ti guida nella creazione della tua app Google: gratuita, una decina di minuti, una sola volta.
 
 Istruzioni: [guida, sezione Aggiornare, fare backup, traslocare](docs/GUIDE.it.md#aggiornare-fare-backup-traslocare).
 
@@ -264,7 +264,7 @@ Istruzioni: [guida, sezione Aggiornare, fare backup, traslocare](docs/GUIDE.it.m
 |---|---|---|
 | **Installazione** | Creare un database MySQL, poi avviare la procedura guidata | ✅ Caricare la cartella, rispondere a 4 domande |
 | **Database** | MySQL obbligatorio | ✅ Nessuno (file protetti) |
-| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 594 KB |
+| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 602 KB |
 | **SEO, sitemap, dati strutturati** | Un plugin da installare e mantenere | ✅ Integrati |
 | **GEO: llms.txt, Markdown, bot IA** | Plugin, raramente completi | ✅ Integrato |
 | **Pagine pubbliche** | Generate a ogni visita, salvo con un plugin di cache | ✅ Servite da una cache statica |
@@ -375,7 +375,7 @@ Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.it.md#sicurezza).
   <img src="docs/images/it/install.webp" alt="Installazione in tre passaggi: carica la cartella, rispondi a quattro domande, il sito è online" width="100%">
 </p>
 
-1. **Scarica** l’archivio [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip) (594 KB) ed estrailo.
+1. **Scarica** l’archivio [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip) (602 KB) ed estrailo.
 2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
 3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
 

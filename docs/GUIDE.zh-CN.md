@@ -40,7 +40,7 @@
 
 ### 安装步骤
 
-1. 下载安装包 [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip)（594 KB）并解压。
+1. 下载安装包 [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip)（602 KB）并解压。
 2. 使用 FTP 软件（如 FileZilla）或主机的文件管理器，把 **`eclair` 文件夹里的内容**上传到主机的公开目录（`public_html`、`www`……）。
    > ⚠️ `.htaccess` 是隐藏文件：请开启“显示隐藏文件”，确保它们也被上传。
 3. 打开你的网站地址：**安装向导随即启动**（支持 7 种语言，包括简体中文）。
@@ -571,6 +571,14 @@ AI 会参考你的编辑风格档案、已发布页面和文章的列表（确�
 ### Google Drive 备份
 
 在**安全 › Google Drive 备份**中，可以把网站的副本发送到你的 Google Drive：每天、每周，或者随时手动备份。
+
+**第一次使用：创建你自己的 Google 应用。** 网站需要一个以你名义创建的 Google 应用才能访问你的 Drive：免费，只需创建一次，大约十分钟，并且只有你的网站会使用它。Google Drive 卡片会显示分步指南，并附上每个页面的链接：
+
+- 在 [Google Cloud 控制台](https://console.cloud.google.com/projectcreate)中创建一个项目，并启用 **Google Drive API**。
+- 在 **Google Auth Platform** 中：填写应用名称和你的电子邮件地址（受众选择“External”），添加 `…/auth/drive.file` 范围，然后点击 **Publish app**（处于测试模式时，Google 会在 7 天后切断访问）。
+- 创建一个类型为 **TVs and Limited Input devices** 的客户端，然后把它的**客户端 ID**和**客户端密钥**粘贴到卡片中。密钥会在你的服务器上加密保存。
+
+然后，按以下步骤连接你的 Drive：
 
 1. 点击**连接 Google Drive**（可能需要再次输入密码）。
 2. Éclair 会显示一个代码。在电脑或手机上打开 **google.com/device**，输入代码，选择你的 Google 账户并授权 Éclair。
