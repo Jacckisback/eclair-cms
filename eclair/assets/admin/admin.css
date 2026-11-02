@@ -90,6 +90,8 @@ table,.num{font-variant-numeric:tabular-nums}
 
 /* Champs */
 .field{display:block;margin:0 0 1.15rem}
+fieldset.field{border:0;padding:0;min-width:0}
+legend.label{padding:0}
 .field>label,.label{display:block;font-weight:600;font-size:var(--fs-3);margin-bottom:.35rem}
 .hint{display:block;color:var(--muted);font-size:var(--fs-2);line-height:1.45;margin-top:.35rem}
 .error-text{display:block;color:var(--bad);font-size:var(--fs-2);margin-top:.35rem;font-weight:600}
@@ -263,6 +265,8 @@ table.list tbody tr:hover td{background:color-mix(in oklch,var(--panel-2) 75%,tr
 .card>table.list td:last-child,.card>table.list th:last-child{padding-right:0}
 .card>table.list tbody tr:hover td{background:none}
 @media (max-width:1180px){.dash-grid{grid-template-columns:minmax(0,1fr)}}
+/* Assistant ouvert : il prend 27,5rem à droite, la colonne de côté passe dessous plutôt que d'écraser la principale. */
+@media (max-width:1620px){html.ai-open .dash-grid{grid-template-columns:minmax(0,1fr)}}
 .card h2 .count-of{font-weight:500;color:var(--muted);font-size:var(--fs-3);margin-left:.5rem;font-variant-numeric:tabular-nums}
 .segments{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;margin:0 0 .75rem}
 .segments i{height:6px;border-radius:3px;background:var(--line)}
