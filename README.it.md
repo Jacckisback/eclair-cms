@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip"><img src="https://img.shields.io/badge/scarica-v1.8.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.8.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/scarica-v1.9.0-5b4cf0?style=for-the-badge" alt="Scarica Éclair 1.9.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o successivo">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-nessuno-14122b?style=for-the-badge" alt="Nessun database">
@@ -63,7 +63,7 @@ WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicur
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleggero</h3>
-      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>480 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
+      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>485 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Semplicissimo</h3>
@@ -159,6 +159,12 @@ Un tema cambia i colori; una **direzione artistica** cambia l’intero universo:
 
 **Immagina la mia direzione con l’IA**: descrivi la tua attività in una frase. L’IA legge anche la presentazione del tuo sito, parte da cose concrete (i tuoi luoghi, i tuoi materiali, la tua luce) e propone **3 direzioni davvero diverse**, evitando i cliché del tuo settore e i tic del «design generato dall’IA». Sceglie solo tra le impostazioni di Éclair e non scrive mai CSS: colori, carattere e composizioni vengono verificati prima di arrivare sul tuo sito. Costo indicativo: ≈ 0,03 $ per le tre proposte con Claude Sonnet 5.5.
 
+**Ritocchi in un clic**: più audace, più sobrio, più colorato, essenziale, chiaro ↔ scuro, altro carattere. Ogni clic trasforma la direzione scelta e l’anteprima si aggiorna subito; concatena i ritocchi o annullali uno alla volta. Nuove composizioni ampliano ancora la scelta: banner con l’immagine a sinistra o incorniciato, punti di forza numerati, filetti tra le sezioni, pulsanti pieni, con contorno o come link sottolineati, e 65 icone disegnate al posto delle emoji.
+
+<p align="center">
+  <img src="docs/images/it/retouches.webp" alt="La direzione Argilla, poi la stessa pagina dopo ogni ritocco: più audace, più colorato, chiaro ↔ scuro, essenziale, altro carattere" width="100%">
+</p>
+
 <table>
   <tr>
     <td width="50%" valign="top">
@@ -246,7 +252,7 @@ Il negozio si apre solo quando le note legali e le condizioni generali di vendit
 |---|---|---|
 | **Installazione** | Creare un database MySQL, poi avviare la procedura guidata | ✅ Caricare la cartella, rispondere a 4 domande |
 | **Database** | MySQL obbligatorio | ✅ Nessuno (file protetti) |
-| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 480 KB |
+| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 485 KB |
 | **SEO, sitemap, dati strutturati** | Un plugin da installare e mantenere | ✅ Integrati |
 | **GEO: llms.txt, Markdown, bot IA** | Plugin, raramente completi | ✅ Integrato |
 | **Pagine pubbliche** | Generate a ogni visita, salvo con un plugin di cache | ✅ Servite da una cache statica |
@@ -355,7 +361,7 @@ Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.it.md#sicurezza).
   <img src="docs/images/it/install.webp" alt="Installazione in tre passaggi: carica la cartella, rispondi a quattro domande, il sito è online" width="100%">
 </p>
 
-1. **Scarica** l’archivio [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) ed estrailo.
+1. **Scarica** l’archivio [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) ed estrailo.
 2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
 3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
 
@@ -383,7 +389,7 @@ PHP 8.1+ senza framework né Composer: classi semplici in `eclair/app/lib/`, vis
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
-php tests/run.php                                                           # 550 verifiche unitarie e HTTP
+php tests/run.php                                                           # 556 verifiche unitarie e HTTP
 php tools/build.php                                                         # archivio pronto da distribuire
 ```
 

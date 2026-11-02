@@ -12,7 +12,7 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 2. [Funktionen im Detail](#funktionen-im-detail)
 3. [Éclair im Alltag](#éclair-im-alltag)
 4. [Visueller Modus](#visueller-modus)
-5. [Art Directions](#art-directions) (inklusive [Meine Richtung mit KI entwerfen](#meine-richtung-mit-ki-entwerfen) und dem [Design-Score](#design-score))
+5. [Art Directions](#art-directions) (inklusive [Feinschliff mit einem Klick](#feinschliff-mit-einem-klick), [Meine Richtung mit KI entwerfen](#meine-richtung-mit-ki-entwerfen) und dem [Design-Score](#design-score))
 6. [Themes](#themes)
 7. [Shop](#shop)
 8. [KI-Assistent](#ki-assistent) (inklusive [Eine Seite mit KI erstellen](#eine-seite-mit-ki-erstellen))
@@ -37,7 +37,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -188,17 +188,37 @@ Ein Theme ändert die Farben; eine **Art Direction** verändert die ganze Bildwe
 - **Schriftart für Überschriften**: 18 Schriften, ausgewählt wegen ihres Charakters (keine von denen, die man überall sieht), oder eine Systemschrift. **Schriftart für Fließtext**: eine Systemschrift, ohne Download.
 - **Schreibweise der Überschriften** (normal oder Großbuchstaben), **Größe der Überschriften** (dezent, ausgewogen, spektakulär), **Ecken** (eckig, abgerundet, rund), **Abstände** (kompakt, normal, luftig).
 - **Karten**: feine Linie, Farbfläche oder Schlagschatten.
-- **Startbanner**: Text und Bild nebeneinander, Plakat (sehr großer Titel), randloses Vollbild (der Titel auf dem Foto), Editorial (Hochformatbild) oder zentriert.
-- **Block „Vorteile“**: Karten, Zeilen oder Spalten mit Linie. **Abschnitte**: einfarbiger Hintergrund oder Farbbänder. **Symbole der Vorteile**: gezeichnete Symbole (Emojis werden durch Liniensymbole ersetzt), ohne Symbol oder Emojis.
+- **Startbanner**: Text und Bild nebeneinander, Bild links, Plakat (sehr großer Titel), randloses Vollbild (der Titel auf dem Foto), Editorial (Hochformatbild), zentriert oder gerahmt (Text und Bild auf einer farbigen Fläche).
+- **Block „Vorteile“**: Karten, Zeilen, Spalten mit Linie oder nummeriert (01, 02 …). **Abschnitte**: einfarbiger Hintergrund, Farbbänder oder Linien zwischen den Abschnitten. **Symbole der Vorteile**: gezeichnete Symbole (65 Liniensymbole, erkannt anhand gängiger Emojis: ☕ 🚗 🐶 ✂️ 🎓 💼 🌸 …), ohne Symbol oder Emojis.
+- **Buttons**: gefüllt, mit Umriss oder als unterstrichene Links (mit Pfeil).
 
 Header, Beitragslisten, Logo, Website-Icon, Fußzeile und eigenes CSS stellst du wie bisher ein. Um zum klassischen Theme zurückzukehren, wähle **Klassisches Theme** und speichere: Seine Einstellungen warten unverändert auf dich.
 
 **Immer lesbar**: Ganz gleich, welche Farben du wählst, Éclair passt automatisch den Text (Kontrast **7:1** zum Hintergrund), den Sekundärtext, die Links und die Buttons (4,5:1) an, auch auf Hintergründen, die mit der Akzentfarbe getönt sind (Badges, Menü, Hervorhebungen). Eine Farbe, die für Text auf hellem Hintergrund zu blass ist, wird also genau so weit abgedunkelt wie nötig.
 
-**Immer schnell**: Die Titelschrift wird **nur einmal von deinem Server heruntergeladen** (von Fontsource, unter der SIL Open Font License), in `media/fonts/` abgelegt, dann von deiner Website ausgeliefert und mit `font-display: optional` vorab geladen: keine Anfragen an Drittanbieter für deine Besucher, keine Layoutverschiebungen. Nur die CSS-Regeln, die deine Richtung braucht, werden in die Seite eingefügt, und der automatische Dark Mode überlässt der hellen oder dunklen Wahl der Richtung das Feld. Mit Lighthouse gemessen: 100 in allen vier Kategorien mit Nocturne, Riviera, Presse und Plakat.
+**Immer schnell**: Die Titelschrift wird **nur einmal von deinem Server heruntergeladen** (von Fontsource, unter der SIL Open Font License), in `media/fonts/` abgelegt, dann von deiner Website ausgeliefert und mit `font-display: optional` vorab geladen: keine Anfragen an Drittanbieter für deine Besucher, keine Layoutverschiebungen. Nur die CSS-Regeln, die deine Richtung braucht, werden in die Seite eingefügt, und der automatische Dark Mode überlässt der hellen oder dunklen Wahl der Richtung das Feld. Mit Lighthouse gemessen: 100 in allen vier Kategorien mit Nocturne, Riviera, Presse und Plakat sowie mit den neuen Layouts (Banner mit Bild links oder gerahmt, nummerierte Vorteile, Linien zwischen den Abschnitten, Buttons mit Umriss oder als unterstrichene Links).
 
 > [!TIP]
 > Wenn dein Hoster ausgehende Verbindungen blockiert, kann die Schrift nicht heruntergeladen werden: Eine Meldung weist dich darauf hin, und bis dahin nutzt die Website eine Ersatzschrift aus derselben Familie (mit Serifen, schmal …). Versuche es später erneut, indem du noch einmal speicherst.
+
+### Feinschliff mit einem Klick
+
+<p align="center">
+  <img src="images/de/retouches.webp" alt="Die Richtung Ton, dann dieselbe Seite nach jedem Feinschliff: mutiger, farbiger, hell ↔ dunkel, reduzieren, andere Schrift" width="100%">
+</p>
+
+Unter den Karten verwandeln sechs Buttons die gewählte Richtung mit einem einzigen Klick, und die Vorschau folgt sofort:
+
+| Feinschliff | Was sich ändert |
+|---|---|
+| **Mutiger** | größere Überschriften, mehr Luft, spektakuläreres Banner (Plakat, dann randloses Vollbild), Farbbänder, kräftigerer Akzent, gefüllte Buttons |
+| **Schlichter** | dezentere Überschriften, normale Schreibweise, feine Linien statt Schatten, ruhigeres Banner, gedämpfter Akzent |
+| **Farbiger** | Hintergrund und Bänder mit der Akzentfarbe getönt, Farbbänder, kräftigerer Akzent |
+| **Reduzieren** | feine Linien, keine Symbole, einfarbiger Hintergrund, mehr Luft, weniger abgerundete Ecken, Vorteile in Spalten |
+| **Hell ↔ dunkel** | kehrt die Helligkeit von Hintergrund, Bändern und Text um und behält ihre Farbtöne bei |
+| **Andere Schrift** | springt zur nächsten Titelschrift, im Wechsel zwischen den Schriftfamilien (mit Serifen, Grotesk, schmal …) |
+
+Du kannst mehrere Schritte aneinanderreihen; **Feinschliff rückgängig machen** geht jeweils einen Schritt zurück. Die Kontraste bleiben bei jedem Schritt garantiert, und nichts wird veröffentlicht, bevor du speicherst.
 
 ### Meine Richtung mit KI entwerfen
 
@@ -602,7 +622,7 @@ tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 550 Unit- und HTTP-Prüfungen; ECLAIR_TEST_ROOT=… zum Testen eines entpackten Archivs
+php tests/run.php                                  # 556 Unit- und HTTP-Prüfungen; ECLAIR_TEST_ROOT=… zum Testen eines entpackten Archivs
 php tools/build.php                                # Archiv zum Verteilen
 ```
 

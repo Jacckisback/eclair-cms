@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip"><img src="https://img.shields.io/badge/descargar-v1.8.0-5b4cf0?style=for-the-badge" alt="Descargar Éclair 1.8.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/descargar-v1.9.0-5b4cf0?style=for-the-badge" alt="Descargar Éclair 1.9.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_datos-ninguna-14122b?style=for-the-badge" alt="Sin base de datos">
@@ -63,7 +63,7 @@ WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraligero</h3>
-      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>480 KB</b>, cero dependencias, cero cookies en el sitio público.
+      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>485 KB</b>, cero dependencias, cero cookies en el sitio público.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facilísimo</h3>
@@ -159,6 +159,12 @@ Un tema cambia los colores; una **dirección de arte** cambia todo el universo: 
 
 **Imagina mi dirección con la IA**: describe tu actividad en una frase. La IA lee también la presentación de tu sitio, parte de cosas concretas (tus lugares, tus materiales, tu luz) y propone **3 direcciones realmente distintas**, evitando los clichés de tu sector y los tics del «diseño generado por IA». Solo elige entre los ajustes de Éclair y nunca escribe CSS: los colores, la tipografía y las composiciones se comprueban antes de llegar a tu sitio. Coste orientativo: ≈ 0,03 $ por las tres propuestas con Claude Sonnet 5.5.
 
+**Retoques en un clic**: más audaz, más sobrio, más colorido, depurar, claro ↔ oscuro, otra tipografía. Cada clic transforma la dirección elegida y la vista previa se actualiza al instante; encadena retoques o deshazlos uno a uno. Nuevas composiciones amplían todavía más las opciones: banner con la imagen a la izquierda o enmarcado, puntos fuertes numerados, líneas entre secciones, botones rellenos, con contorno o como enlaces subrayados, y 65 iconos dibujados en lugar de los emojis.
+
+<p align="center">
+  <img src="docs/images/es/retouches.webp" alt="La dirección Arcilla y, después, la misma página tras cada retoque: más audaz, más colorido, claro ↔ oscuro, depurar, otra tipografía" width="100%">
+</p>
+
 <table>
   <tr>
     <td width="50%" valign="top">
@@ -246,7 +252,7 @@ La tienda solo se abre cuando el aviso legal y las condiciones generales de vent
 |---|---|---|
 | **Instalación** | Crear una base de datos MySQL y luego lanzar el asistente | ✅ Subir la carpeta y responder 4 preguntas |
 | **Base de datos** | MySQL obligatorio | ✅ Ninguna (archivos protegidos) |
-| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 480 KB |
+| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 485 KB |
 | **SEO, sitemap, datos estructurados** | Un plugin que instalar y mantener | ✅ Integrado |
 | **GEO: llms.txt, Markdown, robots de IA** | Plugins, rara vez completos | ✅ Integrado |
 | **Páginas públicas** | Generadas en cada visita, salvo con un plugin de caché | ✅ Servidas desde una caché estática |
@@ -355,7 +361,7 @@ Todos los detalles en la [guía, sección Seguridad](docs/GUIDE.es.md#seguridad)
   <img src="docs/images/es/install.webp" alt="Instalación en tres pasos: subir la carpeta, responder cuatro preguntas, el sitio está en línea" width="100%">
 </p>
 
-1. **Descarga** el archivo [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) y descomprímelo.
+1. **Descarga** el archivo [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) y descomprímelo.
 2. **Sube el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…), incluidos los archivos ocultos `.htaccess`.
 3. **Abre la dirección de tu sitio**: arranca el asistente. Cuatro preguntas, un poco de confeti, y tu sitio está en línea con sus primeras páginas.
 
@@ -383,7 +389,7 @@ PHP 8.1+ sin framework ni Composer: clases sencillas en `eclair/app/lib/`, vista
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desarrollo
-php tests/run.php                                                           # 550 comprobaciones unitarias y HTTP
+php tests/run.php                                                           # 556 comprobaciones unitarias y HTTP
 php tools/build.php                                                         # archivo listo para distribuir
 ```
 

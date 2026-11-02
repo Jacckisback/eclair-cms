@@ -12,7 +12,7 @@ Tutto quello che c’è da sapere per installare, usare, proteggere e mantenere 
 2. [Funzionalità in dettaglio](#funzionalità-in-dettaglio)
 3. [Uso quotidiano](#uso-quotidiano)
 4. [Modalità Visuale](#modalità-visuale)
-5. [Direzioni artistiche](#direzioni-artistiche) (compresi [Immagina la mia direzione con l’IA](#immagina-la-mia-direzione-con-lia) e il [Punteggio Design](#punteggio-design))
+5. [Direzioni artistiche](#direzioni-artistiche) (compresi i [Ritocchi in un clic](#ritocchi-in-un-clic), [Immagina la mia direzione con l’IA](#immagina-la-mia-direzione-con-lia) e il [Punteggio Design](#punteggio-design))
 6. [Temi](#temi)
 7. [Negozio](#negozio)
 8. [Assistente IA](#assistente-ia) (compreso [Creare una pagina con l’IA](#creare-una-pagina-con-lia))
@@ -37,7 +37,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
@@ -188,17 +188,37 @@ Un tema cambia i colori; una **direzione artistica** cambia l’intero universo 
 - **Font dei titoli**: 18 caratteri tipografici scelti per la loro personalità (nessuno di quelli che si vedono ovunque), oppure un font di sistema. **Font del testo**: un font di sistema, senza download.
 - **Maiuscole nei titoli** (normale o maiuscole), **dimensione dei titoli** (discreta, equilibrata, spettacolare), **angoli** (squadrati, smussati, arrotondati), **spaziatura** (compatta, normale, ariosa).
 - **Schede**: filetto sottile, campitura di colore o ombra portata.
-- **Banner di apertura**: testo e immagine affiancati, manifesto (titolo molto grande), immagine a tutta pagina (il titolo sulla foto), editoriale (immagine verticale) o centrato.
-- **Blocco «Punti di forza»**: schede, righe o colonne con filetto. **Sezioni**: sfondo uniforme o fasce di colore. **Icone dei punti di forza**: icone disegnate (le emoji vengono sostituite da icone al tratto), senza icona o emoji.
+- **Banner di apertura**: testo e immagine affiancati, immagine a sinistra, manifesto (titolo molto grande), immagine a tutta pagina (il titolo sulla foto), editoriale (immagine verticale), centrato o incorniciato (testo e immagine in un pannello colorato).
+- **Blocco «Punti di forza»**: schede, righe, colonne con filetto o numerati (01, 02…). **Sezioni**: sfondo uniforme, fasce di colore o filetti tra le sezioni. **Icone dei punti di forza**: icone disegnate (65 icone al tratto, riconosciute a partire dalle emoji più comuni: ☕ 🚗 🐶 ✂️ 🎓 💼 🌸…), senza icona o emoji.
+- **Pulsanti**: pieni, con contorno o come link sottolineati (con una freccia).
 
 Intestazione, elenchi di articoli, logo, icona, piè di pagina e CSS personalizzato si regolano come prima. Per tornare al tema classico, scegli **Tema classico** e salva: le sue impostazioni ti aspettano intatte.
 
 **Sempre leggibile**: qualunque siano i colori scelti, Éclair regola automaticamente il testo (contrasto **7:1** sullo sfondo), il testo secondario, i link e i pulsanti (4,5:1), anche sugli sfondi tinti con il colore d’accento (etichette, menu, evidenziazione). Un colore troppo pallido per un testo su sfondo chiaro viene quindi scurito quanto basta.
 
-**Sempre veloce**: il carattere dei titoli viene **scaricato una sola volta dal tuo server** (da Fontsource, licenza SIL Open Font License), salvato in `media/fonts/`, poi servito dal tuo sito e precaricato con `font-display: optional`: nessuna richiesta a un servizio di terzi per i tuoi visitatori, nessuno spostamento del layout. Nella pagina vengono inserite solo le regole CSS utili alla tua direzione, e la modalità scura automatica lascia il posto alla scelta chiara o scura della direzione. Misurato con Lighthouse: 100 in tutte e quattro le categorie con Notturno, Riviera, Stampa e Manifesto.
+**Sempre veloce**: il carattere dei titoli viene **scaricato una sola volta dal tuo server** (da Fontsource, licenza SIL Open Font License), salvato in `media/fonts/`, poi servito dal tuo sito e precaricato con `font-display: optional`: nessuna richiesta a un servizio di terzi per i tuoi visitatori, nessuno spostamento del layout. Nella pagina vengono inserite solo le regole CSS utili alla tua direzione, e la modalità scura automatica lascia il posto alla scelta chiara o scura della direzione. Misurato con Lighthouse: 100 in tutte e quattro le categorie con Notturno, Riviera, Stampa e Manifesto, e con le nuove composizioni (banner con l’immagine a sinistra o incorniciato, punti di forza numerati, filetti tra le sezioni, pulsanti con contorno o come link sottolineati).
 
 > [!TIP]
 > Se il tuo provider blocca le connessioni in uscita, il carattere non può essere scaricato: un messaggio ti avvisa e, nel frattempo, il sito usa un font di riserva della stessa famiglia (con grazie, condensato…). Riprova più tardi salvando di nuovo.
+
+### Ritocchi in un clic
+
+<p align="center">
+  <img src="images/it/retouches.webp" alt="La direzione Argilla, poi la stessa pagina dopo ogni ritocco: più audace, più colorato, chiaro ↔ scuro, essenziale, altro carattere" width="100%">
+</p>
+
+Sotto le schede, sei pulsanti trasformano la direzione scelta con un solo clic, e l’anteprima si aggiorna subito:
+
+| Ritocco | Cosa cambia |
+|---|---|
+| **Più audace** | titoli più grandi, più aria, banner più spettacolare (manifesto, poi immagine a tutta pagina), fasce di colore, accento più vivace, pulsanti pieni |
+| **Più sobrio** | titoli più discreti, niente maiuscolo, filetti sottili al posto delle ombre, banner più calmo, accento attenuato |
+| **Più colorato** | sfondo e fasce tinti con il colore d’accento, fasce di colore, accento più vivace |
+| **Essenziale** | filetti sottili, nessuna icona, sfondo uniforme, più aria, angoli più squadrati, punti di forza in colonne |
+| **Chiaro ↔ scuro** | inverte la luminosità di sfondo, fasce e testo, mantenendone le tinte |
+| **Altro carattere** | passa al carattere dei titoli successivo, alternando le famiglie (con grazie, grottesco, condensato…) |
+
+I ritocchi si possono concatenare; **Annulla il ritocco** torna indietro di un passo alla volta. I contrasti restano garantiti a ogni passo, e non si pubblica nulla finché non salvi.
 
 ### Immagina la mia direzione con l’IA
 
@@ -602,7 +622,7 @@ tools/build.php          impronte di integrità + archivio dist/eclair-cms-<vers
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # server di sviluppo
-php tests/run.php                                  # 550 verifiche unitarie e HTTP; ECLAIR_TEST_ROOT=… per testare un archivio estratto
+php tests/run.php                                  # 556 verifiche unitarie e HTTP; ECLAIR_TEST_ROOT=… per testare un archivio estratto
 php tools/build.php                                # archivio pronto da distribuire
 ```
 

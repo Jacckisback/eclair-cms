@@ -12,7 +12,7 @@ Todo lo que necesitas saber para instalar, usar, proteger y mantener Éclair. Pa
 2. [Funciones en detalle](#funciones-en-detalle)
 3. [Uso diario](#uso-diario)
 4. [Modo Visual](#modo-visual)
-5. [Direcciones de arte](#direcciones-de-arte) (incluidas [Imagina mi dirección con la IA](#imagina-mi-dirección-con-la-ia) y la [Puntuación de diseño](#puntuación-de-diseño))
+5. [Direcciones de arte](#direcciones-de-arte) (incluidos los [Retoques en un clic](#retoques-en-un-clic), [Imagina mi dirección con la IA](#imagina-mi-dirección-con-la-ia) y la [Puntuación de diseño](#puntuación-de-diseño))
 6. [Temas](#temas)
 7. [Tienda](#tienda)
 8. [Asistente IA](#asistente-ia) (incluido [Crear una página con IA](#crear-una-página-con-ia))
@@ -37,7 +37,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 
 ### Pasos
 
-1. Descarga el archivo [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) y descomprímelo.
+1. Descarga el archivo [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
 3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
@@ -188,17 +188,37 @@ Un tema cambia los colores; una **dirección de arte** cambia todo el universo d
 - **Fuente de los títulos**: 18 tipografías elegidas por su personalidad (ninguna de las que se ven por todas partes) o una fuente del sistema. **Fuente del texto**: una fuente del sistema, sin descarga.
 - **Mayúsculas en los títulos** (normal o mayúsculas), **tamaño de los títulos** (discreto, equilibrado, espectacular), **esquinas** (rectas, suavizadas, redondas), **espaciado** (compacto, normal, amplio).
 - **Tarjetas**: borde fino, color plano o sombra.
-- **Banner de inicio**: texto e imagen lado a lado, cartel (título muy grande), imagen a sangre (el título sobre la foto), editorial (imagen vertical) o centrado.
-- **Bloque «Puntos fuertes»**: tarjetas, filas o columnas con filete. **Secciones**: fondo liso o franjas de color. **Iconos de los puntos fuertes**: iconos dibujados (los emojis se sustituyen por iconos de trazo), sin icono o emojis.
+- **Banner de inicio**: texto e imagen lado a lado, imagen a la izquierda, cartel (título muy grande), imagen a sangre (el título sobre la foto), editorial (imagen vertical), centrado o enmarcado (texto e imagen en un panel de color).
+- **Bloque «Puntos fuertes»**: tarjetas, filas, columnas con filete o numerados (01, 02…). **Secciones**: fondo liso, franjas de color o líneas entre secciones. **Iconos de los puntos fuertes**: iconos dibujados (65 iconos de trazo, reconocidos a partir de los emojis más habituales: ☕ 🚗 🐶 ✂️ 🎓 💼 🌸…), sin icono o emojis.
+- **Botones**: rellenos, con contorno o como enlaces subrayados (con una flecha).
 
 La cabecera, las listas de artículos, el logo, el icono, el pie de página y el CSS personalizado se ajustan como antes. Para volver al tema clásico, elige **Tema clásico** y guarda: sus ajustes te esperan, intactos.
 
 **Siempre legible**: sean cuales sean los colores elegidos, Éclair ajusta automáticamente el texto (contraste de **7:1** sobre el fondo), el texto secundario, los enlaces y los botones (4,5:1), también sobre los fondos tintados con el color de acento (etiquetas, menú, resaltado). Así, un color demasiado pálido para un texto sobre fondo claro se oscurece justo lo necesario.
 
-**Siempre rápido**: tu servidor **descarga la tipografía de los títulos una sola vez** (desde Fontsource, licencia SIL Open Font License), la guarda en `media/fonts/` y después la sirve tu propio sitio, precargada con `font-display: optional`: ninguna petición a un servicio de terceros para tus visitantes, ningún salto de diseño. Solo se insertan en la página las reglas CSS que necesita tu dirección, y el modo oscuro automático cede el paso a la elección clara u oscura de la dirección. Medido con Lighthouse: 100 en las cuatro categorías con Nocturno, Riviera, Prensa y Cartel.
+**Siempre rápido**: tu servidor **descarga la tipografía de los títulos una sola vez** (desde Fontsource, licencia SIL Open Font License), la guarda en `media/fonts/` y después la sirve tu propio sitio, precargada con `font-display: optional`: ninguna petición a un servicio de terceros para tus visitantes, ningún salto de diseño. Solo se insertan en la página las reglas CSS que necesita tu dirección, y el modo oscuro automático cede el paso a la elección clara u oscura de la dirección. Medido con Lighthouse: 100 en las cuatro categorías con Nocturno, Riviera, Prensa y Cartel, y con las nuevas composiciones (banner con la imagen a la izquierda o enmarcado, puntos fuertes numerados, líneas entre secciones, botones con contorno o como enlaces subrayados).
 
 > [!TIP]
 > Si tu proveedor de hosting bloquea las conexiones salientes, la tipografía no se puede descargar: un mensaje te avisa y, mientras tanto, el sitio usa una fuente de reserva de la misma familia (con serifa, condensada…). Vuelve a intentarlo más tarde guardando de nuevo.
+
+### Retoques en un clic
+
+<p align="center">
+  <img src="images/es/retouches.webp" alt="La dirección Arcilla y, después, la misma página tras cada retoque: más audaz, más colorido, claro ↔ oscuro, depurar, otra tipografía" width="100%">
+</p>
+
+Debajo de las tarjetas, seis botones transforman la dirección elegida con un solo clic, y la vista previa se actualiza al instante:
+
+| Retoque | Qué cambia |
+|---|---|
+| **Más audaz** | títulos más grandes, más aire, banner más espectacular (cartel y, después, imagen a sangre), franjas de color, acento más vivo, botones rellenos |
+| **Más sobrio** | títulos más discretos, sin mayúsculas, bordes finos en lugar de sombras, banner más tranquilo, acento suavizado |
+| **Más colorido** | fondo y franjas tintados con el color de acento, franjas de color, acento más vivo |
+| **Depurar** | bordes finos, ningún icono, fondo liso, más aire, esquinas más rectas, puntos fuertes en columnas |
+| **Claro ↔ oscuro** | invierte la luminosidad del fondo, las franjas y el texto, conservando sus tonos |
+| **Otra tipografía** | pasa a la siguiente tipografía de los títulos, alternando las familias (con serifa, grotesca, condensada…) |
+
+Los retoques se encadenan; **Deshacer el retoque** vuelve atrás de uno en uno. Los contrastes siguen garantizados en cada paso, y no se publica nada hasta que guardes.
 
 ### Imagina mi dirección con la IA
 
@@ -602,7 +622,7 @@ tools/build.php          huellas de integridad + archivo dist/eclair-cms-<versi�
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desarrollo
-php tests/run.php                                  # 550 comprobaciones unitarias y HTTP; ECLAIR_TEST_ROOT=… para probar un archivo descomprimido
+php tests/run.php                                  # 556 comprobaciones unitarias y HTTP; ECLAIR_TEST_ROOT=… para probar un archivo descomprimido
 php tools/build.php                                # archivo listo para distribuir
 ```
 

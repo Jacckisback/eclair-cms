@@ -12,7 +12,7 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 2. [Features in detail](#features-in-detail)
 3. [Everyday use](#everyday-use)
 4. [Visual mode](#visual-mode)
-5. [Art directions](#art-directions) (including [Imagine my direction with AI](#imagine-my-direction-with-ai) and the [Design score](#design-score))
+5. [Art directions](#art-directions) (including [One-click tweaks](#one-click-tweaks), [Imagine my direction with AI](#imagine-my-direction-with-ai) and the [Design score](#design-score))
 6. [Themes](#themes)
 7. [Shop](#shop)
 8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai))
@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) archive (480 KB) and unzip it.
+1. Download the [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) archive (485 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -188,17 +188,37 @@ A theme changes colors; an **art direction** changes the site's entire visual wo
 - **Heading font**: 18 typefaces chosen for their personality (none of the ones you see everywhere), or a system font. **Body font**: a system font, nothing to download.
 - **Heading case** (normal or capitals), **heading size** (subtle, balanced, dramatic), **corners** (square, softened, round), **spacing** (compact, normal, airy).
 - **Cards**: thin border, flat color or drop shadow.
-- **Home banner**: text and image side by side, poster (very large title), full-bleed image (the title over the photo), editorial (portrait image) or centered.
-- **“Features” block**: cards, rows or ruled columns. **Sections**: plain background or color bands. **Feature icons**: line icons (emoji are swapped for line-drawn icons), no icon, or emoji.
+- **Home banner**: text and image side by side, image on the left, poster (very large title), full-bleed image (the title over the photo), editorial (portrait image), centered or framed (text and image in a colored panel).
+- **“Features” block**: cards, rows, ruled columns or numbered (01, 02…). **Sections**: plain background, color bands or rules between sections. **Feature icons**: line icons (65 line-drawn icons, recognized from common emoji: ☕ 🚗 🐶 ✂️ 🎓 💼 🌸…), no icon, or emoji.
+- **Buttons**: solid, outline or underlined links (with an arrow).
 
 The header, post lists, logo, site icon, footer and Custom CSS are set just as before. To go back to the classic theme, choose **Classic theme** and save: its settings are waiting for you, untouched.
 
 **Always readable**: whatever colors you choose, Éclair automatically adjusts the text (**7:1** contrast against the background), the secondary text, links and buttons (4.5:1), including on backgrounds tinted with the accent color (badges, menu, highlighting). So a color that's too pale for text on a light background gets darkened just enough.
 
-**Always fast**: the heading font is **downloaded only once, by your server** (from Fontsource, under the SIL Open Font License), stored in `media/fonts/`, then served by your site and preloaded with `font-display: optional`: no requests to a third-party service for your visitors, no layout shift. Only the CSS rules your direction needs are inlined in the page, and the automatic dark mode gives way to the direction's own light or dark choice. Measured with Lighthouse: 100 in all four categories with Nocturne, Riviera, Press and Poster.
+**Always fast**: the heading font is **downloaded only once, by your server** (from Fontsource, under the SIL Open Font License), stored in `media/fonts/`, then served by your site and preloaded with `font-display: optional`: no requests to a third-party service for your visitors, no layout shift. Only the CSS rules your direction needs are inlined in the page, and the automatic dark mode gives way to the direction's own light or dark choice. Measured with Lighthouse: 100 in all four categories with Nocturne, Riviera, Press and Poster, and with the new layouts (banner with the image on the left or framed, numbered features, rules between sections, outline or underlined-link buttons).
 
 > [!TIP]
 > If your host blocks outgoing connections, the font can't be downloaded: a message lets you know, and in the meantime the site uses a fallback font from the same family (serif, condensed…). Try again later by saving again.
+
+### One-click tweaks
+
+<p align="center">
+  <img src="images/en/retouches.webp" alt="The Clay direction, then the same page after each tweak: bolder, more colorful, light ↔ dark, simplify, another typeface" width="100%">
+</p>
+
+Below the cards, six buttons transform the chosen direction in a single click, and the preview updates instantly:
+
+| Tweak | What changes |
+|---|---|
+| **Bolder** | larger headings, more air, a more dramatic banner (poster, then full-bleed image), color bands, a more vivid accent, solid buttons |
+| **Quieter** | subtler headings, normal case, thin borders instead of shadows, a calmer banner, a softer accent |
+| **More colorful** | background and bands tinted with the accent color, color bands, a more vivid accent |
+| **Simplify** | thin borders, no icons, plain background, more air, squarer corners, features in columns |
+| **Light ↔ dark** | inverts the lightness of the background, bands and text, keeping their hues |
+| **Another typeface** | moves to the next heading typeface, alternating families (serif, grotesque, condensed…) |
+
+Tweaks stack up; **Undo tweak** goes back one step at a time. Contrast stays guaranteed at every step, and nothing is published until you save.
 
 ### Imagine my direction with AI
 
@@ -602,7 +622,7 @@ tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip 
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 550 unit and HTTP checks; ECLAIR_TEST_ROOT=… to test an unzipped archive
+php tests/run.php                                  # 556 unit and HTTP checks; ECLAIR_TEST_ROOT=… to test an unzipped archive
 php tools/build.php                                # ready-to-ship archive
 ```
 

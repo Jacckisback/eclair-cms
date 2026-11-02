@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip"><img src="https://img.shields.io/badge/download-v1.8.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.8.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/download-v1.9.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.9.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -63,7 +63,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>480 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>485 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -159,6 +159,12 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 
 **用 AI 构想我的风格**：用一句话描述你的业务。AI 还会阅读你网站的介绍，从具体事物出发（你的场所、你的材料、你的光线），提出 **3 种真正不同的风格**，避开你所在行业的陈词滥调和“AI 生成设计”的套路。它只在 Éclair 的设置中选择，从不编写 CSS：配色、字体和版式在应用到你的网站之前都会经过检查。预估费用：使用 Claude Sonnet 5.5 生成三个方案约 $0.03。
 
+**一键微调**：更大胆、更简约、更多彩、精简、浅色 ↔ 深色、换一种字体。每次点击都会调整所选风格，预览随即更新；可以连续微调，也可以逐一撤销。新的版式让选择更加丰富：横幅可设为图片居左或带底框，优势可加编号，分区之间可以加细线，按钮可选实心、描边或下划线链接，还有 65 个线条图标可取代表情符号。
+
+<p align="center">
+  <img src="docs/images/zh-CN/retouches.webp" alt="陶土风格，以及每次微调后的同一页面：更大胆、更多彩、浅色 ↔ 深色、精简、换一种字体" width="100%">
+</p>
+
 <table>
   <tr>
     <td width="50%" valign="top">
@@ -246,7 +252,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 480 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 485 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -355,7 +361,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip)（480 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip)（485 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
@@ -383,7 +389,7 @@ PHP 8.1+，不依赖框架，也不需要 Composer：`eclair/app/lib/` 中是简
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # 开发服务器
-php tests/run.php                                                           # 550 项单元与 HTTP 检查
+php tests/run.php                                                           # 556 项单元与 HTTP 检查
 php tools/build.php                                                         # 生成可发布的安装包
 ```
 

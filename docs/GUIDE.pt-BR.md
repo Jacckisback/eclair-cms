@@ -12,7 +12,7 @@ Tudo o que você precisa saber para instalar, usar, proteger e manter o Éclair.
 2. [Recursos em detalhe](#recursos-em-detalhe)
 3. [Uso no dia a dia](#uso-no-dia-a-dia)
 4. [Modo Visual](#modo-visual)
-5. [Direções de arte](#direções-de-arte) (incluindo [Imagine minha direção com a IA](#imagine-minha-direção-com-a-ia) e a [Pontuação de design](#pontuação-de-design))
+5. [Direções de arte](#direções-de-arte) (incluindo os [Ajustes em um clique](#ajustes-em-um-clique), [Imagine minha direção com a IA](#imagine-minha-direção-com-a-ia) e a [Pontuação de design](#pontuação-de-design))
 6. [Temas](#temas)
 7. [Loja](#loja)
 8. [Assistente de IA](#assistente-de-ia) (incluindo [Criar uma página com IA](#criar-uma-página-com-ia))
@@ -37,7 +37,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.8.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.8.0.zip) (480 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -188,17 +188,37 @@ Um tema muda as cores; uma **direção de arte** muda o universo inteiro do site
 - **Fonte dos títulos**: 18 fontes tipográficas escolhidas pela personalidade (nenhuma daquelas que se veem em todo lugar) ou uma fonte do sistema. **Fonte do texto**: uma fonte do sistema, sem download.
 - **Caixa dos títulos** (normal ou maiúsculas), **tamanho dos títulos** (discreto, equilibrado, impactante), **cantos** (retos, suavizados, arredondados), **espaçamento** (compacto, normal, arejado).
 - **Cartões**: borda fina, cor sólida ou sombra projetada.
-- **Banner de abertura**: texto e imagem lado a lado, cartaz (título muito grande), imagem de ponta a ponta (o título sobre a foto), editorial (imagem vertical) ou centralizado.
-- **Bloco “Diferenciais”**: cartões, linhas ou colunas com fio. **Seções**: fundo liso ou faixas de cor. **Ícones dos diferenciais**: ícones desenhados (os emojis são trocados por ícones de traço), sem ícone ou emojis.
+- **Banner de abertura**: texto e imagem lado a lado, imagem à esquerda, cartaz (título muito grande), imagem de ponta a ponta (o título sobre a foto), editorial (imagem vertical), centralizado ou emoldurado (texto e imagem em um painel colorido).
+- **Bloco “Diferenciais”**: cartões, linhas, colunas com fio ou numerados (01, 02…). **Seções**: fundo liso, faixas de cor ou linhas entre as seções. **Ícones dos diferenciais**: ícones desenhados (65 ícones de traço, reconhecidos a partir dos emojis mais comuns: ☕ 🚗 🐶 ✂️ 🎓 💼 🌸…), sem ícone ou emojis.
+- **Botões**: preenchidos, com contorno ou como links sublinhados (com uma seta).
 
 Cabeçalho, listas de artigos, logo, ícone, rodapé e CSS personalizado se configuram como antes. Para voltar ao tema clássico, escolha **Tema clássico** e salve: as configurações dele esperam por você, intactas.
 
 **Sempre legível**: sejam quais forem as cores escolhidas, o Éclair ajusta automaticamente o texto (contraste de **7:1** sobre o fundo), o texto secundário, os links e os botões (4,5:1), inclusive sobre os fundos tingidos com a cor de destaque (selos, menu, realce). Assim, uma cor clara demais para um texto sobre fundo claro é escurecida só o necessário.
 
-**Sempre rápido**: a fonte dos títulos é **baixada uma única vez pelo seu servidor** (do Fontsource, licença SIL Open Font License), guardada em `media/fonts/` e depois servida pelo seu site e pré-carregada com `font-display: optional`: nenhuma requisição a um serviço de terceiros para os seus visitantes, nenhum deslocamento de layout. Só as regras CSS que a sua direção usa são inseridas na página, e o modo escuro automático dá lugar à escolha clara ou escura da direção. Medido com o Lighthouse: 100 nas quatro categorias com Noturno, Riviera, Imprensa e Cartaz.
+**Sempre rápido**: a fonte dos títulos é **baixada uma única vez pelo seu servidor** (do Fontsource, licença SIL Open Font License), guardada em `media/fonts/` e depois servida pelo seu site e pré-carregada com `font-display: optional`: nenhuma requisição a um serviço de terceiros para os seus visitantes, nenhum deslocamento de layout. Só as regras CSS que a sua direção usa são inseridas na página, e o modo escuro automático dá lugar à escolha clara ou escura da direção. Medido com o Lighthouse: 100 nas quatro categorias com Noturno, Riviera, Imprensa e Cartaz, e com as novas composições (banner com a imagem à esquerda ou emoldurado, diferenciais numerados, linhas entre as seções, botões com contorno ou como links sublinhados).
 
 > [!TIP]
 > Se a sua hospedagem bloqueia as conexões de saída, a fonte não pode ser baixada: uma mensagem avisa você e, enquanto isso, o site usa uma fonte de reserva da mesma família (serifada, condensada…). Tente de novo mais tarde salvando outra vez.
+
+### Ajustes em um clique
+
+<p align="center">
+  <img src="images/pt-BR/retouches.webp" alt="A direção Argila e, depois, a mesma página após cada ajuste: mais ousado, mais colorido, claro ↔ escuro, enxugar, outra fonte" width="100%">
+</p>
+
+Abaixo dos cartões, seis botões transformam a direção escolhida com um único clique, e a pré-visualização se atualiza na hora:
+
+| Ajuste | O que muda |
+|---|---|
+| **Mais ousado** | títulos maiores, mais espaço, banner mais impactante (cartaz e, depois, imagem de ponta a ponta), faixas de cor, destaque mais vivo, botões preenchidos |
+| **Mais sóbrio** | títulos mais discretos, caixa normal, bordas finas no lugar das sombras, banner mais calmo, destaque suavizado |
+| **Mais colorido** | fundo e faixas tingidos com a cor de destaque, faixas de cor, destaque mais vivo |
+| **Enxugar** | bordas finas, nenhum ícone, fundo liso, mais espaço, cantos mais retos, diferenciais em colunas |
+| **Claro ↔ escuro** | inverte a luminosidade do fundo, das faixas e do texto, mantendo as tonalidades |
+| **Outra fonte** | passa para a próxima fonte dos títulos, alternando as famílias (serifada, grotesca, condensada…) |
+
+Os ajustes podem ser encadeados; **Desfazer ajuste** volta uma etapa de cada vez. Os contrastes continuam garantidos a cada etapa, e nada é publicado antes de você salvar.
 
 ### Imagine minha direção com a IA
 
@@ -602,7 +622,7 @@ tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<v
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 550 verificações unitárias e HTTP; ECLAIR_TEST_ROOT=… para testar um arquivo zip descompactado
+php tests/run.php                                  # 556 verificações unitárias e HTTP; ECLAIR_TEST_ROOT=… para testar um arquivo zip descompactado
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 
