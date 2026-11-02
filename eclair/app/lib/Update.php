@@ -316,11 +316,12 @@ final class Update
         self::preload();
 
         // Ancien code mis de côté : dossiers déplacés d'un coup (renommage), fichiers de la racine copiés en .txt
-        // (aucun point d'entrée exécutable dans le cache).
+        // (aucun point d'entrée exécutable dans le cache), comme les fichiers hors code que l'échange va remplacer.
         $prev = self::dir() . '/previous';
         self::remove($prev);
         Store::ensureDir($prev);
-        if (!@copy(ECLAIR_ROOT . '/index.php', $prev . '/index.php.txt') || (is_file(ECLAIR_ROOT . '/.htaccess') && !@copy(ECLAIR_ROOT . '/.htaccess', $prev . '/htaccess.txt'))) {
+        if (!@copy(ECLAIR_ROOT . '/index.php', $prev . '/index.php.txt') || (is_file(ECLAIR_ROOT . '/.htaccess') && !@copy(ECLAIR_ROOT . '/.htaccess', $prev . '/htaccess.txt'))
+            || !self::keep($extras, $prev)) {
             self::remove($prev);
             return ['ok' => false, 'error' => t('Impossible de mettre de côté la version actuelle : rien n’a été modifié.')];
         }
@@ -428,7 +429,45 @@ final class Update
         }
     }
 
-    /** Remet en place le code mis de côté (dossiers, index.php, .htaccess). */
+    /**
+     * Fichiers hors code que l'échange va remplacer (protections des dossiers, modèle de configuration) : copiés en .txt
+     * dans extra/, et ceux qu'il va ajouter notés dans extra/new.txt, pour qu'un retour remette tout comme avant.
+     */
+    private static function keep(array $extras, string $prev): bool
+    {
+        $added = [];
+        try {
+            foreach ($extras as $path) {
+                if (!self::extra($path)) {
+                    continue;
+                }
+                if (!is_file(ECLAIR_ROOT . '/' . $path)) {
+                    $added[] = $path;
+                    continue;
+                }
+                Store::ensureDir($prev . '/extra');
+                if (!@copy(ECLAIR_ROOT . '/' . $path, $prev . '/extra/' . str_replace('/', '~', $path) . '.txt')) {
+                    return false;
+                }
+            }
+            if ($added) {
+                Store::ensureDir($prev . '/extra');
+                return @file_put_contents($prev . '/extra/new.txt', implode("\n", $added)) !== false;
+            }
+        } catch (\Throwable) {
+            return false;
+        }
+        return true;
+    }
+
+    /** Fichier hors code qu'une mise à jour peut poser (ni le code, ni index.php, ni le .htaccess principal, gardés à part). */
+    private static function extra(string $path): bool
+    {
+        return $path !== '' && $path !== 'index.php' && $path !== '.htaccess' && !str_starts_with($path, 'app/') && !str_starts_with($path, 'assets/')
+            && !str_contains($path, '..') && preg_match(self::SHIPPED, $path) === 1;
+    }
+
+    /** Remet en place le code mis de côté (dossiers, index.php, .htaccess, fichiers hors code). */
     private static function restore(): bool
     {
         $prev = self::dir() . '/previous';
@@ -454,6 +493,19 @@ final class Update
             $content = @file_get_contents($prev . '/' . $saved);
             if (is_string($content)) {
                 $ok = self::put(ECLAIR_ROOT . '/' . $name, $content) && $ok;
+            }
+        }
+        // Fichiers hors code remplacés par l'échange : remis comme avant ; ceux qu'il a ajoutés sont retirés.
+        foreach (glob($prev . '/extra/*.txt') ?: [] as $file) {
+            $path = str_replace('~', '/', substr(basename($file), 0, -4));
+            if (basename($file) !== 'new.txt' && self::extra($path)) {
+                $content = @file_get_contents($file);
+                $ok = is_string($content) && self::put(ECLAIR_ROOT . '/' . $path, $content) && $ok;
+            }
+        }
+        foreach (explode("\n", (string) @file_get_contents($prev . '/extra/new.txt')) as $path) {
+            if (self::extra($path) && is_file(ECLAIR_ROOT . '/' . $path)) {
+                $ok = @unlink(ECLAIR_ROOT . '/' . $path) && $ok;
             }
         }
         self::fresh();

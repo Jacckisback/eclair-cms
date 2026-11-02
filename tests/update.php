@@ -136,8 +136,13 @@ if (!in_array('--unit', $argv, true) && function_exists('sodium_crypto_sign_keyp
         $good = eclair_release($channel, '9.9.9', static function (array $f): array {
             $f['assets/admin/admin.css'] .= "\n/* version-9-9-9 */\n";
             $f['app/lib/Nouveau.php'] = "<?php\ndefined('ECLAIR') || exit;\n";
+            // Fichiers hors code : un modèle et une protection modifiés, une protection ajoutée.
+            $f['eclair-config.exemple.php'] .= "// modèle 9.9.9\n";
+            $f['data/.htaccess'] .= "# protection 9.9.9\n";
+            $f['cache/pages/.htaccess'] = "Require all denied\n";
             return $f;
         });
+        $originals = ['eclair-config.exemple.php' => (string) file_get_contents($copy . '/eclair-config.exemple.php'), 'data/.htaccess' => (string) file_get_contents($copy . '/data/.htaccess')];
         eclair_announce($channel, $chanPort, $good, $intruder);
         $body = $post(['action' => 'check']);
         check('annonce signée par une autre clé : refusée', str_contains($body, 'signature ne correspond pas') && !str_contains($body, 'Éclair 9.9.9 est disponible'));
@@ -221,6 +226,14 @@ if (!in_array('--unit', $argv, true) && function_exists('sodium_crypto_sign_keyp
             && (string) @file_get_contents($copy . '/cache/update/htaccess-9.9.9.txt') === $good['files']['.htaccess'] && str_contains($body, 'conservés tels quels : .htaccess'));
         check('contrôle de santé fait (aucun avertissement), contenus et réglages intacts', !str_contains($body, 'empêche Éclair de contrôler')
             && count(glob($copy . '/data/content/*.php') ?: []) === $contents && $contents > 0 && str_contains($c->req('GET', '/')['body'], 'Atelier Test'));
+        check('fichiers hors code : remplacés, ajoutés, et les originaux gardés pour un retour', str_ends_with((string) file_get_contents($copy . '/eclair-config.exemple.php'), "// modèle 9.9.9\n")
+            && str_ends_with((string) file_get_contents($copy . '/data/.htaccess'), "# protection 9.9.9\n") && is_file($copy . '/cache/pages/.htaccess')
+            && (string) @file_get_contents($copy . '/cache/update/previous/extra/eclair-config.exemple.php.txt') === $originals['eclair-config.exemple.php']
+            && (string) @file_get_contents($copy . '/cache/update/previous/extra/data~.htaccess.txt') === $originals['data/.htaccess']
+            && in_array('cache/pages/.htaccess', explode("\n", (string) @file_get_contents($copy . '/cache/update/previous/extra/new.txt')), true),
+            json_encode(['cfg' => substr((string) file_get_contents($copy . '/eclair-config.exemple.php'), -20), 'data' => substr((string) file_get_contents($copy . '/data/.htaccess'), -24),
+                'pages' => is_file($copy . '/cache/pages/.htaccess'), 'extra' => array_map('basename', glob($copy . '/cache/update/previous/extra/*') ?: []),
+                'new' => (string) @file_get_contents($copy . '/cache/update/previous/extra/new.txt')], JSON_UNESCAPED_UNICODE));
         check('ancienne version gardée sans point d’entrée exécutable', is_file($copy . '/cache/update/previous/index.php.txt') && !is_file($copy . '/cache/update/previous/index.php')
             && !is_dir($copy . '/cache/update/stage') && !glob($copy . '/cache/update/*.zip'));
         // (Le contrôle de santé a déjà rendu l'accueil avec le nouveau code : c'est cette nouvelle page qui est en cache.)
@@ -243,6 +256,13 @@ if (!in_array('--unit', $argv, true) && function_exists('sodium_crypto_sign_keyp
             && is_file($copy . '/app/lib/Ancien.php') && !is_file($copy . '/app/lib/Nouveau.php') && !str_contains((string) file_get_contents($copy . '/assets/admin/admin.css'), 'version-9-9-9'));
         check('retour manuel : site en ligne, nouvelle version de nouveau proposée', $c->req('GET', '/')['status'] === 200 && !is_dir($copy . '/cache/update/previous')
             && str_contains($body, 'Éclair 9.9.9 est disponible') && str_contains((string) file_get_contents($copy . '/.htaccess'), 'Réglage ajouté par l'));
+        check('retour manuel : fichiers hors code remis comme avant, fichier ajouté retiré', (string) file_get_contents($copy . '/eclair-config.exemple.php') === $originals['eclair-config.exemple.php']
+            && (string) file_get_contents($copy . '/data/.htaccess') === $originals['data/.htaccess'] && !is_file($copy . '/cache/pages/.htaccess'));
+        $sec = $c->req('GET', '/gestion/security');
+        $c->req('POST', '/gestion/security', $c->token($sec['body']) + ['action' => 'integrity']);
+        $scan = $c->req('GET', '/gestion/security');
+        check('après le retour : contrôle d’intégrité propre (seul le .htaccess retouché est signalé)', str_contains($scan['body'], 'Fichiers modifiés (1)')
+            && !str_contains($scan['body'], 'Fichiers inconnus') && !str_contains($scan['body'], 'Fichiers suspects'), substr(strip_tags((string) strstr($scan['body'], 'Intégrité des fichiers')), 0, 400));
 
         // Version plus ancienne annoncée : jamais proposée (pas de retour en arrière par le canal).
         $old = eclair_release($channel, '1.0.0');

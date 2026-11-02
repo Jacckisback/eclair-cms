@@ -57,7 +57,11 @@ final class Integrity
             if (str_starts_with($path, $kept)) {
                 $rel = substr($path, strlen($kept));
                 $hash = (string) ($previous[$rel] ?? '');
-                $known = $rel === 'app/manifest.php' || in_array($rel, ['index.php.txt', 'htaccess.txt'], true) || isset($previous[$rel . '.gz'])
+                // Fichier hors code gardé en .txt (extra/dossier~fichier.txt) : comparé à l'empreinte de l'original.
+                if ($rel !== 'extra/new.txt' && preg_match('~^extra/([^/]+)\.txt$~', $rel, $x)) {
+                    $hash = (string) ($previous[str_replace('~', '/', $x[1])] ?? '');
+                }
+                $known = $rel === 'app/manifest.php' || in_array($rel, ['index.php.txt', 'htaccess.txt', 'extra/new.txt'], true) || isset($previous[$rel . '.gz'])
                     || (strlen($hash) >= 32 && hash_equals($hash, substr((string) hash_file('sha256', ECLAIR_ROOT . '/' . $path), 0, strlen($hash))));
                 if (!$known) {
                     $result['unknown'][] = $path;
