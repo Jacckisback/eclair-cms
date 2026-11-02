@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/t%C3%A9l%C3%A9charger-v1.9.0-5b4cf0?style=for-the-badge" alt="Télécharger Éclair 1.9.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip"><img src="https://img.shields.io/badge/t%C3%A9l%C3%A9charger-v1.10.0-5b4cf0?style=for-the-badge" alt="Télécharger Éclair 1.10.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 ou plus">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_donn%C3%A9es-aucune-14122b?style=for-the-badge" alt="Aucune base de données">
@@ -39,7 +39,7 @@
 
 ## Pourquoi Éclair
 
-WordPress sait tout faire, mais il lui faut une base de données, des extensions pour le SEO, la sécurité et le cache… et des mises à jour sans fin. Éclair réunit l'essentiel dans un CMS de **moins de 1 Mo**, pensé pour les indépendants, les artisans et les petites entreprises.
+WordPress sait tout faire, mais il lui faut une base de données, des extensions pour le SEO, la sécurité et le cache… et des mises à jour sans fin. Éclair réunit l'essentiel dans un CMS d'**environ 1 Mo**, pensé pour les indépendants, les artisans et les petites entreprises.
 
 <table>
   <tr>
@@ -63,7 +63,7 @@ WordPress sait tout faire, mais il lui faut une base de données, des extensions
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra léger</h3>
-      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>485 Ko</b>, zéro dépendance, zéro cookie sur le site public.
+      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>506 Ko</b>, zéro dépendance, zéro cookie sur le site public.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Simple comme bonjour</h3>
@@ -246,19 +246,32 @@ La méthode et les garde-fous sont adaptés d'[Impeccable](https://github.com/pb
 
 La boutique ne s'ouvre qu'avec des mentions légales et des conditions générales de vente publiées. Mode d'emploi complet : [guide, section Boutique](docs/GUIDE.md#boutique).
 
+## Mises à jour en un clic, sauvegardes sur Google Drive
+
+Quand une nouvelle version d'Éclair sort, ton tableau de bord te prévient. Tu choisis le moment : un rappel de sauvegarde, une case à cocher, un clic.
+
+- **Signée et vérifiée** : l'annonce de chaque version est signée par le mainteneur (Ed25519), puis Éclair contrôle l'archive, chaque fichier et sa compatibilité avec ta version de PHP **avant de toucher à quoi que ce soit**.
+- **Sans risque pour tes contenus** : seul le code change. Contenus, images, comptes, réglages et CSS personnalisé ne bougent pas, et un `.htaccess` retouché est conservé.
+- **Retour automatique** : après l'installation, Éclair vérifie que ton site et ton administration répondent comme avant ; sinon il revient tout seul à l'ancienne version. Un bouton permet aussi d'y revenir quand tu veux.
+
+**Sauvegardes sur Google Drive** : connecte ton Drive avec un simple code (google.com/device), choisis « chaque jour » ou « chaque semaine », et Éclair y envoie une copie complète de ton site. Il n'a accès qu'aux fichiers qu'il crée, garde les dernières sauvegardes (8 par défaut) et envoie les gros sites par morceaux, avec reprise. Les clés d'API ne quittent jamais ton serveur.
+
+Mode d'emploi : [guide, section Mettre à jour, sauvegarder, déménager](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager).
+
 ## Éclair face à WordPress
 
 | | WordPress classique | ⚡ Éclair |
 |---|---|---|
 | **Installation** | Créer une base MySQL, puis lancer l'assistant | ✅ Envoyer le dossier, répondre à 4 questions |
 | **Base de données** | MySQL obligatoire | ✅ Aucune (fichiers protégés) |
-| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 485 Ko |
+| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 506 Ko |
 | **SEO, sitemap, données structurées** | Extension à installer et à maintenir | ✅ Intégré |
 | **GEO : llms.txt, Markdown, robots IA** | Extensions, rarement complet | ✅ Intégré |
 | **Pages publiques** | Générées à chaque visite, sauf extension de cache | ✅ Servies depuis un cache statique |
 | **Cookies sur le site public** | Souvent nombreux | ✅ Aucun |
 | **Double authentification, anti-bruteforce** | Extensions | ✅ Intégrés |
 | **Mises à jour d'extensions** | Régulières, première source de failles | ✅ Aucune extension à mettre à jour |
+| **Sauvegardes automatiques** | Extension à installer (UpdraftPlus…) | ✅ Intégrées : Google Drive chaque jour ou chaque semaine, ou téléchargement |
 | **Assistant IA (rédaction, images)** | Extensions, souvent avec abonnement | ✅ Intégré : Claude ou ChatGPT, avec ta clé |
 | **Thèmes et design** | À installer, souvent lourds, parfois payants | ✅ 6 thèmes et 12 directions artistiques intégrés, proposées sur mesure par l'IA, aperçu en direct |
 | **Vendre en ligne** | WooCommerce : extension, base de données, mises à jour | ✅ Boutique légère intégrée, paiement par lien Stripe, PayPal ou Revolut |
@@ -347,7 +360,8 @@ Sur un vrai mutualisé, ajoute la latence réseau et le démarrage de PHP de ton
 - **Mot de passe redemandé** pour les actions sensibles, mots de passe provisoires à changer, sessions courtes et révocables.
 - **Site public verrouillé** : Content-Security-Policy stricte, contenus assainis par liste blanche, aucune redirection ouverte, images ré-encodées.
 - **Installation protégée** : fenêtre de 2 heures, et adresse du site vérifiée par le serveur lui-même avant toute redirection.
-- **Page Sécurité** : contrôle d'intégrité des fichiers, test de protection des dossiers, journal, sauvegarde en un clic.
+- **Mises à jour signées** : chaque version est annoncée avec une signature Ed25519 du mainteneur, vérifiée par ton site avant toute installation ; un dépôt GitHub piraté ne suffit pas à pousser du code sur ton site.
+- **Page Sécurité** : contrôle d'intégrité des fichiers, test de protection des dossiers, journal, sauvegarde en un clic ou sur Google Drive.
 - **Connecteur MCP désactivé par défaut** : une fois activé, OAuth 2.1 avec PKCE, accord après connexion, jetons hachés et révocables, aucune publication ni suppression possible.
 
 > [!NOTE]
@@ -361,7 +375,7 @@ Détails complets dans le [guide, section Sécurité](docs/GUIDE.md#sécurité).
   <img src="docs/images/install.webp" alt="Installation en trois étapes : envoyer le dossier, répondre à quatre questions, le site est en ligne" width="100%">
 </p>
 
-1. **Télécharge** l'archive [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 Ko) et décompresse-la.
+1. **Télécharge** l'archive [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (506 Ko) et décompresse-la.
 2. **Envoie le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…), fichiers cachés `.htaccess` compris.
 3. **Ouvre l'adresse de ton site** : l'assistant démarre. Quatre questions, des confettis, et ton site est en ligne avec ses premières pages.
 
@@ -380,7 +394,7 @@ Le [guide complet](docs/GUIDE.md) détaille tout le reste :
 - [Directions artistiques](docs/GUIDE.md#directions-artistiques), [Thèmes](docs/GUIDE.md#thèmes) et [Boutique](docs/GUIDE.md#boutique) : univers sur mesure avec l'IA, Score Design, aperçu en direct, fiches produit, Stripe, PayPal, Revolut, Google Shopping
 - [Assistant IA](docs/GUIDE.md#assistant-ia) : activation, profil éditorial, créer une page avec l'IA, coûts, sécurité
 - [Connecteur MCP](docs/GUIDE.md#connecteur-mcp-claude-et-chatgpt) : Claude et ChatGPT avec ton abonnement
-- [Mettre à jour, sauvegarder, déménager](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager)
+- [Mettre à jour, sauvegarder, déménager](docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager) : mise à jour en un clic, sauvegardes Google Drive, restauration
 - [Dépannage](docs/GUIDE.md#dépannage) : mot de passe oublié, erreurs 404 ou 500, Nginx…
 
 ## Pour les développeurs

@@ -16,6 +16,7 @@ final class AdminUpdate
             'state' => Update::state(),
             'pending' => $pending,
             'blockers' => $pending !== null ? Update::blockers($pending) : [],
+            'modified' => $pending !== null ? Update::modified() : [],
             'previous' => Update::previous(),
             'zip' => class_exists('ZipArchive'),
         ], t('Mises à jour'));

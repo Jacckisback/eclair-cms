@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/download-v1.9.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.9.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip"><img src="https://img.shields.io/badge/download-v1.10.0-5b4cf0?style=for-the-badge" alt="Download Éclair 1.10.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -39,7 +39,7 @@
 
 ## Why Éclair
 
-WordPress can do everything, but it needs a database, plugins for SEO, security and caching… and endless updates. Éclair packs the essentials into a CMS **under 1 MB**, designed for freelancers, craftspeople and small businesses.
+WordPress can do everything, but it needs a database, plugins for SEO, security and caching… and endless updates. Éclair packs the essentials into a CMS of **about 1 MB**, designed for freelancers, craftspeople and small businesses.
 
 <table>
   <tr>
@@ -63,7 +63,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>485 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>506 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -246,19 +246,32 @@ The method and its safeguards are adapted from [Impeccable](https://github.com/p
 
 The shop only opens once your legal notice and terms of sale are published. Step-by-step instructions: see the [guide, Shop section](docs/GUIDE.en.md#shop).
 
+## One-click updates, Google Drive backups
+
+When a new version of Éclair comes out, your dashboard lets you know. You choose the moment: a backup reminder, a checkbox, one click.
+
+- **Signed and verified**: each version's announcement is signed by the maintainer (Ed25519), then Éclair checks the archive, every file and its compatibility with your PHP version **before touching anything**.
+- **No risk to your content**: only the code changes. Content, images, accounts, settings and custom CSS stay untouched, and a `.htaccess` you've edited is kept.
+- **Automatic rollback**: after installing, Éclair checks that your site and your admin respond as before; if not, it goes back to the old version on its own. A button also lets you roll back whenever you like.
+
+**Google Drive backups**: connect your Drive with a simple code (google.com/device), choose “every day” or “every week”, and Éclair sends a full copy of your site there. It only has access to the files it creates, keeps the latest backups (8 by default) and uploads large sites in chunks, resuming if interrupted. API keys never leave your server.
+
+How to use it: [guide, Updating, backing up, moving section](docs/GUIDE.en.md#updating-backing-up-moving).
+
 ## Éclair vs. WordPress
 
 | | Classic WordPress | ⚡ Éclair |
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 485 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 506 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
 | **Cookies on the public site** | Often many | ✅ None |
 | **Two-factor authentication, brute-force protection** | Plugins | ✅ Built in |
 | **Plugin updates** | Frequent, the #1 source of vulnerabilities | ✅ No plugins to update |
+| **Automatic backups** | A plugin to install (UpdraftPlus…) | ✅ Built in: Google Drive every day or every week, or download |
 | **AI assistant (writing, images)** | Plugins, often with a subscription | ✅ Built in: Claude or ChatGPT, with your own key |
 | **Themes and design** | Installed separately, often heavy, sometimes paid | ✅ 6 themes and 12 art directions built in, tailor-made suggestions from AI, live preview |
 | **Selling online** | WooCommerce: a plugin, a database, updates | ✅ Built-in lightweight shop, payment via Stripe, PayPal or Revolut link |
@@ -347,7 +360,8 @@ On real shared hosting, add your host's network latency and PHP startup time.
 - **Password re-prompt** for sensitive actions, temporary passwords that must be changed, short and revocable sessions.
 - **Locked-down public site**: strict Content-Security-Policy, allowlist-based content sanitizing, no open redirects, re-encoded images.
 - **Protected installation**: a 2-hour window, and the site URL verified by the server itself before any redirect.
-- **Security page**: file integrity check, folder protection test, security log, one-click backup.
+- **Signed updates**: each version is announced with an Ed25519 signature from the maintainer, which your site verifies before installing anything; a hacked GitHub repository isn't enough to push code to your site.
+- **Security page**: file integrity check, folder protection test, security log, backup in one click or to Google Drive.
 - **MCP connector disabled by default**: once enabled, OAuth 2.1 with PKCE, approval after login, hashed and revocable tokens, no publishing or deleting possible.
 
 > [!NOTE]
@@ -361,7 +375,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) archive (485 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) archive (506 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
@@ -380,7 +394,7 @@ The [full guide](docs/GUIDE.en.md) covers everything else:
 - [Art directions](docs/GUIDE.en.md#art-directions), [Themes](docs/GUIDE.en.md#themes) and [Shop](docs/GUIDE.en.md#shop): tailor-made visual worlds with AI, Design score, live preview, product pages, Stripe, PayPal, Revolut, Google Shopping
 - [AI assistant](docs/GUIDE.en.md#ai-assistant): activation, editorial profile, creating a page with AI, costs, security
 - [MCP connector](docs/GUIDE.en.md#mcp-connector-claude-and-chatgpt): Claude and ChatGPT with your subscription
-- [Updating, backing up, moving](docs/GUIDE.en.md#updating-backing-up-moving)
+- [Updating, backing up, moving](docs/GUIDE.en.md#updating-backing-up-moving): one-click updates, Google Drive backups, restoring
 - [Troubleshooting](docs/GUIDE.en.md#troubleshooting): forgotten password, 404 or 500 errors, Nginx…
 
 ## For developers

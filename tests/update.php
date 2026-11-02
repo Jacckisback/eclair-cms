@@ -188,6 +188,14 @@ if (!in_array('--unit', $argv, true) && function_exists('sodium_crypto_sign_keyp
         check('retour automatique : signalé sur la page et au journal', str_contains($body, 'ne fonctionnait pas correctement sur ton serveur')
             && ($state()['failed']['version'] ?? '') === '9.9.9' && str_contains($c->req('GET', '/gestion/security')['body'], 'Retour à la version précédente'));
 
+        // Fichier du thème retouché à la main : signalé avant l'installation (il serait remplacé).
+        $themeCss = $copy . '/app/theme/theme.css';
+        $originalCss = (string) file_get_contents($themeCss);
+        file_put_contents($themeCss, $originalCss . "\n/* retouche à la main */\n");
+        $page = $c->req('GET', '/gestion/update')['body'];
+        check('fichiers retouchés à la main : listés avant la mise à jour', str_contains($page, 'Fichiers d’Éclair modifiés à la main') && str_contains($page, 'app/theme/theme.css'));
+        file_put_contents($themeCss, $originalCss);
+
         // Version saine : mot de passe redemandé (session de plus de 15 min), .htaccess personnalisé gardé, ancien fichier écarté.
         file_put_contents($copy . '/.htaccess', "\n# Réglage ajouté par l'hébergeur\n", FILE_APPEND);
         $contents = count(glob($copy . '/data/content/*.php') ?: []);

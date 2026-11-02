@@ -123,7 +123,7 @@ $events = [
       <?php $last = $d['last']; ?>
       <?php if ($last): ?>
         <p class="small"><span class="dot <?= $last['ok'] ? 'ok' : 'warn' ?>"></span>
-          <?= e($last['ok'] ? t('Dernière sauvegarde : {d} ({s} Mo).', ['d' => fmt_date((int) $last['date'], \Eclair\I18n::lang(), true), 's' => number_format((int) ($last['size'] ?? 0) / 1048576, 1, ',', ' ')])
+          <?= e($last['ok'] ? t('Dernière sauvegarde : {d} ({s}).', ['d' => fmt_date((int) $last['date'], \Eclair\I18n::lang(), true), 's' => human_size((int) ($last['size'] ?? 0))])
             : t('Dernière tentative ({d}) : {e}', ['d' => fmt_date((int) $last['date'], \Eclair\I18n::lang(), true), 'e' => (string) ($last['error'] ?? '')])) ?></p>
       <?php else: ?>
         <p class="small muted"><?= e(t('Aucune sauvegarde envoyée pour l’instant.')) ?></p>

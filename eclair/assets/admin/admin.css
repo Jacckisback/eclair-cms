@@ -640,3 +640,4 @@ dialog.small{width:min(30rem,calc(100vw - 2rem))}
 .drive-settings{margin:1rem 0}
 .drive-more{margin:1rem 0}
 .drive-more summary{cursor:pointer;color:var(--muted);font-weight:600}
+#installer form .check+.btn,#installer form .confirm-password+.btn{margin-top:.6rem}

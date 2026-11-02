@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/descargar-v1.9.0-5b4cf0?style=for-the-badge" alt="Descargar Éclair 1.9.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip"><img src="https://img.shields.io/badge/descargar-v1.10.0-5b4cf0?style=for-the-badge" alt="Descargar Éclair 1.10.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_datos-ninguna-14122b?style=for-the-badge" alt="Sin base de datos">
@@ -39,7 +39,7 @@
 
 ## Por qué Éclair
 
-WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la seguridad y la caché… y actualizaciones sin fin. Éclair reúne lo esencial en un CMS de **menos de 1 MB**, pensado para autónomos, artesanos y pequeñas empresas.
+WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la seguridad y la caché… y actualizaciones sin fin. Éclair reúne lo esencial en un CMS de **alrededor de 1 MB**, pensado para autónomos, artesanos y pequeñas empresas.
 
 <table>
   <tr>
@@ -63,7 +63,7 @@ WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraligero</h3>
-      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>485 KB</b>, cero dependencias, cero cookies en el sitio público.
+      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>506 KB</b>, cero dependencias, cero cookies en el sitio público.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facilísimo</h3>
@@ -246,19 +246,32 @@ El método y sus salvaguardas están adaptados de [Impeccable](https://github.co
 
 La tienda solo se abre cuando el aviso legal y las condiciones generales de venta están publicados. Instrucciones completas: consulta la [guía, sección Tienda](docs/GUIDE.es.md#tienda).
 
+## Actualizaciones en un clic, copias de seguridad en Google Drive
+
+Cuando sale una nueva versión de Éclair, tu panel te avisa. Tú eliges el momento: un recordatorio para hacer una copia de seguridad, una casilla que marcar, un clic.
+
+- **Firmada y verificada**: el anuncio de cada versión lo firma el mantenedor (Ed25519) y, después, Éclair comprueba el archivo ZIP, cada uno de sus archivos y su compatibilidad con tu versión de PHP **antes de tocar nada**.
+- **Sin riesgo para tu contenido**: solo cambia el código. Los contenidos, las imágenes, las cuentas, los ajustes y el CSS personalizado se quedan como están, y un `.htaccess` modificado se conserva.
+- **Vuelta atrás automática**: tras la instalación, Éclair comprueba que tu sitio y tu panel responden como antes; si no, vuelve solo a la versión anterior. Un botón también te permite volver a ella cuando quieras.
+
+**Copias de seguridad en Google Drive**: conecta tu Drive con un simple código (google.com/device), elige «cada día» o «cada semana», y Éclair envía allí una copia completa de tu sitio. Solo tiene acceso a los archivos que crea, conserva las últimas copias (8 por defecto) y envía los sitios grandes por partes, retomando el envío si se interrumpe. Las claves de API nunca salen de tu servidor.
+
+Instrucciones de uso: [guía, sección Actualizar, hacer copias de seguridad, mudarse](docs/GUIDE.es.md#actualizar-hacer-copias-de-seguridad-mudarse).
+
 ## Éclair frente a WordPress
 
 | | WordPress clásico | ⚡ Éclair |
 |---|---|---|
 | **Instalación** | Crear una base de datos MySQL y luego lanzar el asistente | ✅ Subir la carpeta y responder 4 preguntas |
 | **Base de datos** | MySQL obligatorio | ✅ Ninguna (archivos protegidos) |
-| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 485 KB |
+| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 506 KB |
 | **SEO, sitemap, datos estructurados** | Un plugin que instalar y mantener | ✅ Integrado |
 | **GEO: llms.txt, Markdown, robots de IA** | Plugins, rara vez completos | ✅ Integrado |
 | **Páginas públicas** | Generadas en cada visita, salvo con un plugin de caché | ✅ Servidas desde una caché estática |
 | **Cookies en el sitio público** | A menudo muchas | ✅ Ninguna |
 | **Verificación en dos pasos, protección contra fuerza bruta** | Plugins | ✅ Integradas |
 | **Actualizaciones de plugins** | Constantes, la principal fuente de vulnerabilidades | ✅ Ningún plugin que actualizar |
+| **Copias de seguridad automáticas** | Un plugin que instalar (UpdraftPlus…) | ✅ Integradas: en Google Drive cada día o cada semana, o por descarga |
 | **Asistente IA (redacción, imágenes)** | Plugins, a menudo con suscripción | ✅ Integrado: Claude o ChatGPT, con tu clave |
 | **Temas y diseño** | Hay que instalarlos; a menudo pesados, a veces de pago | ✅ 6 temas y 12 direcciones de arte integrados, propuestas a medida de la IA, vista previa en directo |
 | **Vender en línea** | WooCommerce: plugin, base de datos, actualizaciones | ✅ Tienda ligera integrada, pago mediante enlace de Stripe, PayPal o Revolut |
@@ -347,7 +360,8 @@ En un hosting compartido real, suma la latencia de red y el arranque de PHP de t
 - **Contraseña solicitada de nuevo** para las acciones sensibles, contraseñas temporales que hay que cambiar, sesiones cortas y revocables.
 - **Sitio público blindado**: Content-Security-Policy estricta, contenido saneado mediante lista blanca, ninguna redirección abierta, imágenes recodificadas.
 - **Instalación protegida**: un plazo de 2 horas, y la URL del sitio verificada por el propio servidor antes de cualquier redirección.
-- **Página Seguridad**: control de integridad de los archivos, prueba de protección de las carpetas, registro, copia de seguridad en un clic.
+- **Actualizaciones firmadas**: cada versión se anuncia con una firma Ed25519 del mantenedor, que tu sitio verifica antes de instalar nada; un repositorio de GitHub comprometido no basta para introducir código en tu sitio.
+- **Página Seguridad**: control de integridad de los archivos, prueba de protección de las carpetas, registro, copia de seguridad en un clic o en Google Drive.
 - **Conector MCP desactivado por defecto**: una vez activado, OAuth 2.1 con PKCE, permiso tras iniciar sesión, tokens almacenados con hash y revocables, sin posibilidad de publicar ni eliminar nada.
 
 > [!NOTE]
@@ -361,7 +375,7 @@ Todos los detalles en la [guía, sección Seguridad](docs/GUIDE.es.md#seguridad)
   <img src="docs/images/es/install.webp" alt="Instalación en tres pasos: subir la carpeta, responder cuatro preguntas, el sitio está en línea" width="100%">
 </p>
 
-1. **Descarga** el archivo [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip) (485 KB) y descomprímelo.
+1. **Descarga** el archivo [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (506 KB) y descomprímelo.
 2. **Sube el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…), incluidos los archivos ocultos `.htaccess`.
 3. **Abre la dirección de tu sitio**: arranca el asistente. Cuatro preguntas, un poco de confeti, y tu sitio está en línea con sus primeras páginas.
 
@@ -380,7 +394,7 @@ La [guía completa](docs/GUIDE.es.md) detalla todo lo demás:
 - [Direcciones de arte](docs/GUIDE.es.md#direcciones-de-arte), [Temas](docs/GUIDE.es.md#temas) y [Tienda](docs/GUIDE.es.md#tienda): universos a medida con la IA, puntuación de diseño, vista previa en directo, fichas de producto, Stripe, PayPal, Revolut, Google Shopping
 - [Asistente IA](docs/GUIDE.es.md#asistente-ia): activación, perfil editorial, crear una página con IA, costes, seguridad
 - [Conector MCP](docs/GUIDE.es.md#conector-mcp-claude-y-chatgpt): Claude y ChatGPT con tu suscripción
-- [Actualizar, hacer copias de seguridad, mudarse](docs/GUIDE.es.md#actualizar-hacer-copias-de-seguridad-mudarse)
+- [Actualizar, hacer copias de seguridad, mudarse](docs/GUIDE.es.md#actualizar-hacer-copias-de-seguridad-mudarse): actualización en un clic, copias de seguridad en Google Drive, restauración
 - [Solución de problemas](docs/GUIDE.es.md#solución-de-problemas): contraseña olvidada, errores 404 o 500, Nginx…
 
 ## Para desarrolladores

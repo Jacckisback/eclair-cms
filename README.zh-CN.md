@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip"><img src="https://img.shields.io/badge/download-v1.9.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.9.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip"><img src="https://img.shields.io/badge/download-v1.10.0-5b4cf0?style=for-the-badge" alt="下载 Éclair 1.10.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -39,7 +39,7 @@
 
 ## 为什么选择 Éclair
 
-WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全和缓存……还要没完没了地更新。Éclair 把核心功能装进一个**不到 1 MB** 的 CMS，专为自由职业者、手艺人和小企业打造。
+WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全和缓存……还要没完没了地更新。Éclair 把核心功能装进一个**约 1 MB** 的 CMS，专为自由职业者、手艺人和小企业打造。
 
 <table>
   <tr>
@@ -63,7 +63,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>485 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>506 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -246,19 +246,32 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 
 只有发布了法律声明和销售条款之后，商店才能开放。完整使用说明请见[指南中的商店章节](docs/GUIDE.zh-CN.md#商店)。
 
+## 一键更新，备份到 Google Drive
+
+Éclair 发布新版本时，仪表盘会提醒你。何时安装由你决定：先提醒你备份，再勾选一个复选框，最后点一下即可。
+
+- **签名并经过验证**：每个版本的发布公告都由维护者签名（Ed25519），随后 Éclair 会**在改动任何东西之前**检查安装包、每个文件，以及它们与你的 PHP 版本是否兼容。
+- **内容毫无风险**：只有代码会改变。内容、图片、账户、设置和自定义 CSS 都保持不变，你修改过的 `.htaccess` 也会保留。
+- **自动回退**：安装完成后，Éclair 会检查你的网站和后台是否像以前一样正常响应；如果不正常，它会自动退回旧版本。你也可以随时点一个按钮退回旧版本。
+
+**备份到 Google Drive**：只需一个简单的代码（google.com/device）就能连接你的 Drive，选择“每天”或“每周”，Éclair 就会把网站的完整副本发送到那里。它只能访问自己创建的文件，保留最近的备份（默认 8 份），大型网站会分块上传，并支持断点续传。API 密钥永远不会离开你的服务器。
+
+使用说明请见[指南中的更新、备份、迁移章节](docs/GUIDE.zh-CN.md#更新备份迁移)。
+
 ## Éclair 与 WordPress 对比
 
 | | 传统 WordPress | ⚡ Éclair |
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 485 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 506 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
 | **公开网站上的 Cookie** | 往往很多 | ✅ 没有 |
 | **双重认证、防暴力破解** | 需要插件 | ✅ 内置 |
 | **插件更新** | 频繁，是安全漏洞的头号来源 | ✅ 没有插件需要更新 |
+| **自动备份** | 需要安装插件（UpdraftPlus……） | ✅ 内置：每天或每周备份到 Google Drive，也可直接下载 |
 | **AI 助手（写作、配图）** | 依赖插件，往往还要订阅 | ✅ 内置：Claude 或 ChatGPT，使用你自己的密钥 |
 | **主题与设计** | 需要另行安装，往往很臃肿，有时还要付费 | ✅ 内置 6 个主题和 12 种艺术风格，AI 可量身推荐，支持实时预览 |
 | **在线销售** | WooCommerce：插件、数据库、更新 | ✅ 内置轻量商店，通过 Stripe、PayPal 或 Revolut 付款链接收款 |
@@ -347,7 +360,8 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 - **敏感操作需再次输入密码**，临时密码必须修改，会话时间短且可随时撤销。
 - **公开网站全面防护**：严格的 Content-Security-Policy，基于白名单的内容过滤，没有开放重定向，图片重新编码。
 - **受保护的安装过程**：2 小时安装时限，并且在任何重定向之前由服务器自行验证网站地址。
-- **安全页面**：文件完整性检查、目录保护测试、安全日志、一键备份。
+- **签名更新**：每个版本发布时都附有维护者的 Ed25519 签名，你的网站在安装前会先验证签名；即使 GitHub 仓库被入侵，也无法把代码推送到你的网站。
+- **安全页面**：文件完整性检查、目录保护测试、安全日志、一键备份或备份到 Google Drive。
 - **MCP 连接器默认关闭**：启用后，采用带 PKCE 的 OAuth 2.1，须登录后授权，令牌经过哈希处理且可撤销，无法发布或删除任何内容。
 
 > [!NOTE]
@@ -361,7 +375,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.9.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.9.0.zip)（485 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip)（506 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
@@ -380,7 +394,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 - [艺术风格](docs/GUIDE.zh-CN.md#艺术风格)、[主题](docs/GUIDE.zh-CN.md#主题)和[商店](docs/GUIDE.zh-CN.md#商店)：用 AI 量身定制视觉风格、设计评分、实时预览、商品详情页、Stripe、PayPal、Revolut、Google Shopping
 - [AI 助手](docs/GUIDE.zh-CN.md#ai-助手)：启用、编辑风格档案、用 AI 生成页面、费用、安全
 - [MCP 连接器](docs/GUIDE.zh-CN.md#mcp-连接器claude-与-chatgpt)：用你的订阅使用 Claude 和 ChatGPT
-- [更新、备份、迁移](docs/GUIDE.zh-CN.md#更新备份迁移)
+- [更新、备份、迁移](docs/GUIDE.zh-CN.md#更新备份迁移)：一键更新、Google Drive 备份、恢复备份
 - [故障排除](docs/GUIDE.zh-CN.md#故障排除)：忘记密码、404 或 500 错误、Nginx……
 
 ## 开发者

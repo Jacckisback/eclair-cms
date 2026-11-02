@@ -220,6 +220,19 @@ final class Update
         return $out;
     }
 
+    /** Fichiers du code retouchés ou ajoutés à la main : la mise à jour les remplace ou les écarte (ils restent dans la version gardée). */
+    public static function modified(): array
+    {
+        $files = (array) (self::manifest(ECLAIR_ROOT . '/app/manifest.php')['files'] ?? []);
+        $out = [];
+        foreach ($files ? Integrity::scan(self::CODE) : [] as $path) {
+            if ($path !== 'app/manifest.php' && !isset($files[$path . '.gz']) && (!isset($files[$path]) || !self::same(ECLAIR_ROOT . '/' . $path, (string) $files[$path]))) {
+                $out[] = $path;
+            }
+        }
+        return $out;
+    }
+
     /**
      * Installe la version annoncée. Renvoie ['ok' => true, 'version', 'kept' => fichiers retouchés gardés, 'checked' => site
      * contrôlé après coup] ou ['ok' => false, 'error' => message] ; en cas d'échec, le site reste (ou revient) tel qu'avant.
@@ -268,7 +281,9 @@ final class Update
     {
         $version = (string) $r['version'];
         $zip = self::dir() . '/eclair-' . $version . '.zip';
-        if (self::get((string) $r['url'], self::MAX, $zip) === null || filesize($zip) !== $r['size'] || !hash_equals((string) $r['sha256'], (string) hash_file('sha256', $zip))) {
+        $fetched = self::get((string) $r['url'], self::MAX, $zip) !== null;
+        clearstatcache(true, $zip);
+        if (!$fetched || filesize($zip) !== $r['size'] || !hash_equals((string) $r['sha256'], (string) hash_file('sha256', $zip))) {
             Log::security('update_download_failed', ['version' => $version]);
             return ['ok' => false, 'error' => t('Archive téléchargée incomplète ou altérée : rien n’a été modifié. Réessaie dans quelques minutes.')];
         }
@@ -299,7 +314,6 @@ final class Update
 
         // Classes encore utiles après l'échange : chargées maintenant, depuis l'ancien code.
         self::preload();
-        $before = self::health(ECLAIR_VERSION);
 
         // Ancien code mis de côté : dossiers déplacés d'un coup (renommage), fichiers de la racine copiés en .txt
         // (aucun point d'entrée exécutable dans le cache).
@@ -310,6 +324,21 @@ final class Update
             self::remove($prev);
             return ['ok' => false, 'error' => t('Impossible de mettre de côté la version actuelle : rien n’a été modifié.')];
         }
+        try {
+            return self::swap($r, $stage, $prev, $roots, $extras, $kept);
+        } catch (\Throwable $e) {
+            // Imprévu pendant l'échange : l'ancienne version est remise en place avant tout.
+            self::restore();
+            Log::error($e);
+            return ['ok' => false, 'error' => t('Erreur inattendue pendant la mise à jour : Éclair est revenu à la version {v}. Détail dans Sécurité › Dernières erreurs techniques.', ['v' => ECLAIR_VERSION])];
+        }
+    }
+
+    /** Échange du code, contrôle de santé, retour automatique si besoin. */
+    private static function swap(array $r, string $stage, string $prev, array $roots, array $extras, array $kept): array
+    {
+        $version = (string) $r['version'];
+        $before = self::health(ECLAIR_VERSION);
         foreach (self::CODE as $dir) {
             if (!@rename(ECLAIR_ROOT . '/' . $dir, $prev . '/' . $dir) || !@rename($stage . '/' . $dir, ECLAIR_ROOT . '/' . $dir)) {
                 self::restore();
@@ -345,15 +374,23 @@ final class Update
         if ($broken) {
             self::restore();
             Log::security('update_rolled_back', ['version' => $version, 'auto' => implode(',', $broken)]);
-            Store::write('update', ['failed' => ['version' => $version, 'date' => time()]] + self::state());
+            self::remember(['failed' => ['version' => $version, 'date' => time()]]);
             return ['ok' => false, 'error' => t('La version {v} ne fonctionnait pas correctement sur ton serveur : Éclair est revenu tout seul à la version {old}. Rien n’est perdu.', ['v' => $version, 'old' => ECLAIR_VERSION])];
         }
         $checked = !in_array(0, $before, true);
-        $state = self::state();
-        unset($state['failed']);
-        Store::write('update', ['last' => ['from' => ECLAIR_VERSION, 'to' => $version, 'date' => time(), 'kept' => $kept, 'checked' => $checked]] + $state);
+        self::remember(['last' => ['from' => ECLAIR_VERSION, 'to' => $version, 'date' => time(), 'kept' => $kept, 'checked' => $checked]], ['failed']);
         Log::security('update_installed', ['from' => ECLAIR_VERSION, 'to' => $version]);
         return ['ok' => true, 'version' => $version, 'kept' => $kept, 'checked' => $checked];
+    }
+
+    /** Note l'issue d'une opération (un disque plein ne doit pas faire croire à un échec : le code, lui, a déjà changé). */
+    private static function remember(array $patch, array $drop = []): void
+    {
+        try {
+            Store::write('update', array_diff_key($patch + self::state(), array_flip($drop)));
+        } catch (\Throwable $e) {
+            Log::error($e);
+        }
     }
 
     /** Version gardée lors de la dernière mise à jour (pour y revenir), ou ''. */
@@ -382,7 +419,7 @@ final class Update
             if (!self::restore()) {
                 return ['ok' => false, 'error' => t('Retour incomplet : vérifie les droits d’écriture, puis réessaie (ou remets en place par FTP le contenu du dossier cache/update/previous).')];
             }
-            Store::write('update', ['last' => ['from' => ECLAIR_VERSION, 'to' => $version, 'date' => time(), 'rollback' => true]] + self::state());
+            self::remember(['last' => ['from' => ECLAIR_VERSION, 'to' => $version, 'date' => time(), 'rollback' => true]]);
             Log::security('update_rolled_back', ['version' => $version]);
             return ['ok' => true, 'version' => $version];
         } finally {
@@ -579,11 +616,15 @@ final class Update
         @unlink(ECLAIR_ROOT . '/cache/runtime.php');
         if (function_exists('opcache_invalidate') && is_dir(ECLAIR_ROOT . '/app')) {
             @opcache_invalidate(ECLAIR_ROOT . '/index.php', true);
-            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(ECLAIR_ROOT . '/app', \FilesystemIterator::SKIP_DOTS));
-            foreach ($it as $path => $info) {
-                if ($info->isFile() && str_ends_with((string) $path, '.php')) {
-                    @opcache_invalidate((string) $path, true);
+            try {
+                $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(ECLAIR_ROOT . '/app', \FilesystemIterator::SKIP_DOTS));
+                foreach ($it as $path => $info) {
+                    if ($info->isFile() && str_ends_with((string) $path, '.php')) {
+                        @opcache_invalidate((string) $path, true);
+                    }
                 }
+            } catch (\Throwable) {
+                // dossier illisible : opcache_reset() ci-dessous suffit
             }
         }
         if (function_exists('opcache_reset')) {

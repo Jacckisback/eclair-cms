@@ -18,7 +18,7 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai))
 9. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
 10. [Security](#security)
-11. [Updating, backing up, moving](#updating-backing-up-moving)
+11. [Updating, backing up, moving](#updating-backing-up-moving) (including [One-click update](#one-click-update) and [Google Drive backups](#google-drive-backups))
 12. [Troubleshooting](#troubleshooting) (including [Nginx](#nginx))
 13. [For developers](#for-developers)
 
@@ -499,6 +499,7 @@ Each draft comes back with a link to **open it in Éclair**; each suggestion, wi
 **Data and server**
 - **No database**: SQL injection is impossible.
 - **Doubly protected data**: the `data/`, `app/` and `cache/` folders are blocked by `.htaccess`; every data file starts with `<?php exit; ?>` (even if a server ignored `.htaccess` files, nothing would be displayed) and no `<?php` sequence can ever be written into it. Private files (0600 permissions), atomic writes.
+- **Signed updates**: each version's announcement carries an Ed25519 signature from the maintainer, verified with the public key built into Éclair; the archive is checked (fingerprint, paths, manifest, PHP syntax) before anything changes, and the update undoes itself if the site stops responding (details in [One-click update](#one-click-update)).
 - **Protected installation**: it is only possible within 2 hours of the first visit, and the site address is only used to redirect visitors once it has been **verified by the server itself** (a wrong or tampered address hijacks nothing).
 
 **Login**
@@ -506,7 +507,7 @@ Each draft comes back with a link to **open it in Éclair**; each suggestion, wi
 - **Brute-force protection**: each attempt is reserved before it is checked (the limit cannot be exceeded with parallel requests); limits per network (IPv4 address or /64 block in IPv6) and per targeted account. **Your usual device is never locked out** by an attacker who fails on purpose. At most two password checks at a time: a flood of requests cannot exhaust the memory.
 - **TOTP two-factor authentication** (Google Authenticator, 1Password, Bitwarden…) with a QR code and 8 recovery codes shown only once; each code works only once, even when sent in parallel; after 10 wrong codes, the account's 2FA is locked for 15 minutes and its owner is notified by email.
 - **Accounts updated atomically**: a login in progress can never undo a password change, a global logout, enabling 2FA, a demotion or a deletion.
-- **Password re-prompt** for sensitive actions (backups, account management, advanced settings, email change) more than 15 minutes after logging in. Temporary passwords must be replaced at first login.
+- **Password re-prompt** for sensitive actions (backups, connecting Google Drive, updates, account management, advanced settings, email change) more than 15 minutes after logging in. Temporary passwords must be replaced at first login.
 - **Hardened sessions**: no session before login (bots can't fill the disk), `HttpOnly`, `Secure`, `SameSite=Strict` cookies, regenerated at login, logout after inactivity, bound to the browser, “Log out my other devices”. The admin is forced onto HTTPS as soon as the site uses it.
 - **CSRF tokens** on every action and origin checks on requests.
 
@@ -519,6 +520,7 @@ Each draft comes back with a link to **open it in Éclair**; each suggestion, wi
 
 **Admin**
 - **Customizable admin URL** (fewer bots), administrator / editor roles; the site's “Edit” button doesn't reveal that URL.
+- **Tightly scoped Google Drive backups**: access limited to the files created by Éclair, encrypted and revocable token, never included in a backup; connecting requires confirming your password.
 - **Bounded AI assistant**: drafts and suggestions only, API keys encrypted and excluded from backups, monthly budget and daily quota (details in [AI assistant](#security-and-privacy)).
 - **Bounded logs** (truncated fields, 1 MB maximum): they can't be inflated.
 - **Integrity check**: compares every file with its original fingerprint and flags suspicious files, including a `.php` file without the protection line in `data/` or `cache/`.
@@ -528,15 +530,62 @@ Each draft comes back with a link to **open it in Éclair**; each suggestion, wi
 
 ## Updating, backing up, moving
 
-**Back up**: Security › Download a backup (ZIP archive of `data/` and `media/`). Without the zip extension, copy these two folders via FTP.
+### One-click update
 
-**Update Éclair**:
+Starting with version 1.10, Éclair checks GitHub twice a day for a new version. When there is one, a banner appears on the dashboard and a badge on **Updates** in the menu (administrators only). Nothing is installed without your approval.
+
+1. Open **Updates**: you'll see the available version and a link to what's new in it.
+2. **Make a backup**: use the button on the same page, or Google Drive if you've connected it.
+3. Check “I have a recent backup of my site”, confirm your password if asked, then click **Update to …**. It takes about ten seconds.
+
+Meanwhile, Éclair:
+
+- downloads the archive from GitHub and verifies the **signature** of its announcement: every version is signed with the maintainer's private key (Ed25519), which is never on GitHub. So a hacked repository isn't enough to push code to your site;
+- checks the archive's fingerprint, every file, and that your PHP version can read every PHP file, **before touching anything**;
+- sets the old version aside (`cache/update/previous`) and installs the new one in an instant: only `app/`, `assets/`, `index.php` and `.htaccess` change. Your content, images, accounts, settings and custom CSS (`data/`, `media/`) stay untouched;
+- checks that your site, your admin and the new version respond as before; if not, **it goes back on its own** to the old version.
+
+Afterwards, **Roll back to the previous version** (same page) restores the old version in one click.
+
+Good to know:
+
+- A `.htaccess` that you've modified (or that your host has added to) is **kept**; the new template is saved in `cache/update/htaccess-<version>.txt` so you can compare them.
+- Éclair files edited by hand (theme…) are replaced by their new version: the Updates page lists them before installing. For a lasting tweak, use **Custom CSS** (Settings › Appearance).
+- If your host prevents the server from calling itself, Éclair installs the update without being able to check it, and tells you so: open your site to check it, and roll back if needed.
+- One-click updates require the `sodium`, `zip` and `curl` PHP extensions, and folders that PHP can write to. Otherwise, the page explains what to fix, and you can still update via FTP.
+- The automatic check can be turned off in Settings › Advanced (the “Check now” button stays available).
+
+**Update via FTP** (server without one-click updates, or upgrading from a version older than 1.10):
 1. Make a backup.
 2. Via FTP, **delete** the `app/` and `assets/` folders, then upload the ones from the new version along with `index.php` and `.htaccess` (deleting first avoids leaving old files behind, which the integrity check would flag).
 3. **Don't touch** `data/` (content, settings, accounts, custom CSS) or `media/` (images).
-4. In the admin: Settings › Advanced › Clear cache.
+4. The cache clears itself on the first visit (otherwise: Settings › Advanced › Clear cache).
 
-**Move to another host or domain**: copy the whole folder, then change the address in Settings › General. Internal links adapt automatically, including in a subfolder.
+### Back up
+
+**Download a backup**: Security › Download a backup, or from the Updates page. The ZIP archive contains `data/` (content, settings, accounts, messages) and `media/` (images). API keys and the Google Drive connection are never included. Without the zip extension, copy these two folders via FTP.
+
+### Google Drive backups
+
+Security › **Google Drive backups** sends a copy of your site to your Google Drive, every day, every week or whenever you like.
+
+1. Click **Connect Google Drive** (you may be asked for your password again).
+2. Éclair shows a code. Open **google.com/device** on your computer or phone, enter the code, choose your Google account and authorize Éclair.
+3. The page updates by itself: you're connected. Choose the frequency (every day, every week, or off) and how many backups to keep.
+
+- Éclair only has access **to the files it creates** (Google's “drive.file” permission): it can't see anything else in your Drive. Backups go into a folder named “Éclair – site name”.
+- Beyond the number you chose (8 by default), the oldest ones go to your Drive's **trash**.
+- **Back up now** starts an upload right away. Large sites are sent in 4 MB chunks: if your host limits execution time, the upload resumes where it left off (keep the page open, it carries on by itself).
+- Automatic backups run when an administrator opens the admin. To have them run even without a visit, copy the **scheduled task URL** (Security › Google Drive backups › Backups at a set time) into your host's scheduled task (cron) or into [cron-job.org](https://cron-job.org), to run every hour: it only starts a backup when one is due. Keep this URL to yourself.
+- The access token is encrypted on your server. **Disconnect Google Drive** revokes it; you can also remove access from your Google account ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Backups already sent stay in your Drive.
+
+### Restore a backup
+
+Unzip the archive, then via FTP replace your installation's `data/` and `media/` folders with the ones from the archive. Enter your API keys again (AI assistant) and reconnect Google Drive if you were using it.
+
+### Move
+
+To another host or domain: copy the whole folder, then change the address in Settings › General. Internal links adapt automatically, including in a subfolder.
 
 ---
 
@@ -552,6 +601,12 @@ YourNewPassword2026
 ```
 
 Within 24 hours, **log in with that email and that new password**: the password is replaced, two-factor authentication for that account is turned off, your other sessions are closed and the file is deleted automatically. Nobody else can trigger it (they would need to know its contents); a file without the first line is refused and deleted.
+
+**The admin no longer loads after an update** (rare: Éclair goes back on its own when it can check the site): via FTP, replace the `app/` and `assets/` folders with the ones in `cache/update/previous/`, then copy `cache/update/previous/index.php.txt` to the root under the name `index.php`.
+
+**“One-click update unavailable on this server”**: the Updates page says why (missing PHP extension, folder not writable, PHP version too old). Fix this with your host, or update via FTP.
+
+**Google Drive: “Google Drive access revoked”**: the authorization was withdrawn from the Google account (or has expired). Click **Connect Google Drive**: the same folder is reused.
 
 **“Installation locked”**: the 2-hour window after the first visit has passed. Delete `data/install-window.php` via FTP and reload the page.
 
@@ -614,10 +669,12 @@ tests/fake-ai.php        fake AI providers (Claude, ChatGPT, images): the assist
 tests/shop.php           themes and shop (product pages, Stripe, PayPal, Revolut, JSON-LD, Merchant Center feed)
 tests/mcp.php            MCP connector (OAuth, PKCE, protocol, revocation) and choosing the AI
 tests/design.php         art directions (contrast, CSS, fonts, booby-trapped settings, AI) and Design score
+tests/update.php         one-click update (fake signed channel: signature, booby-trapped archive, syntax, automatic and manual rollback)
+tests/drive.php          Google Drive backups (tests/fake-google.php: fake OAuth and fake Drive, chunked upload, resume)
 tests/fixtures/          reference sites and a fingerprint of their public rendering (a new version doesn't change a single byte of the site)
 tools/router.php         router for PHP's built-in server (development)
 tools/capture.php        reference capture of the public rendering, and Lighthouse measurements (--lighthouse)
-tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP, compressed admin views, minified admin JS and CSS)
+tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP, compressed admin views, minified admin JS and CSS) + signed dist/latest.json announcement
 ```
 
 ```bash
@@ -626,9 +683,13 @@ php tests/run.php                                  # 556 unit and HTTP checks; E
 php tools/build.php                                # ready-to-ship archive
 ```
 
+**Publishing a release.** `tools/build.php` signs the `dist/latest.json` announcement (version, URL, size and SHA-256 of the archive) with the maintainer's Ed25519 private key, read from the `ECLAIR_SIGNING_KEY` environment variable (base64, 64 bytes); it refuses a key that doesn't match the public key in `app/lib/Update.php`. The credentials of the Google app used for backups are written into the archive from `ECLAIR_GOOGLE_CLIENT_ID` and `ECLAIR_GOOGLE_CLIENT_SECRET` (a “TVs and Limited Input devices” client, `drive.file` scope). None of these values are in the repository.
+
+**Fork or self-hosted install.** In `eclair-config.php`: `ECLAIR_UPDATE_URL` and `ECLAIR_UPDATE_KEY` (base64) for your own signed update channel; `ECLAIR_GOOGLE_CLIENT_ID` and `ECLAIR_GOOGLE_CLIENT_SECRET` for your own Google app.
+
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a backup: the integrity check will flag these files as modified, which is expected). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified to stay under 1 MB: the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 500 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

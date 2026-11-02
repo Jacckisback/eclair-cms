@@ -22,6 +22,20 @@ preg_match("~define\('ECLAIR_VERSION', '([^']+)'\)~", (string) file_get_contents
 $version = $m[1] ?? 'dev';
 require __DIR__ . '/minify.php';
 
+// Clé de signature des annonces (dist/latest.json) : vérifiée avant toute écriture, pour ne jamais laisser une archive et
+// une annonce qui ne se correspondent pas.
+$secret = base64_decode((string) getenv('ECLAIR_SIGNING_KEY'), true);
+$public = null;
+if ((string) getenv('ECLAIR_SIGNING_KEY') !== '') {
+    preg_match("~private const KEY = '([^']+)'~", (string) file_get_contents($root . '/app/lib/Update.php'), $k);
+    $public = base64_decode($k[1] ?? '', true);
+    if (!function_exists('sodium_crypto_sign_detached') || !is_string($secret) || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES
+        || !is_string($public) || !hash_equals($public, sodium_crypto_sign_publickey_from_secretkey($secret))) {
+        fwrite(STDERR, "✗ ECLAIR_SIGNING_KEY ne correspond pas à la clé publique d'app/lib/Update.php : rien n'a été construit.\n");
+        exit(1);
+    }
+}
+
 /** Vues de l'administration et de l'installation : l'indentation du HTML en début de ligne est retirée (jamais dans le PHP). */
 function eclair_compact_view(string $code): string
 {
@@ -171,18 +185,13 @@ echo str_contains(shipped($root, 'app/lib/Drive.php'), "CLIENT_ID = ''")
  * Cette clé n'est jamais dans le dépôt : variable d'environnement ECLAIR_SIGNING_KEY (base64, 64 octets).
  * Les sites ne croient que la clé publique inscrite dans app/lib/Update.php : sans la clé privée, pas d'annonce.
  */
-$secret = base64_decode((string) getenv('ECLAIR_SIGNING_KEY'), true);
-if (!function_exists('sodium_crypto_sign_detached')) {
-    echo "⚠ Extension sodium absente : dist/latest.json non signé.\n";
-} elseif (!is_string($secret) || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
-    echo "⚠ ECLAIR_SIGNING_KEY absente : dist/latest.json inchangé (les sites ne se verront pas proposer cette archive).\n";
+$latest = $dist . '/latest.json';
+if ($public === null) {
+    $announced = json_decode((string) (json_decode((string) @file_get_contents($latest), true)['payload'] ?? ''), true);
+    echo is_array($announced) && ($announced['version'] ?? '') === $version && ($announced['sha256'] ?? '') !== hash_file('sha256', $zipFile)
+        ? "⚠ dist/latest.json annonce une AUTRE archive {$version} : reconstruis avec ECLAIR_SIGNING_KEY avant de publier (sinon les sites refuseront le téléchargement).\n"
+        : "⚠ ECLAIR_SIGNING_KEY absente : dist/latest.json inchangé (les sites ne se verront pas proposer cette archive).\n";
 } else {
-    preg_match("~private const KEY = '([^']+)'~", (string) file_get_contents($root . '/app/lib/Update.php'), $k);
-    $public = base64_decode($k[1] ?? '', true);
-    if (!is_string($public) || !hash_equals($public, sodium_crypto_sign_publickey_from_secretkey($secret))) {
-        fwrite(STDERR, "✗ ECLAIR_SIGNING_KEY ne correspond pas à la clé publique d'app/lib/Update.php : annonce refusée.\n");
-        exit(1);
-    }
     $payload = json_encode([
         'version' => $version,
         'date' => gmdate('Y-m-d'),
@@ -198,6 +207,6 @@ if (!function_exists('sodium_crypto_sign_detached')) {
         fwrite(STDERR, "✗ Signature invalide : annonce refusée.\n");
         exit(1);
     }
-    file_put_contents($dist . '/latest.json', json_encode(['payload' => $payload, 'signature' => base64_encode($signature)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+    file_put_contents($latest, json_encode(['payload' => $payload, 'signature' => base64_encode($signature)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
     echo "✓ Annonce signée : dist/latest.json (version {$version})\n";
 }

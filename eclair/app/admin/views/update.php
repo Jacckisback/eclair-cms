@@ -58,6 +58,12 @@ $last = is_array($s['last'] ?? null) ? $s['last'] : null;
         <p><?= e(t('Tu peux toujours mettre à jour par FTP :')) ?> <a href="https://github.com/Jacckisback/eclair-cms/blob/main/docs/GUIDE.md#mettre-à-jour-sauvegarder-déménager" target="_blank" rel="noopener"><?= e(t('guide de mise à jour')) ?></a></p>
       </div></div>
     <?php else: ?>
+      <?php if ($v['modified']): ?>
+        <div class="notice warn"><span>✍️</span><div>
+          <p><strong><?= e(t('Fichiers d’Éclair modifiés à la main :')) ?></strong> <?= e(t('la mise à jour les remplace par leur nouvelle version. Ta version reste dans la version gardée (bouton « Revenir à la version précédente »). Pour une retouche durable, utilise le CSS personnalisé (Réglages › Apparence).')) ?></p>
+          <ul class="small mono"><?php foreach (array_slice($v['modified'], 0, 20) as $f): ?><li><?= e($f) ?></li><?php endforeach ?></ul>
+        </div></div>
+      <?php endif ?>
       <form method="post" action="<?= e(admin_url('update')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="install">
         <label class="check"><input type="checkbox" name="saved" value="1" required><span><?= e(t('J’ai une sauvegarde récente de mon site.')) ?></span></label>
         <?= Admin::partial('partials/confirm', ['required' => false, 'hint' => t('Inutile si tu viens de le saisir (moins de 15 minutes), par exemple pour la sauvegarde.')]) ?>

@@ -18,7 +18,7 @@ Tout ce qu'il faut savoir pour installer, utiliser, sécuriser et maintenir Écl
 8. [Assistant IA](#assistant-ia) (dont [Créer une page avec l'IA](#créer-une-page-avec-lia))
 9. [Connecteur MCP (Claude et ChatGPT)](#connecteur-mcp-claude-et-chatgpt)
 10. [Sécurité](#sécurité)
-11. [Mettre à jour, sauvegarder, déménager](#mettre-à-jour-sauvegarder-déménager)
+11. [Mettre à jour, sauvegarder, déménager](#mettre-à-jour-sauvegarder-déménager) (dont la [Mise à jour en un clic](#mise-à-jour-en-un-clic) et les [Sauvegardes sur Google Drive](#sauvegardes-sur-google-drive))
 12. [Dépannage](#dépannage) (dont [Nginx](#nginx))
 13. [Pour les développeurs](#pour-les-développeurs)
 
@@ -499,6 +499,7 @@ Chaque brouillon revient avec un lien pour l'**ouvrir dans Éclair** ; chaque pr
 **Données et serveur**
 - **Aucune base de données** : pas d'injection SQL possible.
 - **Données doublement protégées** : dossiers `data/`, `app/` et `cache/` interdits par `.htaccess` ; chaque fichier de données commence par `<?php exit; ?>` (même si un serveur ignorait les `.htaccess`, rien ne s'affiche) et aucune séquence `<?php` ne peut y être écrite. Fichiers privés (droits 0600), écritures atomiques.
+- **Mises à jour signées** : l'annonce de chaque version porte une signature Ed25519 du mainteneur, vérifiée avec la clé publique inscrite dans Éclair ; l'archive est contrôlée (empreinte, chemins, manifeste, syntaxe PHP) avant tout changement, et la mise à jour s'annule d'elle-même si le site ne répond plus (détails dans [Mise à jour en un clic](#mise-à-jour-en-un-clic)).
 - **Installation protégée** : elle n'est possible que dans les 2 heures suivant la première visite, et l'adresse du site n'est utilisée pour rediriger les visiteurs qu'après avoir été **vérifiée par le serveur lui-même** (une adresse erronée ou piégée ne détourne rien).
 
 **Connexion**
@@ -506,7 +507,7 @@ Chaque brouillon revient avec un lien pour l'**ouvrir dans Éclair** ; chaque pr
 - **Anti-bruteforce** : chaque tentative est réservée avant d'être vérifiée (impossible de dépasser la limite en parallèle) ; limite par réseau (adresse IPv4 ou bloc /64 en IPv6) et par compte visé. **Ton appareil habituel n'est jamais bloqué** par un attaquant qui rate exprès. Deux vérifications de mot de passe à la fois au maximum : un afflux de requêtes n'épuise pas la mémoire.
 - **Double authentification TOTP** (Google Authenticator, 1Password, Bitwarden…) avec QR code et 8 codes de secours affichés une seule fois ; chaque code ne sert qu'une fois, même envoyé en parallèle ; après 10 codes faux, la 2FA du compte est bloquée 15 minutes et son titulaire est prévenu par e-mail.
 - **Comptes modifiés de façon atomique** : une connexion en cours ne peut jamais annuler un changement de mot de passe, une déconnexion générale, l'activation de la 2FA, une rétrogradation ou une suppression.
-- **Mot de passe redemandé** pour les actions sensibles (sauvegarde, gestion des comptes, réglages avancés, changement d'e-mail) au-delà de 15 minutes après la connexion. Les mots de passe provisoires doivent être remplacés à la première connexion.
+- **Mot de passe redemandé** pour les actions sensibles (sauvegarde, connexion de Google Drive, mise à jour, gestion des comptes, réglages avancés, changement d'e-mail) au-delà de 15 minutes après la connexion. Les mots de passe provisoires doivent être remplacés à la première connexion.
 - **Sessions durcies** : aucune session avant la connexion (les robots ne remplissent pas le disque), cookies `HttpOnly`, `Secure`, `SameSite=Strict`, régénération à la connexion, déconnexion après inactivité, liées au navigateur, « déconnecter tous les appareils ». L'administration est forcée en HTTPS dès que le site l'est.
 - **Jetons CSRF** sur toutes les actions et vérification de l'origine des requêtes.
 
@@ -519,6 +520,7 @@ Chaque brouillon revient avec un lien pour l'**ouvrir dans Éclair** ; chaque pr
 
 **Administration**
 - **Adresse d'administration personnalisable** (moins de robots), rôles administrateur / rédacteur ; le bouton « Modifier » du site ne révèle pas cette adresse.
+- **Sauvegardes Google Drive cloisonnées** : accès limité aux fichiers créés par Éclair, jeton chiffré et révocable, jamais inclus dans une sauvegarde ; connexion soumise à la confirmation du mot de passe.
 - **Assistant IA borné** : brouillons et propositions seulement, clés d'API chiffrées et exclues des sauvegardes, budget mensuel et quota quotidien (détails dans [Assistant IA](#sécurité-et-confidentialité)).
 - **Journaux bornés** (champs tronqués, 1 Mo maximum) : impossible de les faire gonfler.
 - **Contrôle d'intégrité** : compare chaque fichier à son empreinte d'origine et repère les fichiers suspects, y compris un `.php` sans ligne de protection dans `data/` ou `cache/`.
@@ -528,15 +530,62 @@ Chaque brouillon revient avec un lien pour l'**ouvrir dans Éclair** ; chaque pr
 
 ## Mettre à jour, sauvegarder, déménager
 
-**Sauvegarder** : Sécurité › Télécharger une sauvegarde (archive ZIP de `data/` et `media/`). Sans l'extension zip, copie ces deux dossiers par FTP.
+### Mise à jour en un clic
 
-**Mettre à jour Éclair** :
+Depuis la version 1.10, Éclair regarde deux fois par jour sur GitHub si une nouvelle version existe. Quand c'est le cas, un bandeau apparaît sur le tableau de bord et une pastille sur **Mises à jour** dans le menu (administrateurs seulement). Rien n'est installé sans ton accord.
+
+1. Ouvre **Mises à jour** : tu y vois la version disponible et le lien vers ses nouveautés.
+2. **Fais une sauvegarde** : bouton sur la même page, ou Google Drive si tu l'as connecté.
+3. Coche « J'ai une sauvegarde récente de mon site », confirme ton mot de passe si on te le demande, puis clique sur **Mettre à jour**. Compte une dizaine de secondes.
+
+Pendant ce temps, Éclair :
+
+- télécharge l'archive depuis GitHub et vérifie la **signature** de son annonce : chaque version est signée avec la clé privée du mainteneur (Ed25519), qui n'est jamais sur GitHub. Un dépôt piraté ne suffit donc pas à pousser du code sur ton site ;
+- vérifie l'empreinte de l'archive, chaque fichier, et que ta version de PHP sait lire chaque fichier PHP, **avant de toucher à quoi que ce soit** ;
+- met l'ancienne version de côté (`cache/update/previous`) et installe la nouvelle en un instant : seuls `app/`, `assets/`, `index.php` et `.htaccess` changent. Tes contenus, images, comptes, réglages et ton CSS personnalisé (`data/`, `media/`) ne bougent pas ;
+- vérifie que ton site, ton administration et la nouvelle version répondent comme avant ; sinon, **il revient tout seul** à l'ancienne version.
+
+Ensuite, **Revenir à la version précédente** (même page) remet l'ancienne version en un clic.
+
+Bon à savoir :
+
+- Un `.htaccess` que tu as modifié (ou que ton hébergeur a complété) est **conservé** ; le nouveau modèle est rangé dans `cache/update/htaccess-<version>.txt` pour que tu puisses comparer.
+- Les fichiers d'Éclair modifiés à la main (thème…) sont remplacés par leur nouvelle version : la page Mises à jour les liste avant l'installation. Pour une retouche durable, utilise le **CSS personnalisé** (Réglages › Apparence).
+- Si ton hébergeur empêche le serveur de s'appeler lui-même, Éclair installe la mise à jour sans pouvoir la contrôler et te le dit : ouvre ton site pour vérifier, et reviens en arrière si besoin.
+- La mise à jour en un clic demande les extensions PHP `sodium`, `zip` et `curl`, et des dossiers modifiables par PHP. Sinon, la page explique quoi corriger, et la mise à jour par FTP reste possible.
+- La vérification automatique se désactive dans Réglages › Avancé (le bouton « Vérifier maintenant » reste disponible).
+
+**Mettre à jour par FTP** (serveur sans mise à jour en un clic, ou passage d'une version antérieure à la 1.10) :
 1. Fais une sauvegarde.
 2. Par FTP, **supprime** les dossiers `app/` et `assets/`, puis envoie ceux de la nouvelle version avec `index.php` et `.htaccess` (supprimer d'abord évite de garder d'anciens fichiers, que le contrôle d'intégrité signalerait).
 3. **Ne touche pas** à `data/` (contenus, réglages, comptes, CSS personnalisé) ni à `media/` (images).
-4. Dans l'administration : Réglages › Avancé › Vider le cache.
+4. Le cache se vide tout seul à la première visite (sinon : Réglages › Avancé › Vider le cache).
 
-**Déménager vers un autre hébergement ou domaine** : copie tout le dossier, puis change l'adresse dans Réglages › Général. Les liens internes s'adaptent automatiquement, y compris en sous-dossier.
+### Sauvegarder
+
+**Télécharger une sauvegarde** : Sécurité › Télécharger une sauvegarde, ou depuis la page Mises à jour. L'archive ZIP contient `data/` (contenus, réglages, comptes, messages) et `media/` (images). Les clés d'API et la connexion Google Drive n'y figurent jamais. Sans l'extension zip, copie ces deux dossiers par FTP.
+
+### Sauvegardes sur Google Drive
+
+Sécurité › **Sauvegardes sur Google Drive** envoie une copie de ton site dans ton Google Drive, chaque jour, chaque semaine ou quand tu veux.
+
+1. Clique sur **Connecter Google Drive** (ton mot de passe peut être redemandé).
+2. Éclair affiche un code. Ouvre **google.com/device** sur ton ordinateur ou ton téléphone, saisis le code, choisis ton compte Google et autorise Éclair.
+3. La page se met à jour toute seule : c'est connecté. Choisis la fréquence (chaque jour, chaque semaine, ou désactivées) et le nombre de sauvegardes à garder.
+
+- Éclair n'a accès **qu'aux fichiers qu'il crée** (autorisation Google « drive.file ») : il ne voit rien d'autre de ton Drive. Les sauvegardes arrivent dans un dossier « Éclair – nom du site ».
+- Au-delà du nombre choisi (8 par défaut), les plus anciennes partent dans la **corbeille** de ton Drive.
+- **Sauvegarder maintenant** lance un envoi immédiat. Les gros sites partent par morceaux de 4 Mo : si l'hébergeur limite la durée d'exécution, l'envoi reprend là où il s'était arrêté (garde la page ouverte, elle continue toute seule).
+- Les sauvegardes automatiques partent quand un administrateur ouvre l'administration. Pour qu'elles partent même sans visite, copie l'**adresse de tâche planifiée** (Sécurité › Sauvegardes sur Google Drive › Sauvegardes à heure fixe) dans la tâche planifiée (cron) de ton hébergeur ou sur [cron-job.org](https://cron-job.org), toutes les heures : elle ne lance une sauvegarde que lorsqu'elle est due. Garde cette adresse pour toi.
+- Le jeton d'accès est chiffré sur ton serveur. **Déconnecter Google Drive** le révoque ; tu peux aussi retirer l'accès depuis ton compte Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Les sauvegardes déjà envoyées restent dans ton Drive.
+
+### Restaurer une sauvegarde
+
+Décompresse l'archive, puis remplace par FTP les dossiers `data/` et `media/` de ton installation par ceux de l'archive. Saisis de nouveau tes clés d'API (assistant IA) et reconnecte Google Drive si tu l'utilisais.
+
+### Déménager
+
+Vers un autre hébergement ou domaine : copie tout le dossier, puis change l'adresse dans Réglages › Général. Les liens internes s'adaptent automatiquement, y compris en sous-dossier.
 
 ---
 
@@ -552,6 +601,12 @@ TonNouveauMotDePasse2026
 ```
 
 Dans les 24 heures, **connecte-toi avec cet e-mail et ce nouveau mot de passe** : le mot de passe est remplacé, la double authentification de ce compte est désactivée, tes autres sessions sont fermées et le fichier est supprimé automatiquement. Personne d'autre ne peut le déclencher (il faut connaître son contenu) ; un fichier sans la première ligne est refusé et supprimé.
+
+**L'administration ne s'affiche plus après une mise à jour** (rare : Éclair revient tout seul en arrière quand il peut contrôler le site) : par FTP, remplace les dossiers `app/` et `assets/` par ceux de `cache/update/previous/`, puis copie `cache/update/previous/index.php.txt` à la racine sous le nom `index.php`.
+
+**« Mise à jour en un clic impossible sur ce serveur »** : la page Mises à jour dit pourquoi (extension PHP absente, dossier non modifiable, version de PHP trop ancienne). Corrige ce point chez ton hébergeur, ou mets à jour par FTP.
+
+**Google Drive : « Accès à Google Drive retiré »** : l'autorisation a été retirée depuis le compte Google (ou a expiré). Clique sur **Connecter Google Drive** : le même dossier est réutilisé.
 
 **« Installation verrouillée »** : la fenêtre de 2 heures après la première visite est passée. Supprime `data/install-window.php` par FTP et recharge la page.
 
@@ -614,10 +669,12 @@ tests/fake-ai.php        faux fournisseurs d'IA (Claude, ChatGPT, images) : l'as
 tests/shop.php           thèmes et boutique (fiches, Stripe, PayPal, Revolut, JSON-LD, flux Merchant Center)
 tests/mcp.php            connecteur MCP (OAuth, PKCE, protocole, révocation) et choix de l'IA
 tests/design.php         directions artistiques (contrastes, CSS, polices, réglages piégés, IA) et Score Design
+tests/update.php         mise à jour en un clic (faux canal signé : signature, archive piégée, syntaxe, retour automatique et manuel)
+tests/drive.php          sauvegardes Google Drive (tests/fake-google.php : faux OAuth et faux Drive, envoi par morceaux, reprise)
 tests/fixtures/          sites de référence et empreinte de leur rendu public (une version ne change pas un octet du site)
 tools/router.php         routeur pour le serveur PHP intégré (développement)
 tools/capture.php        capture de référence du rendu public, et mesures Lighthouse (--lighthouse)
-tools/build.php          empreintes d'intégrité + archive dist/eclair-cms-<version>.zip (PHP compacté, vues de l'administration compressées, JS et CSS de l'administration allégés)
+tools/build.php          empreintes d'intégrité + archive dist/eclair-cms-<version>.zip (PHP compacté, vues de l'administration compressées, JS et CSS de l'administration allégés) + annonce signée dist/latest.json
 ```
 
 ```bash
@@ -626,9 +683,13 @@ php tests/run.php                                  # tests (unitaires + HTTP) ; 
 php tools/build.php                                # archive prête à distribuer
 ```
 
+**Publier une version.** `tools/build.php` signe l'annonce `dist/latest.json` (version, adresse, taille et SHA-256 de l'archive) avec la clé privée Ed25519 du mainteneur, lue dans la variable d'environnement `ECLAIR_SIGNING_KEY` (base64, 64 octets) ; il refuse une clé qui ne correspond pas à la clé publique d'`app/lib/Update.php`. Les identifiants de l'application Google des sauvegardes sont posés dans l'archive depuis `ECLAIR_GOOGLE_CLIENT_ID` et `ECLAIR_GOOGLE_CLIENT_SECRET` (client « TV et appareils à saisie limitée », autorisation `drive.file`). Aucune de ces valeurs n'est dans le dépôt.
+
+**Fork ou installation autonome.** Dans `eclair-config.php` : `ECLAIR_UPDATE_URL` et `ECLAIR_UPDATE_KEY` (base64) pour ton propre canal de mises à jour signé ; `ECLAIR_GOOGLE_CLIENT_ID` et `ECLAIR_GOOGLE_CLIENT_SECRET` pour ta propre application Google.
+
 `PHP_CLI_SERVER_WORKERS` permet au site de s'appeler lui-même (vérification de son adresse) : avec un seul processus, la vérification échoue simplement et les redirections vers l'adresse officielle restent désactivées.
 
-Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une sauvegarde : le contrôle d'intégrité signalera ces fichiers comme modifiés, c'est normal). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés pour rester sous 1 Mo : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
+Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une copie : le contrôle d'intégrité signale ces fichiers comme modifiés, et une mise à jour les remplace ; la page Mises à jour les liste avant de le faire). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 500 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
 
 ---
 

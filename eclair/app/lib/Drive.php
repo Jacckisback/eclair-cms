@@ -252,6 +252,13 @@ final class Drive
         if ($lock === false || !flock($lock, LOCK_EX | LOCK_NB)) {
             return ['status' => 'busy', 'percent' => self::percent(self::state()['job'] ?? null)];
         }
+        // Un autre passage vient peut-être de terminer la sauvegarde due : on relit l'état sous verrou.
+        Store::forget();
+        if (!$now && !self::due()) {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+            return ['status' => 'idle', 'percent' => 0];
+        }
         // Durée d'exécution imposée par l'hébergeur : on s'arrête avant elle (le travail reprendra au passage suivant).
         if (!(function_exists('set_time_limit') && @set_time_limit($budget + 60)) && ($max = (int) ini_get('max_execution_time')) > 0) {
             $budget = max(5, min($budget, $max - 10));
