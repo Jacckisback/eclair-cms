@@ -33,7 +33,7 @@ $last = is_array($s['last'] ?? null) ? $s['last'] : null;
       <p class="update-ok"><?= Icons::svg('circle-check') ?><?= e(t('Tu as la dernière version d’Éclair.')) ?></p>
     <?php endif ?>
     <p class="small muted">
-      <?php if (!empty($s['checked'])): ?><?= e(t('Dernière vérification : {d}.', ['d' => fmt_date((int) $s['checked'], $lang, true)])) ?><?php endif ?>
+      <?php if (!empty($s['checked'])): ?><?= e(t('Dernière vérification : {d}.', ['d' => fmt_date((int) $s['checked'], $lang, true)])) ?> <?php endif ?>
       <?= e(Settings::get('updates.check', true) ? t('Éclair vérifie deux fois par jour, sans rien installer sans ton accord (réglable dans Réglages › Avancé).') : t('Vérification automatique désactivée (Réglages › Avancé) : clique sur « Vérifier maintenant ».')) ?></p>
     <?php if (!empty($s['error'])): ?>
       <p class="hint" data-state="bad"><?= Icons::svg('alert') ?><?= e(t('Dernière vérification impossible : {e}.', ['e' => AdminUpdate::reason((string) $s['error'])])) ?></p>

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip"><img src="https://img.shields.io/badge/t%C3%A9l%C3%A9charger-v1.10.0-5b4cf0?style=for-the-badge" alt="Télécharger Éclair 1.10.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip"><img src="https://img.shields.io/badge/t%C3%A9l%C3%A9charger-v1.10.1-5b3cbc?style=for-the-badge" alt="Télécharger Éclair 1.10.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 ou plus">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_donn%C3%A9es-aucune-14122b?style=for-the-badge" alt="Aucune base de données">
@@ -63,7 +63,7 @@ WordPress sait tout faire, mais il lui faut une base de données, des extensions
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra léger</h3>
-      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>528 Ko</b>, zéro dépendance, zéro cookie sur le site public.
+      Aucune base de données : tes contenus sont des fichiers protégés. Une archive de <b>594 Ko</b>, zéro dépendance, zéro cookie sur le site public.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Simple comme bonjour</h3>
@@ -264,7 +264,7 @@ Mode d'emploi : [guide, section Mettre à jour, sauvegarder, déménager](docs/G
 |---|---|---|
 | **Installation** | Créer une base MySQL, puis lancer l'assistant | ✅ Envoyer le dossier, répondre à 4 questions |
 | **Base de données** | MySQL obligatoire | ✅ Aucune (fichiers protégés) |
-| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 528 Ko |
+| **Archive à télécharger** | ≈ 35 Mo[^wp] | ✅ 594 Ko |
 | **SEO, sitemap, données structurées** | Extension à installer et à maintenir | ✅ Intégré |
 | **GEO : llms.txt, Markdown, robots IA** | Extensions, rarement complet | ✅ Intégré |
 | **Pages publiques** | Générées à chaque visite, sauf extension de cache | ✅ Servies depuis un cache statique |
@@ -329,7 +329,7 @@ Sur un vrai mutualisé, ajoute la latence réseau et le démarrage de PHP de ton
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/frame-dashboard.webp" alt="Tableau de bord d'Éclair : statistiques, pages à améliorer et santé du site">
+      <img src="docs/images/frame-dashboard.webp" alt="Tableau de bord d'Éclair : demande à l'assistant IA, contenus modifiés récemment, chiffres du site, scores SEO et GEO moyens, pages à améliorer et santé du site">
       <p align="center"><b>Tableau de bord</b><br><sub>Ce qu'il faut améliorer et la santé du site, d'un coup d'œil.</sub></p>
     </td>
     <td width="50%" valign="top">
@@ -375,7 +375,7 @@ Détails complets dans le [guide, section Sécurité](docs/GUIDE.md#sécurité).
   <img src="docs/images/install.webp" alt="Installation en trois étapes : envoyer le dossier, répondre à quatre questions, le site est en ligne" width="100%">
 </p>
 
-1. **Télécharge** l'archive [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 Ko) et décompresse-la.
+1. **Télécharge** l'archive [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip) (594 Ko) et décompresse-la.
 2. **Envoie le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…), fichiers cachés `.htaccess` compris.
 3. **Ouvre l'adresse de ton site** : l'assistant démarre. Quatre questions, des confettis, et ton site est en ligne avec ses premières pages.
 

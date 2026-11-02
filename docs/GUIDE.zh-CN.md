@@ -40,7 +40,7 @@
 
 ### 安装步骤
 
-1. 下载安装包 [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip)（528 KB）并解压。
+1. 下载安装包 [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip)（594 KB）并解压。
 2. 使用 FTP 软件（如 FileZilla）或主机的文件管理器，把 **`eclair` 文件夹里的内容**上传到主机的公开目录（`public_html`、`www`……）。
    > ⚠️ `.htaccess` 是隐藏文件：请开启“显示隐藏文件”，确保它们也被上传。
 3. 打开你的网站地址：**安装向导随即启动**（支持 7 种语言，包括简体中文）。
@@ -63,7 +63,7 @@
 
 ### 安装完成后
 
-仪表盘会显示一份“新手入门”入门清单：标志和主色、首页、第一篇文章、作者资料、双重认证、法律声明、Google Search Console。
+仪表盘会显示一份“新手入门”入门清单：标志和主色、首页、第一篇文章、作者资料、双重认证、法律声明、Google Search Console。下一步会以黄色高亮显示，每一步都用一句话说明它的用处。
 
 ---
 

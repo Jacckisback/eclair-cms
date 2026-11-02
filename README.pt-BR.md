@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip"><img src="https://img.shields.io/badge/baixar-v1.10.0-5b4cf0?style=for-the-badge" alt="Baixar o Éclair 1.10.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip"><img src="https://img.shields.io/badge/baixar-v1.10.1-5b3cbc?style=for-the-badge" alt="Baixar o Éclair 1.10.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 ou superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/banco_de_dados-nenhum-14122b?style=for-the-badge" alt="Sem banco de dados">
@@ -63,7 +63,7 @@ O WordPress faz de tudo, mas precisa de um banco de dados, de plugins para SEO, 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleve</h3>
-      Sem banco de dados: seu conteúdo fica em arquivos protegidos. Um arquivo de <b>528 KB</b>, zero dependências, zero cookies no site público.
+      Sem banco de dados: seu conteúdo fica em arquivos protegidos. Um arquivo de <b>594 KB</b>, zero dependências, zero cookies no site público.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facílimo</h3>
@@ -264,7 +264,7 @@ Como usar: [guia, seção Atualizar, fazer backup, mudar de hospedagem](docs/GUI
 |---|---|---|
 | **Instalação** | Criar um banco de dados MySQL e depois rodar o assistente | ✅ Enviar a pasta e responder a 4 perguntas |
 | **Banco de dados** | MySQL obrigatório | ✅ Nenhum (arquivos protegidos) |
-| **Arquivo para baixar** | ≈ 35 MB[^wp] | ✅ 528 KB |
+| **Arquivo para baixar** | ≈ 35 MB[^wp] | ✅ 594 KB |
 | **SEO, sitemap, dados estruturados** | Um plugin para instalar e manter | ✅ Integrado |
 | **GEO: llms.txt, Markdown, robôs de IA** | Plugins, raramente completos | ✅ Integrado |
 | **Páginas públicas** | Geradas a cada visita, a menos que você use um plugin de cache | ✅ Servidas a partir de um cache estático |
@@ -329,7 +329,7 @@ Em uma hospedagem compartilhada de verdade, some a latência de rede e a inicial
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/pt-BR/frame-dashboard.webp" alt="Painel do Éclair: estatísticas, páginas para melhorar e saúde do site">
+      <img src="docs/images/pt-BR/frame-dashboard.webp" alt="Painel do Éclair: pedido ao assistente de IA, conteúdos editados recentemente, números do site, pontuações médias de SEO e GEO, páginas para melhorar e saúde do site">
       <p align="center"><b>Painel</b><br><sub>O que melhorar e a saúde do site, em um piscar de olhos.</sub></p>
     </td>
     <td width="50%" valign="top">
@@ -375,7 +375,7 @@ Todos os detalhes no [guia, seção Segurança](docs/GUIDE.pt-BR.md#segurança).
   <img src="docs/images/pt-BR/install.webp" alt="Instalação em três etapas: enviar a pasta, responder a quatro perguntas, o site está no ar" width="100%">
 </p>
 
-1. **Baixe** o arquivo [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 KB) e descompacte-o.
+1. **Baixe** o arquivo [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip) (594 KB) e descompacte-o.
 2. **Envie o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…), incluindo os arquivos ocultos `.htaccess`.
 3. **Abra o endereço do seu site**: o assistente começa. Quatro perguntas, um pouco de confete, e seu site está no ar com as primeiras páginas.
 

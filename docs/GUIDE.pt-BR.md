@@ -37,7 +37,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.10.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.0.zip) (528 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.10.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.1.zip) (594 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -60,7 +60,7 @@ Os conteúdos iniciais existem em francês, espanhol e inglês: um site em portu
 
 ### Logo após a instalação
 
-O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicial, primeiro artigo, perfil de autor, autenticação em dois fatores, aviso legal, Google Search Console.
+O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicial, primeiro artigo, perfil de autor, autenticação em dois fatores, aviso legal, Google Search Console. O próximo passo aparece destacado em amarelo, e cada um explica em uma frase para que serve.
 
 ---
 
