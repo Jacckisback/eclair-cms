@@ -1,0 +1,112 @@
+{
+    "business /": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 870,
+        "cls": 0,
+        "tbt_ms": 30
+    },
+    "business /blog/premiers-pas-avec-eclair": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 939,
+        "cls": 0,
+        "tbt_ms": 40
+    },
+    "landing /": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 891,
+        "cls": 0,
+        "tbt_ms": 0
+    },
+    "business / \u00b7 nocturne": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 795,
+        "cls": 0,
+        "tbt_ms": 28
+    },
+    "business /blog/premiers-pas-avec-eclair \u00b7 nocturne": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 967,
+        "cls": 0,
+        "tbt_ms": 5
+    },
+    "business / \u00b7 riviera": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 876,
+        "cls": 0,
+        "tbt_ms": 23
+    },
+    "business / \u00b7 presse": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 857,
+        "cls": 0,
+        "tbt_ms": 14
+    },
+    "business / \u00b7 affiche": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 787,
+        "cls": 0,
+        "tbt_ms": 25
+    },
+    "business / \u00b7 argile (reverse, numbers, rules, outline)": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 820,
+        "cls": 0,
+        "tbt_ms": 32
+    },
+    "business / \u00b7 nocturne (underline, framed)": {
+        "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+        },
+        "lcp_ms": 838,
+        "cls": 0,
+        "tbt_ms": 13
+    }
+}
