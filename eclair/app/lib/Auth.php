@@ -24,6 +24,11 @@ final class Auth
     private const SLOTS = 2;
     /** Attente maximale d'une place de vérification (secondes) avant de répondre « busy ». */
     private const WAIT = 5.0;
+    /** Fichier de secours FTP daté de plus d'une heure dans le futur (horloge faussée) : refusé, comme un fichier trop vieux. */
+    private const RESET_SKEW = 3600;
+    /** Mots de passe d'exemple des guides (7 langues) : recopiés tels quels, ils seraient connus de tous. */
+    private const RESET_EXAMPLES = ['tonnouveaumotdepasse2026', 'yournewpassword2026', 'deinneuespasswort2026', 'tunuevaclave2026',
+        'latuanuovapassword2026', 'suanovasenha2026'];
 
     private static ?array $user = null;
     private static bool $checked = false;
@@ -463,9 +468,10 @@ final class Auth
 
     /**
      * Secours par FTP : un fichier data/reset.php (ligne de protection, e-mail, nouveau mot de passe)
-     * déposé il y a moins de 24 h. Il ne s'applique qu'à la connexion faite avec CET e-mail et CE mot de
-     * passe : personne d'autre ne peut le déclencher ni savoir qu'il existe. La double authentification
-     * du compte est désactivée et les autres sessions sont fermées.
+     * déposé il y a moins de 24 h (et pas daté dans le futur). Il ne s'applique qu'à la connexion faite avec
+     * CET e-mail et CE mot de passe : personne d'autre ne peut le déclencher ni savoir qu'il existe. La double
+     * authentification du compte est désactivée et les autres sessions sont fermées. Un mot de passe faible
+     * ou recopié de l'exemple des guides est refusé.
      */
     private static function resetFromFile(string $email, string $password): void
     {
@@ -474,8 +480,9 @@ final class Auth
             return;
         }
         $raw = (string) @file_get_contents($file, false, null, 0, 4096);
+        $age = time() - (int) filemtime($file);
         if (!preg_match('/^(?:\xEF\xBB\xBF)?<\?php\s+(?:exit|die)\s*(?:\(\s*\))?\s*;?\s*\?>[ \t]*\r?\n(.*)$/s', $raw, $m)
-            || (int) filemtime($file) < time() - 86400) {
+            || $age > 86400 || $age < -self::RESET_SKEW) {
             @unlink($file);
             Log::security('ftp_reset_refused');
             return;
@@ -486,7 +493,8 @@ final class Auth
         }
         @unlink($file);
         $user = Users::findByEmail($email);
-        if (!$user || Security::passwordIssues($password)) {
+        if (!$user || Security::passwordIssues($password)
+            || in_array(strtolower((string) preg_replace('/[^a-z0-9]/i', '', $password)), self::RESET_EXAMPLES, true)) {
             Log::security('ftp_reset_refused', ['email' => $email]);
             return;
         }
