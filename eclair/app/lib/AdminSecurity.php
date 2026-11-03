@@ -30,7 +30,7 @@ final class AdminSecurity
         Admin::view('security', [
             'checks' => $checks,
             'score' => (int) round(count(array_filter($checks, fn ($c) => $c['ok'])) / count($checks) * 100),
-            'blocked' => RateLimit::active(),
+            'blocked' => self::blocked(),
             'log' => Log::read('security', 80),
             'errors' => Log::read('errors', 20),
             'integrity' => $integrity,
@@ -69,6 +69,20 @@ final class AdminSecurity
                 Admin::back('security', t('Index reconstruit et cache vidé.'));
         }
         Admin::back('security');
+    }
+
+    /** Clés bloquées ; le compteur d'un compte (groupe signé de l'e-mail) affiche les comptes concernés. */
+    private static function blocked(): array
+    {
+        $accounts = [];
+        foreach (Users::all() as $u) {
+            $accounts[Auth::accountKey((string) $u['email'])][] = (string) $u['email'];
+        }
+        $out = [];
+        foreach (RateLimit::active() as $b) {
+            $out[] = $b + ['label' => isset($accounts[$b['key']]) ? $b['key'] . ' (' . implode(', ', $accounts[$b['key']]) . ')' : $b['key']];
+        }
+        return $out;
     }
 
     public static function clearCache(array $user): never

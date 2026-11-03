@@ -14,6 +14,12 @@ final class Auth
     private const SUDO = 900;        // actions sensibles : mot de passe redemandé au-delà de 15 min
     private const DEVICE = 'eclair_dev';
     private const EDITOR_CAN = ['content', 'media', 'categories', 'menus', 'messages', 'redirects'];
+    /**
+     * Compteur « par compte » : l'e-mail est rangé dans un groupe signé par la clé du site (3 chiffres hexadécimaux,
+     * 4 096 groupes). Des e-mails inventés ne créent donc jamais plus de 4 096 fichiers, et un compte existant ou non
+     * se comporte pareil (aucune énumération possible).
+     */
+    private const ACCOUNT_GROUP = 3;
     /** Vérifications de mot de passe simultanées pour les inconnus (Argon2id : 19 Mio chacune sur un mutualisé). */
     private const SLOTS = 2;
     /** Attente maximale d'une place de vérification (secondes) avant de répondre « busy ». */
@@ -332,6 +338,12 @@ final class Auth
         return Session::resume() && time() - (int) ($_SESSION['sudo'] ?? 0) < self::SUDO;
     }
 
+    /** Compteur du compte visé : le groupe signé de son e-mail (le même calcul qu'il existe ou non). */
+    public static function accountKey(string $email): string
+    {
+        return 'login-acct:' . substr(Keys::sign('login-acct|' . mb_strtolower(trim($email))), 0, self::ACCOUNT_GROUP);
+    }
+
     /**
      * Limites de tentatives. Un appareil où le compte s'est déjà connecté (cookie signé) a son propre
      * compteur : un attaquant ne peut pas bloquer le vrai propriétaire en ratant exprès. Ailleurs, la
@@ -345,7 +357,7 @@ final class Auth
         }
         return [
             'login-ip:' . Req::ipPrefix() => [10, 900, 900],
-            'login-acct:' . $email => [30, 3600, 3600],
+            self::accountKey($email) => [30, 3600, 3600],
         ];
     }
 

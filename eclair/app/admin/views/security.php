@@ -79,7 +79,7 @@ $events = [
       <h2><?= e(t('Sessions et blocages')) ?></h2>
       <?php if ($v['blocked']): ?>
         <ul class="health"><?php foreach ($v['blocked'] as $b): ?>
-          <li><span class="dot bad"></span><span class="grow mono small"><?= e($b['key']) ?></span>
+          <li><span class="dot bad"></span><span class="grow mono small"><?= e($b['label'] ?? $b['key']) ?></span>
             <form method="post" action="<?= e(admin_url('security')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="unblock"><input type="hidden" name="key" value="<?= e($b['key']) ?>">
               <button class="btn btn-sm" type="submit"><?= e(t('Débloquer')) ?></button></form></li>
         <?php endforeach ?></ul>
