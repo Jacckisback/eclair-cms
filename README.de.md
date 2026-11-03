@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip"><img src="https://img.shields.io/badge/download-v1.10.2-5b3cbc?style=for-the-badge" alt="Éclair 1.10.0 herunterladen"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip"><img src="https://img.shields.io/badge/download-v1.10.3-5b3cbc?style=for-the-badge" alt="Éclair 1.10.0 herunterladen"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 oder neuer">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/Datenbank-keine-14122b?style=for-the-badge" alt="Keine Datenbank">
@@ -63,7 +63,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleicht</h3>
-      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>602 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
+      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>619 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
@@ -264,7 +264,7 @@ Anleitung: [Handbuch, Abschnitt Aktualisieren, sichern, umziehen](docs/GUIDE.de.
 |---|---|---|
 | **Installation** | MySQL-Datenbank anlegen, dann den Assistenten starten | ✅ Ordner hochladen, 4 Fragen beantworten |
 | **Datenbank** | MySQL erforderlich | ✅ Keine (geschützte Dateien) |
-| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 602 KB |
+| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 619 KB |
 | **SEO, Sitemap, strukturierte Daten** | Ein Plugin, das installiert und gepflegt werden muss | ✅ Integriert |
 | **GEO: llms.txt, Markdown, KI-Bots** | Plugins, selten vollständig | ✅ Integriert |
 | **Öffentliche Seiten** | Bei jedem Aufruf neu erzeugt, außer mit Cache-Plugin | ✅ Aus einem statischen Cache ausgeliefert |
@@ -375,7 +375,7 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
   <img src="docs/images/de/install.webp" alt="Installation in drei Schritten: Ordner hochladen, vier Fragen beantworten, die Website ist online" width="100%">
 </p>
 
-1. **Lade** das Archiv [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip) (602 KB) **herunter** und entpacke es.
+1. **Lade** das Archiv [`eclair-cms-1.10.3.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip) (619 KB) **herunter** und entpacke es.
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 

@@ -58,6 +58,7 @@ Leads closed in code (they depended on the server or the browser):
 - **Public site.** An author page exists only for an account with at least one published article. Page numbers with leading zeros (`/blog/page/01`) return 404. The Markdown copies escape Markdown characters typed as text (`\[` in the raw file). Published pages are otherwise unchanged, byte for byte.
 - **Dashboard.** The site-health list is shown to administrators only.
 - **Media.** `media/` no longer serves `.js` or `.mjs` files (update the Nginx rules in the guide if you use Nginx).
+- The archive grows from 602 KB to 619 KB (security code and translations). README, guides, banner and installation visual give the new size.
 - **Data lock.** On storage without working file locks, Éclair refuses to save with a clear message instead of saving unprotected; the message is shown everywhere (pages, contact form, admin), not as a generic error.
 - **Installer.** Re-running it after `data/site.php` was lost refuses the e-mail of an existing account instead of creating a duplicate, keeps the existing keys, and a failed installation never deletes accounts or content that were already there.
 - **Redirects.** A list that already holds more than 5,000 redirects (from 1.10.2) is never cut in bulk: each new automatic redirect replaces the oldest one, and existing redirects stay editable.

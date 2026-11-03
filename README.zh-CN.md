@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip"><img src="https://img.shields.io/badge/download-v1.10.2-5b3cbc?style=for-the-badge" alt="下载 Éclair 1.10.2"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip"><img src="https://img.shields.io/badge/download-v1.10.3-5b3cbc?style=for-the-badge" alt="下载 Éclair 1.10.2"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -63,7 +63,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>602 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>619 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -264,7 +264,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 602 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 619 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -375,7 +375,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip)（602 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.10.3.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip)（619 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 

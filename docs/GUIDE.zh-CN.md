@@ -40,7 +40,7 @@
 
 ### 安装步骤
 
-1. 下载安装包 [`eclair-cms-1.10.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.2.zip)（602 KB）并解压。
+1. 下载安装包 [`eclair-cms-1.10.3.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip)（619 KB）并解压。
 2. 使用 FTP 软件（如 FileZilla）或主机的文件管理器，把 **`eclair` 文件夹里的内容**上传到主机的公开目录（`public_html`、`www`……）。
    > ⚠️ `.htaccess` 是隐藏文件：请开启“显示隐藏文件”，确保它们也被上传。
 3. 打开你的网站地址：**安装向导随即启动**（支持 7 种语言，包括简体中文）。
@@ -744,7 +744,7 @@ ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<版本>
 
 `PHP_CLI_SERVER_WORKERS` 让网站能够访问自身（用于验证网站地址）：如果只有一个进程，验证会直接失败，重定向到正式地址的功能将保持关闭。
 
-如果只是调整样式，建议使用**自定义 CSS**（设置 › 外观）：它在更新后依然保留。如需更深入地定制主题，请修改 `app/theme/*.php`、`app/theme/theme.css` 和 `app/theme/themes/*.css`（记得保留一份副本：完整性检查会把这些文件标记为已修改，而且更新时它们会被替换；更新页面会在替换之前列出这些文件）。安装包中的 PHP 代码经过精简（`php -w`，去除了注释），后台视图经过压缩（通过 zlib 读取），后台的 JavaScript 和 CSS 也经过精简（安装包约 530 KB）：带注释的源代码在 GitHub 上。公开网站的文件（主题、`site.js`）则原样发布。
+如果只是调整样式，建议使用**自定义 CSS**（设置 › 外观）：它在更新后依然保留。如需更深入地定制主题，请修改 `app/theme/*.php`、`app/theme/theme.css` 和 `app/theme/themes/*.css`（记得保留一份副本：完整性检查会把这些文件标记为已修改，而且更新时它们会被替换；更新页面会在替换之前列出这些文件）。安装包中的 PHP 代码经过精简（`php -w`，去除了注释），后台视图经过压缩（通过 zlib 读取），后台的 JavaScript 和 CSS 也经过精简（安装包约 620 KB）：带注释的源代码在 GitHub 上。公开网站的文件（主题、`site.js`）则原样发布。
 
 ---
 
