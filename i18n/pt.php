@@ -1536,4 +1536,6 @@ return [
     '— Aucune —' => '— Nenhuma —',
     '≈ {cost} l’image.' => '≈ {cost} por imagem.',
     '≈ {cost} par article' => '≈ {cost} por artigo',
+    'Adresse trop longue : {n} caractères au maximum.' => 'Endereço longo demais: máximo de {n} caracteres.',
+    'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => 'Limite de {n} redirecionamentos atingido: exclua os que você não usa mais.',
 ];

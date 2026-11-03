@@ -136,9 +136,8 @@ final class AdminSettings
                     ],
                 ];
                 if ($patch['blog']['base'] !== $s['blog']['base'] && $s['blog']['enabled']) {
-                    foreach (Content::published('post') as $post) {
-                        Redirects::add('/' . $s['blog']['base'] . '/' . $post['slug'], '/' . $patch['blog']['base'] . '/' . $post['slug'], true);
-                    }
+                    Redirects::addMany(array_map(fn ($post) => ['/' . $s['blog']['base'] . '/' . $post['slug'], '/' . $patch['blog']['base'] . '/' . $post['slug']],
+                        array_values(Content::published('post'))), true);
                 }
                 break;
 
@@ -375,9 +374,8 @@ final class AdminSettings
             'thanks' => $page('thanks'),
         ]];
         if ($base !== $old && $s['shop']['enabled']) {
-            foreach (array_merge([['slug' => '']], Content::published('product'), Categories::of('product')) as $x) {
-                Redirects::add(rtrim('/' . $old . '/' . $x['slug'], '/'), rtrim('/' . $base . '/' . $x['slug'], '/'), true);
-            }
+            Redirects::addMany(array_map(fn ($x) => [rtrim('/' . $old . '/' . $x['slug'], '/'), rtrim('/' . $base . '/' . $x['slug'], '/')],
+                array_merge([['slug' => '']], array_values(Content::published('product')), Categories::of('product'))), true);
         }
         // Page de remerciement (après le paiement, Stripe peut y rediriger le client) : créée à la demande, hors index.
         if (Req::input('action') === 'thanks' && $patch['shop']['thanks'] === '') {

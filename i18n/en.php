@@ -1536,4 +1536,6 @@ return [
     '— Aucune —' => '— None —',
     '≈ {cost} l’image.' => '≈ {cost} per image.',
     '≈ {cost} par article' => '≈ {cost} per article',
+    'Adresse trop longue : {n} caractères au maximum.' => 'URL too long: {n} characters max.',
+    'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => 'Limit of {n} redirects reached: delete the ones you no longer need.',
 ];

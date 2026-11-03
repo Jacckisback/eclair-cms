@@ -1536,4 +1536,6 @@ return [
     '— Aucune —' => '— 无 —',
     '≈ {cost} l’image.' => '每张图片约 {cost}。',
     '≈ {cost} par article' => '每篇文章约 {cost}',
+    'Adresse trop longue : {n} caractères au maximum.' => '地址过长：最多 {n} 个字符。',
+    'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => '已达到 {n} 个重定向的上限：请删除不再需要的重定向。',
 ];
