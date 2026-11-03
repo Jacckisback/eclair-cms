@@ -20,14 +20,14 @@ final class AdminDrive
                 if (!Auth::confirmed($user)) {
                     Admin::back(self::BACK, t('Mot de passe incorrect.'), 'bad');
                 }
-                $r = Drive::start();
+                $r = Drive::start($user);
                 $r['ok'] ? Admin::back(self::BACK) : Admin::back(self::BACK, $r['error'], 'bad');
             case 'poll':
-                $state = Drive::poll();
-                [$message, $type] = self::polled($state);
-                Admin::back(self::BACK, $message, $type);
+                $state = Drive::poll($user);
+                // Flux d'une autre session : rien à dire ici (la page montre seulement qu'une connexion est en cours).
+                $state === 'other' ? Admin::back(self::BACK) : Admin::back(self::BACK, ...self::polled($state));
             case 'cancel':
-                Drive::cancel();
+                Drive::cancel($user);
                 Admin::back(self::BACK);
             case 'app':
                 // L'application Google décide où partent les sauvegardes : même exigence que pour connecter un compte.
@@ -71,8 +71,8 @@ final class AdminDrive
     /** Attente de l'autorisation Google (appelé par la page toutes les quelques secondes). */
     public static function poll(array $user): never
     {
-        $state = Drive::poll();
-        if ($state !== 'pending') {
+        $state = Drive::poll($user);
+        if ($state !== 'pending' && $state !== 'other') {
             // Message affiché par la page rechargée.
             [$message, $type] = self::polled($state);
             Session::flash($type, $message);

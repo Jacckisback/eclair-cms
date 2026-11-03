@@ -1539,4 +1539,8 @@ return [
     'Annonce de mise à jour refusée (plus ancienne que celle déjà reçue)' => 'Update notice rejected (older than the one already received)',
     'annonce plus ancienne que celle déjà reçue, ignorée' => 'update notice older than the one already received, ignored',
     'Annonce de mise à jour périmée depuis le {d} : une version plus récente existe peut-être. Nouvel essai automatique dans une heure.' => 'Update notice expired since {d}: a newer version may exist. Automatic retry in an hour.',
+    'Google Drive déconnecté : le compte qui l’avait connecté n’est plus administrateur' => 'Google Drive disconnected: the account that connected it is no longer an administrator',
+    'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => 'A Google Drive connection is in progress in another administrator’s session: the code is only shown there.',
+    'connecté par {name}' => 'connected by {name}',
+    'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive has been disconnected: the account that connected it was deleted or is no longer an administrator. Reconnect it to resume backups.',
 ];

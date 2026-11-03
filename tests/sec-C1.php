@@ -378,3 +378,174 @@ if (!in_array('--unit', $argv, true) && function_exists('sodium_crypto_sign_keyp
         exec('rm -rf ' . escapeshellarg($copy) . ' ' . escapeshellarg($channel));
     }
 }
+
+/* ───────────── Google Drive : connexion liée à la session qui l'a lancée (faux Google, HTTP) ───────────── */
+if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
+    section('Google Drive : code réservé à la session qui l’a demandé, compte de connexion noté et contrôlé');
+    [$copy, $port, $server] = serve('sec-c1-drive');
+    $gdir = sys_get_temp_dir() . '/eclair-c1-google-' . getmypid();
+    exec('rm -rf ' . escapeshellarg($gdir));
+    @mkdir($gdir);
+    [$gport, $google] = start_server([__DIR__ . '/fake-google.php'], ['FAKE_GOOGLE_DIR' => $gdir, 'PHP_CLI_SERVER_WORKERS' => '2'], 60001, 64000);
+    $g = 'http://127.0.0.1:' . $gport;
+    file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\n"
+        . "define('ECLAIR_GOOGLE_ENDPOINTS', ['device' => '$g/device/code', 'token' => '$g/token', 'revoke' => '$g/revoke', 'api' => '$g/drive/v3', 'upload' => '$g/upload/drive/v3']);\n");
+    $gstate = static fn (): array => json_decode((string) @file_get_contents($gdir . '/state.json'), true) ?: [];
+    $uploads = static fn (): int => count($gstate()['files'] ?? []);
+    $glog = static fn (string $needle): int => substr_count((string) @file_get_contents($gdir . '/log.txt'), $needle);
+    $drive = static fn (): array => json_decode(Store::strip((string) @file_get_contents($copy . '/data/drive.php')), true) ?: [];
+    $patch = static function (array $p) use ($copy, $drive): void {
+        file_put_contents($copy . '/data/drive.php', Store::GUARD . json_encode(array_replace_recursive($drive(), $p)));
+    };
+    $bound = static fn (): bool => str_contains((string) @file_get_contents($copy . '/data/vault.php'), '"google_drive"');
+    $users = static fn (): array => json_decode(Store::strip((string) file_get_contents($copy . '/data/users.php')), true) ?: [];
+    $setUser = static function (string $email, ?array $patch) use ($copy, $users): void {
+        $all = $users();
+        foreach ($all as $id => $u) {
+            if ($u['email'] === $email) {
+                if ($patch === null) {
+                    unset($all[$id]);
+                } else {
+                    $all[$id] = $patch + $u;
+                }
+            }
+        }
+        file_put_contents($copy . '/data/users.php', Store::GUARD . json_encode($all));
+    };
+    $uid = static fn (string $email): string => (string) (array_values(array_filter($users(), static fn (array $u): bool => $u['email'] === $email))[0]['id'] ?? '');
+    // Mot de passe saisi il y a plus de 15 minutes : la session est vieillie à la main.
+    $stale = static function (object $who) use ($copy): void {
+        preg_match('~eclair_sid\t(\S+)~', (string) file_get_contents($who->jar), $m);
+        $file = $copy . '/data/sessions/' . hash('sha256', $m[1] ?? '') . '.php';
+        file_put_contents($file, (string) preg_replace('~sudo\|i:\d+;~', 'sudo|i:0;', (string) @file_get_contents($file)));
+    };
+    $page = static fn (object $who): string => $who->req('GET', '/gestion/security')['body'];
+    $post = static function (object $who, array $fields) use ($page): string {
+        $who->req('POST', '/gestion/drive', $who->token($page($who)) + $fields);
+        return $page($who);
+    };
+    $api = static function (object $who, string $path): array {
+        preg_match('~"csrf":"([a-f0-9]+)"~', $who->req('GET', '/gestion')['body'], $m);
+        return json_decode($who->req('POST', '/gestion/api/' . $path, '{}', ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . ($m[1] ?? '')])['body'], true) ?: [];
+    };
+    try {
+        $a = client($port);
+        $form = $a->req('GET', '/');
+        $a->req('POST', '/', $a->token($form['body']) + [
+            'ui' => 'fr', 'site_name' => 'Atelier Lien', 'site_tagline' => 'Reliure', 'site_lang' => 'fr', 'site_type' => 'business',
+            'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
+        ], ['Accept: application/json']);
+        $a->login('camille@example.com', 'Un-mot-de-passe-solide');
+        $post($a, ['action' => 'app', 'client_id' => '123-test.apps.googleusercontent.com', 'client_secret' => 'secret-de-test', 'confirm_password' => 'Un-mot-de-passe-solide']);
+        // Second administrateur : Dominique, dont la confirmation du mot de passe est ancienne.
+        $list = $a->req('GET', '/gestion/users');
+        $a->req('POST', '/gestion/users', $a->token($list['body']) + ['name' => 'Dominique Test', 'email' => 'dominique@example.com', 'role' => 'admin']);
+        preg_match('/([A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4})/', $a->req('GET', '/gestion/users')['body'], $tmp);
+        $b = client($port);
+        $b->login('dominique@example.com', $tmp[1] ?? 'x');
+        $profile = $b->req('GET', '/gestion/profile');
+        $b->req('POST', '/gestion/profile', $b->token($profile['body']) + ['action' => 'password', 'current' => $tmp[1] ?? 'x', 'password' => 'Plume-Bleue-Solide-2026']);
+        $stale($b);
+
+        // Camille (mot de passe récent) lance la connexion : son code n'est affiché que chez elle.
+        $body = $post($a, ['action' => 'connect']);
+        $pending = $drive()['pending'] ?? [];
+        check('connexion lancée : code et attente affichés dans la session qui l’a demandée', str_contains($body, 'ABCD-EFGH') && str_contains($body, 'data-drive-poll'));
+        check('flux en attente lié à son administrateur (compte, version de session, empreinte de session)', ($pending['by']['uid'] ?? '') === $uid('camille@example.com')
+            && ($pending['by']['ver'] ?? 0) === 1 && preg_match('/^[a-f0-9]{64}$/', (string) ($pending['by']['sid'] ?? '')) === 1, (string) json_encode($pending['by'] ?? null));
+        $seen = $page($b);
+        check('autre administrateur (mot de passe ancien) : connexion en cours signalée, code jamais affiché', $seen !== '' && !str_contains($seen, 'ABCD-EFGH')
+            && !str_contains($seen, 'data-drive-poll') && str_contains($seen, 'session d’un autre administrateur'));
+        $b2 = client($port);
+        $b2->login('dominique@example.com', 'Plume-Bleue-Solide-2026');
+        check('autre administrateur, même avec un mot de passe récent : code jamais affiché', !str_contains($page($b2), 'ABCD-EFGH'));
+        // Le code est validé chez Google (par n'importe quel compte) : les autres sessions ne peuvent ni le terminer, ni l'annuler.
+        touch($gdir . '/approved');
+        $patch(['pending' => ['next' => 0]]);
+        $other = $api($b, 'drive/poll');
+        $post($b, ['action' => 'poll']);
+        $post($b2, ['action' => 'poll']);
+        $post($b2, ['action' => 'cancel']);
+        check('autre session : ne termine pas la connexion (Google jamais interrogé), ne l’annule pas', ($other['state'] ?? '') === 'other' && !$bound()
+            && isset($drive()['pending']) && $glog('device_code') === 0, (string) json_encode($other));
+
+        // Version de session changée (mot de passe changé, déconnexion générale) : le flux ne peut plus être terminé.
+        $setUser('camille@example.com', ['ver' => 2]);
+        $a2 = client($port);
+        $a2->login('camille@example.com', 'Un-mot-de-passe-solide');
+        $again = $api($a2, 'drive/poll');
+        check('même compte, nouvelle version de session : connexion jamais terminée', ($again['state'] ?? '') === 'other' && !$bound() && $glog('device_code') === 0,
+            (string) json_encode($again));
+        // Mot de passe trop ancien dans la session qui a lancé la connexion : code masqué, connexion à relancer.
+        $post($a2, ['action' => 'connect']);
+        $stale($a2);
+        $body = $page($a2);
+        $late = $api($a2, 'drive/poll');
+        check('mot de passe de plus de 15 minutes : code masqué, connexion à relancer, rien de connecté', !str_contains($body, 'ABCD-EFGH') && str_contains($body, 'Connecter Google Drive')
+            && ($late['state'] ?? '') === 'expired' && !isset($drive()['pending']) && !$bound(), (string) json_encode($late));
+        // Mot de passe confirmé : connexion terminée, compte de connexion noté.
+        $post($a2, ['action' => 'connect', 'confirm_password' => 'Un-mot-de-passe-solide']);
+        $patch(['pending' => ['next' => 0]]);
+        $done = $api($a2, 'drive/poll');
+        $body = $page($a2);
+        check('session qui a lancé la connexion : terminée, compte qui l’a faite noté et affiché', ($done['state'] ?? '') === 'connected' && $bound()
+            && ($drive()['by']['uid'] ?? '') === $uid('camille@example.com') && str_contains($body, 'connecté par Camille Test'), (string) json_encode($done));
+        preg_match('~/_eclair/backup/([a-f0-9]{32})~', $body, $key);
+        // Le compte de connexion change de mot de passe : la connexion continue.
+        $profile = $a2->req('GET', '/gestion/profile');
+        $a2->req('POST', '/gestion/profile', $a2->token($profile['body']) + ['action' => 'password', 'current' => 'Un-mot-de-passe-solide', 'password' => 'Encre-Verte-Solide-2026']);
+        $count = $uploads();
+        $body = $post($a2, ['action' => 'now']);
+        check('mot de passe changé par le compte de connexion : la connexion et les sauvegardes continuent', str_contains($body, 'Sauvegarde envoyée sur Google Drive')
+            && $uploads() === $count + 1 && $bound(), substr(strip_tags($body), 0, 200));
+
+        // Le compte de connexion n'est plus administrateur : plus aucune sauvegarde (tâche planifiée), connexion retirée.
+        $setUser('camille@example.com', ['role' => 'editor']);
+        $patch(['ok' => time() - 8 * 86400, 'attempt' => time() - 8 * 86400]);
+        $count = $uploads();
+        $revokes = $glog('POST /revoke');
+        $cron = client($port)->req('GET', '/_eclair/backup/' . ($key[1] ?? 'x'));
+        check('compte de connexion rétrogradé : tâche planifiée sans envoi, jeton révoqué, connexion retirée', trim($cron['body']) === 'error' && $uploads() === $count
+            && !$bound() && $glog('POST /revoke') === $revokes + 1 && !isset($drive()['by']), trim($cron['body']));
+        $body = $page($b2);
+        check('page Sécurité : les administrateurs sont invités à reconnecter Google Drive, événement au journal', str_contains($body, 'Reconnecte-le pour reprendre les sauvegardes')
+            && str_contains($body, 'Connecter Google Drive') && str_contains($body, 'le compte qui l’avait connecté n’est plus administrateur'));
+        // Reconnecté par Dominique, puis son compte est supprimé : la sauvegarde à la demande ne part plus.
+        $post($b2, ['action' => 'connect']);
+        $patch(['pending' => ['next' => 0]]);
+        $api($b2, 'drive/poll');
+        $byB = ($drive()['by']['uid'] ?? '') === $uid('dominique@example.com') && $bound();
+        $setUser('dominique@example.com', null);
+        $setUser('camille@example.com', ['role' => 'admin']);
+        $count = $uploads();
+        $body = $post($a2, ['action' => 'now']);
+        check('compte de connexion supprimé : sauvegarde à la demande refusée, connexion retirée', $byB && $uploads() === $count && !$bound()
+            && str_contains($body, 'Google Drive a été déconnecté'), substr(strip_tags($body), 0, 200));
+        check('compte de connexion supprimé : plus de sauvegarde automatique signalée aux pages', !str_contains($a2->req('GET', '/gestion')['body'], '"driveDue":true'));
+
+        // Connexion faite avec la 1.10.2 (compte de connexion non noté) : elle continue ; il est noté à la reconnexion suivante.
+        $post($a2, ['action' => 'connect']);
+        $patch(['pending' => ['next' => 0]]);
+        $api($a2, 'drive/poll');
+        $legacy = $drive();
+        unset($legacy['by']);
+        file_put_contents($copy . '/data/drive.php', Store::GUARD . json_encode($legacy + ['ok' => time() - 8 * 86400, 'attempt' => time() - 8 * 86400]));
+        $patch(['ok' => time() - 8 * 86400, 'attempt' => time() - 8 * 86400]);
+        $count = $uploads();
+        $cron = client($port)->req('GET', '/_eclair/backup/' . ($key[1] ?? 'x'));
+        check('connexion de la 1.10.2 (sans compte noté) : les sauvegardes continuent', trim($cron['body']) === 'done' && $uploads() === $count + 1 && $bound(), trim($cron['body']));
+        // Reconnexion par-dessus une connexion existante : l'envoi en cours vers l'ancien compte est abandonné.
+        @mkdir($copy . '/cache/backups', 0700, true);
+        file_put_contents($copy . '/cache/backups/sauvegarde-0123456789abcdef.zip', 'archive en cours');
+        $patch(['job' => ['file' => 'sauvegarde-0123456789abcdef.zip', 'name' => 'x.zip', 'size' => 16, 'uri' => $g . '/upload/session/up999', 'offset' => 0, 'started' => time(), 'tries' => 0]]);
+        $post($a2, ['action' => 'connect']);
+        $patch(['pending' => ['next' => 0]]);
+        $api($a2, 'drive/poll');
+        check('reconnexion : compte de connexion noté, envoi en cours vers l’ancien compte abandonné', ($drive()['by']['uid'] ?? '') === $uid('camille@example.com')
+            && !isset($drive()['job']) && !is_file($copy . '/cache/backups/sauvegarde-0123456789abcdef.zip') && $bound(), (string) json_encode(array_keys($drive())));
+    } finally {
+        proc_terminate($server);
+        proc_terminate($google);
+        exec('rm -rf ' . escapeshellarg($copy) . ' ' . escapeshellarg($gdir));
+    }
+}

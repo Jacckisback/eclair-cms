@@ -1539,4 +1539,8 @@ return [
     'Annonce de mise à jour refusée (plus ancienne que celle déjà reçue)' => 'Update-Ankündigung abgelehnt (älter als die bereits empfangene)',
     'annonce plus ancienne que celle déjà reçue, ignorée' => 'Update-Ankündigung älter als die bereits empfangene, ignoriert',
     'Annonce de mise à jour périmée depuis le {d} : une version plus récente existe peut-être. Nouvel essai automatique dans une heure.' => 'Update-Ankündigung abgelaufen seit dem {d}: Möglicherweise gibt es eine neuere Version. Neuer automatischer Versuch in einer Stunde.',
+    'Google Drive déconnecté : le compte qui l’avait connecté n’est plus administrateur' => 'Google Drive getrennt: Das Konto, das es verbunden hat, ist kein Administrator mehr',
+    'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => 'In der Sitzung eines anderen Administrators läuft gerade eine Verbindung mit Google Drive: Der Code wird nur dort angezeigt.',
+    'connecté par {name}' => 'verbunden von {name}',
+    'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive wurde getrennt: Das Konto, das es verbunden hat, wurde gelöscht oder ist kein Administrator mehr. Verbinde es erneut, um die Sicherungen fortzusetzen.',
 ];

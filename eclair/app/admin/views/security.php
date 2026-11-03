@@ -22,6 +22,7 @@ $events = [
     'drive_connected' => t('Google Drive connecté'), 'drive_disconnected' => t('Google Drive déconnecté'),
     'drive_revoked' => t('Accès à Google Drive retiré'), 'drive_backup' => t('Sauvegarde envoyée sur Google Drive'),
     'drive_app_saved' => t('Application Google enregistrée'), 'drive_app_removed' => t('Application Google retirée de ce site'),
+    'drive_unbound' => t('Google Drive déconnecté : le compte qui l’avait connecté n’est plus administrateur'),
 ];
 ?>
 <div class="page">
@@ -115,6 +116,9 @@ $events = [
   <section class="card" id="drive" aria-labelledby="drive-title">
     <div class="card-head"><h2 id="drive-title"><?= e(t('Sauvegardes sur Google Drive')) ?></h2>
       <?php if ($d['connected']): ?><span class="badge ok"><?= e(t('Connecté')) ?></span><?php endif ?></div>
+    <?php if ($d['busy']): ?>
+      <div class="notice" role="status"><span><?= Icons::svg('clock') ?></span><p><?= e(t('Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.')) ?></p></div>
+    <?php endif ?>
     <?php if (!$d['ready'] && !$d['connected']): ?>
       <p class="small muted"><?= e(t('Indisponible sur ce serveur : les extensions PHP curl, zip et sodium (ou openssl) sont nécessaires. Le téléchargement de sauvegarde reste disponible ci-dessus.')) ?></p>
     <?php elseif (!$d['available'] && !$d['connected']): ?>
@@ -142,7 +146,7 @@ $events = [
         <?= \Eclair\Admin::partial('partials/confirm', []) ?>
         <button class="btn btn-primary" type="submit"><?= Icons::svg('link') ?><?= e(t('Connecter Google Drive')) ?></button></form>
     <?php else: ?>
-      <p><?= $d['email'] !== '' ? e(t('Compte Google : {e}', ['e' => $d['email']])) : e(t('Compte Google connecté')) ?><?php if ($d['folder'] !== ''): ?> · <?= e(t('dossier « {f} »', ['f' => $d['folder']])) ?><?php endif ?></p>
+      <p><?= $d['email'] !== '' ? e(t('Compte Google : {e}', ['e' => $d['email']])) : e(t('Compte Google connecté')) ?><?php if ($d['folder'] !== ''): ?> · <?= e(t('dossier « {f} »', ['f' => $d['folder']])) ?><?php endif ?><?php if ($d['by'] !== ''): ?> · <?= e(t('connecté par {name}', ['name' => $d['by']])) ?><?php endif ?></p>
       <?php if ($d['job']): ?>
         <div class="drive-run" data-drive-run>
           <p class="small" data-drive-label><?= e(t('Envoi de la sauvegarde : {n} %', ['n' => $d['job']['percent']])) ?></p>
