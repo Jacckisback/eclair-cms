@@ -460,10 +460,23 @@ final class Update
             return self::swap($r, $stage, $prev, $roots, $extras, $kept);
         } catch (\Throwable $e) {
             // Imprévu pendant l'échange : l'ancienne version est remise en place avant tout.
-            self::restore();
+            $restored = self::restore();
             Log::error($e);
-            return ['ok' => false, 'error' => t('Erreur inattendue pendant la mise à jour : Éclair est revenu à la version {v}. Détail dans Sécurité › Dernières erreurs techniques.', ['v' => ECLAIR_VERSION])];
+            return self::undone($restored, t('Erreur inattendue pendant la mise à jour : Éclair est revenu à la version {v}. Détail dans Sécurité › Dernières erreurs techniques.', ['v' => ECLAIR_VERSION]));
         }
+    }
+
+    /**
+     * Issue d'un retour automatique : le message prévu si l'ancienne version est bien revenue ; sinon la marche à suivre
+     * (jamais « rien n'est perdu » quand le retour n'a pas pu se faire en entier).
+     */
+    private static function undone(bool $restored, string $message): array
+    {
+        if ($restored) {
+            return ['ok' => false, 'error' => $message];
+        }
+        Log::error(new \RuntimeException('Retour automatique incomplet après une mise à jour : version gardée dans cache/update/previous.'));
+        return ['ok' => false, 'error' => t('Retour incomplet : vérifie les droits d’écriture, puis réessaie (ou remets en place par FTP le contenu du dossier cache/update/previous).')];
     }
 
     /** Échange du code, contrôle de santé, retour automatique si besoin. */
@@ -473,13 +486,11 @@ final class Update
         $before = self::health(ECLAIR_VERSION);
         foreach (self::CODE as $dir) {
             if (!@rename(ECLAIR_ROOT . '/' . $dir, $prev . '/' . $dir) || !@rename($stage . '/' . $dir, ECLAIR_ROOT . '/' . $dir)) {
-                self::restore();
-                return ['ok' => false, 'error' => t('Impossible de remplacer {p} : rien n’a été modifié.', ['p' => '/' . $dir])];
+                return self::undone(self::restore(), t('Impossible de remplacer {p} : rien n’a été modifié.', ['p' => '/' . $dir]));
             }
         }
         if (!Disk::put(ECLAIR_ROOT . '/index.php', $roots['index.php'])) {
-            self::restore();
-            return ['ok' => false, 'error' => t('Impossible de remplacer {p} : rien n’a été modifié.', ['p' => '/index.php'])];
+            return self::undone(self::restore(), t('Impossible de remplacer {p} : rien n’a été modifié.', ['p' => '/index.php']));
         }
         foreach ($extras as $path) {
             if (!Disk::put(ECLAIR_ROOT . '/' . $path, $roots[$path])) {
@@ -504,10 +515,10 @@ final class Update
             $broken = array_values(array_filter($broken, static fn (string $k): bool => $again[$k] !== $before[$k]));
         }
         if ($broken) {
-            self::restore();
+            $restored = self::restore();
             Log::security('update_rolled_back', ['version' => $version, 'auto' => implode(',', $broken)]);
             self::remember(['failed' => ['version' => $version, 'date' => time()]]);
-            return ['ok' => false, 'error' => t('La version {v} ne fonctionnait pas correctement sur ton serveur : Éclair est revenu tout seul à la version {old}. Rien n’est perdu.', ['v' => $version, 'old' => ECLAIR_VERSION])];
+            return self::undone($restored, t('La version {v} ne fonctionnait pas correctement sur ton serveur : Éclair est revenu tout seul à la version {old}. Rien n’est perdu.', ['v' => $version, 'old' => ECLAIR_VERSION]));
         }
         $checked = !in_array(0, $before, true);
         self::remember(['last' => ['from' => ECLAIR_VERSION, 'to' => $version, 'date' => time(), 'kept' => $kept, 'checked' => $checked]], ['failed']);
@@ -652,8 +663,9 @@ final class Update
             }
         }
         self::fresh();
-        self::remove($junk);
+        // Retour incomplet : rien n'est effacé (ni la version gardée, ni ce qui a été écarté), pour pouvoir finir à la main.
         if ($ok) {
+            self::remove($junk);
             self::remove($prev);
         }
         return $ok;

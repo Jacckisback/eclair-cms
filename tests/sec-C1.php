@@ -98,6 +98,12 @@ $c1Urls = [
 $c1Wrong = array_keys(array_filter($c1Urls, static fn (bool $ok, string $url): bool => $c1Trusted->invoke(null, $url) !== $ok, ARRAY_FILTER_USE_BOTH));
 check('archive et notes : seulement dans le dépôt du projet (jamais celui d’un autre, ni « .. », ni paramètres)', $c1Wrong === [], implode(' | ', $c1Wrong));
 
+// Retour automatique qui n'a pas pu se faire en entier : jamais « Rien n'est perdu », mais la marche à suivre par FTP.
+$c1Undone = method_exists(Eclair\Update::class, 'undone') ? new ReflectionMethod(Eclair\Update::class, 'undone') : null;
+check('retour automatique incomplet : la marche à suivre (FTP), jamais « Rien n’est perdu »', $c1Undone !== null
+    && str_contains((string) $c1Undone->invoke(null, false, 'Rien n’est perdu.')['error'], 'cache/update/previous')
+    && $c1Undone->invoke(null, true, 'Rien n’est perdu.')['error'] === 'Rien n’est perdu.');
+
 require_once dirname(__DIR__) . '/tools/announce.php';
 $c1UpdateCode = (string) file_get_contents(ECLAIR_ROOT . '/app/lib/Update.php');
 preg_match("~private const KEY = '([^']+)'~", $c1UpdateCode, $c1Key);
