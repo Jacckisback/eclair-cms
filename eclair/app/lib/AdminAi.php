@@ -162,14 +162,14 @@ final class AdminAi
             Http::json(['ok' => false, 'error' => t('Ce contenu n’existe plus.')], 404);
         }
         $stale = t('Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.');
-        if ((int) $current['updated'] !== (int) $p['base']) {
+        if (AiTools::stale($p, $current)) {
             Http::json(['ok' => false, 'error' => $stale], 409);
         }
         // Une proposition change le contenu, jamais sa publication : état et date restent ceux de la version enregistrée,
         // qui doit encore être celle sur laquelle la proposition a été faite (vérifié sous verrou).
         $data = ['status' => $current['status'], 'date' => '@' . (int) $current['date']] + $p['data'];
         try {
-            $saved = Content::save($data, $user, static fn (?array $stored): bool => $stored !== null && (int) $stored['updated'] === (int) $p['base']);
+            $saved = Content::save($data, $user, static fn (?array $stored): bool => !AiTools::stale($p, $stored));
         } catch (\UnexpectedValueException) {
             Http::json(['ok' => false, 'error' => $stale], 409);
         } catch (\OverflowException $e) {

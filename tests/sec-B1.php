@@ -216,6 +216,25 @@ $ctx = $b1Ctx();
 $res = AiTools::run('update_content', ['id' => $d4['id'], 'note' => 'Titre', 'title' => 'Brouillon amélioré'], $ctx);
 check('brouillon inchangé entre-temps : modifié directement, annulable', ($res['card']['kind'] ?? '') === 'updated'
     && ($b1Read('content/' . $d4['id'])['title'] ?? '') === 'Brouillon amélioré' && ($res['card']['undo'] ?? '') !== '');
+// Proposition : elle garde l'empreinte de sa version de base (une modification de la même seconde la rend périmée).
+$fpOf = static function (array $item): string {
+    $m = new ReflectionMethod(AiTools::class, 'fingerprint');
+    $m->setAccessible(true);
+    return (string) $m->invoke(null, $item);
+};
+$basePage = $b1Save(['type' => 'page', 'title' => 'Page de base', 'status' => 'published']);
+$ctx = $b1Ctx();
+$res = AiTools::run('update_content', ['id' => $basePage['id'], 'note' => 'Titre', 'title' => 'Titre proposé'], $ctx);
+$prop = Store::read('ai/proposals/' . (string) ($res['card']['pid'] ?? 'x'));
+check('proposition : empreinte de sa version de base gardée (modification de la même seconde repérée)', is_array($prop)
+    && ($prop['fp'] ?? '') === $fpOf((array) $b1Read('content/' . $basePage['id'])));
+// Médiathèque : termes sans doublon, 8 au plus (chacun parcourt toute la médiathèque).
+Store::write('media', ['m1b1' => ['id' => 'm1b1', 'file' => '2026/11/x', 'ext' => 'jpg', 'w' => 10, 'h' => 10, 'webp' => [], 'alt' => '', 'name' => 'neuviemeb1.jpg', 'created' => time()]]);
+$mediaIds = static fn (array $res): array => array_column($res['result']['media'] ?? [], 'id');
+$ctx = $b1Ctx();
+check('médiathèque (find_media) : 8 termes au plus, le neuvième est ignoré', $mediaIds(AiTools::run('find_media', ['query' => 'neuviemeb1'], $ctx)) === ['m1b1']
+    && $mediaIds(AiTools::run('find_media', ['query' => 'aa bb cc dd ee ff gg hh neuviemeb1'], $ctx)) === []);
+Store::delete('media');
 // Propositions en attente bornées (les plus récentes gardées) : le dossier reste petit et vite parcouru.
 $pdir = ECLAIR_DATA . '/ai/proposals';
 @mkdir($pdir, 0700, true);
@@ -352,6 +371,46 @@ proc_close($proc);
 check('reconstruction de l’index : attend le verrou des données (jamais au milieu d’un enregistrement)', $waiting && count((array) $b1Read('index')) === 1);
 $b1Reset();
 
+// Assistant de l'administration, tour complet (faux fournisseur) : la personne agit pendant le tour, au moment où un outil part.
+$fakeDir = sys_get_temp_dir() . '/eclair-fake-ai-b1-' . getmypid();
+@mkdir($fakeDir);
+[$fakePort, $fake] = start_server([__DIR__ . '/fake-ai.php'], ['FAKE_AI_DIR' => $fakeDir, 'PHP_CLI_SERVER_WORKERS' => '2'], 40001, 50000);
+try {
+    defined('ECLAIR_AI_ENDPOINTS') || define('ECLAIR_AI_ENDPOINTS', ['anthropic' => 'http://127.0.0.1:' . $fakePort]);
+    Eclair\Vault::set('ai.anthropic', 'sk-ant-test-0123456789');
+    Settings::save(['ai' => ['provider' => 'anthropic', 'model' => 'claude-opus-5-5', 'budget' => 10, 'daily' => 60, 'editors' => true]]);
+    $chatUser = Users::create(['name' => 'Camille Chat', 'email' => 'chat.b1@example.com', 'pass' => 'x', 'role' => 'admin']);
+    $turn = static function (string $message, callable $atFirstTool) use ($chatUser): array {
+        $events = [];
+        Eclair\AiChat::run($chatUser, '', $message, [], null, static function (array $e) use (&$events, $atFirstTool): void {
+            if ($e['t'] === 'tool' && !array_filter($events, fn (array $x): bool => $x['t'] === 'tool')) {
+                $atFirstTool();
+            }
+            $events[] = $e;
+        });
+        return $events;
+    };
+    $kinds = static fn (array $events): array => array_column(array_column(array_values(array_filter($events, fn (array $e): bool => $e['t'] === 'card')), 'card'), 'kind');
+    // Brouillon de l'IA publié par la personne pendant le tour : l'index chargé au début du tour (contexte) le dit encore brouillon.
+    $d = $b1Save(['title' => 'Brouillon du tour']);
+    $events = $turn('MODIFIE ' . $d['id'], static fn () => $b1Status($d, 'published'));
+    $stored = (array) $b1Read('content/' . $d['id']);
+    check('assistant (tour complet) : brouillon publié pendant le tour, proposition et rien de changé en ligne', $kinds($events) === ['proposal']
+        && $stored['status'] === 'published' && $stored['title'] === 'Brouillon du tour', json_encode([$kinds($events), $stored['title'], $stored['status']]));
+    // Compte supprimé pendant le tour : plus aucun outil ne part en son nom.
+    $d2 = $b1Save(['title' => 'Brouillon d’un compte supprimé']);
+    $events = $turn('MODIFIE ' . $d2['id'], static fn () => Users::delete($chatUser['id']));
+    $errors = array_column(array_values(array_filter($events, fn (array $e): bool => $e['t'] === 'error')), 'error');
+    check('assistant : compte supprimé pendant le tour, aucune modification ensuite', ($b1Read('content/' . $d2['id'])['title'] ?? '') === 'Brouillon d’un compte supprimé'
+        && $kinds($events) === [] && $errors !== [], json_encode([$kinds($events), $errors]));
+} finally {
+    proc_terminate($fake);
+    exec('rm -rf ' . escapeshellarg($fakeDir));
+    Eclair\Vault::set('ai.anthropic', '');
+    Settings::save(['ai' => ['provider' => '', 'model' => '']]);
+    $b1Reset();
+}
+
 [$copy, $port, $server] = serve('secb1');
 try {
     $c = client($port);
@@ -419,6 +478,31 @@ try {
     check('index périmé : fiche produit et flux produits sans la version brouillon', $sheet['status'] === 404 && !str_contains($sheet['body'] . $feed['body'], 'DIVERGENCEB1'),
         $sheet['status'] . ' ' . substr($feed['body'], 0, 200));
     settings($copy, ['shop' => ['enabled' => false]]);
+
+    // Proposition modifiée dans la même seconde que sa version de base : l'éditeur la dit périmée, l'application la refuse.
+    $admin = array_column((array) $read('users'), null, 'email')['camille@example.com'] ?? ['id' => 'x'];
+    $page = (array) ($api('api/save', ['type' => 'page', 'title' => 'Horaires B1', 'status' => 'published', 'blocks' => [['type' => 'paragraph', 'text' => 'Ouvert le samedi.']]])['json']['item'] ?? []);
+    $base = (array) $read('content/' . $page['id']);
+    @mkdir($copy . '/data/ai/proposals', 0700, true);
+    $proposal = ['user' => $admin['id'], 'content' => $page['id'], 'base' => (int) $base['updated'], 'data' => ['title' => 'Titre proposé B1', 'date' => ''] + $base,
+        'note' => 'Titre', 'changes' => ['Titre'], 'created' => time()];
+    $write('ai/proposals/b1fp000001', ['id' => 'b1fp000001', 'fp' => $fpOf($base)] + $proposal);
+    $write('content/' . $page['id'], ['summary' => 'Résumé ajouté dans la même seconde.'] + $base);
+    $view = $c->req('GET', '/gestion/edit/' . $page['id'] . '?proposal=b1fp000001');
+    $applied = $api('api/ai/apply', ['pid' => 'b1fp000001']);
+    check('proposition : modification de la même seconde repérée (l’éditeur la dit périmée, l’application la refuse)', str_contains($view['body'], '"proposal":{"stale":true}')
+        && $applied['status'] === 409 && ($read('content/' . $page['id'])['title'] ?? '') === 'Horaires B1', $applied['status'] . ' ' . substr($applied['body'], 0, 200));
+    // Proposition d'avant la mise à jour (sans empreinte) et page dépubliée dans la même seconde : appliquée sans jamais la remettre en ligne.
+    $write('ai/proposals/b1old00001', ['id' => 'b1old00001'] + $proposal);
+    $write('content/' . $page['id'], ['status' => 'draft'] + $base);
+    $index = (array) $read('index');
+    $index[$page['id']]['status'] = 'draft';
+    $write('index', $index);
+    $applied = $api('api/ai/apply', ['pid' => 'b1old00001']);
+    $after = (array) $read('content/' . $page['id']);
+    check('proposition appliquée : jamais de changement de publication (page dépubliée entre-temps)', ($applied['json']['ok'] ?? false) === true
+        && ($after['title'] ?? '') === 'Titre proposé B1' && ($after['status'] ?? '') === 'draft' && $visitor->req('GET', '/' . $page['slug'])['status'] === 404,
+        json_encode([$applied['status'], $after['status'] ?? null, $after['title'] ?? null]));
 
     // Plafond du nombre de contenus : message clair dans l'éditeur.
     $index = (array) $read('index');

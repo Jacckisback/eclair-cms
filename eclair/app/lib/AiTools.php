@@ -238,7 +238,7 @@ final class AiTools
 
     private static function findMedia(string $query): array
     {
-        $terms = array_filter(preg_split('/\s+/u', mb_strtolower(trim($query))) ?: [], fn ($w) => mb_strlen($w) >= 2);
+        $terms = Content::terms($query); // sans doublon, 8 au plus : chacun parcourt toute la médiathèque
         $out = [];
         foreach (Media::all() as $m) {
             $hay = mb_strtolower($m['name'] . ' ' . $m['alt'] . ' ' . basename((string) $m['file']));
@@ -520,6 +520,8 @@ final class AiTools
         $card = ['kind' => 'proposal', 'key' => 'p-' . $pid, 'pid' => $pid, 'id' => $id, 'title' => (string) ($entry['title'] ?? $item['title'])] + $merge('p-' . $pid);
         Store::write('ai/proposals/' . $pid, [
             'id' => $pid, 'user' => $ctx['user']['id'], 'content' => $id, 'base' => is_array($proposal) ? (int) $proposal['base'] : (int) $item['updated'],
+            // Empreinte de la version de base : une modification faite dans la même seconde rend aussi la proposition périmée.
+            'fp' => is_array($proposal) ? (string) ($proposal['fp'] ?? '') : self::fingerprint($item),
             'data' => $changed, 'note' => $card['note'], 'changes' => $card['changes'], 'created' => time(),
         ]);
         return ['result' => ['done' => 'Proposal ready: the user previews and applies it with one click (not applied yet).'] + $scores + $warn,
@@ -534,6 +536,16 @@ final class AiTools
         $token = random_id();
         Store::write('ai/undo/' . $token, ['user' => $userId, 'item' => $before, 'after' => self::fingerprint($after), 'created' => time()]);
         return $token;
+    }
+
+    /**
+     * Une proposition est-elle périmée (contenu supprimé ou modifié depuis) ? La date de mise à jour (à la seconde près) et,
+     * pour les propositions qui la portent, l'empreinte de la version de base : une modification de la même seconde est vue.
+     */
+    public static function stale(array $proposal, ?array $current): bool
+    {
+        return $current === null || (int) $current['updated'] !== (int) ($proposal['base'] ?? -1)
+            || ((string) ($proposal['fp'] ?? '') !== '' && self::fingerprint($current) !== $proposal['fp']);
     }
 
     /** L'annulation est-elle encore possible (version gardée, et contenu inchangé depuis la modification) ? */

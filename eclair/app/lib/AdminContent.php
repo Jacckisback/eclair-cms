@@ -49,8 +49,8 @@ final class AdminContent
         if (!is_array($p) || $p['content'] !== $item['id'] || ($p['user'] !== $user['id'] && $user['role'] !== 'admin')) {
             return null;
         }
-        if ((int) $item['updated'] !== (int) $p['base']) {
-            return ['stale' => true];
+        if (AiTools::stale($p, $item)) {
+            return ['stale' => true]; // modifié depuis, même dans la seconde (empreinte de la version de base)
         }
         $d = Content::build($p['data'], $user, $item);
         $media = [];
