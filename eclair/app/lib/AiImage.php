@@ -26,6 +26,10 @@ final class AiImage
         if ($provider === '') {
             throw new \RuntimeException(t('Aucun générateur d’images n’est configuré (Réglages › Assistant IA).'));
         }
+        // Médiathèque pleine : refusé avant de payer une image qui ne pourrait pas être enregistrée.
+        if (Media::full()) {
+            throw new \RuntimeException(t('Limite de {n} images atteinte : supprime celles qui ne servent plus.', ['n' => Media::MAX_ITEMS]));
+        }
         $prompt = trim(mb_substr($prompt, 0, 3500));
         if (mb_strlen($prompt) < 10) {
             throw new \RuntimeException('The image prompt is too short: describe the subject, setting, light and style.');

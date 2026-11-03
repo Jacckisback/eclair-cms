@@ -70,14 +70,18 @@ final class AdminSite
         if (Sanitize::text(Req::input('name'), 80) === '') {
             Admin::back('categories', t('Donne un nom à la catégorie.'), 'bad');
         }
-        Categories::save([
-            'id' => Req::input('id'),
-            'name' => Req::input('name'),
-            'slug' => Req::input('slug'),
-            'description' => Req::input('description'),
-            'seo_title' => Req::input('seo_title'),
-            'kind' => Req::input('kind'),
-        ]);
+        try {
+            Categories::save([
+                'id' => Req::input('id'),
+                'name' => Req::input('name'),
+                'slug' => Req::input('slug'),
+                'description' => Req::input('description'),
+                'seo_title' => Req::input('seo_title'),
+                'kind' => Req::input('kind'),
+            ]);
+        } catch (\RuntimeException $e) {
+            Admin::back('categories', $e->getMessage(), 'bad');
+        }
         Admin::back('categories', t('Catégorie enregistrée.'));
     }
 

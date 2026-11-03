@@ -1537,5 +1537,7 @@ return [
     '≈ {cost} l’image.' => '≈ {cost} por imagem.',
     '≈ {cost} par article' => '≈ {cost} por artigo',
     'Adresse trop longue : {n} caractères au maximum.' => 'Endereço longo demais: máximo de {n} caracteres.',
+    'Limite de {n} catégories atteinte : supprime celles qui ne servent plus.' => 'Limite de {n} categorias atingido: exclua as que você não usa mais.',
+    'Limite de {n} images atteinte : supprime celles qui ne servent plus.' => 'Limite de {n} imagens atingido: exclua as que você não usa mais.',
     'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => 'Limite de {n} redirecionamentos atingido: exclua os que você não usa mais.',
 ];

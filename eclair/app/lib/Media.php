@@ -14,9 +14,13 @@ defined('ECLAIR') || exit;
 final class Media
 {
     public const WIDTHS = [480, 800, 1200, 1600];
+    /** Au plus 10 000 images : bien au-delà d'un vrai site (des dizaines de gigaoctets), et chaque page publique relit la liste. */
+    public const MAX_ITEMS = 10_000;
     private const MAX = 2000;
     private const MAX_BYTES = 20 * 1048576;
     private const MAX_PIXELS = 40_000_000;
+    /** Passes d'un JPEG progressif : une dizaine en pratique ; des milliers occuperaient le serveur de longues minutes. */
+    private const MAX_SCANS = 100;
 
     public static function dir(): string
     {
@@ -34,6 +38,13 @@ final class Media
         $all = is_array($all) ? $all : [];
         uasort($all, fn ($a, $b) => $b['created'] <=> $a['created']);
         return $all;
+    }
+
+    /** La médiathèque est-elle pleine (MAX_ITEMS) ? */
+    public static function full(): bool
+    {
+        $all = Store::read('media', []);
+        return is_array($all) && count($all) >= self::MAX_ITEMS;
     }
 
     public static function get(string $id): ?array
@@ -121,6 +132,9 @@ final class Media
 
     private static function ingest(string $tmp, string $originalName, string $userId): array
     {
+        if (self::full()) {
+            throw new \RuntimeException(t('Limite de {n} images atteinte : supprime celles qui ne servent plus.', ['n' => self::MAX_ITEMS]));
+        }
         if (filesize($tmp) > self::MAX_BYTES) {
             throw new \RuntimeException(t('Image trop lourde (20 Mo maximum).'));
         }
@@ -133,6 +147,9 @@ final class Media
         if ($w < 1 || $h < 1 || $w * $h > self::MAX_PIXELS) {
             throw new \RuntimeException(t('Dimensions d’image invalides ou trop grandes (40 mégapixels maximum).'));
         }
+        if ($type === IMAGETYPE_JPEG && self::scans($tmp) > self::MAX_SCANS) {
+            throw new \RuntimeException(t('Image illisible ou corrompue.'));
+        }
         $ext = $types[$type];
         $folder = date('Y/m');
         Store::ensureDir(self::dir() . '/' . $folder);
@@ -143,11 +160,21 @@ final class Media
             }
         }
         $base = substr(slugify(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'image', 0, 60);
-        $name = $base;
         $prefix = self::dir() . '/' . $folder . '/';
-        for ($n = 2; glob($prefix . $name . '.*') || glob($prefix . $name . '-*'); $n++) {
-            $name = $base . '-' . $n;
-        }
+        // Nom choisi puis réservé (fichier vide) sous verrou : deux envois simultanés n'écrivent jamais les mêmes fichiers.
+        // « x-og » n'est jamais donné quand « x » existe : c'est le nom de l'image de partage de « x » (og()).
+        $name = (string) Store::locked(static function () use ($prefix, $base, $ext): string {
+            $name = $base;
+            for ($n = 2; glob($prefix . $name . '.*') || glob($prefix . $name . '-*')
+                || (str_ends_with($name, '-og') && glob($prefix . substr($name, 0, -3) . '.*')); $n++) {
+                $name = $base . '-' . $n;
+            }
+            $h = @fopen($prefix . $name . '.' . $ext, 'x');
+            if ($h !== false) {
+                fclose($h);
+            }
+            return $name;
+        });
         $record = [
             'id' => random_id(),
             'file' => $folder . '/' . $name,
@@ -162,10 +189,19 @@ final class Media
         ];
         $target = self::dir() . '/' . $record['file'];
         $animated = $type === IMAGETYPE_GIF && self::animated($tmp);
-        if (self::gd() && !$animated) {
-            $record = self::process($tmp, $type, $target, $record);
-        } elseif (@file_put_contents($target . '.' . $ext, self::raw($tmp, $type)) === false) {
-            throw new \RuntimeException(t("Impossible d'enregistrer l'image : vérifie les droits du dossier media."));
+        try {
+            if (self::gd() && !$animated) {
+                $record = self::process($tmp, $type, $target, $record);
+            } elseif (@file_put_contents($target . '.' . $ext, self::raw($tmp, $type)) === false) {
+                throw new \RuntimeException(t("Impossible d'enregistrer l'image : vérifie les droits du dossier media."));
+            }
+        } finally {
+            // Réservation restée vide (envoi refusé, ou image enregistrée sous une autre extension) : retirée.
+            $reserved = $target . '.' . $ext;
+            clearstatcache(true, $reserved);
+            if (is_file($reserved) && filesize($reserved) === 0) {
+                @unlink($reserved);
+            }
         }
         $record['bytes'] = (int) @filesize($target . '.' . $record['ext']);
         Store::locked(function () use ($record): void {
@@ -361,6 +397,18 @@ final class Media
         return null;
     }
 
+    /** Nombre de passes d'un JPEG (marqueurs SOS ; dans les données compressées, un octet 0xFF est toujours suivi de 0x00). */
+    private static function scans(string $file): int
+    {
+        $h = @fopen($file, 'rb');
+        if ($h === false) {
+            return 0;
+        }
+        $data = (string) stream_get_contents($h);
+        fclose($h);
+        return substr_count($data, "\xFF\xDA");
+    }
+
     private static function animated(string $file): bool
     {
         $data = (string) @file_get_contents($file, false, null, 0, 1048576);
@@ -508,7 +556,12 @@ final class Media
         if (!$m) {
             return;
         }
-        $files = [self::url($m), '/media/' . $m['file'] . '-og.jpg'];
+        $files = [self::url($m)];
+        // L'image de partage, sauf si ce nom est celui d'une autre image (envoyée sous le nom « x-og » avant que ce nom soit réservé).
+        $og = '/media/' . $m['file'] . '-og.jpg';
+        if (!array_filter((array) Store::read('media', []), fn ($x) => is_array($x) && isset($x['file'], $x['ext']) && self::url($x) === $og)) {
+            $files[] = $og;
+        }
         foreach ($m['webp'] ?? [] as $width) {
             $files[] = self::webpUrl($m, (int) $width);
         }
