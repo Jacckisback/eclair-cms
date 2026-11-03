@@ -199,18 +199,23 @@ final class Auth
     }
 
     /**
-     * Ouvre la session. Refuse si le compte a changé depuis la vérification du mot de passe
-     * (mot de passe, déconnexion générale, rôle, suppression) : une connexion lente ne peut rien annuler.
+     * Ouvre la session, juste après une vérification du mot de passe (connexion, changement de mot de passe,
+     * installation) : c'est elle qui date la session (born) et la confirmation du mot de passe (sudo).
+     * Refuse si le compte a changé depuis la vérification (mot de passe, déconnexion générale, rôle, suppression,
+     * double authentification activée) : une connexion lente ne peut rien annuler.
      */
     public static function login(array $user): bool
     {
         $now = time();
         $ip = Req::ip();
         $ok = false;
+        // Navigateur de confiance pour le compte tel qu'il était (changement de mot de passe) : il le reste.
+        $device = self::$user !== null && (string) self::$user['id'] === (string) $user['id'] ? self::device(self::$user) : '';
         $saved = Users::update((string) $user['id'], function (array $u) use ($user, $now, $ip, &$ok): ?array {
             if (!hash_equals((string) $u['pass'], (string) $user['pass'])
                 || (int) ($u['ver'] ?? 1) !== (int) ($user['ver'] ?? 1)
-                || $u['role'] !== $user['role']) {
+                || $u['role'] !== $user['role']
+                || !empty($u['totp']['on']) !== !empty($user['totp']['on'])) {
                 return null;
             }
             $u['last_login'] = $now;
@@ -232,7 +237,7 @@ final class Auth
         self::$user = $saved;
         self::$checked = true;
         Log::security('login', ['email' => $saved['email']]);
-        self::trustDevice($saved);
+        self::trustDevice($saved, $device);
         // Simple indicateur (ni secret, ni adresse de l'administration) pour le bouton « Modifier » du site.
         setcookie('eclair_edit', '1', [
             'expires' => 0,
@@ -367,15 +372,16 @@ final class Auth
         if (!$user || !is_string($raw) || !preg_match('/^([a-f0-9]{32})\.([a-f0-9]{32})$/', $raw, $m)) {
             return '';
         }
-        return hash_equals(self::deviceSig((string) $user['id'], $m[1]), $m[2]) ? $m[1] : '';
+        return hash_equals(self::deviceSig($user, $m[1]), $m[2]) ? $m[1] : '';
     }
 
-    private static function trustDevice(array $user): void
+    /** Cookie d'appareil de confiance ; $id : l'identifiant que ce navigateur gardait déjà (sinon le sien, ou un nouveau). */
+    private static function trustDevice(array $user, string $id = ''): void
     {
-        $id = self::device($user) ?: bin2hex(random_bytes(16));
+        $id = $id !== '' ? $id : (self::device($user) ?: bin2hex(random_bytes(16)));
         // Aussi sur la page d'autorisation du connecteur MCP, qui a sa propre connexion.
         foreach (['/' . Settings::get('admin_path'), '/_eclair/oauth'] as $path) {
-            setcookie(self::DEVICE, $id . '.' . self::deviceSig((string) $user['id'], $id), [
+            setcookie(self::DEVICE, $id . '.' . self::deviceSig($user, $id), [
                 'expires' => time() + 31536000,
                 'path' => Req::base() . $path,
                 'secure' => Req::isHttps(),
@@ -385,9 +391,14 @@ final class Auth
         }
     }
 
-    private static function deviceSig(string $uid, string $id): string
+    /**
+     * Signature liée à la version de session du compte et à son mot de passe : un nouveau mot de passe, « Déconnecter
+     * mes autres appareils », « Déconnecter tout le monde » ou une réinitialisation font oublier tous les appareils,
+     * comme les sessions (un ancien cookie ne vaut plus rien : l'appareil n'est simplement plus reconnu).
+     */
+    private static function deviceSig(array $user, string $id): string
     {
-        return substr(Keys::sign('device|' . $uid . '|' . $id), 0, 32);
+        return substr(Keys::sign('device|' . $user['id'] . '|' . (int) ($user['ver'] ?? 1) . '|' . hash('sha256', (string) $user['pass']) . '|' . $id), 0, 32);
     }
 
     /**
