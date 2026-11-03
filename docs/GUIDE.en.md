@@ -76,6 +76,8 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 ### 🔎 SEO
 
 - Clean URLs, **automatic 301 redirect** when an address changes, redirect manager (handy for taking over an old WordPress or Wix site).
+  - Addresses under `/.well-known/`, `/_eclair/` and `/__eclair/` can't be redirected. Exception: an administrator can redirect a `/.well-known/…` address such as `change-password`, but never `acme-challenge` or `pki-validation`. Old redirects from these addresses are marked “Disabled” and can be deleted (an administrator can recreate the ones that are allowed).
+  - Following a redirect no longer slows the site down, and usage counts stay visible.
 - Title, meta description and **live Google preview** in the editor, with counters.
 - **Real-time SEO analysis** with a score: title and description length, keyphrase (title, URL, introduction, subheadings, density), word count, structure, alt text, internal linking, featured image…
 - Complete **JSON-LD structured data**: WebSite (+ search), Organization / Person / LocalBusiness (address, opening hours, social profiles, return policy), WebPage / AboutPage / ContactPage, BlogPosting (author, dates, section), BreadcrumbList, FAQPage, ProfilePage, and for the shop, Product / ProductGroup / Offer (price, stock, shipping).
@@ -102,6 +104,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 - **Assisted internal links**: as you type a link, the editor suggests your pages and posts (internal linking in 2 seconds).
 - **Smart paste** from Word, Google Docs or a web page: headings, lists, tables and bold text become clean blocks.
 - `Ctrl+S` to save, local backup draft (nothing is lost if the connection drops), real preview before publishing, **history of the last 20 versions**, scheduled publishing.
+  - This backup draft belongs to the signed-in account and is erased when you log out: it's never offered to another account using the same browser. Backup drafts saved by 1.10.2 are erased after the update: save any open edits before updating.
 - **Visual mode**: the page as it actually looks with your theme, editable right there ([details](#visual-mode)).
 
 ### 🧩 Everything else
@@ -385,7 +388,7 @@ In a new piece of content (page, post or product), the **✨ Create with AI** bo
 2. The **estimated cost** is shown before you start (≈ $0.08 with Claude Sonnet 5.5, ≈ $0.16 with Claude Opus 5.5); it's taken from the assistant's budget. If you've saved both keys, you choose Claude or ChatGPT.
 3. After 20 to 60 seconds, the draft opens in **Visual mode**: title, URL, SEO title and meta description, “Key takeaways”, focus keyphrase and a layout in sections (hero, features, subheadings, lists, callouts, FAQ, buttons, team, contact form, latest posts or products), with a single H1: the hero's title.
 
-The AI relies on your editorial profile, the list of your published pages and posts (so that links point to pages that exist) and your 30 latest images. It makes up no facts: missing prices, figures, names or opening hours stay in the form **“[To complete: …]”**, counted by the Analysis tab until you fill them in. The draft is never published: review it, complete it, then publish it.
+The AI relies on your editorial profile, the list of your published pages and posts (so that links point to pages that exist) and your 30 latest images. It makes up no facts: missing prices, figures, names or opening hours stay in the form **“[To complete: …]”**, counted by the Analysis tab until you fill them in. The draft is never published: review it, complete it, then publish it. If the site already has 500 drafts, the box asks you to publish or delete some first, before spending anything.
 
 ### Touch-ups in the editor
 
@@ -412,11 +415,13 @@ You pay the provider for what you actually use. Éclair calculates each expense 
 
 An image costs about $0.05 (FLUX 3 at 1 megapixel: $0.048). Public prices taken from the official pages of [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing), [OpenAI](https://developers.openai.com/api/docs/pricing) and [Black Forest Labs](https://docs.bfl.ml/release-notes) on October 29, 2026; they may change. The assistant's fixed instructions are cached by the provider, which lowers the cost of follow-up requests.
 
-**Safeguards**: a maximum monthly budget ($10 by default), checked before each step of a request: once it's reached, the assistant stops until the following month. There's also a limit on requests per person per day (60 by default), and each person can run at most two requests at a time. The budget and quota are set in Settings › AI assistant.
+**Safeguards**: a maximum monthly budget ($10 by default), checked before each step of a request: once it's reached, the assistant stops until the following month. There's also a limit on requests per person per day (60 by default), and each person can run at most two requests at a time. Once the site has 500 drafts, the AI stops creating more: it asks you to publish or delete some first. The budget and quota are set in Settings › AI assistant.
 
 ### Security and privacy
 
 - **The AI prepares, you decide**: it can search and read your content, create drafts, edit a draft (undoable), suggest a change to published content and create images. It **cannot publish, delete, or touch the settings, menus or accounts**. Publishing always takes a human click.
+- **Drafts and suggestions checked**: the AI only edits content directly while it's still a draft; if it was published in the meantime, the AI prepares a suggestion instead. A suggestion becomes outdated as soon as the content changes, even within the same second, and applying it never publishes or unpublishes the content.
+- **Access rechecked during the request**: the assistant stops mid-request if the account is deleted, its password is reset or its AI access is removed.
 - **Encrypted keys** on your server (libsodium, or AES-256-GCM), never sent to the browser, never displayed (only a hint like “sk-ant…ab12” is shown), **excluded from backups**, as is the conversation history. For stronger protection, add `define('ECLAIR_SECRET', 'a-long-secret-phrase');` to `eclair-config.php` (do this before saving your keys).
 - **What goes to the provider**: your request, the images you attach, the editorial profile and the relevant context (the list of your pages and posts, the content open in the editor). Don't include sensitive data. According to their terms (checked on October 29, 2026), [Anthropic](https://www.anthropic.com/legal/commercial-terms) doesn't train its models on data sent through the API, and neither does [OpenAI](https://help.openai.com/en/articles/5722486-api-data-usage-policies) by default.
 - **Sanitized content**: everything the AI writes goes through the same allowlist as the editor, and its edits only touch the visible text (never a link's URL). Generated images are downloaded over HTTPS from a verified public address, then re-encoded just like an upload.
@@ -444,7 +449,7 @@ Would you rather work in **Claude** or **ChatGPT**, with the subscription you al
 3. Add it to your AI:
    - **Claude** (web and desktop app): *Customize › Connectors › Add › Add custom connector*, give it a name (“My site”), paste the URL, click **Continue**, keep the detected authentication settings, then click **Add**. On Team and Enterprise plans, an organization owner adds it; members then click **Connect**.
    - **ChatGPT** (on the web): *Plugins › + › Add custom MCP server*, give it a name, paste the URL under **Connection**, choose **OAuth** authentication, accept the warning, then click **Create as a plugin**.
-4. A page on your site opens: log in if needed (two-factor authentication included), check the app and its return URL (`claude.ai` or `chatgpt.com`), then click **Allow**.
+4. A page on your site opens: log in if needed (two-factor authentication included), check the app and its return URL (`claude.ai` or `chatgpt.com`), then click **Allow**. This button starts out grayed out: it turns on after a moment, when you move the mouse, touch the screen or use the keyboard (on a touch screen, the first tap turns it on and the second one authorizes).
 
 You're all set. Ask, for example: “Look at my site and give me 5 article ideas”, “Write a draft article about servicing an e-bike” or “Review my home page and suggest a more direct tagline”.
 
@@ -477,10 +482,11 @@ Each draft comes back with a link to **open it in Éclair**; each suggestion, wi
 
 - **Disabled by default**: as long as it is, none of its URLs respond.
 - **OAuth 2.1**: PKCE required, automatic app registration without storing anything, return URL checked for an exact match.
-- **Your explicit approval**, after you log in to your account (two-factor authentication included), on a page that never reveals your admin URL.
+- **Your explicit approval**, after you log in to your account (two-factor authentication included), on a page that never reveals your admin URL. For Claude and ChatGPT, it reminds you to accept only if you just started the connection yourself. For any other app, your password is always required, even right after logging in: if you log in on that page, you type it twice. **Deny** never asks for the password.
+- **Protected Allow button**: on every approval page, it starts out grayed out, only turns on after a moment and a gesture on the page, and turns off as soon as the window goes to the background. Without JavaScript, authorizing is impossible, and the page says so.
 - **One-hour tokens**, renewed automatically and replaced at each renewal; after 60 days without use, you have to give your approval again. Only their hashes are stored, excluded from backups.
 - **Revoke access**: one button per app in Settings › AI assistant. Turning off the connector cuts off all apps; so does changing your password or logging out all your devices.
-- **Same permissions as the built-in assistant**: editors only have access if “Editors can use the assistant” is checked; at most 60 changes per hour per app, to prevent loops.
+- **Same permissions as the built-in assistant**: editors only have access if “Editors can use the assistant” is checked; at most 60 changes per hour per app, to prevent loops (a strict limit, which no longer refills after 15 minutes); searches are limited to 200 characters.
 - **What goes to Anthropic or OpenAI**: the content the AI reads to answer you, under the terms of your subscription.
 
 ### If the connection fails
@@ -499,30 +505,35 @@ Each draft comes back with a link to **open it in Éclair**; each suggestion, wi
 **Data and server**
 - **No database**: SQL injection is impossible.
 - **Doubly protected data**: the `data/`, `app/` and `cache/` folders are blocked by `.htaccess`; every data file starts with `<?php exit; ?>` (even if a server ignored `.htaccess` files, nothing would be displayed) and no `<?php` sequence can ever be written into it. Private files (0600 permissions), atomic writes.
-- **Signed updates**: each version's announcement carries an Ed25519 signature from the maintainer, verified with the public key built into Éclair; the archive is checked (fingerprint, paths, manifest, PHP syntax) before anything changes, and the update undoes itself if the site stops responding (details in [One-click update](#one-click-update)).
+- **Writes always locked**: if the server can't lock its data (`data/.lock` unusable), Éclair refuses to save, with a clear message, instead of writing without protection; public pages stay online. An unusable lock file left behind by a move or a restore is recreated automatically when possible.
+- **Backups without secrets**: they never contain the encrypted vault (API keys, Google Drive token), sessions, limits or the update state, even when `ECLAIR_DATA` is written with a trailing slash. Backup ZIP files are private (0600 permissions).
+- **Signed updates**: each version's announcement carries an Ed25519 signature from the maintainer, verified with the public key built into Éclair, as well as a serial number and an expiry date that are signed too. An older, replayed announcement is refused and reported; an announcement not renewed for 180 days shows a warning; the site only says “You have the latest version of Éclair” after a successful check. The archive is checked (fingerprint, paths, manifest, PHP syntax) before anything changes, and the update undoes itself if the site stops responding (details in [One-click update](#one-click-update)).
 - **Protected installation**: it is only possible within 2 hours of the first visit, and the site address is only used to redirect visitors once it has been **verified by the server itself** (a wrong or tampered address hijacks nothing).
 
 **Login**
 - **Passwords** hashed with Argon2id (19 MiB, 2 passes: secure and bearable on shared hosting; bcrypt as a fallback), 10 characters minimum, common passwords refused.
-- **Brute-force protection**: each attempt is reserved before it is checked (the limit cannot be exceeded with parallel requests); limits per network (IPv4 address or /64 block in IPv6) and per targeted account. **Your usual device is never locked out** by an attacker who fails on purpose. At most two password checks at a time: a flood of requests cannot exhaust the memory.
-- **TOTP two-factor authentication** (Google Authenticator, 1Password, Bitwarden…) with a QR code and 8 recovery codes shown only once; each code works only once, even when sent in parallel; after 10 wrong codes, the account's 2FA is locked for 15 minutes and its owner is notified by email.
-- **Accounts updated atomically**: a login in progress can never undo a password change, a global logout, enabling 2FA, a demotion or a deletion.
-- **Password re-prompt** for sensitive actions (backups, connecting Google Drive, updates, account management, advanced settings, email change) more than 15 minutes after logging in. Temporary passwords must be replaced at first login.
-- **Hardened sessions**: no session before login (bots can't fill the disk), `HttpOnly`, `Secure`, `SameSite=Strict` cookies, regenerated at login, logout after inactivity, bound to the browser, “Log out my other devices”. The admin is forced onto HTTPS as soon as the site uses it.
+- **Brute-force protection**: each attempt is reserved before it is checked, and every limit is strict: never more attempts per period, even in parallel or after a lockout; limits per network (IPv4 address or /64 block in IPv6) and per targeted account. **Your usual device is never locked out** by an attacker who fails on purpose. At most two password checks at a time for unknown devices, plus one slot reserved for your usual devices and signed-in users: a flood of requests cannot exhaust the memory or keep you out.
+- **Usual devices**: a new password, “Log out my other devices” or “Log everyone out”, a password reset by an administrator and the FTP reset make the account forget its usual devices; the browser that makes the change stays recognized. After updating to 1.10.3, each device becomes a usual device again at its next successful login.
+- **TOTP two-factor authentication** (Google Authenticator, 1Password, Bitwarden…) with a QR code and 8 recovery codes shown only once; each code works only once, even when sent in parallel; after 10 wrong codes, the account's 2FA is locked for 15 minutes and its owner is notified by email. While it's on, it can no longer be set up again from the profile: to change phones, disable it with your current password, then enable it again. Enabling it asks for your password again if you logged in more than 15 minutes ago, and wrong setup codes are limited to 10 per 15 minutes. In **Users**, an administrator can no longer disable their **own** 2FA: they use **My profile**, which asks for the current password.
+- **Accounts updated atomically**: a login in progress can never undo a password change, a global logout, enabling 2FA, a demotion or a deletion. Two administrators deleting or demoting each other at the same moment can no longer leave the site without an administrator, and two accounts can never share the same login email.
+- **Password re-prompt** for sensitive actions (backups, connecting Google Drive, updates, account management, advanced settings, email change) more than 15 minutes after logging in. A wrong current password counts toward the same limit everywhere (changing the password in the profile, disabling 2FA, new backup codes, confirming sensitive actions): 10 attempts per 15 minutes. Temporary passwords must be replaced at first login.
+- **Hardened sessions**: no session before login (bots can't fill the disk), `HttpOnly`, `Secure`, `SameSite=Strict` cookies, regenerated at login, logout after inactivity, bound to the browser, “Log out my other devices” and “Log everyone out”. These two buttons no longer renew the password confirmation (15 minutes) or the session lifetime (48 hours), and a request still in progress can no longer undo a logout. The admin is forced onto HTTPS as soon as the site uses it.
 - **CSRF tokens** on every action and origin checks on requests.
 
 **Public site**
 - **Strict headers**: Content-Security-Policy (no inline scripts, SHA-256 hash for the style), anti-clickjacking, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, optional HSTS. They depend on the settings, never on the request: the cache cannot be poisoned.
 - **No open redirects**: crafted addresses (`/\example.com`, control characters…) return a 404.
-- **Content sanitized** with an allowlist (the HTML is parsed and then entirely rewritten); `javascript:` and `data:` links are impossible, even disguised (`javascript&colon;`). The Markdown, `llms.txt` and RSS versions stay inert.
-- **Contact form** without a captcha: honeypot field, token, 5 messages per network every 10 minutes and 100 per day for the whole site; the inbox is capped at 500 messages (spam goes first) and paginated.
+- **Content sanitized** with an allowlist (the HTML is parsed and then entirely rewritten); `javascript:` and `data:` links are impossible, even disguised (`javascript&colon;`). The Markdown, `llms.txt` and RSS versions stay inert: in the Markdown copies (`.md`, `llms.txt`, `llms-full.txt`), typed text can never become a link, an image or HTML. Its Markdown characters are escaped there (you may see `\[` in the raw file), and real links keep their checked address.
+- **Pages and cache**: a page being rendered while you unpublish content is never served from the cache afterwards. Public pages, `.md` versions, the RSS feed, `llms-full.txt`, the sitemap and the product feed never show content saved as a draft or scheduled. Deleting an account, or changing its display name or public profile, refreshes the cached pages. An author page only exists for an account with at least one published post.
+- **Contact form** without a captcha: honeypot field, token, 5 messages per network every 10 minutes and 100 per day for the whole site. These limits are strict: once the 100 messages are reached, the form refuses everyone until 24 hours after the first of them (before 1.10.3, it reopened after 6 hours). The inbox is capped at 500 messages (spam goes first) and paginated. An address containing double quotes, backslashes, spaces or line breaks is refused, here and everywhere an email address is typed.
 - **Images re-encoded on upload** (removes hidden payloads and EXIF/GPS data); animated GIFs rewritten block by block; any image containing code is refused; 40 megapixels maximum; SVGs refused, no scripts or file listing in `/media`.
 
 **Admin**
 - **Customizable admin URL** (fewer bots), administrator / editor roles; the site's “Edit” button doesn't reveal that URL.
-- **Tightly scoped Google Drive backups**: access limited to the files created by Éclair, encrypted and revocable token, never included in a backup; connecting requires confirming your password.
+- **Tightly scoped Google Drive backups**: access limited to the files created by Éclair, encrypted and revocable token, never included in a backup; connecting requires confirming your password and is tied to the session of the administrator who starts it: the code only shows there, and only within 15 minutes of entering the password. The Security page shows who connected it. If that account is deleted or is no longer an administrator, backups stop, the connection is removed and administrators are asked to connect it again.
 - **Bounded AI assistant**: drafts and suggestions only, API keys encrypted and excluded from backups, monthly budget and daily quota (details in [AI assistant](#security-and-privacy)).
-- **Bounded logs** (truncated fields, 1 MB maximum): they can't be inflated.
+- **Bounded logs** (truncated fields, at most 2 MB per log): they can't be inflated. A full log becomes the previous segment (`*-1.php`) instead of losing its older half; stored email addresses and browsers are cut at 100 characters. Anonymous login failures have their own file, `data/logs/login-failures.php`: a flood of attempts no longer pushes real events out of the security log. The Security page shows the latest real events and the latest anonymous failures.
+- **Generous limits**, so that a runaway AI, connector or account never fills up the site: at most 3,000 pieces of content (drafts included); the AI (assistant, MCP connector, “Create with AI”) stops creating drafts once the site has 500; 16 MB of published text in search (more than 1,500 long posts); 5,000 redirects, with addresses of up to 1,000 characters; 10,000 images; 1,000 categories. Existing content always stays editable, and a clear message says what to delete.
 - **Integrity check**: compares every file with its original fingerprint and flags suspicious files, including a `.php` file without the protection line in `data/` or `cache/`.
 - **Live protection test**: the Security page checks from your browser that internal files really are inaccessible, and that the site address is verified.
 
@@ -540,7 +551,10 @@ Starting with version 1.10, Éclair checks GitHub twice a day for a new version.
 
 Meanwhile, Éclair:
 
-- downloads the archive from GitHub and verifies the **signature** of its announcement: every version is signed with the maintainer's private key (Ed25519), which is never on GitHub. So a hacked repository isn't enough to push code to your site;
+- verifies the **signature** of the received announcement again, then downloads the archive from GitHub: every version is signed with the maintainer's private key (Ed25519), which is never on GitHub. So a hacked repository isn't enough to push code to your site. The signed announcement also carries a serial number and an expiry date:
+  - an older announcement, replayed by the channel, is refused: Éclair logs it and says so on the **Updates** page;
+  - an announcement that hasn't been renewed for 180 days shows a warning, but installing is still possible;
+  - “You have the latest version of Éclair” only appears after a successful check of a signed announcement that is still valid;
 - checks the archive's fingerprint, every file, and that your PHP version can read every PHP file, **before touching anything**;
 - sets the old version aside (`cache/update/previous`) and installs the new one in an instant: only `app/`, `assets/`, `index.php` and `.htaccess` change. Your content, images, accounts, settings and custom CSS (`data/`, `media/`) stay untouched;
 - checks that your site, your admin and the new version respond as before; if not, **it goes back on its own** to the old version.
@@ -552,6 +566,7 @@ Good to know:
 - A `.htaccess` that you've modified (or that your host has added to) is **kept**; the new template is saved in `cache/update/htaccess-<version>.txt` so you can compare them.
 - Éclair files edited by hand (theme…) are replaced by their new version: the Updates page lists them before installing. For a lasting tweak, use **Custom CSS** (Settings › Appearance).
 - If your host prevents the server from calling itself, Éclair installs the update without being able to check it, and tells you so: open your site to check it, and roll back if needed.
+- If the automatic rollback couldn't be completed, the page says so (“Rollback incomplete”) and tells you to put back the contents of `cache/update/previous` via FTP (see [Troubleshooting](#troubleshooting)).
 - One-click updates require the `sodium`, `zip` and `curl` PHP extensions, and folders that PHP can write to. Otherwise, the page explains what to fix, and you can still update via FTP.
 - The automatic check can be turned off in Settings › Advanced (the “Check now” button stays available).
 
@@ -563,7 +578,7 @@ Good to know:
 
 ### Back up
 
-**Download a backup**: Security › Download a backup, or from the Updates page. The ZIP archive contains `data/` (content, settings, accounts, messages) and `media/` (images). API keys and the Google Drive connection are never included. Without the zip extension, copy these two folders via FTP.
+**Download a backup**: Security › Download a backup, or from the Updates page. The ZIP archive contains `data/` (content, settings, accounts, messages) and `media/` (images). The encrypted vault (API keys, Google Drive connection), sessions and limits are never included, and the ZIP file is private on the server (0600 permissions). Without the zip extension, copy these two folders via FTP.
 
 ### Google Drive backups
 
@@ -578,14 +593,15 @@ Security › **Google Drive backups** sends a copy of your site to your Google D
 Then, to connect your Drive:
 
 1. Click **Connect Google Drive** (you may be asked for your password again).
-2. Éclair shows a code. Open **google.com/device** on your computer or phone, enter the code, choose your Google account and authorize Éclair.
+2. Éclair shows a code, only in the session that clicked **Connect Google Drive** and within 15 minutes of entering your password (otherwise, start the connection again). Open **google.com/device** on your computer or phone, enter the code, choose your Google account and authorize Éclair. Other administrators see that a connection is in progress, without the code.
 3. The page updates by itself: you're connected. Choose the frequency (every day, every week, or off) and how many backups to keep.
 
 - Éclair only has access **to the files it creates** (Google's “drive.file” permission): it can't see anything else in your Drive. Backups go into a folder named “Éclair – site name”.
 - Beyond the number you chose (8 by default), the oldest ones go to your Drive's **trash**.
 - **Back up now** starts an upload right away. Large sites are sent in 4 MB chunks: if your host limits execution time, the upload resumes where it left off (keep the page open, it carries on by itself).
 - Automatic backups run when an administrator opens the admin. To have them run even without a visit, copy the **scheduled task URL** (Security › Google Drive backups › Backups on a fixed schedule) into your host's scheduled task (cron) or into [cron-job.org](https://cron-job.org), to run every hour: it only starts a backup when one is due. Keep this URL to yourself.
-- The access token is encrypted on your server. **Disconnect Google Drive** revokes it; you can also remove access from your Google account ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Backups already sent stay in your Drive.
+- The card shows who connected the account (“connected by …”). If that administrator is deleted or demoted, the connection is removed and backups stop until an administrator reconnects Google Drive. A password change doesn't disconnect anything.
+- The access token is encrypted on your server. **Disconnect Google Drive** revokes it, and a new connection revokes the old one; you can also remove access from your Google account ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Backups already sent stay in your Drive.
 
 ### Restore a backup
 
@@ -608,11 +624,17 @@ your-address@example.com
 YourNewPassword2026
 ```
 
-Within 24 hours, **log in with that email and that new password**: the password is replaced, two-factor authentication for that account is turned off, your other sessions are closed and the file is deleted automatically. Nobody else can trigger it (they would need to know its contents); a file without the first line is refused and deleted.
+Replace the example on the third line with your own new password (at least 10 characters): copied as is, it's refused.
+
+Within 24 hours, **log in with that email and that new password**: the password is replaced, two-factor authentication for that account is turned off, your other sessions are closed and the file is deleted automatically. Nobody else can trigger it (they would need to know its contents); a file without the first line, or dated more than one hour in the future, is refused and deleted.
+
+**“The server is very busy” at every login**: if the message persists while nobody is attacking your site, one of the `data/.login-N.lock` files may be unusable: delete them via FTP (Éclair recreates them).
 
 **The admin no longer loads after an update** (rare: Éclair goes back on its own when it can check the site): via FTP, replace the `app/` and `assets/` folders with the ones in `cache/update/previous/`, then copy `cache/update/previous/index.php.txt` to the root under the name `index.php`.
 
 **“One-click update isn’t possible on this server”**: the Updates page says why (missing PHP extension, folder not writable, PHP version too old). Fix this with your host, or update via FTP.
+
+**“Update notice expired” or “update notice older… ignored” (Updates page)**: the site is fine; it keeps the newest announcement it knows. If it lasts more than a day, check the [project page on GitHub](https://github.com/Jacckisback/eclair-cms).
 
 **Google Drive: “Google Drive access revoked”**: the authorization was withdrawn from the Google account (or has expired). Click **Connect Google Drive**: the same folder is reused.
 
@@ -623,6 +645,10 @@ Within 24 hours, **log in with that email and that new password**: the password 
 **404 error on every page except the home page**: the `.htaccess` file wasn't uploaded (hidden file) or URL rewriting is disabled. If your host requires it, uncomment the `RewriteBase /` line in `.htaccess`.
 
 **500 error right after uploading**: your host rejects a `.htaccess` directive (very rare: only directives accepted everywhere are used). Remove the block in question or contact your host.
+
+**“Cannot save: the data lock (data/.lock) is not working…”**: delete `data/.lock` via FTP (Éclair recreates it), or ask your host whether file locking (flock) is available. The `data/` folder must be on local storage where file locking works.
+
+**“Fichier des clés data/keys.php illisible”** (this technical message is in French: the key file can't be read): fix its permissions via FTP. Don't delete it unless you're ready to enter your API keys again and reconnect Google Drive: deleting it also logs everyone out and forgets usual devices.
 
 **Images aren't converted to WebP**: the GD extension (or its WebP support) is missing. Enable it in your host's PHP panel; in the meantime, images stay in JPG/PNG.
 
@@ -638,7 +664,7 @@ Within 24 hours, **log in with that email and that new password**: the password 
 location ~ ^/(app|data|cache)(/|$) { return 404; }
 location ~ /\.(?!well-known/) { return 404; }
 location ^~ /media/ {
-    location ~* \.(php\d?|phtml|phar|s?html?|svgz?|xml|js)$ { return 404; }
+    location ~* \.(php\d?|phtml|phar|inc|pl|py|cgi|sh|asp|aspx|jsp|s?html?|xht(ml)?|svgz?|xml|m?js)$ { return 404; }
     add_header X-Content-Type-Options nosniff;
     expires 1y;
 }
@@ -679,19 +705,37 @@ tests/mcp.php            MCP connector (OAuth, PKCE, protocol, revocation) and c
 tests/design.php         art directions (contrast, CSS, fonts, booby-trapped settings, AI) and Design score
 tests/update.php         one-click update (fake signed channel: signature, booby-trapped archive, syntax, automatic and manual rollback)
 tests/drive.php          Google Drive backups (tests/fake-google.php: fake OAuth and fake Drive, chunked upload, resume)
+tests/sec-*.php          1.10.3 security regression tests
 tests/fixtures/          reference sites and a fingerprint of their public rendering (a new version doesn't change a single byte of the site)
 tools/router.php         router for PHP's built-in server (development)
 tools/capture.php        reference capture of the public rendering, and Lighthouse measurements (--lighthouse)
 tools/build.php          integrity fingerprints + dist/eclair-cms-<version>.zip archive (compacted PHP, compressed admin views, minified admin JS and CSS) + signed dist/latest.json announcement
+tools/announce.php       signs and verifies the update announcement (used by build.php and the tests)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # development server
-php tests/run.php                                  # 609 unit and HTTP checks; ECLAIR_TEST_ROOT=… to test an unzipped archive
+php tests/run.php                                  # tests (unit + HTTP); ECLAIR_TEST_ROOT=… to test an unzipped archive
 php tools/build.php                                # ready-to-ship archive
 ```
 
+**Tests.** The full suite takes about 50 seconds. Don't run two suites at the same time on the same machine.
+
 **Publishing a release.** `tools/build.php` signs the `dist/latest.json` announcement (version, URL, size and SHA-256 of the archive) with the maintainer's Ed25519 private key, read from the `ECLAIR_SIGNING_KEY` environment variable (base64, 64 bytes); it refuses a key that doesn't match the public key in `app/lib/Update.php`. The credentials of the Google app used for backups are written into the archive from `ECLAIR_GOOGLE_CLIENT_ID` and `ECLAIR_GOOGLE_CLIENT_SECRET` (client type “TVs and Limited Input devices” in the Google Cloud console, `drive.file` scope). None of these values are in the repository.
+
+The announcement carries two signatures from the same key: the original one, read by sites on 1.10.0 to 1.10.2, and a “v2” signature that also covers a serial number and an expiry date 180 days out. Before it expires, even without a new release, the maintainer re-signs the channel with a single command:
+
+```bash
+ECLAIR_SIGNING_KEY=… php tools/build.php --resign
+```
+
+To withdraw a release, announce an older archive again (already in `dist/`) with a higher serial number:
+
+```bash
+ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<version>
+```
+
+A signed release can only be built in a Git checkout and only includes tracked files; the source commit is recorded in the manifest. Translation sources (`i18n/*.php`) must stay plain arrays of literal strings: they are read as data, never executed.
 
 **Fork or self-hosted install.** In `eclair-config.php`: `ECLAIR_UPDATE_URL` and `ECLAIR_UPDATE_KEY` (base64) for your own signed update channel; `ECLAIR_GOOGLE_CLIENT_ID` and `ECLAIR_GOOGLE_CLIENT_SECRET` for your own Google app.
 

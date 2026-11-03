@@ -76,6 +76,8 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 ### 🔎 SEO
 
 - Saubere URLs, **automatische 301-Weiterleitung**, wenn sich eine Adresse ändert, Weiterleitungsmanager (praktisch, um eine alte WordPress- oder Wix-Website zu übernehmen).
+  - Adressen unter `/.well-known/`, `/_eclair/` und `/__eclair/` lassen sich nicht weiterleiten. Ausnahme: Ein Administrator kann eine `/.well-known/…`-Adresse wie `change-password` weiterleiten, aber nie `acme-challenge` oder `pki-validation`. Alte Weiterleitungen von diesen Adressen sind als „Deaktiviert“ markiert und lassen sich löschen (ein Administrator kann die erlaubten neu anlegen).
+  - Weiterleitungen bremsen die Website nicht mehr aus, und die Zahl der Aufrufe bleibt sichtbar.
 - Titel, Meta-Beschreibung und **Live-Vorschau in Google** im Editor, mit Zeichenzählern.
 - **SEO-Analyse in Echtzeit** mit Score: Länge von Titel und Beschreibung, Fokus-Keyphrase (Titel, URL, Einleitung, Zwischenüberschriften, Dichte), Wortanzahl, Struktur, Alternativtexte, interne Verlinkung, Beitragsbild …
 - Vollständige **strukturierte Daten in JSON-LD**: WebSite (+ Suche), Organization / Person / LocalBusiness (Adresse, Öffnungszeiten, Social-Media-Profile, Rückgabebedingungen), WebPage / AboutPage / ContactPage, BlogPosting (Autor, Daten, Rubrik), BreadcrumbList, FAQPage, ProfilePage sowie für den Shop Product / ProductGroup / Offer (Preis, Lagerbestand, Versand).
@@ -102,6 +104,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 - **Unterstützte interne Links**: Während du einen Link eingibst, schlägt der Editor deine Seiten und Artikel vor (interne Verlinkung in 2 Sekunden).
 - **Intelligentes Einfügen** aus Word, Google Docs oder einer Webseite: Überschriften, Listen, Tabellen und Fettdruck werden zu sauberen Blöcken.
 - Speichern mit `Strg+S`, lokaler Sicherungsentwurf (nichts geht verloren, wenn die Verbindung abbricht), echte Vorschau vor dem Veröffentlichen, **Verlauf der letzten 20 Versionen**, geplante Veröffentlichung.
+  - Dieser Sicherungsentwurf gehört zum angemeldeten Konto und wird beim Abmelden gelöscht: Einem anderen Konto im selben Browser wird er nie angeboten. Sicherungsentwürfe aus 1.10.2 werden nach dem Update gelöscht: Speichere offene Änderungen, bevor du aktualisierst.
 - **Visueller Modus**: die Seite so, wie sie in deinem Theme aussieht, direkt dort bearbeitbar ([Details](#visueller-modus)).
 
 ### 🧩 Alles Weitere
@@ -385,7 +388,7 @@ In einem neuen Inhalt (Seite, Beitrag oder Produkt) stellt der Bereich **✨ Mit
 2. Die **geschätzten Kosten** werden vor dem Start angezeigt (≈ 0,08 $ mit Claude Sonnet 5.5, ≈ 0,16 $ mit Claude Opus 5.5); sie werden vom Budget des Assistenten abgezogen. Wenn du beide Schlüssel gespeichert hast, wählst du Claude oder ChatGPT.
 3. Nach 20 bis 60 Sekunden öffnet sich der Entwurf im **visuellen Modus**: Titel, Adresse, SEO-Titel und Meta-Beschreibung, „Das Wichtigste“, Fokus-Keyphrase und ein Layout aus Abschnitten (Hero, Vorteile, Zwischenüberschriften, Listen, Hinweisboxen, FAQ, Buttons, Team, Kontaktformular, neueste Beiträge oder Produkte), mit einer einzigen H1: dem Titel des Hero-Blocks.
 
-Die KI stützt sich auf dein Redaktionsprofil, die Liste deiner veröffentlichten Seiten und Beiträge (damit die Links auf Seiten zeigen, die es wirklich gibt) und deine 30 neuesten Bilder. Sie erfindet keine Fakten: Fehlende Preise, Zahlen, Namen oder Öffnungszeiten bleiben als **„[Zu ergänzen: …]“** stehen und werden vom Tab „Analyse“ gezählt, bis du sie ausfüllst. Der Entwurf wird nie veröffentlicht: Lies ihn durch, ergänze ihn und veröffentliche ihn dann.
+Die KI stützt sich auf dein Redaktionsprofil, die Liste deiner veröffentlichten Seiten und Beiträge (damit die Links auf Seiten zeigen, die es wirklich gibt) und deine 30 neuesten Bilder. Sie erfindet keine Fakten: Fehlende Preise, Zahlen, Namen oder Öffnungszeiten bleiben als **„[Zu ergänzen: …]“** stehen und werden vom Tab „Analyse“ gezählt, bis du sie ausfüllst. Der Entwurf wird nie veröffentlicht: Lies ihn durch, ergänze ihn und veröffentliche ihn dann. Hat die Website bereits 500 Entwürfe, bittet dich der Bereich zuerst, einige zu veröffentlichen oder zu löschen, bevor etwas ausgegeben wird.
 
 ### Feinschliff im Editor
 
@@ -412,11 +415,13 @@ Du bezahlst den Anbieter nach tatsächlicher Nutzung. Éclair berechnet jede Aus
 
 Ein Bild kostet etwa 0,05 $ (FLUX 3 mit 1 Megapixel: 0,048 $). Öffentliche Preise laut den offiziellen Seiten von [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing), [OpenAI](https://developers.openai.com/api/docs/pricing) und [Black Forest Labs](https://docs.bfl.ml/release-notes), Stand: 29. Oktober 2026; sie können sich ändern. Die festen Anweisungen des Assistenten werden beim Anbieter zwischengespeichert, was die Kosten der folgenden Anfragen senkt.
 
-**Leitplanken**: ein maximales Monatsbudget (standardmäßig 10 $), das vor jedem Schritt einer Anfrage geprüft wird: Ist es erreicht, pausiert der Assistent bis zum nächsten Monat. Dazu kommen ein Limit für Anfragen pro Person und Tag (standardmäßig 60) und höchstens zwei gleichzeitige Anfragen pro Person. Budget und Tageslimit stellst du unter Einstellungen › KI-Assistent ein.
+**Leitplanken**: ein maximales Monatsbudget (standardmäßig 10 $), das vor jedem Schritt einer Anfrage geprüft wird: Ist es erreicht, pausiert der Assistent bis zum nächsten Monat. Dazu kommen ein Limit für Anfragen pro Person und Tag (standardmäßig 60) und höchstens zwei gleichzeitige Anfragen pro Person. Sobald die Website 500 Entwürfe hat, erstellt die KI keine weiteren: Sie bittet dich zuerst, einige zu veröffentlichen oder zu löschen. Budget und Tageslimit stellst du unter Einstellungen › KI-Assistent ein.
 
 ### Sicherheit und Datenschutz
 
 - **Die KI bereitet vor, du entscheidest**: Sie kann deine Inhalte durchsuchen und lesen, Entwürfe erstellen, einen Entwurf ändern (lässt sich rückgängig machen), eine Änderung an einem veröffentlichten Inhalt vorschlagen und Bilder erstellen. Sie kann **weder veröffentlichen noch löschen noch Einstellungen, Menüs oder Konten ändern**. Veröffentlichen bleibt der Klick eines Menschen.
+- **Entwürfe und Vorschläge geprüft**: Die KI ändert einen Inhalt nur direkt, solange er noch ein Entwurf ist; wurde er inzwischen veröffentlicht, bereitet sie stattdessen einen Vorschlag vor. Ein Vorschlag veraltet, sobald sich der Inhalt ändert, selbst in derselben Sekunde, und seine Übernahme ändert nie, ob der Inhalt veröffentlicht ist.
+- **Zugriff während der Anfrage erneut geprüft**: Der Assistent bricht mitten in einer Anfrage ab, wenn das Konto gelöscht, sein Passwort zurückgesetzt oder sein KI-Zugang entzogen wird.
 - **Verschlüsselte API-Schlüssel** auf deinem Server (libsodium oder AES-256-GCM), nie an den Browser gesendet, nie angezeigt (nur ein Hinweis wie „sk-ant…ab12“), und wie der Unterhaltungsverlauf **von Backups ausgeschlossen**. Für stärkeren Schutz füge `define('ECLAIR_SECRET', 'ein-langer-geheimer-satz');` in `eclair-config.php` ein (und zwar bevor du deine Schlüssel speicherst).
 - **Was an den Anbieter geht**: deine Anfrage, die Bilder, die du anhängst, das Redaktionsprofil und der nötige Kontext (Liste deiner Seiten und Artikel, der im Editor geöffnete Inhalt). Gib deshalb keine sensiblen Daten ein. Laut ihren Bedingungen (geprüft am 29. Oktober 2026) trainiert [Anthropic](https://www.anthropic.com/legal/commercial-terms) seine Modelle nicht mit Daten, die per API gesendet werden, und [OpenAI](https://help.openai.com/en/articles/5722486-api-data-usage-policies) standardmäßig ebenfalls nicht.
 - **Bereinigte Inhalte**: Alles, was die KI schreibt, durchläuft dieselbe Allowlist wie der Editor, und ihre Überarbeitungen betreffen nur den sichtbaren Text (nie die Adresse eines Links). Erzeugte Bilder werden per HTTPS von einer geprüften öffentlichen Adresse heruntergeladen und dann wie ein Upload neu kodiert.
@@ -444,7 +449,7 @@ Du arbeitest lieber in **Claude** oder **ChatGPT**, mit dem Abo, das du schon ha
 3. Füge sie in deiner KI hinzu:
    - **Claude** (Web und Desktop-App): *Anpassen › Connectors › Hinzufügen › Benutzerdefinierten Connector hinzufügen*, gib einen Namen ein („Meine Website“), füge die Adresse ein, klicke auf **Weiter**, übernimm die erkannten Authentifizierungseinstellungen und klicke dann auf **Hinzufügen**. Bei den Tarifen Team und Enterprise fügt ihn ein Inhaber der Organisation hinzu; die Mitglieder klicken danach auf **Verbinden**.
    - **ChatGPT** (im Web): *Plugins › + › Benutzerdefinierten MCP-Server hinzufügen*, gib einen Namen ein, füge die Adresse unter **Verbindung** ein, wähle die Authentifizierung **OAuth**, akzeptiere den Warnhinweis und erstelle dann das Plugin.
-4. Eine Seite deiner Website öffnet sich: Melde dich bei Bedarf an (Zwei-Faktor-Authentifizierung inklusive), prüfe die App und ihre Rücksprungadresse (`claude.ai` oder `chatgpt.com`) und klicke dann auf **Erlauben**.
+4. Eine Seite deiner Website öffnet sich: Melde dich bei Bedarf an (Zwei-Faktor-Authentifizierung inklusive), prüfe die App und ihre Rücksprungadresse (`claude.ai` oder `chatgpt.com`) und klicke dann auf **Erlauben**. Diese Schaltfläche ist zunächst ausgegraut: Sie wird nach einem Moment aktiv, sobald du die Maus bewegst, den Bildschirm berührst oder die Tastatur benutzt (auf einem Touchscreen aktiviert das erste Tippen sie, das zweite erteilt die Erlaubnis).
 
 Fertig. Frag zum Beispiel: „Sieh dir meine Website an und schlag mir 5 Artikelideen vor“, „Schreib als Entwurf einen Artikel über die Wartung eines E-Bikes“ oder „Lies meine Startseite durch und schlag einen direkteren Aufhänger vor“.
 
@@ -477,10 +482,11 @@ Jeder Entwurf kommt mit einem Link zurück, um ihn **in Éclair zu öffnen**; je
 
 - **Standardmäßig deaktiviert**: Solange er es ist, antwortet keine seiner Adressen.
 - **OAuth 2.1**: PKCE verpflichtend, automatische Registrierung der App, ohne etwas zu speichern, Rücksprungadresse auf exakte Übereinstimmung geprüft.
-- **Deine ausdrückliche Zustimmung**, nachdem du dich bei deinem Konto angemeldet hast (Zwei-Faktor-Authentifizierung inklusive), auf einer Seite, die die Adresse deiner Verwaltung nie verrät.
+- **Deine ausdrückliche Zustimmung**, nachdem du dich bei deinem Konto angemeldet hast (Zwei-Faktor-Authentifizierung inklusive), auf einer Seite, die die Adresse deiner Verwaltung nie verrät. Bei Claude und ChatGPT erinnert sie dich daran, nur zuzustimmen, wenn du die Verbindung gerade selbst gestartet hast. Bei jeder anderen App wird immer dein Passwort verlangt, auch direkt nach der Anmeldung: Meldest du dich auf dieser Seite an, gibst du es also zweimal ein. **Ablehnen** verlangt nie das Passwort.
+- **Geschützte Schaltfläche „Erlauben“**: Auf jeder Zustimmungsseite ist sie anfangs ausgegraut, wird erst nach einem Moment und einer Geste auf der Seite aktiv und deaktiviert sich, sobald das Fenster in den Hintergrund rückt. Ohne JavaScript ist keine Erlaubnis möglich, und die Seite sagt das.
 - **Tokens mit einer Stunde Gültigkeit**, automatisch erneuert und bei jeder Erneuerung ersetzt; nach 60 Tagen ohne Nutzung musst du erneut zustimmen. Gespeichert werden nur ihre Hashes, von Backups ausgeschlossen.
 - **Zugriff entziehen**: eine Schaltfläche pro App unter Einstellungen › KI-Assistent. Wenn du den Connector deaktivierst, verlieren alle Apps den Zugriff; ebenso, wenn du dein Passwort änderst oder alle deine Geräte abmeldest.
-- **Dieselben Rechte wie der integrierte Assistent**: Redakteure haben nur Zugriff, wenn „Redakteure dürfen den Assistenten nutzen“ aktiviert ist; höchstens 60 Änderungen pro Stunde und App, gegen Endlosschleifen.
+- **Dieselben Rechte wie der integrierte Assistent**: Redakteure haben nur Zugriff, wenn „Redakteure dürfen den Assistenten nutzen“ aktiviert ist; höchstens 60 Änderungen pro Stunde und App, gegen Endlosschleifen (ein strenges Limit, das sich nicht mehr nach 15 Minuten wieder auffüllt); Suchanfragen sind auf 200 Zeichen begrenzt.
 - **Was an Anthropic oder OpenAI geht**: die Inhalte, die die KI liest, um dir zu antworten, gemäß den Bedingungen deines Abos.
 
 ### Wenn die Verbindung scheitert
@@ -499,30 +505,35 @@ Jeder Entwurf kommt mit einem Link zurück, um ihn **in Éclair zu öffnen**; je
 **Daten und Server**
 - **Keine Datenbank**: SQL-Injection ist unmöglich.
 - **Doppelt geschützte Daten**: Die Ordner `data/`, `app/` und `cache/` sind per `.htaccess` gesperrt; jede Datendatei beginnt mit `<?php exit; ?>` (selbst wenn ein Server `.htaccess`-Dateien ignorieren würde, wird nichts angezeigt), und keine `<?php`-Sequenz kann hineingeschrieben werden. Private Dateien (Rechte 0600), atomare Schreibvorgänge.
-- **Signierte Updates**: Die Ankündigung jeder Version trägt eine Ed25519-Signatur des Maintainers, die mit dem in Éclair hinterlegten öffentlichen Schlüssel geprüft wird; das Archiv wird vor jeder Änderung kontrolliert (Fingerabdruck, Pfade, Manifest, PHP-Syntax), und das Update macht sich von selbst rückgängig, wenn die Website nicht mehr antwortet (Details im Abschnitt [Update mit einem Klick](#update-mit-einem-klick)).
+- **Schreiben immer mit Sperre**: Kann der Server seine Daten nicht sperren (`data/.lock` unbrauchbar), verweigert Éclair das Speichern mit einer klaren Meldung, statt ohne Schutz zu schreiben; die öffentlichen Seiten bleiben online. Eine unbrauchbare Sperrdatei, die ein Umzug oder eine Wiederherstellung hinterlassen hat, wird nach Möglichkeit automatisch neu angelegt.
+- **Backups ohne Geheimnisse**: Sie enthalten nie den verschlüsselten Tresor (API-Schlüssel, Google-Drive-Token), die Sitzungen, die Limits oder den Update-Status, auch wenn `ECLAIR_DATA` mit einem abschließenden Schrägstrich geschrieben ist. Die ZIP-Dateien der Backups sind privat (Rechte 0600).
+- **Signierte Updates**: Die Ankündigung jeder Version trägt eine Ed25519-Signatur des Maintainers, die mit dem in Éclair hinterlegten öffentlichen Schlüssel geprüft wird, dazu eine ebenfalls signierte Seriennummer und ein Ablaufdatum. Eine ältere, erneut eingespielte Ankündigung wird abgelehnt und gemeldet; eine Ankündigung, die 180 Tage lang nicht erneuert wurde, zeigt eine Warnung; „Du hast die neueste Version von Éclair“ erscheint nur nach einer erfolgreichen Prüfung. Das Archiv wird vor jeder Änderung kontrolliert (Fingerabdruck, Pfade, Manifest, PHP-Syntax), und das Update macht sich von selbst rückgängig, wenn die Website nicht mehr antwortet (Details im Abschnitt [Update mit einem Klick](#update-mit-einem-klick)).
 - **Geschützte Installation**: Sie ist nur innerhalb von 2 Stunden nach dem ersten Aufruf möglich, und die Adresse der Website wird erst dann für Weiterleitungen genutzt, wenn sie **vom Server selbst geprüft** wurde (eine falsche oder manipulierte Adresse leitet nichts um).
 
 **Anmeldung**
 - **Passwörter** mit Argon2id gehasht (19 MiB, 2 Durchläufe: sicher und auf Shared Hosting gut tragbar; bcrypt als Ausweichlösung), mindestens 10 Zeichen, gängige Passwörter werden abgelehnt.
-- **Brute-Force-Schutz**: Jeder Versuch wird reserviert, bevor er geprüft wird (das Limit lässt sich auch mit parallelen Anfragen nicht überschreiten); Limits pro Netzwerk (IPv4-Adresse bzw. /64-Block bei IPv6) und pro angegriffenem Konto. **Dein gewohntes Gerät wird nie ausgesperrt**, auch nicht von einem Angreifer, der absichtlich falsche Passwörter eingibt. Höchstens zwei Passwortprüfungen gleichzeitig: Eine Flut von Anfragen kann den Speicher nicht erschöpfen.
-- **Zwei-Faktor-Authentifizierung per TOTP** (Google Authenticator, 1Password, Bitwarden …) mit QR-Code und 8 Wiederherstellungscodes, die nur einmal angezeigt werden; jeder Code funktioniert nur einmal, auch bei parallelen Anfragen; nach 10 falschen Codes wird die 2FA des Kontos 15 Minuten lang gesperrt und der Inhaber per E-Mail benachrichtigt.
-- **Konten werden atomar geändert**: Eine laufende Anmeldung kann niemals eine Passwortänderung, eine allgemeine Abmeldung, die Aktivierung der 2FA, eine Herabstufung oder eine Löschung rückgängig machen.
-- **Erneute Passwortabfrage** bei sensiblen Aktionen (Backup, Verbindung mit Google Drive, Update, Kontoverwaltung, erweiterte Einstellungen, Änderung der E-Mail-Adresse), wenn die Anmeldung mehr als 15 Minuten zurückliegt. Vorläufige Passwörter müssen bei der ersten Anmeldung ersetzt werden.
-- **Gehärtete Sitzungen**: keine Sitzung vor der Anmeldung (Bots können die Festplatte nicht füllen), Cookies mit `HttpOnly`, `Secure`, `SameSite=Strict`, Neuerzeugung bei der Anmeldung, Abmeldung bei Inaktivität, an den Browser gebunden, „Meine anderen Geräte abmelden“. Die Verwaltung wird auf HTTPS gezwungen, sobald die Website es nutzt.
+- **Brute-Force-Schutz**: Jeder Versuch wird reserviert, bevor er geprüft wird, und jedes Limit ist streng: nie mehr Versuche pro Zeitraum, auch nicht parallel oder nach einer Sperre; Limits pro Netzwerk (IPv4-Adresse bzw. /64-Block bei IPv6) und pro angegriffenem Konto. **Dein gewohntes Gerät wird nie ausgesperrt**, auch nicht von einem Angreifer, der absichtlich falsche Passwörter eingibt. Höchstens zwei Passwortprüfungen gleichzeitig für unbekannte Geräte, dazu ein Platz, der deinen gewohnten Geräten und angemeldeten Personen vorbehalten ist: Eine Flut von Anfragen kann den Speicher nicht erschöpfen und dich nicht mehr aussperren.
+- **Gewohnte Geräte**: Ein neues Passwort, „Meine anderen Geräte abmelden“ oder „Alle abmelden“, eine Passwort-Zurücksetzung durch einen Administrator und die Notfall-Zurücksetzung per FTP lassen das Konto seine gewohnten Geräte vergessen; der Browser, der die Änderung vornimmt, wird weiterhin erkannt. Nach dem Update auf 1.10.3 wird jedes Gerät bei seiner nächsten erfolgreichen Anmeldung wieder zum gewohnten Gerät.
+- **Zwei-Faktor-Authentifizierung per TOTP** (Google Authenticator, 1Password, Bitwarden …) mit QR-Code und 8 Wiederherstellungscodes, die nur einmal angezeigt werden; jeder Code funktioniert nur einmal, auch bei parallelen Anfragen; nach 10 falschen Codes wird die 2FA des Kontos 15 Minuten lang gesperrt und der Inhaber per E-Mail benachrichtigt. Solange sie aktiv ist, lässt sie sich im Profil nicht mehr neu einrichten: Um das Smartphone zu wechseln, deaktiviere sie mit deinem aktuellen Passwort und aktiviere sie dann wieder. Beim Aktivieren wird das Passwort erneut abgefragt, wenn deine Anmeldung mehr als 15 Minuten zurückliegt, und falsche Einrichtungscodes sind auf 10 pro 15 Minuten begrenzt. Unter **Benutzer** kann ein Administrator seine **eigene** 2FA nicht mehr deaktivieren: Er nutzt dafür **Mein Profil**, das das aktuelle Passwort verlangt.
+- **Konten werden atomar geändert**: Eine laufende Anmeldung kann niemals eine Passwortänderung, eine allgemeine Abmeldung, die Aktivierung der 2FA, eine Herabstufung oder eine Löschung rückgängig machen. Zwei Administratoren, die sich im selben Moment gegenseitig löschen oder herabstufen, können die Website nicht mehr ohne Administrator zurücklassen, und zwei Konten können nie dieselbe Anmelde-E-Mail haben.
+- **Erneute Passwortabfrage** bei sensiblen Aktionen (Backup, Verbindung mit Google Drive, Update, Kontoverwaltung, erweiterte Einstellungen, Änderung der E-Mail-Adresse), wenn die Anmeldung mehr als 15 Minuten zurückliegt. Ein falsches aktuelles Passwort zählt überall zum selben Limit (Passwortänderung im Profil, Deaktivieren der 2FA, neue Backup-Codes, Bestätigung sensibler Aktionen): 10 Versuche pro 15 Minuten. Vorläufige Passwörter müssen bei der ersten Anmeldung ersetzt werden.
+- **Gehärtete Sitzungen**: keine Sitzung vor der Anmeldung (Bots können die Festplatte nicht füllen), Cookies mit `HttpOnly`, `Secure`, `SameSite=Strict`, Neuerzeugung bei der Anmeldung, Abmeldung bei Inaktivität, an den Browser gebunden, „Meine anderen Geräte abmelden“ und „Alle abmelden“. Diese beiden Schaltflächen starten weder die Passwortbestätigung (15 Minuten) noch die Lebensdauer der Sitzung (48 Stunden) neu, und eine noch laufende Anfrage kann eine Abmeldung nicht mehr rückgängig machen. Die Verwaltung wird auf HTTPS gezwungen, sobald die Website es nutzt.
 - **CSRF-Token** bei allen Aktionen und Prüfung der Herkunft der Anfragen.
 
 **Öffentliche Website**
 - **Strenge Header**: Content-Security-Policy (keine Inline-Skripte, SHA-256-Hash für das Stylesheet), Clickjacking-Schutz, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS optional. Sie hängen von den Einstellungen ab, nie von der Anfrage: Der Cache kann nicht vergiftet werden.
 - **Keine offenen Weiterleitungen**: Präparierte Adressen (`/\beispiel.de`, Steuerzeichen …) ergeben einen 404-Fehler.
-- **Inhalte per Allowlist bereinigt** (das HTML wird analysiert und dann vollständig neu geschrieben); `javascript:`- und `data:`-Links sind unmöglich, auch getarnt (`javascript&colon;`). Die Markdown-, `llms.txt`- und RSS-Versionen bleiben harmlos.
-- **Kontaktformular** ohne Captcha: Honeypot-Feld, Token, 5 Nachrichten pro Netzwerk alle 10 Minuten und 100 pro Tag für die ganze Website; der Posteingang ist auf 500 Nachrichten begrenzt (Spam wird zuerst entfernt) und seitenweise aufgeteilt.
+- **Inhalte per Allowlist bereinigt** (das HTML wird analysiert und dann vollständig neu geschrieben); `javascript:`- und `data:`-Links sind unmöglich, auch getarnt (`javascript&colon;`). Die Markdown-, `llms.txt`- und RSS-Versionen bleiben harmlos: In den Markdown-Kopien (`.md`, `llms.txt`, `llms-full.txt`) wird eingegebener Text nie zu einem Link, einem Bild oder HTML. Seine Markdown-Zeichen werden dort maskiert (in der Rohdatei siehst du zum Beispiel `\[`), und echte Links behalten ihre geprüfte Adresse.
+- **Seiten und Cache**: Eine Seite, die gerade erzeugt wird, während du die Veröffentlichung eines Inhalts aufhebst, wird danach nie aus dem Cache ausgeliefert. Öffentliche Seiten, `.md`-Versionen, der RSS-Feed, `llms-full.txt`, die Sitemap und der Produktfeed zeigen nie einen Inhalt, der als Entwurf oder geplant gespeichert ist. Ein Konto zu löschen oder seinen angezeigten Namen oder seine Profilangaben zu ändern, aktualisiert die zwischengespeicherten Seiten. Eine Autorenseite gibt es nur für ein Konto mit mindestens einem veröffentlichten Beitrag.
+- **Kontaktformular** ohne Captcha: Honeypot-Feld, Token, 5 Nachrichten pro Netzwerk alle 10 Minuten und 100 pro Tag für die ganze Website. Diese Limits sind streng: Sind die 100 Nachrichten erreicht, lehnt das Formular alle ab, bis 24 Stunden seit der ersten davon vergangen sind (vor 1.10.3 öffnete es nach 6 Stunden wieder). Der Posteingang ist auf 500 Nachrichten begrenzt (Spam wird zuerst entfernt) und seitenweise aufgeteilt. Eine Adresse mit doppelten Anführungszeichen, Backslashes, Leerzeichen oder Zeilenumbrüchen wird abgelehnt, hier und überall, wo eine E-Mail-Adresse eingegeben wird.
 - **Bilder werden beim Hochladen neu kodiert** (entfernt versteckte Nutzlasten sowie EXIF-/GPS-Daten); animierte GIFs werden Block für Block neu geschrieben; jedes Bild mit Code wird abgelehnt; maximal 40 Megapixel; SVGs werden abgelehnt, keine Skripte und keine Dateilisten in `/media`.
 
 **Verwaltung**
 - **Anpassbare Adresse der Verwaltung** (weniger Bots), Rollen Administrator / Redakteur; die Schaltfläche „Bearbeiten“ der Website verrät diese Adresse nicht.
-- **Abgeschottete Backups auf Google Drive**: Zugriff nur auf die von Éclair erstellten Dateien, verschlüsseltes und widerrufbares Token, das nie in einem Backup landet; das Verbinden erfordert die Bestätigung des Passworts.
+- **Abgeschottete Backups auf Google Drive**: Zugriff nur auf die von Éclair erstellten Dateien, verschlüsseltes und widerrufbares Token, das nie in einem Backup landet; das Verbinden erfordert die Bestätigung des Passworts und ist an die Sitzung des Administrators gebunden, der es startet: Der Code erscheint nur dort, und nur innerhalb von 15 Minuten nach der Eingabe des Passworts. Die Seite „Sicherheit“ zeigt, wer die Verbindung hergestellt hat. Wird dieses Konto gelöscht oder ist es kein Administrator mehr, stoppen die Backups, die Verbindung wird entfernt und die Administratoren werden gebeten, sie neu herzustellen.
 - **KI-Assistent mit festen Grenzen**: nur Entwürfe und Vorschläge, verschlüsselte API-Schlüssel, die von Backups ausgeschlossen sind, Monatsbudget und Tageslimit (Details im Abschnitt [KI-Assistent](#sicherheit-und-datenschutz)).
-- **Begrenzte Protokolle** (gekürzte Felder, maximal 1 MB): Sie lassen sich nicht aufblähen.
+- **Begrenzte Protokolle** (gekürzte Felder, höchstens 2 MB pro Protokoll): Sie lassen sich nicht aufblähen. Ein volles Protokoll wird zum vorherigen Segment (`*-1.php`), statt seine ältere Hälfte zu verlieren; gespeicherte E-Mail-Adressen und Browserangaben werden nach 100 Zeichen abgeschnitten. Anonyme Fehlanmeldungen haben ihre eigene Datei, `data/logs/login-failures.php`: Eine Flut von Versuchen verdrängt die echten Ereignisse nicht mehr aus dem Sicherheitsprotokoll. Die Seite „Sicherheit“ zeigt die letzten echten Ereignisse und die letzten anonymen Fehlanmeldungen.
+- **Großzügige Limits**, damit eine außer Kontrolle geratene KI, ein Connector oder ein Konto die Website nie überfüllt: höchstens 3.000 Inhalte (Entwürfe inklusive); die KI (Assistent, MCP-Connector, „Mit KI erstellen“) erstellt keine Entwürfe mehr, sobald die Website 500 hat; 16 MB veröffentlichter Text in der Suche (mehr als 1.500 lange Beiträge); 5.000 Weiterleitungen mit Adressen von höchstens 1.000 Zeichen; 10.000 Bilder; 1.000 Kategorien. Bestehende Inhalte bleiben immer bearbeitbar, und eine klare Meldung sagt, was zu löschen ist.
 - **Integritätsprüfung**: Vergleicht jede Datei mit ihrem ursprünglichen Fingerabdruck und erkennt verdächtige Dateien, auch eine `.php`-Datei ohne Schutzzeile in `data/` oder `cache/`.
 - **Live-Schutztest**: Die Seite „Sicherheit“ prüft aus deinem Browser heraus, ob interne Dateien wirklich unzugänglich sind und ob die Adresse der Website verifiziert ist.
 
@@ -540,7 +551,10 @@ Seit Version 1.10 schaut Éclair zweimal täglich auf GitHub nach, ob es eine ne
 
 Währenddessen geht Éclair so vor:
 
-- Es lädt das Archiv von GitHub herunter und prüft die **Signatur** der zugehörigen Ankündigung: Jede Version wird mit dem privaten Schlüssel des Maintainers signiert (Ed25519), der nie auf GitHub liegt. Ein gehacktes Repository reicht also nicht aus, um Code in deine Website einzuschleusen.
+- Es prüft die **Signatur** der erhaltenen Ankündigung erneut und lädt dann das Archiv von GitHub herunter: Jede Version wird mit dem privaten Schlüssel des Maintainers signiert (Ed25519), der nie auf GitHub liegt. Ein gehacktes Repository reicht also nicht aus, um Code in deine Website einzuschleusen. Die signierte Ankündigung trägt außerdem eine Seriennummer und ein Ablaufdatum:
+  - Eine ältere, vom Kanal erneut eingespielte Ankündigung wird abgelehnt: Éclair protokolliert das und meldet es auf der Seite **Updates**.
+  - Eine Ankündigung, die 180 Tage lang nicht erneuert wurde, zeigt eine Warnung, die Installation bleibt aber möglich.
+  - „Du hast die neueste Version von Éclair“ erscheint nur nach einer erfolgreichen Prüfung einer signierten, noch gültigen Ankündigung.
 - Es prüft den Fingerabdruck des Archivs, jede einzelne Datei und ob deine PHP-Version jede PHP-Datei lesen kann, **bevor es irgendetwas anrührt**.
 - Es legt die alte Version beiseite (`cache/update/previous`) und installiert die neue in einem Augenblick: Nur `app/`, `assets/`, `index.php` und `.htaccess` ändern sich. Deine Inhalte, Bilder, Konten, Einstellungen und dein eigenes CSS (`data/`, `media/`) bleiben unangetastet.
 - Es prüft, ob deine Website, deine Verwaltung und die neue Version wie vorher antworten; falls nicht, **kehrt es von selbst** zur alten Version zurück.
@@ -552,6 +566,7 @@ Gut zu wissen:
 - Eine `.htaccess`, die du geändert hast (oder die dein Hoster ergänzt hat), **bleibt erhalten**; die neue Vorlage wird unter `cache/update/htaccess-<version>.txt` abgelegt, damit du vergleichen kannst.
 - Von Hand geänderte Dateien von Éclair (Theme …) werden durch ihre neue Version ersetzt: Die Seite „Updates“ listet sie vor der Installation auf. Für dauerhafte Anpassungen nimm **Eigenes CSS** (Einstellungen › Design).
 - Wenn dein Hoster verhindert, dass sich der Server selbst aufruft, installiert Éclair das Update, ohne es kontrollieren zu können, und sagt dir das: Öffne deine Website, um sie zu prüfen, und kehre bei Bedarf zur vorherigen Version zurück.
+- Konnte die automatische Rückkehr nicht vollständig abgeschlossen werden, sagt die Seite das („Wiederherstellung unvollständig“) und bittet dich, den Inhalt von `cache/update/previous` per FTP an seinen Platz zurückzukopieren (siehe [Fehlerbehebung](#fehlerbehebung)).
 - Das Update mit einem Klick braucht die PHP-Erweiterungen `sodium`, `zip` und `curl` sowie Ordner, in die PHP schreiben darf. Andernfalls erklärt die Seite, was zu tun ist, und das Update per FTP bleibt möglich.
 - Die automatische Prüfung lässt sich unter Einstellungen › Erweitert abschalten (die Schaltfläche „Jetzt prüfen“ bleibt verfügbar).
 
@@ -563,7 +578,7 @@ Gut zu wissen:
 
 ### Sichern
 
-**Backup herunterladen**: Sicherheit › Backup herunterladen oder über die Seite „Updates“. Das ZIP-Archiv enthält `data/` (Inhalte, Einstellungen, Konten, Nachrichten) und `media/` (Bilder). API-Schlüssel und die Verbindung zu Google Drive sind nie darin enthalten. Ohne die Erweiterung zip kopierst du diese beiden Ordner per FTP.
+**Backup herunterladen**: Sicherheit › Backup herunterladen oder über die Seite „Updates“. Das ZIP-Archiv enthält `data/` (Inhalte, Einstellungen, Konten, Nachrichten) und `media/` (Bilder). Der verschlüsselte Tresor (API-Schlüssel, Verbindung zu Google Drive), die Sitzungen und die Limits sind nie darin enthalten, und die ZIP-Datei ist auf dem Server privat (Rechte 0600). Ohne die Erweiterung zip kopierst du diese beiden Ordner per FTP.
 
 ### Backups auf Google Drive
 
@@ -578,14 +593,15 @@ Sicherheit › **Backups auf Google Drive** legt eine Kopie deiner Website in de
 Danach verbindest du dein Drive so:
 
 1. Klicke auf **Google Drive verbinden** (eventuell wirst du erneut nach deinem Passwort gefragt).
-2. Éclair zeigt einen Code an. Öffne **google.com/device** auf deinem Computer oder Smartphone, gib den Code ein, wähle dein Google-Konto und erlaube Éclair den Zugriff.
+2. Éclair zeigt einen Code an, nur in der Sitzung, die auf **Google Drive verbinden** geklickt hat, und nur innerhalb von 15 Minuten nach der Eingabe deines Passworts (sonst starte die Verbindung neu). Öffne **google.com/device** auf deinem Computer oder Smartphone, gib den Code ein, wähle dein Google-Konto und erlaube Éclair den Zugriff. Andere Administratoren sehen, dass eine Verbindung läuft, aber nicht den Code.
 3. Die Seite aktualisiert sich von selbst: Die Verbindung steht. Wähle die Häufigkeit (täglich, wöchentlich oder deaktiviert) und wie viele Backups behalten werden sollen.
 
 - Éclair hat **nur Zugriff auf die Dateien, die es selbst erstellt** (Google-Berechtigung „drive.file“): Alles andere in deinem Drive sieht es nicht. Die Backups landen in einem Ordner „Éclair – Name der Website“.
 - Über die gewählte Anzahl hinaus (standardmäßig 8) wandern die ältesten Backups in den **Papierkorb** von Google Drive.
 - **Jetzt sichern** startet sofort einen Upload. Große Websites werden in Teilen von 4 MB hochgeladen: Begrenzt der Hoster die Ausführungszeit, wird der Upload dort fortgesetzt, wo er unterbrochen wurde (lass die Seite geöffnet, sie macht von selbst weiter).
 - Automatische Backups starten, wenn ein Administrator die Verwaltung öffnet. Damit sie auch ohne Besuch starten, kopiere die **Adresse für die geplante Aufgabe** (Sicherheit › Backups auf Google Drive › Backups zu festen Zeiten) in eine geplante Aufgabe (Cronjob) deines Hosters oder auf [cron-job.org](https://cron-job.org), mit stündlicher Ausführung: Die Adresse startet nur dann ein Backup, wenn eines fällig ist. Behalte sie für dich.
-- Das Zugriffstoken wird auf deinem Server verschlüsselt gespeichert. **Google Drive trennen** widerruft es; du kannst den Zugriff auch in deinem Google-Konto entziehen ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Bereits hochgeladene Backups bleiben in deinem Drive.
+- Die Karte zeigt, wer das Konto verbunden hat („verbunden von …“). Wird dieser Administrator gelöscht oder herabgestuft, wird die Verbindung entfernt, und die Backups stoppen, bis ein Administrator Google Drive neu verbindet. Eine Passwortänderung trennt nichts.
+- Das Zugriffstoken wird auf deinem Server verschlüsselt gespeichert. **Google Drive trennen** widerruft es, und eine neue Verbindung widerruft die alte; du kannst den Zugriff auch in deinem Google-Konto entziehen ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Bereits hochgeladene Backups bleiben in deinem Drive.
 
 ### Ein Backup wiederherstellen
 
@@ -608,11 +624,17 @@ deine-adresse@beispiel.de
 DeinNeuesPasswort2026
 ```
 
-Melde dich innerhalb von 24 Stunden **mit dieser E-Mail-Adresse und diesem neuen Passwort an**: Das Passwort wird ersetzt, die Zwei-Faktor-Authentifizierung dieses Kontos deaktiviert, deine anderen Sitzungen werden beendet und die Datei wird automatisch gelöscht. Niemand sonst kann das auslösen (man müsste ihren Inhalt kennen); eine Datei ohne die erste Zeile wird abgelehnt und gelöscht.
+Ersetze das Beispiel in der dritten Zeile durch dein eigenes neues Passwort (mindestens 10 Zeichen): Das Beispiel selbst wird abgelehnt.
+
+Melde dich innerhalb von 24 Stunden **mit dieser E-Mail-Adresse und diesem neuen Passwort an**: Das Passwort wird ersetzt, die Zwei-Faktor-Authentifizierung dieses Kontos deaktiviert, deine anderen Sitzungen werden beendet und die Datei wird automatisch gelöscht. Niemand sonst kann das auslösen (man müsste ihren Inhalt kennen); eine Datei ohne die erste Zeile oder mit einem Datum, das mehr als eine Stunde in der Zukunft liegt, wird abgelehnt und gelöscht.
+
+**„Der Server ist stark ausgelastet“ bei jeder Anmeldung**: Erscheint die Meldung weiterhin, obwohl niemand deine Website angreift, ist vielleicht eine der Dateien `data/.login-N.lock` unbrauchbar: Lösche sie per FTP (Éclair legt sie neu an).
 
 **Die Verwaltung wird nach einem Update nicht mehr angezeigt** (selten: Éclair kehrt von selbst zur alten Version zurück, wenn es die Website kontrollieren kann): Ersetze per FTP die Ordner `app/` und `assets/` durch die aus `cache/update/previous/` und kopiere dann `cache/update/previous/index.php.txt` unter dem Namen `index.php` ins Stammverzeichnis.
 
 **„Update mit einem Klick auf diesem Server nicht möglich“**: Die Seite „Updates“ nennt den Grund (fehlende PHP-Erweiterung, nicht beschreibbarer Ordner, zu alte PHP-Version). Behebe das bei deinem Hoster oder aktualisiere per FTP.
+
+**„Update-Ankündigung abgelaufen“ oder „Update-Ankündigung älter … ignoriert“ (Seite „Updates“)**: Die Website ist in Ordnung; sie behält die neueste Ankündigung, die sie kennt. Hält das länger als einen Tag an, sieh auf der [Projektseite bei GitHub](https://github.com/Jacckisback/eclair-cms) nach.
 
 **Google Drive: „Zugriff auf Google Drive entzogen“**: Die Berechtigung wurde im Google-Konto entzogen (oder ist abgelaufen). Klicke auf **Google Drive verbinden**: Derselbe Ordner wird weiterverwendet.
 
@@ -623,6 +645,10 @@ Melde dich innerhalb von 24 Stunden **mit dieser E-Mail-Adresse und diesem neuen
 **Fehler 404 auf allen Seiten außer der Startseite**: Die Datei `.htaccess` wurde nicht hochgeladen (versteckte Datei) oder die URL-Umschreibung ist deaktiviert. Falls dein Hoster es verlangt, entferne das Kommentarzeichen vor der Zeile `RewriteBase /` in der `.htaccess`.
 
 **Fehler 500 direkt nach dem Hochladen**: Dein Hoster lehnt eine Direktive der `.htaccess` ab (sehr selten: Es werden nur Direktiven verwendet, die überall zulässig sind). Entferne den betreffenden Block oder wende dich an deinen Hoster.
+
+**„Speichern nicht möglich: Die Datensperre (data/.lock) funktioniert nicht …“**: Lösche `data/.lock` per FTP (Éclair legt sie neu an) oder frage deinen Hoster, ob Dateisperren (flock) verfügbar sind. Der Ordner `data/` muss auf einem lokalen Speicher liegen, auf dem Dateisperren funktionieren.
+
+**„Fichier des clés data/keys.php illisible“** (diese technische Meldung ist auf Französisch: Die Schlüsseldatei ist nicht lesbar): Korrigiere ihre Rechte per FTP. Lösche sie nicht, es sei denn, du nimmst in Kauf, deine API-Schlüssel neu einzugeben und Google Drive neu zu verbinden: Das Löschen meldet außerdem alle ab und lässt die gewohnten Geräte vergessen.
 
 **Bilder werden nicht in WebP umgewandelt**: Die Erweiterung GD (oder ihre WebP-Unterstützung) fehlt. Aktiviere sie im PHP-Bereich deines Hosters; bis dahin bleiben die Bilder im JPG-/PNG-Format.
 
@@ -638,7 +664,7 @@ Unter Nginx braucht Éclair keine `.htaccess`, diese Regeln müssen aber nachgeb
 location ~ ^/(app|data|cache)(/|$) { return 404; }
 location ~ /\.(?!well-known/) { return 404; }
 location ^~ /media/ {
-    location ~* \.(php\d?|phtml|phar|s?html?|svgz?|xml|js)$ { return 404; }
+    location ~* \.(php\d?|phtml|phar|inc|pl|py|cgi|sh|asp|aspx|jsp|s?html?|xht(ml)?|svgz?|xml|m?js)$ { return 404; }
     add_header X-Content-Type-Options nosniff;
     expires 1y;
 }
@@ -679,19 +705,37 @@ tests/mcp.php            MCP-Connector (OAuth, PKCE, Protokoll, Widerruf) und Wa
 tests/design.php         Art Directions (Kontraste, CSS, Schriften, präparierte Einstellungen, KI) und Design-Score
 tests/update.php         Update mit einem Klick (simulierter signierter Kanal: Signatur, präpariertes Archiv, Syntax, automatische und manuelle Rückkehr)
 tests/drive.php          Backups auf Google Drive (tests/fake-google.php: simuliertes OAuth und simuliertes Drive, Upload in Teilen, Wiederaufnahme)
+tests/sec-*.php          Sicherheits-Regressionstests von 1.10.3
 tests/fixtures/          Referenz-Websites und Fingerabdruck ihrer öffentlichen Ausgabe (eine neue Version ändert kein einziges Byte der Website)
 tools/router.php         Router für den eingebauten PHP-Server (Entwicklung)
 tools/capture.php        Referenzaufnahme der öffentlichen Ausgabe und Lighthouse-Messungen (--lighthouse)
 tools/build.php          Integritäts-Fingerabdrücke + Archiv dist/eclair-cms-<Version>.zip (PHP kompaktiert, Views der Verwaltung komprimiert, JS und CSS der Verwaltung verschlankt) + signierte Ankündigung dist/latest.json
+tools/announce.php       signiert und prüft die Update-Ankündigung (genutzt von build.php und den Tests)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # Entwicklungsserver
-php tests/run.php                                  # 609 Unit- und HTTP-Prüfungen; ECLAIR_TEST_ROOT=… zum Testen eines entpackten Archivs
+php tests/run.php                                  # Tests (Unit + HTTP); ECLAIR_TEST_ROOT=… zum Testen eines entpackten Archivs
 php tools/build.php                                # Archiv zum Verteilen
 ```
 
+**Tests.** Die vollständige Suite dauert etwa 50 Sekunden. Starte nie zwei Suiten gleichzeitig auf demselben Rechner.
+
 **Eine Version veröffentlichen.** `tools/build.php` signiert die Ankündigung `dist/latest.json` (Version, Adresse, Größe und SHA-256 des Archivs) mit dem privaten Ed25519-Schlüssel des Maintainers, den es aus der Umgebungsvariable `ECLAIR_SIGNING_KEY` liest (Base64, 64 Bytes); einen Schlüssel, der nicht zum öffentlichen Schlüssel in `app/lib/Update.php` passt, lehnt es ab. Die Zugangsdaten der Google-App für die Backups werden aus `ECLAIR_GOOGLE_CLIENT_ID` und `ECLAIR_GOOGLE_CLIENT_SECRET` ins Archiv geschrieben (Client-Typ „TVs and Limited Input devices“ in der Google-Cloud-Konsole, Berechtigung `drive.file`). Keiner dieser Werte liegt im Repository.
+
+Die Ankündigung trägt zwei Signaturen desselben Schlüssels: die ursprüngliche, die Websites mit 1.10.0 bis 1.10.2 lesen, und eine „v2“-Signatur, die zusätzlich eine Seriennummer und ein Ablaufdatum in 180 Tagen abdeckt. Vor dem Ablauf, auch ohne neue Version, signiert der Maintainer den Kanal mit einem einzigen Befehl neu:
+
+```bash
+ECLAIR_SIGNING_KEY=… php tools/build.php --resign
+```
+
+Um eine Version zurückzuziehen, wird ein älteres Archiv (bereits in `dist/`) mit einer höheren Seriennummer erneut angekündigt:
+
+```bash
+ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<Version>
+```
+
+Eine signierte Version lässt sich nur in einem Git-Checkout bauen und enthält nur versionierte Dateien; der Quell-Commit wird im Manifest vermerkt. Die Übersetzungsquellen (`i18n/*.php`) müssen einfache Arrays aus literalen Texten bleiben: Sie werden als Daten gelesen, nie ausgeführt.
 
 **Fork oder eigenständige Installation.** In `eclair-config.php`: `ECLAIR_UPDATE_URL` und `ECLAIR_UPDATE_KEY` (Base64) für deinen eigenen signierten Update-Kanal; `ECLAIR_GOOGLE_CLIENT_ID` und `ECLAIR_GOOGLE_CLIENT_SECRET` für deine eigene Google-App.
 
