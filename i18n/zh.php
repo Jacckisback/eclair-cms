@@ -1538,4 +1538,8 @@ return [
     '≈ {cost} par article' => '每篇文章约 {cost}',
     'N’accepte que si tu viens de lancer cette connexion toi-même depuis {app}.' => '仅在你刚刚亲自从 {app} 发起此连接时才同意。',
     'Active JavaScript pour autoriser cette application.' => '请启用 JavaScript 以授权此应用。',
+    'Adresse trop longue : {n} caractères au maximum.' => '地址过长：最多 {n} 个字符。',
+    'Limite de {n} catégories atteinte : supprime celles qui ne servent plus.' => '已达到 {n} 个分类的上限：请删除不再需要的分类。',
+    'Limite de {n} images atteinte : supprime celles qui ne servent plus.' => '已达到 {n} 张图片的上限：请删除不再需要的图片。',
+    'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => '已达到 {n} 个重定向的上限：请删除不再需要的重定向。',
 ];

@@ -661,7 +661,7 @@ final class Blocks
                 'table' => self::mdTable($b),
                 'button' => self::mdLink($b['text'], $b['url']),
                 'video' => ($v = self::video($b['url'])) ? self::mdLink('▶ ' . ($b['caption'] !== '' ? $b['caption'] : Theme::t('video', $lang)), $v['watch']) : '',
-                'code' => "```" . $b['lang'] . "\n" . rtrim($b['code']) . "\n```",
+                'code' => ($f = self::fence($b['code'])) . $b['lang'] . "\n" . rtrim($b['code']) . "\n" . $f,
                 'divider' => '---',
                 'hero' => '## ' . self::mdText($b['title']) . ($b['text'] !== '' ? "\n\n" . self::md($b['text']) : '')
                     . ($b['button'] !== '' && $b['url'] !== '' ? "\n\n" . self::mdLink($b['button'], $b['url']) : ''),
@@ -679,40 +679,122 @@ final class Blocks
     }
 
     /**
-     * HTML en ligne (déjà assaini) → Markdown. Chaque valeur n'est décodée qu'une fois, l'adresse des liens
-     * est revalidée, et « < » reste du texte : un lecteur Markdown n'y verra jamais de balise active.
+     * HTML en ligne (déjà assaini) → Markdown des exports publics (.md, llms.txt, llms-full.txt). Les balises connues
+     * deviennent la syntaxe Markdown ; chaque texte n'est décodé qu'une fois puis échappé (mdText) ; le code en ligne
+     * garde son texte entre plus d'accents graves qu'il n'en contient ; l'adresse des liens est revalidée. Rien n'est
+     * redécouvert par une expression régulière : un lecteur Markdown n'y verra jamais de balise active ni de lien non vérifié.
      */
     public static function md(string $html): string
     {
+        $out = '';
+        $code = null;
         $links = [];
-        $md = (string) preg_replace_callback('~<a href="([^"]*)"[^>]*>(.*?)</a>~s', static function (array $m) use (&$links): string {
-            $url = Sanitize::url(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-            if ($url === '') {
-                return $m[2];
+        foreach (preg_split('~(<[^>]*>)~', $html, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) ?: [] as $part) {
+            if ($part[0] !== '<') {
+                $text = html_entity_decode($part, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                if ($code !== null) {
+                    $code .= $text;
+                } else {
+                    $out .= self::mdText($text);
+                }
+                continue;
             }
-            $links[] = str_replace([' ', '(', ')', '<', '>'], ['%20', '%28', '%29', '%3C', '%3E'], self::abs($url));
-            return '[' . $m[2] . "]\x01" . (count($links) - 1) . "\x02";
-        }, str_replace(["\x01", "\x02"], '', $html));
-        $md = strtr($md, [
-            '<strong>' => '**', '</strong>' => '**', '<em>' => '*', '</em>' => '*', '<code>' => '`', '</code>' => '`',
-            '<s>' => '~~', '</s>' => '~~', '<br>' => "  \n",
-        ]);
-        $md = self::mdText(html_entity_decode(strip_tags($md), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-        return trim((string) preg_replace_callback("~\x01(\\d+)\x02~", static fn (array $m): string => '(' . $links[(int) $m[1]] . ')', $md));
+            $close = str_starts_with($part, '</');
+            $tag = strtolower((string) preg_replace('~^</?([a-zA-Z0-9]*).*$~s', '$1', $part));
+            if ($tag === 'code') {
+                if (!$close && $code === null) {
+                    $code = '';
+                } elseif ($close && $code !== null) {
+                    $out .= self::mdCode($code);
+                    $code = null;
+                }
+                continue;
+            }
+            if ($code !== null) {
+                // Dans le code en ligne, les autres balises disparaissent et un retour à la ligne devient une espace.
+                $code .= $tag === 'br' ? ' ' : '';
+                continue;
+            }
+            if ($tag === 'a' && !$close) {
+                $url = preg_match('~\shref="([^"]*)"~', $part, $m) ? Sanitize::url(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')) : '';
+                $links[] = $url === '' ? null : self::mdUrl($url);
+                if ($url !== '') {
+                    // « ![ » ouvrirait une image : un point d'exclamation juste avant le lien reste du texte.
+                    $out = (str_ends_with($out, '!') ? substr($out, 0, -1) . '\\!' : $out) . '[';
+                }
+                continue;
+            }
+            $out .= match ($tag) {
+                'a' => ($url = array_pop($links)) !== null ? '](' . $url . ')' : '',
+                'strong' => '**',
+                'em' => '*',
+                's' => '~~',
+                'br' => "  \n",
+                default => '',
+            };
+        }
+        if ($code !== null) {
+            $out .= self::mdCode($code);
+        }
+        while ($links) {
+            $url = array_pop($links);
+            $out .= $url !== null ? '](' . $url . ')' : '';
+        }
+        return trim($out);
     }
 
-    /** Texte brut inséré dans du Markdown : « < » hors code devient « &lt; ». */
+    /**
+     * Texte brut inséré dans du Markdown : il reste du texte pour tout lecteur. « < » devient « &lt; » (ni HTML ni lien
+     * automatique) ; une barre oblique inverse neutralise les crochets (lien, image, définition de référence), l'accent
+     * grave et le tilde (code), l'accolade (attributs, HTML brut de certains lecteurs) et la barre oblique inverse elle-même.
+     * Le reste de la ponctuation est laissé tel quel, pour que l'export reste agréable à lire.
+     */
     public static function mdText(string $text): string
     {
-        return (string) preg_replace_callback('~(`[^`\n]*`)|<~', static fn (array $m): string => ($m[1] ?? '') !== '' ? $m[1] : '&lt;', $text);
+        return strtr($text, ['\\' => '\\\\', '`' => '\\`', '[' => '\\[', ']' => '\\]', '{' => '\\{', '~' => '\\~', '<' => '&lt;']);
+    }
+
+    /**
+     * Valeur de l'en-tête de métadonnées d'un export Markdown : une chaîne JSON (lue aussi comme du YAML), sans balise,
+     * crochet ni accolade bruts. Un lecteur qui ignore cet en-tête l'affiche comme du texte : rien n'y devient un lien.
+     */
+    public static function mdMeta(string $value): string
+    {
+        return str_replace(['[', ']', '{'], ['\u005b', '\u005d', '\u007b'], (string) json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG));
+    }
+
+    /** Clôture d'un bloc de code : plus d'accents graves que la plus longue suite du code, trois au moins. */
+    public static function fence(string $code): string
+    {
+        preg_match_all('~`+~', $code, $runs);
+        return str_repeat('`', max(3, max(array_map('strlen', $runs[0]) ?: [0]) + 1));
+    }
+
+    /** Code en ligne : sur une seule ligne, entre plus d'accents graves qu'il n'en contient (espacé s'il en commence ou finit par un). */
+    private static function mdCode(string $code): string
+    {
+        $code = str_replace(["\r\n", "\r", "\n"], ' ', $code);
+        if ($code === '') {
+            return '';
+        }
+        preg_match_all('~`+~', $code, $runs);
+        $tick = str_repeat('`', max(array_map('strlen', $runs[0]) ?: [0]) + 1);
+        $pad = trim($code, ' ') !== '' && preg_match('~^[ `]|[ `]$~', $code) ? ' ' : '';
+        return $tick . $pad . $code . $pad . $tick;
     }
 
     /** Lien Markdown à partir d'un texte brut et d'une adresse (revalidée). */
     private static function mdLink(string $text, string $url): string
     {
         $url = Sanitize::url($url);
-        $text = str_replace(['[', ']'], '', self::mdText($text));
-        return $url === '' ? $text : '[' . $text . '](' . str_replace([' ', '(', ')', '<', '>'], ['%20', '%28', '%29', '%3C', '%3E'], self::abs($url)) . ')';
+        $text = self::mdText(str_replace(['[', ']'], '', $text));
+        return $url === '' ? $text : '[' . $text . '](' . self::mdUrl($url) . ')';
+    }
+
+    /** Adresse d'un lien Markdown : absolue, sans espace, parenthèse, chevron ni barre oblique inverse (qui échapperait la suite). */
+    private static function mdUrl(string $url): string
+    {
+        return str_replace(['\\', ' ', '(', ')', '<', '>'], ['%5C', '%20', '%28', '%29', '%3C', '%3E'], self::abs($url));
     }
 
     private static function abs(string $url): string
@@ -727,7 +809,7 @@ final class Blocks
             return '';
         }
         $alt = $b['alt'] !== '' ? $b['alt'] : (string) $media['alt'];
-        return '![' . str_replace(['[', ']'], '', self::mdText($alt)) . '](' . absolute_url(Media::url($media)) . ')'
+        return '![' . self::mdText(str_replace(['[', ']'], '', $alt)) . '](' . self::mdUrl(absolute_url(Media::url($media))) . ')'
             . ($b['caption'] !== '' ? "\n*" . self::md($b['caption']) . '*' : '');
     }
 
@@ -747,7 +829,7 @@ final class Blocks
         foreach ($rows as $row) {
             $out[] = $line($row);
         }
-        return ($b['caption'] !== '' ? '**' . $b['caption'] . "**\n\n" : '') . implode("\n", $out);
+        return ($b['caption'] !== '' ? '**' . self::mdText($b['caption']) . "**\n\n" : '') . implode("\n", $out);
     }
 
     private static function mdPosts(array $b, string $lang): string

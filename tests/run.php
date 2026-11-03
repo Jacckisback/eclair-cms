@@ -647,6 +647,7 @@ require __DIR__ . '/design.php';
 require __DIR__ . '/update.php';
 require __DIR__ . '/drive.php';
 require __DIR__ . '/sec-C2.php';
+require __DIR__ . '/sec-B2.php';
 
 exec('rm -rf ' . escapeshellarg(ECLAIR_DATA));
 echo "\n" . ($failed ? '❌ ' . count($failed) . ' échec(s), ' : '✅ ') . $passed . " vérifications réussies\n";

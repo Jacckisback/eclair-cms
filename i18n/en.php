@@ -1538,4 +1538,8 @@ return [
     '≈ {cost} par article' => '≈ {cost} per article',
     'N’accepte que si tu viens de lancer cette connexion toi-même depuis {app}.' => 'Only accept if you just started this connection yourself from {app}.',
     'Active JavaScript pour autoriser cette application.' => 'Enable JavaScript to authorize this app.',
+    'Adresse trop longue : {n} caractères au maximum.' => 'URL too long: {n} characters max.',
+    'Limite de {n} catégories atteinte : supprime celles qui ne servent plus.' => 'Limit of {n} categories reached: delete the ones you no longer need.',
+    'Limite de {n} images atteinte : supprime celles qui ne servent plus.' => 'Limit of {n} images reached: delete the ones you no longer need.',
+    'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => 'Limit of {n} redirects reached: delete the ones you no longer need.',
 ];

@@ -199,7 +199,7 @@ final class Design
         $out = ['id' => substr((string) preg_replace('/[^a-z0-9-]/', '', strtolower((string) ($d['id'] ?? ''))), 0, 30) ?: 'custom',
             'name' => Sanitize::text($d['name'] ?? '', 40), 'idea' => Sanitize::text($d['idea'] ?? '', 200)];
         foreach (['ground', 'surface', 'ink', 'muted', 'accent'] as $k) {
-            if (!is_string($d[$k] ?? null) || !preg_match('/^#[0-9a-f]{6}$/i', $d[$k])) {
+            if (!is_string($d[$k] ?? null) || !preg_match('/^#[0-9a-f]{6}\z/i', $d[$k])) {
                 return null;
             }
             $out[$k] = strtolower($d[$k]);

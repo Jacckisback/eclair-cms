@@ -14,6 +14,8 @@ defined('ECLAIR') || exit;
 final class Categories
 {
     public const KINDS = ['post', 'product'];
+    /** Au plus 1 000 catégories : un vrai site en compte quelques dizaines, et chaque page publique les relit. */
+    public const MAX = 1000;
 
     public static function all(): array
     {
@@ -58,6 +60,9 @@ final class Categories
             $cats = self::all();
             $id = preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '';
             $existing = $id !== '' ? self::get($id) : null;
+            if ($existing === null && count($cats) >= self::MAX) {
+                throw new \RuntimeException(t('Limite de {n} catégories atteinte : supprime celles qui ne servent plus.', ['n' => self::MAX]));
+            }
             // Le type d'une catégorie existante ne change pas : ses contenus garderaient une catégorie de l'autre type.
             $kind = $existing['kind'] ?? (($data['kind'] ?? '') === 'product' ? 'product' : 'post');
             $name = Sanitize::text($data['name'] ?? '', 80);

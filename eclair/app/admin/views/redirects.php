@@ -26,7 +26,7 @@ use Eclair\Security;
       <tbody>
       <?php foreach ($v['redirects'] as $r): ?>
         <tr><td class="mono small"><?= e($r['from']) ?></td><td class="mono small"><?= e($r['to']) ?></td>
-          <td><span class="badge"><?= (int) $r['code'] ?></span><?= !empty($r['auto']) ? ' <span class="badge brand">' . e(t('auto')) . '</span>' : '' ?></td>
+          <td><span class="badge"><?= (int) $r['code'] ?></span><?= !empty($r['auto']) ? ' <span class="badge brand">' . e(t('auto')) . '</span>' : '' ?><?= ($r['active'] ?? true) ? '' : ' <span class="badge">' . e(t('Désactivée')) . '</span>' ?></td>
           <td class="small"><?= (int) $r['hits'] ?></td>
           <td><form method="post" action="<?= e(admin_url('redirects')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="from" value="<?= e($r['from']) ?>">
             <button class="btn btn-sm btn-ghost btn-icon btn-danger" type="submit" aria-label="<?= e(t('Supprimer')) ?>"><?= Icons::svg('trash') ?></button></form></td></tr>

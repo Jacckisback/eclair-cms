@@ -523,7 +523,7 @@ final class Seo
             ]);
             $out .= "---\n";
             foreach ($meta as $k => $v) {
-                $out .= $k . ': ' . json_encode((string) $v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . "\n";
+                $out .= $k . ': ' . Blocks::mdMeta((string) $v) . "\n";
             }
             $out .= "---\n\n";
         }

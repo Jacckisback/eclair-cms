@@ -1538,4 +1538,8 @@ return [
     '≈ {cost} par article' => '≈ {cost} por artigo',
     'N’accepte que si tu viens de lancer cette connexion toi-même depuis {app}.' => 'Aceite apenas se você mesmo acabou de iniciar esta conexão pelo {app}.',
     'Active JavaScript pour autoriser cette application.' => 'Ative o JavaScript para autorizar este aplicativo.',
+    'Adresse trop longue : {n} caractères au maximum.' => 'Endereço longo demais: máximo de {n} caracteres.',
+    'Limite de {n} catégories atteinte : supprime celles qui ne servent plus.' => 'Limite de {n} categorias atingido: exclua as que você não usa mais.',
+    'Limite de {n} images atteinte : supprime celles qui ne servent plus.' => 'Limite de {n} imagens atingido: exclua as que você não usa mais.',
+    'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => 'Limite de {n} redirecionamentos atingido: exclua os que você não usa mais.',
 ];

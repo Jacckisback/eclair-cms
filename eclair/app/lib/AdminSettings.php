@@ -72,7 +72,7 @@ final class AdminSettings
                 $look[$k] = $q($k);
             }
         }
-        if (preg_match('/^#[0-9a-f]{6}$/i', $q('accent'))) {
+        if (preg_match('/^#[0-9a-f]{6}\z/i', $q('accent'))) {
             $look['accent'] = strtolower($q('accent'));
         }
         foreach (['font_head', 'font_body'] as $k) {
@@ -116,6 +116,12 @@ final class AdminSettings
                 if (!preg_match('~^https?://[^/\s]+~', $url)) {
                     Admin::back($redirect, t('L’adresse du site doit commencer par https:// (ou http://).'), 'bad');
                 }
+                // Seulement protocole, hôte, port et dossier : ni identifiants, ni paramètres, ni ancre, qui détourneraient
+                // la vérification de l'adresse (/__eclair/ping) ou les liens absolus du site.
+                $p = parse_url($url) ?: [];
+                if (isset($p['scheme'], $p['host'])) {
+                    $url = rtrim($p['scheme'] . '://' . $p['host'] . (isset($p['port']) ? ':' . $p['port'] : '') . ($p['path'] ?? ''), '/');
+                }
                 $base = slugify(Req::input('blog_base')) ?: 'blog';
                 $home = Req::input('home');
                 $patch = [
@@ -136,9 +142,8 @@ final class AdminSettings
                     ],
                 ];
                 if ($patch['blog']['base'] !== $s['blog']['base'] && $s['blog']['enabled']) {
-                    foreach (Content::published('post') as $post) {
-                        Redirects::add('/' . $s['blog']['base'] . '/' . $post['slug'], '/' . $patch['blog']['base'] . '/' . $post['slug'], true);
-                    }
+                    Redirects::addMany(array_map(fn ($post) => ['/' . $s['blog']['base'] . '/' . $post['slug'], '/' . $patch['blog']['base'] . '/' . $post['slug']],
+                        array_values(Content::published('post'))), true);
                 }
                 break;
 
@@ -375,9 +380,8 @@ final class AdminSettings
             'thanks' => $page('thanks'),
         ]];
         if ($base !== $old && $s['shop']['enabled']) {
-            foreach (array_merge([['slug' => '']], Content::published('product'), Categories::of('product')) as $x) {
-                Redirects::add(rtrim('/' . $old . '/' . $x['slug'], '/'), rtrim('/' . $base . '/' . $x['slug'], '/'), true);
-            }
+            Redirects::addMany(array_map(fn ($x) => [rtrim('/' . $old . '/' . $x['slug'], '/'), rtrim('/' . $base . '/' . $x['slug'], '/')],
+                array_merge([['slug' => '']], array_values(Content::published('product')), Categories::of('product'))), true);
         }
         // Page de remerciement (après le paiement, Stripe peut y rediriger le client) : créée à la demande, hors index.
         if (Req::input('action') === 'thanks' && $patch['shop']['thanks'] === '') {

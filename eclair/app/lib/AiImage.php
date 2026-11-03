@@ -26,6 +26,10 @@ final class AiImage
         if ($provider === '') {
             throw new \RuntimeException(t('Aucun générateur d’images n’est configuré (Réglages › Assistant IA).'));
         }
+        // Médiathèque pleine : refusé avant de payer une image qui ne pourrait pas être enregistrée.
+        if (Media::full()) {
+            throw new \RuntimeException(t('Limite de {n} images atteinte : supprime celles qui ne servent plus.', ['n' => Media::MAX_ITEMS]));
+        }
         $prompt = trim(mb_substr($prompt, 0, 3500));
         if (mb_strlen($prompt) < 10) {
             throw new \RuntimeException('The image prompt is too short: describe the subject, setting, light and style.');
@@ -166,12 +170,14 @@ final class AiImage
                 return [];
             }
         }
-        if (($p['scheme'] ?? '') !== 'https') {
+        // Nom d'hôte ASCII seulement : cURL décode « %2e » et convertit les noms internationaux avant de résoudre,
+        // et la résolution imposée ci-dessous ne s'appliquerait plus au nom réellement contacté.
+        if (($p['scheme'] ?? '') !== 'https' || !preg_match('~^[a-z0-9.-]+$~', $host)) {
             return null;
         }
         $ips = filter_var($host, FILTER_VALIDATE_IP) ? [$host] : (gethostbynamel($host) ?: []);
         foreach ($ips as $ip) {
-            if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            if (!self::publicIp($ip)) {
                 return null;
             }
         }
@@ -180,5 +186,26 @@ final class AiImage
             CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
         ];
+    }
+
+    /**
+     * Adresse IPv4 publique et joignable : ni privée ni réservée, ni partagée (CGNAT 100.64/10, dont des adresses de
+     * métadonnées de nuages), ni de test, de documentation, de banc d'essai, de relais 6to4 ou de multidiffusion.
+     */
+    private static function publicIp(string $ip): bool
+    {
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            return false;
+        }
+        $n = (int) ip2long($ip);
+        foreach (['0.0.0.0/8', '100.64.0.0/10', '192.0.0.0/24', '192.0.2.0/24', '192.88.99.0/24', '198.18.0.0/15', '198.51.100.0/24',
+            '203.0.113.0/24', '224.0.0.0/4', '240.0.0.0/4'] as $cidr) {
+            [$net, $bits] = explode('/', $cidr);
+            $mask = -1 << (32 - (int) $bits) & 0xFFFFFFFF;
+            if (($n & $mask) === ((int) ip2long($net) & $mask)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

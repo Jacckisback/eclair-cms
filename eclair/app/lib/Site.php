@@ -179,7 +179,8 @@ final class Site
         if ($entry) {
             self::single($entry);
         }
-        $redirect = Redirects::find($path);
+        // Recherche par empreinte, sans verrou : jamais pour /_eclair/, /__eclair/ ni les validations de domaine (/.well-known/).
+        $redirect = Redirects::lookup($path);
         if ($redirect) {
             Redirects::hit($path);
             $to = $redirect['to'];

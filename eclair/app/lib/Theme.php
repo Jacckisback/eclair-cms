@@ -362,7 +362,12 @@ final class Theme
     {
         $css = str_replace(["\r\n", "\r", '<'], ["\n", "\n", ''], Sanitize::utf8($css));
         $css = (string) preg_replace('/[\x00-\x08\x0B-\x1F\x7F]/', '', $css);
-        $css = (string) preg_replace('/@import\b[^;{}]*;?/i', '', $css);
+        // Jamais de feuille externe : @import retiré jusqu'à ce qu'il n'en reste plus (« @im@import;port » en cachait un),
+        // ainsi que toute règle @ dont le nom contient un échappement CSS (« @\69mport » se lit @import).
+        do {
+            $before = $css;
+            $css = (string) preg_replace(['/@import\b[^;{}]*;?/i', '/(?<![^\s;{}])@[\w-]*\\\\[^;{}]*;?/'], '', $css);
+        } while ($css !== $before);
         return trim(mb_strcut($css, 0, self::CUSTOM_MAX, 'UTF-8'));
     }
 

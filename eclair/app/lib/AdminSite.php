@@ -70,14 +70,18 @@ final class AdminSite
         if (Sanitize::text(Req::input('name'), 80) === '') {
             Admin::back('categories', t('Donne un nom à la catégorie.'), 'bad');
         }
-        Categories::save([
-            'id' => Req::input('id'),
-            'name' => Req::input('name'),
-            'slug' => Req::input('slug'),
-            'description' => Req::input('description'),
-            'seo_title' => Req::input('seo_title'),
-            'kind' => Req::input('kind'),
-        ]);
+        try {
+            Categories::save([
+                'id' => Req::input('id'),
+                'name' => Req::input('name'),
+                'slug' => Req::input('slug'),
+                'description' => Req::input('description'),
+                'seo_title' => Req::input('seo_title'),
+                'kind' => Req::input('kind'),
+            ]);
+        } catch (\RuntimeException $e) {
+            Admin::back('categories', $e->getMessage(), 'bad');
+        }
         Admin::back('categories', t('Catégorie enregistrée.'));
     }
 
@@ -101,7 +105,7 @@ final class AdminSite
 
     public static function redirects(array $user): never
     {
-        Admin::view('redirects', ['redirects' => array_reverse(Redirects::all())], t('Redirections'));
+        Admin::view('redirects', ['redirects' => array_reverse(Redirects::listing())], t('Redirections'));
     }
 
     public static function saveRedirect(array $user): never
@@ -116,7 +120,20 @@ final class AdminSite
         if ($from === '/' || $to === '') {
             Admin::back('redirects', t('Indique une ancienne adresse et une nouvelle.'), 'bad');
         }
-        Redirects::add($from, $to, false, Req::input('code') === '302' ? 302 : 301);
+        // /.well-known/ (validations de domaine), /_eclair/ et /__eclair/ appartiennent à l'hébergement et à Éclair.
+        $admin = Auth::can('settings');
+        if (!Redirects::allowed($from, $admin)) {
+            Admin::back('redirects', t('Cette adresse est déjà utilisée : choisis-en une autre.'), 'bad');
+        }
+        if (mb_strlen($from) > Redirects::MAX_LENGTH || (!preg_match('~^https?://~i', $to) && mb_strlen(Redirects::normalize($to)) > Redirects::MAX_LENGTH)) {
+            Admin::back('redirects', t('Adresse trop longue : {n} caractères au maximum.', ['n' => Redirects::MAX_LENGTH]), 'bad');
+        }
+        if (Redirects::full() && Redirects::find($from) === null) {
+            Admin::back('redirects', t('Limite de {n} redirections atteinte : supprime celles qui ne servent plus.', ['n' => Redirects::MAX]), 'bad');
+        }
+        if (!Redirects::add($from, $to, false, Req::input('code') === '302' ? 302 : 301, $admin)) {
+            Admin::back('redirects', t('Indique une ancienne adresse et une nouvelle.'), 'bad');
+        }
         Cache::purge();
         Admin::back('redirects', t('Redirection ajoutée.'));
     }
