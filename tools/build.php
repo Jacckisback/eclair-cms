@@ -19,7 +19,7 @@
  * strictement croissant et une date d'expiration : les sites refusent une annonce plus ancienne que la dernière reçue et
  * signalent une annonce périmée. Le canal doit donc être re-signé avant son échéance, même sans nouvelle version : une
  * commande suffit (--resign). Un retrait de version est une nouvelle annonce, au numéro plus grand (--resign=<version>).
- * La clé n'est jamais affichée.
+ * La clé n'est jamais affichée, et la construction signée n'exécute aucune source de traduction (lues comme des données).
  *
  *   php tools/build.php
  *   ECLAIR_SIGNING_KEY=… php tools/build.php                   (version publiée : archive et annonce signée)
@@ -159,11 +159,64 @@ function distributable(string $root): array
     return $files;
 }
 
+/**
+ * Commande Git dans le dépôt (sortie, ou null si Git manque ou échoue). Lancée sans la clé dans son environnement.
+ */
+function eclair_git(string $repo, array $args): ?string
+{
+    $env = getenv();
+    unset($env['ECLAIR_SIGNING_KEY'], $env['ECLAIR_GOOGLE_CLIENT_SECRET']);
+    $p = @proc_open(array_merge(['git', '-C', $repo], $args), [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, $env);
+    if (!is_resource($p)) {
+        return null;
+    }
+    $out = (string) stream_get_contents($pipes[1]);
+    stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    return proc_close($p) === 0 ? $out : null;
+}
+
+/** Fichiers suivis par Git sous eclair/ (chemins relatifs à eclair/), ou null sans dépôt Git. */
+function eclair_tracked(string $repo): ?array
+{
+    $out = eclair_git($repo, ['ls-files', '-z', '--', 'eclair']);
+    if ($out === null) {
+        return null;
+    }
+    $files = [];
+    foreach (explode("\0", $out) as $path) {
+        if (str_starts_with($path, 'eclair/')) {
+            $files[] = substr($path, 7);
+        }
+    }
+    return $files;
+}
+
 $latest = $dist . '/latest.json';
 $current = is_file($latest) ? eclair_announce_read((string) file_get_contents($latest), $public, $context) : 'absente';
 
 if ($resign === null) {
-    // Traductions de l'administration : les fichiers livrés sont recompilés depuis i18n/.
+    $files = distributable($root);
+    // Version publiée : seuls des fichiers suivis par Git entrent dans l'archive signée (jamais un fichier oublié dans le
+    // dossier, comme une copie de eclair-config.php ou un script de débogage) ; le commit source est noté au manifeste.
+    $commit = '';
+    if ($signing) {
+        $tracked = eclair_tracked(dirname(__DIR__));
+        if ($tracked === null) {
+            fwrite(STDERR, "✗ Version signée : dépôt Git introuvable (elle se construit depuis le dépôt). Rien n'a été construit.\n");
+            exit(1);
+        }
+        $untracked = array_values(array_diff($files, $tracked));
+        if ($untracked) {
+            fwrite(STDERR, "✗ Fichiers non suivis par Git, refusés dans une version signée : " . implode(', ', array_slice($untracked, 0, 10))
+                . (count($untracked) > 10 ? '…' : '') . "\n  Ajoute-les avec git add, ou retire-les. Rien n'a été construit.\n");
+            exit(1);
+        }
+        $commit = trim((string) eclair_git(dirname(__DIR__), ['rev-parse', 'HEAD']));
+    }
+
+    // Traductions de l'administration : les fichiers livrés sont recompilés depuis i18n/ (lus comme des données, jamais exécutés).
     require __DIR__ . '/i18n.php';
     echo '✓ Traductions : ' . count(eclair_i18n_build()) . " langues compilées (eclair/app/lang)\n";
 
@@ -172,7 +225,7 @@ if ($resign === null) {
     foreach ($files as $rel) {
         $hashes[$rel] = substr((string) hash_file('sha256', $root . '/' . $rel), 0, 32);
     }
-    $manifest = ['version' => $version, 'generated' => gmdate('c'), 'files' => $hashes];
+    $manifest = ['version' => $version, 'generated' => gmdate('c')] + (preg_match('/^[a-f0-9]{40,64}$/', $commit) ? ['commit' => $commit] : []) + ['files' => $hashes];
     file_put_contents($root . '/app/manifest.php', "<?php exit; ?>\n" . json_encode($manifest, JSON_UNESCAPED_SLASHES) . "\n");
     echo "✓ Empreintes : " . count($hashes) . " fichiers (app/manifest.php)\n";
 

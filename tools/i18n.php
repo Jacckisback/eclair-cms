@@ -17,10 +17,86 @@ declare(strict_types=1);
 
 defined('ECLAIR') || define('ECLAIR', true);
 
+/**
+ * Lit une source i18n/<langue>.php comme des données, sans jamais l'exécuter : seuls la ligne de protection et un tableau
+ * de textes littéraux (« 'texte français' => 'traduction', ») sont acceptés. Une contribution de traduction ne peut donc
+ * faire tourner aucun code, en particulier pendant la construction signée d'une version (tools/build.php).
+ */
+function eclair_i18n_load(string $source): array
+{
+    $tokens = token_get_all((string) file_get_contents($source));
+    $where = static fn (mixed $t): string => basename($source) . (is_array($t) ? ', ligne ' . $t[2] : '');
+    if (!is_array($tokens[0] ?? null) || $tokens[0][0] !== T_OPEN_TAG) {
+        throw new RuntimeException('Traductions : ' . basename($source) . ' doit commencer par <?php.');
+    }
+    $code = array_values(array_filter(array_slice($tokens, 1), static fn (mixed $t): bool => !is_array($t) || !in_array($t[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)));
+    // En-tête attendu, à l'identique : defined('ECLAIR') || exit; return [
+    $head = [[T_STRING, 'defined'], '(', [T_CONSTANT_ENCAPSED_STRING, "'ECLAIR'"], ')', [T_BOOLEAN_OR, '||'], [T_EXIT, 'exit'], ';', [T_RETURN, 'return'], '['];
+    foreach ($head as $i => $want) {
+        $t = $code[$i] ?? null;
+        $ok = is_array($want) ? is_array($t) && $t[0] === $want[0] && strtolower($t[1]) === strtolower($want[1]) : $t === $want;
+        if (!$ok) {
+            throw new RuntimeException('Traductions : en-tête inattendu dans ' . $where($t) . ' (attendu : defined(\'ECLAIR\') || exit; return [).');
+        }
+    }
+    $dict = [];
+    $n = count($code);
+    for ($i = count($head); $i < $n;) {
+        if ($code[$i] === ']') {
+            if (($code[$i + 1] ?? null) !== ';' || $i + 2 !== $n) {
+                throw new RuntimeException('Traductions : rien n’est permis après le tableau dans ' . $where($code[$i + 1] ?? null) . '.');
+            }
+            return $dict;
+        }
+        $key = $code[$i];
+        $arrow = $code[$i + 1] ?? null;
+        $value = $code[$i + 2] ?? null;
+        $next = $code[$i + 3] ?? null;
+        if (!is_array($key) || $key[0] !== T_CONSTANT_ENCAPSED_STRING || !is_array($arrow) || $arrow[0] !== T_DOUBLE_ARROW
+            || !is_array($value) || $value[0] !== T_CONSTANT_ENCAPSED_STRING || ($next !== ',' && $next !== ']')) {
+            throw new RuntimeException('Traductions : seul « \'texte\' => \'traduction\', » est permis (' . $where(is_array($key) ? $key : $value) . ').');
+        }
+        $dict[eclair_i18n_literal($key[1], $where($key))] = eclair_i18n_literal($value[1], $where($value));
+        $i += $next === ',' ? 4 : 3;
+    }
+    throw new RuntimeException('Traductions : tableau non refermé dans ' . basename($source) . '.');
+}
+
+/** Valeur d'un texte littéral PHP (entre apostrophes, ou entre guillemets sans variable), décodé comme PHP le fait. */
+function eclair_i18n_literal(string $literal, string $where): string
+{
+    $body = substr($literal, 1, -1);
+    if ($literal[0] === "'") {
+        return (string) preg_replace_callback("/\\\\([\\\\'])/", static fn (array $m): string => $m[1], $body);
+    }
+    // Entre guillemets : le jeton T_CONSTANT_ENCAPSED_STRING garantit l'absence de variable ; seuls les échappements sont décodés.
+    if ($literal[0] !== '"') {
+        throw new RuntimeException('Traductions : texte illisible (' . $where . ').');
+    }
+    $simple = ['n' => "\n", 't' => "\t", 'r' => "\r", 'v' => "\v", 'e' => "\e", 'f' => "\f", '\\' => '\\', '$' => '$', '"' => '"'];
+    return (string) preg_replace_callback('/\\\\(?:([ntrvef\\\\$"])|([0-7]{1,3})|x([0-9A-Fa-f]{1,2})|u\{([0-9A-Fa-f]+)\})/', static function (array $m) use ($simple, $where): string {
+        if (($m[1] ?? '') !== '') {
+            return $simple[$m[1]];
+        }
+        if (($m[2] ?? '') !== '') {
+            return chr(octdec($m[2]) & 255);
+        }
+        if (($m[3] ?? '') !== '') {
+            return chr((int) hexdec($m[3]));
+        }
+        $code = (int) hexdec($m[4]);
+        $char = function_exists('mb_chr') ? mb_chr($code, 'UTF-8') : false;
+        if (!is_string($char)) {
+            throw new RuntimeException('Traductions : caractère \\u{' . $m[4] . '} invalide (' . $where . ').');
+        }
+        return $char;
+    }, $body);
+}
+
 /** Contenu du fichier livré pour une source i18n/<langue>.php (identique d'une compilation à l'autre). */
 function eclair_i18n_compile(string $source): string
 {
-    $dict = include $source;
+    $dict = eclair_i18n_load($source);
     $map = [];
     $seen = [];
     foreach ($dict as $fr => $text) {

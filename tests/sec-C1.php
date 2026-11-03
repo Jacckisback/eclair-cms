@@ -82,7 +82,7 @@ check('lien symbolique vers le coffre parmi les contenus : exclu (test effectif)
 exec('rm -rf ' . escapeshellarg($c1Root) . ' ' . escapeshellarg($c1Data));
 
 /* ───────────── Canal de mise à jour : adresses permises, outils de publication (unitaire) ───────────── */
-section('Mise à jour : adresses permises, annonce publiée');
+section('Mise à jour : adresses permises, annonce publiée, traductions lues comme des données');
 $c1Trusted = new ReflectionMethod(Eclair\Update::class, 'trusted');
 $c1Urls = [
     'https://raw.githubusercontent.com/Jacckisback/eclair-cms/main/dist/eclair-cms-1.10.3.zip' => true,
@@ -116,6 +116,37 @@ if (is_file($c1Latest)) {
     check('dist/latest.json : l’archive annoncée dans dist/ correspond à son empreinte et à sa taille', $c1Zip !== '' && is_file($c1Zip)
         && hash_file('sha256', $c1Zip) === $c1Announced['fields']['sha256'] && filesize($c1Zip) === $c1Announced['fields']['size'], basename($c1Zip));
 }
+
+require_once dirname(__DIR__) . '/tools/i18n.php';
+$c1Same = function_exists('eclair_i18n_load') ? [] : ['eclair_i18n_load absente'];
+foreach (function_exists('eclair_i18n_load') ? glob(dirname(__DIR__) . '/i18n/*.php') ?: [] : [] as $source) {
+    if (eclair_i18n_load($source) !== include $source) {
+        $c1Same[] = basename($source);
+    }
+}
+check('traductions lues comme des données : même résultat que leur exécution (6 langues)', $c1Same === [] && count(glob(dirname(__DIR__) . '/i18n/*.php') ?: []) === 6, implode(' ', $c1Same));
+$c1Evil = sys_get_temp_dir() . '/eclair-c1-i18n-' . getmypid() . '.php';
+$c1Mark = sys_get_temp_dir() . '/eclair-c1-i18n-mark-' . getmypid();
+@unlink($c1Mark);
+$c1Refused = 0;
+foreach ([
+    "<?php\ndefined('ECLAIR') || exit;\nreturn ['Bonjour' => 'Hello', 'x' => touch('$c1Mark') ? 'a' : 'b'];\n",
+    "<?php\ndefined('ECLAIR') || exit;\ntouch('$c1Mark');\nreturn ['Bonjour' => 'Hello'];\n",
+    "<?php\ndefined('ECLAIR') || exit;\nreturn ['Bonjour' => 'Hel' . 'lo'];\n",
+    "<?php\ndefined('ECLAIR') || exit;\nreturn ['Bonjour' => \"Hello {\$x}\"];\n",
+    "<?php\ndefined('ECLAIR') || exit;\nreturn ['Bonjour' => 'Hello'];\ntouch('$c1Mark');\n",
+] as $code) {
+    file_put_contents($c1Evil, $code);
+    try {
+        if (function_exists('eclair_i18n_load')) {
+            eclair_i18n_load($c1Evil);
+        }
+    } catch (RuntimeException) {
+        $c1Refused++;
+    }
+}
+@unlink($c1Evil);
+check('traduction piégée (appel de fonction, concaténation, variable, code après le tableau) : refusée sans être exécutée', $c1Refused === 5 && !file_exists($c1Mark), (string) $c1Refused);
 
 /* ───────────── tools/build.php : annonce au nouveau format, re-signature, clé jamais affichée (copie de travail) ───────────── */
 if (function_exists('sodium_crypto_sign_keypair') && class_exists('ZipArchive')) {
@@ -198,7 +229,11 @@ if (function_exists('sodium_crypto_sign_keypair') && class_exists('ZipArchive'))
     $res7 = $c1Run(['--resign'], false);
     $res8 = $c1Run(['--inconnue=' . base64_encode($c1Secret)]);
     check('--resign sans la clé : refusé ; argument inconnu jamais recopié', $res7['rc'] !== 0 && str_contains($res7['out'], 'ECLAIR_SIGNING_KEY') && $res8['rc'] !== 0 && !$c1Leak($res8['out']), $res7['out'] . $res8['out']);
-    check('la clé n’apparaît dans aucune sortie de tools/build.php', !$c1Leak($res['out'] . $res2['out'] . $res3['out'] . $res4['out'] . $res5['out'] . $res6['out'] . $res7['out']));
+    // Version signée construite hors d'un dépôt Git : refusée avant toute écriture.
+    $res9 = $c1Run([]);
+    check('version signée hors d’un dépôt Git : refusée, rien n’est construit', $res9['rc'] !== 0 && str_contains($res9['out'], 'Git') && !is_file($c1Build . '/dist/eclair-cms-7.7.8.zip.tmp')
+        && !is_file($c1Build . '/eclair/app/manifest.php'), $res9['out']);
+    check('la clé n’apparaît dans aucune sortie de tools/build.php', !$c1Leak($res['out'] . $res2['out'] . $res3['out'] . $res4['out'] . $res5['out'] . $res6['out'] . $res7['out'] . $res9['out']));
     exec('rm -rf ' . escapeshellarg($c1Build));
 }
 
