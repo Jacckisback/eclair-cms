@@ -42,11 +42,12 @@ final class Markdown
                 $flush();
                 continue;
             }
-            // Bloc de code.
-            if (preg_match('/^(```|~~~)\s*([\w+#-]*)/', $trim, $m)) {
+            // Bloc de code : il se termine à une clôture du même caractère, au moins aussi longue (CommonMark).
+            if (preg_match('/^(`{3,}|~{3,})\s*([\w+#-]*)/', $trim, $m)) {
                 $flush();
                 $code = [];
-                for ($i++; $i < $n && !str_starts_with(trim($lines[$i]), $m[1]); $i++) {
+                $end = '/^' . preg_quote($m[1][0], '/') . '{' . strlen($m[1]) . ',}\s*$/';
+                for ($i++; $i < $n && !preg_match($end, trim($lines[$i])); $i++) {
                     $code[] = $lines[$i];
                 }
                 $blocks[] = ['type' => 'code', 'code' => implode("\n", $code), 'lang' => strtolower($m[2])];
@@ -180,24 +181,25 @@ final class Markdown
         $out = [];
         foreach ($blocks as $b) {
             $out[] = match ($b['type']) {
-                'paragraph' => Blocks::md($b['text']),
-                'heading' => str_repeat('#', $b['level']) . ' ' . Blocks::md($b['text']),
-                'list' => implode("\n", array_map(fn ($li, $k) => ($b['style'] === 'ol' ? ($k + 1) . '. ' : '- ') . Blocks::md($li), $b['items'], array_keys($b['items']))),
-                'quote' => '> ' . Blocks::md($b['text']) . ($b['cite'] !== '' ? "\n> — " . $b['cite'] : ''),
+                'paragraph' => self::fromHtml($b['text']),
+                'heading' => str_repeat('#', $b['level']) . ' ' . self::fromHtml($b['text']),
+                'list' => implode("\n", array_map(fn ($li, $k) => ($b['style'] === 'ol' ? ($k + 1) . '. ' : '- ') . self::fromHtml($li), $b['items'], array_keys($b['items']))),
+                'quote' => '> ' . self::fromHtml($b['text']) . ($b['cite'] !== '' ? "\n> — " . $b['cite'] : ''),
                 'image' => '![' . $b['alt'] . '](media:' . $b['media'] . ')',
-                'callout' => '> [!' . strtoupper(array_search($b['variant'], self::ALERTS, true) ?: 'NOTE') . '] ' . $b['title'] . "\n> " . Blocks::md($b['text']),
-                'faq' => '[FAQ' . ($b['title'] !== '' ? ' : ' . $b['title'] : '') . "]\n" . implode("\n", array_map(fn ($q) => 'Q: ' . $q['q'] . "\nR: " . Blocks::md($q['a']), $b['items'])),
-                'table' => implode("\n", array_map(fn ($r) => '| ' . implode(' | ', array_map([Blocks::class, 'md'], $r)) . ' |', $b['rows'])),
+                'callout' => '> [!' . strtoupper(array_search($b['variant'], self::ALERTS, true) ?: 'NOTE') . '] ' . $b['title'] . "\n> " . self::fromHtml($b['text']),
+                'faq' => '[FAQ' . ($b['title'] !== '' ? ' : ' . $b['title'] : '') . "]\n" . implode("\n", array_map(fn ($q) => 'Q: ' . $q['q'] . "\nR: " . self::fromHtml($q['a']), $b['items'])),
+                'table' => implode("\n", array_map(fn ($r) => '| ' . implode(' | ', array_map([self::class, 'fromHtml'], $r)) . ' |', $b['rows'])),
                 'button' => '[' . t('Bouton') . ' : ' . $b['text'] . '](' . $b['url'] . ')',
                 'video' => '[' . t('Vidéo') . '](' . $b['url'] . ')',
-                'code' => "```" . $b['lang'] . "\n" . $b['code'] . "\n```",
+                // Clôture plus longue que toute suite d'accents graves du code : le bloc reste entier pour le modèle.
+                'code' => ($f = Blocks::fence($b['code'])) . $b['lang'] . "\n" . $b['code'] . "\n" . $f,
                 'divider' => '---',
-                'hero' => '[' . t('Bannière') . '] # ' . $b['title'] . ($b['text'] !== '' ? "\n" . Blocks::md($b['text']) : '')
+                'hero' => '[' . t('Bannière') . '] # ' . $b['title'] . ($b['text'] !== '' ? "\n" . self::fromHtml($b['text']) : '')
                     . ($b['button'] !== '' ? "\n[" . $b['button'] . '](' . $b['url'] . ')' : ''),
                 'features' => '[' . t('Atouts') . ($b['title'] !== '' ? ' : ' . $b['title'] : '') . "]\n"
-                    . implode("\n", array_map(fn ($f) => '- ' . trim($f['icon'] . ' ' . $f['title']) . ($f['text'] !== '' ? ' — ' . Blocks::md($f['text']) : ''), $b['items'])),
+                    . implode("\n", array_map(fn ($f) => '- ' . trim($f['icon'] . ' ' . $f['title']) . ($f['text'] !== '' ? ' — ' . self::fromHtml($f['text']) : ''), $b['items'])),
                 'team' => '[' . t('Équipe') . ($b['title'] !== '' ? ' : ' . $b['title'] : '') . "]\n"
-                    . implode("\n", array_map(fn ($p) => '- ' . $p['name'] . ($p['role'] !== '' ? ' — ' . $p['role'] : '') . ($p['bio'] !== '' ? ' : ' . Blocks::md($p['bio']) : '')
+                    . implode("\n", array_map(fn ($p) => '- ' . $p['name'] . ($p['role'] !== '' ? ' — ' . $p['role'] : '') . ($p['bio'] !== '' ? ' : ' . self::fromHtml($p['bio']) : '')
                         . ($p['media'] !== '' ? ' (photo media:' . $p['media'] . ')' : ''), $b['items'])),
                 'posts' => '[' . t('Derniers articles') . ']',
                 'contact' => '[' . t('Formulaire de contact') . ']',
@@ -205,5 +207,32 @@ final class Markdown
             };
         }
         return trim(implode("\n\n", array_filter($out, fn ($s) => $s !== '')));
+    }
+
+    /**
+     * HTML en ligne (déjà assaini) → Markdown lu par le modèle. Le texte reste tel qu'il a été écrit, sans échappement :
+     * le modèle recopie des passages pour ses modifications ciblées, et inline() les relit tels quels. Seule l'adresse
+     * des liens est revalidée, et « < » hors code devient « &lt; ». Jamais servi aux visiteurs : les exports publics
+     * (.md, llms.txt) passent par Blocks::md, qui neutralise toute la syntaxe Markdown du texte.
+     */
+    public static function fromHtml(string $html): string
+    {
+        $links = [];
+        $md = (string) preg_replace_callback('~<a href="([^"]*)"[^>]*>(.*?)</a>~s', static function (array $m) use (&$links): string {
+            $url = Sanitize::url(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if ($url === '') {
+                return $m[2];
+            }
+            $url = str_starts_with($url, '/') && !str_starts_with($url, '//') ? absolute_url($url) : $url;
+            $links[] = str_replace([' ', '(', ')', '<', '>'], ['%20', '%28', '%29', '%3C', '%3E'], $url);
+            return '[' . $m[2] . "]\x01" . (count($links) - 1) . "\x02";
+        }, str_replace(["\x01", "\x02"], '', $html));
+        $md = strtr($md, [
+            '<strong>' => '**', '</strong>' => '**', '<em>' => '*', '</em>' => '*', '<code>' => '`', '</code>' => '`',
+            '<s>' => '~~', '</s>' => '~~', '<br>' => "  \n",
+        ]);
+        $md = html_entity_decode(strip_tags($md), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $md = (string) preg_replace_callback('~(`[^`\n]*`)|<~', static fn (array $m): string => ($m[1] ?? '') !== '' ? $m[1] : '&lt;', $md);
+        return trim((string) preg_replace_callback("~\x01(\\d+)\x02~", static fn (array $m): string => '(' . $links[(int) $m[1]] . ')', $md));
     }
 }
