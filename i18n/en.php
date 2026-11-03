@@ -1536,4 +1536,7 @@ return [
     '— Aucune —' => '— None —',
     '≈ {cost} l’image.' => '≈ {cost} per image.',
     '≈ {cost} par article' => '≈ {cost} per article',
+    'Annonce de mise à jour refusée (plus ancienne que celle déjà reçue)' => 'Update notice rejected (older than the one already received)',
+    'annonce plus ancienne que celle déjà reçue, ignorée' => 'update notice older than the one already received, ignored',
+    'Annonce de mise à jour périmée depuis le {d} : une version plus récente existe peut-être. Nouvel essai automatique dans une heure.' => 'Update notice expired since {d}: a newer version may exist. Automatic retry in an hour.',
 ];

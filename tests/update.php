@@ -59,14 +59,21 @@ function eclair_release(string $channel, string $version, ?callable $change = nu
     return ['version' => $version, 'file' => $name, 'sha256' => hash_file('sha256', $channel . '/' . $name), 'size' => filesize($channel . '/' . $name), 'files' => $files];
 }
 
-/** Annonce signée (latest.json) pour cette archive. */
+/**
+ * Annonce signée (latest.json) pour cette archive, au format de tools/build.php : signature d'origine, et format 2 avec un
+ * numéro de série croissant d'une annonce à l'autre et une échéance (sans eux, la 1.10.3 refuse l'annonce).
+ */
 function eclair_announce(string $channel, int $port, array $release, string $secret, array $override = []): void
 {
-    $payload = json_encode($override + [
+    static $serial = 1000;
+    require_once dirname(__DIR__) . '/tools/announce.php';
+    preg_match("~private const CONTEXT = '([^']+)'~", (string) file_get_contents(ECLAIR_ROOT . '/app/lib/Update.php'), $context);
+    $fields = array_diff_key($override, ['serial' => 0, 'expires' => 0]) + [
         'version' => $release['version'], 'date' => '2026-11-02', 'url' => 'http://127.0.0.1:' . $port . '/' . $release['file'],
         'sha256' => $release['sha256'], 'size' => $release['size'], 'php' => '8.1', 'notes' => 'https://github.com/Jacckisback/eclair-cms/releases/tag/' . $release['version'],
-    ], JSON_UNESCAPED_SLASHES);
-    file_put_contents($channel . '/latest.json', json_encode(['payload' => $payload, 'signature' => base64_encode(sodium_crypto_sign_detached($payload, $secret))]));
+    ];
+    $signed = eclair_announce_sign($fields, (int) ($override['serial'] ?? ++$serial), (int) ($override['expires'] ?? time() + 86400), $secret, $context[1] ?? '');
+    file_put_contents($channel . '/latest.json', eclair_announce_json($signed));
 }
 
 if (!in_array('--unit', $argv, true) && function_exists('sodium_crypto_sign_keypair') && class_exists('ZipArchive')) {

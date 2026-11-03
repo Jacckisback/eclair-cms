@@ -1536,4 +1536,7 @@ return [
     '— Aucune —' => '— 无 —',
     '≈ {cost} l’image.' => '每张图片约 {cost}。',
     '≈ {cost} par article' => '每篇文章约 {cost}',
+    'Annonce de mise à jour refusée (plus ancienne que celle déjà reçue)' => '更新公告被拒绝（比已收到的公告更旧）',
+    'annonce plus ancienne que celle déjà reçue, ignorée' => '更新公告比已收到的公告更旧，已忽略',
+    'Annonce de mise à jour périmée depuis le {d} : une version plus récente existe peut-être. Nouvel essai automatique dans une heure.' => '更新公告已于 {d} 过期：可能已有更新的版本。一小时后将自动重试。',
 ];

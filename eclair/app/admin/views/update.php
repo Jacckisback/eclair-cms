@@ -10,12 +10,16 @@ use Eclair\I18n;
 use Eclair\Icons;
 use Eclair\Security;
 use Eclair\Settings;
+use Eclair\Update;
 
 $s = $v['state'];
 $p = $v['pending'];
 $lang = I18n::lang();
 $failed = is_array($s['failed'] ?? null) && $p && ($s['failed']['version'] ?? '') === $p['version'] ? $s['failed'] : null;
 $last = is_array($s['last'] ?? null) ? $s['last'] : null;
+// Périmée : annonce gardée dont l'échéance est passée (le canal n'a plus été re-signé) ; signalée, sans rien bloquer.
+$expired = Update::expired($s);
+$error = (string) ($s['error'] ?? '');
 ?>
 <div class="page">
   <div class="topbar"><div><h1><?= e(t('Mises à jour')) ?></h1>
@@ -29,14 +33,17 @@ $last = is_array($s['last'] ?? null) ? $s['last'] : null;
       <p class="update-new"><?= Icons::svg('zap') ?><strong><?= e(t('Éclair {v} est disponible.', ['v' => $p['version']])) ?></strong>
         <?php if ($p['date'] !== ''): ?><span class="muted"><?= e(t('Publiée le {d}.', ['d' => fmt_date((int) strtotime($p['date']), $lang)])) ?></span><?php endif ?>
         <?php if ($p['notes'] !== ''): ?><a href="<?= e($p['notes']) ?>" target="_blank" rel="noopener"><?= e(t('Voir les nouveautés')) ?> →</a><?php endif ?></p>
-    <?php elseif (is_array($s['release'] ?? null)): ?>
+    <?php elseif (Update::current($s)): ?>
       <p class="update-ok"><?= Icons::svg('circle-check') ?><?= e(t('Tu as la dernière version d’Éclair.')) ?></p>
     <?php endif ?>
     <p class="small muted">
       <?php if (!empty($s['checked'])): ?><?= e(t('Dernière vérification : {d}.', ['d' => fmt_date((int) $s['checked'], $lang, true)])) ?> <?php endif ?>
       <?= e(Settings::get('updates.check', true) ? t('Éclair vérifie deux fois par jour, sans rien installer sans ton accord (réglable dans Réglages › Avancé).') : t('Vérification automatique désactivée (Réglages › Avancé) : clique sur « Vérifier maintenant ».')) ?></p>
-    <?php if (!empty($s['error'])): ?>
-      <p class="hint" data-state="bad"><?= Icons::svg('alert') ?><?= e(t('Dernière vérification impossible : {e}.', ['e' => AdminUpdate::reason((string) $s['error'])])) ?></p>
+    <?php if ($error !== '' && $error !== 'expired'): ?>
+      <p class="hint" data-state="bad"><?= Icons::svg('alert') ?><?= e(t('Dernière vérification impossible : {e}.', ['e' => AdminUpdate::reason($error)])) ?></p>
+    <?php endif ?>
+    <?php if ($expired > 0): ?>
+      <div class="notice warn" role="status"><span><?= Icons::svg('alert') ?></span><p><?= e(AdminUpdate::expired($expired)) ?></p></div>
     <?php endif ?>
     <?php if ($failed): ?>
       <div class="notice warn"><span>↩️</span><p><?= e(t('Le {d}, la version {v} ne fonctionnait pas correctement sur ton serveur : Éclair est revenu tout seul à ta version. Vérifie la version de PHP et ses extensions chez ton hébergeur, ou réessaie plus tard.', ['d' => fmt_date((int) $failed['date'], $lang, true), 'v' => $p['version']])) ?></p></div>

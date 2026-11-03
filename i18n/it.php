@@ -1536,4 +1536,7 @@ return [
     '— Aucune —' => '— Nessuna —',
     '≈ {cost} l’image.' => '≈ {cost} a immagine.',
     '≈ {cost} par article' => '≈ {cost} ad articolo',
+    'Annonce de mise à jour refusée (plus ancienne que celle déjà reçue)' => 'Annuncio di aggiornamento rifiutato (più vecchio di quello già ricevuto)',
+    'annonce plus ancienne que celle déjà reçue, ignorée' => 'annuncio più vecchio di quello già ricevuto, ignorato',
+    'Annonce de mise à jour périmée depuis le {d} : une version plus récente existe peut-être. Nouvel essai automatique dans une heure.' => 'Annuncio di aggiornamento scaduto dal {d}: forse esiste una versione più recente. Nuovo tentativo automatico tra un’ora.',
 ];

@@ -15,16 +15,31 @@ defined('ECLAIR') || exit;
  * refuse toute annonce dont la signature ne correspond pas à la clé publique ci-dessous. Un dépôt piraté ne suffit donc
  * pas à pousser du code sur les sites.
  *
+ * Fraîcheur (depuis la 1.10.3) : l'annonce porte une seconde signature (format 2, clé « v2 ») qui couvre aussi un numéro
+ * de série strictement croissant et une date d'expiration. Le site garde le plus grand numéro accepté : une annonce plus
+ * ancienne, même bien signée, est refusée et signalée (un dépôt piraté ne peut plus figer les sites sur une version, ni
+ * proposer de nouveau une version retirée) ; un retrait de version est une nouvelle annonce, au numéro plus grand. Une
+ * annonce périmée reste utilisée mais signalée : le mainteneur re-signe le canal avant l'échéance, même sans nouvelle
+ * version. La signature d'origine reste telle quelle pour les sites en 1.10.0 à 1.10.2, qui ignorent la clé « v2 ».
+ *
  * L'installation ne remplace que le code (app/, assets/, index.php, et .htaccess s'il n'a pas été retouché) : contenus,
- * réglages, comptes, images et CSS personnalisé ne sont jamais touchés. Avant de toucher à quoi que ce soit, l'archive est
- * vérifiée (empreinte annoncée, manifeste, syntaxe PHP lue par la version de PHP du serveur). L'ancien code est gardé de
- * côté, et la mise à jour s'annule d'elle-même si le site ou l'administration ne répondent plus comme avant.
+ * réglages, comptes, images et CSS personnalisé ne sont jamais touchés. Avant de toucher à quoi que ce soit, l'annonce
+ * enregistrée est vérifiée de nouveau (signature), puis l'archive (empreinte annoncée, manifeste, syntaxe PHP lue par la
+ * version de PHP du serveur). L'ancien code est gardé de côté, et la mise à jour s'annule d'elle-même si le site ou
+ * l'administration ne répondent plus comme avant.
  */
 final class Update
 {
     private const CHANNEL = 'https://raw.githubusercontent.com/Jacckisback/eclair-cms/main/dist/latest.json';
     /** Clé publique du mainteneur (Ed25519, base64) : seule une annonce signée par sa clé privée est acceptée. */
     private const KEY = 'H+pk0ph+U+csV7aoGTUZp8hsWBrjvtxavotdKqJuYEs=';
+    /**
+     * Contexte signé devant l'annonce du format 2 (tools/build.php l'ajoute aussi) : une signature faite pour autre chose,
+     * l'annonce d'origine comprise, ne passe jamais pour une annonce de ce format.
+     */
+    private const CONTEXT = 'eclair-cms/annonce/2:';
+    /** Dépôt du projet : l'archive et les notes de version annoncées doivent s'y trouver (jamais dans le dépôt d'un autre). */
+    private const REPOSITORY = 'Jacckisback/eclair-cms';
     private const HOSTS = ['raw.githubusercontent.com', 'github.com'];
     private const MAX = 8000000;
     private const UNPACKED = 40000000;
@@ -41,34 +56,71 @@ final class Update
 
     /* ─────────────────────────────── Annonce ─────────────────────────────── */
 
-    /** Dernière version annoncée et vérifiée ; relue sur GitHub si $refresh ou si la dernière lecture date de plus de 12 h. */
+    /**
+     * Dernière version annoncée et vérifiée ; relue sur GitHub si $refresh, si la dernière lecture date de plus de 12 h, ou
+     * si l'annonce gardée vient d'une version d'avant la 1.10.3 (sans numéro de série : relue une fois, puis oubliée).
+     */
     public static function latest(bool $refresh = false): ?array
     {
         $state = self::state();
-        if ($refresh || (int) ($state['next'] ?? 0) <= time()) {
+        if ($refresh || (int) ($state['next'] ?? 0) <= time() || self::legacy($state)) {
             $state = self::refresh($state);
         }
-        return is_array($state['release'] ?? null) ? $state['release'] : null;
+        return self::known($state);
     }
 
     /** Version plus récente déjà connue, sans appel réseau (menu, tableau de bord) ; null s'il n'y en a pas. */
     public static function pending(): ?array
     {
-        $r = self::state()['release'] ?? null;
-        return is_array($r) && version_compare((string) $r['version'], ECLAIR_VERSION, '>') ? $r : null;
+        $r = self::known(self::state());
+        return $r !== null && version_compare((string) $r['version'], ECLAIR_VERSION, '>') ? $r : null;
     }
 
     /** Faut-il relire l'annonce en arrière-plan (vérification automatique active et dernière lecture de plus de 12 h) ? */
     public static function stale(): bool
     {
-        return (bool) Settings::get('updates.check', true) && (int) (self::state()['next'] ?? 0) <= time();
+        $state = self::state();
+        return (bool) Settings::get('updates.check', true) && ((int) ($state['next'] ?? 0) <= time() || self::legacy($state));
     }
 
-    /** État enregistré : annonce lue (release), date (checked), erreur, dernière mise à jour (last), dernière annulée (failed). */
+    /**
+     * État enregistré : annonce lue (release, avec sa version signée « signed » et son numéro « serial », le plus grand
+     * accepté), date (checked), erreur, dernière mise à jour (last), dernière annulée (failed).
+     */
     public static function state(): array
     {
         $s = Store::read('update', []);
         return is_array($s) ? $s : [];
+    }
+
+    /**
+     * La dernière vérification permet-elle d'affirmer qu'Éclair est à jour ? Seulement si elle a réussi, avec une annonce
+     * signée de son numéro de série et pas encore périmée (jamais après un échec, un rejeu ou une annonce périmée).
+     */
+    public static function current(array $state): bool
+    {
+        $r = self::known($state);
+        return $r !== null && (string) ($state['error'] ?? '') === '' && (int) $r['expires'] > time();
+    }
+
+    /** Date d'expiration de l'annonce gardée si elle est dépassée (le canal n'a plus été re-signé depuis), sinon 0. */
+    public static function expired(array $state): int
+    {
+        $r = self::known($state);
+        return $r !== null && (int) $r['expires'] <= time() ? (int) $r['expires'] : 0;
+    }
+
+    /** Annonce gardée par ce code (format 2, avec son numéro de série), ou null. */
+    private static function known(array $state): ?array
+    {
+        $r = $state['release'] ?? null;
+        return is_array($r) && is_int($r['serial'] ?? null) && $r['serial'] > 0 && is_int($r['expires'] ?? null) ? $r : null;
+    }
+
+    /** Annonce enregistrée par une version d'avant la 1.10.3 (sans numéro de série) : jamais proposée, relue au plus vite. */
+    private static function legacy(array $state): bool
+    {
+        return is_array($state['release'] ?? null) && self::known($state) === null;
     }
 
     /** Version installée sur le disque (manifeste), même si ce processus a démarré avec l'ancien code. */
@@ -80,12 +132,31 @@ final class Update
     private static function refresh(array $state): array
     {
         $error = '';
-        $release = self::fetch($error);
-        $state = ['checked' => time(), 'next' => time() + ($release !== null ? self::EVERY : self::RETRY), 'error' => $error] + $state;
-        if ($release !== null) {
-            // L'annonce la plus récente fait foi, même si elle revient en arrière (version retirée par le mainteneur).
-            $state['release'] = $release;
+        $signed = null;
+        $release = self::fetch($error, $signed);
+        $seen = (int) ($state['serial'] ?? 0);
+        if ($error === 'replay' || ($release !== null && $release['serial'] < $seen)) {
+            // Annonce bien signée mais plus ancienne que la dernière acceptée (ou d'avant la 1.10.3) : rejouée par le canal.
+            // Elle est ignorée ; la dernière acceptée reste proposée.
+            Log::security('update_replayed', ['serial' => $release['serial'] ?? 0, 'seen' => $seen]);
+            $error = 'replay';
+            $release = null;
         }
+        if (self::legacy($state)) {
+            // Annonce d'une version d'avant la 1.10.3 (sans numéro de série) : jamais réutilisée par ce code.
+            unset($state['release'], $state['signed']);
+        }
+        if ($release !== null) {
+            // Le plus grand numéro de série fait foi : un retrait de version est une nouvelle annonce, au numéro plus grand.
+            $state['release'] = $release;
+            $state['signed'] = $signed;
+            $state['serial'] = $release['serial'];
+            if ($release['expires'] <= time()) {
+                // Gardée (c'est la plus récente connue) mais signalée : le canal n'a plus été re-signé depuis son échéance.
+                $error = 'expired';
+            }
+        }
+        $state = ['checked' => time(), 'next' => time() + ($error === '' ? self::EVERY : self::RETRY), 'error' => $error] + $state;
         try {
             Store::write('update', $state);
         } catch (\Throwable $e) {
@@ -94,8 +165,11 @@ final class Update
         return $state;
     }
 
-    /** Lit et vérifie l'annonce. $error : network, signature, format ou sodium. */
-    private static function fetch(string &$error): ?array
+    /**
+     * Lit et vérifie l'annonce. $error : network, signature, format, sodium, ou replay (annonce d'avant la 1.10.3, sans
+     * signature du format 2). $signed reçoit l'annonce signée du format 2, gardée pour être vérifiée de nouveau à l'installation.
+     */
+    private static function fetch(string &$error, ?array &$signed = null): ?array
     {
         if (!function_exists('sodium_crypto_sign_verify_detached')) {
             $error = 'sodium';
@@ -107,20 +181,43 @@ final class Update
             $error = 'network';
             return null;
         }
-        if (!self::signed($outer['payload'], (string) ($outer['signature'] ?? ''))) {
-            $error = 'signature';
-            Log::security('update_rejected');
+        $v2 = $outer['v2'] ?? null;
+        if (!is_array($v2) || !is_string($v2['payload'] ?? null)) {
+            // Pas de signature du format 2 : une annonce d'avant la 1.10.3 si l'ancienne signature est bonne, sinon un faux.
+            $error = self::signed($outer['payload'], (string) ($outer['signature'] ?? '')) ? 'replay' : 'signature';
+            if ($error === 'signature') {
+                Log::security('update_rejected');
+            }
             return null;
         }
-        $r = json_decode($outer['payload'], true);
+        $signed = ['payload' => $v2['payload'], 'signature' => (string) ($v2['signature'] ?? '')];
+        $release = self::verify($signed, $error);
+        if ($error === 'signature') {
+            Log::security('update_rejected');
+        }
+        return $release;
+    }
+
+    /** Annonce du format 2 vérifiée (signature, champs, adresses), ou null avec $error : signature ou format. */
+    private static function verify(array $signed, string &$error): ?array
+    {
+        $payload = (string) ($signed['payload'] ?? '');
+        if (!self::signed(self::CONTEXT . $payload, (string) ($signed['signature'] ?? ''))) {
+            $error = 'signature';
+            return null;
+        }
+        $r = json_decode($payload, true);
         $semver = '/^\d{1,3}\.\d{1,3}\.\d{1,3}$/';
         if (!is_array($r) || !preg_match($semver, (string) ($r['version'] ?? '')) || !preg_match('/^[a-f0-9]{64}$/', (string) ($r['sha256'] ?? ''))
-            || !self::trusted((string) ($r['url'] ?? '')) || !is_int($r['size'] ?? null) || $r['size'] < 1000 || $r['size'] > self::MAX) {
+            || !self::trusted((string) ($r['url'] ?? '')) || !is_int($r['size'] ?? null) || $r['size'] < 1000 || $r['size'] > self::MAX
+            || !is_int($r['serial'] ?? null) || $r['serial'] < 1 || !is_int($r['expires'] ?? null) || $r['expires'] < 1) {
             $error = 'format';
             return null;
         }
         return [
             'version' => $r['version'], 'url' => $r['url'], 'sha256' => $r['sha256'], 'size' => $r['size'],
+            // Numéro de série (strictement croissant d'une annonce à l'autre) et date d'expiration, signés avec le reste.
+            'serial' => $r['serial'], 'expires' => $r['expires'],
             'php' => preg_match('/^\d\.\d{1,2}$/', (string) ($r['php'] ?? '')) ? $r['php'] : '8.1',
             // Version minimale pour la mise à jour en un clic : en dessous, la page demande une installation manuelle.
             'from' => preg_match($semver, (string) ($r['from'] ?? '')) ? $r['from'] : '',
@@ -134,25 +231,48 @@ final class Update
         return defined('ECLAIR_UPDATE_URL') ? (string) ECLAIR_UPDATE_URL : self::CHANNEL;
     }
 
-    /** Signature Ed25519 de l'annonce par la clé du mainteneur. */
-    private static function signed(string $payload, string $signature): bool
+    /** Signature Ed25519 par la clé du mainteneur. */
+    private static function signed(string $message, string $signature): bool
     {
         $key = base64_decode(defined('ECLAIR_UPDATE_KEY') ? (string) ECLAIR_UPDATE_KEY : self::KEY, true);
         $sig = base64_decode($signature, true);
         return function_exists('sodium_crypto_sign_verify_detached') && is_string($key) && strlen($key) === 32 && is_string($sig) && strlen($sig) === 64
-            && sodium_crypto_sign_verify_detached($sig, $payload, $key);
+            && sodium_crypto_sign_verify_detached($sig, $message, $key);
     }
 
-    /** Adresse permise : GitHub en HTTPS, ou le serveur du canal (canal de test ou de fork déclaré dans eclair-config.php). */
+    /**
+     * Adresse permise : dans le dépôt du projet sur GitHub, en HTTPS ; pour un canal déclaré dans eclair-config.php (test,
+     * fork), dans son dépôt GitHub, ou sur son serveur. Chemin simple seulement : ni « .. », ni paramètres, ni identifiants.
+     */
     private static function trusted(string $url): bool
     {
         $u = parse_url($url);
-        $c = parse_url(self::channel());
-        if (!is_array($u) || !isset($u['scheme'], $u['host']) || isset($u['user']) || isset($u['pass'])) {
+        $path = is_array($u) ? (string) ($u['path'] ?? '') : '';
+        if (!is_array($u) || !isset($u['scheme'], $u['host']) || isset($u['user']) || isset($u['pass']) || isset($u['query']) || isset($u['fragment'])
+            || !preg_match('#^/[A-Za-z0-9._~/-]*$#', $path) || preg_match('#(^|/)\.{1,2}(/|$)#', $path)) {
             return false;
         }
-        return ($u['scheme'] === 'https' && in_array($u['host'], self::HOSTS, true))
-            || ($u['scheme'] === ($c['scheme'] ?? '') && $u['host'] === ($c['host'] ?? '') && ($u['port'] ?? null) === ($c['port'] ?? null));
+        foreach (self::prefixes() as $prefix) {
+            if (str_starts_with($url, $prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Débuts d'adresse permis : le dépôt du projet, et celui (ou le serveur) d'un canal déclaré dans eclair-config.php. */
+    private static function prefixes(): array
+    {
+        $out = [];
+        $c = parse_url(self::channel());
+        $repo = self::REPOSITORY;
+        if (is_array($c) && isset($c['scheme'], $c['host']) && !in_array($c['host'], self::HOSTS, true)) {
+            $out[] = $c['scheme'] . '://' . $c['host'] . (isset($c['port']) ? ':' . $c['port'] : '') . '/';
+        } elseif (is_array($c) && preg_match('#^/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/#', (string) ($c['path'] ?? ''), $m) && $m[1] !== $repo) {
+            $out[] = 'https://raw.githubusercontent.com/' . $m[1] . '/';
+            $out[] = 'https://github.com/' . $m[1] . '/';
+        }
+        return array_merge($out, ['https://raw.githubusercontent.com/' . $repo . '/', 'https://github.com/' . $repo . '/']);
     }
 
     /** Téléchargement borné, sans redirection ; dans un fichier si $file est donné ('' en cas de succès). Null en cas d'échec. */
@@ -241,6 +361,17 @@ final class Update
      */
     public static function install(array $release): array
     {
+        // L'archive à poser vient de l'annonce signée gardée, vérifiée de nouveau : data/update.php seul ne suffit jamais à
+        // désigner une archive (adresse, empreinte, taille).
+        $error = '';
+        $state = self::state();
+        $signed = is_array($state['signed'] ?? null) ? self::verify($state['signed'], $error) : null;
+        if ($signed === null || $signed['version'] !== (string) ($release['version'] ?? '') || $signed['serial'] < (int) ($state['serial'] ?? 0)) {
+            Log::security('update_rejected');
+            self::remember(['next' => 0]);
+            return ['ok' => false, 'error' => t('Vérification impossible : {e}. Nouvel essai automatique dans une heure.', ['e' => t('annonce refusée, sa signature ne correspond pas à celle du mainteneur')])];
+        }
+        $release = $signed;
         if ($blocked = self::blockers($release)) {
             return ['ok' => false, 'error' => $blocked[0]];
         }

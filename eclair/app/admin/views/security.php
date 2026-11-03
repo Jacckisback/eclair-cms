@@ -18,7 +18,7 @@ $events = [
     'totp_locked' => t('2FA bloquée (trop de codes faux)'), 'sudo_failed' => t('Confirmation du mot de passe refusée'),
     'update_installed' => t('Mise à jour d’Éclair installée'), 'update_rolled_back' => t('Retour à la version précédente d’Éclair'),
     'update_rejected' => t('Annonce de mise à jour refusée (signature)'), 'update_download_failed' => t('Archive de mise à jour altérée'),
-    'update_archive_rejected' => t('Archive de mise à jour refusée'),
+    'update_archive_rejected' => t('Archive de mise à jour refusée'), 'update_replayed' => t('Annonce de mise à jour refusée (plus ancienne que celle déjà reçue)'),
     'drive_connected' => t('Google Drive connecté'), 'drive_disconnected' => t('Google Drive déconnecté'),
     'drive_revoked' => t('Accès à Google Drive retiré'), 'drive_backup' => t('Sauvegarde envoyée sur Google Drive'),
     'drive_app_saved' => t('Application Google enregistrée'), 'drive_app_removed' => t('Application Google retirée de ce site'),
