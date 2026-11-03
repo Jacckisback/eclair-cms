@@ -114,9 +114,8 @@ section('Assistant IA : parcours complet (faux fournisseurs)');
 [$copy, $port, $server] = serve('ai');
 $fakeDir = sys_get_temp_dir() . '/eclair-fake-ai-' . getmypid();
 @mkdir($fakeDir);
-$fakePort = random_int(40001, 50000);
-$fake = proc_open([PHP_BINARY, '-S', '127.0.0.1:' . $fakePort, __DIR__ . '/fake-ai.php'], [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']],
-    $fakePipes, null, ['FAKE_AI_DIR' => $fakeDir, 'PATH' => (string) getenv('PATH'), 'PHP_CLI_SERVER_WORKERS' => '4']);
+// Port libre vérifié (start_server) : jamais le faux serveur d'une autre suite lancée en même temps.
+[$fakePort, $fake] = start_server([__DIR__ . '/fake-ai.php'], ['FAKE_AI_DIR' => $fakeDir, 'PHP_CLI_SERVER_WORKERS' => '4'], 40001, 50000);
 $fakeBase = 'http://127.0.0.1:' . $fakePort;
 file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_AI_ENDPOINTS', ['anthropic' => '$fakeBase', 'openai' => '$fakeBase', 'bfl' => '$fakeBase', 'ideogram' => '$fakeBase']);\n");
 usleep(400000);

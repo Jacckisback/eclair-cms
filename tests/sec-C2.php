@@ -81,13 +81,15 @@ exec('rm -rf ' . escapeshellarg($mailDir));
 section('Sécurité 1.10.3 : brouillons de secours par compte, bouton « Autoriser » protégé, liens de l’assistant');
 $adminJs = (string) file_get_contents(ECLAIR_ROOT . '/assets/admin/admin.js');
 $editorJs = (string) file_get_contents(ECLAIR_ROOT . '/assets/admin/editor.js');
-$oauthView = (string) file_get_contents(ECLAIR_ROOT . '/app/admin/views/oauth.php');
+// Vue livrée compressée dans l'archive (app/admin/views/*.php.gz) : la suite tourne aussi sur l'archive (ECLAIR_TEST_ROOT).
+$oauthView = is_file(ECLAIR_ROOT . '/app/admin/views/oauth.php') ? (string) file_get_contents(ECLAIR_ROOT . '/app/admin/views/oauth.php')
+    : (string) @gzdecode((string) @file_get_contents(ECLAIR_ROOT . '/app/admin/views/oauth.php.gz'));
 preg_match_all('~localStorage\.\w+\(([^)]*)\)~', $editorJs, $direct);
 check('éditeur : brouillons lus, écrits et effacés seulement par le magasin lié au compte (drafts)', str_contains($editorJs, 'drafts.key(item)')
     && str_contains($editorJs, 'drafts.get(storeKey)') && str_contains($editorJs, 'drafts.set(storeKey') && !str_contains($editorJs, "'eclair-draft-")
     && array_filter($direct[1], static fn (string $a): bool => !str_contains($a, 'eclair-mode')) === [], implode(' | ', $direct[0]));
 check('admin.js : brouillons effacés à la déconnexion et sur la page qui la suit', str_contains($adminJs, "form[data-logout]") && str_contains($adminJs, 'bye=1')
-    && str_contains($adminJs, "SITE + D.me + '-'"));
+    && preg_match("~SITE\s*\+\s*D\.me\s*\+\s*'-'~", $adminJs) === 1); // source ou version allégée de l'archive
 check('consentement : « Autoriser » désactivé dans le HTML, consent.js chargé', (bool) preg_match('~value="allow"[^>]*\sdisabled\sdata-gate~', $oauthView)
     && str_contains($oauthView, "asset('admin/consent.js')") && is_file(ECLAIR_ROOT . '/assets/admin/consent.js'));
 
@@ -261,7 +263,7 @@ safe('gateEnter', () => {
   return [typed, [h.submits(), h.last.defaultPrevented]];
 });
 safe('links', () => {
-  const m = fs.readFileSync(assistantFile, 'utf8').match(/const safeHref = (\(url\) => .*?);\n/);
+  const m = fs.readFileSync(assistantFile, 'utf8').match(/safeHref\s*=\s*(\(url\)\s*=>.*?);/);
   const fn = vm.runInNewContext(m[1]);
   return ['/contact', '#faq', 'https://exemple.fr/a', '//evil.example/x', '/\\evil.example/x', 'javascript:alert(1)'].map((u) => fn(u) !== null);
 });
