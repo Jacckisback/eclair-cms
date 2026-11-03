@@ -152,11 +152,13 @@ $meter = static fn (int $s): string => '<meter min="0" max="100" low="50" high="
 
       <section class="card" aria-labelledby="health-title">
         <h2 id="health-title"><?= e(t('Santé du site')) ?></h2>
+        <?php if ($v['health']): ?>
         <ul class="health">
           <?php foreach ($v['health'] as $h): ?>
             <li class="<?= $h['ok'] ? 'ok' : 'warn' ?>"><?= Icons::svg($h['ok'] ? 'circle-check' : 'alert') ?><span><?= e($h['label']) ?></span></li>
           <?php endforeach ?>
         </ul>
+        <?php endif ?>
         <p class="files-line"><?= e(t('Fichiers générés automatiquement :')) ?>
           <a href="<?= e(path_to('/sitemap.xml')) ?>" target="_blank" rel="noopener">sitemap.xml</a> ·
           <a href="<?= e(path_to('/robots.txt')) ?>" target="_blank" rel="noopener">robots.txt</a> ·

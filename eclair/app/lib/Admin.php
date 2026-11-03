@@ -336,7 +336,8 @@ final class Admin
             ],
             'recent' => array_slice($recent, 0, 6, true),
             'improve' => array_slice(array_filter($improve, fn ($e) => $e['score']['seo'] < 80 || $e['score']['geo'] < 80), 0, 5, true),
-            'health' => self::health($user),
+            // Réservé aux administrateurs : version de PHP, administrateurs sans double authentification… (rien qu'un rédacteur puisse régler).
+            'health' => $user['role'] === 'admin' ? self::health($user) : [],
         ], t('Tableau de bord'));
     }
 
