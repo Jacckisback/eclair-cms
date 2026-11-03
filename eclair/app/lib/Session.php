@@ -11,10 +11,18 @@ defined('ECLAIR') || exit;
  * Sessions stockées dans data/sessions, sous un nom haché :
  * même en listant le dossier, impossible de retrouver un identifiant de session valide.
  * Les sessions ne sont démarrées que pour l'administration (le site public reste sans cookie).
+ *
+ * Concurrence : contrairement au gestionnaire de fichiers de PHP, une requête n'en bloque pas une autre de la même
+ * session pendant toute sa durée (une longue sauvegarde ne fige pas les autres onglets). Écriture, mise à jour et
+ * destruction passent en revanche sous le verrou des données : une session fermée (déconnexion, nouvel identifiant)
+ * n'est jamais recréée par une requête plus lente qui l'avait lue avant. La dernière écriture l'emporte.
  */
 final class Session implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     public const NAME = 'eclair_sid';
+
+    /** @var array<string, bool> Sessions dont le fichier existait quand cette requête les a lues. */
+    private array $seen = [];
 
     public static function start(): void
     {
@@ -42,6 +50,13 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
             'samesite' => 'Strict',
         ]);
         session_start();
+        // Session enregistrée avant le premier octet de la réponse (et non après) : la requête suivante, souvent
+        // immédiate (clic, autre onglet), lit toujours la session à jour et ne réécrit pas une copie périmée (jeton, message).
+        header_register_callback(static function (): void {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                @session_write_close();
+            }
+        });
     }
 
     /** Reprend une session existante, sans jamais en créer pour un visiteur anonyme. */
@@ -113,18 +128,28 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
     public function read(string $id): string|false
     {
         $raw = @file_get_contents($this->path($id));
+        $this->seen[$id] = $raw !== false;
         return $raw === false ? '' : Store::strip($raw);
     }
 
+    /**
+     * Une session qui existait à la lecture et a disparu depuis (fermée par une requête concurrente) n'est jamais
+     * recréée : le contrôle et l'écriture se font sous le même verrou que destroy().
+     */
     public function write(string $id, string $data): bool
     {
-        if ($data === '' && !is_file($this->path($id))) {
-            return true;
-        }
+        $file = $this->path($id);
         try {
-            Store::atomic($this->path($id), Store::GUARD . $data);
-            return true;
-        } catch (\Throwable) {
+            return (bool) Store::locked(function () use ($id, $data, $file): bool {
+                clearstatcache(true, $file);
+                if (!is_file($file) && ($data === '' || !empty($this->seen[$id]))) {
+                    return true;
+                }
+                Store::atomic($file, Store::GUARD . $data);
+                return true;
+            });
+        } catch (\Throwable $e) {
+            Log::error($e); // verrou des données ou dossier inutilisable : la cause reste dans le journal des erreurs
             return false;
         }
     }
@@ -132,7 +157,15 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
     public function destroy(string $id): bool
     {
         $file = $this->path($id);
-        return !is_file($file) || @unlink($file);
+        $end = static function () use ($file): bool {
+            clearstatcache(true, $file);
+            return !is_file($file) || @unlink($file);
+        };
+        try {
+            return (bool) Store::locked($end);
+        } catch (\Throwable) {
+            return $end(); // verrou des données inutilisable : la session est fermée quand même
+        }
     }
 
     public function gc(int $max_lifetime): int|false
@@ -151,10 +184,20 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
         return is_file($this->path($id));
     }
 
-    /** Ne crée jamais de fichier : une session vide (identifiant inconnu, visiteur anonyme) ne laisse aucune trace. */
+    /**
+     * Ne crée jamais de fichier : une session vide (identifiant inconnu, visiteur anonyme) ne laisse aucune trace,
+     * et une session détruite au même moment n'est pas recréée vide (même verrou que destroy()).
+     */
     public function updateTimestamp(string $id, string $data): bool
     {
         $file = $this->path($id);
-        return !is_file($file) || @touch($file);
+        try {
+            return (bool) Store::locked(static function () use ($file): bool {
+                clearstatcache(true, $file);
+                return !is_file($file) || @touch($file);
+            });
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

@@ -34,7 +34,8 @@ final class AdminUsers
             Admin::back('users', t('Cette adresse e-mail est déjà utilisée.'), 'bad');
         }
         $password = Security::randomPassword();
-        Users::create([
+        // E-mail revérifié sous verrou : deux créations simultanées ne donnent jamais deux comptes au même e-mail.
+        $created = Users::create([
             'name' => $name,
             'email' => $email,
             'pass' => Security::hashPassword($password),
@@ -42,6 +43,9 @@ final class AdminUsers
             'lang' => I18n::lang(),
             'must_change' => true,
         ]);
+        if (!$created) {
+            Admin::back('users', t('Cette adresse e-mail est déjà utilisée.'), 'bad');
+        }
         Log::security('user_created', ['target' => $email]);
         Session::flash('secret', t('Compte créé. Transmets ce mot de passe provisoire à {name} (il ne sera plus affiché) : {pass}', ['name' => $name, 'pass' => $password]));
         Http::redirect(admin_url('users'));
@@ -72,7 +76,7 @@ final class AdminUsers
                 if ($isSelf || $lastAdmin) {
                     Admin::back('users/' . $id, t('Impossible de supprimer ce compte.'), 'bad');
                 }
-                Users::delete($id);
+                Users::delete($id, (string) $user['id']) || Admin::back('users/' . $id, t('Impossible de supprimer ce compte.'), 'bad');
                 // Pages en cache qui montrent ce compte (page d'auteur, signatures, Markdown, flux, plan du site) : périmées.
                 Cache::purge();
                 Log::security('user_deleted', ['target' => $target['email']]);
@@ -89,6 +93,10 @@ final class AdminUsers
                 Session::flash('secret', t('Nouveau mot de passe provisoire pour {name} : {pass}', ['name' => $target['name'], 'pass' => $password]));
                 Http::redirect(admin_url('users/' . $id));
             case 'disable2fa':
+                // Sa propre 2FA se désactive depuis Mon profil, avec le mot de passe actuel (pas avec la seule confirmation récente).
+                if ($isSelf) {
+                    Admin::back('profile#securite');
+                }
                 Users::update($id, fn (array $u): array => ['totp' => self::NO_TOTP] + $u);
                 Log::security('2fa_reset', ['target' => $target['email']]);
                 Admin::back('users/' . $id, t('Double authentification désactivée pour ce compte.'));
@@ -100,14 +108,24 @@ final class AdminUsers
                 }
                 $name = Sanitize::text(Req::input('name'), 80);
                 $role = Req::input('role') === 'admin' ? 'admin' : 'editor';
-                Users::update($id, function (array $u) use ($name, $email, $role, $isSelf, $lastAdmin): array {
+                $taken = false;
+                Users::update($id, function (array $u) use ($id, $name, $email, $role, $isSelf, &$taken): ?array {
+                    // Revérifié sous verrou : e-mail toujours libre, et le site garde un administrateur
+                    // (deux rétrogradations croisées ne le laissent jamais sans).
+                    if (Users::taken(Users::all(), $email, $id)) {
+                        $taken = true;
+                        return null;
+                    }
                     $u['name'] = $name !== '' ? $name : $u['name'];
                     $u['email'] = $email;
-                    if (!$lastAdmin && !$isSelf) {
+                    if (!$isSelf && ($u['role'] !== 'admin' || count(Users::admins()) > 1)) {
                         $u['role'] = $role;
                     }
                     return $u;
                 });
+                if ($taken) {
+                    Admin::back('users/' . $id, t('Adresse e-mail invalide ou déjà utilisée.'), 'bad');
+                }
                 Cache::purge();
                 Admin::back('users/' . $id, t('Compte mis à jour.'));
         }
@@ -138,8 +156,9 @@ final class AdminUsers
         $id = (string) $user['id'];
         switch (Req::input('action')) {
             case 'password':
-                if (!password_verify(Req::input('current'), (string) $user['pass'])) {
-                    Admin::back('profile#mot-de-passe', t('Mot de passe actuel incorrect.'), 'bad');
+                $check = Auth::checkPassword($user, Req::input('current'));
+                if ($check !== 'ok') {
+                    Admin::back('profile#mot-de-passe', self::refusal($check, t('Mot de passe actuel incorrect.')), 'bad');
                 }
                 $new = Req::input('password');
                 $issues = Security::passwordIssues($new, [$user['name'], explode('@', $user['email'])[0]]);
@@ -158,32 +177,59 @@ final class AdminUsers
                 Log::security('password_changed');
                 Admin::back('profile', t('Mot de passe modifié. Les autres appareils ont été déconnectés.'));
             case '2fa-start':
+                // Déjà active : jamais remplacée d'ici. Pour changer de téléphone, on la désactive (mot de passe actuel), puis on recommence.
+                if (!empty($user['totp']['on'])) {
+                    Admin::back('profile#securite');
+                }
                 $_SESSION['totp_setup'] = Totp::secret();
                 Http::redirect(admin_url('profile#securite'));
             case '2fa-confirm':
+                if (!empty($user['totp']['on'])) {
+                    Admin::back('profile#securite');
+                }
+                // Action sensible : mot de passe redemandé si la connexion date de plus de 15 minutes ; codes faux limités.
+                if (!Auth::confirmed($user)) {
+                    Admin::back('profile#securite', t('Mot de passe incorrect.'), 'bad');
+                }
+                if (!RateLimit::attempt('totp-setup:' . $id, 10, 900, 900)) {
+                    Admin::back('profile#securite', t('Trop de tentatives. Par sécurité, réessaie dans quelques minutes.'), 'bad');
+                }
                 $secret = (string) ($_SESSION['totp_setup'] ?? '');
                 $step = $secret !== '' ? Totp::verify($secret, Req::input('code')) : null;
                 if ($step === null) {
                     Admin::back('profile#securite', t('Code incorrect : vérifie l’heure de ton téléphone et réessaie.'), 'bad');
                 }
+                RateLimit::release('totp-setup:' . $id);
                 $codes = Totp::recoveryCodes();
                 $totp = ['on' => true, 'secret' => $secret, 'last' => $step, 'recovery' => array_map([Totp::class, 'hashRecovery'], $codes)];
-                Users::update($id, fn (array $u): array => ['totp' => $totp] + $u);
+                $enabled = false;
+                Users::update($id, function (array $u) use ($totp, &$enabled): ?array {
+                    if (!empty($u['totp']['on'])) {
+                        return null; // activée entre-temps (autre onglet) : jamais remplacée d'ici
+                    }
+                    $enabled = true;
+                    return ['totp' => $totp] + $u;
+                });
+                if (!$enabled) {
+                    Admin::back('profile#securite');
+                }
                 unset($_SESSION['totp_setup']);
                 $_SESSION['recovery_show'] = $codes;
                 Log::security('2fa_enabled');
                 Session::flash('ok', t('Double authentification activée. Garde précieusement tes codes de secours.'));
                 Http::redirect(admin_url('profile#securite'));
             case '2fa-disable':
-                if (!password_verify(Req::input('current'), (string) $user['pass'])) {
-                    Admin::back('profile#securite', t('Mot de passe incorrect.'), 'bad');
+                $check = Auth::checkPassword($user, Req::input('current'));
+                if ($check !== 'ok') {
+                    Admin::back('profile#securite', self::refusal($check, t('Mot de passe incorrect.')), 'bad');
                 }
                 Users::update($id, fn (array $u): array => ['totp' => self::NO_TOTP] + $u);
                 Log::security('2fa_disabled');
                 Admin::back('profile#securite', t('Double authentification désactivée.'), 'warn');
             case 'recovery':
-                if (empty($user['totp']['on']) || !password_verify(Req::input('current'), (string) $user['pass'])) {
-                    Admin::back('profile#securite', t('Mot de passe incorrect.'), 'bad');
+                $check = empty($user['totp']['on']) ? 'invalid' : Auth::checkPassword($user, Req::input('current'));
+                if ($check !== 'ok') {
+                    Admin::back('profile#securite', self::refusal($check, t('Mot de passe incorrect.')), 'bad');
                 }
                 $codes = Totp::recoveryCodes();
                 $hashes = array_map([Totp::class, 'hashRecovery'], $codes);
@@ -194,10 +240,12 @@ final class AdminUsers
                 $_SESSION['recovery_show'] = $codes;
                 Http::redirect(admin_url('profile#securite'));
             case 'revoke':
-                $user = Auth::revokeAll($id);
-                if (!$user || !Auth::login($user)) {
+                // Aucun mot de passe vérifié ici : la session garde son âge et sa confirmation (Auth::rebind, pas login).
+                $saved = Auth::revokeAll($id);
+                if (!$saved || !Auth::rebind($saved)) {
                     Admin::back('profile', t('Session expirée : réessaie.'), 'bad');
                 }
+                Log::security('sessions_revoked');
                 Admin::back('profile#securite', t('Tous tes autres appareils ont été déconnectés.'));
             default:
                 $email = Sanitize::email(Req::input('email'));
@@ -228,10 +276,30 @@ final class AdminUsers
                 if ($name !== '') {
                     $changes['name'] = $name;
                 }
-                Users::update($id, fn (array $u): array => $changes + $u);
+                $taken = false;
+                Users::update($id, function (array $u) use ($id, $changes, &$taken): ?array {
+                    if (Users::taken(Users::all(), (string) $changes['email'], $id)) {
+                        $taken = true; // revérifié sous verrou : pris entre-temps par un autre compte
+                        return null;
+                    }
+                    return $changes + $u;
+                });
+                if ($taken) {
+                    Admin::back('profile', t('Adresse e-mail invalide ou déjà utilisée.'), 'bad');
+                }
                 Cache::purge();
                 I18n::setLang($lang);
                 Admin::back('profile', t('Profil enregistré.'));
         }
+    }
+
+    /** Message d'un mot de passe refusé : faux, trop d'essais, ou serveur saturé. */
+    private static function refusal(string $check, string $wrong): string
+    {
+        return match ($check) {
+            'locked' => t('Trop de tentatives. Par sécurité, réessaie dans quelques minutes.'),
+            'busy' => t('Le serveur est très sollicité : réessaie dans un instant.'),
+            default => $wrong,
+        };
     }
 }

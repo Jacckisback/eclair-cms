@@ -225,7 +225,13 @@ final class Admin
             if (!Security::checkFormToken()) {
                 $error = t('Session expirée : réessaie.');
             } else {
-                $result = Auth::attempt(Req::input('email'), Req::input('password'));
+                try {
+                    $result = Auth::attempt(Req::input('email'), Req::input('password'));
+                } catch (\RuntimeException $e) {
+                    // Données impossibles à enregistrer (droits du dossier, verrou) : la cause s'affiche, pas une page muette.
+                    Log::error($e);
+                    [$result, $error] = ['error', $e->getMessage()];
+                }
                 if ($result === 'ok') {
                     self::redirectNext();
                 }
@@ -236,6 +242,7 @@ final class Admin
                 $error = match ($result) {
                     'locked' => t('Trop de tentatives. Par sécurité, réessaie dans quelques minutes.'),
                     'busy' => t('Le serveur est très sollicité : réessaie dans un instant.'),
+                    'error' => $error,
                     default => t('E-mail ou mot de passe incorrect.'),
                 };
             }

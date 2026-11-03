@@ -1552,4 +1552,5 @@ return [
     'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => 'Die Website hat bereits {n} Inhalte, das Maximum: Lösche die nicht mehr benötigten, bevor du neue erstellst.',
     'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'Der Suchindex der Website ist voll: Lösche oder kürze veröffentlichte Inhalte, bevor du weitere veröffentlichst.',
     'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'Die Website hat bereits {n} Entwürfe: Veröffentliche oder lösche einige, bevor du mit der KI weitere erstellst.',
+    'Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.' => 'Speichern nicht möglich: Die Datensperre (data/.lock) funktioniert nicht. Lösche diese Datei per FTP (Éclair legt sie neu an) oder frage deinen Hoster, ob Dateisperren (flock) verfügbar sind.',
 ];

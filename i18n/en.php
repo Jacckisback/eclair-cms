@@ -1552,4 +1552,5 @@ return [
     'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => 'The site already has {n} items of content, the maximum: delete the ones you no longer need before creating more.',
     'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'The site’s search index is full: delete or shorten some published content before publishing more.',
     'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'The site already has {n} drafts: publish or delete some before creating more with the AI.',
+    'Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.' => 'Cannot save: the data lock (data/.lock) is not working. Delete this file via FTP (Éclair recreates it), or ask your host whether file locking (flock) is available.',
 ];

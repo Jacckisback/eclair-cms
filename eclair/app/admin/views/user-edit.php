@@ -28,7 +28,7 @@ $self = $u['id'] === $v['user']['id'];
     <?= Admin::partial('partials/confirm', []) ?>
     <div class="row">
       <button class="btn" type="submit" name="action" value="reset" data-confirm="<?= e(t('Générer un nouveau mot de passe provisoire ? L’ancien ne fonctionnera plus.')) ?>"><?= Icons::svg('key') ?><?= e(t('Réinitialiser le mot de passe')) ?></button>
-      <?php if (!empty($u['totp']['on'])): ?>
+      <?php if (!empty($u['totp']['on']) && !$self): ?>
       <button class="btn" type="submit" name="action" value="disable2fa" data-confirm="<?= e(t('Désactiver la double authentification de ce compte (téléphone perdu) ?')) ?>"><?= Icons::svg('lock') ?><?= e(t('Désactiver la 2FA')) ?></button>
       <?php endif ?>
       <?php if (!$self): ?>

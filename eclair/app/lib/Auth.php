@@ -14,6 +14,21 @@ final class Auth
     private const SUDO = 900;        // actions sensibles : mot de passe redemandé au-delà de 15 min
     private const DEVICE = 'eclair_dev';
     private const EDITOR_CAN = ['content', 'media', 'categories', 'menus', 'messages', 'redirects'];
+    /**
+     * Compteur « par compte » : l'e-mail est rangé dans un groupe signé par la clé du site (3 chiffres hexadécimaux,
+     * 4 096 groupes). Des e-mails inventés ne créent donc jamais plus de 4 096 fichiers, et un compte existant ou non
+     * se comporte pareil (aucune énumération possible).
+     */
+    private const ACCOUNT_GROUP = 3;
+    /** Vérifications de mot de passe simultanées pour les inconnus (Argon2id : 19 Mio chacune sur un mutualisé). */
+    private const SLOTS = 2;
+    /** Attente maximale d'une place de vérification (secondes) avant de répondre « busy ». */
+    private const WAIT = 5.0;
+    /** Fichier de secours FTP daté de plus d'une heure dans le futur (horloge faussée) : refusé, comme un fichier trop vieux. */
+    private const RESET_SKEW = 3600;
+    /** Mots de passe d'exemple des guides (7 langues) : recopiés tels quels, ils seraient connus de tous. */
+    private const RESET_EXAMPLES = ['tonnouveaumotdepasse2026', 'yournewpassword2026', 'deinneuespasswort2026', 'tunuevaclave2026',
+        'latuanuovapassword2026', 'suanovasenha2026'];
 
     private static ?array $user = null;
     private static bool $checked = false;
@@ -76,7 +91,8 @@ final class Auth
                 return 'locked';
             }
         }
-        $slot = self::slot();
+        // Appareil de confiance : il a sa place réservée, un afflux d'inconnus ne peut pas bloquer son propriétaire.
+        $slot = self::slot(str_starts_with((string) array_key_first($keys), 'login-dev:'));
         if ($slot === null) {
             foreach (array_keys($keys) as $key) {
                 RateLimit::release($key);
@@ -92,10 +108,8 @@ final class Auth
                 $user = self::rehash($user, $password);
             }
         } finally {
-            if (is_resource($slot)) {
-                flock($slot, LOCK_UN);
-                fclose($slot);
-            }
+            flock($slot, LOCK_UN);
+            fclose($slot);
         }
         if (!$valid || !$user) {
             Log::security('login_failed', ['email' => $email]);
@@ -190,18 +204,23 @@ final class Auth
     }
 
     /**
-     * Ouvre la session. Refuse si le compte a changé depuis la vérification du mot de passe
-     * (mot de passe, déconnexion générale, rôle, suppression) : une connexion lente ne peut rien annuler.
+     * Ouvre la session, juste après une vérification du mot de passe (connexion, changement de mot de passe,
+     * installation) : c'est elle qui date la session (born) et la confirmation du mot de passe (sudo).
+     * Refuse si le compte a changé depuis la vérification (mot de passe, déconnexion générale, rôle, suppression,
+     * double authentification activée) : une connexion lente ne peut rien annuler.
      */
     public static function login(array $user): bool
     {
         $now = time();
         $ip = Req::ip();
         $ok = false;
+        // Navigateur de confiance pour le compte tel qu'il était (changement de mot de passe) : il le reste.
+        $device = self::$user !== null && (string) self::$user['id'] === (string) $user['id'] ? self::device(self::$user) : '';
         $saved = Users::update((string) $user['id'], function (array $u) use ($user, $now, $ip, &$ok): ?array {
             if (!hash_equals((string) $u['pass'], (string) $user['pass'])
                 || (int) ($u['ver'] ?? 1) !== (int) ($user['ver'] ?? 1)
-                || $u['role'] !== $user['role']) {
+                || $u['role'] !== $user['role']
+                || !empty($u['totp']['on']) !== !empty($user['totp']['on'])) {
                 return null;
             }
             $u['last_login'] = $now;
@@ -223,7 +242,7 @@ final class Auth
         self::$user = $saved;
         self::$checked = true;
         Log::security('login', ['email' => $saved['email']]);
-        self::trustDevice($saved);
+        self::trustDevice($saved, $device);
         // Simple indicateur (ni secret, ni adresse de l'administration) pour le bouton « Modifier » du site.
         setcookie('eclair_edit', '1', [
             'expires' => 0,
@@ -232,6 +251,31 @@ final class Auth
             'httponly' => false,
             'samesite' => 'Strict',
         ]);
+        return true;
+    }
+
+    /**
+     * Garde la session en cours après « Déconnecter mes autres appareils » ou « Déconnecter tout le monde » : nouvel
+     * identifiant et nouvelle version, mais ni l'âge de la session (born) ni l'heure du dernier mot de passe (sudo) ne
+     * changent, car aucun mot de passe n'a été vérifié ici. Refuse si le compte a changé entre-temps (autre
+     * déconnexion générale, nouveau mot de passe) : une session ne survit pas ainsi à un changement fait en même temps.
+     */
+    public static function rebind(array $saved): bool
+    {
+        if (!Session::resume() || (string) ($_SESSION['uid'] ?? '') !== (string) $saved['id']
+            || (int) ($saved['ver'] ?? 1) !== (int) ($_SESSION['ver'] ?? 0) + 1) {
+            return false;
+        }
+        $device = self::$user !== null && (string) self::$user['id'] === (string) $saved['id'] ? self::device(self::$user) : '';
+        Session::regenerate();
+        $_SESSION['ver'] = (int) ($saved['ver'] ?? 1);
+        unset($_SESSION['csrf']);
+        self::$user = $saved;
+        self::$checked = true;
+        // Ce navigateur reste un appareil de confiance s'il l'était ; ceux des autres sessions sont oubliés.
+        if ($device !== '') {
+            self::trustDevice($saved, $device);
+        }
         return true;
     }
 
@@ -283,23 +327,56 @@ final class Auth
         if (self::fresh()) {
             return true;
         }
-        $password = Req::input('confirm_password');
-        if ($password === '' || strlen($password) > 1024 || !RateLimit::attempt('sudo:' . $user['id'], 10, 900, 900)) {
+        if (self::checkPassword($user, Req::input('confirm_password')) !== 'ok') {
             return false;
         }
-        if (!password_verify($password, (string) $user['pass'])) {
-            Log::security('sudo_failed');
-            return false;
-        }
-        RateLimit::release('sudo:' . $user['id']);
         $_SESSION['sudo'] = time();
         return true;
+    }
+
+    /**
+     * Mot de passe d'une personne connectée (confirmation d'une action sensible, profil) : au plus 10 essais faux par
+     * 15 minutes et par compte, et vérifié dans une place de vérification comme une connexion (mémoire bornée).
+     * Renvoie « ok », « invalid », « locked » ou « busy ».
+     */
+    public static function checkPassword(array $user, string $password): string
+    {
+        if ($password === '' || strlen($password) > 1024) {
+            return 'invalid';
+        }
+        $key = 'sudo:' . $user['id'];
+        if (!RateLimit::attempt($key, 10, 900, 900)) {
+            return 'locked';
+        }
+        $slot = self::slot(true);
+        if ($slot === null) {
+            RateLimit::release($key);
+            return 'busy';
+        }
+        try {
+            $ok = password_verify($password, (string) $user['pass']);
+        } finally {
+            flock($slot, LOCK_UN);
+            fclose($slot);
+        }
+        if (!$ok) {
+            Log::security('sudo_failed');
+            return 'invalid';
+        }
+        RateLimit::release($key);
+        return 'ok';
     }
 
     /** Le mot de passe a-t-il été saisi récemment ? (sinon les formulaires sensibles le redemandent) */
     public static function fresh(): bool
     {
         return Session::resume() && time() - (int) ($_SESSION['sudo'] ?? 0) < self::SUDO;
+    }
+
+    /** Compteur du compte visé : le groupe signé de son e-mail (le même calcul qu'il existe ou non). */
+    public static function accountKey(string $email): string
+    {
+        return 'login-acct:' . substr(Keys::sign('login-acct|' . mb_strtolower(trim($email))), 0, self::ACCOUNT_GROUP);
     }
 
     /**
@@ -315,7 +392,7 @@ final class Auth
         }
         return [
             'login-ip:' . Req::ipPrefix() => [10, 900, 900],
-            'login-acct:' . $email => [30, 3600, 3600],
+            self::accountKey($email) => [30, 3600, 3600],
         ];
     }
 
@@ -325,15 +402,16 @@ final class Auth
         if (!$user || !is_string($raw) || !preg_match('/^([a-f0-9]{32})\.([a-f0-9]{32})$/', $raw, $m)) {
             return '';
         }
-        return hash_equals(self::deviceSig((string) $user['id'], $m[1]), $m[2]) ? $m[1] : '';
+        return hash_equals(self::deviceSig($user, $m[1]), $m[2]) ? $m[1] : '';
     }
 
-    private static function trustDevice(array $user): void
+    /** Cookie d'appareil de confiance ; $id : l'identifiant que ce navigateur gardait déjà (sinon le sien, ou un nouveau). */
+    private static function trustDevice(array $user, string $id = ''): void
     {
-        $id = self::device($user) ?: bin2hex(random_bytes(16));
+        $id = $id !== '' ? $id : (self::device($user) ?: bin2hex(random_bytes(16)));
         // Aussi sur la page d'autorisation du connecteur MCP, qui a sa propre connexion.
         foreach (['/' . Settings::get('admin_path'), '/_eclair/oauth'] as $path) {
-            setcookie(self::DEVICE, $id . '.' . self::deviceSig((string) $user['id'], $id), [
+            setcookie(self::DEVICE, $id . '.' . self::deviceSig($user, $id), [
                 'expires' => time() + 31536000,
                 'path' => Req::base() . $path,
                 'secure' => Req::isHttps(),
@@ -343,31 +421,45 @@ final class Auth
         }
     }
 
-    private static function deviceSig(string $uid, string $id): string
+    /**
+     * Signature liée à la version de session du compte et à son mot de passe : un nouveau mot de passe, « Déconnecter
+     * mes autres appareils », « Déconnecter tout le monde » ou une réinitialisation font oublier tous les appareils,
+     * comme les sessions (un ancien cookie ne vaut plus rien : l'appareil n'est simplement plus reconnu).
+     */
+    private static function deviceSig(array $user, string $id): string
     {
-        return substr(Keys::sign('device|' . $uid . '|' . $id), 0, 32);
+        return substr(Keys::sign('device|' . $user['id'] . '|' . (int) ($user['ver'] ?? 1) . '|' . hash('sha256', (string) $user['pass']) . '|' . $id), 0, 32);
     }
 
     /**
-     * Au plus deux vérifications de mot de passe simultanées : un afflux de tentatives
-     * ne peut pas épuiser la mémoire d'un hébergement mutualisé. Attente maximale : 5 s.
+     * Places de vérification du mot de passe (data/.login-N.lock) : au plus deux simultanées pour les inconnus, pour
+     * qu'un afflux de tentatives ne puisse pas épuiser la mémoire d'un hébergement mutualisé. Une place de plus est
+     * réservée aux appareils de confiance et aux personnes connectées : un afflux ne bloque pas le propriétaire.
+     * Un fichier de verrou inutilisable (ni ouvert, ni recréé) ne donne jamais de place. Attente maximale : 5 s.
      *
-     * @return resource|true|null
+     * @return resource|null
      */
-    private static function slot(): mixed
+    private static function slot(bool $trusted, float $wait = self::WAIT): mixed
     {
         Store::ensureDir(ECLAIR_DATA);
-        $until = microtime(true) + 5;
+        $ids = $trusted ? [self::SLOTS, ...range(0, self::SLOTS - 1)] : range(0, self::SLOTS - 1);
+        $until = microtime(true) + $wait;
         do {
-            for ($i = 0; $i < 2; $i++) {
-                $h = @fopen(ECLAIR_DATA . '/.login-' . $i . '.lock', 'c');
+            $usable = false;
+            foreach ($ids as $i) {
+                $h = Store::lockFile(ECLAIR_DATA . '/.login-' . $i . '.lock');
                 if ($h === false) {
-                    return true;
+                    continue;
                 }
                 if (flock($h, LOCK_EX | LOCK_NB)) {
                     return $h;
                 }
                 fclose($h);
+                $usable = true;
+            }
+            if (!$usable) {
+                Log::alert('login-slots', 'Connexions refusées : aucune place de vérification du mot de passe ne peut être ouverte (data/.login-N.lock).');
+                return null;
             }
             usleep(50000);
         } while (microtime(true) < $until);
@@ -376,9 +468,10 @@ final class Auth
 
     /**
      * Secours par FTP : un fichier data/reset.php (ligne de protection, e-mail, nouveau mot de passe)
-     * déposé il y a moins de 24 h. Il ne s'applique qu'à la connexion faite avec CET e-mail et CE mot de
-     * passe : personne d'autre ne peut le déclencher ni savoir qu'il existe. La double authentification
-     * du compte est désactivée et les autres sessions sont fermées.
+     * déposé il y a moins de 24 h (et pas daté dans le futur). Il ne s'applique qu'à la connexion faite avec
+     * CET e-mail et CE mot de passe : personne d'autre ne peut le déclencher ni savoir qu'il existe. La double
+     * authentification du compte est désactivée et les autres sessions sont fermées. Un mot de passe faible
+     * ou recopié de l'exemple des guides est refusé.
      */
     private static function resetFromFile(string $email, string $password): void
     {
@@ -387,8 +480,9 @@ final class Auth
             return;
         }
         $raw = (string) @file_get_contents($file, false, null, 0, 4096);
+        $age = time() - (int) filemtime($file);
         if (!preg_match('/^(?:\xEF\xBB\xBF)?<\?php\s+(?:exit|die)\s*(?:\(\s*\))?\s*;?\s*\?>[ \t]*\r?\n(.*)$/s', $raw, $m)
-            || (int) filemtime($file) < time() - 86400) {
+            || $age > 86400 || $age < -self::RESET_SKEW) {
             @unlink($file);
             Log::security('ftp_reset_refused');
             return;
@@ -399,7 +493,8 @@ final class Auth
         }
         @unlink($file);
         $user = Users::findByEmail($email);
-        if (!$user || Security::passwordIssues($password)) {
+        if (!$user || Security::passwordIssues($password)
+            || in_array(strtolower((string) preg_replace('/[^a-z0-9]/i', '', $password)), self::RESET_EXAMPLES, true)) {
             Log::security('ftp_reset_refused', ['email' => $email]);
             return;
         }

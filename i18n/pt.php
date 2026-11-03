@@ -1552,4 +1552,5 @@ return [
     'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => 'O site já tem {n} conteúdos, o máximo: exclua os que você não usa mais antes de criar outros.',
     'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'O índice de pesquisa do site está cheio: exclua ou encurte conteúdos publicados antes de publicar outros.',
     'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'O site já tem {n} rascunhos: publique ou exclua alguns antes de criar outros com a IA.',
+    'Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.' => 'Não foi possível salvar: o bloqueio dos dados (data/.lock) não funciona. Exclua este arquivo pelo FTP (o Éclair o recria) ou pergunte à sua hospedagem se o bloqueio de arquivos (flock) está disponível.',
 ];

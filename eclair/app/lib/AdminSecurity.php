@@ -30,8 +30,8 @@ final class AdminSecurity
         Admin::view('security', [
             'checks' => $checks,
             'score' => (int) round(count(array_filter($checks, fn ($c) => $c['ok'])) / count($checks) * 100),
-            'blocked' => RateLimit::active(),
-            'log' => Log::read('security', 80),
+            'blocked' => self::blocked(),
+            'log' => self::events(),
             'errors' => Log::read('errors', 20),
             'integrity' => $integrity,
             'zip' => class_exists('ZipArchive'),
@@ -50,8 +50,10 @@ final class AdminSecurity
             case 'revoke-all':
                 foreach (array_keys(Users::all()) as $id) {
                     $saved = Auth::revokeAll((string) $id);
-                    if ($saved && $id === $user['id']) {
-                        Auth::login($saved);
+                    // Identifiants comparés en texte (une clé « 1234567890 » devient un entier en PHP). Aucun mot de passe
+                    // vérifié ici : la session garde son âge et sa confirmation (Auth::rebind, pas login).
+                    if ($saved && (string) $id === (string) $user['id']) {
+                        Auth::rebind($saved);
                     }
                 }
                 Log::security('sessions_revoked');
@@ -69,6 +71,31 @@ final class AdminSecurity
                 Admin::back('security', t('Index reconstruit et cache vidé.'));
         }
         Admin::back('security');
+    }
+
+    /** Clés bloquées ; le compteur d'un compte (groupe signé de l'e-mail) affiche les comptes concernés. */
+    private static function blocked(): array
+    {
+        $accounts = [];
+        foreach (Users::all() as $u) {
+            $accounts[Auth::accountKey((string) $u['email'])][] = (string) $u['email'];
+        }
+        $out = [];
+        foreach (RateLimit::active() as $b) {
+            $out[] = $b + ['label' => isset($accounts[$b['key']]) ? $b['key'] . ' (' . implode(', ', $accounts[$b['key']]) . ')' : $b['key']];
+        }
+        return $out;
+    }
+
+    /**
+     * Journal de la page : les vrais événements, plus les derniers échecs de connexion anonymes, gardés à part
+     * pour qu'aucun afflux ne puisse chasser les premiers.
+     */
+    private static function events(): array
+    {
+        $log = array_merge(Log::read('security', 80), Log::read(Log::FAILURES, 20));
+        usort($log, static fn (array $a, array $b): int => (int) ($b['t'] ?? 0) <=> (int) ($a['t'] ?? 0));
+        return $log;
     }
 
     public static function clearCache(array $user): never
