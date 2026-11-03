@@ -76,6 +76,8 @@ O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicia
 ### 🔎 SEO
 
 - URLs limpas, **redirecionamento 301 automático** quando um endereço muda, gerenciador de redirecionamentos (prático para migrar um site antigo em WordPress ou Wix).
+  - Os endereços em `/.well-known/`, `/_eclair/` e `/__eclair/` não podem ser redirecionados. Exceção: um administrador pode redirecionar um endereço `/.well-known/…` como `change-password`, mas nunca `acme-challenge` nem `pki-validation`. Os redirecionamentos antigos a partir desses endereços aparecem marcados como “Desativada” e podem ser excluídos (um administrador pode recriar os que são permitidos).
+  - Seguir um redirecionamento não deixa mais o site lento, e o número de usos continua visível.
 - Título, meta description e **prévia do Google ao vivo** no editor, com contadores.
 - **Análise de SEO em tempo real** com pontuação: tamanho do título e da descrição, frase-chave (título, URL, introdução, subtítulos, densidade), número de palavras, estrutura, textos alternativos, links internos, imagem destacada…
 - **Dados estruturados JSON-LD** completos: WebSite (+ busca), Organization / Person / LocalBusiness (endereço, horários, perfis sociais, política de devolução), WebPage / AboutPage / ContactPage, BlogPosting (autor, datas, seção), BreadcrumbList, FAQPage, ProfilePage e, para a loja, Product / ProductGroup / Offer (preço, estoque, entrega).
@@ -102,6 +104,7 @@ O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicia
 - **Links internos assistidos**: enquanto você digita um link, o editor sugere suas páginas e artigos (links internos em 2 segundos).
 - **Colagem inteligente** do Word, do Google Docs ou de uma página web: títulos, listas, tabelas e negritos viram blocos limpos.
 - Salvamento com `Ctrl+S`, rascunho local de segurança (nada se perde se a conexão cair), prévia real antes de publicar, **histórico das últimas 20 versões**, publicação agendada.
+  - Esse rascunho de segurança pertence à conta conectada e é apagado quando você sai: ele nunca é oferecido a outra conta que use o mesmo navegador. Os rascunhos de segurança da 1.10.2 são apagados depois da atualização: salve as edições em andamento antes de atualizar.
 - **Modo Visual**: a página do jeito que ela aparece com o seu tema, editável ali mesmo ([detalhes](#modo-visual)).
 
 ### 🧩 Todo o resto
@@ -385,7 +388,7 @@ Em um conteúdo novo (página, artigo ou produto), a caixa **✨ Criar com IA** 
 2. O **custo estimado** aparece antes de começar (≈ US$ 0,08 com o Claude Sonnet 5.5, ≈ US$ 0,16 com o Claude Opus 5.5) e é descontado do orçamento do assistente. Com as duas chaves salvas, você escolhe entre o Claude e o ChatGPT.
 3. Depois de 20 a 60 segundos, o rascunho abre no **modo Visual**: título, endereço, título SEO e meta descrição, “O essencial”, frase-chave e um layout em seções (destaque, diferenciais, subtítulos, listas, quadros de destaque, FAQ, botões, equipe, formulário de contato, últimos artigos ou produtos), com um único H1: o título do bloco de destaque.
 
-A IA se baseia no seu perfil editorial, na lista das suas páginas e artigos publicados (para que os links levem a páginas que existem) e nas suas 30 imagens mais recentes. Ela não inventa nenhum fato: preços, números, nomes ou horários que faltam ficam no formato **“[A completar: …]”**, contados pela aba Análise até você preenchê-los. O rascunho nunca é publicado: revise, complete e depois publique.
+A IA se baseia no seu perfil editorial, na lista das suas páginas e artigos publicados (para que os links levem a páginas que existem) e nas suas 30 imagens mais recentes. Ela não inventa nenhum fato: preços, números, nomes ou horários que faltam ficam no formato **“[A completar: …]”**, contados pela aba Análise até você preenchê-los. O rascunho nunca é publicado: revise, complete e depois publique. Se o site já tiver 500 rascunhos, a caixa pede primeiro que você publique ou exclua alguns, antes de gastar qualquer coisa.
 
 ### Retoques no editor
 
@@ -412,11 +415,13 @@ Você paga ao provedor conforme o uso real. O Éclair calcula cada gasto a parti
 
 Uma imagem custa cerca de US$ 0,05 (FLUX 3 em 1 megapixel: US$ 0,048). Preços públicos consultados em 29 de outubro de 2026 nas páginas oficiais da [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing), da [OpenAI](https://developers.openai.com/api/docs/pricing) e da [Black Forest Labs](https://docs.bfl.ml/release-notes); eles podem mudar. As instruções fixas do assistente ficam em cache no provedor, o que reduz o custo dos pedidos seguintes.
 
-**Travas de segurança**: orçamento mensal máximo (US$ 10 por padrão), verificado antes de cada etapa de um pedido: quando ele é atingido, o assistente para até o mês seguinte. Além disso, há um limite de solicitações por pessoa e por dia (60 por padrão), e cada pessoa pode ter no máximo dois pedidos em andamento ao mesmo tempo. O orçamento e a cota são definidos em Configurações › Assistente de IA.
+**Travas de segurança**: orçamento mensal máximo (US$ 10 por padrão), verificado antes de cada etapa de um pedido: quando ele é atingido, o assistente para até o mês seguinte. Além disso, há um limite de solicitações por pessoa e por dia (60 por padrão), e cada pessoa pode ter no máximo dois pedidos em andamento ao mesmo tempo. Quando o site tem 500 rascunhos, a IA para de criar novos: ela pede primeiro que você publique ou exclua alguns. O orçamento e a cota são definidos em Configurações › Assistente de IA.
 
 ### Segurança e privacidade
 
 - **A IA prepara, você decide**: ela pode buscar e ler seus conteúdos, criar rascunhos, alterar um rascunho (dá para desfazer), propor uma alteração em um conteúdo publicado e criar imagens. Ela **não pode publicar, excluir nem mexer nas configurações, nos menus ou nas contas**. Publicar continua sendo um clique humano.
+- **Rascunhos e propostas verificados**: a IA só altera diretamente um conteúdo enquanto ele ainda é rascunho; se ele foi publicado nesse meio-tempo, ela prepara uma proposta no lugar. Uma proposta fica desatualizada assim que o conteúdo muda, mesmo no mesmo segundo, e aplicá-la nunca muda o estado de publicação do conteúdo.
+- **Acesso verificado de novo durante o pedido**: o assistente para no meio de um pedido se a conta for excluída, se a senha dela for redefinida ou se o acesso dela à IA for retirado.
 - **Chaves criptografadas** no seu servidor (libsodium ou AES-256-GCM), nunca enviadas ao navegador, nunca exibidas (só aparece um trecho, como “sk-ant…ab12”), **excluídas dos backups**, assim como o histórico de conversas. Para uma proteção reforçada, adicione `define('ECLAIR_SECRET', 'uma-frase-secreta-longa');` em `eclair-config.php` (faça isso antes de salvar suas chaves).
 - **O que vai para o provedor**: o seu pedido, as imagens que você anexar, o perfil editorial e o contexto necessário (lista das suas páginas e artigos, conteúdo aberto no editor). Não inclua dados sensíveis. Segundo os termos de cada um (verificados em 29 de outubro de 2026), a [Anthropic](https://www.anthropic.com/legal/commercial-terms) não treina seus modelos com os dados enviados pela API, e a [OpenAI](https://help.openai.com/en/articles/5722486-api-data-usage-policies) também não, por padrão.
 - **Conteúdo higienizado**: tudo o que a IA escreve passa pela mesma lista de permissões do editor, e os retoques dela só alteram o texto visível (nunca o endereço de um link). As imagens geradas são baixadas por HTTPS de um endereço público verificado e depois recodificadas como qualquer imagem enviada.
@@ -444,7 +449,7 @@ Você prefere trabalhar no **Claude** ou no **ChatGPT**, com a assinatura que j�
 3. Adicione-o à sua IA:
    - **Claude** (na web e no aplicativo para desktop): *Personalizar › Conectores › Adicionar › Adicionar conector personalizado*, dê um nome (“Meu site”), cole o endereço, **Continuar**, mantenha as configurações de autenticação detectadas e depois **Adicionar**. Nos planos Team e Enterprise, quem adiciona o conector é um proprietário da organização; depois, os membros clicam em **Conectar**.
    - **ChatGPT** (na web): *Plugins › + › Adicionar servidor MCP personalizado*, dê um nome, cole o endereço em **Conexão**, escolha a autenticação **OAuth**, aceite o aviso e depois crie o plugin.
-4. Uma página do seu site se abre: faça login se for preciso (autenticação em dois fatores incluída), confira o aplicativo e o endereço de retorno dele (`claude.ai` ou `chatgpt.com`) e depois **Permitir**.
+4. Uma página do seu site se abre: faça login se for preciso (autenticação em dois fatores incluída), confira o aplicativo e o endereço de retorno dele (`claude.ai` ou `chatgpt.com`) e depois **Permitir**. Esse botão começa acinzentado: ele é ativado depois de um instante, quando você move o mouse, toca a tela ou usa o teclado (em uma tela sensível ao toque, o primeiro toque o ativa e o segundo autoriza).
 
 Pronto. Peça, por exemplo: “Dê uma olhada no meu site e sugira 5 ideias de artigos”, “Escreva um rascunho de artigo sobre a manutenção de uma bicicleta elétrica” ou “Revise minha página inicial e sugira uma chamada mais direta”.
 
@@ -477,10 +482,11 @@ Cada rascunho volta com um link para **abri-lo no Éclair**; cada proposta, com 
 
 - **Desativado por padrão**: enquanto ele estiver desativado, nenhum dos endereços dele responde.
 - **OAuth 2.1**: PKCE obrigatório, registro automático do aplicativo sem armazenar nada, endereço de retorno verificado de forma exata.
-- **A sua autorização explícita**, depois do login na sua conta (autenticação em dois fatores incluída), em uma página que nunca revela o endereço do seu painel.
+- **A sua autorização explícita**, depois do login na sua conta (autenticação em dois fatores incluída), em uma página que nunca revela o endereço do seu painel. Para o Claude e o ChatGPT, ela lembra você de aceitar só se você mesmo acabou de iniciar a conexão. Para qualquer outro aplicativo, a sua senha é sempre pedida, mesmo logo depois do login: se você fizer login nessa página, vai digitá-la duas vezes. **Recusar** nunca pede a senha.
+- **Botão Permitir protegido**: em cada página de autorização, ele começa acinzentado, só é ativado depois de um instante e de um gesto na página, e é desativado assim que a janela vai para segundo plano. Sem JavaScript, é impossível autorizar, e a página avisa.
 - **Tokens de uma hora**, renovados automaticamente e substituídos a cada renovação; depois de 60 dias sem uso, é preciso dar a sua autorização de novo. Só os hashes deles são armazenados, fora dos backups.
 - **Revogar acesso**: um botão por aplicativo em Configurações › Assistente de IA. Desativar o conector corta o acesso de todos os aplicativos; trocar a senha ou desconectar todos os seus dispositivos também.
-- **Mesmas permissões do assistente integrado**: os redatores só têm acesso se a opção “Os editores podem usar o assistente” estiver marcada; no máximo 60 alterações por hora e por aplicativo, para evitar loops.
+- **Mesmas permissões do assistente integrado**: os redatores só têm acesso se a opção “Os editores podem usar o assistente” estiver marcada; no máximo 60 alterações por hora e por aplicativo, para evitar loops (um limite rígido, que não se recarrega mais depois de 15 minutos); buscas limitadas a 200 caracteres.
 - **O que vai para a Anthropic ou a OpenAI**: os conteúdos que a IA lê para responder a você, conforme os termos da sua assinatura.
 
 ### Se a conexão falhar
@@ -499,30 +505,35 @@ O Éclair foi feito para um ambiente hostil (hospedagem compartilhada, robôs te
 **Dados e servidor**
 - **Sem banco de dados**: nenhuma injeção de SQL é possível.
 - **Dados com dupla proteção**: as pastas `data/`, `app/` e `cache/` são bloqueadas pelo `.htaccess`; cada arquivo de dados começa com `<?php exit; ?>` (mesmo que um servidor ignorasse os `.htaccess`, nada seria exibido) e nenhuma sequência `<?php` pode ser gravada nele. Arquivos privados (permissões 0600), gravações atômicas.
-- **Atualizações assinadas**: o anúncio de cada versão traz uma assinatura Ed25519 do mantenedor, verificada com a chave pública gravada no Éclair; o arquivo zip é verificado (impressão digital, caminhos, manifesto, sintaxe PHP) antes de qualquer mudança, e a atualização se desfaz sozinha se o site parar de responder (detalhes em [Atualização em um clique](#atualização-em-um-clique)).
+- **Gravações sempre com bloqueio**: se o servidor não consegue bloquear os dados dele (`data/.lock` inutilizável), o Éclair se recusa a salvar, com uma mensagem clara, em vez de gravar sem proteção; as páginas públicas continuam no ar. Um arquivo de bloqueio inutilizável deixado por uma mudança de hospedagem ou uma restauração é recriado automaticamente quando possível.
+- **Backups sem segredos**: eles nunca contêm o cofre criptografado (chaves de API, token do Google Drive), as sessões, os limites nem o estado das atualizações, mesmo que `ECLAIR_DATA` seja escrito com uma barra no final. Os arquivos ZIP de backup são privados (permissões 0600).
+- **Atualizações assinadas**: o anúncio de cada versão traz uma assinatura Ed25519 do mantenedor, verificada com a chave pública gravada no Éclair, além de um número de série e uma data de expiração também assinados. Um anúncio mais antigo, reenviado, é recusado e sinalizado; um anúncio que não é renovado há 180 dias mostra um aviso; o site só diz “Você tem a versão mais recente do Éclair” depois de uma verificação bem-sucedida. O arquivo zip é verificado (impressão digital, caminhos, manifesto, sintaxe PHP) antes de qualquer mudança, e a atualização se desfaz sozinha se o site parar de responder (detalhes em [Atualização em um clique](#atualização-em-um-clique)).
 - **Instalação protegida**: ela só é possível nas 2 horas seguintes à primeira visita, e o endereço do site só é usado para redirecionar os visitantes depois de ser **verificado pelo próprio servidor** (um endereço errado ou adulterado não desvia nada).
 
 **Login**
 - **Senhas** protegidas com Argon2id (19 MiB, 2 passagens: seguro e viável em hospedagem compartilhada; bcrypt como alternativa), no mínimo 10 caracteres, senhas comuns recusadas.
-- **Proteção contra força bruta**: cada tentativa é reservada antes de ser verificada (impossível passar do limite com requisições em paralelo); limite por rede (endereço IPv4 ou bloco /64 em IPv6) e por conta visada. **Seu dispositivo de costume nunca é bloqueado** por um atacante que erra de propósito. No máximo duas verificações de senha ao mesmo tempo: uma enxurrada de requisições não esgota a memória.
-- **Autenticação em dois fatores TOTP** (Google Authenticator, 1Password, Bitwarden…) com QR code e 8 códigos de recuperação exibidos uma única vez; cada código só vale uma vez, mesmo enviado em paralelo; depois de 10 códigos errados, a 2FA da conta fica bloqueada por 15 minutos e o titular é avisado por e-mail.
-- **Contas alteradas de forma atômica**: um login em andamento nunca consegue desfazer uma troca de senha, uma desconexão geral, a ativação da 2FA, um rebaixamento ou uma exclusão.
-- **Senha solicitada de novo** nas ações sensíveis (backup, conexão do Google Drive, atualização, gestão de contas, configurações avançadas, troca de e-mail) depois de 15 minutos do login. As senhas provisórias precisam ser trocadas no primeiro login.
-- **Sessões reforçadas**: nenhuma sessão antes do login (os robôs não enchem o disco), cookies `HttpOnly`, `Secure`, `SameSite=Strict`, regeneradas no login, desconexão por inatividade, vinculadas ao navegador, “Desconectar meus outros dispositivos”. O painel é forçado para HTTPS assim que o site usa HTTPS.
+- **Proteção contra força bruta**: cada tentativa é reservada antes de ser verificada, e cada limite é rígido: nunca mais tentativas por período, nem em paralelo nem depois de um bloqueio; limite por rede (endereço IPv4 ou bloco /64 em IPv6) e por conta visada. **Seu dispositivo de costume nunca é bloqueado** por um atacante que erra de propósito. No máximo duas verificações de senha ao mesmo tempo para dispositivos desconhecidos, mais uma vaga reservada aos seus dispositivos de costume e às pessoas já conectadas: uma enxurrada de requisições não esgota a memória nem consegue mais impedir você de entrar.
+- **Dispositivos de costume**: uma nova senha, “Desconectar meus outros dispositivos” ou “Desconectar todo mundo”, uma redefinição de senha feita por um administrador e a recuperação por FTP fazem a conta esquecer os dispositivos de costume dela; o navegador que faz a mudança continua reconhecido. Depois da atualização para a 1.10.3, cada dispositivo volta a ser de costume no próximo login bem-sucedido.
+- **Autenticação em dois fatores TOTP** (Google Authenticator, 1Password, Bitwarden…) com QR code e 8 códigos de recuperação exibidos uma única vez; cada código só vale uma vez, mesmo enviado em paralelo; depois de 10 códigos errados, a 2FA da conta fica bloqueada por 15 minutos e o titular é avisado por e-mail. Enquanto ela está ativa, não pode mais ser configurada de novo pelo perfil: para trocar de celular, desative-a com a sua senha atual e depois ative-a de novo. Ativá-la pede a senha de novo se o seu login tiver mais de 15 minutos, e os códigos de configuração errados são limitados a 10 a cada 15 minutos. Em **Usuários**, um administrador não pode mais desativar a **própria** 2FA: ele passa por **Meu perfil**, que pede a senha atual.
+- **Contas alteradas de forma atômica**: um login em andamento nunca consegue desfazer uma troca de senha, uma desconexão geral, a ativação da 2FA, um rebaixamento ou uma exclusão. Dois administradores que se excluem ou se rebaixam um ao outro no mesmo instante não podem mais deixar o site sem administrador, e duas contas nunca podem ter o mesmo e-mail de login.
+- **Senha solicitada de novo** nas ações sensíveis (backup, conexão do Google Drive, atualização, gestão de contas, configurações avançadas, troca de e-mail) depois de 15 minutos do login. Uma senha atual errada conta no mesmo limite em todos os lugares (troca de senha no perfil, desativação da 2FA, novos códigos de recuperação, confirmação das ações sensíveis): 10 tentativas a cada 15 minutos. As senhas provisórias precisam ser trocadas no primeiro login.
+- **Sessões reforçadas**: nenhuma sessão antes do login (os robôs não enchem o disco), cookies `HttpOnly`, `Secure`, `SameSite=Strict`, regeneradas no login, desconexão por inatividade, vinculadas ao navegador, “Desconectar meus outros dispositivos” e “Desconectar todo mundo”. Esses dois botões não renovam mais nem a confirmação da senha (15 minutos) nem a duração da sessão (48 horas), e uma requisição ainda em andamento não consegue mais desfazer uma desconexão. O painel é forçado para HTTPS assim que o site usa HTTPS.
 - **Tokens CSRF** em todas as ações e verificação da origem das requisições.
 
 **Site público**
 - **Cabeçalhos rígidos**: Content-Security-Policy (nenhum script embutido, hash SHA-256 para o estilo), proteção contra clickjacking, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS opcional. Eles dependem das configurações, nunca da requisição: o cache não pode ser envenenado.
 - **Nenhum redirecionamento aberto**: endereços adulterados (`/\exemplo.com`, caracteres de controle…) retornam 404.
-- **Conteúdo higienizado** por lista de permissões (o HTML é analisado e depois totalmente reescrito); links `javascript:` e `data:` são impossíveis, mesmo disfarçados (`javascript&colon;`). As versões Markdown, `llms.txt` e RSS continuam inertes.
-- **Formulário de contato** sem captcha: campo isca, token, 5 mensagens por rede a cada 10 minutos e 100 por dia para o site inteiro; caixa limitada a 500 mensagens (o spam sai primeiro), com paginação.
+- **Conteúdo higienizado** por lista de permissões (o HTML é analisado e depois totalmente reescrito); links `javascript:` e `data:` são impossíveis, mesmo disfarçados (`javascript&colon;`). As versões Markdown, `llms.txt` e RSS continuam inertes: nas cópias Markdown (`.md`, `llms.txt`, `llms-full.txt`), um texto digitado nunca vira link, imagem ou HTML. Os caracteres Markdown dele são escapados (você pode ver `\[` no arquivo bruto), e os links de verdade mantêm o endereço verificado.
+- **Páginas e cache**: uma página que está sendo gerada enquanto você tira um conteúdo do ar nunca é servida depois a partir do cache. As páginas públicas, as versões `.md`, o feed RSS, o `llms-full.txt`, o sitemap e o feed de produtos nunca mostram um conteúdo salvo como rascunho ou agendado. Excluir uma conta, ou mudar o nome público ou a apresentação dela, atualiza as páginas em cache. Uma página de autor só existe para uma conta com pelo menos um artigo publicado.
+- **Formulário de contato** sem captcha: campo isca, token, 5 mensagens por rede a cada 10 minutos e 100 por dia para o site inteiro. Esses limites são rígidos: quando as 100 mensagens são atingidas, o formulário recusa todo mundo até 24 horas depois da primeira delas (antes da 1.10.3, ele reabria depois de 6 horas). Caixa limitada a 500 mensagens (o spam sai primeiro), com paginação. Um endereço com aspas duplas, barras invertidas, espaços ou quebras de linha é recusado, aqui e em qualquer lugar onde se digite um e-mail.
 - **Imagens recodificadas no envio** (remove cargas ocultas e dados EXIF/GPS); GIFs animados reescritos bloco a bloco; qualquer imagem que contenha código é recusada; no máximo 40 megapixels; SVGs recusados, nenhum script nem listagem de arquivos em `/media`.
 
 **Painel**
 - **Endereço do painel personalizável** (menos robôs), papéis de administrador / redator; o botão “Editar” do site não revela esse endereço.
-- **Backups no Google Drive isolados**: acesso limitado aos arquivos criados pelo Éclair, token criptografado e revogável, nunca incluído em um backup; conexão sujeita à confirmação da senha.
+- **Backups no Google Drive isolados**: acesso limitado aos arquivos criados pelo Éclair, token criptografado e revogável, nunca incluído em um backup; conexão sujeita à confirmação da senha e vinculada à sessão do administrador que a inicia: o código só aparece ali, e só nos 15 minutos seguintes à digitação da senha. A página Segurança mostra quem fez a conexão. Se essa conta for excluída ou deixar de ser administradora, os backups param, a conexão é removida e os administradores são convidados a refazê-la.
 - **Assistente de IA com limites**: só rascunhos e propostas, chaves de API criptografadas e excluídas dos backups, orçamento mensal e cota diária (detalhes em [Assistente de IA](#segurança-e-privacidade)).
-- **Registros limitados** (campos truncados, no máximo 1 MB): impossível inflá-los.
+- **Registros limitados** (campos truncados, no máximo 2 MB por registro): impossível inflá-los. Um registro cheio vira o segmento anterior (`*-1.php`) em vez de perder a metade mais antiga; os e-mails e navegadores gravados são cortados em 100 caracteres. As falhas de login anônimas têm um arquivo próprio, `data/logs/login-failures.php`: uma enxurrada de tentativas não expulsa mais os eventos reais do registro de segurança. A página Segurança mostra os últimos eventos reais e as últimas falhas anônimas.
+- **Limites generosos**, para que uma IA, um conector ou uma conta descontrolados nunca encham o site: no máximo 3.000 conteúdos (rascunhos incluídos); a IA (assistente, conector MCP, “Criar com IA”) para de criar rascunhos assim que o site tem 500; 16 MB de texto publicado na busca (mais de 1.500 artigos longos); 5.000 redirecionamentos, com endereços de até 1.000 caracteres; 10.000 imagens; 1.000 categorias. Os conteúdos existentes continuam sempre editáveis, e uma mensagem clara diz o que excluir.
 - **Verificação de integridade**: compara cada arquivo com sua impressão digital original e aponta arquivos suspeitos, inclusive um `.php` sem a linha de proteção em `data/` ou `cache/`.
 - **Teste de proteção ao vivo**: a página Segurança verifica, a partir do seu navegador, se os arquivos internos estão mesmo inacessíveis e se o endereço do site está verificado.
 
@@ -540,7 +551,10 @@ Desde a versão 1.10, o Éclair confere duas vezes por dia no GitHub se existe u
 
 Enquanto isso, o Éclair:
 
-- baixa o arquivo zip do GitHub e verifica a **assinatura** do anúncio dele: cada versão é assinada com a chave privada do mantenedor (Ed25519), que nunca fica no GitHub. Por isso, um repositório invadido não basta para enviar código ao seu site;
+- verifica de novo a **assinatura** do anúncio recebido e depois baixa o arquivo zip do GitHub: cada versão é assinada com a chave privada do mantenedor (Ed25519), que nunca fica no GitHub. Por isso, um repositório invadido não basta para enviar código ao seu site. O anúncio assinado também traz um número de série e uma data de expiração:
+  - um anúncio mais antigo, reenviado pelo canal, é recusado: o Éclair anota isso no registro e avisa na página **Atualizações**;
+  - um anúncio que não foi renovado há 180 dias mostra um aviso, mas a instalação continua possível;
+  - “Você tem a versão mais recente do Éclair” só aparece depois de uma verificação bem-sucedida de um anúncio assinado ainda válido;
 - verifica a impressão digital do arquivo zip, cada arquivo e se a sua versão do PHP consegue ler cada arquivo PHP, **antes de mexer em qualquer coisa**;
 - guarda a versão antiga (`cache/update/previous`) e instala a nova em um instante: só `app/`, `assets/`, `index.php` e `.htaccess` mudam. Os seus conteúdos, imagens, contas, configurações e o seu CSS personalizado (`data/`, `media/`) continuam como estão;
 - verifica se o seu site, o seu painel e a nova versão respondem como antes; se não, **ele volta sozinho** para a versão antiga.
@@ -552,6 +566,7 @@ Bom saber:
 - Um `.htaccess` que você modificou (ou que a sua hospedagem complementou) é **mantido**; o novo modelo fica guardado em `cache/update/htaccess-<version>.txt` para você poder comparar.
 - Os arquivos do Éclair modificados à mão (tema…) são substituídos pela nova versão deles: a página Atualizações lista esses arquivos antes da instalação. Para um ajuste duradouro, use o **CSS personalizado** (Configurações › Aparência).
 - Se a sua hospedagem impede que o servidor chame a si mesmo, o Éclair instala a atualização sem conseguir conferi-la e avisa você: abra o seu site para verificar e volte à versão anterior se for preciso.
+- Se a volta automática não pôde ser concluída, a página avisa (“Retorno incompleto”) e pede que você recoloque no lugar, por FTP, o conteúdo de `cache/update/previous` (veja [Solução de problemas](#solução-de-problemas)).
 - A atualização em um clique precisa das extensões PHP `sodium`, `zip` e `curl`, e de pastas que o PHP possa modificar. Caso contrário, a página explica o que corrigir, e a atualização por FTP continua possível.
 - A verificação automática pode ser desativada em Configurações › Avançado (o botão “Verificar agora” continua disponível).
 
@@ -563,7 +578,7 @@ Bom saber:
 
 ### Fazer backup
 
-**Baixar um backup**: Segurança › Baixar backup, ou pela página Atualizações. O arquivo ZIP contém `data/` (conteúdos, configurações, contas, mensagens) e `media/` (imagens). As chaves de API e a conexão com o Google Drive nunca são incluídas nele. Sem a extensão zip, copie essas duas pastas por FTP.
+**Baixar um backup**: Segurança › Baixar backup, ou pela página Atualizações. O arquivo ZIP contém `data/` (conteúdos, configurações, contas, mensagens) e `media/` (imagens). O cofre criptografado (chaves de API, conexão com o Google Drive), as sessões e os limites nunca são incluídos nele, e o arquivo ZIP fica privado no servidor (permissões 0600). Sem a extensão zip, copie essas duas pastas por FTP.
 
 ### Backups no Google Drive
 
@@ -578,14 +593,15 @@ Segurança › **Backups no Google Drive** envia uma cópia do seu site para o s
 Depois, para conectar o seu Drive:
 
 1. Clique em **Conectar o Google Drive** (a sua senha pode ser pedida de novo).
-2. O Éclair mostra um código. Abra **google.com/device** no computador ou no celular, digite o código, escolha a sua conta Google e autorize o Éclair.
+2. O Éclair mostra um código, só na sessão que clicou em **Conectar o Google Drive** e nos 15 minutos seguintes à digitação da sua senha (senão, comece a conexão de novo). Abra **google.com/device** no computador ou no celular, digite o código, escolha a sua conta Google e autorize o Éclair. Os outros administradores veem que há uma conexão em andamento, sem o código.
 3. A página se atualiza sozinha: está conectado. Escolha a frequência (todos os dias, todas as semanas ou desativados) e quantos backups guardar.
 
 - O Éclair só tem acesso **aos arquivos que ele mesmo cria** (permissão “drive.file” do Google): ele não vê mais nada do seu Drive. Os backups ficam em uma pasta “Éclair – nome do site”.
 - Quando o número escolhido (8 por padrão) é ultrapassado, os mais antigos vão para a **lixeira** do seu Drive.
 - **Fazer backup agora** inicia um envio imediato. Os sites grandes são enviados em partes de 4 MB: se a hospedagem limita o tempo de execução, o envio continua de onde parou (deixe a página aberta: ela continua sozinha).
 - Os backups automáticos são enviados quando um administrador abre o painel. Para que sejam enviados mesmo sem visitas, copie o **endereço da tarefa agendada** (Segurança › Backups no Google Drive › Backups em horário fixo) e cole-o na tarefa agendada (cron) da sua hospedagem ou no [cron-job.org](https://cron-job.org), para ser chamado a cada hora: ele só inicia um backup quando é o momento de fazer um. Não compartilhe esse endereço.
-- O token de acesso fica criptografado no seu servidor. **Desconectar o Google Drive** revoga esse token; você também pode retirar o acesso pela sua conta Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Os backups já enviados continuam no seu Drive.
+- O cartão mostra quem conectou a conta (“conectado por …”). Se esse administrador for excluído ou rebaixado, a conexão é removida e os backups param até que um administrador conecte o Google Drive de novo. Uma troca de senha não desconecta nada.
+- O token de acesso fica criptografado no seu servidor. **Desconectar o Google Drive** revoga esse token, e uma nova conexão revoga a anterior; você também pode retirar o acesso pela sua conta Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Os backups já enviados continuam no seu Drive.
 
 ### Restaurar um backup
 
@@ -608,11 +624,17 @@ seu-endereco@exemplo.com.br
 SuaNovaSenha2026
 ```
 
-Em até 24 horas, **faça login com esse e-mail e essa nova senha**: a senha é substituída, a autenticação em dois fatores dessa conta é desativada, suas outras sessões são encerradas e o arquivo é apagado automaticamente. Ninguém mais consegue acionar isso (é preciso conhecer o conteúdo do arquivo); um arquivo sem a primeira linha é recusado e apagado.
+Substitua o exemplo da terceira linha pela sua própria senha nova (no mínimo 10 caracteres): copiado como está, ele é recusado.
+
+Em até 24 horas, **faça login com esse e-mail e essa nova senha**: a senha é substituída, a autenticação em dois fatores dessa conta é desativada, suas outras sessões são encerradas e o arquivo é apagado automaticamente. Ninguém mais consegue acionar isso (é preciso conhecer o conteúdo do arquivo); um arquivo sem a primeira linha, ou com data mais de uma hora no futuro, é recusado e apagado.
+
+**“O servidor está muito ocupado” a cada login**: se a mensagem continuar mesmo sem ninguém atacando o seu site, talvez um dos arquivos `data/.login-N.lock` esteja inutilizável: apague-os por FTP (o Éclair os recria).
 
 **O painel não aparece mais depois de uma atualização** (raro: o Éclair volta sozinho à versão anterior quando consegue conferir o site): por FTP, substitua as pastas `app/` e `assets/` pelas de `cache/update/previous/` e depois copie `cache/update/previous/index.php.txt` para a raiz com o nome `index.php`.
 
 **“Não é possível atualizar com um clique neste servidor”**: a página Atualizações diz o motivo (extensão PHP ausente, pasta sem permissão de escrita, versão do PHP antiga demais). Corrija isso com a sua hospedagem ou atualize por FTP.
+
+**“Anúncio de atualização expirado” ou “anúncio mais antigo… ignorado” (página Atualizações)**: o site está bem; ele mantém o anúncio mais recente que conhece. Se isso durar mais de um dia, consulte a [página do projeto no GitHub](https://github.com/Jacckisback/eclair-cms).
 
 **Google Drive: “Acesso ao Google Drive revogado”**: a autorização foi retirada pela conta Google (ou expirou). Clique em **Conectar o Google Drive**: a mesma pasta é reutilizada.
 
@@ -623,6 +645,10 @@ Em até 24 horas, **faça login com esse e-mail e essa nova senha**: a senha é 
 **Erro 404 em todas as páginas, menos na inicial**: o arquivo `.htaccess` não foi enviado (arquivo oculto) ou a reescrita de URL está desativada. Se a sua hospedagem exigir, tire o comentário da linha `RewriteBase /` do `.htaccess`.
 
 **Erro 500 logo depois do envio**: sua hospedagem recusa uma diretiva do `.htaccess` (muito raro: só são usadas diretivas aceitas em todo lugar). Remova o bloco em questão ou fale com a sua hospedagem.
+
+**“Não foi possível salvar: o bloqueio dos dados (data/.lock) não funciona…”**: apague `data/.lock` por FTP (o Éclair o recria) ou pergunte à sua hospedagem se o bloqueio de arquivos (flock) está disponível. A pasta `data/` precisa ficar em um armazenamento local onde esse bloqueio funcione.
+
+**“Fichier des clés data/keys.php illisible”** (esta mensagem técnica está em francês: o arquivo de chaves não pode ser lido): corrija as permissões dele por FTP. Não o apague, a não ser que aceite digitar de novo as suas chaves de API e reconectar o Google Drive: apagá-lo também desconecta todo mundo e faz esquecer os dispositivos de costume.
 
 **As imagens não são convertidas em WebP**: falta a extensão GD (ou o suporte a WebP dela). Ative-a no painel de PHP da sua hospedagem; enquanto isso, as imagens continuam em JPG/PNG.
 
@@ -638,7 +664,7 @@ No Nginx, o Éclair não precisa de `.htaccess`, mas é preciso reproduzir estas
 location ~ ^/(app|data|cache)(/|$) { return 404; }
 location ~ /\.(?!well-known/) { return 404; }
 location ^~ /media/ {
-    location ~* \.(php\d?|phtml|phar|s?html?|svgz?|xml|js)$ { return 404; }
+    location ~* \.(php\d?|phtml|phar|inc|pl|py|cgi|sh|asp|aspx|jsp|s?html?|xht(ml)?|svgz?|xml|m?js)$ { return 404; }
     add_header X-Content-Type-Options nosniff;
     expires 1y;
 }
@@ -679,19 +705,37 @@ tests/mcp.php            conector MCP (OAuth, PKCE, protocolo, revogação) e es
 tests/design.php         direções de arte (contrastes, CSS, fontes, configurações maliciosas, IA) e pontuação de design
 tests/update.php         atualização em um clique (canal assinado falso: assinatura, arquivo zip malicioso, sintaxe, volta automática e manual)
 tests/drive.php          backups no Google Drive (tests/fake-google.php: OAuth e Drive falsos, envio em partes, retomada)
+tests/sec-*.php          testes de não regressão da segurança da 1.10.3
 tests/fixtures/          sites de referência e a impressão digital da renderização pública deles (uma nova versão não muda nem um byte do site)
 tools/router.php         roteador para o servidor embutido do PHP (desenvolvimento)
 tools/capture.php        captura de referência da renderização pública e medições do Lighthouse (--lighthouse)
 tools/build.php          impressões de integridade + arquivo dist/eclair-cms-<versão>.zip (PHP compactado, telas do painel comprimidas, JS e CSS do painel enxugados) + anúncio assinado dist/latest.json
+tools/announce.php       assina e verifica o anúncio de atualização (usado pelo build.php e pelos testes)
 ```
 
 ```bash
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t eclair tools/router.php   # servidor de desenvolvimento
-php tests/run.php                                  # 609 verificações unitárias e HTTP; ECLAIR_TEST_ROOT=… para testar um arquivo zip descompactado
+php tests/run.php                                  # testes (unitários + HTTP); ECLAIR_TEST_ROOT=… para testar um arquivo zip descompactado
 php tools/build.php                                # arquivo pronto para distribuir
 ```
 
+**Testes.** A suíte completa leva cerca de 50 segundos. Não rode duas suítes ao mesmo tempo na mesma máquina.
+
 **Publicar uma versão.** O `tools/build.php` assina o anúncio `dist/latest.json` (versão, endereço, tamanho e SHA-256 do arquivo zip) com a chave privada Ed25519 do mantenedor, lida da variável de ambiente `ECLAIR_SIGNING_KEY` (base64, 64 bytes); ele recusa uma chave que não corresponda à chave pública de `app/lib/Update.php`. As credenciais do aplicativo Google dos backups são gravadas no arquivo zip a partir de `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` (tipo de cliente “TVs and Limited Input devices” no console do Google Cloud, permissão `drive.file`). Nenhum desses valores está no repositório.
+
+O anúncio traz duas assinaturas da mesma chave: a original, lida pelos sites nas versões 1.10.0 a 1.10.2, e uma assinatura “v2” que cobre também um número de série e uma data de expiração de 180 dias. Antes do vencimento, mesmo sem nova versão, o mantenedor assina o canal de novo com um único comando:
+
+```bash
+ECLAIR_SIGNING_KEY=… php tools/build.php --resign
+```
+
+Para retirar uma versão, o mantenedor anuncia de novo um arquivo zip mais antigo (já em `dist/`) com um número de série maior:
+
+```bash
+ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<versão>
+```
+
+Uma versão assinada só é gerada em um checkout Git e só inclui os arquivos versionados; o commit de origem é registrado no manifesto. As fontes das traduções (`i18n/*.php`) precisam continuar sendo arrays simples de textos literais: elas são lidas como dados, nunca executadas.
 
 **Fork ou instalação independente.** Em `eclair-config.php`: `ECLAIR_UPDATE_URL` e `ECLAIR_UPDATE_KEY` (base64) para o seu próprio canal de atualizações assinado; `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` para o seu próprio aplicativo Google.
 
