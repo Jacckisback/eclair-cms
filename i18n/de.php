@@ -1553,4 +1553,5 @@ return [
     'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'Der Suchindex der Website ist voll: Lösche oder kürze veröffentlichte Inhalte, bevor du weitere veröffentlichst.',
     'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'Die Website hat bereits {n} Entwürfe: Veröffentliche oder lösche einige, bevor du mit der KI weitere erstellst.',
     'Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.' => 'Speichern nicht möglich: Die Datensperre (data/.lock) funktioniert nicht. Lösche diese Datei per FTP (Éclair legt sie neu an) oder frage deinen Hoster, ob Dateisperren (flock) verfügbar sind.',
+    'Connexion faite avant la 1.10.3 : déconnecte puis reconnecte Google Drive pour qu’Éclair sache quel administrateur l’a établie.' => 'Vor 1.10.3 verbunden: Trenne Google Drive und verbinde es erneut, damit Éclair weiß, welcher Administrator die Verbindung eingerichtet hat.',
 ];

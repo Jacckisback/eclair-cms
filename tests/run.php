@@ -657,6 +657,7 @@ require __DIR__ . '/sec-B2.php';
 require __DIR__ . '/sec-C1.php';
 require __DIR__ . '/sec-B1.php';
 require __DIR__ . '/sec-A.php';
+require __DIR__ . '/sec-review.php';
 
 exec('rm -rf ' . escapeshellarg(ECLAIR_DATA));
 echo "\n" . ($failed ? '❌ ' . count($failed) . ' échec(s), ' : '✅ ') . $passed . " vérifications réussies\n";

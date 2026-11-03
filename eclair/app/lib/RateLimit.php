@@ -12,6 +12,8 @@ final class RateLimit
 {
     /** Clés bloquées listées sur la page Sécurité : au-delà de 100, la liste n'aiderait plus personne. */
     private const SHOWN = 100;
+    /** Fichiers lus au plus pour la page Sécurité : le temps d'affichage reste borné pendant une attaque. */
+    private const SCAN = 20000;
     /** Compteur inactif depuis plus d'un jour : supprimé (aucune fenêtre ne dure plus de 24 h). */
     private const IDLE = 86400;
 
@@ -91,26 +93,40 @@ final class RateLimit
 
     /**
      * Clés actuellement bloquées (pour la page Sécurité). Le dossier est lu un fichier à la fois, sans garder les
-     * compteurs en mémoire : la page reste légère même avec des centaines de milliers de compteurs.
+     * compteurs en mémoire : la page reste légère même avec des centaines de milliers de compteurs. Les comptes, appareils
+     * et confirmations bloqués passent avant les réseaux (login-ip, contact) : pendant une attaque venue de nombreuses
+     * adresses, celle qu'un administrateur doit débloquer reste visible. Au plus SCAN fichiers lus.
      */
     public static function active(): array
     {
-        $out = [];
+        $main = [];
+        $networks = [];
         $now = time();
+        $read = 0;
         foreach (self::files() as $file) {
-            if (!preg_match('~/[a-f0-9]{40}\.php$~', $file)) {
+            if (!preg_match('~/[a-f0-9]{40}\.php$~', $file) || ++$read > self::SCAN) {
+                if ($read > self::SCAN) {
+                    break;
+                }
                 continue;
             }
             $row = self::peek($file);
-            if ((int) ($row['b'] ?? 0) > $now) {
-                $out[] = ['key' => (string) ($row['k'] ?? ''), 'until' => (int) $row['b']];
-                if (count($out) >= self::SHOWN) {
-                    break;
+            if ((int) ($row['b'] ?? 0) <= $now) {
+                continue;
+            }
+            $entry = ['key' => (string) ($row['k'] ?? ''), 'until' => (int) $row['b']];
+            if (preg_match('/^(login-ip|contact):/', $entry['key'])) {
+                if (count($networks) < self::SHOWN) {
+                    $networks[] = $entry;
                 }
+            } elseif (count($main) < self::SHOWN) {
+                $main[] = $entry;
+            } else {
+                break;
             }
         }
         self::gc();
-        return $out;
+        return array_slice(array_merge($main, $networks), 0, self::SHOWN);
     }
 
     /** Supprime les compteurs inactifs depuis plus d'un jour (dossier lu au fil de l'eau : mémoire constante). */

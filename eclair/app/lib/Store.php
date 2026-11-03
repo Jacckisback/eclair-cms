@@ -107,7 +107,7 @@ final class Store
             if ($h !== false) {
                 fclose($h);
             }
-            throw new \RuntimeException(t('Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.'));
+            throw new StorageException(t('Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.'));
         }
         self::$depth++;
         try {

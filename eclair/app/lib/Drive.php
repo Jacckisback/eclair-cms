@@ -41,6 +41,12 @@ final class Drive
     private const CHUNK = 4194304;
     public const SCHEDULES = ['off' => 0, 'daily' => 86400, 'weekly' => 604800];
     private const VAULT = 'google_drive';
+    /**
+     * Fenêtre de la connexion en cours : 15 minutes après son lancement, qui suit toujours la confirmation du mot de passe
+     * (AdminDrive). Comptée depuis le lancement et non depuis la dernière saisie du mot de passe : une connexion lancée juste
+     * avant la fin de ces 15 minutes ne s'éteint pas une minute plus tard (le code de Google, lui, vaut 30 minutes).
+     */
+    private const FLOW_TTL = 900;
     /** Application Google du site (ID et code secret), enregistrée dans l'administration quand l'archive n'en fournit pas. */
     private const APP = 'google_app';
 
@@ -159,16 +165,18 @@ final class Drive
         $pending = is_array($s['pending'] ?? null) && (int) $s['pending']['expires'] > time() ? $s['pending'] : null;
         $user = Auth::user();
         $mine = $pending !== null && $user !== null && self::initiated($pending, $user);
-        $by = Users::find((string) ($s['by']['uid'] ?? ''));
+        $by = Users::find(self::binder($s));
         return [
             'ready' => self::ready(),
             'available' => self::available(),
             'builtin' => self::builtIn(),
             'own' => self::ownApp(),
             'connected' => self::connected(),
-            'pending' => $mine && Auth::fresh() ? array_intersect_key($pending, array_flip(['code', 'url', 'expires', 'interval'])) : null,
+            'pending' => $mine && self::live($pending) ? array_intersect_key($pending, array_flip(['code', 'url', 'expires', 'interval'])) : null,
             'busy' => $pending !== null && !$mine && is_array($pending['by'] ?? null),
             'by' => self::connected() && $by !== null ? (string) $by['name'] : '',
+            // Connexion dont l'administrateur n'est pas connu (faite avant la 1.10.3) : la page invite à la refaire.
+            'unbound' => self::connected() && self::binder($s) === '',
             'email' => (string) ($s['email'] ?? ''),
             'folder' => (string) ($s['folder_name'] ?? ''),
             'job' => $job !== null ? ['percent' => self::percent($job), 'started' => (int) $job['started']] : null,
@@ -240,7 +248,7 @@ final class Drive
             'expires' => time() + max(60, min(1800, (int) ($j['expires_in'] ?? 1800))),
             'interval' => max(5, min(60, (int) ($j['interval'] ?? 5))),
             'next' => 0,
-            'by' => ['uid' => (string) $user['id'], 'ver' => (int) ($user['ver'] ?? 1), 'sid' => $sid],
+            'by' => ['uid' => (string) $user['id'], 'ver' => (int) ($user['ver'] ?? 1), 'sid' => $sid, 'at' => time()],
         ]], ['error']);
         return ['ok' => true];
     }
@@ -248,7 +256,7 @@ final class Drive
     /**
      * Google a-t-il reçu l'autorisation ? Renvoie connected, pending, denied, expired, error, ou other (flux lancé par une
      * autre session : celle-ci n'y touche pas). Respecte l'intervalle imposé par Google entre deux questions (sinon il
-     * ralentit la cadence). Seule la session qui a lancé le flux, avec un mot de passe récent, peut le terminer.
+     * ralentit la cadence). Seule la session qui a lancé le flux, dans les 15 minutes qui suivent, peut le terminer.
      */
     public static function poll(array $user): string
     {
@@ -259,8 +267,8 @@ final class Drive
         if (!self::initiated($p, $user)) {
             return 'other';
         }
-        if ((int) $p['expires'] <= time() || !Auth::fresh()) {
-            // Code échu, ou mot de passe saisi il y a trop longtemps : le code n'est plus affiché, la connexion est à relancer.
+        if ((int) $p['expires'] <= time() || !self::live($p)) {
+            // Code échu, ou connexion lancée il y a plus de 15 minutes : le code n'est plus affiché, la connexion est à relancer.
             self::flow($p, null);
             return 'expired';
         }
@@ -299,16 +307,22 @@ final class Drive
             }
             return !$claimed && self::connected() ? 'connected' : 'expired';
         }
-        // Un compte déjà connecté est remplacé : son jeton est révoqué (jamais celui qui vient d'être reçu) et l'envoi en
-        // cours vers lui abandonné.
-        $old = Vault::get(self::VAULT);
-        self::drop(hash_equals($old, $refresh) ? '' : $old);
-        Vault::set(self::VAULT, $refresh);
         $token = (string) $j['access_token'];
         $about = self::http('GET', self::endpoint('api') . '/about?fields=user(emailAddress)', ['Authorization: Bearer ' . $token]);
+        $email = (string) ($about['json']['user']['emailAddress'] ?? '');
+        // Un compte déjà connecté est remplacé : l'envoi en cours vers lui est abandonné, et son jeton révoqué s'il s'agit
+        // d'un autre compte Google. Pour le même compte, rien n'est révoqué : chez Google, révoquer un jeton retire toute
+        // l'autorisation, y compris le jeton qui vient d'être reçu.
+        $old = Vault::get(self::VAULT);
+        $same = $email !== '' && strcasecmp($email, (string) (self::state()['email'] ?? '')) === 0;
+        self::drop(hash_equals($old, $refresh) || $same ? '' : $old);
+        Vault::set(self::VAULT, $refresh);
         // Le dossier déjà créé est repris s'il appartient au même compte (sinon Google répond 404 et un nouveau est créé).
-        self::save(['email' => (string) ($about['json']['user']['emailAddress'] ?? ''), 'since' => time(),
-            'by' => ['uid' => (string) $now['id'], 'email' => (string) $now['email']]], ['pending', 'error']);
+        // L'administrateur qui a connecté est noté avec la date de cette connexion : une connexion refaite autrement (par
+        // une version d'avant la 1.10.3, après un retour en arrière) ne lui est jamais attribuée.
+        $since = time();
+        self::save(['email' => $email, 'since' => $since,
+            'by' => ['uid' => (string) $now['id'], 'email' => (string) $now['email'], 'since' => $since]], ['pending', 'error']);
         self::folder($token);
         // Première connexion : sauvegarde hebdomadaire proposée d'office (modifiable aussitôt).
         if (!Settings::get('backup.chosen')) {
@@ -318,11 +332,11 @@ final class Drive
         return 'connected';
     }
 
-    /** Annule la connexion en cours : seulement depuis la session qui l'a lancée, avec un mot de passe récent. */
+    /** Annule la connexion en cours : seulement depuis la session qui l'a lancée. */
     public static function cancel(array $user): void
     {
         $p = self::state()['pending'] ?? null;
-        if (is_array($p) && self::initiated($p, $user) && Auth::fresh()) {
+        if (is_array($p) && self::initiated($p, $user)) {
             self::flow($p, null);
         }
     }
@@ -352,12 +366,12 @@ final class Drive
     /**
      * Le compte qui a connecté le Drive n'existe plus ou n'est plus administrateur : la connexion est retirée (jeton
      * révoqué, envoi abandonné), l'événement est journalisé et la page Sécurité invite à reconnecter. Renvoie true si
-     * c'est le cas. Une connexion faite avec la 1.10.2 (compte non noté) continue ; il sera noté à la prochaine connexion.
+     * c'est le cas. Une connexion faite avant la 1.10.3 (compte non noté) continue, et la page Sécurité invite à la refaire.
      */
     private static function guard(): bool
     {
         $s = self::state();
-        $uid = (string) ($s['by']['uid'] ?? '');
+        $uid = self::binder($s);
         // Comptes illisibles pour l'instant (data/users.php vide ou en cours de réparation) : rien n'est décidé.
         $all = Users::all();
         if ($uid === '' || $all === [] || !self::connected()) {
@@ -396,6 +410,22 @@ final class Drive
             Store::write('drive', $s);
             return true;
         });
+    }
+
+    /** Flux encore dans sa fenêtre de 15 minutes depuis son lancement (un flux sans heure de lancement est échu). */
+    private static function live(array $p): bool
+    {
+        return time() - (int) ($p['by']['at'] ?? 0) < self::FLOW_TTL;
+    }
+
+    /**
+     * Administrateur qui a établi la connexion en place ('' s'il n'est pas connu) : noté avec la date de la connexion, il ne
+     * compte que pour celle-ci.
+     */
+    private static function binder(array $s): string
+    {
+        $by = is_array($s['by'] ?? null) ? $s['by'] : [];
+        return isset($by['since'], $s['since']) && (int) $by['since'] === (int) $s['since'] ? (string) ($by['uid'] ?? '') : '';
     }
 
     /** Flux lancé par cette session : même compte, même version de session, même identifiant de session. */

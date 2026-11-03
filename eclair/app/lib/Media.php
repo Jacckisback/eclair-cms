@@ -189,6 +189,16 @@ final class Media
         ];
         $target = self::dir() . '/' . $record['file'];
         $animated = $type === IMAGETYPE_GIF && self::animated($tmp);
+        // Réservation restée vide : retirée après l'envoi, même si PHP s'arrête en route (mémoire épuisée par une image
+        // énorme), ce que « finally » ne couvre pas.
+        $reserved = $target . '.' . $ext;
+        $unreserve = static function () use ($reserved): void {
+            clearstatcache(true, $reserved);
+            if (is_file($reserved) && filesize($reserved) === 0) {
+                @unlink($reserved);
+            }
+        };
+        register_shutdown_function($unreserve);
         try {
             if (self::gd() && !$animated) {
                 $record = self::process($tmp, $type, $target, $record);
@@ -197,11 +207,7 @@ final class Media
             }
         } finally {
             // Réservation restée vide (envoi refusé, ou image enregistrée sous une autre extension) : retirée.
-            $reserved = $target . '.' . $ext;
-            clearstatcache(true, $reserved);
-            if (is_file($reserved) && filesize($reserved) === 0) {
-                @unlink($reserved);
-            }
+            $unreserve();
         }
         $record['bytes'] = (int) @filesize($target . '.' . $record['ext']);
         Store::locked(function () use ($record): void {

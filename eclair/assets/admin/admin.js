@@ -129,13 +129,17 @@
     zone.addEventListener('drop', (e) => { const files = [...(e.dataTransfer?.files || [])].filter((f) => f.type.startsWith('image/')); if (files.length) onFiles(files); });
   }
 
-  /* ── Brouillons de secours de l'éditeur (navigateur) : propres au compte connecté, effacés à la déconnexion ── */
-  // Clé « eclair-draft-<compte>-<contenu> » ; D.me est l'identifiant du compte connecté (vide sans session). La copie d'un
-  // autre compte, ou d'avant la 1.10.3 (sans compte : auteur inconnu), n'est jamais proposée : elle est effacée dès qu'une
-  // page de l'administration s'ouvre. Seules ces clés sont touchées : la préférence « eclair-mode » et le site public restent.
+  /* ── Brouillons de secours de l'éditeur (navigateur) : propres au site et au compte connecté, effacés à la déconnexion ── */
+  // Clé « eclair-draft-<site>|<compte>-<contenu> » : <site> est le dossier du site (deux sites Éclair à la même adresse,
+  // l'un en sous-dossier, ne touchent jamais aux brouillons l'un de l'autre) ; D.me est le compte connecté (vide sans
+  // session). La copie d'un autre compte n'est jamais proposée : elle est effacée dès qu'une page de l'administration
+  // s'ouvre. Celles d'avant la 1.10.3 (sans site ni compte) sont reprises par le seul compte d'un site qui n'en a qu'un
+  // (D.solo), sinon effacées. Seules ces clés sont touchées : la préférence « eclair-mode » et le site public restent.
   const DRAFT = 'eclair-draft-';
+  const SITE = DRAFT + encodeURIComponent(D.base || '/') + '|';
+  const legacy = (k) => k.startsWith(DRAFT) && !k.includes('|');
   const drafts = {
-    key: (item) => (D.me ? DRAFT + D.me + '-' + (item.id || 'new-' + item.type) : ''),
+    key: (item) => (D.me ? SITE + D.me + '-' + (item.id || 'new-' + item.type) : ''),
     get: (key) => {
       try {
         const b = key ? JSON.parse(localStorage.getItem(key) || 'null') : null;
@@ -144,19 +148,36 @@
     },
     set: (key, data) => { try { if (key) localStorage.setItem(key, JSON.stringify({ t: Date.now(), u: D.me, data })); } catch (e) { /* stockage indisponible ou plein */ } },
     drop: (...keys) => { try { keys.forEach((k) => k && localStorage.removeItem(k)); } catch (e) { /* stockage indisponible */ } },
-    // Efface les brouillons, sauf ceux du compte « keep » s'il est donné.
+    // Efface les brouillons de ce site (et ceux d'avant la 1.10.3), sauf ceux du compte « keep » s'il est donné.
     clear: (keep = '') => {
       try {
         const all = [];
         for (let i = 0; i < localStorage.length; i++) all.push(localStorage.key(i));
-        all.filter((k) => k && k.startsWith(DRAFT) && !(keep && k.startsWith(DRAFT + keep + '-'))).forEach((k) => localStorage.removeItem(k));
+        all.filter((k) => k && (legacy(k) || (k.startsWith(SITE) && !(keep && k.startsWith(SITE + keep + '-'))))).forEach((k) => localStorage.removeItem(k));
+      } catch (e) { /* stockage indisponible */ }
+    },
+    // Site à un seul compte : les copies d'avant la 1.10.3 (« eclair-draft-<contenu> ») lui reviennent, rien ne se perd.
+    adopt: () => {
+      try {
+        const all = [];
+        for (let i = 0; i < localStorage.length; i++) all.push(localStorage.key(i));
+        all.filter((k) => k && legacy(k)).forEach((k) => {
+          const b = JSON.parse(localStorage.getItem(k) || 'null');
+          const target = SITE + D.me + '-' + k.slice(DRAFT.length);
+          if (b && typeof b.t === 'number' && b.data && typeof b.data === 'object' && !localStorage.getItem(target)) {
+            localStorage.setItem(target, JSON.stringify({ t: b.t, u: D.me, data: b.data }));
+          }
+          localStorage.removeItem(k);
+        });
       } catch (e) { /* stockage indisponible */ }
     },
   };
-  // Compte connecté : seuls ses brouillons restent. Page de connexion qui suit une déconnexion : plus aucun (aussi quand
-  // le formulaire de déconnexion est parti sans script).
-  if (D.me) drafts.clear(D.me);
-  else if (/[?&]bye=1(&|$)/.test(location.search)) drafts.clear();
+  // Compte connecté : seuls ses brouillons restent. Page de connexion qui suit une déconnexion : plus aucun pour ce site
+  // (aussi quand le formulaire de déconnexion est parti sans script).
+  if (D.me) {
+    if (D.solo) drafts.adopt();
+    drafts.clear(D.me);
+  } else if (/[?&]bye=1(&|$)/.test(location.search)) drafts.clear();
 
   window.Eclair = { D, t, api, toast, upload, pickMedia, h, $, $$, dropEvents, drafts };
 

@@ -159,14 +159,16 @@ final class Redirects
                         $gone[] = $r['from'];
                     }
                 }
-                if (count($next) >= self::MAX) {
-                    // Liste pleine : une redirection ajoutée à la main est refusée (l'écran le dit avant) ; une redirection
-                    // automatique prend la place des plus anciennes redirections automatiques, sinon elle est omise.
+                // Liste pleine (ou au-delà : liste d'avant la 1.10.3, jamais coupée en masse). Remplacer une redirection
+                // existante (même ancienne adresse) est toujours permis ; une nouvelle redirection ajoutée à la main est
+                // refusée (l'écran le dit avant) ; une nouvelle redirection automatique prend la place de la plus ancienne
+                // redirection automatique, une pour une, sinon elle est omise.
+                if (count($next) >= self::MAX && !in_array($row['from'], $gone, true)) {
                     if (!$auto) {
                         continue;
                     }
-                    [$next, $pruned] = self::prune($next, count($next) - self::MAX + 1);
-                    if (count($next) >= self::MAX) {
+                    [$next, $pruned] = self::prune($next, 1);
+                    if ($pruned === []) {
                         continue;
                     }
                     $gone = array_merge($gone, $pruned);

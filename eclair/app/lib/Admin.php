@@ -207,6 +207,8 @@ final class Admin
         return '<script type="application/json" id="eclair-data">' . json_script($extra + [
             'csrf' => $user ? Security::csrfToken() : '',
             'me' => $user ? (string) $user['id'] : '',
+            // Site à un seul compte : les brouillons de secours d'avant la 1.10.3 (sans compte) lui reviennent.
+            'solo' => $user !== null && count(Users::all()) === 1,
             'admin' => admin_url(),
             'base' => Req::base(),
             'i18n' => AdminStrings::js(),

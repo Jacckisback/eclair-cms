@@ -121,7 +121,10 @@ final class Cache
     {
         $raw = @file_get_contents(ECLAIR_ROOT . '/cache/runtime.php');
         $rt = $raw === false ? null : json_decode(Store::strip($raw), true);
-        if (!is_array($rt) || ($rt['v'] ?? '') !== ECLAIR_VERSION || (!empty($rt['expires']) && time() >= (int) $rt['expires'])) {
+        // Sans génération (fichier écrit par une version d'avant la 1.10.3, par exemple pendant une mise à jour par FTP) :
+        // rien ne serait plus jamais mis en cache ; une purge en publie une, une seule fois.
+        if (!is_array($rt) || ($rt['v'] ?? '') !== ECLAIR_VERSION || !is_string($rt['g'] ?? null) || $rt['g'] === ''
+            || (!empty($rt['expires']) && time() >= (int) $rt['expires'])) {
             self::purge();
         }
     }

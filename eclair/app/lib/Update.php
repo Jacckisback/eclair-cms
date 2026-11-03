@@ -278,7 +278,9 @@ final class Update
     /** Téléchargement borné, sans redirection ; dans un fichier si $file est donné ('' en cas de succès). Null en cas d'échec. */
     private static function get(string $url, int $max, ?string $file = null): ?string
     {
-        if (!function_exists('curl_init') || !self::trusted($url)) {
+        // L'adresse du canal elle-même (celle d'Éclair, ou celle d'un fork déclarée dans eclair-config.php, paramètres
+        // compris) est toujours permise ; les adresses annoncées (archive, notes) passent la vérification stricte.
+        if (!function_exists('curl_init') || ($url !== self::channel() && !self::trusted($url))) {
             return null;
         }
         $out = $file !== null ? @fopen($file, 'wb') : null;

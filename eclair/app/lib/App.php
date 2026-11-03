@@ -79,11 +79,13 @@ final class App
         if (headers_sent()) {
             return;
         }
-        http_response_code(500);
+        // Panne du serveur que la personne peut régler (verrou des données) : son message dit quoi faire, partout.
+        $storage = $e instanceof StorageException;
+        http_response_code($storage ? 503 : 500);
         header('Cache-Control: no-store');
         if (Req::wantsJson()) {
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['ok' => false, 'error' => ECLAIR_DEBUG ? $e->getMessage() : 'Erreur interne (' . $id . ')']);
+            echo json_encode(['ok' => false, 'error' => ECLAIR_DEBUG || $storage ? $e->getMessage() : 'Erreur interne (' . $id . ')']);
             return;
         }
         header('Content-Type: text/html; charset=utf-8');
@@ -92,7 +94,7 @@ final class App
             . '<meta name="robots" content="noindex"><title>Oups…</title>'
             . '<body style="font:17px/1.6 system-ui,sans-serif;max-width:42rem;margin:12vh auto;padding:0 1.25rem;color:#1e1b4b">'
             . '<p style="font-size:3rem;margin:0">⚡</p><h1 style="margin:.2em 0">Oups, un court-circuit.</h1>'
-            . '<p>Une erreur inattendue est survenue. Réessaie dans un instant.</p>'
+            . '<p>' . ($storage ? e($e->getMessage()) : 'Une erreur inattendue est survenue. Réessaie dans un instant.') . '</p>'
             . '<p style="color:#64748b;font-size:.9rem">Référence : ' . e($id) . '</p>' . $detail . '</body></html>';
     }
 }

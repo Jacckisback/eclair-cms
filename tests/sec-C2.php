@@ -87,7 +87,7 @@ check('éditeur : brouillons lus, écrits et effacés seulement par le magasin l
     && str_contains($editorJs, 'drafts.get(storeKey)') && str_contains($editorJs, 'drafts.set(storeKey') && !str_contains($editorJs, "'eclair-draft-")
     && array_filter($direct[1], static fn (string $a): bool => !str_contains($a, 'eclair-mode')) === [], implode(' | ', $direct[0]));
 check('admin.js : brouillons effacés à la déconnexion et sur la page qui la suit', str_contains($adminJs, "form[data-logout]") && str_contains($adminJs, 'bye=1')
-    && str_contains($adminJs, "DRAFT + D.me + '-'"));
+    && str_contains($adminJs, "SITE + D.me + '-'"));
 check('consentement : « Autoriser » désactivé dans le HTML, consent.js chargé', (bool) preg_match('~value="allow"[^>]*\sdisabled\sdata-gate~', $oauthView)
     && str_contains($oauthView, "asset('admin/consent.js')") && is_file(ECLAIR_ROOT . '/assets/admin/consent.js'));
 
@@ -111,10 +111,10 @@ const storage = (init) => {
   };
 };
 // admin.js sur une page de l'administration réduite à son bloc de données (et au formulaire de déconnexion).
-const page = (me, search, store, withLogout = false) => {
+const page = (me, search, store, withLogout = false, solo = false) => {
   const form = { dataset: {}, handlers: [], addEventListener(type, fn) { if (type === 'submit') this.handlers.push(fn); } };
   const forms = withLogout ? [form] : [];
-  const data = { textContent: JSON.stringify({ i18n: {}, csrf: '0', me, admin: '/gestion', base: '' }) };
+  const data = { textContent: JSON.stringify({ i18n: {}, csrf: '0', me, solo, admin: '/gestion', base: '' }) };
   const ctx = {
     document: {
       getElementById: (id) => (id === 'eclair-data' ? data : null),
@@ -133,11 +133,15 @@ const page = (me, search, store, withLogout = false) => {
 };
 const A = 'aaaaaaaaaa';
 const B = 'bbbbbbbbbb';
+// Brouillons de ce site (dossier « / ») ; ceux d'un autre site Éclair à la même adresse (sous-dossier /test) ne sont jamais touchés.
+const SITE = 'eclair-draft-%2F|';
+const OTHER = 'eclair-draft-%2Ftest|' + A + '-dd462d991e';
 const start = () => ({
   'eclair-draft-dd462d991e': JSON.stringify({ t: 1, data: { title: 'ancien format' } }),
   'eclair-draft-new-page': JSON.stringify({ t: 1, data: { title: 'ancien format, nouvelle page' } }),
-  ['eclair-draft-' + B + '-dd462d991e']: JSON.stringify({ t: 1, u: B, data: { title: 'de B' } }),
-  ['eclair-draft-' + A + '-dd462d991e']: JSON.stringify({ t: 1, u: A, data: { title: 'de A' } }),
+  [SITE + B + '-dd462d991e']: JSON.stringify({ t: 1, u: B, data: { title: 'de B' } }),
+  [SITE + A + '-dd462d991e']: JSON.stringify({ t: 1, u: A, data: { title: 'de A' } }),
+  [OTHER]: JSON.stringify({ t: 1, u: A, data: { title: 'autre site' } }),
   'eclair-mode': 'visual',
   'cle-du-site': 'gardee',
 });
@@ -145,6 +149,12 @@ safe('signedIn', () => { const s = storage(start()); page(A, '', s); return s.ke
 safe('afterLogout', () => { const s = storage(start()); page('', '?bye=1', s); return s.keys(); });
 safe('expired', () => { const s = storage(start()); page('', '?next=%2Fedit%2Fdd462d991e', s); return s.keys(); });
 safe('logout', () => { const s = storage(start()); page(A, '', s, true).logout(); return s.keys(); });
+safe('solo', () => {
+  const s = storage(start());
+  page(A, '', s, false, true);
+  const adopted = JSON.parse(s.getItem(SITE + A + '-new-page') || 'null');
+  return [s.keys(), adopted && adopted.u, adopted && adopted.data.title, JSON.parse(s.getItem(SITE + A + '-dd462d991e') || 'null').data.title];
+});
 safe('keys', () => {
   const a = page(A, '', storage()).E.drafts;
   const anon = page('', '', storage()).E.drafts;
@@ -266,14 +276,18 @@ if ($node === '') {
     $js = (array) json_decode((string) shell_exec(implode(' ', array_map('escapeshellarg', [$node, $harnessFile, ECLAIR_ROOT . '/assets/admin/admin.js',
         ECLAIR_ROOT . '/assets/admin/consent.js', ECLAIR_ROOT . '/assets/admin/assistant.js'])) . ' 2>&1'), true);
     @unlink($harnessFile);
-    $mine = 'eclair-draft-aaaaaaaaaa-dd462d991e';
+    $site = 'eclair-draft-%2F|';
+    $mine = $site . 'aaaaaaaaaa-dd462d991e';
+    $other = 'eclair-draft-%2Ftest|aaaaaaaaaa-dd462d991e';
     $show = static fn (string $k): string => json_encode($js[$k] ?? null, JSON_UNESCAPED_UNICODE);
     check('brouillons (JS) : compte connecté, ceux des autres comptes et ceux sans compte (1.10.2) effacés, « eclair-mode » gardé',
-        ($js['signedIn'] ?? null) === ['cle-du-site', $mine, 'eclair-mode'], $show('signedIn'));
-    check('brouillons (JS) : page de connexion après déconnexion, plus aucun brouillon, préférences gardées', ($js['afterLogout'] ?? null) === ['cle-du-site', 'eclair-mode'], $show('afterLogout'));
-    check('brouillons (JS) : session expirée, rien d’effacé (le compte peut revenir les retrouver)', count((array) ($js['expired'] ?? [])) === 6, $show('expired'));
-    check('brouillons (JS) : déconnexion, tous les brouillons effacés dans le navigateur', ($js['logout'] ?? null) === ['cle-du-site', 'eclair-mode'], $show('logout'));
-    check('brouillons (JS) : clé propre au compte, aucune sans compte connecté', ($js['keys'] ?? null) === [$mine, 'eclair-draft-aaaaaaaaaa-new-page', ''], $show('keys'));
+        ($js['signedIn'] ?? null) === ['cle-du-site', $other, $mine, 'eclair-mode'], $show('signedIn'));
+    check('brouillons (JS) : page de connexion après déconnexion, plus aucun brouillon de ce site, préférences et autre site gardés', ($js['afterLogout'] ?? null) === ['cle-du-site', $other, 'eclair-mode'], $show('afterLogout'));
+    check('brouillons (JS) : session expirée, rien d’effacé (le compte peut revenir les retrouver)', count((array) ($js['expired'] ?? [])) === 7, $show('expired'));
+    check('brouillons (JS) : déconnexion, tous les brouillons de ce site effacés, ceux d’un autre site Éclair à la même adresse gardés', ($js['logout'] ?? null) === ['cle-du-site', $other, 'eclair-mode'], $show('logout'));
+    check('brouillons (JS) : site à un seul compte, brouillons de la 1.10.2 repris par ce compte (rien de perdu), ceux d’un autre compte effacés',
+        ($js['solo'] ?? null) === [['cle-du-site', $other, $mine, $site . 'aaaaaaaaaa-new-page', 'eclair-mode'], 'aaaaaaaaaa', 'ancien format, nouvelle page', 'de A'], $show('solo'));
+    check('brouillons (JS) : clé propre au site et au compte, aucune sans compte connecté', ($js['keys'] ?? null) === [$mine, $site . 'aaaaaaaaaa-new-page', ''], $show('keys'));
     check('brouillons (JS) : seule une copie écrite par ce compte est proposée', ($js['author'] ?? null) === ['texte de A', null, null], $show('author'));
     check('brouillons (JS) : un autre compte du même navigateur ne se voit rien proposer', ($js['otherAccount'] ?? null) === [null, null, []], $show('otherAccount'));
     check('« Autoriser » (JS) : désactivé au chargement', ($js['gateLoad'] ?? null) === true, $show('gateLoad'));

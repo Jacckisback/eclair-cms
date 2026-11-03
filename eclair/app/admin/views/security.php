@@ -147,6 +147,7 @@ $events = [
         <button class="btn btn-primary" type="submit"><?= Icons::svg('link') ?><?= e(t('Connecter Google Drive')) ?></button></form>
     <?php else: ?>
       <p><?= $d['email'] !== '' ? e(t('Compte Google : {e}', ['e' => $d['email']])) : e(t('Compte Google connecté')) ?><?php if ($d['folder'] !== ''): ?> · <?= e(t('dossier « {f} »', ['f' => $d['folder']])) ?><?php endif ?><?php if ($d['by'] !== ''): ?> · <?= e(t('connecté par {name}', ['name' => $d['by']])) ?><?php endif ?></p>
+      <?php if (!empty($d['unbound'])): ?><div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Connexion faite avant la 1.10.3 : déconnecte puis reconnecte Google Drive pour qu’Éclair sache quel administrateur l’a établie.')) ?></p></div><?php endif ?>
       <?php if ($d['job']): ?>
         <div class="drive-run" data-drive-run>
           <p class="small" data-drive-label><?= e(t('Envoi de la sauvegarde : {n} %', ['n' => $d['job']['percent']])) ?></p>

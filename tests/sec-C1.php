@@ -520,15 +520,19 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         $again = $api($a2, 'drive/poll');
         check('même compte, nouvelle version de session : connexion jamais terminée', ($again['state'] ?? '') === 'other' && !$bound() && $glog('device_code') === 0,
             (string) json_encode($again));
-        // Mot de passe trop ancien dans la session qui a lancé la connexion : code masqué, connexion à relancer.
+        // Connexion lancée il y a plus de 15 minutes : code masqué, connexion à relancer.
         $post($a2, ['action' => 'connect']);
-        $stale($a2);
+        $patch(['pending' => ['by' => ['at' => time() - 1000]]]);
         $body = $page($a2);
         $late = $api($a2, 'drive/poll');
-        check('mot de passe de plus de 15 minutes : code masqué, connexion à relancer, rien de connecté', !str_contains($body, 'ABCD-EFGH') && str_contains($body, 'Connecter Google Drive')
+        check('connexion lancée il y a plus de 15 minutes : code masqué, connexion à relancer, rien de connecté', !str_contains($body, 'ABCD-EFGH') && str_contains($body, 'Connecter Google Drive')
             && ($late['state'] ?? '') === 'expired' && !isset($drive()['pending']) && !$bound(), (string) json_encode($late));
         // Mot de passe confirmé : connexion terminée, compte de connexion noté.
         $post($a2, ['action' => 'connect', 'confirm_password' => 'Un-mot-de-passe-solide']);
+        // Mot de passe devenu ancien pendant la connexion (lancée juste avant la fin de ses 15 minutes) : la connexion reste
+        // valable 15 minutes depuis son lancement, code toujours affiché.
+        $stale($a2);
+        check('mot de passe devenu ancien pendant la connexion : code toujours affiché', str_contains($page($a2), 'ABCD-EFGH'));
         $patch(['pending' => ['next' => 0]]);
         $done = $api($a2, 'drive/poll');
         $body = $page($a2);

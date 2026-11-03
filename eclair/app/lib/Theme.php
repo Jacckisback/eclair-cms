@@ -366,7 +366,7 @@ final class Theme
         // ainsi que toute règle @ dont le nom contient un échappement CSS (« @\69mport » se lit @import).
         do {
             $before = $css;
-            $css = (string) preg_replace(['/@import\b[^;{}]*;?/i', '/(?<![^\s;{}])@[\w-]*\\\\[^;{}]*;?/'], '', $css);
+            $css = (string) preg_replace(['/@import\b[^;{}]*;?/i', '/(?:^|[;{}])\s*\K@[\w-]*\\\\[^;{}]*;?/'], '', $css);
         } while ($css !== $before);
         return trim(mb_strcut($css, 0, self::CUSTOM_MAX, 'UTF-8'));
     }

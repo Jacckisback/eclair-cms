@@ -416,6 +416,9 @@ final class AdminAi
         if (AiTools::draftsFull()) {
             Http::json(['ok' => false, 'error' => t('Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.', ['n' => AiTools::MAX_SITE_DRAFTS])], 422);
         }
+        if (count(Content::index()) >= Content::MAX_ITEMS) {
+            Http::json(['ok' => false, 'error' => t('Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.', ['n' => Content::MAX_ITEMS])], 422);
+        }
         $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
         extend_time(300);

@@ -207,6 +207,14 @@ if ($resign === null) {
             fwrite(STDERR, "✗ Version signée : dépôt Git introuvable (elle se construit depuis le dépôt). Rien n'a été construit.\n");
             exit(1);
         }
+        // Lien symbolique suivi par Git : son contenu viendrait de hors du dépôt (un lien vers un fichier personnel serait
+        // publié dans une archive signée).
+        $links = array_values(array_filter($files, static fn (string $rel): bool => is_link($root . '/' . $rel)));
+        if ($links) {
+            fwrite(STDERR, "✗ Liens symboliques refusés dans une version signée : " . implode(', ', array_slice($links, 0, 10))
+                . (count($links) > 10 ? '…' : '') . "\n  Remplace-les par de vrais fichiers. Rien n'a été construit.\n");
+            exit(1);
+        }
         $untracked = array_values(array_diff($files, $tracked));
         if ($untracked) {
             fwrite(STDERR, "✗ Fichiers non suivis par Git, refusés dans une version signée : " . implode(', ', array_slice($untracked, 0, 10))
@@ -214,6 +222,10 @@ if ($resign === null) {
             exit(1);
         }
         $commit = trim((string) eclair_git(dirname(__DIR__), ['rev-parse', 'HEAD']));
+        // Modifications non enregistrées dans Git (hors manifeste, réécrit par chaque construction) : le manifeste le dit.
+        $changes = array_filter(explode("\n", (string) eclair_git(dirname(__DIR__), ['status', '--porcelain', '--', 'eclair'])),
+            static fn (string $line): bool => trim($line) !== '' && !str_ends_with($line, 'eclair/app/manifest.php'));
+        $dirty = $changes !== [];
     }
 
     // Traductions de l'administration : les fichiers livrés sont recompilés depuis i18n/ (lus comme des données, jamais exécutés).
@@ -225,7 +237,8 @@ if ($resign === null) {
     foreach ($files as $rel) {
         $hashes[$rel] = substr((string) hash_file('sha256', $root . '/' . $rel), 0, 32);
     }
-    $manifest = ['version' => $version, 'generated' => gmdate('c')] + (preg_match('/^[a-f0-9]{40,64}$/', $commit) ? ['commit' => $commit] : []) + ['files' => $hashes];
+    $manifest = ['version' => $version, 'generated' => gmdate('c')] + (preg_match('/^[a-f0-9]{40,64}$/', $commit) ? ['commit' => $commit] : [])
+        + (!empty($dirty) ? ['dirty' => true] : []) + ['files' => $hashes];
     file_put_contents($root . '/app/manifest.php', "<?php exit; ?>\n" . json_encode($manifest, JSON_UNESCAPED_SLASHES) . "\n");
     echo "✓ Empreintes : " . count($hashes) . " fichiers (app/manifest.php)\n";
 

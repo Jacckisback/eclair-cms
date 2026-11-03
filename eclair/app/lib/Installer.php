@@ -34,10 +34,12 @@ final class Installer
             if ($errors) {
                 Http::json(['ok' => false, 'errors' => $errors], 422);
             }
+            // Ce qui existe déjà dans data/ (réinstallation après la perte de data/site.php) : jamais effacé par un échec.
+            $before = self::present();
             try {
                 self::install();
             } catch (\Throwable $e) {
-                self::rollback();
+                self::rollback($before);
                 Log::error($e);
                 Http::json(['ok' => false, 'errors' => ['_' => t("L'installation a échoué : {msg}", ['msg' => $e->getMessage()])]], 500);
             }
@@ -125,8 +127,12 @@ final class Installer
         if (Sanitize::text(Req::input('user_name'), 80) === '') {
             $e['user_name'] = t('Indique ton nom.');
         }
-        if (Sanitize::email(Req::input('user_email')) === '') {
+        $email = Sanitize::email(Req::input('user_email'));
+        if ($email === '') {
             $e['user_email'] = t('Adresse e-mail invalide.');
+        } elseif (Users::taken(Users::all(), $email, '')) {
+            // Comptes déjà présents (data/site.php perdu, data/users.php resté) : jamais deux comptes avec le même e-mail.
+            $e['user_email'] = t('Cette adresse e-mail est déjà utilisée.');
         }
         $issues = Security::passwordIssues(Req::input('user_pass'), [Req::input('user_name'), explode('@', Req::input('user_email'))[0], Req::input('site_name')]);
         if ($issues) {
@@ -147,7 +153,9 @@ final class Installer
         }
         Store::ensureDir(ECLAIR_ROOT . '/cache/pages');
         Store::ensureDir(ECLAIR_ROOT . '/media/site');
-        Keys::generate();
+        // Clés déjà présentes (réinstallation) : gardées, sinon le coffre, les sessions et les codes de secours seraient perdus.
+        $keys = Store::read('keys', []);
+        Keys::generate(is_array($keys) ? $keys : []);
 
         $lang = Req::input('site_lang');
         $type = Req::input('site_type');
@@ -178,7 +186,7 @@ final class Installer
             'pass' => Security::hashPassword(Req::input('user_pass')),
             'role' => 'admin',
             'lang' => I18n::lang(),
-        ]);
+        ]) ?? throw new \RuntimeException(t('Cette adresse e-mail est déjà utilisée.'));
         Starter::create($type, $lang, $user, $name);
         Media::icons(null, (string) Settings::get('appearance.accent'));
         @unlink(Backup::dataDir() . '/install-window.php');
@@ -189,14 +197,23 @@ final class Installer
         Log::security('install', ['email' => $user['email']]);
     }
 
-    /** En cas d'échec, on efface ce qui a été créé pour pouvoir recommencer proprement. */
-    private static function rollback(): void
+    /** Fichiers de données que l'installation peut créer, déjà présents avant elle. */
+    private static function present(): array
     {
-        foreach (['site', 'users', 'keys', 'index', 'categories', 'menus', 'search', 'redirects'] as $name) {
-            Store::delete($name);
-        }
-        foreach (Store::names('content') as $name) {
-            Store::delete($name);
+        $names = array_merge(['site', 'users', 'keys', 'index', 'categories', 'menus', 'search', 'redirects'], Store::names('content'));
+        return array_values(array_filter($names, static fn (string $name): bool => Store::exists($name)));
+    }
+
+    /**
+     * En cas d'échec, on efface ce que cette installation a créé pour pouvoir recommencer proprement, et seulement cela :
+     * des comptes ou des contenus déjà là (réinstallation après la perte de data/site.php) ne sont jamais effacés.
+     */
+    private static function rollback(array $before): void
+    {
+        foreach (array_merge(['site', 'users', 'keys', 'index', 'categories', 'menus', 'search', 'redirects'], Store::names('content')) as $name) {
+            if (!in_array($name, $before, true)) {
+                Store::delete($name);
+            }
         }
     }
 }

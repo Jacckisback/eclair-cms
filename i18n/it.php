@@ -1553,4 +1553,5 @@ return [
     'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'L’indice di ricerca del sito è pieno: elimina o accorcia dei contenuti pubblicati prima di pubblicarne altri.',
     'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'Il sito ha già {n} bozze: pubblicane o eliminane alcune prima di crearne altre con l’IA.',
     'Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.' => 'Impossibile salvare: il blocco dei dati (data/.lock) non funziona. Elimina questo file via FTP (Éclair lo ricrea) oppure chiedi al tuo hosting se il blocco dei file (flock) è disponibile.',
+    'Connexion faite avant la 1.10.3 : déconnecte puis reconnecte Google Drive pour qu’Éclair sache quel administrateur l’a établie.' => 'Connessione effettuata prima della 1.10.3: disconnetti e ricollega Google Drive perché Éclair sappia quale amministratore l’ha creata.',
 ];
