@@ -386,17 +386,22 @@ final class AdminSettings
         // Page de remerciement (après le paiement, Stripe peut y rediriger le client) : créée à la demande, hors index.
         if (Req::input('action') === 'thanks' && $patch['shop']['thanks'] === '') {
             $lang = (string) $s['lang'];
-            $thanks = Content::save([
-                'type' => 'page',
-                'status' => 'published',
-                'title' => Theme::t('thanks_title', $lang),
-                'lang' => $lang,
-                'blocks' => [
-                    ['type' => 'paragraph', 'text' => Theme::t('thanks_text', $lang)],
-                    ['type' => 'button', 'text' => Theme::t('all_products', $lang), 'url' => '/' . $base, 'style' => 'secondary', 'align' => 'left'],
-                ],
-                'seo' => ['noindex' => true],
-            ], $user);
+            try {
+                $thanks = Content::save([
+                    'type' => 'page',
+                    'status' => 'published',
+                    'title' => Theme::t('thanks_title', $lang),
+                    'lang' => $lang,
+                    'blocks' => [
+                        ['type' => 'paragraph', 'text' => Theme::t('thanks_text', $lang)],
+                        ['type' => 'button', 'text' => Theme::t('all_products', $lang), 'url' => '/' . $base, 'style' => 'secondary', 'align' => 'left'],
+                    ],
+                    'seo' => ['noindex' => true],
+                ], $user);
+            } catch (\OverflowException $e) {
+                // Site au maximum de contenus (Content::MAX_ITEMS) : le message dit quoi faire, rien n'est enregistré.
+                Admin::back($redirect, $e->getMessage(), 'bad');
+            }
             $patch['shop']['thanks'] = $thanks['id'];
         }
         return $patch;
