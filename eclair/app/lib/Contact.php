@@ -37,8 +37,10 @@ final class Contact
         if ($name === '' || $email === '' || mb_strlen($message) < 5) {
             self::reply(false, 422, $lang);
         }
-        // 5 messages par réseau (IPv4, ou /64 en IPv6) toutes les 10 min, et 100 par jour pour tout le site.
-        if (!RateLimit::attempt('contact:' . Req::ipPrefix(), 5, 600, 1800) || !RateLimit::attempt('contact:site', 100, 86400, 21600)) {
+        // 5 messages par réseau (IPv4, ou /64 en IPv6) toutes les 10 min, et 100 par jour pour tout le site. Quota du site déjà
+        // épuisé : refus d'emblée, sans compteur de plus pour chaque nouveau réseau.
+        if (RateLimit::blocked('contact:site') > 0
+            || !RateLimit::attempt('contact:' . Req::ipPrefix(), 5, 600, 1800) || !RateLimit::attempt('contact:site', 100, 86400, 21600)) {
             self::reply(false, 429, $lang);
         }
         $page = Content::index()[preg_replace('/[^a-z0-9]/', '', Req::input('page')) ?? ''] ?? null;

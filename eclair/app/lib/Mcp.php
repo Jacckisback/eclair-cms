@@ -408,21 +408,13 @@ final class Mcp
     }
 
     /**
-     * Mot de passe fourni avec l'accord (champ « confirm_password »), vérifié même si la connexion est récente. Mêmes limites
-     * que la confirmation des actions sensibles (Auth::confirmed) : 10 essais par 15 minutes et par compte, même compteur.
+     * Mot de passe fourni avec l'accord (champ « confirm_password »), vérifié même si la connexion est récente, par la même
+     * vérification que la confirmation des actions sensibles (Auth::checkPassword) : 10 essais par 15 minutes et par compte,
+     * même compteur, place de vérification réservée aux personnes connectées.
      */
     private static function password(array $user): bool
     {
-        $password = Req::input('confirm_password');
-        if ($password === '' || strlen($password) > 1024 || !RateLimit::attempt('sudo:' . $user['id'], 10, 900, 900)) {
-            return false;
-        }
-        if (!password_verify($password, (string) $user['pass'])) {
-            Log::security('sudo_failed');
-            return false;
-        }
-        RateLimit::release('sudo:' . $user['id']);
-        return true;
+        return Auth::checkPassword($user, Req::input('confirm_password')) === 'ok';
     }
 
     /** Pages de l'autorisation, sans le JavaScript de l'administration (dont l'adresse reste ainsi privée). */
