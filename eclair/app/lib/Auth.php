@@ -249,6 +249,31 @@ final class Auth
         return true;
     }
 
+    /**
+     * Garde la session en cours après « Déconnecter mes autres appareils » ou « Déconnecter tout le monde » : nouvel
+     * identifiant et nouvelle version, mais ni l'âge de la session (born) ni l'heure du dernier mot de passe (sudo) ne
+     * changent, car aucun mot de passe n'a été vérifié ici. Refuse si le compte a changé entre-temps (autre
+     * déconnexion générale, nouveau mot de passe) : une session ne survit pas ainsi à un changement fait en même temps.
+     */
+    public static function rebind(array $saved): bool
+    {
+        if (!Session::resume() || (string) ($_SESSION['uid'] ?? '') !== (string) $saved['id']
+            || (int) ($saved['ver'] ?? 1) !== (int) ($_SESSION['ver'] ?? 0) + 1) {
+            return false;
+        }
+        $device = self::$user !== null && (string) self::$user['id'] === (string) $saved['id'] ? self::device(self::$user) : '';
+        Session::regenerate();
+        $_SESSION['ver'] = (int) ($saved['ver'] ?? 1);
+        unset($_SESSION['csrf']);
+        self::$user = $saved;
+        self::$checked = true;
+        // Ce navigateur reste un appareil de confiance s'il l'était ; ceux des autres sessions sont oubliés.
+        if ($device !== '') {
+            self::trustDevice($saved, $device);
+        }
+        return true;
+    }
+
     public static function logout(): void
     {
         $user = self::user();

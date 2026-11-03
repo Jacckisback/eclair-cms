@@ -195,10 +195,12 @@ final class AdminUsers
                 $_SESSION['recovery_show'] = $codes;
                 Http::redirect(admin_url('profile#securite'));
             case 'revoke':
-                $user = Auth::revokeAll($id);
-                if (!$user || !Auth::login($user)) {
+                // Aucun mot de passe vérifié ici : la session garde son âge et sa confirmation (Auth::rebind, pas login).
+                $saved = Auth::revokeAll($id);
+                if (!$saved || !Auth::rebind($saved)) {
                     Admin::back('profile', t('Session expirée : réessaie.'), 'bad');
                 }
+                Log::security('sessions_revoked');
                 Admin::back('profile#securite', t('Tous tes autres appareils ont été déconnectés.'));
             default:
                 $email = Sanitize::email(Req::input('email'));

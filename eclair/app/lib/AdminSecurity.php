@@ -50,8 +50,10 @@ final class AdminSecurity
             case 'revoke-all':
                 foreach (array_keys(Users::all()) as $id) {
                     $saved = Auth::revokeAll((string) $id);
-                    if ($saved && $id === $user['id']) {
-                        Auth::login($saved);
+                    // Identifiants comparés en texte (une clé « 1234567890 » devient un entier en PHP). Aucun mot de passe
+                    // vérifié ici : la session garde son âge et sa confirmation (Auth::rebind, pas login).
+                    if ($saved && (string) $id === (string) $user['id']) {
+                        Auth::rebind($saved);
                     }
                 }
                 Log::security('sessions_revoked');
