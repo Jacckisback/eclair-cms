@@ -129,7 +129,36 @@
     zone.addEventListener('drop', (e) => { const files = [...(e.dataTransfer?.files || [])].filter((f) => f.type.startsWith('image/')); if (files.length) onFiles(files); });
   }
 
-  window.Eclair = { D, t, api, toast, upload, pickMedia, h, $, $$, dropEvents };
+  /* ── Brouillons de secours de l'éditeur (navigateur) : propres au compte connecté, effacés à la déconnexion ── */
+  // Clé « eclair-draft-<compte>-<contenu> » ; D.me est l'identifiant du compte connecté (vide sans session). La copie d'un
+  // autre compte, ou d'avant la 1.10.3 (sans compte : auteur inconnu), n'est jamais proposée : elle est effacée dès qu'une
+  // page de l'administration s'ouvre. Seules ces clés sont touchées : la préférence « eclair-mode » et le site public restent.
+  const DRAFT = 'eclair-draft-';
+  const drafts = {
+    key: (item) => (D.me ? DRAFT + D.me + '-' + (item.id || 'new-' + item.type) : ''),
+    get: (key) => {
+      try {
+        const b = key ? JSON.parse(localStorage.getItem(key) || 'null') : null;
+        return b && b.u === D.me && typeof b.t === 'number' && b.data && typeof b.data === 'object' ? b : null;
+      } catch (e) { return null; }
+    },
+    set: (key, data) => { try { if (key) localStorage.setItem(key, JSON.stringify({ t: Date.now(), u: D.me, data })); } catch (e) { /* stockage indisponible ou plein */ } },
+    drop: (...keys) => { try { keys.forEach((k) => k && localStorage.removeItem(k)); } catch (e) { /* stockage indisponible */ } },
+    // Efface les brouillons, sauf ceux du compte « keep » s'il est donné.
+    clear: (keep = '') => {
+      try {
+        const all = [];
+        for (let i = 0; i < localStorage.length; i++) all.push(localStorage.key(i));
+        all.filter((k) => k && k.startsWith(DRAFT) && !(keep && k.startsWith(DRAFT + keep + '-'))).forEach((k) => localStorage.removeItem(k));
+      } catch (e) { /* stockage indisponible */ }
+    },
+  };
+  // Compte connecté : seuls ses brouillons restent. Page de connexion qui suit une déconnexion : plus aucun (aussi quand
+  // le formulaire de déconnexion est parti sans script).
+  if (D.me) drafts.clear(D.me);
+  else if (/[?&]bye=1(&|$)/.test(location.search)) drafts.clear();
+
+  window.Eclair = { D, t, api, toast, upload, pickMedia, h, $, $$, dropEvents, drafts };
 
   /* ── Comportements généraux ── */
   document.addEventListener('click', (e) => {
@@ -147,6 +176,8 @@
     if (color && $('#accent')) { $('#accent').value = color.dataset.color; $('#accent').dispatchEvent(new Event('input', { bubbles: true })); }
     if (e.target.closest('dialog [data-close]')) e.target.closest('dialog').close();
   });
+  // Déconnexion : les brouillons de secours partent avec la session.
+  $$('form[data-logout]').forEach((form) => form.addEventListener('submit', () => drafts.clear()));
   // Confirmation avant une action irréversible (sur le formulaire, ou sur le bouton qui l'envoie).
   $$('form').forEach((form) => form.addEventListener('submit', (e) => {
     const text = (e.submitter && e.submitter.dataset.confirm) || form.dataset.confirm;

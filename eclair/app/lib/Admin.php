@@ -197,12 +197,16 @@ final class Admin
         self::view('error', ['title' => t('Accès réservé'), 'text' => t('Cette section est réservée aux administrateurs du site.')], t('Accès réservé'), 403);
     }
 
-    /** Données passées au JavaScript (sans script en ligne : bloc JSON non exécutable). */
+    /**
+     * Données passées au JavaScript (sans script en ligne : bloc JSON non exécutable).
+     * « me » : compte connecté (vide sans session), auquel l'éditeur lie ses brouillons de secours dans le navigateur.
+     */
     public static function jsData(array $extra = []): string
     {
         $user = Auth::user();
         return '<script type="application/json" id="eclair-data">' . json_script($extra + [
             'csrf' => $user ? Security::csrfToken() : '',
+            'me' => $user ? (string) $user['id'] : '',
             'admin' => admin_url(),
             'base' => Req::base(),
             'i18n' => AdminStrings::js(),
