@@ -146,16 +146,18 @@ final class Site
                 }
                 self::listing('blog', 1);
             }
-            if (preg_match('~^/' . $page . '/(\d{1,6})$~', $rest, $m)) {
+            // Numéros de page sans zéro en tête (« /page/01 » n'existe pas) : un seul rendu, une seule entrée de cache par page.
+            if (preg_match('~^/' . $page . '/([1-9]\d{0,5})$~', $rest, $m)) {
                 self::listing('blog', (int) $m[1]);
             }
-            if (preg_match('~^/' . preg_quote($words['author'], '~') . '/([a-z0-9-]+)(?:/' . $page . '/(\d{1,6}))?$~', $rest, $m)) {
+            if (preg_match('~^/' . preg_quote($words['author'], '~') . '/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m)) {
                 $user = Users::findBySlug($m[1]);
-                if ($user) {
+                // Page d'auteur seulement pour une personne qui a publié (comme le plan du site) : les autres comptes restent invisibles.
+                if ($user && array_filter(Content::published('post'), fn (array $p): bool => $p['author'] === $user['id'])) {
                     self::listing('author', (int) ($m[2] ?? 1), Users::profile($user));
                 }
             }
-            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/(\d{1,6}))?$~', $rest, $m)) {
+            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m)) {
                 $cat = Categories::bySlug($m[1], 'post');
                 if ($cat) {
                     self::listing('category', (int) ($m[2] ?? 1), $cat);
@@ -168,10 +170,10 @@ final class Site
             if ($rest === '') {
                 self::catalog(1);
             }
-            if (preg_match('~^/' . $page . '/(\d{1,6})$~', $rest, $m)) {
+            if (preg_match('~^/' . $page . '/([1-9]\d{0,5})$~', $rest, $m)) {
                 self::catalog((int) $m[1]);
             }
-            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/(\d{1,6}))?$~', $rest, $m) && ($cat = Categories::bySlug($m[1], 'product'))) {
+            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m) && ($cat = Categories::bySlug($m[1], 'product'))) {
                 self::catalog((int) ($m[2] ?? 1), $cat);
             }
         }

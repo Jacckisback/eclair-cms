@@ -616,13 +616,16 @@ final class Seo
             . $items . '</channel></rss>' . "\n";
     }
 
-    /** Schéma + hôte de l'URL officielle (sans le dossier d'installation). */
+    /**
+     * Schéma + hôte de l'URL officielle (sans le dossier d'installation). Sans adresse enregistrée, rien (liens relatifs,
+     * comme absolute_url) : l'hôte annoncé par le premier visiteur ne doit pas finir dans un fichier mis en cache.
+     */
     public static function origin(): string
     {
         $url = (string) Settings::get('url');
         $parts = parse_url($url);
         if (!$parts || empty($parts['host'])) {
-            return rtrim(Req::origin(), '/');
+            return '';
         }
         return ($parts['scheme'] ?? 'https') . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
     }

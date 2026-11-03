@@ -158,6 +158,13 @@ final class AiChat
         $deadline = time() + self::DEADLINE;
         Ai::onTick(static fn () => $emit(['t' => 'ping']));
         for ($step = 0; $step < self::MAX_STEPS; $step++) {
+            // Demande arrêtée ou fenêtre fermée pendant les outils : aucun nouvel appel payant au modèle (le signal envoyé le révèle).
+            if ($step > 0) {
+                $emit(['t' => 'ping']);
+                if (connection_aborted()) {
+                    break;
+                }
+            }
             // Avant chaque nouvelle étape : budget (dépense des étapes précédentes comprise) et durée totale.
             if ($step > 0 && (($error = (string) Ai::overBudget()) !== '' || time() > $deadline)) {
                 $error = $error ?: t('Demande trop longue : je me suis arrêté après {n} étapes. Ce qui est déjà fait est conservé.', ['n' => $step]);

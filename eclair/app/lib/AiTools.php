@@ -18,12 +18,17 @@ final class AiTools
     private const MAX_IMAGES = 3;
     private const MAX_UPDATES = 8;
     private const KEEP_DAYS = 14; // annulations et propositions en attente
+    /** Annulations et propositions gardées au plus (les plus récentes) : leur dossier reste petit et vite parcouru. */
+    private const MAX_KEEP = 1000;
     /**
      * Brouillons que l'IA (assistant, connecteur MCP, « Crée ta page avec l'IA ») peut trouver sur le site avant de cesser
      * d'en créer : la personne publie ou supprime les siens d'abord. Elle ne publie ni ne supprime rien elle-même : une boucle
      * ne peut donc jamais remplir le site (Content::MAX_ITEMS) au point d'empêcher l'équipe de créer ses contenus.
      */
     public const MAX_SITE_DRAFTS = 500;
+
+    /** Dossiers déjà nettoyés pendant cette requête : un tour qui enchaîne les modifications ne les parcourt qu'une fois. */
+    private static array $pruned = [];
 
     /** Définitions envoyées au modèle (schémas JSON). */
     public static function definitions(): array
@@ -547,11 +552,24 @@ final class AiTools
         return md5((string) json_encode($item, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
-    /** Supprime les annulations et propositions de plus de 14 jours. */
+    /**
+     * Supprime les annulations et propositions de plus de 14 jours, et les plus anciennes au-delà de MAX_KEEP.
+     * Une fois par requête et par dossier : une rafale de modifications ne reparcourt pas tout le dossier à chaque écriture.
+     */
     private static function prune(string $dir): void
     {
+        if (isset(self::$pruned[$dir])) {
+            return;
+        }
+        self::$pruned[$dir] = true;
+        $times = [];
         foreach (Store::names($dir) as $name) {
-            if (@filemtime(Store::file($name)) < time() - self::KEEP_DAYS * 86400) {
+            $times[$name] = (int) @filemtime(Store::file($name));
+        }
+        arsort($times);
+        $kept = 0;
+        foreach ($times as $name => $time) {
+            if ($time < time() - self::KEEP_DAYS * 86400 || ++$kept > self::MAX_KEEP) {
                 Store::delete($name);
             }
         }
