@@ -22,8 +22,12 @@ final class Mcp
     private const REFRESH = 5184000;  // jeton de renouvellement : 60 jours, remplacé à chaque usage
     private const MAX = 50;           // connexions gardées au plus (5 par personne)
     private const DATA = 'ai/mcp';    // hors des sauvegardes, comme les conversations de l'assistant
-    // Applications reconnues à leur adresse de retour exacte (et non au nom qu'elles se donnent).
-    private const KNOWN = ['Claude' => '~^https://claude\.ai/api/mcp/auth_callback$~', 'ChatGPT' => '~^https://chatgpt\.com/connector(_platform_oauth_redirect|/oauth/[\w-]+)$~'];
+    // Recherche (search_content, find_media) : quelques mots-clés suffisent. Chaque mot est cherché dans tous les contenus et
+    // un lot porte jusqu'à 20 appels : une requête démesurée occuperait le serveur pour rien.
+    private const QUERY = 200;
+    // Applications reconnues à leur adresse de retour exacte (et non au nom qu'elles se donnent). « D » : « $ » est la
+    // vraie fin de l'adresse, jamais un saut de ligne final.
+    private const KNOWN = ['Claude' => '~^https://claude\.ai/api/mcp/auth_callback$~D', 'ChatGPT' => '~^https://chatgpt\.com/connector(_platform_oauth_redirect|/oauth/[\w-]+)$~D'];
 
     public static function enabled(): bool
     {
@@ -185,13 +189,17 @@ final class Mcp
         if ($name === 'get_site') {
             return self::text(AiChat::context($user, null) . "\n\n" . AiChat::rules());
         }
+        $args = is_array($p['arguments'] ?? null) ? $p['arguments'] : [];
+        if (is_string($args['query'] ?? null) && mb_strlen($args['query']) > self::QUERY) {
+            return self::text('{"error":"Query too long: use a few keywords (at most ' . self::QUERY . ' characters)."}', true);
+        }
         // Garde-fou contre une boucle : 60 écritures par heure et par connexion.
         if (!$tool['annotations']['readOnlyHint'] && !RateLimit::attempt('mcp:' . $gid, 60, 3600, 900)) {
             return self::text('{"error":"Too many changes in the last hour: tell the person and try again later."}', true);
         }
         $ctx = ['user' => $user, 'editing' => null, 'turn' => ['drafts' => 0, 'images' => 0, 'updates' => 0, 'undo' => [], 'proposals' => []]];
         try {
-            $out = AiTools::run($name, is_array($p['arguments'] ?? null) ? $p['arguments'] : [], $ctx);
+            $out = AiTools::run($name, $args, $ctx);
         } catch (\Throwable $e) {
             return self::text('{"error":"Internal error (' . Log::error($e) . ')."}', true);
         }
@@ -276,9 +284,10 @@ final class Mcp
         }
         $in = Req::json();
         $uris = array_values(array_filter((array) ($in['redirect_uris'] ?? []), 'is_string'));
-        // https vers un nom d'hôte ordinaire, ou http en boucle locale ; ni identifiants, ni fragment, ni caractère exotique.
+        // https vers un nom d'hôte ordinaire, ou http en boucle locale ; ni identifiants, ni fragment, ni caractère exotique,
+        // ni saut de ligne final (« D »).
         $ok = static fn (string $u): bool => strlen($u) <= 500
-            && preg_match('~^(https://([a-z0-9-]+\.)*[a-z0-9-]+|http://(localhost|127\.0\.0\.1|\[::1\]))(:\d{1,5})?(/[^\s#\\\\]*)?$~i', $u) === 1;
+            && preg_match('~^(https://([a-z0-9-]+\.)*[a-z0-9-]+|http://(localhost|127\.0\.0\.1|\[::1\]))(:\d{1,5})?(/[^\s#\\\\]*)?$~iD', $u) === 1;
         if (!$uris || count($uris) > 5 || count(array_filter($uris, $ok)) !== count($uris)) {
             self::fail('invalid_redirect_uri', 400, 'One to five https (or loopback http) redirect URIs.');
         }
@@ -299,10 +308,10 @@ final class Mcp
         return is_array($c) && count($c) === 2 && is_array($c[1]) ? $c : null;
     }
 
-    /** Adresse de retour enregistrée ; en boucle locale (Claude Code…), le port peut changer (RFC 8252). */
+    /** Adresse de retour enregistrée ; en boucle locale (Claude Code…), le port peut changer (RFC 8252), dans les limites d'un port. */
     private static function registered(string $uri, array $uris): bool
     {
-        $loose = static fn (string $u): string => (string) preg_replace('~^(http://(?:localhost|127\.0\.0\.1|\[::1\])):\d+~', '$1', $u);
+        $loose = static fn (string $u): string => (string) preg_replace('~^(http://(?:localhost|127\.0\.0\.1|\[::1\])):\d{1,5}(?!\d)~', '$1', $u);
         foreach ($uris as $r) {
             if ($uri === $r || $loose($uri) === $loose((string) $r)) {
                 return true;
