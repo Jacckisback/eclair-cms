@@ -9,14 +9,24 @@ defined('ECLAIR') || exit;
 
 /**
  * Journaux (erreurs et événements de sécurité), au format JSON ligne par ligne.
- * Taille bornée : chaque champ est tronqué, et au-delà de 1 Mo seuls les 256 derniers Ko sont gardés.
+ * Taille bornée : chaque champ est tronqué ; un journal plein devient le segment précédent (<nom>-1), qui remplace
+ * l'ancien. Les échecs de connexion anonymes ont leur propre petit journal : ils ne chassent jamais les vrais événements.
  */
 final class Log
 {
+    /** Au-delà de 1 Mo, le journal passe en segment précédent : au plus 2 Mo par journal sur le disque. */
     private const MAX_BYTES = 1048576;
+    /** Échecs de connexion anonymes : un attaquant les choisit, ils restent donc dans un fichier à part, petit. */
+    private const FAILURES_MAX = 262144;
+    /** Lecture : seule la fin de chaque segment est lue (la page Sécurité n'affiche que les dernières lignes). */
     private const KEEP_BYTES = 262144;
+    /** E-mail saisi et navigateur : une adresse ou un navigateur réels tiennent largement dans 100 caractères. */
+    private const FIELD_MAX = 100;
     /** Même problème signalé au plus une fois par heure (verrou inutilisable, à chaque requête sinon). */
     private const ALERT_EVERY = 3600;
+    /** Journal des échecs de connexion anonymes (affichés aussi sur la page Sécurité). */
+    public const FAILURES = 'login-failures';
+    private const ANONYMOUS = ['login_failed', 'login_locked'];
 
     /** Enregistre une erreur et renvoie une référence courte à communiquer. */
     public static function error(\Throwable $e): string
@@ -52,18 +62,41 @@ final class Log
     public static function security(string $event, array $context = []): void
     {
         $user = Auth::user();
-        self::append('security', [
+        $email = mb_substr((string) ($user['email'] ?? ($context['email'] ?? '')), 0, self::FIELD_MAX);
+        if (isset($context['email']) && mb_substr((string) $context['email'], 0, self::FIELD_MAX) === $email) {
+            unset($context['email']); // déjà dans « user » : jamais deux fois
+        }
+        $anonymous = $user === null && in_array($event, self::ANONYMOUS, true);
+        self::append($anonymous ? self::FAILURES : 'security', [
             'event' => $event,
             'ip' => Req::ip(),
-            'user' => $user['email'] ?? ($context['email'] ?? ''),
-            'ua' => mb_substr(Req::userAgent(), 0, 120),
+            'user' => $email,
+            'ua' => mb_substr(Req::userAgent(), 0, self::FIELD_MAX),
         ] + $context);
     }
 
-    /** Dernières entrées, de la plus récente à la plus ancienne (seule la fin du fichier est lue). */
+    /** Dernières entrées, de la plus récente à la plus ancienne (seule la fin de chaque segment est lue). */
     public static function read(string $name, int $limit = 200): array
     {
-        $h = @fopen(self::file($name), 'rb');
+        $out = [];
+        foreach ([$name, $name . '-1'] as $segment) {
+            foreach (array_reverse(self::tail(self::file($segment))) as $line) {
+                $row = json_decode($line, true);
+                if (is_array($row)) {
+                    $out[] = $row;
+                    if (count($out) >= $limit) {
+                        return $out;
+                    }
+                }
+            }
+        }
+        return $out;
+    }
+
+    /** @return list<string> lignes de la fin d'un journal (au plus KEEP_BYTES lus) */
+    private static function tail(string $file): array
+    {
+        $h = @fopen($file, 'rb');
         if ($h === false) {
             return [];
         }
@@ -72,15 +105,8 @@ final class Log
         fseek($h, $start);
         $raw = (string) stream_get_contents($h);
         fclose($h);
-        $lines = explode("\n", trim($start === 0 ? Store::strip($raw) : substr($raw, (int) strpos($raw, "\n") + 1)));
-        $out = [];
-        foreach (array_reverse(array_slice($lines, -$limit)) as $line) {
-            $row = json_decode($line, true);
-            if (is_array($row)) {
-                $out[] = $row;
-            }
-        }
-        return $out;
+        $raw = $start === 0 ? Store::strip($raw) : substr($raw, (int) strpos($raw, "\n") + 1);
+        return explode("\n", trim($raw));
     }
 
     private static function file(string $name): string
@@ -103,22 +129,33 @@ final class Log
             }
             Store::ensureDir(ECLAIR_DATA . '/logs');
             $file = self::file($name);
-            $head = (string) @file_get_contents($file, false, null, 0, strlen(Store::GUARD));
-            if ($head !== Store::GUARD) {
-                // Fichier absent ou sans ligne de protection : on repart d'un journal propre.
-                Store::atomic($file, Store::GUARD . $line);
+            $h = @fopen($file, 'a+b');
+            if ($h === false) {
+                error_log('[eclair] ' . $line);
                 return;
             }
-            clearstatcache(true, $file);
-            if ((int) filesize($file) > self::MAX_BYTES) {
-                $h = fopen($file, 'rb');
-                fseek($h, -self::KEEP_BYTES, SEEK_END);
-                $tail = (string) stream_get_contents($h);
+            try {
+                // Verrou du journal lui-même : vérification de l'en-tête, rotation et ajout sans perdre la ligne d'un autre.
+                flock($h, LOCK_EX);
+                fseek($h, 0);
+                $head = (string) fread($h, strlen(Store::GUARD));
+                $full = (int) fstat($h)['size'] > ($name === self::FAILURES ? self::FAILURES_MAX : self::MAX_BYTES);
+                if ($head !== Store::GUARD || $full) {
+                    if ($head === Store::GUARD) {
+                        // Journal plein : il devient le segment précédent (rien n'est jeté d'un coup), puis repart à zéro.
+                        fseek($h, 0);
+                        Store::atomic(self::file($name . '-1'), (string) stream_get_contents($h));
+                    }
+                    // Fichier nouveau, plein, ou sans ligne de protection : on repart d'un journal propre (0600).
+                    ftruncate($h, 0);
+                    fwrite($h, Store::GUARD);
+                    @chmod($file, 0600);
+                }
+                fwrite($h, $line);
+            } finally {
+                flock($h, LOCK_UN);
                 fclose($h);
-                Store::atomic($file, Store::GUARD . substr($tail, (int) strpos($tail, "\n") + 1) . $line);
-                return;
             }
-            file_put_contents($file, $line, FILE_APPEND | LOCK_EX);
         } catch (\Throwable) {
             // Un journal ne doit jamais faire tomber le site.
         }

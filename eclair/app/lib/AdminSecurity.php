@@ -31,7 +31,7 @@ final class AdminSecurity
             'checks' => $checks,
             'score' => (int) round(count(array_filter($checks, fn ($c) => $c['ok'])) / count($checks) * 100),
             'blocked' => self::blocked(),
-            'log' => Log::read('security', 80),
+            'log' => self::events(),
             'errors' => Log::read('errors', 20),
             'integrity' => $integrity,
             'zip' => class_exists('ZipArchive'),
@@ -83,6 +83,17 @@ final class AdminSecurity
             $out[] = $b + ['label' => isset($accounts[$b['key']]) ? $b['key'] . ' (' . implode(', ', $accounts[$b['key']]) . ')' : $b['key']];
         }
         return $out;
+    }
+
+    /**
+     * Journal de la page : les vrais événements, plus les derniers échecs de connexion anonymes, gardés à part
+     * pour qu'aucun afflux ne puisse chasser les premiers.
+     */
+    private static function events(): array
+    {
+        $log = array_merge(Log::read('security', 80), Log::read(Log::FAILURES, 20));
+        usort($log, static fn (array $a, array $b): int => (int) ($b['t'] ?? 0) <=> (int) ($a['t'] ?? 0));
+        return $log;
     }
 
     public static function clearCache(array $user): never
