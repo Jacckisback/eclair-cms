@@ -390,7 +390,9 @@ final class Mcp
                 $back(['error' => 'access_denied']);
             }
             // Ouvrir l'accès au site est une action sensible : mot de passe saisi il y a moins de 15 minutes, ou redemandé.
-            if (!Auth::confirmed($user)) {
+            // Application inconnue (enregistrée par n'importe qui) : toujours redemandé, même juste après la connexion.
+            // Un seul clic ne doit jamais envoyer un code vers une adresse de retour inconnue.
+            if (!($v['known'] ? Auth::confirmed($user) : self::password($user))) {
                 self::page('consent', ['error' => t('Mot de passe incorrect.'), 'user' => $user] + $v, 401);
             }
             $code = bin2hex(random_bytes(32));
@@ -403,6 +405,24 @@ final class Mcp
             $back(['code' => $code]);
         }
         self::page('consent', $v + ['user' => $user]);
+    }
+
+    /**
+     * Mot de passe fourni avec l'accord (champ « confirm_password »), vérifié même si la connexion est récente. Mêmes limites
+     * que la confirmation des actions sensibles (Auth::confirmed) : 10 essais par 15 minutes et par compte, même compteur.
+     */
+    private static function password(array $user): bool
+    {
+        $password = Req::input('confirm_password');
+        if ($password === '' || strlen($password) > 1024 || !RateLimit::attempt('sudo:' . $user['id'], 10, 900, 900)) {
+            return false;
+        }
+        if (!password_verify($password, (string) $user['pass'])) {
+            Log::security('sudo_failed');
+            return false;
+        }
+        RateLimit::release('sudo:' . $user['id']);
+        return true;
     }
 
     /** Pages de l'autorisation, sans le JavaScript de l'administration (dont l'adresse reste ainsi privée). */

@@ -1536,4 +1536,6 @@ return [
     '— Aucune —' => '— 无 —',
     '≈ {cost} l’image.' => '每张图片约 {cost}。',
     '≈ {cost} par article' => '每篇文章约 {cost}',
+    'N’accepte que si tu viens de lancer cette connexion toi-même depuis {app}.' => '仅在你刚刚亲自从 {app} 发起此连接时才同意。',
+    'Active JavaScript pour autoriser cette application.' => '请启用 JavaScript 以授权此应用。',
 ];

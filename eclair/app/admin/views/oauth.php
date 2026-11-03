@@ -3,11 +3,13 @@
 // Copyright (c) 2026 Thierry Gustin
 /**
  * Autorisation d'une application MCP (Claude, ChatGPT) : relais, connexion, double authentification, consentement.
- * Page publique sans le JavaScript de l'administration : son adresse n'y apparaît jamais.
+ * Page publique sans le JavaScript de l'administration : son adresse n'y apparaît jamais. Seul consent.js (sans donnée)
+ * y garde « Autoriser » désactivé tant que la personne n'a pas vraiment la page sous les yeux (double clickjacking).
  * Variables : mode, app (application reconnue, sinon domaine de retour), host, known, here, error, user (consentement), message (erreur)
  */
 defined('ECLAIR') || exit;
 
+use Eclair\Auth;
 use Eclair\I18n;
 use Eclair\Icons;
 use Eclair\Security;
@@ -24,6 +26,7 @@ $mode = $v['mode'];
 <title><?= e(t('Autoriser une application')) ?> · <?= e(Settings::get('name')) ?></title>
 <?= admin_css() ?>
 <link rel="icon" href="<?= e(asset('admin/favicon.svg')) ?>" type="image/svg+xml">
+<?php if ($mode === 'consent'): ?><script src="<?= e(asset('admin/consent.js')) ?>" defer></script><?php endif ?>
 </head>
 <body>
 <div class="auth">
@@ -53,7 +56,8 @@ $mode = $v['mode'];
       <button class="btn btn-primary btn-lg btn-block" type="submit"><?= e(t('Vérifier')) ?></button>
     <?php else: ?>
       <p class="sub"><?= e(t('{app} demande à travailler sur « {site} » en ton nom ({name}).', ['app' => $v['app'], 'site' => Settings::get('name'), 'name' => $v['user']['name']])) ?></p>
-      <?php if (!$v['known']): ?><div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Application inconnue : n’accepte que si tu viens de l’ajouter toi-même.')) ?></p></div><?php endif ?>
+      <?php if (!$v['known']): ?><div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Application inconnue : n’accepte que si tu viens de l’ajouter toi-même.')) ?></p></div>
+      <?php else: ?><div class="notice"><span><?= Icons::svg('shield') ?></span><p><?= e(t('N’accepte que si tu viens de lancer cette connexion toi-même depuis {app}.', ['app' => $v['app']])) ?></p></div><?php endif ?>
       <ul class="grant">
         <li><?= Icons::svg('check') ?><?= e(t('Lire tes pages, articles, produits et ta médiathèque')) ?></li>
         <li><?= Icons::svg('check') ?><?= e(t('Créer des brouillons et modifier tes brouillons')) ?></li>
@@ -62,13 +66,16 @@ $mode = $v['mode'];
       </ul>
       <p class="small muted"><?= e(t('Retour vers {host}. Tu peux couper cet accès à tout moment dans Réglages › Assistant IA.', ['host' => $v['host']])) ?></p>
       <?= Security::csrfField() ?>
-      <?php if (!\Eclair\Auth::fresh()): ?>
+      <?php // Application inconnue : mot de passe toujours demandé ; application reconnue : seulement si la connexion date de plus de 15 minutes. ?>
+      <?php if (!$v['known'] || !Auth::fresh()): ?>
         <label class="field"><span class="label"><?= e(t('Confirme ton mot de passe pour autoriser cette application.')) ?></span>
           <input type="password" name="confirm_password" autocomplete="current-password" required></label>
       <?php endif ?>
+      <noscript><div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Active JavaScript pour autoriser cette application.')) ?></p></div></noscript>
       <div class="row">
-        <button class="btn btn-lg" type="submit" name="step" value="deny"><?= e(t('Refuser')) ?></button>
-        <button class="btn btn-primary btn-lg" type="submit" name="step" value="allow"><?= e(t('Autoriser')) ?></button>
+        <button class="btn btn-lg" type="submit" name="step" value="deny" formnovalidate><?= e(t('Refuser')) ?></button>
+        <?php // Désactivé au chargement : consent.js ne l'active qu'après un court délai et un geste dans la page (autocomplete : Firefox ne le restaure pas actif). ?>
+        <button class="btn btn-primary btn-lg" type="submit" name="step" value="allow" disabled data-gate autocomplete="off"><?= e(t('Autoriser')) ?></button>
       </div>
     <?php endif ?>
   <?php endif ?>
