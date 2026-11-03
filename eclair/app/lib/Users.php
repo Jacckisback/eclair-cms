@@ -44,12 +44,18 @@ final class Users
         return null;
     }
 
-    /** Crée un compte (identifiant généré). */
-    public static function create(array $user): array
+    /**
+     * Crée un compte (identifiant généré). Renvoie null si l'e-mail de connexion est déjà pris : vérifié sous verrou,
+     * deux créations simultanées ne donnent jamais deux comptes avec le même e-mail.
+     */
+    public static function create(array $user): ?array
     {
-        return Store::locked(function () use ($user): array {
+        return Store::locked(function () use ($user): ?array {
             $users = Store::read('users', []);
             $users = is_array($users) ? $users : [];
+            if (self::taken($users, (string) ($user['email'] ?? ''), '')) {
+                return null;
+            }
             // Les valeurs fournies l'emportent sur les valeurs par défaut (l'identifiant est toujours généré).
             $user = ['id' => random_id()] + array_diff_key($user, ['id' => true]) + [
                 'role' => 'editor',
@@ -95,13 +101,39 @@ final class Users
         });
     }
 
-    public static function delete(string $id): void
+    /**
+     * Supprime un compte. Avec $by (l'administrateur qui le demande), tout est revérifié sous verrou : il est toujours
+     * administrateur, ce n'est pas son propre compte, et le site garde au moins un administrateur (deux suppressions
+     * croisées ne laissent jamais le site sans administrateur). Renvoie false si la suppression est refusée.
+     */
+    public static function delete(string $id, string $by = ''): bool
     {
-        Store::locked(function () use ($id): void {
+        return (bool) Store::locked(function () use ($id, $by): bool {
             $users = Store::read('users', []);
+            $users = is_array($users) ? $users : [];
+            if ($by !== '') {
+                $admins = count(array_filter($users, static fn (array $u): bool => ($u['role'] ?? '') === 'admin'));
+                if (($users[$by]['role'] ?? '') !== 'admin' || $by === $id || !isset($users[$id])
+                    || (($users[$id]['role'] ?? '') === 'admin' && $admins <= 1)) {
+                    return false;
+                }
+            }
             unset($users[$id]);
             Store::write('users', $users);
+            return true;
         });
+    }
+
+    /** L'e-mail de connexion est-il déjà pris par un autre compte que $id ? (à appeler sur une lecture faite sous verrou) */
+    public static function taken(array $users, string $email, string $id): bool
+    {
+        $email = mb_strtolower(trim($email));
+        foreach ($users as $key => $u) {
+            if ($email !== '' && (string) $key !== $id && mb_strtolower((string) ($u['email'] ?? '')) === $email) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static function admins(): array

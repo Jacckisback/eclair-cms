@@ -62,6 +62,7 @@ $on = !empty($me['totp']['on']);
       <div class="qr"><?= $v['qr'] ?><div><p class="small muted"><?= e(t('Ou saisis cette clé manuellement :')) ?></p><p><code><?= e(trim(chunk_split($v['setup'], 4, ' '))) ?></code></p></div></div>
       <form method="post" action="<?= e(admin_url('profile')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="2fa-confirm">
         <label class="field"><span class="label"><?= e(t('Saisis le code à 6 chiffres affiché pour confirmer')) ?></span><input class="otp" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required placeholder="000000"></label>
+        <?= Admin::partial('partials/confirm', []) ?>
         <button class="btn btn-primary" type="submit"><?= e(t('Confirmer et activer')) ?></button></form>
     <?php else: ?>
       <p><?= e(t('Codes de secours restants : {n}', ['n' => count((array) ($me['totp']['recovery'] ?? []))])) ?></p>
