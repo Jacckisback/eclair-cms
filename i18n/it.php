@@ -1549,4 +1549,7 @@ return [
     'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => 'Un collegamento a Google Drive è in corso nella sessione di un altro amministratore: il codice è visibile solo lì.',
     'connecté par {name}' => 'collegato da {name}',
     'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive è stato scollegato: l’account che l’aveva collegato è stato eliminato o non è più amministratore. Ricollegalo per riprendere i backup.',
+    'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => 'Il sito ha già {n} contenuti, il massimo: elimina quelli che non servono più prima di crearne altri.',
+    'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'L’indice di ricerca del sito è pieno: elimina o accorcia dei contenuti pubblicati prima di pubblicarne altri.',
+    'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'Il sito ha già {n} bozze: pubblicane o eliminane alcune prima di crearne altre con l’IA.',
 ];

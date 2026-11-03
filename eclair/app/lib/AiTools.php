@@ -18,6 +18,17 @@ final class AiTools
     private const MAX_IMAGES = 3;
     private const MAX_UPDATES = 8;
     private const KEEP_DAYS = 14; // annulations et propositions en attente
+    /** Annulations et propositions gardées au plus (les plus récentes) : leur dossier reste petit et vite parcouru. */
+    private const MAX_KEEP = 1000;
+    /**
+     * Brouillons que l'IA (assistant, connecteur MCP, « Crée ta page avec l'IA ») peut trouver sur le site avant de cesser
+     * d'en créer : la personne publie ou supprime les siens d'abord. Elle ne publie ni ne supprime rien elle-même : une boucle
+     * ne peut donc jamais remplir le site (Content::MAX_ITEMS) au point d'empêcher l'équipe de créer ses contenus.
+     */
+    public const MAX_SITE_DRAFTS = 500;
+
+    /** Dossiers déjà nettoyés pendant cette requête : un tour qui enchaîne les modifications ne les parcourt qu'une fois. */
+    private static array $pruned = [];
 
     /** Définitions envoyées au modèle (schémas JSON). */
     public static function definitions(): array
@@ -140,6 +151,10 @@ final class AiTools
      */
     public static function run(string $name, array $in, array &$ctx): array
     {
+        // Chaque outil part des données enregistrées, pas de celles gardées depuis le début de la demande : un contenu publié
+        // ou dépublié entre-temps (par la personne, dans un autre onglet) est vu tel qu'il est.
+        Content::forget();
+        Store::forget();
         try {
             return match ($name) {
                 'search_content' => ['result' => self::search($in), 'card' => null, 'error' => false],
@@ -166,7 +181,8 @@ final class AiTools
     private static function search(array $in): array
     {
         $type = in_array($in['type'] ?? '', ['post', 'page', 'product'], true) ? $in['type'] : '';
-        $terms = array_filter(preg_split('/\s+/u', mb_strtolower(trim((string) ($in['query'] ?? '')))) ?: [], fn ($w) => mb_strlen($w) >= 2);
+        $terms = Content::terms((string) ($in['query'] ?? ''));
+        // Texte des contenus publiés seulement (Content::save) : un brouillon est trouvé par son titre, son adresse et son extrait.
         $texts = Store::read('search', []);
         $found = [];
         foreach (Content::index() as $id => $e) {
@@ -222,7 +238,7 @@ final class AiTools
 
     private static function findMedia(string $query): array
     {
-        $terms = array_filter(preg_split('/\s+/u', mb_strtolower(trim($query))) ?: [], fn ($w) => mb_strlen($w) >= 2);
+        $terms = Content::terms($query); // sans doublon, 8 au plus : chacun parcourt toute la médiathèque
         $out = [];
         foreach (Media::all() as $m) {
             $hay = mb_strtolower($m['name'] . ' ' . $m['alt'] . ' ' . basename((string) $m['file']));
@@ -269,6 +285,9 @@ final class AiTools
         if ($type === 'product' && !Shop::enabled()) {
             return 'The shop is closed: no product can be created. Tell the user to open it in Settings › Shop first.';
         }
+        if (self::draftsFull()) {
+            return 'Limit reached: the site already holds ' . self::MAX_SITE_DRAFTS . ' drafts. Tell the user to publish or delete some of them first, and stop.';
+        }
         $title = Sanitize::text($in['title'] ?? '', 200);
         $layout = self::sections($in['sections'] ?? null);
         $blocks = array_merge($layout, Markdown::toBlocks(is_string($in['body'] ?? null) ? $in['body'] : ''));
@@ -304,6 +323,12 @@ final class AiTools
             'options' => ['toc' => 'auto', 'hide_title' => ($layout[0]['type'] ?? '') === 'hero' && $blocks[0] === $layout[0]],
             'product' => $type === 'product' && is_array($in['product'] ?? null) ? $in['product'] : [],
         ], $user);
+    }
+
+    /** Le site a-t-il atteint le nombre de brouillons au-delà duquel l'IA n'en crée plus (MAX_SITE_DRAFTS) ? */
+    public static function draftsFull(): bool
+    {
+        return count(array_filter(Content::index(), fn (array $e): bool => $e['status'] === 'draft')) >= self::MAX_SITE_DRAFTS;
     }
 
     /**
@@ -459,9 +484,19 @@ final class AiTools
                 'card' => ['kind' => 'editor', 'id' => $id, 'title' => $built['title'], 'note' => $note, 'changes' => $labels, 'patch' => $patch, 'media' => $media],
                 'error' => false];
         }
-        $entry = Content::index()[$id] ?? null;
-        if ($entry && $entry['status'] === 'draft') {
-            $saved = Content::save($changed, $ctx['user']);
+        $entry = Content::index()[$id] ?? null; // titre de la carte seulement
+        // Modification directe seulement d'un brouillon : décidée sur la version lue ici (jamais sur une proposition de ce tour,
+        // ni sur un index gardé depuis le début de la demande), et écrite seulement si le contenu enregistré est encore exactement
+        // ce brouillon (vérifié sous verrou). Publié entre-temps, il reçoit une proposition : l'IA ne change jamais ce qui est en ligne.
+        if (!is_array($proposal) && $item['status'] === 'draft') {
+            $changed['status'] = 'draft';
+            $read = self::fingerprint($item);
+            try {
+                $saved = Content::save($changed, $ctx['user'], static fn (?array $stored): bool => $stored !== null
+                    && $stored['status'] === 'draft' && self::fingerprint($stored) === $read);
+            } catch (\UnexpectedValueException) {
+                return self::fail('This content changed since you read it (it may have been published or edited meanwhile): read it again with get_content, then retry.');
+            }
             // Une seule annulation par brouillon et par tour : elle rétablit la version d'avant la demande.
             $token = (string) ($ctx['turn']['undo'][$id] ?? '');
             $undo = $token !== '' ? Store::read('ai/undo/' . $token) : null;
@@ -485,6 +520,8 @@ final class AiTools
         $card = ['kind' => 'proposal', 'key' => 'p-' . $pid, 'pid' => $pid, 'id' => $id, 'title' => (string) ($entry['title'] ?? $item['title'])] + $merge('p-' . $pid);
         Store::write('ai/proposals/' . $pid, [
             'id' => $pid, 'user' => $ctx['user']['id'], 'content' => $id, 'base' => is_array($proposal) ? (int) $proposal['base'] : (int) $item['updated'],
+            // Empreinte de la version de base : une modification faite dans la même seconde rend aussi la proposition périmée.
+            'fp' => is_array($proposal) ? (string) ($proposal['fp'] ?? '') : self::fingerprint($item),
             'data' => $changed, 'note' => $card['note'], 'changes' => $card['changes'], 'created' => time(),
         ]);
         return ['result' => ['done' => 'Proposal ready: the user previews and applies it with one click (not applied yet).'] + $scores + $warn,
@@ -501,6 +538,16 @@ final class AiTools
         return $token;
     }
 
+    /**
+     * Une proposition est-elle périmée (contenu supprimé ou modifié depuis) ? La date de mise à jour (à la seconde près) et,
+     * pour les propositions qui la portent, l'empreinte de la version de base : une modification de la même seconde est vue.
+     */
+    public static function stale(array $proposal, ?array $current): bool
+    {
+        return $current === null || (int) $current['updated'] !== (int) ($proposal['base'] ?? -1)
+            || ((string) ($proposal['fp'] ?? '') !== '' && self::fingerprint($current) !== $proposal['fp']);
+    }
+
     /** L'annulation est-elle encore possible (version gardée, et contenu inchangé depuis la modification) ? */
     public static function undoable(string $token): bool
     {
@@ -510,18 +557,31 @@ final class AiTools
     }
 
     /** Empreinte d'un contenu, hors date de mise à jour : elle change dès que quelqu'un modifie quoi que ce soit. */
-    private static function fingerprint(array $item): string
+    public static function fingerprint(array $item): string
     {
         unset($item['updated'], $item['score']);
         ksort($item);
         return md5((string) json_encode($item, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
-    /** Supprime les annulations et propositions de plus de 14 jours. */
+    /**
+     * Supprime les annulations et propositions de plus de 14 jours, et les plus anciennes au-delà de MAX_KEEP.
+     * Une fois par requête et par dossier : une rafale de modifications ne reparcourt pas tout le dossier à chaque écriture.
+     */
     private static function prune(string $dir): void
     {
+        if (isset(self::$pruned[$dir])) {
+            return;
+        }
+        self::$pruned[$dir] = true;
+        $times = [];
         foreach (Store::names($dir) as $name) {
-            if (@filemtime(Store::file($name)) < time() - self::KEEP_DAYS * 86400) {
+            $times[$name] = (int) @filemtime(Store::file($name));
+        }
+        arsort($times);
+        $kept = 0;
+        foreach ($times as $name => $time) {
+            if ($time < time() - self::KEEP_DAYS * 86400 || ++$kept > self::MAX_KEEP) {
                 Store::delete($name);
             }
         }

@@ -156,10 +156,28 @@ final class AiChat
         $cost = 0.0;
         $error = '';
         $deadline = time() + self::DEADLINE;
+        // Compte revérifié avant chaque nouvel appel au modèle et chaque outil, comme le connecteur MCP à chaque requête : un compte
+        // supprimé, dont le mot de passe a été réinitialisé ou à qui l'assistant a été retiré pendant la demande n'agit plus.
+        $revoked = static function () use ($user): string {
+            Store::forget();
+            Settings::forget();
+            $now = Users::find((string) $user['id']);
+            if (!$now || (int) ($now['ver'] ?? 1) !== (int) ($user['ver'] ?? 1) || !empty($now['must_change'])) {
+                return t('Session expirée : réessaie.');
+            }
+            return Ai::allowed($now) ? '' : t('L’assistant IA n’est pas activé pour ton compte.');
+        };
         Ai::onTick(static fn () => $emit(['t' => 'ping']));
         for ($step = 0; $step < self::MAX_STEPS; $step++) {
-            // Avant chaque nouvelle étape : budget (dépense des étapes précédentes comprise) et durée totale.
-            if ($step > 0 && (($error = (string) Ai::overBudget()) !== '' || time() > $deadline)) {
+            // Demande arrêtée ou fenêtre fermée pendant les outils : aucun nouvel appel payant au modèle (le signal envoyé le révèle).
+            if ($step > 0) {
+                $emit(['t' => 'ping']);
+                if (connection_aborted()) {
+                    break;
+                }
+            }
+            // Avant chaque nouvelle étape : compte toujours valable, budget (dépense des étapes précédentes comprise) et durée totale.
+            if ($step > 0 && (($error = $revoked()) !== '' || ($error = (string) Ai::overBudget()) !== '' || time() > $deadline)) {
                 $error = $error ?: t('Demande trop longue : je me suis arrêté après {n} étapes. Ce qui est déjà fait est conservé.', ['n' => $step]);
                 break;
             }
@@ -191,6 +209,9 @@ final class AiChat
             $results = [];
             foreach ($res['calls'] as $call) {
                 $emit(['t' => 'tool', 'name' => $call['name'], 'label' => AiTools::status($call['name'])]);
+                if (($error = $revoked()) !== '') {
+                    break 2;
+                }
                 $out = AiTools::run($call['name'], $call['input'], $ctx);
                 if ($out['card']) {
                     // Une carte qui porte une clé remplace la précédente (même brouillon ou même proposition modifiés deux fois).

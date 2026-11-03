@@ -161,10 +161,20 @@ final class AdminAi
         if (!$current) {
             Http::json(['ok' => false, 'error' => t('Ce contenu n’existe plus.')], 404);
         }
-        if ((int) $current['updated'] !== (int) $p['base']) {
-            Http::json(['ok' => false, 'error' => t('Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.')], 409);
+        $stale = t('Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.');
+        if (AiTools::stale($p, $current)) {
+            Http::json(['ok' => false, 'error' => $stale], 409);
         }
-        $saved = Content::save($p['data'], $user);
+        // Une proposition change le contenu, jamais sa publication : état et date restent ceux de la version enregistrée,
+        // qui doit encore être celle sur laquelle la proposition a été faite (vérifié sous verrou).
+        $data = ['status' => $current['status'], 'date' => '@' . (int) $current['date']] + $p['data'];
+        try {
+            $saved = Content::save($data, $user, static fn (?array $stored): bool => !AiTools::stale($p, $stored));
+        } catch (\UnexpectedValueException) {
+            Http::json(['ok' => false, 'error' => $stale], 409);
+        } catch (\OverflowException $e) {
+            Http::json(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
         $undo = AiTools::snapshot($current, $saved, $user['id']);
         Store::delete('ai/proposals/' . $pid);
         AiChat::markProposal((string) $p['user'], $pid, ['applied' => true, 'undo' => $undo]);
@@ -211,12 +221,21 @@ final class AdminAi
         if (!$current) {
             Http::json(['ok' => false, 'error' => t('Ce contenu n’existe plus.')], 404);
         }
+        $changed = t('Ce contenu a été modifié depuis : l’annulation n’est plus possible. Ses versions précédentes restent dans l’historique des versions de l’éditeur.');
         if (!AiTools::undoable($token)) {
-            Http::json(['ok' => false, 'error' => t('Ce contenu a été modifié depuis : l’annulation n’est plus possible. Ses versions précédentes restent dans l’historique des versions de l’éditeur.')], 409);
+            Http::json(['ok' => false, 'error' => $changed], 409);
         }
         $item['status'] = $current['status'];
         $item['date'] = '@' . (int) $current['date'];
-        $saved = Content::save($item, $user);
+        // Toujours sur la version vérifiée ci-dessus : une modification arrivée entre-temps n'est jamais écrasée.
+        $after = (string) ($u['after'] ?? '');
+        try {
+            $saved = Content::save($item, $user, static fn (?array $stored): bool => $stored !== null && AiTools::fingerprint($stored) === $after);
+        } catch (\UnexpectedValueException) {
+            Http::json(['ok' => false, 'error' => $changed], 409);
+        } catch (\OverflowException $e) {
+            Http::json(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
         Store::delete('ai/undo/' . $token);
         self::ping($saved);
         Http::json(['ok' => true]);
@@ -236,7 +255,11 @@ final class AdminAi
         }
         $item['status'] = 'published';
         $item['date'] = $date !== '' ? $date : '@' . time();
-        $saved = Content::save($item, $user);
+        try {
+            $saved = Content::save($item, $user);
+        } catch (\OverflowException $e) {
+            Http::json(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
         self::ping($saved);
         $entry = Content::entry($saved);
         Http::json(['ok' => true, 'card' => AiTools::draftCard($saved), 'url' => path_to(Content::path($entry)), 'visible' => Content::visible($entry)]);
@@ -389,6 +412,10 @@ final class AdminAi
         if (mb_strlen($brief) < 10) {
             Http::json(['ok' => false, 'error' => t('Décris ta page en une ou deux phrases.')], 422);
         }
+        // Avant tout appel payant : le brouillon composé serait refusé.
+        if (AiTools::draftsFull()) {
+            Http::json(['ok' => false, 'error' => t('Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.', ['n' => AiTools::MAX_SITE_DRAFTS])], 422);
+        }
         $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
         extend_time(300);
@@ -421,7 +448,11 @@ final class AdminAi
         ], 'required' => ['title', 'slug', 'seo_title', 'seo_description', 'summary', 'keyword', 'sections'], 'additionalProperties' => false]);
         self::charged($user, $res);
         $d = $res['data'];
-        $item = AiTools::draft(['type' => $type, 'lang' => $lang, 'body' => ''] + array_intersect_key($d, array_flip(['title', 'slug', 'seo_title', 'seo_description', 'summary', 'keyword', 'sections'])), $user);
+        try {
+            $item = AiTools::draft(['type' => $type, 'lang' => $lang, 'body' => ''] + array_intersect_key($d, array_flip(['title', 'slug', 'seo_title', 'seo_description', 'summary', 'keyword', 'sections'])), $user);
+        } catch (\OverflowException $e) {
+            Http::json(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
         if (is_string($item)) {
             Http::json(['ok' => false, 'error' => t('Réponse inattendue de l’IA : réessaie.')], 502);
         }

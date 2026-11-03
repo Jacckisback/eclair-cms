@@ -361,6 +361,10 @@ final class Seo
                 }
                 $images = [];
                 $item = Content::get($entry['id']);
+                // L'index n'est qu'un résumé : un contenu dont la version enregistrée n'est pas en ligne n'est jamais listé.
+                if (!$item || !Content::visible($item)) {
+                    continue;
+                }
                 foreach (array_merge([$entry['image']], $item['product']['gallery'] ?? [], $item ? Blocks::media($item['blocks']) : []) as $mid) {
                     $m = Media::get((string) $mid);
                     if ($m) {
@@ -453,7 +457,7 @@ final class Seo
         if ($full) {
             foreach ($published as $entry) {
                 $item = Content::get($entry['id']);
-                if ($item) {
+                if ($item && Content::visible($item)) {
                     $out .= "---\n\n" . self::markdown($item, false) . "\n";
                 }
             }
@@ -586,7 +590,7 @@ final class Seo
         $items = '';
         foreach ($posts as $entry) {
             $item = Content::get($entry['id']);
-            if (!$item) {
+            if (!$item || !Content::visible($item)) {
                 continue;
             }
             $url = absolute_url(Content::path($entry));
@@ -612,13 +616,16 @@ final class Seo
             . $items . '</channel></rss>' . "\n";
     }
 
-    /** Schéma + hôte de l'URL officielle (sans le dossier d'installation). */
+    /**
+     * Schéma + hôte de l'URL officielle (sans le dossier d'installation). Sans adresse enregistrée, rien (liens relatifs,
+     * comme absolute_url) : l'hôte annoncé par le premier visiteur ne doit pas finir dans un fichier mis en cache.
+     */
     public static function origin(): string
     {
         $url = (string) Settings::get('url');
         $parts = parse_url($url);
         if (!$parts || empty($parts['host'])) {
-            return rtrim(Req::origin(), '/');
+            return '';
         }
         return ($parts['scheme'] ?? 'https') . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
     }

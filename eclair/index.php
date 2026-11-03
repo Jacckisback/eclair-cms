@@ -49,7 +49,9 @@ define('ECLAIR_ROOT', __DIR__);
         return;
     }
     $meta = json_decode((string) fgets($h), true);
-    if (!is_array($meta)) {
+    // Page d'une autre génération (rendue à partir de données lues avant la dernière purge) : jamais servie, l'application la refait.
+    $generation = (string) ($rt['g'] ?? '');
+    if (!is_array($meta) || $generation === '' || ($meta['g'] ?? null) !== $generation) {
         fclose($h);
         return;
     }

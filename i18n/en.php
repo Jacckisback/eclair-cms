@@ -1549,4 +1549,7 @@ return [
     'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => 'A Google Drive connection is in progress in another administrator’s session: the code is only shown there.',
     'connecté par {name}' => 'connected by {name}',
     'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive has been disconnected: the account that connected it was deleted or is no longer an administrator. Reconnect it to resume backups.',
+    'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => 'The site already has {n} items of content, the maximum: delete the ones you no longer need before creating more.',
+    'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'The site’s search index is full: delete or shorten some published content before publishing more.',
+    'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'The site already has {n} drafts: publish or delete some before creating more with the AI.',
 ];

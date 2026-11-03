@@ -1549,4 +1549,7 @@ return [
     'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => 'Hay una conexión a Google Drive en curso en la sesión de otro administrador: el código solo se muestra allí.',
     'connecté par {name}' => 'conectado por {name}',
     'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive se ha desconectado: la cuenta que lo conectó se ha eliminado o ya no es administradora. Vuelve a conectarlo para reanudar las copias de seguridad.',
+    'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => 'El sitio ya tiene {n} contenidos, el máximo: elimina los que ya no necesites antes de crear otros.',
+    'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'El índice de búsqueda del sitio está lleno: elimina o acorta contenidos publicados antes de publicar otros.',
+    'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'El sitio ya tiene {n} borradores: publica o elimina algunos antes de crear otros con la IA.',
 ];

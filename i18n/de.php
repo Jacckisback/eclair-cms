@@ -1549,4 +1549,7 @@ return [
     'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => 'In der Sitzung eines anderen Administrators läuft gerade eine Verbindung mit Google Drive: Der Code wird nur dort angezeigt.',
     'connecté par {name}' => 'verbunden von {name}',
     'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive wurde getrennt: Das Konto, das es verbunden hat, wurde gelöscht oder ist kein Administrator mehr. Verbinde es erneut, um die Sicherungen fortzusetzen.',
+    'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => 'Die Website hat bereits {n} Inhalte, das Maximum: Lösche die nicht mehr benötigten, bevor du neue erstellst.',
+    'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'Der Suchindex der Website ist voll: Lösche oder kürze veröffentlichte Inhalte, bevor du weitere veröffentlichst.',
+    'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'Die Website hat bereits {n} Entwürfe: Veröffentliche oder lösche einige, bevor du mit der KI weitere erstellst.',
 ];

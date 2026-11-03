@@ -12,6 +12,8 @@ final class App
 {
     public static function run(): never
     {
+        // Génération du cache figée avant toute lecture de réglages ou de contenus (voir Cache::put).
+        Cache::generation();
         error_reporting(E_ALL);
         ini_set('display_errors', ECLAIR_DEBUG ? '1' : '0');
         set_error_handler([self::class, 'onError']);

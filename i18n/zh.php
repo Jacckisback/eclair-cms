@@ -1549,4 +1549,7 @@ return [
     'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => '另一位管理员的会话中正在连接 Google Drive：代码只在该会话中显示。',
     'connecté par {name}' => '由 {name} 连接',
     'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive 已断开连接：连接它的账号已被删除或不再是管理员。请重新连接以恢复备份。',
+    'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => '网站已有 {n} 项内容，已达上限：请先删除不再需要的内容，再创建新内容。',
+    'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => '网站的搜索索引已满：请先删除或缩短部分已发布的内容，再发布新内容。',
+    'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => '网站已有 {n} 篇草稿：请先发布或删除一些，再用 AI 创建新的草稿。',
 ];

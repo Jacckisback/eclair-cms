@@ -70,7 +70,7 @@ final class Site
         if (str_ends_with($path, '.md') && Settings::get('geo.markdown')) {
             $target = substr($path, 0, -3);
             $entry = Content::findByPath($target === '/index' ? '/' : $target);
-            if ($entry && !$entry['noindex'] && ($item = Content::get($entry['id']))) {
+            if ($entry && !$entry['noindex'] && ($item = Content::get($entry['id'])) && Content::visible($item)) {
                 self::file($path, Seo::markdown($item), 'text/markdown; charset=utf-8', [
                     'X-Robots-Tag: noindex',
                     'Link: <' . absolute_url(Content::path($entry)) . '>; rel="canonical"',
@@ -146,16 +146,18 @@ final class Site
                 }
                 self::listing('blog', 1);
             }
-            if (preg_match('~^/' . $page . '/(\d{1,6})$~', $rest, $m)) {
+            // Numéros de page sans zéro en tête (« /page/01 » n'existe pas) : un seul rendu, une seule entrée de cache par page.
+            if (preg_match('~^/' . $page . '/([1-9]\d{0,5})$~', $rest, $m)) {
                 self::listing('blog', (int) $m[1]);
             }
-            if (preg_match('~^/' . preg_quote($words['author'], '~') . '/([a-z0-9-]+)(?:/' . $page . '/(\d{1,6}))?$~', $rest, $m)) {
+            if (preg_match('~^/' . preg_quote($words['author'], '~') . '/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m)) {
                 $user = Users::findBySlug($m[1]);
-                if ($user) {
+                // Page d'auteur seulement pour une personne qui a publié (comme le plan du site) : les autres comptes restent invisibles.
+                if ($user && array_filter(Content::published('post'), fn (array $p): bool => $p['author'] === $user['id'])) {
                     self::listing('author', (int) ($m[2] ?? 1), Users::profile($user));
                 }
             }
-            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/(\d{1,6}))?$~', $rest, $m)) {
+            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m)) {
                 $cat = Categories::bySlug($m[1], 'post');
                 if ($cat) {
                     self::listing('category', (int) ($m[2] ?? 1), $cat);
@@ -168,10 +170,10 @@ final class Site
             if ($rest === '') {
                 self::catalog(1);
             }
-            if (preg_match('~^/' . $page . '/(\d{1,6})$~', $rest, $m)) {
+            if (preg_match('~^/' . $page . '/([1-9]\d{0,5})$~', $rest, $m)) {
                 self::catalog((int) $m[1]);
             }
-            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/(\d{1,6}))?$~', $rest, $m) && ($cat = Categories::bySlug($m[1], 'product'))) {
+            if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m) && ($cat = Categories::bySlug($m[1], 'product'))) {
                 self::catalog((int) ($m[2] ?? 1), $cat);
             }
         }
@@ -195,7 +197,9 @@ final class Site
     {
         self::$edit = $edit && $preview;
         $item ??= Content::get($entry['id']);
-        if (!$item) {
+        // L'index n'est qu'un résumé : hors aperçu, la version enregistrée doit elle-même être en ligne (jamais un brouillon,
+        // même enregistré pendant le rendu ou derrière une entrée d'index périmée).
+        if (!$item || (!$preview && !Content::visible($item))) {
             self::notFound();
         }
         if ($item['type'] === 'product') {

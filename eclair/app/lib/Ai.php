@@ -215,6 +215,9 @@ final class Ai
     /** Ajoute une dépense au compteur du mois (les 12 derniers mois sont gardés). */
     public static function charge(string $userId, float $cost, int $images = 0): void
     {
+        // Une valeur négative (fournisseur ou passerelle défaillants) ne doit jamais faire baisser la dépense du mois.
+        $cost = is_finite($cost) ? max(0.0, $cost) : 0.0;
+        $images = max(0, $images);
         if ($cost <= 0 && $images === 0) {
             return;
         }
@@ -254,8 +257,9 @@ final class Ai
     public static function cost(string $provider, string $model, array $usage): float
     {
         [, $in, $out, $cached, $write] = self::MODELS[$provider][$model] ?? array_values(self::MODELS[$provider])[0] ?? ['', 5, 25, 0.5, 6.25];
-        return ((int) ($usage['in'] ?? 0) * $in + (int) ($usage['out'] ?? 0) * $out
-            + (int) ($usage['cache_read'] ?? 0) * $cached + (int) ($usage['cache_write'] ?? 0) * $write) / 1_000_000;
+        // Jetons négatifs annoncés par un fournisseur défaillant : comptés zéro.
+        $n = static fn (string $k): int => max(0, (int) ($usage[$k] ?? 0));
+        return ($n('in') * $in + $n('out') * $out + $n('cache_read') * $cached + $n('cache_write') * $write) / 1_000_000;
     }
 
     public static function money(float $amount): string

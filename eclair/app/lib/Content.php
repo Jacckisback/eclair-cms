@@ -15,6 +15,21 @@ final class Content
 {
     public const LANGS = ['fr' => 'Français', 'es' => 'Español', 'en' => 'English', 'de' => 'Deutsch', 'it' => 'Italiano', 'pt' => 'Português'];
     private const MAX_REVISIONS = 20;
+    /**
+     * Nombre maximal de contenus (pages, articles, produits, brouillons compris), bien au-delà de ce qu'atteint le site d'une
+     * petite entreprise. data/index.php les résume tous : relu à chaque page générée et réécrit à chaque enregistrement, il ne
+     * doit pas pouvoir grossir sans fin (boucle d'une IA ou d'un connecteur, compte malveillant) jusqu'à bloquer le site.
+     */
+    public const MAX_ITEMS = 3000;
+    /**
+     * Taille maximale de l'index de recherche (data/search.php : le texte des contenus publiés), relu en entier à chaque
+     * recherche d'un visiteur. 16 Mo, c'est plus de 1 500 longs articles ; au-delà, la recherche épuiserait la mémoire de PHP.
+     */
+    public const MAX_SEARCH_BYTES = 16_000_000;
+    /** Texte cherchable gardé par contenu (caractères). */
+    private const SEARCH_TEXT = 30000;
+    /** Termes d'une recherche pris en compte : chacun parcourt tout l'index de recherche. */
+    private const MAX_TERMS = 8;
 
     private static ?array $index = null;
 
@@ -28,6 +43,12 @@ final class Content
             self::$index = is_array($index) ? $index : self::reindex();
         }
         return self::$index;
+    }
+
+    /** Oublie l'index gardé pour la requête : la prochaine lecture repart du disque (changements faits par d'autres requêtes). */
+    public static function forget(): void
+    {
+        self::$index = null;
     }
 
     public static function get(string $id): ?array
@@ -126,10 +147,17 @@ final class Content
         return $next;
     }
 
+    /** Termes d'une recherche : en minuscules, au moins 2 caractères, sans doublon, MAX_TERMS au plus. */
+    public static function terms(string $query): array
+    {
+        $terms = array_filter(preg_split('/\s+/u', mb_strtolower(trim($query))) ?: [], fn ($t) => mb_strlen($t) >= 2);
+        return array_slice(array_values(array_unique($terms)), 0, self::MAX_TERMS);
+    }
+
     /** Recherche plein texte simple, pondérée (titre > résumé > texte). */
     public static function search(string $query, int $limit = 30): array
     {
-        $terms = array_filter(preg_split('/\s+/u', mb_strtolower(trim($query))) ?: [], fn ($t) => mb_strlen($t) >= 2);
+        $terms = self::terms($query);
         if (!$terms) {
             return [];
         }
@@ -161,34 +189,55 @@ final class Content
     /**
      * Crée ou met à jour un contenu à partir des données de l'éditeur.
      * Gère : slug unique, redirection 301 si l'URL change, révisions, index, cache.
+     * $expect (enregistrement conditionnel, outils de l'IA) reçoit la version enregistrée, relue sous verrou (null pour un
+     * nouveau contenu) : s'il ne l'accepte pas, rien n'est écrit (UnexpectedValueException).
+     * Un nouveau contenu au-delà de MAX_ITEMS, ou un texte qui ferait déborder l'index de recherche, est refusé (OverflowException).
      */
-    public static function save(array $data, array $user): array
+    public static function save(array $data, array $user, ?callable $expect = null): array
     {
-        $result = Store::locked(function () use ($data, $user): array {
+        $result = Store::locked(function () use ($data, $user, $expect): array {
             self::$index = null;
             $index = self::index();
             $id = preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '';
             $old = $id !== '' && isset($index[$id]) ? self::get($id) : null;
+            if ($expect !== null && !$expect($old)) {
+                throw new \UnexpectedValueException('Contenu modifié entre-temps.');
+            }
+            if ($old === null && count($index) >= self::MAX_ITEMS) {
+                throw new \OverflowException(t('Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.', ['n' => self::MAX_ITEMS]));
+            }
             $item = self::build($data, $user, $old, $index);
             $id = $item['id'];
+            $entry = self::entry($item);
+            $oldEntry = $index[$id] ?? null;
+            $index[$id] = $entry;
+            // Index de recherche préparé (et sa taille vérifiée) avant toute écriture : un refus ne laisse rien à moitié enregistré.
+            $search = self::searchTexts($index, $id, $item['status'] === 'published' ? Blocks::text($item['blocks']) : null);
             if ($old !== null) {
                 self::addRevision($old);
-                $oldEntry = $index[$id];
-                if (self::visible($oldEntry)) {
+                if ($oldEntry !== null && self::visible($oldEntry)) {
                     $from = self::path($oldEntry);
-                    $to = self::path(self::entry($item));
+                    $to = self::path($entry);
                     if ($from !== $to && $from !== '/') {
                         Redirects::add($from, $to, true);
                     }
                 }
             }
-            Store::write('content/' . $id, $item);
-            $index[$id] = self::entry($item);
-            Store::write('index', $index);
+            // L'index décide de ce qui est en ligne. Un contenu qui le quitte (brouillon, date future) y est inscrit avant d'être
+            // écrit : une écriture interrompue (disque plein…) laisse toujours la version la moins visible, jamais un brouillon public.
+            if ($old !== null && !self::visible($entry)) {
+                Store::write('index', $index);
+                Store::write('content/' . $id, $item);
+            } else {
+                Store::write('content/' . $id, $item);
+                Store::write('index', $index);
+            }
             self::$index = $index;
-            self::storeSearchText($id, Blocks::text($item['blocks']));
+            if ($search !== null) {
+                Store::write('search', $search);
+            }
             if ($item['status'] !== 'draft') {
-                Redirects::remove(self::path($index[$id]));
+                Redirects::remove(self::path($entry));
             }
             return $item;
         });
@@ -324,18 +373,26 @@ final class Content
                 return;
             }
             $entry = $index[$id];
+            // Le fichier d'abord : s'il ne peut pas être supprimé (droits du dossier), rien ne change et l'erreur est signalée,
+            // au lieu d'un fichier orphelin qu'une reconstruction de l'index remettrait en ligne.
+            Store::delete('content/' . $id);
+            if (is_file(Store::file('content/' . $id))) {
+                throw new \RuntimeException("Impossible de supprimer « content/" . $id . '.php » : vérifie les droits du dossier.');
+            }
             if (self::visible($entry) && $redirectTo !== '') {
                 Redirects::add(self::path($entry), $redirectTo, false);
             }
             unset($index[$id]);
             Store::write('index', $index);
             self::$index = $index;
-            Store::delete('content/' . $id);
             foreach (Store::names('revisions/' . $id) as $rev) {
                 Store::delete($rev);
             }
             @rmdir(ECLAIR_DATA . '/revisions/' . $id);
-            self::storeSearchText($id, null);
+            $search = self::searchTexts($index, $id, null);
+            if ($search !== null) {
+                Store::write('search', $search);
+            }
             if (Settings::get('home') === $id) {
                 Settings::save(['home' => '']);
             }
@@ -358,37 +415,54 @@ final class Content
         return self::save($item, $user);
     }
 
-    /** Relie deux contenus comme traductions l'un de l'autre. */
+    /**
+     * Relie deux contenus comme traductions l'un de l'autre. Sous verrou, à partir des versions enregistrées : un
+     * enregistrement concurrent (un contenu dépublié pendant ce temps) n'est jamais écrasé par une copie périmée.
+     */
     public static function linkTranslation(string $id, string $otherId): void
     {
-        $a = self::get($id);
-        $b = self::get($otherId);
-        if (!$a || !$b || $id === $otherId) {
-            return;
-        }
-        $group = $b['tgroup'] !== '' ? $b['tgroup'] : ($a['tgroup'] !== '' ? $a['tgroup'] : $b['id']);
-        foreach ([$a, $b] as $item) {
-            $item['tgroup'] = $group;
-            Store::write('content/' . $item['id'], $item);
-        }
-        self::reindex();
-        Cache::purge();
-    }
-
-    /** Reconstruit l'index à partir des fichiers (réparation). */
-    public static function reindex(): array
-    {
-        $index = [];
-        foreach (Store::names('content') as $name) {
-            $item = Store::read($name);
-            if (is_array($item) && isset($item['id'], $item['blocks'])) {
+        $linked = Store::locked(function () use ($id, $otherId): bool {
+            self::$index = null;
+            $index = self::index();
+            $a = isset($index[$id]) ? self::get($id) : null;
+            $b = isset($index[$otherId]) ? self::get($otherId) : null;
+            if (!$a || !$b || $id === $otherId) {
+                return false;
+            }
+            $group = $b['tgroup'] !== '' ? $b['tgroup'] : ($a['tgroup'] !== '' ? $a['tgroup'] : $b['id']);
+            foreach ([$a, $b] as $item) {
+                $item['tgroup'] = $group;
+                Store::write('content/' . $item['id'], $item);
                 $index[$item['id']] = self::entry($item);
             }
-        }
-        if (Settings::installed()) {
             Store::write('index', $index);
+            self::$index = $index;
+            return true;
+        });
+        if ($linked) {
+            Cache::purge();
         }
-        return self::$index = $index;
+    }
+
+    /**
+     * Reconstruit l'index à partir des fichiers (réparation). Sous verrou, les contenus relus sous ce verrou : un
+     * enregistrement concurrent (un contenu dépublié pendant la reconstruction) n'est jamais écrasé par l'état d'avant.
+     */
+    public static function reindex(): array
+    {
+        return Store::locked(function (): array {
+            $index = [];
+            foreach (Store::names('content') as $name) {
+                $item = Store::read($name);
+                if (is_array($item) && isset($item['id'], $item['blocks'])) {
+                    $index[$item['id']] = self::entry($item);
+                }
+            }
+            if (Settings::installed()) {
+                Store::write('index', $index);
+            }
+            return self::$index = $index;
+        });
     }
 
     /* ────────────────────────────── Révisions ─────────────────────────────── */
@@ -459,16 +533,33 @@ final class Content
         }
     }
 
-    private static function storeSearchText(string $id, ?string $text): void
+    /**
+     * Index de recherche (data/search.php) après l'écriture d'un contenu, ou null s'il ne change pas. Seul le texte des
+     * contenus publiés (programmés compris) y figure : la recherche publique ne lit jamais celui d'un brouillon, et l'assistant
+     * retrouve les brouillons par leur titre, leur adresse et leur extrait. Les textes que d'anciennes versions gardaient pour
+     * les brouillons partent au passage. Un texte qui ferait dépasser MAX_SEARCH_BYTES est refusé (OverflowException) ;
+     * retirer ou raccourcir un texte reste toujours possible.
+     */
+    private static function searchTexts(array $index, string $id, ?string $text): ?array
     {
-        $all = Store::read('search', []);
-        $all = is_array($all) ? $all : [];
+        $current = Store::read('search', []);
+        $current = is_array($current) ? $current : [];
+        $all = array_intersect_key($current, array_filter($index, fn (array $e): bool => $e['status'] === 'published'));
         if ($text === null) {
             unset($all[$id]);
         } else {
-            $all[$id] = mb_substr($text, 0, 30000);
+            $all[$id] = mb_substr($text, 0, self::SEARCH_TEXT);
+            $size = static fn (string $s): int => strlen((string) json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                | JSON_INVALID_UTF8_SUBSTITUTE | JSON_HEX_TAG | JSON_HEX_AMP));
+            $grows = $size($all[$id]) - (isset($current[$id]) ? $size((string) $current[$id]) : 0);
+            // Estimation par la taille du fichier actuel, puis mesure exacte seulement si elle dépasse la limite.
+            if ($grows > 0 && (int) @filesize(Store::file('search')) + $grows + strlen($id) + 8 > self::MAX_SEARCH_BYTES
+                && strlen((string) json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                    | JSON_INVALID_UTF8_SUBSTITUTE | JSON_HEX_TAG | JSON_HEX_AMP)) > self::MAX_SEARCH_BYTES) {
+                throw new \OverflowException(t('L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.'));
+            }
         }
-        Store::write('search', $all);
+        return $all === $current ? null : $all;
     }
 
     /** Durée de lecture en minutes. */
