@@ -1536,4 +1536,7 @@ return [
     '— Aucune —' => '— 无 —',
     '≈ {cost} l’image.' => '每张图片约 {cost}。',
     '≈ {cost} par article' => '每篇文章约 {cost}',
+    'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => '网站已有 {n} 项内容，已达上限：请先删除不再需要的内容，再创建新内容。',
+    'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => '网站的搜索索引已满：请先删除或缩短部分已发布的内容，再发布新内容。',
+    'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => '网站已有 {n} 篇草稿：请先发布或删除一些，再用 AI 创建新的草稿。',
 ];

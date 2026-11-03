@@ -138,7 +138,11 @@ final class AdminContent
         if ($id !== '' && !Content::get($id)) {
             Http::json(['ok' => false, 'error' => t('Ce contenu n’existe plus.')], 404);
         }
-        $item = Content::save($data, $user);
+        try {
+            $item = Content::save($data, $user);
+        } catch (\OverflowException $e) {
+            Http::json(['ok' => false, 'error' => $e->getMessage()], 422); // nombre de contenus ou index de recherche au maximum
+        }
         $link = preg_replace('/[^a-z0-9]/', '', (string) ($data['translation_of'] ?? '')) ?? '';
         if ($link !== '') {
             Content::linkTranslation($item['id'], $link);
@@ -210,7 +214,11 @@ final class AdminContent
     public static function duplicate(array $user): never
     {
         $data = Req::json();
-        $copy = Content::duplicate(preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '', $user);
+        try {
+            $copy = Content::duplicate(preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '', $user);
+        } catch (\OverflowException $e) {
+            Http::json(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
         Http::json($copy ? ['ok' => true, 'id' => $copy['id'], 'edit' => admin_url('edit/' . $copy['id'])] : ['ok' => false], $copy ? 200 : 404);
     }
 

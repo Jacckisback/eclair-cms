@@ -1536,4 +1536,7 @@ return [
     '— Aucune —' => '— Nenhuma —',
     '≈ {cost} l’image.' => '≈ {cost} por imagem.',
     '≈ {cost} par article' => '≈ {cost} por artigo',
+    'Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.' => 'O site já tem {n} conteúdos, o máximo: exclua os que você não usa mais antes de criar outros.',
+    'L’index de recherche du site est plein : supprime ou raccourcis des contenus publiés avant d’en publier d’autres.' => 'O índice de pesquisa do site está cheio: exclua ou encurte conteúdos publicados antes de publicar outros.',
+    'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => 'O site já tem {n} rascunhos: publique ou exclua alguns antes de criar outros com a IA.',
 ];

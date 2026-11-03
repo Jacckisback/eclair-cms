@@ -18,6 +18,12 @@ final class AiTools
     private const MAX_IMAGES = 3;
     private const MAX_UPDATES = 8;
     private const KEEP_DAYS = 14; // annulations et propositions en attente
+    /**
+     * Brouillons que l'IA (assistant, connecteur MCP, « Crée ta page avec l'IA ») peut trouver sur le site avant de cesser
+     * d'en créer : la personne publie ou supprime les siens d'abord. Elle ne publie ni ne supprime rien elle-même : une boucle
+     * ne peut donc jamais remplir le site (Content::MAX_ITEMS) au point d'empêcher l'équipe de créer ses contenus.
+     */
+    public const MAX_SITE_DRAFTS = 500;
 
     /** Définitions envoyées au modèle (schémas JSON). */
     public static function definitions(): array
@@ -166,7 +172,8 @@ final class AiTools
     private static function search(array $in): array
     {
         $type = in_array($in['type'] ?? '', ['post', 'page', 'product'], true) ? $in['type'] : '';
-        $terms = array_filter(preg_split('/\s+/u', mb_strtolower(trim((string) ($in['query'] ?? '')))) ?: [], fn ($w) => mb_strlen($w) >= 2);
+        $terms = Content::terms((string) ($in['query'] ?? ''));
+        // Texte des contenus publiés seulement (Content::save) : un brouillon est trouvé par son titre, son adresse et son extrait.
         $texts = Store::read('search', []);
         $found = [];
         foreach (Content::index() as $id => $e) {
@@ -269,6 +276,9 @@ final class AiTools
         if ($type === 'product' && !Shop::enabled()) {
             return 'The shop is closed: no product can be created. Tell the user to open it in Settings › Shop first.';
         }
+        if (self::draftsFull()) {
+            return 'Limit reached: the site already holds ' . self::MAX_SITE_DRAFTS . ' drafts. Tell the user to publish or delete some of them first, and stop.';
+        }
         $title = Sanitize::text($in['title'] ?? '', 200);
         $layout = self::sections($in['sections'] ?? null);
         $blocks = array_merge($layout, Markdown::toBlocks(is_string($in['body'] ?? null) ? $in['body'] : ''));
@@ -304,6 +314,12 @@ final class AiTools
             'options' => ['toc' => 'auto', 'hide_title' => ($layout[0]['type'] ?? '') === 'hero' && $blocks[0] === $layout[0]],
             'product' => $type === 'product' && is_array($in['product'] ?? null) ? $in['product'] : [],
         ], $user);
+    }
+
+    /** Le site a-t-il atteint le nombre de brouillons au-delà duquel l'IA n'en crée plus (MAX_SITE_DRAFTS) ? */
+    public static function draftsFull(): bool
+    {
+        return count(array_filter(Content::index(), fn (array $e): bool => $e['status'] === 'draft')) >= self::MAX_SITE_DRAFTS;
     }
 
     /**
