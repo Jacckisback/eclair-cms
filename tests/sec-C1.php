@@ -134,13 +134,24 @@ require_once dirname(__DIR__) . '/tools/announce.php';
 $c1UpdateCode = (string) file_get_contents(ECLAIR_ROOT . '/app/lib/Update.php');
 preg_match("~private const KEY = '([^']+)'~", $c1UpdateCode, $c1Key);
 preg_match("~private const CONTEXT = '([^']+)'~", $c1UpdateCode, $c1Context);
-$c1Latest = dirname(__DIR__) . '/dist/latest.json';
-if (is_file($c1Latest)) {
-    $c1Announced = eclair_announce_read((string) file_get_contents($c1Latest), (string) base64_decode($c1Key[1] ?? '', true), $c1Context[1] ?? '');
-    $c1Zip = is_array($c1Announced) ? dirname(__DIR__) . '/dist/' . basename((string) parse_url((string) $c1Announced['fields']['url'], PHP_URL_PATH)) : '';
-    check('dist/latest.json : signé par la clé du mainteneur (et format 2 cohérent s’il est là)', is_array($c1Announced), is_string($c1Announced) ? $c1Announced : '');
-    check('dist/latest.json : l’archive annoncée dans dist/ correspond à son empreinte et à sa taille', $c1Zip !== '' && is_file($c1Zip)
-        && hash_file('sha256', $c1Zip) === $c1Announced['fields']['sha256'] && filesize($c1Zip) === $c1Announced['fields']['size'], basename($c1Zip));
+// Annonce et archive publiées (celles du dernier commit, que reçoivent les sites et les nouvelles installations) : une
+// archive reconstruite localement sans clé (tools/build.php, comme le demande CONTRIBUTING) ne compte pas.
+$c1Git = static function (array $args): ?string {
+    $p = @proc_open(array_merge(['git', '-C', dirname(__DIR__)], $args), [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    if (!is_resource($p)) {
+        return null;
+    }
+    $out = (string) stream_get_contents($pipes[1]);
+    stream_get_contents($pipes[2]);
+    return proc_close($p) === 0 ? $out : null;
+};
+$c1Latest = $c1Git(['show', 'HEAD:dist/latest.json']);
+if ($c1Latest !== null) {
+    $c1Announced = eclair_announce_read($c1Latest, (string) base64_decode($c1Key[1] ?? '', true), $c1Context[1] ?? '');
+    $c1Zip = is_array($c1Announced) ? $c1Git(['show', 'HEAD:dist/' . basename((string) parse_url((string) $c1Announced['fields']['url'], PHP_URL_PATH))]) : null;
+    check('dist/latest.json publié : signé par la clé du mainteneur (et format 2 cohérent s’il est là)', is_array($c1Announced), is_string($c1Announced) ? $c1Announced : '');
+    check('archive publiée dans dist/ : correspond à l’empreinte et à la taille annoncées', $c1Zip !== null
+        && hash('sha256', $c1Zip) === $c1Announced['fields']['sha256'] && strlen($c1Zip) === $c1Announced['fields']['size']);
 }
 
 require_once dirname(__DIR__) . '/tools/i18n.php';
