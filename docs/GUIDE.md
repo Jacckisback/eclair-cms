@@ -104,7 +104,7 @@ Le tableau de bord affiche une checklist « Premiers pas » : logo et couleur, p
 - **Liens internes assistés** : en tapant un lien, l'éditeur propose tes pages et articles (maillage interne en 2 secondes).
 - **Collage intelligent** depuis Word, Google Docs ou une page web : titres, listes, tableaux et gras sont convertis en blocs propres.
 - Enregistrement `Ctrl+S`, brouillon local de secours (rien n'est perdu en cas de coupure), aperçu réel avant publication, **historique des 20 dernières versions**, publication programmée.
-  - Ce brouillon de secours appartient au compte connecté et s'efface à la déconnexion : il n'est jamais proposé à un autre compte qui utilise le même navigateur. Les brouillons de secours de la 1.10.2 sont effacés après la mise à jour : enregistre tes modifications en cours avant de mettre à jour.
+  - Ce brouillon de secours appartient au compte connecté et s'efface à la déconnexion : il n'est jamais proposé à un autre compte qui utilise le même navigateur. Ceux de la 1.10.2 sont repris sur un site à un seul compte ; s'il y a plusieurs comptes, ils sont effacés après la mise à jour : enregistre tes modifications en cours avant de mettre à jour.
 - **Mode Visuel** : la page telle qu'elle s'affiche avec ton thème, modifiable sur place ([détails](#mode-visuel)).
 
 ### 🧩 Le reste
@@ -530,7 +530,7 @@ Chaque brouillon revient avec un lien pour l'**ouvrir dans Éclair** ; chaque pr
 
 **Administration**
 - **Adresse d'administration personnalisable** (moins de robots), rôles administrateur / rédacteur ; le bouton « Modifier » du site ne révèle pas cette adresse.
-- **Sauvegardes Google Drive cloisonnées** : accès limité aux fichiers créés par Éclair, jeton chiffré et révocable, jamais inclus dans une sauvegarde ; connexion soumise à la confirmation du mot de passe et liée à la session de l'administrateur qui la lance : le code ne s'affiche que là, et seulement dans les 15 minutes qui suivent la saisie du mot de passe. La page Sécurité indique qui l'a connecté. Si ce compte est supprimé ou n'est plus administrateur, les sauvegardes s'arrêtent, la connexion est retirée et les administrateurs sont invités à la refaire.
+- **Sauvegardes Google Drive cloisonnées** : accès limité aux fichiers créés par Éclair, jeton chiffré et révocable, jamais inclus dans une sauvegarde ; connexion soumise à la confirmation du mot de passe et liée à la session de l'administrateur qui la lance : le code ne s'affiche que là, et seulement dans les 15 minutes qui suivent son lancement. La page Sécurité indique qui l'a connecté. Si ce compte est supprimé ou n'est plus administrateur, les sauvegardes s'arrêtent, la connexion est retirée et les administrateurs sont invités à la refaire.
 - **Assistant IA borné** : brouillons et propositions seulement, clés d'API chiffrées et exclues des sauvegardes, budget mensuel et quota quotidien (détails dans [Assistant IA](#sécurité-et-confidentialité)).
 - **Journaux bornés** (champs tronqués, 2 Mo au plus par journal) : impossible de les faire gonfler. Un journal plein devient le segment précédent (`*-1.php`) au lieu de perdre sa moitié la plus ancienne ; les e-mails et navigateurs enregistrés sont coupés à 100 caractères. Les échecs de connexion anonymes ont leur propre fichier, `data/logs/login-failures.php` : un afflux de tentatives ne chasse plus les vrais événements du journal de sécurité. La page Sécurité affiche les derniers vrais événements et les derniers échecs anonymes.
 - **Limites généreuses**, pour qu'une IA, un connecteur ou un compte qui s'emballe ne remplisse jamais le site : 3 000 contenus au plus (brouillons compris) ; l'IA (assistant, connecteur MCP, « Créer avec l'IA ») ne crée plus de brouillons dès que le site en compte 500 ; 16 Mo de texte publié dans la recherche (plus de 1 500 longs articles) ; 5 000 redirections, d'adresses de 1 000 caractères au plus ; 10 000 images ; 1 000 catégories. Les contenus existants restent toujours modifiables, et un message clair dit quoi supprimer.
@@ -593,14 +593,14 @@ Sécurité › **Sauvegardes sur Google Drive** envoie une copie de ton site dan
 Ensuite, pour connecter ton Drive :
 
 1. Clique sur **Connecter Google Drive** (ton mot de passe peut être redemandé).
-2. Éclair affiche un code, seulement dans la session qui a cliqué sur **Connecter Google Drive** et dans les 15 minutes qui suivent la saisie de ton mot de passe (sinon, relance la connexion). Ouvre **google.com/device** sur ton ordinateur ou ton téléphone, saisis le code, choisis ton compte Google et autorise Éclair. Les autres administrateurs voient qu'une connexion est en cours, sans le code.
+2. Éclair affiche un code, seulement dans la session qui a cliqué sur **Connecter Google Drive** et pendant les 15 minutes qui suivent le lancement de la connexion (sinon, relance-la). Ouvre **google.com/device** sur ton ordinateur ou ton téléphone, saisis le code, choisis ton compte Google et autorise Éclair. Les autres administrateurs voient qu'une connexion est en cours, sans le code.
 3. La page se met à jour toute seule : c'est connecté. Choisis la fréquence (chaque jour, chaque semaine, ou désactivées) et le nombre de sauvegardes à garder.
 
 - Éclair n'a accès **qu'aux fichiers qu'il crée** (autorisation Google « drive.file ») : il ne voit rien d'autre de ton Drive. Les sauvegardes arrivent dans un dossier « Éclair – nom du site ».
 - Au-delà du nombre choisi (8 par défaut), les plus anciennes partent dans la **corbeille** de ton Drive.
 - **Sauvegarder maintenant** lance un envoi immédiat. Les gros sites partent par morceaux de 4 Mo : si l'hébergeur limite la durée d'exécution, l'envoi reprend là où il s'était arrêté (garde la page ouverte, elle continue toute seule).
 - Les sauvegardes automatiques partent quand un administrateur ouvre l'administration. Pour qu'elles partent même sans visite, copie l'**adresse de tâche planifiée** (Sécurité › Sauvegardes sur Google Drive › Sauvegardes à heure fixe) dans la tâche planifiée (cron) de ton hébergeur ou sur [cron-job.org](https://cron-job.org), toutes les heures : elle ne lance une sauvegarde que lorsqu'elle est due. Garde cette adresse pour toi.
-- La carte indique qui a connecté le compte (« connecté par … »). Si cet administrateur est supprimé ou rétrogradé, la connexion est retirée et les sauvegardes s'arrêtent jusqu'à ce qu'un administrateur reconnecte Google Drive. Un changement de mot de passe ne déconnecte rien.
+- La carte indique qui a connecté le compte (« connecté par … »). Si cet administrateur est supprimé ou rétrogradé, la connexion est retirée et les sauvegardes s'arrêtent jusqu'à ce qu'un administrateur reconnecte Google Drive. Un changement de mot de passe ne déconnecte rien. Une connexion faite avant la 1.10.3 est signalée : déconnecte puis reconnecte Google Drive pour qu'Éclair sache quel administrateur l'a établie.
 - Le jeton d'accès est chiffré sur ton serveur. **Déconnecter Google Drive** le révoque, et une nouvelle connexion révoque l'ancienne ; tu peux aussi retirer l'accès depuis ton compte Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Les sauvegardes déjà envoyées restent dans ton Drive.
 
 ### Restaurer une sauvegarde
@@ -737,7 +737,7 @@ ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<version>
 
 Une version signée ne se construit que dans un dépôt Git et n'inclut que les fichiers suivis ; le commit source est noté dans le manifeste. Les sources des traductions (`i18n/*.php`) doivent rester de simples tableaux de textes littéraux : elles sont lues comme des données, jamais exécutées.
 
-**Fork ou installation autonome.** Dans `eclair-config.php` : `ECLAIR_UPDATE_URL` et `ECLAIR_UPDATE_KEY` (base64) pour ton propre canal de mises à jour signé ; `ECLAIR_GOOGLE_CLIENT_ID` et `ECLAIR_GOOGLE_CLIENT_SECRET` pour ta propre application Google.
+**Fork ou installation autonome.** Dans `eclair-config.php` : `ECLAIR_UPDATE_URL` et `ECLAIR_UPDATE_KEY` (base64) pour ton propre canal de mises à jour signé ; `ECLAIR_GOOGLE_CLIENT_ID` et `ECLAIR_GOOGLE_CLIENT_SECRET` pour ta propre application Google. Ton canal doit publier des annonces faites par le `tools/build.php` de la 1.10.3 ou plus récent : sinon, tes sites en 1.10.3 les prennent pour un rejeu et les ignorent.
 
 `PHP_CLI_SERVER_WORKERS` permet au site de s'appeler lui-même (vérification de son adresse) : avec un seul processus, la vérification échoue simplement et les redirections vers l'adresse officielle restent désactivées.
 

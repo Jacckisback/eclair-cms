@@ -4,7 +4,7 @@ All notable changes to Éclair CMS are recorded here. Release notes for each ver
 
 ## 1.10.3 — 2026-11-03
 
-Security release. It fixes every issue found by a full security audit of 1.10.2: 15 confirmed flaws (3 of medium severity, none critical or high) and 8 leads that depend on the server or the browser, all closed in code. It also applies more than fifty of the audit's hardening recommendations. Sites running 1.10.0, 1.10.1 or 1.10.2 update in one click from Administration › Updates. **Save any open edits before updating**: unsaved editor backups from 1.10.2 are not kept (see "Editor" below).
+Security release. It fixes every issue found by a full security audit of 1.10.2: 15 confirmed flaws (3 of medium severity, none critical or high) and 8 leads that depend on the server or the browser, all closed in code. It also applies more than fifty of the audit's hardening recommendations. Sites running 1.10.0, 1.10.1 or 1.10.2 update in one click from Administration › Updates. On sites with several accounts, **save any open edits before updating**: their unsaved editor backups from 1.10.2 are not kept (see "Editor" below).
 
 ### Security fixes
 
@@ -51,20 +51,23 @@ Leads closed in code (they depended on the server or the browser):
 - **Contact form.** Once the 100 messages per day for the whole site are reached, the form refuses everyone until 24 hours after the first of them (it reopened after 6 hours before). E-mail addresses with quotes, backslashes, spaces or line breaks are refused everywhere.
 - **MCP connector.** Unknown apps always need the password. On every consent page, "Autoriser" starts greyed out and turns on after a moment once you move the mouse, touch the screen or use the keyboard; JavaScript is required. Claude and ChatGPT show a "start this yourself" notice. Searches longer than 200 characters are refused.
 - **Updates page.** "Tu as la dernière version" appears only after a successful check of a fresh signed announcement. An older announcement is refused and reported; an announcement not renewed for 180 days shows a warning (installing stays possible). If an automatic rollback cannot complete, the page says to restore `cache/update/previous` by FTP.
-- **Google Drive.** The connection code is shown only in the session that started the connection, within 15 minutes of entering the password; other admins see that a connection is in progress. The card shows who connected the account. Reconnecting revokes the previous connection.
+- **Google Drive.** The connection code is shown only in the session that started the connection, for 15 minutes after it starts; other admins see that a connection is in progress. The card shows who connected the account. Reconnecting another Google account revokes the previous connection. A connection made before 1.10.3 is flagged: disconnect and reconnect it so Éclair records who set it up.
 - **Security page.** Real events and the latest anonymous login failures are shown together; anonymous failures are kept in their own file. Logs roll over to a previous segment instead of losing their older half. Blocked account counters show the accounts they cover.
-- **Editor.** The local backup copy of unsaved work now belongs to the signed-in account and is erased at logout; another account in the same browser is never offered it. Copies saved by 1.10.2 are erased after the update.
+- **Editor.** The local backup copy of unsaved work now belongs to the signed-in account and is erased at logout; another account in the same browser is never offered it. Copies saved by 1.10.2 are kept on a site with a single account, and erased when there are several accounts. Two Éclair sites on the same domain (one in a sub-folder) never touch each other's copies.
 - **AI assistant.** It stops mid-request when the account is deleted, its password reset or its AI access removed. A proposal becomes outdated as soon as its content changes, even within the same second, and applying it never changes the publication state.
 - **Public site.** An author page exists only for an account with at least one published article. Page numbers with leading zeros (`/blog/page/01`) return 404. The Markdown copies escape Markdown characters typed as text (`\[` in the raw file). Published pages are otherwise unchanged, byte for byte.
 - **Dashboard.** The site-health list is shown to administrators only.
 - **Media.** `media/` no longer serves `.js` or `.mjs` files (update the Nginx rules in the guide if you use Nginx).
-- **Data lock.** On storage without working file locks, Éclair refuses to save with a clear message instead of saving unprotected.
+- **Data lock.** On storage without working file locks, Éclair refuses to save with a clear message instead of saving unprotected; the message is shown everywhere (pages, contact form, admin), not as a generic error.
+- **Installer.** Re-running it after `data/site.php` was lost refuses the e-mail of an existing account instead of creating a duplicate, keeps the existing keys, and a failed installation never deletes accounts or content that were already there.
+- **Redirects.** A list that already holds more than 5,000 redirects (from 1.10.2) is never cut in bulk: each new automatic redirect replaces the oldest one, and existing redirects stay editable.
 
 ### For maintainers
 
 - `dist/latest.json` keeps its original signature, read by sites on 1.10.0 to 1.10.2, and gains a second one (`v2`) covering a serial number and a 180-day expiry. Re-sign the channel before it expires, even without a release: `ECLAIR_SIGNING_KEY=… php tools/build.php --resign`. A withdrawal announces an older archive again: `--resign=<version>`.
 - Signed builds run only in a Git checkout, include only tracked files and record the source commit in the manifest. Translation sources (`i18n/*.php`) are read as data and must stay plain arrays of literal strings.
-- New security regression tests: `tests/sec-A.php`, `tests/sec-B1.php`, `tests/sec-B2.php`, `tests/sec-C1.php`, `tests/sec-C2.php` (897 checks in total). The CLA workflow no longer starts for plain issue comments.
+- Forks with their own update channel must publish announcements built by the 1.10.3 (or later) `tools/build.php`: 1.10.3 sites treat an announcement without the `v2` signature as a replay. Signed builds refuse symbolic links and mark the manifest `dirty` when tracked files have uncommitted changes.
+- New security regression tests: `tests/sec-A.php`, `tests/sec-B1.php`, `tests/sec-B2.php`, `tests/sec-C1.php`, `tests/sec-C2.php` and `tests/sec-review.php` (918 checks in total). The CLA workflow no longer starts for plain issue comments.
 
 ## 1.10.2 — 2026-11-02
 

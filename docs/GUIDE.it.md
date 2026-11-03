@@ -104,7 +104,7 @@ La bacheca mostra una checklist «Primi passi»: logo e colore, home page, primo
 - **Link interni assistiti**: mentre scrivi un link, l’editor ti propone le tue pagine e i tuoi articoli (link interni in 2 secondi).
 - **Incolla intelligente** da Word, Google Docs o una pagina web: titoli, elenchi, tabelle e grassetti diventano blocchi puliti.
 - Salvataggio con `Ctrl+S`, bozza locale di riserva (non si perde nulla se cade la connessione), anteprima reale prima della pubblicazione, **cronologia delle ultime 20 versioni**, pubblicazione programmata.
-  - Questa bozza di riserva appartiene all’account connesso e viene cancellata quando esci: non viene mai proposta a un altro account che usa lo stesso browser. Le bozze di riserva della 1.10.2 vengono cancellate dopo l’aggiornamento: salva le modifiche in corso prima di aggiornare.
+  - Questa bozza di riserva appartiene all’account connesso e viene cancellata quando esci: non viene mai proposta a un altro account che usa lo stesso browser. Quelle della 1.10.2 vengono mantenute su un sito con un solo account; con più account vengono cancellate dopo l’aggiornamento: salva le modifiche in corso prima di aggiornare.
 - **Modalità Visuale**: la pagina così come appare con il tuo tema, modificabile direttamente lì ([dettagli](#modalità-visuale)).
 
 ### 🧩 Tutto il resto
@@ -530,7 +530,7 @@ Ogni bozza torna con un link per **aprirla in Éclair**; ogni proposta, con un l
 
 **Pannello**
 - **Indirizzo del pannello personalizzabile** (meno bot), ruoli amministratore / redattore; il pulsante «Modifica» del sito non rivela questo indirizzo.
-- **Backup su Google Drive isolati**: accesso limitato ai file creati da Éclair, token cifrato e revocabile, mai incluso in un backup; il collegamento richiede la conferma della password ed è legato alla sessione dell’amministratore che lo avvia: il codice compare solo lì, e solo entro 15 minuti dall’inserimento della password. La pagina Sicurezza indica chi l’ha collegato. Se quell’account viene eliminato o non è più amministratore, i backup si fermano, il collegamento viene rimosso e agli amministratori viene chiesto di rifarlo.
+- **Backup su Google Drive isolati**: accesso limitato ai file creati da Éclair, token cifrato e revocabile, mai incluso in un backup; il collegamento richiede la conferma della password ed è legato alla sessione dell’amministratore che lo avvia: il codice compare solo lì, e solo entro 15 minuti dal suo avvio. La pagina Sicurezza indica chi l’ha collegato. Se quell’account viene eliminato o non è più amministratore, i backup si fermano, il collegamento viene rimosso e agli amministratori viene chiesto di rifarlo.
 - **Assistente IA con limiti precisi**: solo bozze e proposte, chiavi API cifrate ed escluse dai backup, budget mensile e limite giornaliero (dettagli in [Assistente IA](#sicurezza-e-privacy)).
 - **Registri limitati** (campi troncati, al massimo 2 MB per registro): impossibile gonfiarli. Un registro pieno diventa il segmento precedente (`*-1.php`) invece di perdere la sua metà più vecchia; le e-mail e i browser registrati vengono tagliati a 100 caratteri. Gli accessi falliti anonimi hanno un file tutto loro, `data/logs/login-failures.php`: un’ondata di tentativi non spinge più fuori dal registro di sicurezza gli eventi reali. La pagina Sicurezza mostra gli ultimi eventi reali e gli ultimi accessi falliti anonimi.
 - **Limiti generosi**, perché un’IA, un connettore o un account fuori controllo non riempia mai il sito: al massimo 3.000 contenuti (bozze comprese); l’IA (assistente, connettore MCP, «Crea con l’IA») smette di creare bozze appena il sito ne ha 500; 16 MB di testo pubblicato nella ricerca (più di 1.500 articoli lunghi); 5.000 reindirizzamenti, con indirizzi di al massimo 1.000 caratteri; 10.000 immagini; 1.000 categorie. I contenuti esistenti restano sempre modificabili, e un messaggio chiaro dice cosa eliminare.
@@ -593,14 +593,14 @@ Sicurezza › **Backup su Google Drive** invia una copia del tuo sito nel tuo Go
 Poi, per collegare il tuo Drive:
 
 1. Clicca su **Collega Google Drive** (potrebbe esserti chiesta di nuovo la password).
-2. Éclair mostra un codice, solo nella sessione che ha cliccato su **Collega Google Drive** ed entro 15 minuti dall’inserimento della tua password (altrimenti, riavvia il collegamento). Apri **google.com/device** sul tuo computer o sul tuo telefono, inserisci il codice, scegli il tuo account Google e autorizza Éclair. Gli altri amministratori vedono che un collegamento è in corso, senza il codice.
+2. Éclair mostra un codice, solo nella sessione che ha cliccato su **Collega Google Drive** e per i 15 minuti successivi all’avvio del collegamento (altrimenti, riavvialo). Apri **google.com/device** sul tuo computer o sul tuo telefono, inserisci il codice, scegli il tuo account Google e autorizza Éclair. Gli altri amministratori vedono che un collegamento è in corso, senza il codice.
 3. La pagina si aggiorna da sola: il collegamento è fatto. Scegli la frequenza (ogni giorno, ogni settimana o disattivati) e il numero di backup da conservare.
 
 - Éclair ha accesso **solo ai file che crea** (autorizzazione Google «drive.file»): non vede nient’altro del tuo Drive. I backup arrivano in una cartella «Éclair – nome del sito».
 - Oltre il numero scelto (8 di default), i più vecchi finiscono nel **cestino** del tuo Drive.
 - **Esegui il backup ora** avvia subito un invio. I siti grandi vengono inviati a blocchi da 4 MB: se il provider limita il tempo di esecuzione, l’invio riprende da dove si era interrotto (tieni la pagina aperta, continua da sola).
 - I backup automatici partono quando un amministratore apre il pannello. Perché partano anche senza visite, copia l’**indirizzo dell’attività pianificata** (Sicurezza › Backup su Google Drive › Backup a orari fissi) in un’attività pianificata (cron) del tuo provider o su [cron-job.org](https://cron-job.org), da eseguire ogni ora: avvia un backup solo quando ne è previsto uno. Tieni questo indirizzo per te.
-- La scheda indica chi ha collegato l’account («collegato da …»). Se quell’amministratore viene eliminato o declassato, il collegamento viene rimosso e i backup si fermano finché un amministratore non ricollega Google Drive. Un cambio di password non scollega nulla.
+- La scheda indica chi ha collegato l’account («collegato da …»). Se quell’amministratore viene eliminato o declassato, il collegamento viene rimosso e i backup si fermano finché un amministratore non ricollega Google Drive. Un cambio di password non scollega nulla. Un collegamento effettuato prima della 1.10.3 viene segnalato: scollega e ricollega Google Drive perché Éclair sappia quale amministratore l’ha creato.
 - Il token di accesso è cifrato sul tuo server. **Scollega Google Drive** lo revoca, e un nuovo collegamento revoca il precedente; puoi anche revocare l’accesso dal tuo account Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). I backup già inviati restano nel tuo Drive.
 
 ### Ripristinare un backup
@@ -737,7 +737,7 @@ ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<versione>
 
 Una versione firmata si costruisce solo in un checkout Git e include solo i file tracciati; il commit di origine viene annotato nel manifest. Le sorgenti delle traduzioni (`i18n/*.php`) devono restare semplici array di testi letterali: vengono lette come dati, mai eseguite.
 
-**Fork o installazione autonoma.** In `eclair-config.php`: `ECLAIR_UPDATE_URL` e `ECLAIR_UPDATE_KEY` (base64) per il tuo canale di aggiornamenti firmato; `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` per la tua applicazione Google.
+**Fork o installazione autonoma.** In `eclair-config.php`: `ECLAIR_UPDATE_URL` e `ECLAIR_UPDATE_KEY` (base64) per il tuo canale di aggiornamenti firmato; `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` per la tua applicazione Google. Il tuo canale deve pubblicare annunci creati con il `tools/build.php` della 1.10.3 o successivo: altrimenti i tuoi siti in 1.10.3 li considerano una ripetizione e li ignorano.
 
 `PHP_CLI_SERVER_WORKERS` permette al sito di chiamare se stesso (verifica del suo indirizzo): con un solo processo, la verifica semplicemente fallisce e i reindirizzamenti all’indirizzo ufficiale restano disattivati.
 

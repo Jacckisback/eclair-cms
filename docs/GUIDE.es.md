@@ -104,7 +104,7 @@ El panel muestra una lista de «Primeros pasos»: logo y color, página de inici
 - **Enlaces internos asistidos**: mientras escribes un enlace, el editor te propone tus páginas y artículos (enlazado interno en 2 segundos).
 - **Pegado inteligente** desde Word, Google Docs o una página web: títulos, listas, tablas y negritas se convierten en bloques limpios.
 - Guardado con `Ctrl+S`, borrador local de respaldo (no se pierde nada si se corta la conexión), vista previa real antes de publicar, **historial de las 20 últimas versiones**, publicación programada.
-  - Este borrador de respaldo pertenece a la cuenta con la sesión iniciada y se borra al cerrar sesión: nunca se ofrece a otra cuenta que use el mismo navegador. Los borradores de respaldo de la 1.10.2 se borran después de la actualización: guarda los cambios en curso antes de actualizar.
+  - Este borrador de respaldo pertenece a la cuenta con la sesión iniciada y se borra al cerrar sesión: nunca se ofrece a otra cuenta que use el mismo navegador. Los de la 1.10.2 se conservan en un sitio con una sola cuenta; si hay varias cuentas, se borran después de la actualización: guarda los cambios en curso antes de actualizar.
 - **Modo Visual**: la página tal como se ve con tu tema, editable ahí mismo ([detalles](#modo-visual)).
 
 ### 🧩 Todo lo demás
@@ -530,7 +530,7 @@ Cada borrador vuelve con un enlace para **abrirlo en Éclair**; cada propuesta, 
 
 **Panel de administración**
 - **Dirección del panel personalizable** (menos robots), roles de administrador y redactor; el botón «Editar» del sitio no revela esa dirección.
-- **Copias de seguridad en Google Drive compartimentadas**: acceso limitado a los archivos creados por Éclair, token cifrado y revocable, nunca incluido en una copia de seguridad; la conexión exige confirmar la contraseña y queda ligada a la sesión del administrador que la inicia: el código solo aparece allí, y solo en los 15 minutos siguientes a la introducción de la contraseña. La página Seguridad indica quién la conectó. Si esa cuenta se elimina o deja de ser administradora, las copias se detienen, la conexión se retira y se pide a los administradores que vuelvan a conectarla.
+- **Copias de seguridad en Google Drive compartimentadas**: acceso limitado a los archivos creados por Éclair, token cifrado y revocable, nunca incluido en una copia de seguridad; la conexión exige confirmar la contraseña y queda ligada a la sesión del administrador que la inicia: el código solo aparece allí, y solo en los 15 minutos siguientes a su inicio. La página Seguridad indica quién la conectó. Si esa cuenta se elimina o deja de ser administradora, las copias se detienen, la conexión se retira y se pide a los administradores que vuelvan a conectarla.
 - **Asistente IA acotado**: solo borradores y propuestas, claves de API cifradas y excluidas de las copias de seguridad, presupuesto mensual y cuota diaria (detalles en [Asistente IA](#seguridad-y-privacidad)).
 - **Registros acotados** (campos truncados, 2 MB como máximo por registro): imposible inflarlos. Un registro lleno pasa a ser el segmento anterior (`*-1.php`) en lugar de perder su mitad más antigua; los correos y navegadores guardados se cortan a 100 caracteres. Los fallos de inicio de sesión anónimos tienen su propio archivo, `data/logs/login-failures.php`: una avalancha de intentos ya no expulsa los eventos reales del registro de seguridad. La página Seguridad muestra los últimos eventos reales y los últimos fallos anónimos.
 - **Límites generosos**, para que una IA, un conector o una cuenta desbocados nunca llenen el sitio: 3.000 contenidos como máximo (borradores incluidos); la IA (asistente, conector MCP, «Crear con IA») deja de crear borradores en cuanto el sitio tiene 500; 16 MB de texto publicado en la búsqueda (más de 1.500 artículos largos); 5.000 redirecciones, con direcciones de hasta 1.000 caracteres; 10.000 imágenes; 1.000 categorías. Los contenidos existentes siempre se pueden editar, y un mensaje claro indica qué eliminar.
@@ -593,14 +593,14 @@ Seguridad › **Copias de seguridad en Google Drive** envía una copia de tu sit
 Después, para conectar tu Drive:
 
 1. Haz clic en **Conectar Google Drive** (puede que se te vuelva a pedir la contraseña).
-2. Éclair muestra un código, solo en la sesión que hizo clic en **Conectar Google Drive** y en los 15 minutos siguientes a la introducción de tu contraseña (si no, vuelve a iniciar la conexión). Abre **google.com/device** en tu ordenador o en tu móvil, introduce el código, elige tu cuenta de Google y autoriza a Éclair. Los demás administradores ven que hay una conexión en curso, sin el código.
+2. Éclair muestra un código, solo en la sesión que hizo clic en **Conectar Google Drive** y durante los 15 minutos siguientes al inicio de la conexión (si no, vuelve a iniciarla). Abre **google.com/device** en tu ordenador o en tu móvil, introduce el código, elige tu cuenta de Google y autoriza a Éclair. Los demás administradores ven que hay una conexión en curso, sin el código.
 3. La página se actualiza sola: ya está conectado. Elige la frecuencia (cada día, cada semana o desactivadas) y el número de copias que quieres conservar.
 
 - Éclair solo tiene acceso **a los archivos que crea** (permiso de Google «drive.file»): no ve nada más de tu Drive. Las copias se guardan en una carpeta «Éclair – nombre del sitio».
 - Por encima del número elegido (8 por defecto), las más antiguas van a la **papelera** de tu Drive.
 - **Hacer copia de seguridad ahora** lanza un envío inmediato. Los sitios grandes se envían en partes de 4 MB: si tu proveedor limita el tiempo de ejecución, el envío se retoma donde se quedó (deja la página abierta, sigue sola).
 - Las copias automáticas se hacen cuando un administrador abre el panel. Para que se hagan aunque nadie entre, copia la **dirección de la tarea programada** (Seguridad › Copias de seguridad en Google Drive › Copias de seguridad a hora fija) en la tarea programada (cron) de tu proveedor o en [cron-job.org](https://cron-job.org), cada hora: solo lanza una copia cuando toca. No compartas esta dirección.
-- La tarjeta indica quién conectó la cuenta («conectado por …»). Si se elimina a ese administrador o se le baja de rol, la conexión se retira y las copias se detienen hasta que un administrador vuelva a conectar Google Drive. Un cambio de contraseña no desconecta nada.
+- La tarjeta indica quién conectó la cuenta («conectado por …»). Si se elimina a ese administrador o se le baja de rol, la conexión se retira y las copias se detienen hasta que un administrador vuelva a conectar Google Drive. Un cambio de contraseña no desconecta nada. Una conexión hecha antes de la 1.10.3 se señala: desconecta y vuelve a conectar Google Drive para que Éclair sepa qué administrador la estableció.
 - El token de acceso está cifrado en tu servidor. **Desconectar Google Drive** lo revoca, y una nueva conexión revoca la anterior; también puedes retirar el acceso desde tu cuenta de Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Las copias ya enviadas se quedan en tu Drive.
 
 ### Restaurar una copia de seguridad
@@ -737,7 +737,7 @@ ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<versión>
 
 Una versión firmada solo se construye en un repositorio Git e incluye solo los archivos versionados; el commit de origen se anota en el manifiesto. Las fuentes de las traducciones (`i18n/*.php`) deben seguir siendo simples arrays de textos literales: se leen como datos, nunca se ejecutan.
 
-**Fork o instalación independiente.** En `eclair-config.php`: `ECLAIR_UPDATE_URL` y `ECLAIR_UPDATE_KEY` (base64) para tu propio canal de actualizaciones firmado; `ECLAIR_GOOGLE_CLIENT_ID` y `ECLAIR_GOOGLE_CLIENT_SECRET` para tu propia aplicación de Google.
+**Fork o instalación independiente.** En `eclair-config.php`: `ECLAIR_UPDATE_URL` y `ECLAIR_UPDATE_KEY` (base64) para tu propio canal de actualizaciones firmado; `ECLAIR_GOOGLE_CLIENT_ID` y `ECLAIR_GOOGLE_CLIENT_SECRET` para tu propia aplicación de Google. Tu canal debe publicar anuncios hechos con el `tools/build.php` de la 1.10.3 o posterior: si no, tus sitios en 1.10.3 los toman por una repetición y los ignoran.
 
 `PHP_CLI_SERVER_WORKERS` permite que el sitio se llame a sí mismo (verificación de su dirección): con un solo proceso, la verificación simplemente falla y las redirecciones a la dirección oficial siguen desactivadas.
 

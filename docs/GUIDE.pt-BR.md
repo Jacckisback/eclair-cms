@@ -104,7 +104,7 @@ O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicia
 - **Links internos assistidos**: enquanto você digita um link, o editor sugere suas páginas e artigos (links internos em 2 segundos).
 - **Colagem inteligente** do Word, do Google Docs ou de uma página web: títulos, listas, tabelas e negritos viram blocos limpos.
 - Salvamento com `Ctrl+S`, rascunho local de segurança (nada se perde se a conexão cair), prévia real antes de publicar, **histórico das últimas 20 versões**, publicação agendada.
-  - Esse rascunho de segurança pertence à conta conectada e é apagado quando você sai: ele nunca é oferecido a outra conta que use o mesmo navegador. Os rascunhos de segurança da 1.10.2 são apagados depois da atualização: salve as edições em andamento antes de atualizar.
+  - Esse rascunho de segurança pertence à conta conectada e é apagado quando você sai: ele nunca é oferecido a outra conta que use o mesmo navegador. Os da 1.10.2 são mantidos em um site com uma única conta; com várias contas, são apagados depois da atualização: salve as edições em andamento antes de atualizar.
 - **Modo Visual**: a página do jeito que ela aparece com o seu tema, editável ali mesmo ([detalhes](#modo-visual)).
 
 ### 🧩 Todo o resto
@@ -530,7 +530,7 @@ O Éclair foi feito para um ambiente hostil (hospedagem compartilhada, robôs te
 
 **Painel**
 - **Endereço do painel personalizável** (menos robôs), papéis de administrador / redator; o botão “Editar” do site não revela esse endereço.
-- **Backups no Google Drive isolados**: acesso limitado aos arquivos criados pelo Éclair, token criptografado e revogável, nunca incluído em um backup; conexão sujeita à confirmação da senha e vinculada à sessão do administrador que a inicia: o código só aparece ali, e só nos 15 minutos seguintes à digitação da senha. A página Segurança mostra quem fez a conexão. Se essa conta for excluída ou deixar de ser administradora, os backups param, a conexão é removida e os administradores são convidados a refazê-la.
+- **Backups no Google Drive isolados**: acesso limitado aos arquivos criados pelo Éclair, token criptografado e revogável, nunca incluído em um backup; conexão sujeita à confirmação da senha e vinculada à sessão do administrador que a inicia: o código só aparece ali, e só nos 15 minutos seguintes ao seu início. A página Segurança mostra quem fez a conexão. Se essa conta for excluída ou deixar de ser administradora, os backups param, a conexão é removida e os administradores são convidados a refazê-la.
 - **Assistente de IA com limites**: só rascunhos e propostas, chaves de API criptografadas e excluídas dos backups, orçamento mensal e cota diária (detalhes em [Assistente de IA](#segurança-e-privacidade)).
 - **Registros limitados** (campos truncados, no máximo 2 MB por registro): impossível inflá-los. Um registro cheio vira o segmento anterior (`*-1.php`) em vez de perder a metade mais antiga; os e-mails e navegadores gravados são cortados em 100 caracteres. As falhas de login anônimas têm um arquivo próprio, `data/logs/login-failures.php`: uma enxurrada de tentativas não expulsa mais os eventos reais do registro de segurança. A página Segurança mostra os últimos eventos reais e as últimas falhas anônimas.
 - **Limites generosos**, para que uma IA, um conector ou uma conta descontrolados nunca encham o site: no máximo 3.000 conteúdos (rascunhos incluídos); a IA (assistente, conector MCP, “Criar com IA”) para de criar rascunhos assim que o site tem 500; 16 MB de texto publicado na busca (mais de 1.500 artigos longos); 5.000 redirecionamentos, com endereços de até 1.000 caracteres; 10.000 imagens; 1.000 categorias. Os conteúdos existentes continuam sempre editáveis, e uma mensagem clara diz o que excluir.
@@ -593,14 +593,14 @@ Segurança › **Backups no Google Drive** envia uma cópia do seu site para o s
 Depois, para conectar o seu Drive:
 
 1. Clique em **Conectar o Google Drive** (a sua senha pode ser pedida de novo).
-2. O Éclair mostra um código, só na sessão que clicou em **Conectar o Google Drive** e nos 15 minutos seguintes à digitação da sua senha (senão, comece a conexão de novo). Abra **google.com/device** no computador ou no celular, digite o código, escolha a sua conta Google e autorize o Éclair. Os outros administradores veem que há uma conexão em andamento, sem o código.
+2. O Éclair mostra um código, só na sessão que clicou em **Conectar o Google Drive** e durante os 15 minutos seguintes ao início da conexão (senão, comece-a de novo). Abra **google.com/device** no computador ou no celular, digite o código, escolha a sua conta Google e autorize o Éclair. Os outros administradores veem que há uma conexão em andamento, sem o código.
 3. A página se atualiza sozinha: está conectado. Escolha a frequência (todos os dias, todas as semanas ou desativados) e quantos backups guardar.
 
 - O Éclair só tem acesso **aos arquivos que ele mesmo cria** (permissão “drive.file” do Google): ele não vê mais nada do seu Drive. Os backups ficam em uma pasta “Éclair – nome do site”.
 - Quando o número escolhido (8 por padrão) é ultrapassado, os mais antigos vão para a **lixeira** do seu Drive.
 - **Fazer backup agora** inicia um envio imediato. Os sites grandes são enviados em partes de 4 MB: se a hospedagem limita o tempo de execução, o envio continua de onde parou (deixe a página aberta: ela continua sozinha).
 - Os backups automáticos são enviados quando um administrador abre o painel. Para que sejam enviados mesmo sem visitas, copie o **endereço da tarefa agendada** (Segurança › Backups no Google Drive › Backups em horário fixo) e cole-o na tarefa agendada (cron) da sua hospedagem ou no [cron-job.org](https://cron-job.org), para ser chamado a cada hora: ele só inicia um backup quando é o momento de fazer um. Não compartilhe esse endereço.
-- O cartão mostra quem conectou a conta (“conectado por …”). Se esse administrador for excluído ou rebaixado, a conexão é removida e os backups param até que um administrador conecte o Google Drive de novo. Uma troca de senha não desconecta nada.
+- O cartão mostra quem conectou a conta (“conectado por …”). Se esse administrador for excluído ou rebaixado, a conexão é removida e os backups param até que um administrador conecte o Google Drive de novo. Uma troca de senha não desconecta nada. Uma conexão feita antes da 1.10.3 é sinalizada: desconecte e conecte de novo o Google Drive para que o Éclair saiba qual administrador a criou.
 - O token de acesso fica criptografado no seu servidor. **Desconectar o Google Drive** revoga esse token, e uma nova conexão revoga a anterior; você também pode retirar o acesso pela sua conta Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Os backups já enviados continuam no seu Drive.
 
 ### Restaurar um backup
@@ -737,7 +737,7 @@ ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<versão>
 
 Uma versão assinada só é gerada em um checkout Git e só inclui os arquivos versionados; o commit de origem é registrado no manifesto. As fontes das traduções (`i18n/*.php`) precisam continuar sendo arrays simples de textos literais: elas são lidas como dados, nunca executadas.
 
-**Fork ou instalação independente.** Em `eclair-config.php`: `ECLAIR_UPDATE_URL` e `ECLAIR_UPDATE_KEY` (base64) para o seu próprio canal de atualizações assinado; `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` para o seu próprio aplicativo Google.
+**Fork ou instalação independente.** Em `eclair-config.php`: `ECLAIR_UPDATE_URL` e `ECLAIR_UPDATE_KEY` (base64) para o seu próprio canal de atualizações assinado; `ECLAIR_GOOGLE_CLIENT_ID` e `ECLAIR_GOOGLE_CLIENT_SECRET` para o seu próprio aplicativo Google. O seu canal deve publicar anúncios feitos com o `tools/build.php` da 1.10.3 ou posterior: senão, os seus sites em 1.10.3 os tratam como repetição e os ignoram.
 
 `PHP_CLI_SERVER_WORKERS` permite que o site chame a si mesmo (verificação do endereço): com um único processo, a verificação simplesmente falha e os redirecionamentos para o endereço oficial continuam desativados.
 
