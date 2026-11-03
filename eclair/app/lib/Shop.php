@@ -326,7 +326,8 @@ final class Shop
         $x = static fn (string $s): string => Seo::xml($s);
         foreach (Content::published('product') as $entry) {
             $item = $entry['noindex'] ? null : Content::get($entry['id']);
-            if (!$item) {
+            // L'index n'est qu'un résumé : la version enregistrée du produit doit elle-même être en ligne.
+            if (!$item || !Content::visible($item)) {
                 continue;
             }
             $p = $item['product'];

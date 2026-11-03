@@ -70,7 +70,7 @@ final class Site
         if (str_ends_with($path, '.md') && Settings::get('geo.markdown')) {
             $target = substr($path, 0, -3);
             $entry = Content::findByPath($target === '/index' ? '/' : $target);
-            if ($entry && !$entry['noindex'] && ($item = Content::get($entry['id']))) {
+            if ($entry && !$entry['noindex'] && ($item = Content::get($entry['id'])) && Content::visible($item)) {
                 self::file($path, Seo::markdown($item), 'text/markdown; charset=utf-8', [
                     'X-Robots-Tag: noindex',
                     'Link: <' . absolute_url(Content::path($entry)) . '>; rel="canonical"',
@@ -194,7 +194,9 @@ final class Site
     {
         self::$edit = $edit && $preview;
         $item ??= Content::get($entry['id']);
-        if (!$item) {
+        // L'index n'est qu'un résumé : hors aperçu, la version enregistrée doit elle-même être en ligne (jamais un brouillon,
+        // même enregistré pendant le rendu ou derrière une entrée d'index périmée).
+        if (!$item || (!$preview && !Content::visible($item))) {
             self::notFound();
         }
         if ($item['type'] === 'product') {

@@ -223,8 +223,15 @@ final class Content
                     }
                 }
             }
-            Store::write('content/' . $id, $item);
-            Store::write('index', $index);
+            // L'index décide de ce qui est en ligne. Un contenu qui le quitte (brouillon, date future) y est inscrit avant d'être
+            // écrit : une écriture interrompue (disque plein…) laisse toujours la version la moins visible, jamais un brouillon public.
+            if ($old !== null && !self::visible($entry)) {
+                Store::write('index', $index);
+                Store::write('content/' . $id, $item);
+            } else {
+                Store::write('content/' . $id, $item);
+                Store::write('index', $index);
+            }
             self::$index = $index;
             if ($search !== null) {
                 Store::write('search', $search);
@@ -366,13 +373,18 @@ final class Content
                 return;
             }
             $entry = $index[$id];
+            // Le fichier d'abord : s'il ne peut pas être supprimé (droits du dossier), rien ne change et l'erreur est signalée,
+            // au lieu d'un fichier orphelin qu'une reconstruction de l'index remettrait en ligne.
+            Store::delete('content/' . $id);
+            if (is_file(Store::file('content/' . $id))) {
+                throw new \RuntimeException("Impossible de supprimer « content/" . $id . '.php » : vérifie les droits du dossier.');
+            }
             if (self::visible($entry) && $redirectTo !== '') {
                 Redirects::add(self::path($entry), $redirectTo, false);
             }
             unset($index[$id]);
             Store::write('index', $index);
             self::$index = $index;
-            Store::delete('content/' . $id);
             foreach (Store::names('revisions/' . $id) as $rev) {
                 Store::delete($rev);
             }
@@ -403,37 +415,54 @@ final class Content
         return self::save($item, $user);
     }
 
-    /** Relie deux contenus comme traductions l'un de l'autre. */
+    /**
+     * Relie deux contenus comme traductions l'un de l'autre. Sous verrou, à partir des versions enregistrées : un
+     * enregistrement concurrent (un contenu dépublié pendant ce temps) n'est jamais écrasé par une copie périmée.
+     */
     public static function linkTranslation(string $id, string $otherId): void
     {
-        $a = self::get($id);
-        $b = self::get($otherId);
-        if (!$a || !$b || $id === $otherId) {
-            return;
-        }
-        $group = $b['tgroup'] !== '' ? $b['tgroup'] : ($a['tgroup'] !== '' ? $a['tgroup'] : $b['id']);
-        foreach ([$a, $b] as $item) {
-            $item['tgroup'] = $group;
-            Store::write('content/' . $item['id'], $item);
-        }
-        self::reindex();
-        Cache::purge();
-    }
-
-    /** Reconstruit l'index à partir des fichiers (réparation). */
-    public static function reindex(): array
-    {
-        $index = [];
-        foreach (Store::names('content') as $name) {
-            $item = Store::read($name);
-            if (is_array($item) && isset($item['id'], $item['blocks'])) {
+        $linked = Store::locked(function () use ($id, $otherId): bool {
+            self::$index = null;
+            $index = self::index();
+            $a = isset($index[$id]) ? self::get($id) : null;
+            $b = isset($index[$otherId]) ? self::get($otherId) : null;
+            if (!$a || !$b || $id === $otherId) {
+                return false;
+            }
+            $group = $b['tgroup'] !== '' ? $b['tgroup'] : ($a['tgroup'] !== '' ? $a['tgroup'] : $b['id']);
+            foreach ([$a, $b] as $item) {
+                $item['tgroup'] = $group;
+                Store::write('content/' . $item['id'], $item);
                 $index[$item['id']] = self::entry($item);
             }
-        }
-        if (Settings::installed()) {
             Store::write('index', $index);
+            self::$index = $index;
+            return true;
+        });
+        if ($linked) {
+            Cache::purge();
         }
-        return self::$index = $index;
+    }
+
+    /**
+     * Reconstruit l'index à partir des fichiers (réparation). Sous verrou, les contenus relus sous ce verrou : un
+     * enregistrement concurrent (un contenu dépublié pendant la reconstruction) n'est jamais écrasé par l'état d'avant.
+     */
+    public static function reindex(): array
+    {
+        return Store::locked(function (): array {
+            $index = [];
+            foreach (Store::names('content') as $name) {
+                $item = Store::read($name);
+                if (is_array($item) && isset($item['id'], $item['blocks'])) {
+                    $index[$item['id']] = self::entry($item);
+                }
+            }
+            if (Settings::installed()) {
+                Store::write('index', $index);
+            }
+            return self::$index = $index;
+        });
     }
 
     /* ────────────────────────────── Révisions ─────────────────────────────── */
