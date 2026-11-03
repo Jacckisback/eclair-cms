@@ -72,7 +72,7 @@ final class AdminSettings
                 $look[$k] = $q($k);
             }
         }
-        if (preg_match('/^#[0-9a-f]{6}$/i', $q('accent'))) {
+        if (preg_match('/^#[0-9a-f]{6}\z/i', $q('accent'))) {
             $look['accent'] = strtolower($q('accent'));
         }
         foreach (['font_head', 'font_body'] as $k) {
@@ -115,6 +115,12 @@ final class AdminSettings
                 $url = rtrim(Sanitize::url(Req::input('url')), '/');
                 if (!preg_match('~^https?://[^/\s]+~', $url)) {
                     Admin::back($redirect, t('L’adresse du site doit commencer par https:// (ou http://).'), 'bad');
+                }
+                // Seulement protocole, hôte, port et dossier : ni identifiants, ni paramètres, ni ancre, qui détourneraient
+                // la vérification de l'adresse (/__eclair/ping) ou les liens absolus du site.
+                $p = parse_url($url) ?: [];
+                if (isset($p['scheme'], $p['host'])) {
+                    $url = rtrim($p['scheme'] . '://' . $p['host'] . (isset($p['port']) ? ':' . $p['port'] : '') . ($p['path'] ?? ''), '/');
                 }
                 $base = slugify(Req::input('blog_base')) ?: 'blog';
                 $home = Req::input('home');

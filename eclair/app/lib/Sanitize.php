@@ -133,7 +133,8 @@ final class Sanitize
     public static function url(string $url): string
     {
         $url = trim((string) preg_replace('/[\x00-\x1F\x7F]/u', '', self::utf8($url)));
-        if ($url === '' || mb_strlen($url) > 2000) {
+        // « \hôte » ou « /\hôte » : les navigateurs y lisent « //hôte », un autre site déguisé en lien interne.
+        if ($url === '' || mb_strlen($url) > 2000 || preg_match('~^[/\\\\]*\\\\~', $url)) {
             return '';
         }
         // Le schéma est aussi vérifié sur la forme décodée et compactée (« javascript&colon; », « java&#9;script: »…).
