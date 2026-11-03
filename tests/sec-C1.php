@@ -298,6 +298,13 @@ if (!in_array('--unit', $argv, true) && function_exists('sodium_crypto_sign_keyp
             $c->req('POST', '/gestion/update', $c->token($page['body']) + ['action' => 'check']);
             return $c->req('GET', '/gestion/update')['body'];
         };
+        // Serveur de développement : mêmes refus que media/.htaccess, quelle que soit la casse.
+        @mkdir($copy . '/media/2026/11', 0755, true);
+        foreach (['page.xhtml', 'outil.mjs', 'script.js'] as $file) {
+            file_put_contents($copy . '/media/2026/11/' . $file, '<x>');
+        }
+        $served = array_map(static fn (string $p): int => $c->req('GET', $p)['status'], ['/media/2026/11/page.xhtml', '/media/2026/11/outil.mjs', '/MEDIA/2026/11/script.js', '/DATA/site.php']);
+        check('serveur de développement : pages, scripts et dossiers internes refusés (casse comprise)', $served === [404, 404, 404, 404], implode(',', $served));
         $saved = static fn (): string => (string) file_get_contents($channel . '/latest.json');
         $offers = static fn (string $body, string $v): bool => str_contains($body, 'Éclair ' . $v . ' est disponible') && str_contains($body, 'name="action" value="install"');
         $upToDate = static fn (string $body): bool => str_contains($body, 'Tu as la dernière version');

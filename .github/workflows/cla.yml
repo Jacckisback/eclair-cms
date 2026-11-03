@@ -20,10 +20,12 @@ permissions:
 
 jobs:
   cla:
+    # Only pull request events, and the two CLA comments posted on a pull request (never on a plain issue): any other
+    # comment does not even start the job, so no write token is issued for it.
+    if: (github.event.issue.pull_request && (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA')) || github.event_name == 'pull_request_target'
     runs-on: ubuntu-latest
     steps:
       - name: CLA Assistant
-        if: (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA') || github.event_name == 'pull_request_target'
         # v2.6.1, pinned by commit SHA: this third-party action runs with write access.
         uses: contributor-assistant/github-action@ca4a40a7d1004f18d9960b404b97e5f30a505a08
         env:
