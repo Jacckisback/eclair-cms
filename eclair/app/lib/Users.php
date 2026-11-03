@@ -78,7 +78,8 @@ final class Users
      */
     public static function update(string $id, callable $change): ?array
     {
-        return Store::locked(function () use ($id, $change): ?array {
+        $public = false;
+        $saved = Store::locked(function () use ($id, $change, &$public): ?array {
             $users = Store::read('users', []);
             if (!is_array($users) || !isset($users[$id])) {
                 return null;
@@ -89,10 +90,17 @@ final class Users
             }
             $user['id'] = $id;
             $user['slug'] = self::uniqueSlug(slugify((string) $user['name']) ?: 'auteur', $id, $users);
+            $public = self::profile($user) !== self::profile($users[$id]);
             $users[$id] = $user;
             Store::write('users', $users);
             return $user;
         });
+        // Profil public changé (nom, adresse de la page d'auteur, présentation…), même par une écriture sans rapport
+        // (connexion) : les pages en cache qui le montrent sont périmées.
+        if ($public) {
+            Cache::purge();
+        }
+        return $saved;
     }
 
     public static function delete(string $id): void

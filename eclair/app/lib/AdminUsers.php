@@ -73,6 +73,8 @@ final class AdminUsers
                     Admin::back('users/' . $id, t('Impossible de supprimer ce compte.'), 'bad');
                 }
                 Users::delete($id);
+                // Pages en cache qui montrent ce compte (page d'auteur, signatures, Markdown, flux, plan du site) : périmées.
+                Cache::purge();
                 Log::security('user_deleted', ['target' => $target['email']]);
                 Admin::back('users', t('Compte supprimé.'));
             case 'reset':
