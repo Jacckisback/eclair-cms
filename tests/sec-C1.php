@@ -81,6 +81,32 @@ foreach (['sans barre finale' => $c1Data, 'avec une barre finale' => $c1Data . '
 check('lien symbolique vers le coffre parmi les contenus : exclu (test effectif)', $c1Link, 'symlink indisponible');
 exec('rm -rf ' . escapeshellarg($c1Root) . ' ' . escapeshellarg($c1Data));
 
+/* ───────────── Clés du site : jamais régénérées par-dessus un fichier illisible (processus séparé) ───────────── */
+section('Clés du site : un fichier illisible n’est jamais remplacé en silence');
+$c1KeysData = sys_get_temp_dir() . '/eclair-c1-keys-' . getmypid();
+exec('rm -rf ' . escapeshellarg($c1KeysData));
+@mkdir($c1KeysData, 0700, true);
+$c1Keys = static fn (): array => c1_child(<<<'PHP'
+    try {
+        $out = ['secret' => Eclair\Keys::get('secret'), 'indexnow' => Eclair\Keys::get('indexnow')];
+    } catch (Throwable $e) {
+        $out = ['refused' => $e->getMessage()];
+    }
+    echo json_encode($out);
+    PHP, ['root' => ECLAIR_ROOT, 'data' => $c1KeysData]);
+$first = $c1Keys();
+$again = $c1Keys();
+check('clés absentes : créées une fois, puis relues à l’identique', strlen((string) ($first['secret'] ?? '')) === 64 && ($again['secret'] ?? '') === $first['secret'], json_encode($first));
+file_put_contents($c1KeysData . '/keys.php', Store::GUARD . json_encode(['secret' => str_repeat('ab', 32), 'dummy' => 'x']));
+$partial = $c1Keys();
+check('clé manquante ajoutée sans toucher aux autres (secret conservé)', ($partial['secret'] ?? '') === str_repeat('ab', 32) && strlen((string) ($partial['indexnow'] ?? '')) === 32, json_encode($partial));
+$broken = Store::GUARD . '{"secret": "abab';
+file_put_contents($c1KeysData . '/keys.php', $broken);
+$refused = $c1Keys();
+check('fichier des clés illisible : refusé, jamais remplacé (coffre, sessions et codes de secours préservés)', isset($refused['refused'])
+    && (string) file_get_contents($c1KeysData . '/keys.php') === $broken, json_encode($refused));
+exec('rm -rf ' . escapeshellarg($c1KeysData));
+
 /* ───────────── Canal de mise à jour : adresses permises, outils de publication (unitaire) ───────────── */
 section('Mise à jour : adresses permises, annonce publiée, traductions lues comme des données');
 $c1Trusted = new ReflectionMethod(Eclair\Update::class, 'trusted');

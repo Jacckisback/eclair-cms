@@ -13,10 +13,21 @@ final class Keys
     public static function get(string $name): string
     {
         $keys = Store::read('keys', []);
-        if (!is_array($keys) || empty($keys[$name])) {
-            $keys = self::generate(is_array($keys) ? $keys : []);
+        if (is_array($keys) && !empty($keys[$name])) {
+            return (string) $keys[$name];
         }
-        return (string) $keys[$name];
+        // Clé absente : créée sous verrou, après relecture (un autre processus vient peut-être de la créer). Un fichier de
+        // clés présent mais illisible n'est jamais remplacé : de nouvelles clés rendraient indéchiffrable le coffre (clés
+        // d'API, connexion Google Drive) et invalideraient sessions, appareils reconnus et codes de secours.
+        return (string) Store::locked(static function () use ($name): string {
+            $keys = Store::read('keys', null);
+            if (!is_array($keys) && Store::exists('keys')) {
+                throw new \RuntimeException('Fichier des clés data/keys.php illisible : il n’a pas été remplacé. Vérifie ses droits par FTP '
+                    . '(ou supprime-le pour en créer de nouvelles : clés d’API et connexion Google Drive seront alors à saisir de nouveau).');
+            }
+            $keys = is_array($keys) ? $keys : [];
+            return (string) (empty($keys[$name]) ? self::generate($keys) : $keys)[$name];
+        });
     }
 
     public static function generate(array $keys = []): array
