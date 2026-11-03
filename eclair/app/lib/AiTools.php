@@ -146,6 +146,10 @@ final class AiTools
      */
     public static function run(string $name, array $in, array &$ctx): array
     {
+        // Chaque outil part des données enregistrées, pas de celles gardées depuis le début de la demande : un contenu publié
+        // ou dépublié entre-temps (par la personne, dans un autre onglet) est vu tel qu'il est.
+        Content::forget();
+        Store::forget();
         try {
             return match ($name) {
                 'search_content' => ['result' => self::search($in), 'card' => null, 'error' => false],
@@ -475,9 +479,19 @@ final class AiTools
                 'card' => ['kind' => 'editor', 'id' => $id, 'title' => $built['title'], 'note' => $note, 'changes' => $labels, 'patch' => $patch, 'media' => $media],
                 'error' => false];
         }
-        $entry = Content::index()[$id] ?? null;
-        if ($entry && $entry['status'] === 'draft') {
-            $saved = Content::save($changed, $ctx['user']);
+        $entry = Content::index()[$id] ?? null; // titre de la carte seulement
+        // Modification directe seulement d'un brouillon : décidée sur la version lue ici (jamais sur une proposition de ce tour,
+        // ni sur un index gardé depuis le début de la demande), et écrite seulement si le contenu enregistré est encore exactement
+        // ce brouillon (vérifié sous verrou). Publié entre-temps, il reçoit une proposition : l'IA ne change jamais ce qui est en ligne.
+        if (!is_array($proposal) && $item['status'] === 'draft') {
+            $changed['status'] = 'draft';
+            $read = self::fingerprint($item);
+            try {
+                $saved = Content::save($changed, $ctx['user'], static fn (?array $stored): bool => $stored !== null
+                    && $stored['status'] === 'draft' && self::fingerprint($stored) === $read);
+            } catch (\UnexpectedValueException) {
+                return self::fail('This content changed since you read it (it may have been published or edited meanwhile): read it again with get_content, then retry.');
+            }
             // Une seule annulation par brouillon et par tour : elle rétablit la version d'avant la demande.
             $token = (string) ($ctx['turn']['undo'][$id] ?? '');
             $undo = $token !== '' ? Store::read('ai/undo/' . $token) : null;
@@ -526,7 +540,7 @@ final class AiTools
     }
 
     /** Empreinte d'un contenu, hors date de mise à jour : elle change dès que quelqu'un modifie quoi que ce soit. */
-    private static function fingerprint(array $item): string
+    public static function fingerprint(array $item): string
     {
         unset($item['updated'], $item['score']);
         ksort($item);

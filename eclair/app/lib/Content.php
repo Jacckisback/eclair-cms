@@ -45,6 +45,12 @@ final class Content
         return self::$index;
     }
 
+    /** Oublie l'index gardé pour la requête : la prochaine lecture repart du disque (changements faits par d'autres requêtes). */
+    public static function forget(): void
+    {
+        self::$index = null;
+    }
+
     public static function get(string $id): ?array
     {
         if (!preg_match('/^[a-z0-9]{1,32}$/', $id)) {
@@ -183,15 +189,20 @@ final class Content
     /**
      * Crée ou met à jour un contenu à partir des données de l'éditeur.
      * Gère : slug unique, redirection 301 si l'URL change, révisions, index, cache.
+     * $expect (enregistrement conditionnel, outils de l'IA) reçoit la version enregistrée, relue sous verrou (null pour un
+     * nouveau contenu) : s'il ne l'accepte pas, rien n'est écrit (UnexpectedValueException).
      * Un nouveau contenu au-delà de MAX_ITEMS, ou un texte qui ferait déborder l'index de recherche, est refusé (OverflowException).
      */
-    public static function save(array $data, array $user): array
+    public static function save(array $data, array $user, ?callable $expect = null): array
     {
-        $result = Store::locked(function () use ($data, $user): array {
+        $result = Store::locked(function () use ($data, $user, $expect): array {
             self::$index = null;
             $index = self::index();
             $id = preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '';
             $old = $id !== '' && isset($index[$id]) ? self::get($id) : null;
+            if ($expect !== null && !$expect($old)) {
+                throw new \UnexpectedValueException('Contenu modifié entre-temps.');
+            }
             if ($old === null && count($index) >= self::MAX_ITEMS) {
                 throw new \OverflowException(t('Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.', ['n' => self::MAX_ITEMS]));
             }

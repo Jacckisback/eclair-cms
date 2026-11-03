@@ -161,11 +161,17 @@ final class AdminAi
         if (!$current) {
             Http::json(['ok' => false, 'error' => t('Ce contenu n’existe plus.')], 404);
         }
+        $stale = t('Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.');
         if ((int) $current['updated'] !== (int) $p['base']) {
-            Http::json(['ok' => false, 'error' => t('Ce contenu a été modifié depuis la proposition : demande une nouvelle proposition à l’assistant.')], 409);
+            Http::json(['ok' => false, 'error' => $stale], 409);
         }
+        // Une proposition change le contenu, jamais sa publication : état et date restent ceux de la version enregistrée,
+        // qui doit encore être celle sur laquelle la proposition a été faite (vérifié sous verrou).
+        $data = ['status' => $current['status'], 'date' => '@' . (int) $current['date']] + $p['data'];
         try {
-            $saved = Content::save($p['data'], $user);
+            $saved = Content::save($data, $user, static fn (?array $stored): bool => $stored !== null && (int) $stored['updated'] === (int) $p['base']);
+        } catch (\UnexpectedValueException) {
+            Http::json(['ok' => false, 'error' => $stale], 409);
         } catch (\OverflowException $e) {
             Http::json(['ok' => false, 'error' => $e->getMessage()], 422);
         }
@@ -215,13 +221,18 @@ final class AdminAi
         if (!$current) {
             Http::json(['ok' => false, 'error' => t('Ce contenu n’existe plus.')], 404);
         }
+        $changed = t('Ce contenu a été modifié depuis : l’annulation n’est plus possible. Ses versions précédentes restent dans l’historique des versions de l’éditeur.');
         if (!AiTools::undoable($token)) {
-            Http::json(['ok' => false, 'error' => t('Ce contenu a été modifié depuis : l’annulation n’est plus possible. Ses versions précédentes restent dans l’historique des versions de l’éditeur.')], 409);
+            Http::json(['ok' => false, 'error' => $changed], 409);
         }
         $item['status'] = $current['status'];
         $item['date'] = '@' . (int) $current['date'];
+        // Toujours sur la version vérifiée ci-dessus : une modification arrivée entre-temps n'est jamais écrasée.
+        $after = (string) ($u['after'] ?? '');
         try {
-            $saved = Content::save($item, $user);
+            $saved = Content::save($item, $user, static fn (?array $stored): bool => $stored !== null && AiTools::fingerprint($stored) === $after);
+        } catch (\UnexpectedValueException) {
+            Http::json(['ok' => false, 'error' => $changed], 409);
         } catch (\OverflowException $e) {
             Http::json(['ok' => false, 'error' => $e->getMessage()], 422);
         }
