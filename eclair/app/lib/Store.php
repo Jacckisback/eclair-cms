@@ -17,6 +17,8 @@ defined('ECLAIR') || exit;
 final class Store
 {
     public const GUARD = "<?php exit; ?>\n";
+    /** Réparation d'un fichier de verrou laissée en plan au-delà de ce délai (secondes) : abandonnée, on peut reprendre. */
+    private const REPAIR_STALE = 30;
 
     /** @var array<string, mixed> */
     private static array $memo = [];
@@ -88,18 +90,25 @@ final class Store
         return $out;
     }
 
-    /** Exécute une opération lire-modifier-écrire sous verrou exclusif (réentrant). */
+    /**
+     * Exécute une opération lire-modifier-écrire sous verrou exclusif (réentrant).
+     * Jamais sans verrou : si data/.lock ne peut être ni ouvert, ni recréé, ni verrouillé, l'enregistrement est refusé
+     * (une exception au message clair) plutôt que lancé sans protection sur des données lues plus tôt.
+     */
     public static function locked(callable $fn): mixed
     {
         if (self::$depth > 0) {
             return $fn();
         }
         self::ensureDir(ECLAIR_DATA);
-        $h = @fopen(ECLAIR_DATA . '/.lock', 'c');
-        if ($h === false) {
-            return $fn();
+        $h = self::lockFile(ECLAIR_DATA . '/.lock');
+        // Un appel interrompu (signal) est retenté une fois ; un échec persistant (stockage sans verrous) refuse.
+        if ($h === false || (!flock($h, LOCK_EX) && !flock($h, LOCK_EX))) {
+            if ($h !== false) {
+                fclose($h);
+            }
+            throw new \RuntimeException(t('Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.'));
         }
-        flock($h, LOCK_EX);
         self::$depth++;
         try {
             self::$memo = [];
@@ -108,6 +117,49 @@ final class Store
             self::$depth--;
             flock($h, LOCK_UN);
             fclose($h);
+        }
+    }
+
+    /**
+     * Ouvre un fichier de verrou (data/.lock, places de connexion). S'il existe mais que PHP ne peut plus l'ouvrir
+     * (copié ou restauré par un autre compte, dossier à sa place), il est recréé quand le dossier le permet.
+     * Un seul processus répare à la fois (mkdir est atomique) : jamais deux fichiers de verrou en service en même temps.
+     *
+     * @return resource|false
+     */
+    public static function lockFile(string $file): mixed
+    {
+        $h = @fopen($file, 'c');
+        if ($h !== false) {
+            return $h;
+        }
+        clearstatcache(true, $file);
+        if (!file_exists($file) && !is_link($file)) {
+            return false; // absent et impossible à créer : le dossier lui-même est en lecture seule
+        }
+        $mutex = $file . '.repair';
+        if (!@mkdir($mutex, 0700)) {
+            clearstatcache(true, $mutex);
+            // Réparation en cours ailleurs (ou à l'instant) : un nouvel essai suffit. Un reste d'une réparation
+            // interrompue (plus de 30 s) est retiré pour ne jamais bloquer la suivante.
+            if (time() - (int) @filemtime($mutex) < self::REPAIR_STALE || !@rmdir($mutex) || !@mkdir($mutex, 0700)) {
+                return @fopen($file, 'c');
+            }
+        }
+        try {
+            clearstatcache(true, $file);
+            if (is_dir($file) && !is_link($file)) {
+                @rmdir($file); // un dossier vide à la place du fichier
+            } elseif ((file_exists($file) || is_link($file)) && !is_writable($file)) {
+                @unlink($file); // appartient à un autre compte : le dossier, lui, nous appartient
+            }
+            $h = @fopen($file, 'c');
+            if ($h !== false) {
+                Log::alert('lock-repaired', 'Fichier de verrou recréé (il ne pouvait plus être ouvert) : ' . basename($file));
+            }
+            return $h;
+        } finally {
+            @rmdir($mutex);
         }
     }
 

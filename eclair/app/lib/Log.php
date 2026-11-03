@@ -15,6 +15,8 @@ final class Log
 {
     private const MAX_BYTES = 1048576;
     private const KEEP_BYTES = 262144;
+    /** Même problème signalé au plus une fois par heure (verrou inutilisable, à chaque requête sinon). */
+    private const ALERT_EVERY = 3600;
 
     /** Enregistre une erreur et renvoie une référence courte à communiquer. */
     public static function error(\Throwable $e): string
@@ -27,6 +29,24 @@ final class Log
             'path' => Req::path(),
         ]);
         return $id;
+    }
+
+    /** Signale un problème qui se répéterait à chaque requête : une ligne par heure au plus dans le journal des erreurs. */
+    public static function alert(string $key, string $message): void
+    {
+        try {
+            Store::ensureDir(ECLAIR_DATA . '/logs');
+            $mark = ECLAIR_DATA . '/logs/' . preg_replace('/[^a-z0-9-]/', '', $key) . '.alert';
+            clearstatcache(true, $mark);
+            $last = @filemtime($mark);
+            if ($last !== false && time() - $last < self::ALERT_EVERY) {
+                return;
+            }
+            @touch($mark);
+        } catch (\Throwable) {
+            // dossier des journaux inaccessible : la ligne part dans le journal du serveur (append)
+        }
+        self::append('errors', ['id' => $key, 'msg' => $message, 'at' => '', 'path' => Req::path()]);
     }
 
     public static function security(string $event, array $context = []): void

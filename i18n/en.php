@@ -1536,4 +1536,5 @@ return [
     '— Aucune —' => '— None —',
     '≈ {cost} l’image.' => '≈ {cost} per image.',
     '≈ {cost} par article' => '≈ {cost} per article',
+    'Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.' => 'Cannot save: the data lock (data/.lock) is not working. Delete this file via FTP (Éclair recreates it), or ask your host whether file locking (flock) is available.',
 ];

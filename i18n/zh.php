@@ -1536,4 +1536,5 @@ return [
     '— Aucune —' => '— 无 —',
     '≈ {cost} l’image.' => '每张图片约 {cost}。',
     '≈ {cost} par article' => '每篇文章约 {cost}',
+    'Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.' => '无法保存：数据锁（data/.lock）无法使用。请通过 FTP 删除此文件（Éclair 会重新创建），或询问你的主机商是否支持文件锁定（flock）。',
 ];
