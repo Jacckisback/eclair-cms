@@ -14,6 +14,10 @@ final class Auth
     private const SUDO = 900;        // actions sensibles : mot de passe redemandé au-delà de 15 min
     private const DEVICE = 'eclair_dev';
     private const EDITOR_CAN = ['content', 'media', 'categories', 'menus', 'messages', 'redirects'];
+    /** Vérifications de mot de passe simultanées pour les inconnus (Argon2id : 19 Mio chacune sur un mutualisé). */
+    private const SLOTS = 2;
+    /** Attente maximale d'une place de vérification (secondes) avant de répondre « busy ». */
+    private const WAIT = 5.0;
 
     private static ?array $user = null;
     private static bool $checked = false;
@@ -76,7 +80,8 @@ final class Auth
                 return 'locked';
             }
         }
-        $slot = self::slot();
+        // Appareil de confiance : il a sa place réservée, un afflux d'inconnus ne peut pas bloquer son propriétaire.
+        $slot = self::slot(str_starts_with((string) array_key_first($keys), 'login-dev:'));
         if ($slot === null) {
             foreach (array_keys($keys) as $key) {
                 RateLimit::release($key);
@@ -92,10 +97,8 @@ final class Auth
                 $user = self::rehash($user, $password);
             }
         } finally {
-            if (is_resource($slot)) {
-                flock($slot, LOCK_UN);
-                fclose($slot);
-            }
+            flock($slot, LOCK_UN);
+            fclose($slot);
         }
         if (!$valid || !$user) {
             Log::security('login_failed', ['email' => $email]);
@@ -283,17 +286,44 @@ final class Auth
         if (self::fresh()) {
             return true;
         }
-        $password = Req::input('confirm_password');
-        if ($password === '' || strlen($password) > 1024 || !RateLimit::attempt('sudo:' . $user['id'], 10, 900, 900)) {
+        if (self::checkPassword($user, Req::input('confirm_password')) !== 'ok') {
             return false;
         }
-        if (!password_verify($password, (string) $user['pass'])) {
-            Log::security('sudo_failed');
-            return false;
-        }
-        RateLimit::release('sudo:' . $user['id']);
         $_SESSION['sudo'] = time();
         return true;
+    }
+
+    /**
+     * Mot de passe d'une personne connectée (confirmation d'une action sensible, profil) : au plus 10 essais faux par
+     * 15 minutes et par compte, et vérifié dans une place de vérification comme une connexion (mémoire bornée).
+     * Renvoie « ok », « invalid », « locked » ou « busy ».
+     */
+    public static function checkPassword(array $user, string $password): string
+    {
+        if ($password === '' || strlen($password) > 1024) {
+            return 'invalid';
+        }
+        $key = 'sudo:' . $user['id'];
+        if (!RateLimit::attempt($key, 10, 900, 900)) {
+            return 'locked';
+        }
+        $slot = self::slot(true);
+        if ($slot === null) {
+            RateLimit::release($key);
+            return 'busy';
+        }
+        try {
+            $ok = password_verify($password, (string) $user['pass']);
+        } finally {
+            flock($slot, LOCK_UN);
+            fclose($slot);
+        }
+        if (!$ok) {
+            Log::security('sudo_failed');
+            return 'invalid';
+        }
+        RateLimit::release($key);
+        return 'ok';
     }
 
     /** Le mot de passe a-t-il été saisi récemment ? (sinon les formulaires sensibles le redemandent) */
@@ -349,25 +379,34 @@ final class Auth
     }
 
     /**
-     * Au plus deux vérifications de mot de passe simultanées : un afflux de tentatives
-     * ne peut pas épuiser la mémoire d'un hébergement mutualisé. Attente maximale : 5 s.
+     * Places de vérification du mot de passe (data/.login-N.lock) : au plus deux simultanées pour les inconnus, pour
+     * qu'un afflux de tentatives ne puisse pas épuiser la mémoire d'un hébergement mutualisé. Une place de plus est
+     * réservée aux appareils de confiance et aux personnes connectées : un afflux ne bloque pas le propriétaire.
+     * Un fichier de verrou inutilisable (ni ouvert, ni recréé) ne donne jamais de place. Attente maximale : 5 s.
      *
-     * @return resource|true|null
+     * @return resource|null
      */
-    private static function slot(): mixed
+    private static function slot(bool $trusted, float $wait = self::WAIT): mixed
     {
         Store::ensureDir(ECLAIR_DATA);
-        $until = microtime(true) + 5;
+        $ids = $trusted ? [self::SLOTS, ...range(0, self::SLOTS - 1)] : range(0, self::SLOTS - 1);
+        $until = microtime(true) + $wait;
         do {
-            for ($i = 0; $i < 2; $i++) {
-                $h = @fopen(ECLAIR_DATA . '/.login-' . $i . '.lock', 'c');
+            $usable = false;
+            foreach ($ids as $i) {
+                $h = Store::lockFile(ECLAIR_DATA . '/.login-' . $i . '.lock');
                 if ($h === false) {
-                    return true;
+                    continue;
                 }
                 if (flock($h, LOCK_EX | LOCK_NB)) {
                     return $h;
                 }
                 fclose($h);
+                $usable = true;
+            }
+            if (!$usable) {
+                Log::alert('login-slots', 'Connexions refusées : aucune place de vérification du mot de passe ne peut être ouverte (data/.login-N.lock).');
+                return null;
             }
             usleep(50000);
         } while (microtime(true) < $until);

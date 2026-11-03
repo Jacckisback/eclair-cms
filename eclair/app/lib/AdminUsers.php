@@ -136,8 +136,9 @@ final class AdminUsers
         $id = (string) $user['id'];
         switch (Req::input('action')) {
             case 'password':
-                if (!password_verify(Req::input('current'), (string) $user['pass'])) {
-                    Admin::back('profile#mot-de-passe', t('Mot de passe actuel incorrect.'), 'bad');
+                $check = Auth::checkPassword($user, Req::input('current'));
+                if ($check !== 'ok') {
+                    Admin::back('profile#mot-de-passe', self::refusal($check, t('Mot de passe actuel incorrect.')), 'bad');
                 }
                 $new = Req::input('password');
                 $issues = Security::passwordIssues($new, [$user['name'], explode('@', $user['email'])[0]]);
@@ -173,15 +174,17 @@ final class AdminUsers
                 Session::flash('ok', t('Double authentification activée. Garde précieusement tes codes de secours.'));
                 Http::redirect(admin_url('profile#securite'));
             case '2fa-disable':
-                if (!password_verify(Req::input('current'), (string) $user['pass'])) {
-                    Admin::back('profile#securite', t('Mot de passe incorrect.'), 'bad');
+                $check = Auth::checkPassword($user, Req::input('current'));
+                if ($check !== 'ok') {
+                    Admin::back('profile#securite', self::refusal($check, t('Mot de passe incorrect.')), 'bad');
                 }
                 Users::update($id, fn (array $u): array => ['totp' => self::NO_TOTP] + $u);
                 Log::security('2fa_disabled');
                 Admin::back('profile#securite', t('Double authentification désactivée.'), 'warn');
             case 'recovery':
-                if (empty($user['totp']['on']) || !password_verify(Req::input('current'), (string) $user['pass'])) {
-                    Admin::back('profile#securite', t('Mot de passe incorrect.'), 'bad');
+                $check = empty($user['totp']['on']) ? 'invalid' : Auth::checkPassword($user, Req::input('current'));
+                if ($check !== 'ok') {
+                    Admin::back('profile#securite', self::refusal($check, t('Mot de passe incorrect.')), 'bad');
                 }
                 $codes = Totp::recoveryCodes();
                 $hashes = array_map([Totp::class, 'hashRecovery'], $codes);
@@ -231,5 +234,15 @@ final class AdminUsers
                 I18n::setLang($lang);
                 Admin::back('profile', t('Profil enregistré.'));
         }
+    }
+
+    /** Message d'un mot de passe refusé : faux, trop d'essais, ou serveur saturé. */
+    private static function refusal(string $check, string $wrong): string
+    {
+        return match ($check) {
+            'locked' => t('Trop de tentatives. Par sécurité, réessaie dans quelques minutes.'),
+            'busy' => t('Le serveur est très sollicité : réessaie dans un instant.'),
+            default => $wrong,
+        };
     }
 }
