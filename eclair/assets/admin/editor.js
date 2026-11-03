@@ -5,7 +5,7 @@
   const E = window.Eclair;
   const root = document.getElementById('editor');
   if (!E || !root || !E.D.editor) return;
-  const { D, t, api, toast, pickMedia, upload, h, $, $$, dropEvents } = E;
+  const { D, t, api, toast, pickMedia, upload, h, $, $$, dropEvents, drafts } = E;
   const cfg = D.editor;
   const media = cfg.media || {};
   let item = cfg.item;
@@ -1037,7 +1037,8 @@
   };
 
   /* ───────────── État, sauvegarde, brouillon local ───────────── */
-  const storeKey = 'eclair-draft-' + (item.id || 'new-' + item.type);
+  // Copie de secours dans ce navigateur, propre au compte connecté (voir drafts dans admin.js) ; suit le contenu une fois enregistré.
+  let storeKey = drafts.key(item);
   let saved = '';
   let localTimer = null;
   const isDirty = () => JSON.stringify(serialize()) !== saved;
@@ -1054,9 +1055,7 @@
     if (!vQuiet && root.classList.contains('is-visual')) rerender();
     status(isDirty() ? '● ' + t('Modifications non enregistrées') : '');
     clearTimeout(localTimer);
-    localTimer = setTimeout(() => {
-      try { if (isDirty()) localStorage.setItem(storeKey, JSON.stringify({ t: Date.now(), data: serialize() })); } catch (e) { /* stockage indisponible */ }
-    }, 800);
+    localTimer = setTimeout(() => { if (isDirty()) drafts.set(storeKey, serialize()); }, 800);
   }
   const updateBadge = () => {
     const st = item.status === 'published' ? (item.date > Date.now() / 1000 ? 'scheduled' : 'published') : 'draft';
@@ -1090,7 +1089,8 @@
     f('f-translation').value = '';
     slugTouched = true;
     saved = JSON.stringify(serialize());
-    try { localStorage.removeItem(storeKey); localStorage.removeItem('eclair-draft-new-' + item.type); } catch (e) { /* rien */ }
+    drafts.drop(storeKey, drafts.key({ type: item.type }), drafts.key(item));
+    storeKey = drafts.key(item);
     if (wasNew) history.replaceState(null, '', D.admin + '/edit/' + item.id);
     showAnalysis(res.analysis);
     updateBadge();
@@ -1469,7 +1469,8 @@
     }
   }
   try {
-    const backup = JSON.parse(localStorage.getItem(storeKey) || 'null');
+    // Seule une copie écrite par ce compte est proposée (drafts.get vérifie son auteur).
+    const backup = drafts.get(storeKey);
     if (backup && backup.t > (item.updated || 0) * 1000 && JSON.stringify(backup.data) !== saved) {
       toast(t('Une version non enregistrée a été retrouvée. La restaurer ?'), '', { label: t('Restaurer'), run: () => {
         load({ ...item, ...backup.data, seo: backup.data.seo, options: backup.data.options, blocks: backup.data.blocks });

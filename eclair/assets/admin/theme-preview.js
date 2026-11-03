@@ -2,7 +2,9 @@
 // Copyright (c) 2026 Thierry Gustin
 /* ⚡ Éclair — aperçu de l'apparence (Réglages › Apparence) : les liens du site restent dans l'aperçu, avec l'apparence essayée. */
 (() => {
-  const base = (document.currentScript || {}).dataset?.base || '';
+  // Lu par l'accesseur d'origine : un élément nommé « currentScript » dans la page ne peut pas s'y substituer.
+  const script = Object.getOwnPropertyDescriptor(Document.prototype, 'currentScript').get.call(document);
+  const base = (script && script.dataset.base) || '';
   const current = new URLSearchParams(location.search).get('path') || '/';
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');

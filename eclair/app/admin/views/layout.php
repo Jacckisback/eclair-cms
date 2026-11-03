@@ -78,7 +78,7 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
         <span class="avatar"><?php if ($avatar): ?><img src="<?= e(path_to(Media::thumb($avatar))) ?>" alt=""><?php else: ?><?= e($initials) ?><?php endif ?></span>
         <span><b><?= e($user['name']) ?></b><small><?= e($user['role'] === 'admin' ? t('Administrateur') : t('Rédacteur')) ?></small></span>
       </a>
-      <form method="post" action="<?= e(admin_url('logout')) ?>">
+      <form method="post" action="<?= e(admin_url('logout')) ?>" data-logout>
         <?= Security::csrfField() ?>
         <button class="btn btn-ghost btn-sm btn-block" type="submit"><?= Icons::svg('logout') ?><?= e(t('Se déconnecter')) ?></button>
       </form>

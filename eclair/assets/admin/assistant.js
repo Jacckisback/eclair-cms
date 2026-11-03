@@ -45,7 +45,8 @@
   const iconBtn = (name, label, onclick, cls = 'btn btn-ghost btn-icon') => h('button', { type: 'button', class: cls, title: label, 'aria-label': label, onclick }, icon(name));
 
   /* ───────── Markdown des réponses → éléments (jamais de HTML venu du modèle) ───────── */
-  const safeHref = (url) => (/^(https?:\/\/|\/(?!\/)|#)/i.test(url) ? url : null);
+  // Lien absolu https, ancre, ou chemin du site : « // » et « /\ » (que les navigateurs lisent comme « // ») mèneraient ailleurs.
+  const safeHref = (url) => (/^(https?:\/\/|\/(?![/\\])|#)/i.test(url) ? url : null);
   const inline = (text) => {
     const frag = document.createDocumentFragment();
     const re = /(\*\*([^*]+)\*\*|\*([^*\s][^*]*?)\*|`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\))/g;

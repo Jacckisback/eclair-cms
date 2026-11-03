@@ -1536,4 +1536,6 @@ return [
     '— Aucune —' => '— None —',
     '≈ {cost} l’image.' => '≈ {cost} per image.',
     '≈ {cost} par article' => '≈ {cost} per article',
+    'N’accepte que si tu viens de lancer cette connexion toi-même depuis {app}.' => 'Only accept if you just started this connection yourself from {app}.',
+    'Active JavaScript pour autoriser cette application.' => 'Enable JavaScript to authorize this app.',
 ];

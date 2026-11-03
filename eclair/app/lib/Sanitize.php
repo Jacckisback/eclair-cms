@@ -181,9 +181,17 @@ final class Sanitize
         return preg_match('/^#[0-9a-f]{6}$/', $value) ? $value : $default;
     }
 
+    /**
+     * Adresse e-mail ordinaire, sur une seule ligne. FILTER_VALIDATE_EMAIL accepte une partie locale entre guillemets
+     * où « \ » échappe n'importe quel caractère, retour à la ligne compris : une telle adresse, reprise dans un en-tête
+     * (Reply-To), y ajouterait des lignes. Caractères de contrôle, espaces, guillemets et antislashs sont donc refusés.
+     */
     public static function email(mixed $value): string
     {
         $value = is_string($value) ? trim($value) : '';
+        if ($value === '' || preg_match('/[\x00-\x20\x7F"\\\\]/', $value)) {
+            return '';
+        }
         return filter_var($value, FILTER_VALIDATE_EMAIL) ? mb_substr($value, 0, 190) : '';
     }
 

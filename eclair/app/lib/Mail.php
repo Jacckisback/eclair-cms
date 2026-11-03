@@ -12,6 +12,11 @@ final class Mail
 {
     public static function send(string $to, string $subject, string $body, string $replyTo = ''): bool
     {
+        // Destinataire, sujet et adresse de réponse tiennent sur une seule ligne : sinon, rien ne part
+        // (un retour à la ligne y commencerait un nouvel en-tête).
+        if (self::multiline($to . $subject . $replyTo)) {
+            return false;
+        }
         $to = Sanitize::email($to);
         if ($to === '' || !function_exists('mail')) {
             return false;
@@ -25,6 +30,16 @@ final class Mail
             $headers[] = 'Reply-To: ' . $replyTo;
         }
         array_push($headers, 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit');
+        // Défense en profondeur : chaque en-tête construit ici reste une seule ligne, quelle que soit sa source (réglages compris).
+        if (self::multiline(implode('', $headers))) {
+            return false;
+        }
         return @mail($to, $encode('[' . $site . '] ' . $subject), $body, implode("\r\n", $headers));
+    }
+
+    /** Retour chariot, saut de ligne ou octet nul : interdits dans toute valeur d'en-tête. */
+    private static function multiline(string $value): bool
+    {
+        return strpbrk($value, "\r\n\0") !== false;
     }
 }
