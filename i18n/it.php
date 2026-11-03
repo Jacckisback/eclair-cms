@@ -1542,4 +1542,11 @@ return [
     'Limite de {n} catégories atteinte : supprime celles qui ne servent plus.' => 'Limite di {n} categorie raggiunto: elimina quelle che non usi più.',
     'Limite de {n} images atteinte : supprime celles qui ne servent plus.' => 'Limite di {n} immagini raggiunto: elimina quelle che non usi più.',
     'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => 'Limite di {n} reindirizzamenti raggiunto: elimina quelli che non usi più.',
+    'Annonce de mise à jour refusée (plus ancienne que celle déjà reçue)' => 'Annuncio di aggiornamento rifiutato (più vecchio di quello già ricevuto)',
+    'annonce plus ancienne que celle déjà reçue, ignorée' => 'annuncio più vecchio di quello già ricevuto, ignorato',
+    'Annonce de mise à jour périmée depuis le {d} : une version plus récente existe peut-être. Nouvel essai automatique dans une heure.' => 'Annuncio di aggiornamento scaduto dal {d}: forse esiste una versione più recente. Nuovo tentativo automatico tra un’ora.',
+    'Google Drive déconnecté : le compte qui l’avait connecté n’est plus administrateur' => 'Google Drive scollegato: l’account che l’aveva collegato non è più amministratore',
+    'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => 'Un collegamento a Google Drive è in corso nella sessione di un altro amministratore: il codice è visibile solo lì.',
+    'connecté par {name}' => 'collegato da {name}',
+    'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive è stato scollegato: l’account che l’aveva collegato è stato eliminato o non è più amministratore. Ricollegalo per riprendere i backup.',
 ];

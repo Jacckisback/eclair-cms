@@ -59,7 +59,7 @@ final class Installer
      */
     private static function window(): bool
     {
-        $file = ECLAIR_DATA . '/install-window.php';
+        $file = Backup::dataDir() . '/install-window.php';
         if (!is_file($file)) {
             try {
                 Store::ensureDir(ECLAIR_DATA);
@@ -85,7 +85,7 @@ final class Installer
         }
         $gd = Media::gd();
         $add(t('Traitement des images (GD)'), $gd ? 'ok' : 'warn', $gd ? (function_exists('imagewebp') ? t('WebP disponible : images ultra légères.') : t('Sans WebP : les images resteront en JPG/PNG.')) : t('Sans GD, les images ne seront ni redimensionnées ni converties.'));
-        foreach (['data' => ECLAIR_DATA, 'cache' => ECLAIR_ROOT . '/cache', 'media' => ECLAIR_ROOT . '/media'] as $name => $dir) {
+        foreach (['data' => Backup::dataDir(), 'cache' => ECLAIR_ROOT . '/cache', 'media' => ECLAIR_ROOT . '/media'] as $name => $dir) {
             $ok = self::writable($dir);
             $add(t('Dossier « {d} » accessible en écriture', ['d' => $name]), $ok ? 'ok' : 'error', $ok ? '' : t('Donne les droits d’écriture (755) à ce dossier via ton FTP.'));
         }
@@ -143,7 +143,7 @@ final class Installer
     {
         extend_time(120);
         foreach (['content', 'revisions', 'sessions', 'limits', 'logs', 'messages'] as $dir) {
-            Store::ensureDir(ECLAIR_DATA . '/' . $dir);
+            Store::ensureDir(Backup::dataDir() . '/' . $dir);
         }
         Store::ensureDir(ECLAIR_ROOT . '/cache/pages');
         Store::ensureDir(ECLAIR_ROOT . '/media/site');
@@ -181,7 +181,7 @@ final class Installer
         ]);
         Starter::create($type, $lang, $user, $name);
         Media::icons(null, (string) Settings::get('appearance.accent'));
-        @unlink(ECLAIR_DATA . '/install-window.php');
+        @unlink(Backup::dataDir() . '/install-window.php');
         // Les visiteurs ne seront redirigés vers cette adresse que si elle mène vraiment à ce site.
         Settings::verifyUrl();
         Cache::purge();

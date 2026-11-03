@@ -1542,4 +1542,11 @@ return [
     'Limite de {n} catégories atteinte : supprime celles qui ne servent plus.' => '已达到 {n} 个分类的上限：请删除不再需要的分类。',
     'Limite de {n} images atteinte : supprime celles qui ne servent plus.' => '已达到 {n} 张图片的上限：请删除不再需要的图片。',
     'Limite de {n} redirections atteinte : supprime celles qui ne servent plus.' => '已达到 {n} 个重定向的上限：请删除不再需要的重定向。',
+    'Annonce de mise à jour refusée (plus ancienne que celle déjà reçue)' => '更新公告被拒绝（比已收到的公告更旧）',
+    'annonce plus ancienne que celle déjà reçue, ignorée' => '更新公告比已收到的公告更旧，已忽略',
+    'Annonce de mise à jour périmée depuis le {d} : une version plus récente existe peut-être. Nouvel essai automatique dans une heure.' => '更新公告已于 {d} 过期：可能已有更新的版本。一小时后将自动重试。',
+    'Google Drive déconnecté : le compte qui l’avait connecté n’est plus administrateur' => 'Google Drive 已断开连接：连接它的账号已不再是管理员',
+    'Connexion à Google Drive en cours dans la session d’un autre administrateur : le code ne s’affiche que là.' => '另一位管理员的会话中正在连接 Google Drive：代码只在该会话中显示。',
+    'connecté par {name}' => '由 {name} 连接',
+    'Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.' => 'Google Drive 已断开连接：连接它的账号已被删除或不再是管理员。请重新连接以恢复备份。',
 ];

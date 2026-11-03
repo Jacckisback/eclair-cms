@@ -80,7 +80,7 @@ final class Integrity
 
     private static function guarded(string $path): bool
     {
-        $file = str_starts_with($path, 'data/') ? ECLAIR_DATA . substr($path, 4) : ECLAIR_ROOT . '/' . $path;
+        $file = str_starts_with($path, 'data/') ? Backup::dataDir() . substr($path, 4) : ECLAIR_ROOT . '/' . $path;
         $head = (string) @file_get_contents($file, false, null, 0, strlen(Store::GUARD));
         return $head === Store::GUARD || ($path === 'data/reset.php' && str_starts_with($head, '<?php'));
     }
@@ -90,14 +90,15 @@ final class Integrity
     {
         $out = [];
         foreach ($dirs as $dir) {
-            $root = $dir === 'data' ? ECLAIR_DATA : ECLAIR_ROOT . '/' . $dir;
+            $root = $dir === 'data' ? Backup::dataDir() : ECLAIR_ROOT . '/' . $dir;
             if (!is_dir($root)) {
                 continue;
             }
             $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
-            foreach ($it as $path => $info) {
+            foreach ($it as $info) {
                 if ($info->isFile()) {
-                    $out[] = $dir . '/' . str_replace('\\', '/', substr((string) $path, strlen($root) + 1));
+                    // Chemin relatif donné par l'itérateur (indépendant de l'écriture du dossier, barre finale comprise).
+                    $out[] = $dir . '/' . str_replace('\\', '/', $it->getSubPathname());
                 }
             }
         }

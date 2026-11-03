@@ -17,6 +17,12 @@ defined('ECLAIR') || exit;
  * Une sauvegarde est un travail qui avance par étapes courtes (archive, puis envoi par morceaux de 4 Mo, avec reprise) :
  * il continue à la requête suivante quand l'hébergeur limite la durée d'exécution. Il part à la demande, quand une
  * sauvegarde automatique est due et qu'un administrateur ouvre l'administration, ou par l'adresse de tâche planifiée.
+ *
+ * Le compte Google qui reçoit les sauvegardes est celui qui valide le code : la connexion est donc liée à la session de
+ * l'administrateur qui l'a lancée après avoir confirmé son mot de passe (compte, version de session, empreinte de
+ * l'identifiant de session). Seule cette session voit le code et peut terminer ou annuler la connexion, et seulement tant
+ * que son mot de passe est récent. Le compte qui a connecté le Drive est noté : s'il est supprimé ou n'est plus
+ * administrateur, les sauvegardes s'arrêtent et la connexion est retirée (un changement de mot de passe ne la coupe pas).
  */
 final class Drive
 {
@@ -141,19 +147,28 @@ final class Drive
         });
     }
 
-    /** Résumé pour l'administration. */
+    /**
+     * Résumé pour l'administration. Le code de connexion n'est rendu qu'à la session qui l'a demandé, tant que son mot de
+     * passe est récent ; les autres administrateurs voient seulement qu'une connexion est en cours (busy).
+     */
     public static function status(): array
     {
+        self::guard();
         $s = self::state();
         $job = is_array($s['job'] ?? null) ? $s['job'] : null;
         $pending = is_array($s['pending'] ?? null) && (int) $s['pending']['expires'] > time() ? $s['pending'] : null;
+        $user = Auth::user();
+        $mine = $pending !== null && $user !== null && self::initiated($pending, $user);
+        $by = Users::find((string) ($s['by']['uid'] ?? ''));
         return [
             'ready' => self::ready(),
             'available' => self::available(),
             'builtin' => self::builtIn(),
             'own' => self::ownApp(),
             'connected' => self::connected(),
-            'pending' => $pending,
+            'pending' => $mine && Auth::fresh() ? array_intersect_key($pending, array_flip(['code', 'url', 'expires', 'interval'])) : null,
+            'busy' => $pending !== null && !$mine && is_array($pending['by'] ?? null),
+            'by' => self::connected() && $by !== null ? (string) $by['name'] : '',
             'email' => (string) ($s['email'] ?? ''),
             'folder' => (string) ($s['folder_name'] ?? ''),
             'job' => $job !== null ? ['percent' => self::percent($job), 'started' => (int) $job['started']] : null,
@@ -180,7 +195,7 @@ final class Drive
     /** Du travail à faire : une sauvegarde en cours, ou une sauvegarde automatique arrivée à échéance. */
     public static function due(): bool
     {
-        if (!self::connected() || !self::available()) {
+        if (self::guard() || !self::connected() || !self::available()) {
             return false;
         }
         $s = self::state();
@@ -198,11 +213,18 @@ final class Drive
 
     /* ─────────────────────────────── Connexion ─────────────────────────────── */
 
-    /** Demande un code à Google : l'administrateur le saisit sur google.com/device. */
-    public static function start(): array
+    /**
+     * Demande un code à Google : l'administrateur le saisit sur google.com/device. Le flux est lié à sa session (compte,
+     * version de session, empreinte de l'identifiant de session) : appelé seulement après la confirmation du mot de passe.
+     */
+    public static function start(array $user): array
     {
         if (!self::available()) {
             return ['ok' => false, 'error' => t('Sauvegarde Google Drive indisponible sur cette installation.')];
+        }
+        $sid = self::sid();
+        if ($sid === '') {
+            return ['ok' => false, 'error' => t('Session expirée : réessaie.')];
         }
         [$id] = self::client();
         $res = self::http('POST', self::endpoint('device'), [], null, ['client_id' => $id, 'scope' => self::SCOPE]);
@@ -218,22 +240,28 @@ final class Drive
             'expires' => time() + max(60, min(1800, (int) ($j['expires_in'] ?? 1800))),
             'interval' => max(5, min(60, (int) ($j['interval'] ?? 5))),
             'next' => 0,
+            'by' => ['uid' => (string) $user['id'], 'ver' => (int) ($user['ver'] ?? 1), 'sid' => $sid],
         ]], ['error']);
         return ['ok' => true];
     }
 
     /**
-     * Google a-t-il reçu l'autorisation ? Renvoie connected, pending, denied, expired ou error. Respecte l'intervalle
-     * imposé par Google entre deux questions (sinon il ralentit la cadence).
+     * Google a-t-il reçu l'autorisation ? Renvoie connected, pending, denied, expired, error, ou other (flux lancé par une
+     * autre session : celle-ci n'y touche pas). Respecte l'intervalle imposé par Google entre deux questions (sinon il
+     * ralentit la cadence). Seule la session qui a lancé le flux, avec un mot de passe récent, peut le terminer.
      */
-    public static function poll(): string
+    public static function poll(array $user): string
     {
         $p = self::state()['pending'] ?? null;
         if (!is_array($p)) {
             return self::connected() ? 'connected' : 'expired';
         }
-        if ((int) $p['expires'] <= time()) {
-            self::save([], ['pending']);
+        if (!self::initiated($p, $user)) {
+            return 'other';
+        }
+        if ((int) $p['expires'] <= time() || !Auth::fresh()) {
+            // Code échu, ou mot de passe saisi il y a trop longtemps : le code n'est plus affiché, la connexion est à relancer.
+            self::flow($p, null);
             return 'expired';
         }
         if ((int) $p['next'] > time()) {
@@ -248,22 +276,39 @@ final class Drive
         $error = (string) ($j['error'] ?? '');
         if ($error === 'authorization_pending' || $error === 'slow_down') {
             $interval = (int) $p['interval'] + ($error === 'slow_down' ? 5 : 0);
-            self::save(['pending' => ['interval' => $interval, 'next' => time() + $interval] + $p]);
+            self::flow($p, ['interval' => $interval, 'next' => time() + $interval]);
             return 'pending';
         }
         if ($error === 'access_denied' || $error === 'expired_token') {
-            self::save([], ['pending']);
+            self::flow($p, null);
             return $error === 'access_denied' ? 'denied' : 'expired';
         }
         if ($res['status'] !== 200 || empty($j['refresh_token']) || empty($j['access_token'])) {
-            self::save(['pending' => ['next' => time() + (int) $p['interval']] + $p]);
+            self::flow($p, ['next' => time() + (int) $p['interval']]);
             return 'error';
         }
-        Vault::set(self::VAULT, (string) $j['refresh_token']);
+        $refresh = (string) $j['refresh_token'];
+        // Le flux est retiré sous verrou s'il est toujours le même (ni annulé, ni remplacé, ni terminé par un autre passage),
+        // puis l'administrateur qui l'a lancé est relu : même compte, toujours administrateur, même version de session.
+        $claimed = self::flow($p, null);
+        $now = Users::find((string) $user['id']);
+        if (!$claimed || $now === null || ($now['role'] ?? '') !== 'admin' || (int) ($now['ver'] ?? 1) !== (int) ($p['by']['ver'] ?? -1)) {
+            // Jeton refusé, révoqué aussitôt (sauf s'il est déjà celui de la connexion, terminée par un passage concurrent).
+            if (!hash_equals(Vault::get(self::VAULT), $refresh)) {
+                self::http('POST', self::endpoint('revoke'), [], null, ['token' => $refresh], 10);
+            }
+            return !$claimed && self::connected() ? 'connected' : 'expired';
+        }
+        // Un compte déjà connecté est remplacé : son jeton est révoqué (jamais celui qui vient d'être reçu) et l'envoi en
+        // cours vers lui abandonné.
+        $old = Vault::get(self::VAULT);
+        self::drop(hash_equals($old, $refresh) ? '' : $old);
+        Vault::set(self::VAULT, $refresh);
         $token = (string) $j['access_token'];
         $about = self::http('GET', self::endpoint('api') . '/about?fields=user(emailAddress)', ['Authorization: Bearer ' . $token]);
         // Le dossier déjà créé est repris s'il appartient au même compte (sinon Google répond 404 et un nouveau est créé).
-        self::save(['email' => (string) ($about['json']['user']['emailAddress'] ?? ''), 'since' => time()], ['pending', 'error']);
+        self::save(['email' => (string) ($about['json']['user']['emailAddress'] ?? ''), 'since' => time(),
+            'by' => ['uid' => (string) $now['id'], 'email' => (string) $now['email']]], ['pending', 'error']);
         self::folder($token);
         // Première connexion : sauvegarde hebdomadaire proposée d'office (modifiable aussitôt).
         if (!Settings::get('backup.chosen')) {
@@ -273,25 +318,100 @@ final class Drive
         return 'connected';
     }
 
-    public static function cancel(): void
+    /** Annule la connexion en cours : seulement depuis la session qui l'a lancée, avec un mot de passe récent. */
+    public static function cancel(array $user): void
     {
-        self::save([], ['pending']);
+        $p = self::state()['pending'] ?? null;
+        if (is_array($p) && self::initiated($p, $user) && Auth::fresh()) {
+            self::flow($p, null);
+        }
     }
 
     /** Déconnexion : jeton révoqué chez Google (si possible) puis effacé ; les sauvegardes déjà envoyées restent sur le Drive. */
     public static function disconnect(): void
     {
-        $refresh = Vault::get(self::VAULT);
+        self::drop(Vault::get(self::VAULT));
+        Vault::set(self::VAULT, '');
+        self::save([], ['pending', 'job', 'email', 'error', 'since', 'by']);
+        Log::security('drive_disconnected');
+    }
+
+    /** Jeton de renouvellement révoqué chez Google (si possible), envoi en cours et archive préparée abandonnés. */
+    private static function drop(string $refresh): void
+    {
         if ($refresh !== '') {
             self::http('POST', self::endpoint('revoke'), [], null, ['token' => $refresh], 10);
         }
-        Vault::set(self::VAULT, '');
         $job = self::state()['job'] ?? null;
         if (is_array($job)) {
             @unlink(self::dir() . '/' . basename((string) $job['file']));
         }
-        self::save([], ['pending', 'job', 'email', 'error', 'since']);
-        Log::security('drive_disconnected');
+        self::save([], ['job']);
+    }
+
+    /**
+     * Le compte qui a connecté le Drive n'existe plus ou n'est plus administrateur : la connexion est retirée (jeton
+     * révoqué, envoi abandonné), l'événement est journalisé et la page Sécurité invite à reconnecter. Renvoie true si
+     * c'est le cas. Une connexion faite avec la 1.10.2 (compte non noté) continue ; il sera noté à la prochaine connexion.
+     */
+    private static function guard(): bool
+    {
+        $s = self::state();
+        $uid = (string) ($s['by']['uid'] ?? '');
+        // Comptes illisibles pour l'instant (data/users.php vide ou en cours de réparation) : rien n'est décidé.
+        $all = Users::all();
+        if ($uid === '' || $all === [] || !self::connected()) {
+            return false;
+        }
+        $owner = $all[$uid] ?? null;
+        if (is_array($owner) && ($owner['role'] ?? '') === 'admin') {
+            return false;
+        }
+        self::drop(Vault::get(self::VAULT));
+        Vault::set(self::VAULT, '');
+        self::save(['error' => t('Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.')],
+            ['pending', 'email', 'since', 'by']);
+        Log::security('drive_unbound', ['email' => (string) ($s['by']['email'] ?? ''), 'binder' => (string) ($s['by']['email'] ?? '')]);
+        return true;
+    }
+
+    /**
+     * Met à jour ($patch) ou retire (null) le flux en attente, sous verrou et seulement s'il est toujours le même (même
+     * code d'appareil) : un passage concurrent ne fait jamais réapparaître un flux déjà terminé ou remplacé.
+     */
+    private static function flow(array $p, ?array $patch): bool
+    {
+        return (bool) Store::locked(static function () use ($p, $patch): bool {
+            Store::forget();
+            $s = self::state();
+            $now = $s['pending'] ?? null;
+            if (!is_array($now) || !hash_equals((string) ($now['device'] ?? ''), (string) ($p['device'] ?? ''))) {
+                return false;
+            }
+            if ($patch === null) {
+                unset($s['pending']);
+            } else {
+                $s['pending'] = $patch + $now;
+            }
+            Store::write('drive', $s);
+            return true;
+        });
+    }
+
+    /** Flux lancé par cette session : même compte, même version de session, même identifiant de session. */
+    private static function initiated(array $p, array $user): bool
+    {
+        $by = is_array($p['by'] ?? null) ? $p['by'] : [];
+        $sid = self::sid();
+        return $sid !== '' && hash_equals((string) ($by['sid'] ?? ''), $sid) && hash_equals((string) ($by['uid'] ?? ''), (string) $user['id'])
+            && (int) ($by['ver'] ?? -1) === (int) ($user['ver'] ?? 1);
+    }
+
+    /** Empreinte de l'identifiant de la session en cours ('' sans session) : jamais l'identifiant lui-même. */
+    private static function sid(): string
+    {
+        $id = Session::resume() ? (string) session_id() : '';
+        return $id !== '' ? hash('sha256', 'drive-flow|' . $id) : '';
     }
 
     /* ─────────────────────────────── Sauvegarde ─────────────────────────────── */
@@ -307,6 +427,11 @@ final class Drive
      */
     public static function run(int $budget, bool $now = false): array
     {
+        // Sauvegarde à la demande, automatique ou par la tâche planifiée : jamais vers un compte choisi par quelqu'un qui
+        // n'est plus administrateur.
+        if (self::guard()) {
+            return ['status' => 'error', 'percent' => 0, 'error' => (string) (self::state()['error'] ?? '')];
+        }
         if (!self::connected() || !self::available()) {
             return ['status' => 'idle', 'percent' => 0];
         }

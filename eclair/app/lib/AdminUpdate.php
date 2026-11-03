@@ -29,7 +29,11 @@ final class AdminUpdate
         switch (Req::input('action')) {
             case 'check':
                 Update::latest(true);
-                $error = (string) (Update::state()['error'] ?? '');
+                $state = Update::state();
+                $error = (string) ($state['error'] ?? '');
+                if ($error === 'expired') {
+                    Admin::back('update', self::expired(Update::expired($state)), 'warn');
+                }
                 if ($error !== '') {
                     Admin::back('update', t('Vérification impossible : {e}. Nouvel essai automatique dans une heure.', ['e' => self::reason($error)]), 'warn');
                 }
@@ -87,7 +91,15 @@ final class AdminUpdate
             'signature' => t('annonce refusée, sa signature ne correspond pas à celle du mainteneur'),
             'format' => t('annonce illisible'),
             'sodium' => t('extension PHP sodium absente'),
+            'replay' => t('annonce plus ancienne que celle déjà reçue, ignorée'),
             default => t('GitHub injoignable depuis ton serveur'),
         };
+    }
+
+    /** Annonce gardée périmée (le canal n'a plus été re-signé) : jamais « à jour », sans bloquer pour autant. */
+    public static function expired(int $since): string
+    {
+        return t('Annonce de mise à jour périmée depuis le {d} : une version plus récente existe peut-être. Nouvel essai automatique dans une heure.',
+            ['d' => fmt_date($since, I18n::lang())]);
     }
 }

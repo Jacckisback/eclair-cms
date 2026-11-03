@@ -3,7 +3,7 @@
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [R=404,L]
-    RewriteRule \.(php\d?|phtml|phar|inc|pl|py|cgi|sh|asp|aspx|jsp|s?html?|xht(ml)?|svgz?|xml)$ - [R=404,NC,L]
+    RewriteRule \.(php\d?|phtml|phar|inc|pl|py|cgi|sh|asp|aspx|jsp|s?html?|xht(ml)?|svgz?|xml|m?js)$ - [R=404,NC,L]
 </IfModule>
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
