@@ -290,10 +290,14 @@ final class Drive
         $refresh = (string) $j['refresh_token'];
         // Le flux est retiré sous verrou s'il est toujours le même (ni annulé, ni remplacé, ni terminé par un autre passage),
         // puis l'administrateur qui l'a lancé est relu : même compte, toujours administrateur, même version de session.
+        $claimed = self::flow($p, null);
         $now = Users::find((string) $user['id']);
-        if (!self::flow($p, null) || $now === null || ($now['role'] ?? '') !== 'admin' || (int) ($now['ver'] ?? 1) !== (int) ($p['by']['ver'] ?? -1)) {
-            self::http('POST', self::endpoint('revoke'), [], null, ['token' => $refresh], 10);
-            return 'expired';
+        if (!$claimed || $now === null || ($now['role'] ?? '') !== 'admin' || (int) ($now['ver'] ?? 1) !== (int) ($p['by']['ver'] ?? -1)) {
+            // Jeton refusé, révoqué aussitôt (sauf s'il est déjà celui de la connexion, terminée par un passage concurrent).
+            if (!hash_equals(Vault::get(self::VAULT), $refresh)) {
+                self::http('POST', self::endpoint('revoke'), [], null, ['token' => $refresh], 10);
+            }
+            return !$claimed && self::connected() ? 'connected' : 'expired';
         }
         // Un compte déjà connecté est remplacé : son jeton est révoqué (jamais celui qui vient d'être reçu) et l'envoi en
         // cours vers lui abandonné.
