@@ -310,7 +310,13 @@ function start_server(array $args, array $env = [], int $from = 20000, int $to =
             $sock = @fsockopen('127.0.0.1', $port, $errno, $errstr, 0.2);
             if ($sock) {
                 fclose($sock);
-                return [$port, $server];
+                // Le port répond, mais peut-être par le serveur d'une autre suite lancée en même temps : le nôtre, qui n'a
+                // pas pu l'ouvrir, s'arrête alors aussitôt. On vérifie qu'il tourne encore un instant plus tard.
+                usleep(300000);
+                if (proc_get_status($server)['running']) {
+                    return [$port, $server];
+                }
+                break;
             }
             usleep(100000);
         }
