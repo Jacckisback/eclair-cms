@@ -49,6 +49,10 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
       <label class="field"><span class="label"><?= e(t('Fuseau horaire')) ?></span><select name="timezone">
         <?php foreach (DateTimeZone::listIdentifiers() as $tz): ?><option<?= $s['timezone'] === $tz ? ' selected' : '' ?>><?= e($tz) ?></option><?php endforeach ?></select></label>
     </div>
+    <label class="field"><span class="label"><?= e(t('Usage du site')) ?></span><select name="usage">
+      <option value=""><?= e(t('Non précisé')) ?></option>
+      <?php foreach (\Eclair\Usage::all() as $key => [, $label]): ?><option value="<?= e($key) ?>"<?= $s['usage'] === $key ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach ?>
+    </select><span class="hint"><?= e(t('Le tableau de bord met en premier les outils de cet usage. Rien ne change sur le site public.')) ?></span></label>
     <label class="field"><span class="label"><?= e(t('Page d’accueil')) ?></span><select name="home">
       <option value=""><?= e(t('Les derniers articles du blog')) ?></option>
       <?php foreach ($v['pages'] as $p): ?><option value="<?= e($p['id']) ?>"<?= $s['home'] === $p['id'] ? ' selected' : '' ?>><?= e($p['title']) ?></option><?php endforeach ?>

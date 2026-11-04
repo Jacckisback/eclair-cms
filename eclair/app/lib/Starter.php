@@ -13,7 +13,8 @@ defined('ECLAIR') || exit;
  */
 final class Starter
 {
-    public const TYPES = ['blog', 'business', 'freelance', 'landing'];
+    /** Types proposés à l'installation ; « media », « affiliate » et « revival » partent du contenu d'un blog (voir Usage). */
+    public const TYPES = ['blog', 'business', 'freelance', 'landing', 'media', 'affiliate', 'revival'];
 
     /** Textes [fr, es, en]. Les « {site} » et « {name} » sont remplacés. */
     private const T = [
@@ -263,6 +264,9 @@ final class Starter
 
         switch ($type) {
             case 'blog':
+            case 'media':
+            case 'affiliate':
+            case 'revival':
                 $main = [['type' => 'content', 'id' => $about['id']], ['type' => 'content', 'id' => $contact['id']]];
                 break;
             case 'business':

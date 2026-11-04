@@ -136,6 +136,7 @@ final class AdminSettings
                     'timezone' => in_array(Req::input('timezone'), \DateTimeZone::listIdentifiers(), true) ? Req::input('timezone') : $s['timezone'],
                     'home' => $home === '' || (Content::index()[$home]['type'] ?? '') === 'page' ? $home : '',
                     'search' => Req::bool('search'),
+                    'usage' => in_array(Req::input('usage'), Starter::TYPES, true) ? Req::input('usage') : '',
                     'blog' => [
                         'enabled' => Req::bool('blog_enabled'),
                         'base' => in_array($base, [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'products', ltrim(Shop::path(), '/')], true) ? 'blog' : $base,

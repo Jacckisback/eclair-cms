@@ -174,6 +174,7 @@ final class Installer
             'geo' => ['ai' => in_array(Req::input('ai'), ['open', 'search', 'closed'], true) ? Req::input('ai') : 'open'],
             'security' => ['https' => $https, 'hsts' => false],
             'indexnow' => Req::bool('index') && $https,
+            'usage' => $type,
             'installed' => time(),
             'version' => ECLAIR_VERSION,
         ]);

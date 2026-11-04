@@ -132,6 +132,8 @@ final class Settings
         ],
         // Google Discover (voir Discover, Trends) : pays des tendances du jour, vide = celui de la langue du site.
         'discover' => ['geo' => ''],
+        // Usage du site (Starter::TYPES), choisi à l'installation : le tableau de bord met ses outils en premier (voir Usage).
+        'usage' => '',
         'onboarding' => ['done' => false],
         'installed' => 0,
         'version' => '',
