@@ -656,6 +656,7 @@ require __DIR__ . '/design.php';
 require __DIR__ . '/ux.php';
 require __DIR__ . '/ai-visits.php';
 require __DIR__ . '/plan.php';
+require __DIR__ . '/wayback.php';
 require __DIR__ . '/update.php';
 require __DIR__ . '/drive.php';
 require __DIR__ . '/sec-C2.php';

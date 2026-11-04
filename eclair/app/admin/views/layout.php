@@ -22,6 +22,7 @@ $nav = [
     ['menus', 'menus', 'menu', t('Menus'), 'menus'],
     ['messages', 'messages', 'mail', t('Messages'), 'messages'],
     ['redirects', 'redirects', 'redirect', t('Redirections'), 'redirects'],
+    ['wayback', 'wayback', 'clock', t('Ancien site'), 'settings'],
     ['plan', 'plan', 'calendar', t('Planning'), 'content'],
       ['ai-visits', 'ai-visits', 'bot', t('Robots IA'), 'content'],
 ];

@@ -2,6 +2,23 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Added
+
+- **Old site (Administration › Old site, administrators).** Find in the Wayback Machine the addresses this domain used to have and give each one a page again, so that the links still pointing to them lead somewhere again. Only the site's own domain is searched (Internet Archive's CDX index: HTML pages archived with a 200 answer, up to a chosen date). The home page, addresses with parameters, other domains and subdomains, addresses Éclair reserves and old `.php` addresses (refused by the `.htaccess`) are left out; listing pages (tags, categories, authors, pagination, cart…) start unticked. For each ticked address, the AI writes a brand-new page or article from the archived page's title alone: title, main heading, description and language are the only things read from the capture (fetched with `id_`, without the archive's banner), so neither the old text nor the old images are ever copied, and the old brand is never reused. The draft keeps the old address when Éclair can serve it as is; otherwise the old address redirects to the new page (301). One address at a time from the browser, within the monthly AI budget and the daily quota, with a stop button; the cost is shown before (per page) and after (tokens and dollars, per address and in total). Optionally, a brand-new cover image per page from the assistant's image generator. Nothing is published on its own: "Publish the reviewed drafts" publishes them in one go, except those that still contain "To complete" markers. The page recalls Google's expired-domain policy.
+
+### Changed
+
+- Date fields in the admin (Planner, Old site) now look like the other fields.
+
+### For maintainers
+
+- New files: `app/lib/Wayback.php`, `app/lib/AdminWayback.php`, `app/admin/views/wayback.php`. New data: `data/wayback.php` (old addresses, their state and cost).
+- New routes (`settings` right): `GET /wayback`, `POST /wayback`, `POST /api/wayback/scan`, `POST /api/wayback/build`. The archive address (`https://web.archive.org`) can be replaced through `ECLAIR_AI_ENDPOINTS['wayback']`, as the tests do.
+- 35 new checks in `tests/wayback.php`, with a fake Wayback Machine (`tests/fake-wayback.php`) and the fake AI provider. The suite passes on the source and on the built archive (1,069 checks).
+- Archive: 675 KB (+17 KB, of which 7 KB are translations).
+
 ## 1.12.0 — 2026-11-04
 
 GEO and editorial release: see which AIs read your site and why, and plan your articles in a calendar where the AI suggests ideas and writes drafts, with the cost of every call shown in tokens and dollars. Nothing is ever published without you. Public pages stay identical to the byte. Sites on 1.11.x update in one click from Administration › Updates, after a backup.

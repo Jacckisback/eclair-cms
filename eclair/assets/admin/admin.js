@@ -315,6 +315,53 @@
     api('api/plan/tick', {}, { quiet: true }).then((json) => { if (json && json.text) toast(json.text, 'ok'); }).catch(() => {});
   }
 
+  /* ── Ancien site (Wayback Machine) : recherche dans l'archive, puis une adresse à la fois jusqu'à la fin ou l'arrêt ── */
+  const wb = $('[data-wayback]');
+  if (wb) {
+    const scan = $('[data-wb-scan]', wb);
+    scan.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      planRun($('button', scan), scan.dataset.wait, 'api/wayback/scan', { date: new FormData(scan).get('date') }, () => location.reload());
+    });
+    const boxes = $$('[data-wb-path]', wb).filter((b) => !b.disabled);
+    const all = $('[data-wb-all]', wb);
+    if (all) all.addEventListener('change', () => boxes.forEach((b) => { b.checked = all.checked; }));
+    const go = $('[data-wb-build]', wb);
+    const halt = $('[data-wb-stop]', wb);
+    const status = $('[data-wb-status]', wb);
+    let stop = false;
+    if (halt) halt.addEventListener('click', () => { stop = true; halt.disabled = true; });
+    if (go) go.addEventListener('click', async () => {
+      const list = boxes.filter((b) => b.checked);
+      if (!list.length) { toast(t('Coche au moins une adresse.'), 'bad'); return; }
+      const image = !!($('[data-wb-image]', wb) || {}).checked;
+      go.disabled = true;
+      halt.hidden = false;
+      let done = 0;
+      for (const [i, box] of list.entries()) {
+        if (stop) break;
+        status.textContent = t('Page {n} sur {total} : {path}…').replace('{n}', i + 1).replace('{total}', list.length).replace('{path}', box.value);
+        const row = box.closest('tr');
+        const json = await api('api/wayback/build', { path: box.value, image }, { quiet: true })
+          .catch(() => ({ ok: false, stop: true, error: t('Erreur réseau : vérifie ta connexion.') }));
+        $('[data-wb-error]', row).textContent = json.ok ? json.note || '' : json.error || '';
+        if (json.ok) {
+          done++;
+          box.checked = false;
+          box.disabled = true;
+          $('[data-wb-badge]', row).className = 'badge warn';
+          $('[data-wb-badge]', row).textContent = t('Brouillon');
+        } else if (json.stop || !json.error) {
+          toast(json.error || t('Erreur réseau : vérifie ta connexion.'), 'bad');
+          break;
+        }
+      }
+      status.textContent = t('{n} pages reconstruites en brouillon.').replace('{n}', done);
+      if (done) setTimeout(() => location.reload(), 1500);
+      else { go.disabled = false; halt.hidden = true; }
+    });
+  }
+
   /* ── Nouvelle version d'Éclair : vérification discrète, deux fois par jour au plus (administrateurs) ── */
   if (D.updateCheck) {
     api('api/update/check', {}, { quiet: true }).then((json) => {
