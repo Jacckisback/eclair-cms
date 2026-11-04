@@ -2,6 +2,43 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## 1.10.4 — 2026-11-04
+
+Security release. A second, deeper audit of 1.10.3 confirmed the 1.10.2 fixes held and surfaced a new, smaller set of issues, all closed here: one high-severity issue in the release tooling (not in any installed site), one medium-severity issue (Google Drive), four low-severity issues, and six host-dependent hardening items. One further lead on reserved redirects is fixed as a precaution. Sites on 1.10.0–1.10.3 update in one click from Administration › Updates, after a backup.
+
+### Security fixes
+
+High severity (release tooling, not installed sites):
+
+- **`tools/build.php --resign=<version>` now signs only an archive already signed for that version** (its SHA-256 and size must match a key-verified announcement in the Git history of `dist/latest.json`), or one whose SHA-256 the maintainer supplies in `ECLAIR_EXPECT_SHA256`. An archive swapped into `dist/` by someone without the signing key can no longer be re-announced as authentic.
+
+Medium severity:
+
+- **A Google Drive connection made before 1.10.3 (or redone by 1.10.2) is now removed until an administrator reconnects it.** Éclair could not tell which administrator had established it, so an admin deleted or demoted before the update could keep receiving full site backups. The connection is now revoked and the Security page asks an administrator to reconnect Google Drive.
+
+Low severity:
+
+- **Restoring a backup no longer revives sessions or MCP connections cut by "Log out everyone", "Log out my other devices", a new password, a password reset (by an admin or via FTP) or account deletion:** they are now deleted, not just refused.
+- **Unpublishing or deleting content now clears the page cache even when a later write fails** (full disk…), so the retracted page is no longer served to visitors.
+- **Rolling back to the previous version no longer overwrites a `.htaccess` or folder-protection file changed since the update** (a host's rule…): it is kept, its previous version is saved in `cache/update`, and the page says so.
+- **Rebuilding the content index can no longer republish content deleted before 1.10.3 whose file was left behind:** a file the index does not list comes back as a draft for review.
+- **Editors can no longer change the target of an administrator's `/.well-known/` redirect** by redirecting the page it points to (redirect chain collapse).
+
+Hardening (host- or configuration-dependent):
+
+- Data files (accounts, keys, vault) and backup archives are created private from the start, never briefly readable by other accounts, and the data folder is tightened to `0700` where the host allows it.
+- If `data/site.php` is lost, the installer now stays locked until `data/install-window.php` is deleted via FTP; the window is kept, closed, after installing. Reinstalling still keeps accounts, keys and content.
+- Images rejected by the provider's safety filter (FLUX, Ideogram) or lost after submission now count toward the monthly AI budget.
+- The share image of a very large photo is no longer decoded beyond the host's memory limit: the page renders and is cached with the original as the share image.
+- The MCP connector's anonymous registration and token counters are grouped into at most 4,096 per kind, so invented IPv6 networks can no longer create one counter file each.
+- Backup copies of never-saved content left by 1.10.2 (with no site or account) are erased instead of being given to the only account of the site; copies of existing content are still kept.
+
+### Still guaranteed
+
+- **Your content does not move**, and your public site stays identical to the byte.
+- **Automated checks** on the source and on the archive, including one regression test per fix.
+- The 1.10.0–1.10.3 → 1.10.4 update is signed (Ed25519) and verified before anything is touched, with automatic rollback.
+
 ## 1.10.3 — 2026-11-03
 
 Security release. It fixes every issue found by a full security audit of 1.10.2: 15 confirmed flaws (3 of medium severity, none critical or high) and 8 leads that depend on the server or the browser, all closed in code. It also applies more than fifty of the audit's hardening recommendations. Sites running 1.10.0, 1.10.1 or 1.10.2 update in one click from Administration › Updates. On sites with several accounts, **save any open edits before updating**: their unsaved editor backups from 1.10.2 are not kept (see "Editor" below).
