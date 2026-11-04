@@ -63,7 +63,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleicht</h3>
-      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>619 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
+      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>621 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
@@ -264,7 +264,7 @@ Anleitung: [Handbuch, Abschnitt Aktualisieren, sichern, umziehen](docs/GUIDE.de.
 |---|---|---|
 | **Installation** | MySQL-Datenbank anlegen, dann den Assistenten starten | ✅ Ordner hochladen, 4 Fragen beantworten |
 | **Datenbank** | MySQL erforderlich | ✅ Keine (geschützte Dateien) |
-| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 619 KB |
+| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 621 KB |
 | **SEO, Sitemap, strukturierte Daten** | Ein Plugin, das installiert und gepflegt werden muss | ✅ Integriert |
 | **GEO: llms.txt, Markdown, KI-Bots** | Plugins, selten vollständig | ✅ Integriert |
 | **Öffentliche Seiten** | Bei jedem Aufruf neu erzeugt, außer mit Cache-Plugin | ✅ Aus einem statischen Cache ausgeliefert |
@@ -375,7 +375,7 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
   <img src="docs/images/de/install.webp" alt="Installation in drei Schritten: Ordner hochladen, vier Fragen beantworten, die Website ist online" width="100%">
 </p>
 
-1. **Lade** das Archiv [`eclair-cms-1.10.4.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.4.zip) (619 KB) **herunter** und entpacke es.
+1. **Lade** das Archiv [`eclair-cms-1.10.4.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.4.zip) (621 KB) **herunter** und entpacke es.
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 
