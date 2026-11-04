@@ -28,8 +28,11 @@ check('activées : moins de 1 Ko ajouté au style de la page', strlen($on) > str
 check('activées aussi avec une direction artistique', str_contains($onDirection, '@keyframes eclair-in') && str_contains($onDirection, '--bg:#0f1724'));
 $motion = (string) file_get_contents(ECLAIR_ROOT . '/app/theme/motion.css');
 preg_match_all('~@keyframes[^{]+\{(.*?)\}\}~s', $motion, $frames);
-check('animations sur opacity et translate seulement : aucun décalage de mise en page', $frames[1] !== []
+check('animations sur les transformations (et l’opacité de la FAQ ouverte) : aucun décalage de mise en page', $frames[1] !== []
     && !preg_match('~(?<![-\w])(width|height|top|left|right|bottom|margin|padding)\s*:~', implode('', $frames[1])));
+preg_match('~@keyframes eclair-in\{(.*?)\}\}~s', $motion, $reveal);
+check('apparition au défilement sans transparence : texte jamais pâli, contraste intact (Lighthouse)', isset($reveal[1]) && str_contains($reveal[1], 'translate')
+    && !str_contains($reveal[1], 'opacity'));
 check('le haut de page n’est jamais animé (bannière exclue)', !preg_match('~\.hero[^{]*\{[^}]*animation~', $motion));
 
 section('1.11 : suppression, barre du mode Visuel, couleurs et filtres de l’administration');
