@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.4.zip"><img src="https://img.shields.io/badge/download-v1.10.4-5b3cbc?style=for-the-badge" alt="下载 Éclair 1.10.2"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip"><img src="https://img.shields.io/badge/download-v1.11.0-5b3cbc?style=for-the-badge" alt="下载 Éclair 1.11.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -63,7 +63,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>621 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>627 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -139,7 +139,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/frame-visual.webp" alt="编辑器的可视化模式：页面以网站主题显示，“优势”区块处于选中状态，带有工具栏（上移、下移、创建副本、删除、添加、用 AI 修改），右侧面板中显示它的表单" width="100%">
 </p>
 
-在编辑器中，从**区块**切换到**可视化**：页面会以你的主题显示，和访客看到的完全一样，你可以直接在页面上修改。点击标题或段落即可输入文字，点击图片即可更换。一个小工具栏可以移动、复制、删除或添加区块；✨ 则用 AI 修改这段内容。你还可以按手机、平板或电脑的宽度检查显示效果，并用 Ctrl+Z 撤销。
+在编辑器中，从**区块**切换到**可视化**：页面会以你的主题显示，和访客看到的完全一样，你可以直接在页面上修改。点击标题或段落即可输入文字，点击图片即可更换。一个小工具栏可以移动、复制、删除或添加区块；✨ 则用 AI 修改这段内容。你还可以按手机、平板或电脑的宽度检查显示效果。所有操作都能撤销和重做，可视化模式与区块模式一样：按 `Ctrl+Z` / `Cmd+Z`，或点击 ↶ ↷ 按钮；删除的区块可在提示中一键恢复，无法撤销的操作（删除页面、图片）会先请你确认。
 
 **不知从何下手？** 在新内容中打开**用 AI 生成**，描述你的页面：目标、受众、语气、想要的版块。AI 会按照你网站的语气编排一份完整的草稿（横幅、优势、FAQ、行动号召、用于 Google 的标题和描述），链接指向你真实存在的页面，并使用你自己的图片。它不会编造任何内容：缺失的信息会标记为“[To complete: …]”，在补全之前，分析会一直提醒你。草稿会直接在可视化模式中打开。
 
@@ -200,7 +200,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/themes.webp" alt="同一个网站分别使用 Éclair 的 6 个主题：Éclair、杂志、工坊、工作室、商店和高对比" width="100%">
 </p>
 
-**内置 6 个主题**：Éclair、杂志、工坊、工作室、商店和高对比。在 设置 › 外观 中挑选，保存之前就能在电脑或手机上**实时预览**你的真实网站。页眉可选是否居中，列表可选网格或列表样式，主色和字体随你选择。每个主题只是一个 1.5 至 3 KB 的样式表：HTML 不变，速度、无障碍和 SEO 自然也不变。如需自行微调，可在**自定义 CSS** 中添加规则：它位于主题之后，更新时会被保留。
+**内置 6 个主题**：Éclair、杂志、工坊、工作室、商店和高对比。在 设置 › 外观 中挑选，保存之前就能在电脑或手机上**实时预览**你的真实网站。页眉可选是否居中，列表可选网格或列表样式，主色和字体随你选择。每个主题只是一个 1.5 至 3 KB 的样式表：HTML 不变，速度、无障碍和 SEO 自然也不变。如需自行微调，可在**自定义 CSS** 中添加规则：它位于主题之后，更新时会被保留。**微动画**选项：卡片、优势和图片会在滚动时滑入，仅用 CSS 实现（不到 1 KB，无脚本），页面加载时不做任何动画；对偏好减少动态效果的访客会自动关闭。
 
 <p align="center">
   <img src="docs/images/shop.webp" alt="Éclair 的商品详情页：照片图库、划线价、规格、连接 Stripe 的“购买”按钮、配送与退货信息；右侧是手机上的商品目录" width="100%">
@@ -264,7 +264,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 621 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 627 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -375,7 +375,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.10.4.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.4.zip)（621 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip)（627 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 

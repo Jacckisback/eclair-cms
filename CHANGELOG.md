@@ -2,16 +2,16 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased (1.11.0) — UX and quality
+## 1.11.0 — 2026-11-04
 
-Usability work on the page builder and the admin, with no AI and no new legal surface. Existing public sites stay identical to the byte unless their owner turns the new micro-animations on.
+Usability release for the page builder and the admin: undo and redo everywhere, deletions you can take back, the admin's own confirmation dialogs, a redrawn Visual mode toolbar, an orange that is no longer brown, and optional micro-animations. Existing public sites stay identical to the byte unless their owner turns the micro-animations on. Sites on 1.10.x update in one click from Administration › Updates, after a backup.
 
 ### Added
 
 - **Undo and redo everywhere in the editor.** Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z (or Ctrl+Y) and two new ↶ ↷ buttons in the editor bar undo and redo every change, in Blocks mode as in Visual mode: blocks added, moved, duplicated or deleted, items removed from a FAQ, features, team or variants, settings, AI rewrites, restored versions. Typing in one field is one step until a 3-second pause; inside the field you are typing in, Ctrl/Cmd+Z stays the browser's own, letter by letter. Up to 60 steps.
 - **Deletions can be undone from a notification.** Deleting a block or an item (FAQ question, feature, team member, variant, menu item) shows "Deleted · Undo"; the notification stays while the pointer or keyboard is on it.
 - **Visual mode: Delete key.** After Esc, Delete or Backspace removes the selected block (and Ctrl/Cmd+Z brings it back).
-- **Micro-animations.** In the admin: dialogs, menus and notifications appear and leave smoothly, and a block that is added, moved, duplicated or restored flashes briefly in the lightning yellow, so you see at once what changed. They can be turned off per browser in My profile › Interface, and the system's "reduce motion" setting always turns them off. On the public site, a new **Appearance › Micro-animations** switch makes cards, features, FAQ answers and images slide in on scroll and adds a few hover effects: CSS only (under 1 KB, no script), opacity and transforms only (no layout shift), nothing animated on page load, off for visitors who prefer less motion. On for new sites; existing sites keep their exact pages until the switch is turned on.
+- **Micro-animations.** In the admin: dialogs, menus and notifications appear and leave smoothly, and a block that is added, moved, duplicated or restored flashes briefly in the lightning yellow, so you see at once what changed. They can be turned off per browser in My profile › Interface, and the system's "reduce motion" setting always turns them off. On the public site, a new **Appearance › Micro-animations** switch makes cards, features, FAQ answers and images slide in on scroll and adds a few hover effects: CSS only (under 1 KB, no script), transforms only (no layout shift, and text is never faded, so its contrast holds at every instant), nothing animated on page load, off for visitors who prefer less motion. Measured with Lighthouse 12 on the demo site: 100 in all four categories, on mobile and desktop, with the animations on or off. On for new sites; existing sites keep their exact pages until the switch is turned on.
 
 ### Changed
 
@@ -26,11 +26,17 @@ Usability work on the page builder and the admin, with no AI and no new legal su
 
 - Dark mode: the "Recommended" tag of the installer and settings choices was a dark brown pill; it now uses the lightning yellow.
 
+### Still guaranteed
+
+- **Your content does not move**, and your public site stays identical to the byte as long as the micro-animations stay off (they are only on for sites installed with 1.11.0).
+- **Automated checks** on the source and on the archive.
+- The 1.10.x → 1.11.0 update is signed (Ed25519) and verified before anything is touched, with automatic rollback.
+
 ### For maintainers
 
 - New file `app/theme/motion.css` (appended to the inline style only when `appearance.motion` is on, before the custom CSS). New setting `appearance.motion` (default `false`; set to `true` by the installer).
-- 17 new checks: `tests/ux.php`, plus one in `tests/run.php` (new sites start with micro-animations) and one in `tests/design.php` (art-direction prompt); `tests/design.php` also posts the new `motion` field with the Appearance form. The suite passes on the source and on the built archive (981 checks).
-- Archive: about 627 KB (+6 KB), 1.22 MB once unzipped.
+- 18 new checks: `tests/ux.php` (16), plus one in `tests/run.php` (new sites start with micro-animations) and one in `tests/design.php` (art-direction prompt); `tests/design.php` also posts the new `motion` field with the Appearance form. The suite passes on the source and on the built archive (982 checks).
+- Archive: 627 KB (+6 KB), 1.22 MB once unzipped. README banners and installation visuals show the new size in all 7 languages.
 
 ## 1.10.4 — 2026-11-04
 

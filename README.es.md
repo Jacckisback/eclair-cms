@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.4.zip"><img src="https://img.shields.io/badge/descargar-v1.10.4-5b3cbc?style=for-the-badge" alt="Descargar Éclair 1.10.2"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip"><img src="https://img.shields.io/badge/descargar-v1.11.0-5b3cbc?style=for-the-badge" alt="Descargar Éclair 1.11.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_datos-ninguna-14122b?style=for-the-badge" alt="Sin base de datos">
@@ -63,7 +63,7 @@ WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraligero</h3>
-      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>621 KB</b>, cero dependencias, cero cookies en el sitio público.
+      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>627 KB</b>, cero dependencias, cero cookies en el sitio público.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facilísimo</h3>
@@ -139,7 +139,7 @@ Puesta en marcha en 3 minutos y planes compatibles: consulta la [guía, sección
   <img src="docs/images/es/frame-visual.webp" alt="El modo Visual del editor: la página se muestra con el tema del sitio, el bloque «Puntos fuertes» está seleccionado con su barra de herramientas (subir, bajar, duplicar, eliminar, añadir, retocar con IA) y su formulario en el panel de la derecha" width="100%">
 </p>
 
-En el editor, pasa de **Bloques** a **Visual**: tu página aparece con tu tema, exactamente como la verán tus visitantes, y la editas ahí mismo. Haz clic en un título o un párrafo para escribir en él, o en una imagen para cambiarla. Una pequeña barra mueve, duplica, elimina o añade un bloque; ✨ retoca el fragmento con IA. Comprueba cómo se ve en ancho de móvil, tableta u ordenador, y deshaz con Ctrl+Z.
+En el editor, pasa de **Bloques** a **Visual**: tu página aparece con tu tema, exactamente como la verán tus visitantes, y la editas ahí mismo. Haz clic en un título o un párrafo para escribir en él, o en una imagen para cambiarla. Una pequeña barra mueve, duplica, elimina o añade un bloque; ✨ retoca el fragmento con IA. Comprueba cómo se ve en ancho de móvil, tableta u ordenador. Todo se puede deshacer y rehacer, aquí como en el modo Bloques: `Ctrl+Z` / `Cmd+Z` o los botones ↶ ↷; un bloque eliminado vuelve con un clic desde el aviso, y lo que no se puede deshacer (una página, una imagen) pide confirmación antes.
 
 **¿No sabes por dónde empezar?** En un contenido nuevo, abre **Crear con IA** y describe tu página: su objetivo, su público, su tono, las secciones que quieres. La IA compone un borrador completo (portada, ventajas, FAQ, llamada a la acción, título y descripción para Google) con el tono de tu sitio, con enlaces a tus páginas reales y con tus imágenes. No se inventa nada: lo que falta queda marcado como «[A completar: …]», y el análisis te lo recuerda mientras no esté rellenado. El borrador se abre directamente en modo Visual.
 
@@ -200,7 +200,7 @@ El método y sus salvaguardas están adaptados de [Impeccable](https://github.co
   <img src="docs/images/es/themes.webp" alt="El mismo sitio con los 6 temas de Éclair: Éclair, Editorial, Taller, Estudio, Tienda y Contraste" width="100%">
 </p>
 
-**6 temas incluidos**, para elegir en Ajustes › Apariencia con una **vista previa en directo** de tu sitio real, en ordenador o en móvil, antes de guardar: Éclair, Editorial, Taller, Estudio, Tienda y Contraste. Cabecera centrada o no, listas en cuadrícula o en lista, color y fuentes a tu gusto. Cada tema es solo una hoja de estilos de 1,5 a 3 KB: el HTML no cambia, así que la velocidad, la accesibilidad y el posicionamiento tampoco. Para tus propios retoques, un campo de **CSS personalizado** se añade después del tema y se mantiene en las actualizaciones.
+**6 temas incluidos**, para elegir en Ajustes › Apariencia con una **vista previa en directo** de tu sitio real, en ordenador o en móvil, antes de guardar: Éclair, Editorial, Taller, Estudio, Tienda y Contraste. Cabecera centrada o no, listas en cuadrícula o en lista, color y fuentes a tu gusto. Cada tema es solo una hoja de estilos de 1,5 a 3 KB: el HTML no cambia, así que la velocidad, la accesibilidad y el posicionamiento tampoco. Para tus propios retoques, un campo de **CSS personalizado** se añade después del tema y se mantiene en las actualizaciones. Opción **Microanimaciones**: tarjetas, puntos fuertes e imágenes aparecen deslizándose al desplazarse, solo con CSS (menos de 1 KB, sin scripts) y sin animar nada al cargar; se desactivan para los visitantes que prefieren menos movimiento.
 
 <p align="center">
   <img src="docs/images/shop.webp" alt="Una ficha de producto de Éclair: galería de fotos, precio tachado, variantes, botón de compra conectado a Stripe, envío y devoluciones; a la derecha, el catálogo en el móvil" width="100%">
@@ -264,7 +264,7 @@ Instrucciones de uso: [guía, sección Actualizar, hacer copias de seguridad, mu
 |---|---|---|
 | **Instalación** | Crear una base de datos MySQL y luego lanzar el asistente | ✅ Subir la carpeta y responder 4 preguntas |
 | **Base de datos** | MySQL obligatorio | ✅ Ninguna (archivos protegidos) |
-| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 621 KB |
+| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 627 KB |
 | **SEO, sitemap, datos estructurados** | Un plugin que instalar y mantener | ✅ Integrado |
 | **GEO: llms.txt, Markdown, robots de IA** | Plugins, rara vez completos | ✅ Integrado |
 | **Páginas públicas** | Generadas en cada visita, salvo con un plugin de caché | ✅ Servidas desde una caché estática |
@@ -375,7 +375,7 @@ Todos los detalles en la [guía, sección Seguridad](docs/GUIDE.es.md#seguridad)
   <img src="docs/images/es/install.webp" alt="Instalación en tres pasos: subir la carpeta, responder cuatro preguntas, el sitio está en línea" width="100%">
 </p>
 
-1. **Descarga** el archivo [`eclair-cms-1.10.4.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.4.zip) (621 KB) y descomprímelo.
+1. **Descarga** el archivo [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) (627 KB) y descomprímelo.
 2. **Sube el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…), incluidos los archivos ocultos `.htaccess`.
 3. **Abre la dirección de tu sitio**: arranca el asistente. Cuatro preguntas, un poco de confeti, y tu sitio está en línea con sus primeras páginas.
 
