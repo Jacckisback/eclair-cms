@@ -273,13 +273,23 @@ final class Mcp
 
     /* ─────────────────────────────── OAuth ─────────────────────────────── */
 
+    /**
+     * Compteur anonyme du réseau appelant (enregistrement, jetons) : le groupe signé de son réseau, parmi 4 096 au plus par
+     * famille, comme le compteur des comptes visés à la connexion. Des réseaux inventés (IPv6) ne créent donc jamais plus de
+     * 4 096 fichiers de compteurs, et aucun plafond commun ne bloque tout le monde à la fois.
+     */
+    private static function network(string $family): string
+    {
+        return $family . ':' . substr(Keys::sign('mcp-net|' . Req::ipPrefix()), 0, 3);
+    }
+
     /** Enregistrement dynamique (RFC 7591), sans stockage : l'identifiant porte le nom et les adresses de retour, signés par le site. */
     private static function register(): never
     {
         if (Req::method() !== 'POST') {
             self::fail('invalid_request', 405);
         }
-        if (!RateLimit::attempt('mcp-reg:' . Req::ipPrefix(), 30, 3600, 3600)) {
+        if (!RateLimit::attempt(self::network('mcp-reg'), 30, 3600, 3600)) {
             self::fail('slow_down', 429);
         }
         $in = Req::json();
@@ -438,7 +448,7 @@ final class Mcp
         if (Req::method() !== 'POST') {
             self::fail('invalid_request', 405);
         }
-        if (!RateLimit::attempt('mcp-token:' . Req::ipPrefix(), 60, 600, 600)) {
+        if (!RateLimit::attempt(self::network('mcp-token'), 60, 600, 600)) {
             self::fail('slow_down', 429);
         }
         $in = $_POST ?: Req::json();

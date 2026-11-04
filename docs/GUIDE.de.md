@@ -104,7 +104,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 - **Unterstützte interne Links**: Während du einen Link eingibst, schlägt der Editor deine Seiten und Artikel vor (interne Verlinkung in 2 Sekunden).
 - **Intelligentes Einfügen** aus Word, Google Docs oder einer Webseite: Überschriften, Listen, Tabellen und Fettdruck werden zu sauberen Blöcken.
 - Speichern mit `Strg+S`, lokaler Sicherungsentwurf (nichts geht verloren, wenn die Verbindung abbricht), echte Vorschau vor dem Veröffentlichen, **Verlauf der letzten 20 Versionen**, geplante Veröffentlichung.
-  - Dieser Sicherungsentwurf gehört zum angemeldeten Konto und wird beim Abmelden gelöscht: Einem anderen Konto im selben Browser wird er nie angeboten. Entwürfe aus 1.10.2 bleiben auf einer Website mit nur einem Konto erhalten; bei mehreren Konten werden sie nach dem Update gelöscht: Speichere offene Änderungen, bevor du aktualisierst.
+  - Dieser Sicherungsentwurf gehört zum angemeldeten Konto und wird beim Abmelden gelöscht: Einem anderen Konto im selben Browser wird er nie angeboten. Entwürfe aus 1.10.2 zu bereits gespeicherten Inhalten bleiben auf einer Website mit nur einem Konto erhalten; die zu neuen, nie gespeicherten Inhalten, bei mehreren Konten alle, werden nach dem Update gelöscht: Speichere offene Änderungen, bevor du aktualisierst.
 - **Visueller Modus**: die Seite so, wie sie in deinem Theme aussieht, direkt dort bearbeitbar ([Details](#visueller-modus)).
 
 ### 🧩 Alles Weitere
@@ -600,7 +600,7 @@ Danach verbindest du dein Drive so:
 - Über die gewählte Anzahl hinaus (standardmäßig 8) wandern die ältesten Backups in den **Papierkorb** von Google Drive.
 - **Jetzt sichern** startet sofort einen Upload. Große Websites werden in Teilen von 4 MB hochgeladen: Begrenzt der Hoster die Ausführungszeit, wird der Upload dort fortgesetzt, wo er unterbrochen wurde (lass die Seite geöffnet, sie macht von selbst weiter).
 - Automatische Backups starten, wenn ein Administrator die Verwaltung öffnet. Damit sie auch ohne Besuch starten, kopiere die **Adresse für die geplante Aufgabe** (Sicherheit › Backups auf Google Drive › Backups zu festen Zeiten) in eine geplante Aufgabe (Cronjob) deines Hosters oder auf [cron-job.org](https://cron-job.org), mit stündlicher Ausführung: Die Adresse startet nur dann ein Backup, wenn eines fällig ist. Behalte sie für dich.
-- Die Karte zeigt, wer das Konto verbunden hat („verbunden von …“). Wird dieser Administrator gelöscht oder herabgestuft, wird die Verbindung entfernt, und die Backups stoppen, bis ein Administrator Google Drive neu verbindet. Eine Passwortänderung trennt nichts. Eine Verbindung von vor 1.10.3 wird markiert: Trenne Google Drive und verbinde es erneut, damit Éclair weiß, welcher Administrator sie eingerichtet hat.
+- Die Karte zeigt, wer das Konto verbunden hat („verbunden von …“). Wird dieser Administrator gelöscht oder herabgestuft, wird die Verbindung entfernt, und die Backups stoppen, bis ein Administrator Google Drive neu verbindet. Eine Passwortänderung trennt nichts. Eine Verbindung von vor 1.10.3 (oder von einer früheren Version neu eingerichtet) wird ebenso entfernt, weil Éclair nicht weiß, welcher Administrator sie eingerichtet hat: Die Backups stoppen, bis ein Administrator Google Drive neu verbindet, wodurch sein Konto vermerkt wird.
 - Das Zugriffstoken wird auf deinem Server verschlüsselt gespeichert. **Google Drive trennen** widerruft es, und eine neue Verbindung widerruft die alte; du kannst den Zugriff auch in deinem Google-Konto entziehen ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Bereits hochgeladene Backups bleiben in deinem Drive.
 
 ### Ein Backup wiederherstellen
@@ -734,6 +734,8 @@ Um eine Version zurückzuziehen, wird ein älteres Archiv (bereits in `dist/`) m
 ```bash
 ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<Version>
 ```
+
+Das Archiv muss das bereits für diese Version signierte sein: SHA-256 und Größe müssen zu einer Ankündigung dieser Version in der Git-Historie von `dist/latest.json` passen (mit dem öffentlichen Schlüssel geprüft). Sonst wird nichts signiert, außer du gibst den erwarteten Fingerabdruck an, den du bei der Veröffentlichung notiert hast: `ECLAIR_EXPECT_SHA256=<sha256>`.
 
 Eine signierte Version lässt sich nur in einem Git-Checkout bauen und enthält nur versionierte Dateien; der Quell-Commit wird im Manifest vermerkt. Die Übersetzungsquellen (`i18n/*.php`) müssen einfache Arrays aus literalen Texten bleiben: Sie werden als Daten gelesen, nie ausgeführt.
 

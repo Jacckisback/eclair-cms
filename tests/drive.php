@@ -157,6 +157,44 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         $cron = $c->req('GET', '/_eclair/backup/' . ($key[1] ?? 'x'));
         check('tâche planifiée : sauvegarde due envoyée', trim($cron['body']) === 'done' && count($live()) === 2 && count($gstate()['files'] ?? []) === 4, trim($cron['body']));
 
+        // Connexion dont l'administrateur n'est pas connu (faite avant la 1.10.3 sans « by », ou refaite par la 1.10.2 : date
+        // différente) : la tâche planifiée n'envoie rien, la connexion est retirée (jeton révoqué) avec un message clair.
+        $unbound = static function (?array $by) use ($copy, $drive, $c, $key, $gstate, $gdir): array {
+            $s = $drive();
+            unset($s['by']);
+            $s = ($by !== null ? ['by' => $by] : []) + ['ok' => time() - 2 * 86400, 'attempt' => time() - 2 * 86400] + $s;
+            file_put_contents($copy . '/data/drive.php', Store::GUARD . json_encode($s));
+            @unlink($gdir . '/revoked');
+            $files = count($gstate()['files'] ?? []);
+            $cron = trim($c->req('GET', '/_eclair/backup/' . ($key[1] ?? 'x'))['body']);
+            $after = $drive();
+            return ['cron' => $cron, 'sent' => count($gstate()['files'] ?? []) - $files + count(glob($copy . '/cache/backups/*.zip') ?: []),
+                'revoked' => is_file($gdir . '/revoked'), 'left' => array_values(array_intersect(['email', 'since', 'by'], array_keys($after))),
+                'error' => (string) ($after['error'] ?? '')];
+        };
+        $reconnect = static function () use ($post, $patch, $api, $drive): bool {
+            $post(['action' => 'connect']);
+            $patch(['pending' => ['next' => 0]]);
+            $api('drive/poll');
+            $s = $drive();
+            return isset($s['since'], $s['by']['since']) && (int) $s['by']['since'] === (int) $s['since'];
+        };
+        $old = $unbound(null);
+        $body = $c->req('GET', '/gestion/security')['body'];
+        check('connexion d’avant la 1.10.3 (administrateur non noté) : tâche planifiée en erreur, rien envoyé, jeton révoqué, connexion retirée',
+            $old['cron'] === 'error' && $old['sent'] === 0 && $old['revoked'] && $old['left'] === [] && str_contains($old['error'], 'date d’avant la 1.10.3'), json_encode($old));
+        check('connexion d’avant la 1.10.3 : un administrateur est invité à reconnecter Google Drive', str_contains($body, 'Un administrateur doit le reconnecter')
+            && str_contains($body, 'Connecter Google Drive'));
+        $rebound = $reconnect();
+        $s = $drive();
+        $redone = $unbound(['uid' => (string) ($s['by']['uid'] ?? ''), 'email' => 'camille@example.com', 'since' => (int) ($s['since'] ?? 0) - 60]);
+        check('connexion refaite par la 1.10.2 (date différente de celle de l’administrateur noté) : rien envoyé, jeton révoqué, connexion retirée',
+            $rebound && $redone['cron'] === 'error' && $redone['sent'] === 0 && $redone['revoked'] && $redone['left'] === [], json_encode($redone));
+        $rebound = $reconnect();
+        $patch(['ok' => time() - 2 * 86400, 'attempt' => time() - 2 * 86400]);
+        $cron = $c->req('GET', '/_eclair/backup/' . ($key[1] ?? 'x'));
+        check('reconnexion par un administrateur (compte noté) : la tâche planifiée envoie de nouveau', $rebound && trim($cron['body']) === 'done', trim($cron['body']));
+
         // Ouverture de l'administration : sauvegarde due signalée au JavaScript, qui la fait avancer en arrière-plan.
         $patch(['ok' => time() - 2 * 86400, 'attempt' => time() - 2 * 86400]);
         $dash = $c->req('GET', '/gestion');

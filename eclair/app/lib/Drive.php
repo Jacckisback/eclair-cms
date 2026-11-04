@@ -175,7 +175,8 @@ final class Drive
             'pending' => $mine && self::live($pending) ? array_intersect_key($pending, array_flip(['code', 'url', 'expires', 'interval'])) : null,
             'busy' => $pending !== null && !$mine && is_array($pending['by'] ?? null),
             'by' => self::connected() && $by !== null ? (string) $by['name'] : '',
-            // Connexion dont l'administrateur n'est pas connu (faite avant la 1.10.3) : la page invite à la refaire.
+            // Connexion dont l'administrateur n'est pas connu (faite avant la 1.10.3), encore là seulement si les comptes
+            // sont illisibles (guard n'a alors rien décidé) : la page invite à la refaire.
             'unbound' => self::connected() && self::binder($s) === '',
             'email' => (string) ($s['email'] ?? ''),
             'folder' => (string) ($s['folder_name'] ?? ''),
@@ -364,9 +365,10 @@ final class Drive
     }
 
     /**
-     * Le compte qui a connecté le Drive n'existe plus ou n'est plus administrateur : la connexion est retirée (jeton
-     * révoqué, envoi abandonné), l'événement est journalisé et la page Sécurité invite à reconnecter. Renvoie true si
-     * c'est le cas. Une connexion faite avant la 1.10.3 (compte non noté) continue, et la page Sécurité invite à la refaire.
+     * Le compte qui a connecté le Drive n'existe plus, n'est plus administrateur ou n'est pas connu (connexion faite avant
+     * la 1.10.3, ou refaite par une version antérieure) : la connexion est retirée (jeton révoqué, envoi abandonné),
+     * l'événement est journalisé et la page Sécurité invite un administrateur à reconnecter, ce qui note son compte.
+     * Renvoie true si c'est le cas : aucune archive ne part avant cette reconnexion.
      */
     private static function guard(): bool
     {
@@ -374,16 +376,18 @@ final class Drive
         $uid = self::binder($s);
         // Comptes illisibles pour l'instant (data/users.php vide ou en cours de réparation) : rien n'est décidé.
         $all = Users::all();
-        if ($uid === '' || $all === [] || !self::connected()) {
+        if ($all === [] || !self::connected()) {
             return false;
         }
-        $owner = $all[$uid] ?? null;
+        $owner = $uid !== '' ? ($all[$uid] ?? null) : null;
         if (is_array($owner) && ($owner['role'] ?? '') === 'admin') {
             return false;
         }
         self::drop(Vault::get(self::VAULT));
         Vault::set(self::VAULT, '');
-        self::save(['error' => t('Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.')],
+        self::save(['error' => $uid === ''
+            ? t('Google Drive a été déconnecté : cette connexion date d’avant la 1.10.3 et Éclair ne sait pas quel administrateur l’a établie. Un administrateur doit le reconnecter pour reprendre les sauvegardes.')
+            : t('Google Drive a été déconnecté : le compte qui l’avait connecté a été supprimé ou n’est plus administrateur. Reconnecte-le pour reprendre les sauvegardes.')],
             ['pending', 'email', 'since', 'by']);
         Log::security('drive_unbound', ['email' => (string) ($s['by']['email'] ?? ''), 'binder' => (string) ($s['by']['email'] ?? '')]);
         return true;

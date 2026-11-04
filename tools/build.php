@@ -18,13 +18,19 @@
  * exactement sa forme. La seconde (champ v2, lue depuis la 1.10.3) couvre les mêmes champs plus un numéro de série
  * strictement croissant et une date d'expiration : les sites refusent une annonce plus ancienne que la dernière reçue et
  * signalent une annonce périmée. Le canal doit donc être re-signé avant son échéance, même sans nouvelle version : une
- * commande suffit (--resign). Un retrait de version est une nouvelle annonce, au numéro plus grand (--resign=<version>).
+ * commande suffit (--resign). Un retrait de version est une nouvelle annonce, au numéro plus grand (--resign=<version>) :
+ * l'archive de dist/ doit être celle déjà signée pour cette version (empreinte et taille d'une annonce de cette version dans
+ * l'historique Git de dist/latest.json, vérifiée avec la clé publique), sinon rien n'est signé, sauf si ECLAIR_EXPECT_SHA256
+ * donne l'empreinte attendue, relevée ailleurs que dans le dépôt (à sa publication). Une archive remplacée dans dist/ par
+ * quelqu'un qui n'a pas la clé n'est donc jamais signée comme authentique.
  * La clé n'est jamais affichée, et la construction signée n'exécute aucune source de traduction (lues comme des données).
  *
  *   php tools/build.php
  *   ECLAIR_SIGNING_KEY=… php tools/build.php                   (version publiée : archive et annonce signée)
  *   ECLAIR_SIGNING_KEY=… php tools/build.php --resign          (annonce actuelle re-signée : nouveau numéro, nouvelle échéance)
- *   ECLAIR_SIGNING_KEY=… php tools/build.php --resign=1.10.3   (retrait : annonce de nouveau la 1.10.3, archive déjà dans dist/)
+ *   ECLAIR_SIGNING_KEY=… php tools/build.php --resign=1.10.3   (retrait : annonce de nouveau la 1.10.3, archive déjà signée, dans dist/)
+ *   ECLAIR_EXPECT_SHA256=<sha256> ECLAIR_SIGNING_KEY=… php tools/build.php --resign=1.10.3
+ *                                                             (retrait d'une archive absente de l'historique signé : empreinte attendue)
  */
 declare(strict_types=1);
 
@@ -193,6 +199,26 @@ function eclair_tracked(string $repo): ?array
     return $files;
 }
 
+/**
+ * Archives déjà signées pour cette version : [sha256, taille] de chaque annonce de dist/latest.json dans l'historique Git,
+ * vérifiée avec la clé publique (une annonce ajoutée sans la clé n'y figure donc jamais).
+ */
+function eclair_attested(string $repo, string $version, string $public, string $context): array
+{
+    $out = [];
+    foreach (explode("\n", (string) eclair_git($repo, ['log', '--format=%H', '--', 'dist/latest.json'])) as $commit) {
+        if (!preg_match('/^[0-9a-f]{40,64}$/', $commit)) {
+            continue;
+        }
+        $read = eclair_announce_read((string) eclair_git($repo, ['show', $commit . ':dist/latest.json']), $public, $context);
+        $fields = is_array($read) ? $read['fields'] : [];
+        if (($fields['version'] ?? '') === $version && is_string($fields['sha256'] ?? null) && is_int($fields['size'] ?? null)) {
+            $out[] = [$fields['sha256'], $fields['size']];
+        }
+    }
+    return $out;
+}
+
 $latest = $dist . '/latest.json';
 $current = is_file($latest) ? eclair_announce_read((string) file_get_contents($latest), $public, $context) : 'absente';
 
@@ -355,6 +381,21 @@ if ($resign === '') {
             exit(1);
         }
         $check->close();
+        // Seule une archive déjà signée pour cette version est ré-annoncée (même empreinte, même taille) : jamais des octets
+        // déposés dans dist/ par quelqu'un qui n'a pas la clé, même s'ils portent le bon numéro de version. Sinon, le
+        // mainteneur donne lui-même l'empreinte attendue (ECLAIR_EXPECT_SHA256), relevée ailleurs que dans le dépôt.
+        $known = eclair_attested(dirname(__DIR__), $announce, $public, $context);
+        if (is_array($current) && ($current['fields']['version'] ?? '') === $announce) {
+            $known[] = [$current['fields']['sha256'] ?? '', $current['fields']['size'] ?? -1];
+        }
+        $sha = (string) hash_file('sha256', $zipFile);
+        $expected = strtolower(trim((string) getenv('ECLAIR_EXPECT_SHA256')));
+        if (!in_array([$sha, filesize($zipFile)], $known, true) && !(preg_match('/^[a-f0-9]{64}$/', $expected) && hash_equals($expected, $sha))) {
+            fwrite(STDERR, "✗ --resign={$announce} : dist/eclair-cms-{$announce}.zip ne correspond à aucune archive déjà signée pour cette version"
+                . " (historique Git de dist/latest.json). Si c'est bien la bonne, donne son empreinte SHA-256 relevée à sa publication :"
+                . " ECLAIR_EXPECT_SHA256=… Rien n'a été signé.\n");
+            exit(1);
+        }
         // Date de publication d'origine : celle de la construction de l'archive.
         $date = preg_match('/^\d{4}-\d{2}-\d{2}/', (string) ($inside['generated'] ?? ''), $d) ? $d[0] : $date;
     }
