@@ -592,6 +592,7 @@ return [
     'Fichiers manquants' => 'Arquivos ausentes',
     'Fichiers modifiés' => 'Arquivos modificados',
     'Fichiers personnalisés conservés tels quels : {f}.' => 'Arquivos personalizados mantidos como estão: {f}.',
+    'Fichiers modifiés depuis la mise à jour, conservés tels quels : {f}. Leur version d’avant est rangée dans cache/update.' => 'Arquivos alterados desde a atualização, mantidos como estão: {f}. A versão anterior deles fica guardada em cache/update.',
     'Fichiers suspects' => 'Arquivos suspeitos',
     'Filet fin' => 'Borda fina',
     'Filets entre les sections' => 'Linhas entre as seções',

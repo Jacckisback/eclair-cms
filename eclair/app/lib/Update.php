@@ -49,6 +49,9 @@ final class Update
     private const SHIPPED = '~^(app/|assets/|index\.php$|\.htaccess$|eclair-config\.exemple\.php$|(data|cache|cache/pages|media)/(\.htaccess|index\.html)$)~';
     private const CODE = ['app', 'assets'];
 
+    /** Fichiers hors code changés depuis la mise à jour, gardés tels quels par le dernier retour en arrière (restore()). */
+    private static array $kept = [];
+
     public static function dir(): string
     {
         return ECLAIR_ROOT . '/cache/update';
@@ -545,7 +548,10 @@ final class Update
         return is_dir($prev . '/assets') && is_file($prev . '/index.php.txt') ? (string) (self::manifest($prev . '/app/manifest.php')['version'] ?? '') : '';
     }
 
-    /** Revient à la version gardée lors de la dernière mise à jour. */
+    /**
+     * Revient à la version gardée lors de la dernière mise à jour. Renvoie ['ok' => true, 'version', 'kept' => fichiers hors
+     * code changés depuis la mise à jour, gardés tels quels] ou ['ok' => false, 'error' => message].
+     */
     public static function rollback(): array
     {
         $version = self::previous();
@@ -566,7 +572,7 @@ final class Update
             }
             self::remember(['last' => ['from' => ECLAIR_VERSION, 'to' => $version, 'date' => time(), 'rollback' => true]]);
             Log::security('update_rolled_back', ['version' => $version]);
-            return ['ok' => true, 'version' => $version];
+            return ['ok' => true, 'version' => $version, 'kept' => self::$kept];
         } finally {
             flock($lock, LOCK_UN);
             fclose($lock);
@@ -611,11 +617,20 @@ final class Update
             && !str_contains($path, '..') && preg_match(self::SHIPPED, $path) === 1;
     }
 
-    /** Remet en place le code mis de côté (dossiers, index.php, .htaccess, fichiers hors code). */
+    /**
+     * Remet en place le code mis de côté (dossiers, index.php, .htaccess, fichiers hors code). Un .htaccess ou un fichier
+     * hors code n'est remis comme avant (ou retiré s'il a été ajouté) que s'il est encore celui que la mise à jour a posé,
+     * d'après le manifeste de la version que l'on quitte. Changé depuis (règle ajoutée par l'hébergeur ou le propriétaire du
+     * site), il est gardé tel quel, sa version d'avant rangée dans cache/update, et noté dans self::$kept pour être signalé.
+     */
     private static function restore(): bool
     {
         $prev = self::dir() . '/previous';
         $junk = self::dir() . '/discarded';
+        // Lues avant que le code de la version quittée ne parte : ses empreintes, et la version à laquelle on revient.
+        $shipped = (array) (self::manifest(ECLAIR_ROOT . '/app/manifest.php')['files'] ?? []);
+        $back = (string) (self::manifest($prev . '/app/manifest.php')['version'] ?? '');
+        self::$kept = [];
         self::remove($junk);
         try {
             Store::ensureDir($junk);
@@ -633,10 +648,23 @@ final class Update
             }
             $ok = @rename($prev . '/' . $dir, ECLAIR_ROOT . '/' . $dir) && $ok;
         }
+        // .htaccess ou fichier hors code remis comme avant ($content), ou retiré s'il a été ajouté par l'échange (null), s'il
+        // est encore celui que l'échange a posé ; sinon gardé et signalé, sa version d'avant rangée à côté (htaccess-<v>.txt…).
+        $undo = static function (string $path, ?string $content) use ($shipped, $back): bool {
+            $here = ECLAIR_ROOT . '/' . $path;
+            if ($content === null ? !is_file($here) : self::same($here, hash('sha256', $content))) {
+                return true; // déjà comme avant
+            }
+            if (is_file($here) && !(isset($shipped[$path]) && self::same($here, (string) $shipped[$path]))) {
+                self::$kept[] = $path;
+                return $content === null || Disk::write(self::dir() . '/' . str_replace('/', '~', ltrim($path, '.')) . '-' . $back . '.txt', $content);
+            }
+            return $content === null ? Disk::delete($here) : Disk::put($here, $content);
+        };
         foreach (['index.php.txt' => 'index.php', 'htaccess.txt' => '.htaccess'] as $saved => $name) {
             $content = Disk::read($prev . '/' . $saved);
             if (is_string($content)) {
-                $ok = Disk::put(ECLAIR_ROOT . '/' . $name, $content) && $ok;
+                $ok = ($name === 'index.php' ? Disk::put(ECLAIR_ROOT . '/' . $name, $content) : $undo($name, $content)) && $ok;
             }
         }
         // Fichiers hors code remplacés par l'échange : remis comme avant ; ceux qu'il a ajoutés sont retirés.
@@ -644,12 +672,12 @@ final class Update
             $path = str_replace('~', '/', substr(basename($file), 0, -4));
             if (basename($file) !== 'new.txt' && self::extra($path)) {
                 $content = Disk::read($file);
-                $ok = is_string($content) && Disk::put(ECLAIR_ROOT . '/' . $path, $content) && $ok;
+                $ok = is_string($content) && $undo($path, $content) && $ok;
             }
         }
         foreach (explode("\n", (string) Disk::read($prev . '/extra/new.txt')) as $path) {
             if (self::extra($path) && is_file(ECLAIR_ROOT . '/' . $path)) {
-                $ok = Disk::delete(ECLAIR_ROOT . '/' . $path) && $ok;
+                $ok = $undo($path, null) && $ok;
             }
         }
         // Retour vers une version qui ne gardait pas ces fichiers (avant la 1.10.1) : seul l'en-tête de licence ajouté par la

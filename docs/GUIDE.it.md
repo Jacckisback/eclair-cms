@@ -563,7 +563,7 @@ In seguito, **Torna alla versione precedente** (nella stessa pagina) ripristina 
 
 Buono a sapersi:
 
-- Un `.htaccess` che hai modificato (o che il tuo provider ha integrato) viene **conservato**; il nuovo modello viene salvato in `cache/update/htaccess-<version>.txt`, così puoi confrontarli.
+- Un `.htaccess` che hai modificato (o che il tuo provider ha integrato) viene **conservato**; il nuovo modello viene salvato in `cache/update/htaccess-<version>.txt`, così puoi confrontarli. Allo stesso modo, **Torna alla versione precedente** conserva un `.htaccess` o una protezione di cartella modificati dopo l’aggiornamento: la loro versione precedente viene salvata in `cache/update/` e la pagina te lo segnala.
 - I file di Éclair modificati a mano (tema…) vengono sostituiti dalla loro nuova versione: la pagina Aggiornamenti li elenca prima dell’installazione. Per un ritocco duraturo, usa il **CSS personalizzato** (Impostazioni › Aspetto).
 - Se il tuo provider impedisce al server di chiamare se stesso, Éclair installa l’aggiornamento senza poterlo controllare e te lo dice: apri il tuo sito per verificare, e torna indietro se serve.
 - Se il ritorno automatico non è riuscito fino in fondo, la pagina lo dice («Ripristino incompleto») e ti indica di rimettere al suo posto via FTP il contenuto di `cache/update/previous` (vedi [Risoluzione dei problemi](#risoluzione-dei-problemi)).
@@ -638,7 +638,7 @@ Entro 24 ore, **accedi con questa e-mail e questa nuova password**: la password 
 
 **Google Drive: «Accesso a Google Drive revocato»**: l’autorizzazione è stata revocata dall’account Google (o è scaduta). Clicca su **Collega Google Drive**: viene riutilizzata la stessa cartella.
 
-**«Installazione bloccata»**: la finestra di 2 ore dalla prima visita è scaduta. Elimina `data/install-window.php` via FTP e ricarica la pagina.
+**«Installazione bloccata»**: la finestra di 2 ore dalla prima visita è scaduta, oppure il sito era già installato e `data/site.php` è sparito (reinstallare richiede sempre l’accesso FTP; account, chiavi e contenuti vengono conservati). Elimina `data/install-window.php` via FTP e ricarica la pagina.
 
 **Indirizzo del sito non verificato (pagina Sicurezza)**: il tuo server non riesce a chiamare se stesso sull’indirizzo del sito (firewall del provider, DNS non ancora propagato…). Il sito funziona normalmente, ma senza reindirizzamento all’indirizzo ufficiale (con/senza www). Clicca su «Verifica l’indirizzo del sito» quando il dominio è pronto.
 

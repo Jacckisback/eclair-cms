@@ -92,20 +92,28 @@ final class Backup
             throw new \RuntimeException(t('Espace disque insuffisant pour préparer la sauvegarde ({n} Mo nécessaires).', ['n' => (int) ceil($size * 1.1 / 1048576) + 20]));
         }
         Store::ensureDir(dirname($file));
-        $zip = new \ZipArchive();
-        if ($zip->open($file, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-            throw new \RuntimeException(t('Impossible de créer la sauvegarde.'));
-        }
-        foreach ($files as $rel => $path) {
-            $zip->addFile($path, $rel);
-            if (str_starts_with($rel, 'media/') && preg_match('~\.(jpe?g|png|gif|webp|avif|woff2)$~i', $rel)) {
-                $zip->setCompressionName($rel, \ZipArchive::CM_STORE);
+        // Comptes et clés du site : l'archive (et le fichier temporaire de la bibliothèque zip) est créée privée, sous le
+        // masque 0077, jamais lisible un instant par un autre compte avant ses droits définitifs.
+        $mask = umask(0077);
+        try {
+            $zip = new \ZipArchive();
+            if ($zip->open($file, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                throw new \RuntimeException(t('Impossible de créer la sauvegarde.'));
             }
+            foreach ($files as $rel => $path) {
+                $zip->addFile($path, $rel);
+                if (str_starts_with($rel, 'media/') && preg_match('~\.(jpe?g|png|gif|webp|avif|woff2)$~i', $rel)) {
+                    $zip->setCompressionName($rel, \ZipArchive::CM_STORE);
+                }
+            }
+            $zip->addFromString('LISEZ-MOI.txt', "Sauvegarde Éclair du " . date('Y-m-d H:i') . " (" . Settings::get('name') . ")\n\n"
+                . "Pour restaurer : remplace les dossiers data/ et media/ de ton installation par ceux-ci (par FTP), puis vide le cache depuis l'administration.\n"
+                . "Les clés d'API (assistant IA) et la connexion Google Drive ne sont jamais sauvegardées : saisis-les de nouveau après une restauration.\n");
+            $closed = $zip->close();
+        } finally {
+            umask($mask);
         }
-        $zip->addFromString('LISEZ-MOI.txt', "Sauvegarde Éclair du " . date('Y-m-d H:i') . " (" . Settings::get('name') . ")\n\n"
-            . "Pour restaurer : remplace les dossiers data/ et media/ de ton installation par ceux-ci (par FTP), puis vide le cache depuis l'administration.\n"
-            . "Les clés d'API (assistant IA) et la connexion Google Drive ne sont jamais sauvegardées : saisis-les de nouveau après une restauration.\n");
-        if (!$zip->close() || !is_file($file)) {
+        if (!$closed || !is_file($file)) {
             @unlink($file);
             throw new \RuntimeException(t('Impossible de créer la sauvegarde.'));
         }

@@ -563,7 +563,7 @@ Después, **Volver a la versión anterior** (en la misma página) restaura la ve
 
 Conviene saber:
 
-- Si has modificado el `.htaccess` (o tu proveedor lo ha completado), **se conserva**; la nueva plantilla se guarda en `cache/update/htaccess-<version>.txt` para que puedas compararlos.
+- Si has modificado el `.htaccess` (o tu proveedor lo ha completado), **se conserva**; la nueva plantilla se guarda en `cache/update/htaccess-<version>.txt` para que puedas compararlos. Del mismo modo, **Volver a la versión anterior** conserva un `.htaccess` o una protección de carpeta modificados desde la actualización: su versión anterior se guarda en `cache/update/` y la página te lo indica.
 - Los archivos de Éclair modificados a mano (tema…) se sustituyen por su nueva versión: la página Actualizaciones los enumera antes de la instalación. Para un retoque duradero, usa el **CSS personalizado** (Ajustes › Apariencia).
 - Si tu proveedor de hosting impide que el servidor se llame a sí mismo, Éclair instala la actualización sin poder comprobarla y te lo indica: abre tu sitio para comprobarlo y vuelve atrás si hace falta.
 - Si la vuelta atrás automática no se ha podido completar, la página lo indica («Vuelta atrás incompleta») y te pide que vuelvas a colocar por FTP el contenido de `cache/update/previous` (consulta [Solución de problemas](#solución-de-problemas)).
@@ -638,7 +638,7 @@ En las 24 horas siguientes, **inicia sesión con ese correo y esa nueva contrase
 
 **Google Drive: «Acceso a Google Drive revocado»**: la autorización se retiró desde la cuenta de Google (o ha caducado). Haz clic en **Conectar Google Drive**: se reutiliza la misma carpeta.
 
-**«Instalación bloqueada»**: ya ha pasado el plazo de 2 horas desde la primera visita. Borra `data/install-window.php` por FTP y recarga la página.
+**«Instalación bloqueada»**: ya ha pasado el plazo de 2 horas desde la primera visita, o el sitio ya estaba instalado y `data/site.php` ha desaparecido (reinstalar siempre exige acceso FTP; tus cuentas, claves y contenidos se conservan). Borra `data/install-window.php` por FTP y recarga la página.
 
 **Dirección del sitio sin verificar (página Seguridad)**: tu servidor no consigue llamarse a sí mismo en la dirección del sitio (cortafuegos del proveedor, DNS aún sin propagar…). El sitio funciona con normalidad, pero sin redirección a la dirección oficial (con o sin www). Haz clic en «Verificar la dirección del sitio» cuando el dominio esté listo.
 

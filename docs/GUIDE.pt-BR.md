@@ -563,7 +563,7 @@ Depois, **Voltar à versão anterior** (na mesma página) restaura a versão ant
 
 Bom saber:
 
-- Um `.htaccess` que você modificou (ou que a sua hospedagem complementou) é **mantido**; o novo modelo fica guardado em `cache/update/htaccess-<version>.txt` para você poder comparar.
+- Um `.htaccess` que você modificou (ou que a sua hospedagem complementou) é **mantido**; o novo modelo fica guardado em `cache/update/htaccess-<version>.txt` para você poder comparar. Da mesma forma, **Voltar à versão anterior** mantém um `.htaccess` ou uma proteção de pasta alterados desde a atualização: a versão anterior deles fica guardada em `cache/update/` e a página avisa você.
 - Os arquivos do Éclair modificados à mão (tema…) são substituídos pela nova versão deles: a página Atualizações lista esses arquivos antes da instalação. Para um ajuste duradouro, use o **CSS personalizado** (Configurações › Aparência).
 - Se a sua hospedagem impede que o servidor chame a si mesmo, o Éclair instala a atualização sem conseguir conferi-la e avisa você: abra o seu site para verificar e volte à versão anterior se for preciso.
 - Se a volta automática não pôde ser concluída, a página avisa (“Retorno incompleto”) e pede que você recoloque no lugar, por FTP, o conteúdo de `cache/update/previous` (veja [Solução de problemas](#solução-de-problemas)).
@@ -638,7 +638,7 @@ Em até 24 horas, **faça login com esse e-mail e essa nova senha**: a senha é 
 
 **Google Drive: “Acesso ao Google Drive revogado”**: a autorização foi retirada pela conta Google (ou expirou). Clique em **Conectar o Google Drive**: a mesma pasta é reutilizada.
 
-**“Instalação bloqueada”**: a janela de 2 horas após a primeira visita já passou. Apague `data/install-window.php` por FTP e recarregue a página.
+**“Instalação bloqueada”**: a janela de 2 horas após a primeira visita já passou, ou o site já estava instalado e o `data/site.php` sumiu (reinstalar sempre exige acesso FTP; suas contas, chaves e conteúdos são mantidos). Apague `data/install-window.php` por FTP e recarregue a página.
 
 **Endereço do site não verificado (página Segurança)**: seu servidor não consegue chamar a si mesmo no endereço do site (firewall da hospedagem, DNS ainda não propagado…). O site funciona normalmente, mas sem redirecionamento para o endereço oficial (com/sem www). Clique em “Verificar endereço do site” quando o domínio estiver pronto.
 

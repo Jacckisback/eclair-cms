@@ -77,6 +77,7 @@ final class AdminUsers
                     Admin::back('users/' . $id, t('Impossible de supprimer ce compte.'), 'bad');
                 }
                 Users::delete($id, (string) $user['id']) || Admin::back('users/' . $id, t('Impossible de supprimer ce compte.'), 'bad');
+                Auth::revokeAccess($id);
                 // Pages en cache qui montrent ce compte (page d'auteur, signatures, Markdown, flux, plan du site) : périmées.
                 Cache::purge();
                 Log::security('user_deleted', ['target' => $target['email']]);
@@ -89,6 +90,7 @@ final class AdminUsers
                     'ver' => (int) ($u['ver'] ?? 1) + 1,
                     'must_change' => true,
                 ] + $u) ?? Admin::back('users', t('Compte introuvable.'), 'bad');
+                Auth::revokeAccess($id);
                 Log::security('password_reset', ['target' => $target['email']]);
                 Session::flash('secret', t('Nouveau mot de passe provisoire pour {name} : {pass}', ['name' => $target['name'], 'pass' => $password]));
                 Http::redirect(admin_url('users/' . $id));
@@ -171,6 +173,9 @@ final class AdminUsers
                     'ver' => (int) ($u['ver'] ?? 1) + 1,
                     'must_change' => false,
                 ] + $u);
+                if ($user) {
+                    Auth::revokeAccess($id);
+                }
                 if (!$user || !Auth::login($user)) {
                     Admin::back('profile', t('Session expirée : réessaie.'), 'bad');
                 }

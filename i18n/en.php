@@ -592,6 +592,7 @@ return [
     'Fichiers manquants' => 'Missing files',
     'Fichiers modifiés' => 'Modified files',
     'Fichiers personnalisés conservés tels quels : {f}.' => 'Customized files kept as is: {f}.',
+    'Fichiers modifiés depuis la mise à jour, conservés tels quels : {f}. Leur version d’avant est rangée dans cache/update.' => 'Files changed since the update, kept as is: {f}. Their previous version is saved in cache/update.',
     'Fichiers suspects' => 'Suspicious files',
     'Filet fin' => 'Thin border',
     'Filets entre les sections' => 'Rules between sections',

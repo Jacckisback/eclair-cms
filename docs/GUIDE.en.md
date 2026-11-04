@@ -563,7 +563,7 @@ Afterwards, **Roll back to the previous version** (same page) restores the old v
 
 Good to know:
 
-- A `.htaccess` that you've modified (or that your host has added to) is **kept**; the new template is saved in `cache/update/htaccess-<version>.txt` so you can compare them.
+- A `.htaccess` that you've modified (or that your host has added to) is **kept**; the new template is saved in `cache/update/htaccess-<version>.txt` so you can compare them. Likewise, **Roll back to the previous version** keeps a `.htaccess` or folder protection file changed since the update: its previous version is saved in `cache/update/` and the page tells you.
 - Éclair files edited by hand (theme…) are replaced by their new version: the Updates page lists them before installing. For a lasting tweak, use **Custom CSS** (Settings › Appearance).
 - If your host prevents the server from calling itself, Éclair installs the update without being able to check it, and tells you so: open your site to check it, and roll back if needed.
 - If the automatic rollback couldn't be completed, the page says so (“Rollback incomplete”) and tells you to put back the contents of `cache/update/previous` via FTP (see [Troubleshooting](#troubleshooting)).
@@ -638,7 +638,7 @@ Within 24 hours, **log in with that email and that new password**: the password 
 
 **Google Drive: “Google Drive access revoked”**: the authorization was withdrawn from the Google account (or has expired). Click **Connect Google Drive**: the same folder is reused.
 
-**“Installation locked”**: the 2-hour window after the first visit has passed. Delete `data/install-window.php` via FTP and reload the page.
+**“Installation locked”**: the 2-hour window after the first visit has passed, or the site was already installed and `data/site.php` has disappeared (reinstalling always requires FTP access; your accounts, keys and content are kept). Delete `data/install-window.php` via FTP and reload the page.
 
 **Site address not verified (Security page)**: your server can't call itself on the site's address (host firewall, DNS not propagated yet…). The site works normally, but without redirects to the official address (www / non-www). Click “Verify the site address” once the domain is in place.
 

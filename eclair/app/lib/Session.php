@@ -92,6 +92,29 @@ final class Session implements \SessionHandlerInterface, \SessionUpdateTimestamp
         ]);
     }
 
+    /**
+     * Ferme les sessions d'un compte, sauf celle de cette requête : leurs fichiers sont effacés (Auth::revokeAccess). Le
+     * compte se reconnaît à son identifiant tel que PHP l'enregistre, dans $_SESSION['uid'] ou dans une connexion qui attend
+     * le code de double authentification, quel que soit le format des sessions du serveur (php, php_serialize, php_binary).
+     */
+    public static function revokeUser(string $uid): void
+    {
+        $current = session_status() === PHP_SESSION_ACTIVE ? hash('sha256', (string) session_id()) . '.php' : '';
+        $value = 's:' . strlen($uid) . ':"' . $uid . '";';
+        $marks = ['uid|' . $value, '"uid";' . $value, "\x03uid" . $value];
+        Store::locked(static function () use ($current, $marks): void {
+            foreach (glob(ECLAIR_DATA . '/sessions/*.php') ?: [] as $file) {
+                $raw = basename($file) === $current ? '' : (string) @file_get_contents($file);
+                foreach ($marks as $mark) {
+                    if ($raw !== '' && str_contains($raw, $mark)) {
+                        @unlink($file);
+                        break;
+                    }
+                }
+            }
+        });
+    }
+
     /** Message affiché une seule fois après une redirection. */
     public static function flash(string $type, string $message): void
     {
