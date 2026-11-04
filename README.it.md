@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip"><img src="https://img.shields.io/badge/scarica-v1.13.0-5b3cbc?style=for-the-badge" alt="Scarica Éclair 1.13.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip"><img src="https://img.shields.io/badge/scarica-v1.14.0-5b3cbc?style=for-the-badge" alt="Scarica Éclair 1.14.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o successivo">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-nessuno-14122b?style=for-the-badge" alt="Nessun database">
@@ -63,7 +63,7 @@ WordPress fa tutto, ma ha bisogno di un database, di plugin per la SEO, la sicur
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleggero</h3>
-      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>691 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
+      Nessun database: i tuoi contenuti sono file protetti. Un archivio di <b>730 KB</b>, zero dipendenze, zero cookie sul sito pubblico.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Semplicissimo</h3>
@@ -266,7 +266,7 @@ Istruzioni: [guida, sezione Aggiornare, fare backup, traslocare](docs/GUIDE.it.m
 |---|---|---|
 | **Installazione** | Creare un database MySQL, poi avviare la procedura guidata | ✅ Caricare la cartella, rispondere a 4 domande |
 | **Database** | MySQL obbligatorio | ✅ Nessuno (file protetti) |
-| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 691 KB |
+| **Archivio da scaricare** | ≈ 35 MB[^wp] | ✅ 730 KB |
 | **SEO, sitemap, dati strutturati** | Un plugin da installare e mantenere | ✅ Integrati |
 | **GEO: llms.txt, Markdown, bot IA** | Plugin, raramente completi | ✅ Integrato |
 | **Pagine pubbliche** | Generate a ogni visita, salvo con un plugin di cache | ✅ Servite da una cache statica |
@@ -312,6 +312,8 @@ Su un vero hosting condiviso, aggiungi la latenza di rete e l’avvio di PHP del
         <li><b>Reindirizzamenti 301 automatici</b> quando un indirizzo cambia, e un gestore dei reindirizzamenti per migrare un vecchio sito.</li>
         <li><b>Vecchio sito</b>: la Wayback Machine ritrova gli indirizzi che il tuo dominio aveva un tempo e l’IA ridà a ciascuno una pagina nuova, così i link che puntano ancora lì tornano a contare.</li>
         <li><b>Link di affiliazione</b>: avviso pubblicitario e <code>rel="sponsored"</code> aggiunti in automatico (frase Amazon compresa); l’IA ne ricava un confronto o una guida all’acquisto, come bozza.</li>
+        <li><b>Google Discover</b>: controllo «pronto per Discover» dei tuoi articoli (immagini grandi, titoli, autori), tendenze del giorno di Google Trends per trovare idee e pubblicità AdSense in regola solo sugli articoli (consenso, <code>ads.txt</code>, etichetta «Pubblicità»).</li>
+        <li><b>Uso del sito</b>: magazine, affiliazione, vecchio sito da rilanciare, sito vetrina o blog… la bacheca mette per primi gli strumenti del tuo uso.</li>
         <li><b>IndexNow</b>: Bing e gli altri motori compatibili vengono avvisati a ogni pubblicazione.</li>
       </ul>
     </td>
@@ -380,7 +382,7 @@ Tutti i dettagli nella [guida, sezione Sicurezza](docs/GUIDE.it.md#sicurezza).
   <img src="docs/images/it/install.webp" alt="Installazione in tre passaggi: carica la cartella, rispondi a quattro domande, il sito è online" width="100%">
 </p>
 
-1. **Scarica** l’archivio [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip) (691 KB) ed estrailo.
+1. **Scarica** l’archivio [`eclair-cms-1.14.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip) (730 KB) ed estrailo.
 2. **Carica il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…), compresi i file nascosti `.htaccess`.
 3. **Apri l’indirizzo del tuo sito**: parte la procedura guidata. Quattro domande, un po’ di coriandoli, e il tuo sito è online con le sue prime pagine.
 

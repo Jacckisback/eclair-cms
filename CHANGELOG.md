@@ -2,7 +2,9 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 1.14.0 — 2026-11-04
+
+Google Discover release: get your posts ready for Google's Discover feed, find ideas in today's trends, show compliant AdSense ads on posts, and let the dashboard adapt to what the site is for (media, affiliate, old site to relaunch, business site…). Nothing changes on public pages until ads are turned on, apart from the structured data of posts with a large featured image. Sites on 1.13.x update in one click from Administration › Updates, after a backup.
 
 ### Added
 
@@ -18,11 +20,21 @@ All notable changes to Éclair CMS are recorded here. Release notes for each ver
 
 - **Posts:** when the featured image is at least 1200 px wide, the `BlogPosting` structured data lists the original image first, uncropped, before the 1200×630 share image (Google Discover recommends large images, crops them itself and advises against an aspect ratio applied automatically). Pages, and posts with a smaller image or none, are unchanged.
 
+### Still guaranteed
+
+- **Your content does not move.** Discover, today's trends and site purposes only add advice, ideas in the planner and a dashboard card; ads appear only once you turn them on.
+- **Public pages stay identical to the byte** while advertising is not set up, with one exception: posts whose featured image is at least 1200 px wide list the original image first in their structured data.
+- **Every page without ads keeps Éclair's strict security policy**, and Éclair's public CSS and JavaScript are unchanged.
+- **The AI never publishes on its own**: ideas drawn from the trends land in the planner, as ideas.
+- **Automated checks** on the source and on the archive.
+- The 1.13.x → 1.14.0 update is signed (Ed25519) and verified before anything is touched, with automatic rollback.
+
 ### For maintainers
 
 - New files `app/lib/Ads.php`, `app/lib/Discover.php`, `app/lib/Trends.php`, `app/lib/AdminDiscover.php`, `app/admin/views/discover.php`, `app/theme/ads.css`; new data `data/trends.php` (latest feed read). New settings `ads` (`client`, `enabled`, `consent`, `auto`, `slot`, `positions`, `txt`) and `discover.geo`; new content option `options.noads`. New routes (`content` right; the advertising form needs the `settings` right): `GET /discover`, `POST /discover`, `POST /api/discover/trends`, `POST /api/discover/ideas`. `Security::headers()` takes an optional nonce; `Blocks::html()` accepts `$ctx['after']` (HTML inserted after a block); `Seo::pageType()` is now public. The Google Trends address (`https://trends.google.com`) can be replaced through `ECLAIR_AI_ENDPOINTS['trends']`, as the tests do with `tests/fake-trends.php`.
 - Site purposes: new file `app/lib/Usage.php`; new setting `usage` (one of `Starter::TYPES`, saved at installation, editable in Settings › General); `Starter::TYPES` gains `media`, `affiliate` and `revival`, which create a blog's starter content.
-- 59 new checks: `tests/discover.php` (44, with a fake Google Trends in `tests/fake-trends.php`) and `tests/usage.php` (15). The suite passes on the source (1,158 checks).
+- 59 new checks: `tests/discover.php` (44, with a fake Google Trends in `tests/fake-trends.php`) and `tests/usage.php` (15). The suite passes on the source and on the built archive (1,158 checks).
+- Archive: 730 KB (+39 KB, of which 21 KB are translations), 1.39 MB once unzipped. README banners and installation visuals show the new size in all 7 languages.
 
 ## 1.13.0 — 2026-11-04
 

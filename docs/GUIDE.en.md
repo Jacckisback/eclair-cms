@@ -15,7 +15,7 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 5. [Art directions](#art-directions) (including [One-click tweaks](#one-click-tweaks), [Imagine my direction with AI](#imagine-my-direction-with-ai) and the [Design score](#design-score))
 6. [Themes](#themes)
 7. [Shop](#shop)
-8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai), the [Editorial calendar](#editorial-calendar), the [Old site](#old-site-wayback-machine) and [Affiliate links](#affiliate-links))
+8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai), the [Editorial calendar](#editorial-calendar), the [Old site](#old-site-wayback-machine), [Affiliate links](#affiliate-links) and [Google Discover](#google-discover))
 9. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
 10. [Security](#security)
 11. [Updating, backing up, moving](#updating-backing-up-moving) (including [One-click update](#one-click-update) and [Google Drive backups](#google-drive-backups))
@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip) archive (691 KB) and unzip it.
+1. Download the [`eclair-cms-1.14.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip) archive (730 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -47,7 +47,7 @@ The wizard checks all of this for you and explains what to fix.
 
 Installing in a subfolder (`example.com/site/`): just upload the files to that subfolder, everything is detected automatically.
 
-### The 4 site types
+### The 7 site types
 
 | Type | What gets created |
 |---|---|
@@ -55,12 +55,17 @@ Installing in a subfolder (`example.com/site/`): just upload the files to that s
 | ✍️ Blog | Home = latest posts, About, Contact, a “Guides” category, legal pages |
 | 🧑‍💻 Freelancer / portfolio | Home in your name, skills, About, Blog, Contact, legal pages |
 | 🎯 Landing page | A sales page (hero, features, FAQ, form) + legal pages, no blog |
+| 🧭 Media / Google Discover | Like a blog (home = latest posts, About, Contact, legal pages); the dashboard puts Discover, today's trends and advertising first |
+| 🛍️ Affiliate | Like a blog; the dashboard puts your affiliate links and AI-written articles first |
+| 🕰️ Relaunch an old site | Like a blog; the dashboard starts by finding your domain's old addresses (Old site) |
 
 Starter content is available in English, French and Spanish; a site in German, Italian or Portuguese starts with the English content. The legal pages contain an outline to complete (French LCEN, Spanish LSSI, GDPR).
 
+The chosen type becomes the **site purpose** (Settings › General, editable at any time): the dashboard opens with a card gathering that purpose's tools and their state. Nothing changes on the public site.
+
 ### Right after installation
 
-The dashboard shows a “Getting started” checklist: logo and color, home page, first post, author profile, two-factor authentication, legal notice, Google Search Console. The next step is highlighted in yellow, and each one says in a sentence why it matters.
+The dashboard shows a “Getting started” checklist: logo and color, home page, first post, author profile, two-factor authentication, legal notice, Google Search Console. The next step is highlighted in yellow, and each one says in a sentence why it matters. For a media site, an affiliate site or an old site, it starts with the step that matters for that purpose.
 
 ---
 
@@ -131,6 +136,9 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Plan my articles, have the AI suggest and write them | **Planner** |
 | Give the old addresses of my domain a page again | **Old site** |
 | Manage my affiliate links, turn them into an article with the AI | **Affiliate links** |
+| Get my posts ready for Google Discover, find ideas in today's trends | **Discover** |
+| Show AdSense ads on my posts | **Discover** › Advertising |
+| Adapt the dashboard to my purpose | Settings › General › Site purpose |
 | Open the shop | Settings › Shop |
 | Add a product | Content › **+ Product** |
 | Choose the home page | Settings › General |
@@ -431,6 +439,18 @@ The AI relies on your editorial profile, the list of your published pages and po
 - **Write an article with the AI**: tick links and choose a comparison (2 to 10 links), a product overview or a buying guide. The AI writes only from the names and your notes: it invents no price, no review and no test result, and leaves "[To complete: …]" where your opinion matters. The draft opens in the editor; nothing is published.
 
 Nothing changes on your site until you save a first link.
+
+### Google Discover
+
+**Discover** menu: what helps your posts appear in Google's Discover feed, today's trends, and advertising. Google offers no setting to “rank” in Discover: an indexed article is eligible automatically ([Google's recommendations](https://developers.google.com/search/docs/appearance/google-discover)).
+
+- **Ready for Discover**: the site (open to search engines, HTTPS, logo, “About” and “Contact” pages) and your 100 latest posts are checked: an image at least 1200 px wide (never the logo), a title without sensationalism (capitals, “!!”), an introduced author, length. A “Fix” link for each point. The structured data gives the large original image, uncropped.
+- **Today's trends**: the searches rising on Google in the chosen country (public Google Trends feed, read at most once an hour), with the press headlines. “Add to the planner” turns one into an idea dated today. With the AI assistant, “Suggest ideas for my site” keeps only the trends related to your topic (often none) and suggests at most 4 useful, lasting articles, never a news story.
+- **Advertising (Google AdSense)**, administrators: your publisher ID, auto ads and/or an ad unit that Éclair places between two blocks of the text (after the 2nd paragraph, in the middle of long posts, at the end), with the “Advertisements” label Google requires and its space reserved. Posts only, never on pages or in the preview; a “No ads on this post” checkbox in the editor.
+- **Consent**: advertising can only be turned on once the “European regulations” message is published in AdSense › Privacy & messaging. Google requires a certified consent platform for European visitors ([AdSense help](https://support.google.com/adsense/answer/13554116)); its own is shown by the AdSense code.
+- **ads.txt**: as soon as the ID is saved, Éclair publishes `/ads.txt` and the tag Google uses to verify your site.
+
+> ⚠️ Google's scripts slow down the pages that carry ads (Lighthouse will no longer score 100 there): Éclair reserves the space for ads and loads nothing on the other pages. Never click your own ads: Google forbids it.
 
 ### Touch-ups in the editor
 
@@ -750,6 +770,8 @@ tests/ai-visits.php      1.12 AI bots (detection, log written by index.php witho
 tests/plan.php           1.12 editorial calendar (slots, AI ideas and writing, cost, automatic writing, scheduled task)
 tests/wayback.php        old site in 1.13 (fake Wayback Machine: domain addresses, sorting, brand-new page by the AI, redirects, publishing)
 tests/affiliate.php      affiliate links in 1.13 (advertising disclosure, Amazon statement, rel="sponsored", article written by the AI)
+tests/discover.php       Google Discover in 1.14 (ready for Discover; AdSense ads: consent, ads.txt, label, nonce; fake Google Trends, AI ideas)
+tests/usage.php          site purposes in 1.14 (site types, adapted dashboard, setting)
 tests/update.php         one-click update (fake signed channel: signature, booby-trapped archive, syntax, automatic and manual rollback)
 tests/drive.php          Google Drive backups (tests/fake-google.php: fake OAuth and fake Drive, chunked upload, resume)
 tests/sec-*.php          1.10.3 security regression tests
@@ -790,7 +812,7 @@ A signed release can only be built in a Git checkout and only includes tracked f
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 690 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 730 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

@@ -10,7 +10,7 @@
 declare(strict_types=1);
 
 define('ECLAIR', true);
-define('ECLAIR_VERSION', '1.13.0');
+define('ECLAIR_VERSION', '1.14.0');
 define('ECLAIR_ROOT', __DIR__);
 
 (static function (): void {

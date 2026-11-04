@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip"><img src="https://img.shields.io/badge/download-v1.13.0-5b3cbc?style=for-the-badge" alt="下载 Éclair 1.13.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip"><img src="https://img.shields.io/badge/download-v1.14.0-5b3cbc?style=for-the-badge" alt="下载 Éclair 1.14.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -63,7 +63,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
     </td>
     <td width="33%" valign="top">
       <h3>🪶 超轻量</h3>
-      无需数据库：内容保存在受保护的文件中。安装包仅 <b>691 KB</b>，零依赖，公开网站零 Cookie。
+      无需数据库：内容保存在受保护的文件中。安装包仅 <b>730 KB</b>，零依赖，公开网站零 Cookie。
     </td>
     <td width="33%" valign="top">
       <h3>😊 简单易用</h3>
@@ -266,7 +266,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 |---|---|---|
 | **安装** | 先创建 MySQL 数据库，再运行安装向导 | ✅ 上传文件夹，回答 4 个问题 |
 | **数据库** | 必须使用 MySQL | ✅ 无需（受保护的文件） |
-| **安装包大小** | ≈ 35 MB[^wp] | ✅ 691 KB |
+| **安装包大小** | ≈ 35 MB[^wp] | ✅ 730 KB |
 | **SEO、站点地图、结构化数据** | 需要安装并维护插件 | ✅ 内置 |
 | **GEO：llms.txt、Markdown、AI 爬虫** | 依赖插件，很少完整 | ✅ 内置 |
 | **公开页面** | 每次访问都重新生成，除非安装缓存插件 | ✅ 从静态缓存直接输出 |
@@ -312,6 +312,8 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
         <li>网址变更时<b>自动 301 重定向</b>，另有重定向管理器，方便迁移旧网站。</li>
         <li><b>旧网站</b>：Wayback Machine 找回你的域名过去的网址，AI 为每个网址写一个全新的页面，让仍指向它们的链接重新发挥作用。</li>
         <li><b>联盟推广链接</b>：自动添加广告声明和 <code>rel="sponsored"</code>（含亚马逊要求的声明）；AI 可据此生成对比或选购指南草稿。</li>
+        <li><b>Google Discover</b>：检查文章是否“为 Discover 做好准备”（大图、标题、作者），用 Google Trends 的今日趋势寻找选题，并只在文章中展示合规的 AdSense 广告（同意消息、<code>ads.txt</code>、“广告”标签）。</li>
+        <li><b>网站用途</b>：媒体、联盟推广、要重启的旧网站、展示网站或博客……仪表板会优先显示你这种用途的工具。</li>
         <li><b>IndexNow</b>：每次发布都会通知 Bing 及其他兼容的搜索引擎。</li>
       </ul>
     </td>
@@ -380,7 +382,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip)（691 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.14.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip)（730 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 

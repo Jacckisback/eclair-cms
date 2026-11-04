@@ -15,7 +15,7 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 5. [Art Directions](#art-directions) (inklusive [Feinschliff mit einem Klick](#feinschliff-mit-einem-klick), [Meine Richtung mit KI entwerfen](#meine-richtung-mit-ki-entwerfen) und dem [Design-Score](#design-score))
 6. [Themes](#themes)
 7. [Shop](#shop)
-8. [KI-Assistent](#ki-assistent) (inklusive [Eine Seite mit KI erstellen](#eine-seite-mit-ki-erstellen), [Redaktionsplan](#redaktionsplan), [Alte Website](#alte-website-wayback-machine) und [Affiliate-Links](#affiliate-links))
+8. [KI-Assistent](#ki-assistent) (inklusive [Eine Seite mit KI erstellen](#eine-seite-mit-ki-erstellen), [Redaktionsplan](#redaktionsplan), [Alte Website](#alte-website-wayback-machine), [Affiliate-Links](#affiliate-links) und [Google Discover](#google-discover))
 9. [MCP-Connector (Claude und ChatGPT)](#mcp-connector-claude-und-chatgpt)
 10. [Sicherheit](#sicherheit)
 11. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen) (inklusive [Update mit einem Klick](#update-mit-einem-klick) und [Backups auf Google Drive](#backups-auf-google-drive))
@@ -37,7 +37,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip) (691 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.14.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip) (730 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -47,7 +47,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 Installation in einem Unterordner (`beispiel.de/website/`): Lade die Dateien einfach in diesen Unterordner hoch, alles wird automatisch erkannt.
 
-### Die 4 Website-Typen
+### Die 7 Website-Typen
 
 | Typ (im Assistenten) | Was angelegt wird |
 |---|---|
@@ -55,12 +55,17 @@ Installation in einem Unterordner (`beispiel.de/website/`): Lade die Dateien ein
 | ✍️ Blog | Startseite = neueste Artikel, Über uns, Kontakt, Kategorie „Guides“, rechtliche Seiten |
 | 🧑‍💻 Freelancer / Portfolio | Startseite mit deinem Namen, Kompetenzen, Über mich, Blog, Kontakt, rechtliche Seiten |
 | 🎯 Landingpage | Eine Verkaufsseite (Hero, Vorteile, FAQ, Formular) + rechtliche Seiten, ohne Blog |
+| 🧭 Magazin / Google Discover | Wie ein Blog (Startseite = neueste Artikel, Über uns, Kontakt, rechtliche Seiten); das Dashboard stellt Discover, die Trends des Tages und die Werbung nach vorn |
+| 🛍️ Affiliate | Wie ein Blog; das Dashboard stellt deine Affiliate-Links und die von der KI geschriebenen Artikel nach vorn |
+| 🕰️ Eine alte Website neu starten | Wie ein Blog; das Dashboard beginnt damit, die alten Adressen deiner Domain zu finden (Alte Website) |
 
 Die Startinhalte gibt es auf Französisch, Spanisch und Englisch: Eine Website auf Deutsch startet mit den englischen Texten, die du dann übersetzt. Die rechtlichen Seiten enthalten ein Gerüst nach französischem (LCEN) und spanischem Recht (LSSI) sowie der DSGVO; die Pflichtangaben deines Landes (zum Beispiel das Impressum) musst du selbst ergänzen.
 
+Der gewählte Typ wird zum **Zweck der Website** (Einstellungen › Allgemein, jederzeit änderbar): Das Dashboard öffnet sich mit einer Karte, die die Werkzeuge dieses Zwecks und ihren Stand zusammenfasst. Auf der öffentlichen Website ändert sich nichts.
+
 ### Direkt nach der Installation
 
-Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Startseite, erster Artikel, Autorenprofil, Zwei-Faktor-Authentifizierung, rechtliche Angaben, Google Search Console. Der nächste Schritt ist gelb markiert, und jeder sagt in einem Satz, wozu er dient.
+Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Startseite, erster Artikel, Autorenprofil, Zwei-Faktor-Authentifizierung, rechtliche Angaben, Google Search Console. Der nächste Schritt ist gelb markiert, und jeder sagt in einem Satz, wozu er dient. Bei einem Magazin, einer Affiliate-Website oder einer alten Website beginnt sie mit dem Schritt, der zu diesem Zweck gehört.
 
 ---
 
@@ -131,6 +136,9 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Meine Artikel planen, von der KI vorschlagen und schreiben lassen | **Planung** |
 | Den alten Adressen meiner Domain wieder eine Seite geben | **Alte Website** |
 | Meine Affiliate-Links verwalten und mit der KI einen Artikel daraus machen | **Affiliate-Links** |
+| Meine Artikel für Google Discover vorbereiten, Ideen in den Trends des Tages finden | **Discover** |
+| AdSense-Werbung auf meinen Artikeln zeigen | **Discover** › Werbung |
+| Das Dashboard an meinen Zweck anpassen | Einstellungen › Allgemein › Zweck der Website |
 | Den Shop öffnen | Einstellungen › Shop |
 | Ein Produkt hinzufügen | Inhalte › **+ Produkt** |
 | Die Startseite festlegen | Einstellungen › Allgemein |
@@ -431,6 +439,18 @@ Menü **Affiliate-Links**: deine Affiliate-Links an einem Ort, mit deinen Notize
 - **Einen Artikel mit der KI schreiben**: Wähle Links aus und entscheide dich für einen Vergleich (2 bis 10 Links), eine Produktvorstellung oder eine Kaufberatung. Die KI schreibt nur anhand der Namen und deiner Notizen: Sie erfindet weder Preise noch Bewertungen noch Testergebnisse und setzt „[Zu ergänzen: …]“ dort, wo deine Meinung zählt. Der Entwurf öffnet sich im Editor; nichts wird veröffentlicht.
 
 Solange du keinen Link speicherst, ändert sich auf deiner Website nichts.
+
+### Google Discover
+
+Menü **Discover**: was deinen Artikeln hilft, im Discover-Feed von Google zu erscheinen, die Trends des Tages und die Werbung. Google bietet keine Einstellung, um sich in Discover zu „platzieren“: Ein indexierter Artikel ist automatisch berechtigt ([Empfehlungen von Google](https://developers.google.com/search/docs/appearance/google-discover?hl=de)).
+
+- **Bereit für Discover**: Geprüft werden die Website (für Suchmaschinen geöffnet, HTTPS, Logo, Seiten „Über uns“ und „Kontakt“) und deine 100 neuesten Artikel: Bild mit mindestens 1200 px Breite (nie das Logo), Titel ohne Sensationsmache (Großbuchstaben, „!!“), vorgestellter Autor, Länge. Ein Link „Beheben“ für jeden Punkt. Die strukturierten Daten liefern das große Originalbild, unbeschnitten.
+- **Trends des Tages**: die Suchanfragen, die bei Google im gewählten Land steigen (öffentlicher Feed von Google Trends, höchstens einmal pro Stunde abgerufen), mit den Schlagzeilen der Presse. „Zur Planung hinzufügen“ macht daraus eine Idee mit dem heutigen Datum. Mit dem KI-Assistenten behält „Ideen für meine Website vorschlagen“ nur die Trends, die dein Thema betreffen (oft keine), und schlägt höchstens 4 nützliche, dauerhafte Artikel vor, nie einen Nachrichtenartikel.
+- **Werbung (Google AdSense)**, Administratoren: deine Publisher-ID, automatische Anzeigen und/oder ein Anzeigenblock, den Éclair zwischen zwei Textblöcke setzt (nach dem 2. Absatz, in der Mitte langer Artikel, am Ende), mit der von Google verlangten Kennzeichnung „Werbung“ und reserviertem Platz. Nur auf Artikeln, nie auf Seiten oder in der Vorschau; Kästchen „Keine Werbung in diesem Artikel“ im Editor.
+- **Einwilligung**: Die Werbung lässt sich erst aktivieren, wenn die Mitteilung „Europäische Vorschriften“ in AdSense › Datenschutz und Mitteilungen veröffentlicht ist. Google verlangt für europäische Besucher eine zertifizierte Einwilligungsplattform ([AdSense-Hilfe](https://support.google.com/adsense/answer/13554116?hl=de)); die eigene wird über den AdSense-Code angezeigt.
+- **ads.txt**: Sobald die ID gespeichert ist, veröffentlicht Éclair `/ads.txt` und das Tag, mit dem Google deine Website bestätigt.
+
+> ⚠️ Die Skripte von Google verlangsamen Seiten mit Werbung (Lighthouse zeigt dort keine 100 mehr): Éclair reserviert den Platz der Anzeigen und lädt auf den anderen Seiten nichts. Klicke nie auf deine eigenen Anzeigen: Google verbietet das.
 
 ### Feinschliff im Editor
 
@@ -750,6 +770,8 @@ tests/ai-visits.php      KI-Bots von 1.12 (Erkennung, Protokoll von index.php oh
 tests/plan.php           Redaktionsplan von 1.12 (Termine, Ideen und Texte der KI, Kosten, automatisches Schreiben, geplante Aufgabe)
 tests/wayback.php        alte Website in 1.13 (simulierte Wayback Machine: Adressen der Domain, Einordnung, neue Seite durch die KI, Weiterleitungen, Veröffentlichung)
 tests/affiliate.php      Affiliate-Links in 1.13 (Werbehinweis, Amazon-Satz, rel="sponsored", von der KI geschriebener Artikel)
+tests/discover.php       Google Discover in 1.14 (bereit für Discover; AdSense-Werbung: Einwilligung, ads.txt, Kennzeichnung, Nonce; simuliertes Google Trends, Ideen der KI)
+tests/usage.php          Website-Zwecke in 1.14 (Website-Typen, angepasstes Dashboard, Einstellung)
 tests/update.php         Update mit einem Klick (simulierter signierter Kanal: Signatur, präpariertes Archiv, Syntax, automatische und manuelle Rückkehr)
 tests/drive.php          Backups auf Google Drive (tests/fake-google.php: simuliertes OAuth und simuliertes Drive, Upload in Teilen, Wiederaufnahme)
 tests/sec-*.php          Sicherheits-Regressionstests von 1.10.3
@@ -790,7 +812,7 @@ Eine signierte Version lässt sich nur in einem Git-Checkout bauen und enthält 
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (leg dir eine Kopie an: Die Integritätsprüfung meldet diese Dateien als geändert, und ein Update ersetzt sie; die Seite „Updates“ listet sie vorher auf). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 690 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
+Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (leg dir eine Kopie an: Die Integritätsprüfung meldet diese Dateien als geändert, und ein Update ersetzt sie; die Seite „Updates“ listet sie vorher auf). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 730 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
 
 ---
 

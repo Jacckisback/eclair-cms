@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip"><img src="https://img.shields.io/badge/download-v1.13.0-5b3cbc?style=for-the-badge" alt="Éclair 1.13.0 herunterladen"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip"><img src="https://img.shields.io/badge/download-v1.14.0-5b3cbc?style=for-the-badge" alt="Éclair 1.14.0 herunterladen"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 oder neuer">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/Datenbank-keine-14122b?style=for-the-badge" alt="Keine Datenbank">
@@ -63,7 +63,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleicht</h3>
-      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>691 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
+      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>730 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
@@ -266,7 +266,7 @@ Anleitung: [Handbuch, Abschnitt Aktualisieren, sichern, umziehen](docs/GUIDE.de.
 |---|---|---|
 | **Installation** | MySQL-Datenbank anlegen, dann den Assistenten starten | ✅ Ordner hochladen, 4 Fragen beantworten |
 | **Datenbank** | MySQL erforderlich | ✅ Keine (geschützte Dateien) |
-| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 691 KB |
+| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 730 KB |
 | **SEO, Sitemap, strukturierte Daten** | Ein Plugin, das installiert und gepflegt werden muss | ✅ Integriert |
 | **GEO: llms.txt, Markdown, KI-Bots** | Plugins, selten vollständig | ✅ Integriert |
 | **Öffentliche Seiten** | Bei jedem Aufruf neu erzeugt, außer mit Cache-Plugin | ✅ Aus einem statischen Cache ausgeliefert |
@@ -312,6 +312,8 @@ Auf echtem Shared Hosting kommen die Netzwerklatenz und der PHP-Start deines Hos
         <li><b>Automatische 301-Weiterleitungen</b>, wenn sich eine Adresse ändert, und ein Weiterleitungsmanager für den Umzug einer alten Website.</li>
         <li><b>Alte Website</b>: Die Wayback Machine findet die Adressen, die deine Domain früher hatte, und die KI gibt jeder eine neue Seite, damit Links, die noch dorthin zeigen, wieder zählen.</li>
         <li><b>Affiliate-Links</b>: Werbehinweis und <code>rel="sponsored"</code> werden automatisch ergänzt (Amazon-Satz inklusive); die KI macht daraus einen Vergleich oder eine Kaufberatung, als Entwurf.</li>
+        <li><b>Google Discover</b>: Prüfung „bereit für Discover“ deiner Artikel (große Bilder, Titel, Autoren), die Trends des Tages aus Google Trends für neue Ideen und regelkonforme AdSense-Werbung nur auf Artikeln (Einwilligung, <code>ads.txt</code>, Kennzeichnung „Werbung“).</li>
+        <li><b>Zweck der Website</b>: Magazin, Affiliate, alte Website zum Neustart, Unternehmenswebsite oder Blog … das Dashboard zeigt die Werkzeuge deines Zwecks zuerst.</li>
         <li><b>IndexNow</b>: Bing und andere kompatible Suchmaschinen werden bei jeder Veröffentlichung benachrichtigt.</li>
       </ul>
     </td>
@@ -380,7 +382,7 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
   <img src="docs/images/de/install.webp" alt="Installation in drei Schritten: Ordner hochladen, vier Fragen beantworten, die Website ist online" width="100%">
 </p>
 
-1. **Lade** das Archiv [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip) (691 KB) **herunter** und entpacke es.
+1. **Lade** das Archiv [`eclair-cms-1.14.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip) (730 KB) **herunter** und entpacke es.
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 
