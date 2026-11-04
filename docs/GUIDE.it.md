@@ -15,7 +15,7 @@ Tutto quello che c’è da sapere per installare, usare, proteggere e mantenere 
 5. [Direzioni artistiche](#direzioni-artistiche) (compresi i [Ritocchi in un clic](#ritocchi-in-un-clic), [Immagina la mia direzione con l’IA](#immagina-la-mia-direzione-con-lia) e il [Punteggio Design](#punteggio-design))
 6. [Temi](#temi)
 7. [Negozio](#negozio)
-8. [Assistente IA](#assistente-ia) (compreso [Creare una pagina con l’IA](#creare-una-pagina-con-lia) e il [Piano editoriale](#piano-editoriale))
+8. [Assistente IA](#assistente-ia) (compreso [Creare una pagina con l’IA](#creare-una-pagina-con-lia), il [Piano editoriale](#piano-editoriale), il [Vecchio sito](#vecchio-sito-wayback-machine) e l’[Affiliazione](#affiliazione))
 9. [Connettore MCP (Claude e ChatGPT)](#connettore-mcp-claude-e-chatgpt)
 10. [Sicurezza](#sicurezza)
 11. [Aggiornare, fare backup, traslocare](#aggiornare-fare-backup-traslocare) (compresi l’[Aggiornamento in un clic](#aggiornamento-in-un-clic) e i [Backup su Google Drive](#backup-su-google-drive))
@@ -37,7 +37,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) (659 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip) (691 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
@@ -129,6 +129,8 @@ Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagi
 | Attivare o disattivare le micro-animazioni | Impostazioni › Aspetto › Micro-animazioni (sito) · Il mio profilo › Interfaccia (amministrazione) |
 | Vedere quali IA leggono il mio sito | **Bot IA** |
 | Pianificare i miei articoli, farli proporre e scrivere dall’IA | **Pianificazione** |
+| Ridare una pagina ai vecchi indirizzi del mio dominio | **Vecchio sito** |
+| Gestire i miei link di affiliazione e ricavarne un articolo con l’IA | **Affiliazione** |
 | Aprire il negozio | Impostazioni › Negozio |
 | Aggiungere un prodotto | Contenuti › **+ Prodotto** |
 | Scegliere la home page | Impostazioni › Generali |
@@ -406,6 +408,29 @@ Menu **Pianificazione**: i tuoi prossimi articoli in un calendario mensile (pubb
 - **Scrivi**: l’IA scrive l’idea come bozza completa, con lo stesso motore di «Crea con l’IA», poi si apre l’editor. Rileggi, completa i «[Da completare: …]», programma.
 - **Costo**: ogni pulsante mostra il costo stimato (≈ 0,035 $ per serie di idee e ≈ 0,08 $ per articolo con Claude Sonnet 5.5); dopo, i token e i dollari spesi vengono annotati sull’idea e nel totale della pianificazione, e conteggiati nel budget dell’assistente.
 - **Scrittura automatica** (amministratori, disattivata per impostazione predefinita): l’IA scrive l’idea in scadenza da 1 a 14 giorni prima della data, una alla volta, nel budget, quando un amministratore apre l’amministrazione. Per non dipenderne, fai chiamare ogni ora l’indirizzo segreto indicato (cron del tuo hosting, cron-job.org…). «Programma senza rilettura» esiste ma è sconsigliato: Google penalizza i testi pubblicati in serie senza revisione umana, e un articolo che contiene ancora «Da completare» attende sempre la tua rilettura.
+
+### Vecchio sito (Wayback Machine)
+
+Menu **Vecchio sito** (amministratori): quando riprendi un dominio che ha già avuto un sito, ci sono ancora link che puntano ai suoi vecchi indirizzi. Éclair li ritrova nella Wayback Machine e ridà loro una pagina.
+
+- **Cercare**: Éclair interroga l’indice della Wayback Machine solo per il dominio del sito (www compreso), fino alla data scelta. Vengono esclusi la home page, gli indirizzi con parametri (`?p=12`), gli altri domini e gli indirizzi `.php` (rifiutati dal `.htaccess`); le pagine elenco (tag, categorie, paginazione…) arrivano non selezionate.
+- **Ricostruire**: per ogni indirizzo selezionato, l’IA scrive una pagina o un articolo **nuovo** partendo solo dal titolo della vecchia pagina. Né il suo testo né le sue immagini vengono copiati, e il vecchio marchio non viene ripreso. Un indirizzo alla volta, con un pulsante per fermarsi; immagine di copertina nuova facoltativa.
+- **Indirizzi**: la pagina mantiene il vecchio indirizzo quando Éclair può servirlo così com’è; altrimenti il vecchio indirizzo reindirizza al nuovo (301). Un indirizzo già servito dal tuo sito non viene mai sostituito.
+- **Pubblicare**: tutto parte come bozza. «Pubblica le bozze rilette» le pubblica in una volta, tranne quelle che contengono ancora «[Da completare: …]».
+- **Costo**: mostrato prima (per pagina) e dopo (token e dollari, per indirizzo e in totale), nel budget dell’assistente.
+
+> ⚠️ Google penalizza i domini scaduti pieni di pagine senza valore per il visitatore ([norme contro lo spam](https://developers.google.com/search/docs/essentials/spam-policies#expired-domains)): rileggi e arricchisci ogni pagina prima di pubblicarla.
+
+### Affiliazione
+
+Menu **Affiliazione**: i tuoi link di affiliazione in un unico posto, con le tue note su ogni prodotto.
+
+- **Avviso pubblicitario automatico**: su ogni pagina che contiene un link di affiliazione, e nel feed RSS, Éclair mostra l’avviso «Link di affiliazione» nella lingua della pagina (o il tuo testo), subito dopo il banner di apertura. La pubblicità deve essere chiaramente riconoscibile come tale: [LCEN, art. 20](https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000018048180) in Francia, [LSSI, art. 20](https://www.boe.es/buscar/act.php?id=BOE-A-2002-13758) in Spagna.
+- **Amazon**: per un link Amazon viene aggiunta la frase richiesta dal Programma di affiliazione Amazon, nella lingua del negozio («In qualità di Affiliato Amazon io ricevo un guadagno dagli acquisti idonei.» per amazon.it). I link Amazon con il tuo ID (`tag=`) e i link brevi amzn.to vengono riconosciuti anche se non sono nell’elenco.
+- **Per Google**: ogni link di affiliazione è contrassegnato `rel="sponsored nofollow"`. Nessun link mascherato né reindirizzamento: i link portano direttamente al venditore.
+- **Scrivere un articolo con l’IA**: seleziona dei link e scegli un confronto (da 2 a 10 link), una presentazione di prodotto o una guida all’acquisto. L’IA scrive solo a partire dai nomi e dalle tue note: non inventa prezzi, recensioni né risultati di test, e lascia «[Da completare: …]» dove conta la tua opinione. La bozza si apre nell’editor; niente viene pubblicato.
+
+Finché non salvi un primo link, sul tuo sito non cambia nulla.
 
 ### Ritocchi nell’editor
 
@@ -723,6 +748,8 @@ tests/design.php         direzioni artistiche (contrasti, CSS, caratteri, impost
 tests/ux.php             usabilità della 1.11 (annulla/ripeti, finestre di conferma, barra della modalità Visuale, micro-animazioni)
 tests/ai-visits.php      bot IA della 1.12 (riconoscimento, registro scritto da index.php senza IP, limite, pagina e scheda)
 tests/plan.php           piano editoriale della 1.12 (date libere, idee e scrittura con l’IA, costo, scrittura automatica, attività pianificata)
+tests/wayback.php        vecchio sito della 1.13 (Wayback Machine simulata: indirizzi del dominio, classificazione, pagina nuova dall’IA, reindirizzamenti, pubblicazione)
+tests/affiliate.php      affiliazione della 1.13 (avviso pubblicitario, frase Amazon, rel="sponsored", articolo scritto dall’IA)
 tests/update.php         aggiornamento in un clic (finto canale firmato: firma, archivio trappola, sintassi, ritorno automatico e manuale)
 tests/drive.php          backup su Google Drive (tests/fake-google.php: finto OAuth e finto Drive, invio a blocchi, ripresa)
 tests/sec-*.php          test di non regressione della sicurezza della 1.10.3
@@ -763,7 +790,7 @@ Una versione firmata si costruisce solo in un checkout Git e include solo i file
 
 `PHP_CLI_SERVER_WORKERS` permette al sito di chiamare se stesso (verifica del suo indirizzo): con un solo processo, la verifica semplicemente fallisce e i reindirizzamenti all’indirizzo ufficiale restano disattivati.
 
-Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnala questi file come modificati, e un aggiornamento li sostituisce; la pagina Aggiornamenti li elenca prima di farlo). Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 660 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
+Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnala questi file come modificati, e un aggiornamento li sostituisce; la pagina Aggiornamenti li elenca prima di farlo). Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 690 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
 
 ---
 

@@ -15,7 +15,7 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 5. [Art directions](#art-directions) (including [One-click tweaks](#one-click-tweaks), [Imagine my direction with AI](#imagine-my-direction-with-ai) and the [Design score](#design-score))
 6. [Themes](#themes)
 7. [Shop](#shop)
-8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai) and the [Editorial calendar](#editorial-calendar))
+8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai), the [Editorial calendar](#editorial-calendar), the [Old site](#old-site-wayback-machine) and [Affiliate links](#affiliate-links))
 9. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
 10. [Security](#security)
 11. [Updating, backing up, moving](#updating-backing-up-moving) (including [One-click update](#one-click-update) and [Google Drive backups](#google-drive-backups))
@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) archive (659 KB) and unzip it.
+1. Download the [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip) archive (691 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -129,6 +129,8 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Turn micro-animations on or off | Settings › Appearance › Micro-animations (site) · My profile › Interface (admin) |
 | See which AIs read my site | **AI bots** |
 | Plan my articles, have the AI suggest and write them | **Planner** |
+| Give the old addresses of my domain a page again | **Old site** |
+| Manage my affiliate links, turn them into an article with the AI | **Affiliate links** |
 | Open the shop | Settings › Shop |
 | Add a product | Content › **+ Product** |
 | Choose the home page | Settings › General |
@@ -406,6 +408,29 @@ The AI relies on your editorial profile, the list of your published pages and po
 - **Write**: the AI writes the idea as a complete draft, with the same engine as "Create with AI", then the editor opens. Review it, fill in the "[To complete: …]" markers, schedule it.
 - **Cost**: each button shows the estimated cost (≈ $0.035 per set of ideas and ≈ $0.08 per article with Claude Sonnet 5.5); afterwards, the tokens and dollars spent are recorded on the idea and in the planner total, and counted in the assistant's budget.
 - **Automatic writing** (administrators, off by default): the AI writes the due idea 1 to 14 days before its date, one at a time, within the budget, when an administrator opens the admin. To not depend on that, have the secret address shown called every hour (your host's cron, cron-job.org…). "Schedule without review" exists but is not recommended: Google penalises text published in bulk without human review, and an article that still contains "To complete" always waits for your review.
+
+### Old site (Wayback Machine)
+
+**Old site** menu (administrators): when you take over a domain that already had a site, links still point to its old addresses. Éclair finds them in the Wayback Machine and gives them a page again.
+
+- **Search**: Éclair queries the Wayback Machine's index for the site's own domain only (www included), up to the date you choose. The home page, addresses with parameters (`?p=12`), other domains and `.php` addresses (refused by the `.htaccess`) are left out; listing pages (tags, categories, pagination…) start unticked.
+- **Rebuild**: for each ticked address, the AI writes a **brand-new** page or article from the old page's title alone. Neither its text nor its images are copied, and the old brand is not reused. One address at a time, with a stop button; a brand-new cover image is optional.
+- **Addresses**: the page keeps the old address when Éclair can serve it as is; otherwise the old address redirects to the new one (301). An address your site already serves is never replaced.
+- **Publish**: everything starts as a draft. "Publish the reviewed drafts" publishes them in one go, except those that still contain "[To complete: …]".
+- **Cost**: shown before (per page) and after (tokens and dollars, per address and in total), within the assistant's budget.
+
+> ⚠️ Google penalises expired domains filled with pages of no value to visitors ([spam policies](https://developers.google.com/search/docs/essentials/spam-policies#expired-domains)): review and enrich each page before publishing it.
+
+### Affiliate links
+
+**Affiliate links** menu: your affiliate links in one place, with your notes about each product.
+
+- **Automatic advertising disclosure**: on every page that contains an affiliate link, and in the RSS feed, Éclair shows the "Affiliate links" disclosure in the page's language (or your own text), right after the opening banner. Advertising must be clearly identifiable as such: [LCEN, art. 20](https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000018048180) in France, [LSSI, art. 20](https://www.boe.es/buscar/act.php?id=BOE-A-2002-13758) in Spain.
+- **Amazon**: for an Amazon link, the statement required by the Amazon Associates Program is added in the store's language ("As an Amazon Associate I earn from qualifying purchases." for amazon.com and amazon.co.uk). Amazon links carrying your Associate tag (`tag=`) and amzn.to short links are recognised even when they are not in the list.
+- **For Google**: each affiliate link is marked `rel="sponsored nofollow"`. No cloaking, no redirect: links go straight to the merchant.
+- **Write an article with the AI**: tick links and choose a comparison (2 to 10 links), a product overview or a buying guide. The AI writes only from the names and your notes: it invents no price, no review and no test result, and leaves "[To complete: …]" where your opinion matters. The draft opens in the editor; nothing is published.
+
+Nothing changes on your site until you save a first link.
 
 ### Touch-ups in the editor
 
@@ -723,6 +748,8 @@ tests/design.php         art directions (contrast, CSS, fonts, booby-trapped set
 tests/ux.php             1.11 usability (undo/redo, confirmation dialogs, Visual mode toolbar, micro-animations)
 tests/ai-visits.php      1.12 AI bots (detection, log written by index.php without IP, cap, page and card)
 tests/plan.php           1.12 editorial calendar (slots, AI ideas and writing, cost, automatic writing, scheduled task)
+tests/wayback.php        old site in 1.13 (fake Wayback Machine: domain addresses, sorting, brand-new page by the AI, redirects, publishing)
+tests/affiliate.php      affiliate links in 1.13 (advertising disclosure, Amazon statement, rel="sponsored", article written by the AI)
 tests/update.php         one-click update (fake signed channel: signature, booby-trapped archive, syntax, automatic and manual rollback)
 tests/drive.php          Google Drive backups (tests/fake-google.php: fake OAuth and fake Drive, chunked upload, resume)
 tests/sec-*.php          1.10.3 security regression tests
@@ -763,7 +790,7 @@ A signed release can only be built in a Git checkout and only includes tracked f
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 660 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 690 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 
