@@ -2,6 +2,12 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Added
+
+- **AI bots (Administration › AI bots).** See which AIs read your site, which pages and why, over 7, 30 or 90 days: on-demand lookups (ChatGPT-User, Claude-User, Perplexity-User… someone asked an AI and it came to read your page, a potential citation), answer-engine indexing (OAI-SearchBot, Claude-SearchBot, PerplexityBot…) and model training (GPTBot, ClaudeBot, CCBot, Bytespider…). Visits per day, per bot and per page, robots.txt reads, published pages no AI has read yet (with what to do about them), and a warning when training bots come despite a robots.txt that asks them not to. A summary card sits on the dashboard. Recorded by `index.php` before anything else, so cached pages are counted too: one regular expression on the user agent, then one line (time, bot, address without query string) appended to `data/ai/YYYY-MM.php`. No IP address, no human visitor, no cookie; each month's log is capped at 4 MB and deleted after 13 months. On by default, switchable in Settings › AI & GEO. Identity is as declared by each bot.
+
 ## 1.11.0 — 2026-11-04
 
 Usability release for the page builder and the admin: undo and redo everywhere, deletions you can take back, the admin's own confirmation dialogs, a redrawn Visual mode toolbar, an orange that is no longer brown, and optional micro-animations. Existing public sites stay identical to the byte unless their owner turns the micro-animations on. Sites on 1.10.x update in one click from Administration › Updates, after a backup.

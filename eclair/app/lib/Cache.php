@@ -106,6 +106,12 @@ final class Cache
             'https' => Security::httpsOnly(),
         ];
         try {
+            // Visites des robots d'IA notées par index.php (Réglages › IA & GEO) : dossier du journal et agents reconnus.
+            if (Settings::get('geo.ai_log')) {
+                Store::ensureDir(AiVisits::dir());
+                $data['ai'] = AiVisits::dir();
+                $data['ai_re'] = AiVisits::pattern();
+            }
             Store::ensureDir(ECLAIR_ROOT . '/cache');
             Store::atomic(ECLAIR_ROOT . '/cache/runtime.php', Store::GUARD . json_encode($data));
         } catch (\Throwable $e) {
