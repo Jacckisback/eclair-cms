@@ -15,7 +15,7 @@ Tutto quello che c’è da sapere per installare, usare, proteggere e mantenere 
 5. [Direzioni artistiche](#direzioni-artistiche) (compresi i [Ritocchi in un clic](#ritocchi-in-un-clic), [Immagina la mia direzione con l’IA](#immagina-la-mia-direzione-con-lia) e il [Punteggio Design](#punteggio-design))
 6. [Temi](#temi)
 7. [Negozio](#negozio)
-8. [Assistente IA](#assistente-ia) (compreso [Creare una pagina con l’IA](#creare-una-pagina-con-lia), il [Piano editoriale](#piano-editoriale), il [Vecchio sito](#vecchio-sito-wayback-machine) e l’[Affiliazione](#affiliazione))
+8. [Assistente IA](#assistente-ia) (compreso [Creare una pagina con l’IA](#creare-una-pagina-con-lia), il [Piano editoriale](#piano-editoriale), il [Vecchio sito](#vecchio-sito-wayback-machine), l’[Affiliazione](#affiliazione) e [Google Discover](#google-discover))
 9. [Connettore MCP (Claude e ChatGPT)](#connettore-mcp-claude-e-chatgpt)
 10. [Sicurezza](#sicurezza)
 11. [Aggiornare, fare backup, traslocare](#aggiornare-fare-backup-traslocare) (compresi l’[Aggiornamento in un clic](#aggiornamento-in-un-clic) e i [Backup su Google Drive](#backup-su-google-drive))
@@ -37,7 +37,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip) (691 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-1.14.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.0.zip) (730 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
@@ -47,7 +47,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 Installazione in una sottocartella (`esempio.it/sito/`): basta caricare i file in quella sottocartella, tutto viene rilevato automaticamente.
 
-### I 4 tipi di sito
+### I 7 tipi di sito
 
 | Tipo (nella procedura guidata) | Cosa viene creato |
 |---|---|
@@ -55,12 +55,17 @@ Installazione in una sottocartella (`esempio.it/sito/`): basta caricare i file i
 | ✍️ Blog | Home = ultimi articoli, Chi siamo, Contatti, categoria «Guides», pagine legali |
 | 🧑‍💻 Freelance / portfolio | Home a tuo nome, competenze, Chi sono, Blog, Contatti, pagine legali |
 | 🎯 Pagina unica | Una pagina di vendita (banner, punti di forza, FAQ, modulo) + pagine legali, senza blog |
+| 🧭 Magazine / Google Discover | Come un blog (home = ultimi articoli, Chi siamo, Contatti, pagine legali); la bacheca mette in primo piano Discover, le tendenze del giorno e la pubblicità |
+| 🛍️ Affiliazione | Come un blog; la bacheca mette in primo piano i tuoi link di affiliazione e gli articoli scritti dall’IA |
+| 🕰️ Rilanciare un vecchio sito | Come un blog; la bacheca comincia dal ritrovare i vecchi indirizzi del tuo dominio (Vecchio sito) |
 
 I contenuti iniziali esistono in francese, spagnolo e inglese: un sito in italiano parte dai testi inglesi, da tradurre. Le pagine legali contengono uno schema basato sul diritto francese (LCEN), spagnolo (LSSI) e sul GDPR; gli obblighi specifici del tuo Paese vanno aggiunti da te.
 
+Il tipo scelto diventa l’**uso del sito** (Impostazioni › Generale, modificabile in qualsiasi momento): la bacheca si apre con una scheda che riunisce gli strumenti di quell’uso e il loro stato. Sul sito pubblico non cambia nulla.
+
 ### Subito dopo l’installazione
 
-La bacheca mostra una checklist «Primi passi»: logo e colore, home page, primo articolo, profilo dell’autore, autenticazione a due fattori, note legali, Google Search Console. Il passo successivo è evidenziato in giallo e ognuno spiega in una frase a cosa serve.
+La bacheca mostra una checklist «Primi passi»: logo e colore, home page, primo articolo, profilo dell’autore, autenticazione a due fattori, note legali, Google Search Console. Il passo successivo è evidenziato in giallo e ognuno spiega in una frase a cosa serve. Per un magazine, un sito di affiliazione o un vecchio sito, comincia dal passo proprio di quell’uso.
 
 ---
 
@@ -131,6 +136,9 @@ Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagi
 | Pianificare i miei articoli, farli proporre e scrivere dall’IA | **Pianificazione** |
 | Ridare una pagina ai vecchi indirizzi del mio dominio | **Vecchio sito** |
 | Gestire i miei link di affiliazione e ricavarne un articolo con l’IA | **Affiliazione** |
+| Preparare i miei articoli per Google Discover, trovare idee nelle tendenze del giorno | **Discover** |
+| Mostrare pubblicità AdSense sui miei articoli | **Discover** › Pubblicità |
+| Adattare la bacheca al mio uso | Impostazioni › Generale › Uso del sito |
 | Aprire il negozio | Impostazioni › Negozio |
 | Aggiungere un prodotto | Contenuti › **+ Prodotto** |
 | Scegliere la home page | Impostazioni › Generali |
@@ -431,6 +439,18 @@ Menu **Affiliazione**: i tuoi link di affiliazione in un unico posto, con le tue
 - **Scrivere un articolo con l’IA**: seleziona dei link e scegli un confronto (da 2 a 10 link), una presentazione di prodotto o una guida all’acquisto. L’IA scrive solo a partire dai nomi e dalle tue note: non inventa prezzi, recensioni né risultati di test, e lascia «[Da completare: …]» dove conta la tua opinione. La bozza si apre nell’editor; niente viene pubblicato.
 
 Finché non salvi un primo link, sul tuo sito non cambia nulla.
+
+### Google Discover
+
+Menu **Discover**: ciò che aiuta i tuoi articoli a comparire nel feed Discover di Google, le tendenze del giorno e la pubblicità. Google non offre alcuna impostazione per «posizionarsi» su Discover: un articolo indicizzato è idoneo automaticamente ([raccomandazioni di Google](https://developers.google.com/search/docs/appearance/google-discover?hl=it)).
+
+- **Pronto per Discover**: vengono controllati il sito (aperto ai motori di ricerca, HTTPS, logo, pagine «Chi siamo» e «Contatti») e i tuoi 100 ultimi articoli: immagine larga almeno 1200 px (mai il logo), titolo senza sensazionalismo (maiuscole, «!!»), autore presentato, lunghezza. Un link «Correggi» per ogni punto. I dati strutturati indicano l’immagine grande originale, senza ritagli.
+- **Tendenze del giorno**: le ricerche in crescita su Google nel paese scelto (feed pubblico di Google Trends, letto al massimo una volta all’ora), con i titoli della stampa. «Aggiungi alla pianificazione» ne fa un’idea con la data di oggi. Con l’assistente IA, «Proponi idee per il mio sito» tiene solo le tendenze che riguardano il tuo argomento (spesso nessuna) e propone al massimo 4 articoli utili e duraturi, mai una notizia.
+- **Pubblicità (Google AdSense)**, amministratori: il tuo ID publisher, gli annunci automatici e/o un’unità pubblicitaria che Éclair inserisce tra due blocchi del testo (dopo il 2° paragrafo, a metà degli articoli lunghi, alla fine), con l’etichetta «Pubblicità» richiesta da Google e il suo spazio riservato. Solo sugli articoli, mai sulle pagine né nell’anteprima; casella «Nessuna pubblicità in questo articolo» nell’editor.
+- **Consenso**: la pubblicità si attiva solo quando il messaggio «Normative europee» è pubblicato in AdSense › Privacy e messaggi. Google richiede una piattaforma di consenso certificata per i visitatori europei ([guida di AdSense](https://support.google.com/adsense/answer/13554116?hl=it)); la sua viene mostrata dal codice AdSense.
+- **ads.txt**: appena l’ID è salvato, Éclair pubblica `/ads.txt` e il tag con cui Google convalida il tuo sito.
+
+> ⚠️ Gli script di Google rallentano le pagine con pubblicità (lì Lighthouse non sarà più a 100): Éclair riserva lo spazio degli annunci e non carica nulla sulle altre pagine. Non cliccare mai sui tuoi annunci: Google lo vieta.
 
 ### Ritocchi nell’editor
 
@@ -750,6 +770,8 @@ tests/ai-visits.php      bot IA della 1.12 (riconoscimento, registro scritto da 
 tests/plan.php           piano editoriale della 1.12 (date libere, idee e scrittura con l’IA, costo, scrittura automatica, attività pianificata)
 tests/wayback.php        vecchio sito della 1.13 (Wayback Machine simulata: indirizzi del dominio, classificazione, pagina nuova dall’IA, reindirizzamenti, pubblicazione)
 tests/affiliate.php      affiliazione della 1.13 (avviso pubblicitario, frase Amazon, rel="sponsored", articolo scritto dall’IA)
+tests/discover.php       Google Discover della 1.14 (pronto per Discover; pubblicità AdSense: consenso, ads.txt, etichetta, nonce; Google Trends simulato, idee dell’IA)
+tests/usage.php          usi della 1.14 (tipi di sito, bacheca adattata, impostazione)
 tests/update.php         aggiornamento in un clic (finto canale firmato: firma, archivio trappola, sintassi, ritorno automatico e manuale)
 tests/drive.php          backup su Google Drive (tests/fake-google.php: finto OAuth e finto Drive, invio a blocchi, ripresa)
 tests/sec-*.php          test di non regressione della sicurezza della 1.10.3
@@ -790,7 +812,7 @@ Una versione firmata si costruisce solo in un checkout Git e include solo i file
 
 `PHP_CLI_SERVER_WORKERS` permette al sito di chiamare se stesso (verifica del suo indirizzo): con un solo processo, la verifica semplicemente fallisce e i reindirizzamenti all’indirizzo ufficiale restano disattivati.
 
-Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnala questi file come modificati, e un aggiornamento li sostituisce; la pagina Aggiornamenti li elenca prima di farlo). Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 690 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
+Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnala questi file come modificati, e un aggiornamento li sostituisce; la pagina Aggiornamenti li elenca prima di farlo). Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 730 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
 
 ---
 
