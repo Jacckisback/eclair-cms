@@ -22,7 +22,8 @@ $nav = [
     ['menus', 'menus', 'menu', t('Menus'), 'menus'],
     ['messages', 'messages', 'mail', t('Messages'), 'messages'],
     ['redirects', 'redirects', 'redirect', t('Redirections'), 'redirects'],
-    ['ai-visits', 'ai-visits', 'bot', t('Robots IA'), 'content'],
+    ['plan', 'plan', 'calendar', t('Planning'), 'content'],
+      ['ai-visits', 'ai-visits', 'bot', t('Robots IA'), 'content'],
 ];
 $adminNav = [
     ['settings', 'settings', 'settings', t('Réglages'), 'settings'],
@@ -98,6 +99,6 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
   </main>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale(), 'driveDue' => $user['role'] === 'admin' && \Eclair\Drive::due()]) ?>
+<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale(), 'driveDue' => $user['role'] === 'admin' && \Eclair\Drive::due(), 'planDue' => $user['role'] === 'admin' && \Eclair\Plan::due() !== null]) ?>
 </body>
 </html>

@@ -54,6 +54,10 @@ final class App
         if (preg_match('~^/_eclair/backup/([a-f0-9]{32})$~', $path, $m)) {
             Drive::cron($m[1]);
         }
+        // Tâche planifiée du planning éditorial (adresse secrète) : rédige l'idée due, s'il y en a une.
+        if (preg_match('~^/_eclair/plan/([a-f0-9]{32})$~', $path, $m)) {
+            Plan::cron($m[1]);
+        }
         // Connecteur MCP (Claude, ChatGPT) et sa découverte OAuth : rien ne répond tant qu'il est désactivé.
         if (str_starts_with($path, '/_eclair/') || str_starts_with($path, '/.well-known/')) {
             Mcp::handle($path);

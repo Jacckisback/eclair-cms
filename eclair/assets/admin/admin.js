@@ -291,6 +291,30 @@
     driveTick().catch(() => {});
   }
 
+  /* ── Planning éditorial : idées et articles rédigés par l'IA, rédaction automatique en arrière-plan ── */
+  const planRun = (btn, wait, path, body, done) => {
+    const label = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = wait;
+    const back = () => { btn.disabled = false; btn.innerHTML = label; };
+    api(path, body).then((json) => (json.ok ? done(json) : back())).catch(back);
+  };
+  const planIdeas = $('[data-plan-ideas]');
+  if (planIdeas) {
+    planIdeas.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const f = new FormData(planIdeas);
+      planRun($('button', planIdeas), planIdeas.dataset.wait, 'api/plan/ideas',
+        { count: Number(f.get('count')), week: Number(f.get('week')), theme: f.get('theme') }, () => location.reload());
+    });
+  }
+  $$('[data-plan-write]').forEach((btn) => btn.addEventListener('click', () => {
+    planRun(btn, btn.dataset.wait, 'api/plan/write', { id: btn.dataset.planWrite }, (json) => { location.href = json.edit; });
+  }));
+  if (D.planDue) {
+    api('api/plan/tick', {}, { quiet: true }).then((json) => { if (json && json.text) toast(json.text, 'ok'); }).catch(() => {});
+  }
+
   /* ── Nouvelle version d'Éclair : vérification discrète, deux fois par jour au plus (administrateurs) ── */
   if (D.updateCheck) {
     api('api/update/check', {}, { quiet: true }).then((json) => {
