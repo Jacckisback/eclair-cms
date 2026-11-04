@@ -15,7 +15,7 @@ Everything you need to know to install, use, secure and maintain Éclair. For th
 5. [Art directions](#art-directions) (including [One-click tweaks](#one-click-tweaks), [Imagine my direction with AI](#imagine-my-direction-with-ai) and the [Design score](#design-score))
 6. [Themes](#themes)
 7. [Shop](#shop)
-8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai))
+8. [AI assistant](#ai-assistant) (including [Create a page with AI](#create-a-page-with-ai) and the [Editorial calendar](#editorial-calendar))
 9. [MCP connector (Claude and ChatGPT)](#mcp-connector-claude-and-chatgpt)
 10. [Security](#security)
 11. [Updating, backing up, moving](#updating-backing-up-moving) (including [One-click update](#one-click-update) and [Google Drive backups](#google-drive-backups))
@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) archive (627 KB) and unzip it.
+1. Download the [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) archive (659 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -96,6 +96,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 - **“Key takeaways”** block: the summary AI likes to quote, shown at the top of the article.
 - **GEO score** in the editor: summary, direct introduction, FAQ, question-style subheadings, lists and tables, concrete figures, external sources, identified author (E-E-A-T), short paragraphs, freshness.
 - Author pages with a bio and profiles (`sameAs`), visible publication and update dates.
+- **AI bots** (admin menu): which AIs read your pages (ChatGPT-User, Claude-User, OAI-SearchBot, PerplexityBot, GPTBot, ClaudeBot…), which pages, and for what purpose: on-demand lookups (someone asked a question, a potential citation), answer-engine indexing or training. Visits per day, per bot and per page, robots.txt reads, published pages never read yet with what to do about them, a warning when training bots come despite your robots.txt, and a dashboard card. `index.php` records only the time, the bot and the address, never an IP address or a human visitor; the log is capped at 4 MB per month and deleted after 13 months; tracking can be turned off in Settings › AI & GEO. Identity is as declared by the bot.
 
 ### ✍️ Block editor
 
@@ -126,6 +127,8 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Change the theme, logo, color, fonts | Settings › Appearance |
 | Add my own CSS | Settings › Appearance › Custom CSS |
 | Turn micro-animations on or off | Settings › Appearance › Micro-animations (site) · My profile › Interface (admin) |
+| See which AIs read my site | **AI bots** |
+| Plan my articles, have the AI suggest and write them | **Planner** |
 | Open the shop | Settings › Shop |
 | Add a product | Content › **+ Product** |
 | Choose the home page | Settings › General |
@@ -393,6 +396,16 @@ In a new piece of content (page, post or product), the **✨ Create with AI** bo
 3. After 20 to 60 seconds, the draft opens in **Visual mode**: title, URL, SEO title and meta description, “Key takeaways”, focus keyphrase and a layout in sections (hero, features, subheadings, lists, callouts, FAQ, buttons, team, contact form, latest posts or products), with a single H1: the hero's title.
 
 The AI relies on your editorial profile, the list of your published pages and posts (so that links point to pages that exist) and your 30 latest images. It makes up no facts: missing prices, figures, names or opening hours stay in the form **“[To complete: …]”**, counted by the Analysis tab until you fill them in. The draft is never published: review it, complete it, then publish it. If the site already has 500 drafts, the box asks you to publish or delete some first, before spending anything.
+
+### Editorial calendar
+
+**Planner** menu: your next articles in a month calendar (published, scheduled, drafts, ideas) and an "Upcoming" list.
+
+- **Add an idea** by hand: title, planned date, keyword, category, angle and notes for writing.
+- **Suggest ideas with AI**: 4 to 12 ideas based on your site (business, categories, articles already written, pages AI bots read most in AI bots) and an optional theme. They are placed on the next free days, at the pace you choose (1 to 5 per week). Nothing is published.
+- **Write**: the AI writes the idea as a complete draft, with the same engine as "Create with AI", then the editor opens. Review it, fill in the "[To complete: …]" markers, schedule it.
+- **Cost**: each button shows the estimated cost (≈ $0.035 per set of ideas and ≈ $0.08 per article with Claude Sonnet 5.5); afterwards, the tokens and dollars spent are recorded on the idea and in the planner total, and counted in the assistant's budget.
+- **Automatic writing** (administrators, off by default): the AI writes the due idea 1 to 14 days before its date, one at a time, within the budget, when an administrator opens the admin. To not depend on that, have the secret address shown called every hour (your host's cron, cron-job.org…). "Schedule without review" exists but is not recommended: Google penalises text published in bulk without human review, and an article that still contains "To complete" always waits for your review.
 
 ### Touch-ups in the editor
 
@@ -708,6 +721,8 @@ tests/shop.php           themes and shop (product pages, Stripe, PayPal, Revolut
 tests/mcp.php            MCP connector (OAuth, PKCE, protocol, revocation) and choosing the AI
 tests/design.php         art directions (contrast, CSS, fonts, booby-trapped settings, AI) and Design score
 tests/ux.php             1.11 usability (undo/redo, confirmation dialogs, Visual mode toolbar, micro-animations)
+tests/ai-visits.php      1.12 AI bots (detection, log written by index.php without IP, cap, page and card)
+tests/plan.php           1.12 editorial calendar (slots, AI ideas and writing, cost, automatic writing, scheduled task)
 tests/update.php         one-click update (fake signed channel: signature, booby-trapped archive, syntax, automatic and manual rollback)
 tests/drive.php          Google Drive backups (tests/fake-google.php: fake OAuth and fake Drive, chunked upload, resume)
 tests/sec-*.php          1.10.3 security regression tests
@@ -748,7 +763,7 @@ A signed release can only be built in a Git checkout and only includes tracked f
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 630 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 660 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

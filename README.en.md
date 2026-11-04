@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip"><img src="https://img.shields.io/badge/download-v1.11.0-5b3cbc?style=for-the-badge" alt="Download Éclair 1.11.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip"><img src="https://img.shields.io/badge/download-v1.12.0-5b3cbc?style=for-the-badge" alt="Download Éclair 1.12.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -63,7 +63,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>627 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>659 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -115,6 +115,8 @@ Type what you need, as you would to a colleague: *“Write an article about choo
     </td>
   </tr>
 </table>
+
+**Editorial calendar.** Your next articles in a calendar: add your ideas, or let the AI suggest some based on your site (business, categories, articles already written, pages AI bots read most), then write each one as a draft in one click. The cost of every call is shown in tokens and dollars, before and after. Optional **automatic writing** prepares the drafts a few days before their date; you review and schedule them.
 
 5-minute setup and detailed pricing: see the [guide, AI assistant section](docs/GUIDE.en.md#ai-assistant).
 
@@ -264,7 +266,7 @@ How to use it: [guide, Updating, backing up, moving section](docs/GUIDE.en.md#up
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 627 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 659 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -317,6 +319,7 @@ On real shared hosting, add your host's network latency and PHP startup time.
         <li><code>/llms.txt</code> and <code>/llms-full.txt</code> generated automatically (<a href="https://llmstxt.org/">llmstxt.org</a> proposal).</li>
         <li><b>A Markdown version of every page</b>: add <code>.md</code> to any URL.</li>
         <li><b>One-click AI bot policy</b>: open, citations only or closed, for 30 bots (GPTBot, ClaudeBot, PerplexityBot…).</li>
+        <li><b>AI bots</b>: which AIs read your pages, which pages and why (answering a question, indexing, training), with no IP address and no cookie.</li>
         <li>A <b>“Key takeaways”</b> block at the top of each article: the summary AI likes to quote.</li>
         <li><b>GEO score</b>: FAQ, question-style subheadings, concrete figures, sources, identified author (E-E-A-T)…</li>
       </ul>
@@ -375,7 +378,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) archive (627 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) archive (659 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip"><img src="https://img.shields.io/badge/download-v1.11.0-5b3cbc?style=for-the-badge" alt="Éclair 1.11.0 herunterladen"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip"><img src="https://img.shields.io/badge/download-v1.12.0-5b3cbc?style=for-the-badge" alt="Éclair 1.12.0 herunterladen"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 oder neuer">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/Datenbank-keine-14122b?style=for-the-badge" alt="Keine Datenbank">
@@ -63,7 +63,7 @@ WordPress kann alles, braucht dafür aber eine Datenbank, Plugins für SEO, Sich
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleicht</h3>
-      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>627 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
+      Keine Datenbank: Deine Inhalte liegen in geschützten Dateien. Ein Download von <b>659 KB</b>, null Abhängigkeiten, null Cookies auf der öffentlichen Website.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Kinderleicht</h3>
@@ -115,6 +115,8 @@ Beschreib einfach, was du brauchst, wie im Gespräch mit einem Kollegen: *„Sch
     </td>
   </tr>
 </table>
+
+**Redaktionsplan.** Deine nächsten Artikel in einem Kalender: Füge deine Ideen hinzu oder lass die KI anhand deiner Website weitere vorschlagen (Tätigkeit, Kategorien, bereits geschriebene Artikel, von KIs meistgelesene Seiten) und jede mit einem Klick als Entwurf schreiben. Die Kosten jedes Aufrufs werden in Tokens und Dollar angezeigt, vorher und nachher. Optional bereitet das **automatische Schreiben** die Entwürfe einige Tage vor ihrem Datum vor; du prüfst und planst sie ein.
 
 Aktivierung in 5 Minuten und Preise im Detail: siehe [Handbuch, Abschnitt KI-Assistent](docs/GUIDE.de.md#ki-assistent).
 
@@ -264,7 +266,7 @@ Anleitung: [Handbuch, Abschnitt Aktualisieren, sichern, umziehen](docs/GUIDE.de.
 |---|---|---|
 | **Installation** | MySQL-Datenbank anlegen, dann den Assistenten starten | ✅ Ordner hochladen, 4 Fragen beantworten |
 | **Datenbank** | MySQL erforderlich | ✅ Keine (geschützte Dateien) |
-| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 627 KB |
+| **Download-Größe** | ≈ 35 MB[^wp] | ✅ 659 KB |
 | **SEO, Sitemap, strukturierte Daten** | Ein Plugin, das installiert und gepflegt werden muss | ✅ Integriert |
 | **GEO: llms.txt, Markdown, KI-Bots** | Plugins, selten vollständig | ✅ Integriert |
 | **Öffentliche Seiten** | Bei jedem Aufruf neu erzeugt, außer mit Cache-Plugin | ✅ Aus einem statischen Cache ausgeliefert |
@@ -317,6 +319,7 @@ Auf echtem Shared Hosting kommen die Netzwerklatenz und der PHP-Start deines Hos
         <li><code>/llms.txt</code> und <code>/llms-full.txt</code> werden automatisch erzeugt (Vorschlag <a href="https://llmstxt.org/">llmstxt.org</a>).</li>
         <li><b>Markdown-Version jeder Seite</b>: Hänge <code>.md</code> an eine beliebige Adresse an.</li>
         <li><b>KI-Bot-Regeln mit einem Klick</b>: offen, nur Zitate oder gesperrt, für 30 Bots (GPTBot, ClaudeBot, PerplexityBot …).</li>
+        <li><b>KI-Bots</b>: welche KIs deine Seiten lesen, welche Seiten und wozu (Antwort auf eine Frage, Indexierung, Training), ohne IP-Adresse und ohne Cookie.</li>
         <li>Ein Block <b>„Das Wichtigste“</b> am Anfang jedes Artikels: die Zusammenfassung, die KI gern zitiert.</li>
         <li><b>GEO-Score</b>: FAQ, Zwischenüberschriften als Fragen, konkrete Zahlen, Quellen, erkennbarer Autor (E-E-A-T) …</li>
       </ul>
@@ -375,7 +378,7 @@ Alle Details im [Handbuch, Abschnitt Sicherheit](docs/GUIDE.de.md#sicherheit).
   <img src="docs/images/de/install.webp" alt="Installation in drei Schritten: Ordner hochladen, vier Fragen beantworten, die Website ist online" width="100%">
 </p>
 
-1. **Lade** das Archiv [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) (627 KB) **herunter** und entpacke es.
+1. **Lade** das Archiv [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) (659 KB) **herunter** und entpacke es.
 2. **Lade den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), einschließlich der versteckten `.htaccess`-Dateien.
 3. **Öffne die Adresse deiner Website**: Der Assistent startet. Vier Fragen, ein bisschen Konfetti, und deine Website ist mit ihren ersten Seiten online.
 
