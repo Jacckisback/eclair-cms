@@ -104,7 +104,7 @@ El panel muestra una lista de «Primeros pasos»: logo y color, página de inici
 - **Enlaces internos asistidos**: mientras escribes un enlace, el editor te propone tus páginas y artículos (enlazado interno en 2 segundos).
 - **Pegado inteligente** desde Word, Google Docs o una página web: títulos, listas, tablas y negritas se convierten en bloques limpios.
 - Guardado con `Ctrl+S`, borrador local de respaldo (no se pierde nada si se corta la conexión), vista previa real antes de publicar, **historial de las 20 últimas versiones**, publicación programada.
-  - Este borrador de respaldo pertenece a la cuenta con la sesión iniciada y se borra al cerrar sesión: nunca se ofrece a otra cuenta que use el mismo navegador. Los de la 1.10.2 se conservan en un sitio con una sola cuenta; si hay varias cuentas, se borran después de la actualización: guarda los cambios en curso antes de actualizar.
+  - Este borrador de respaldo pertenece a la cuenta con la sesión iniciada y se borra al cerrar sesión: nunca se ofrece a otra cuenta que use el mismo navegador. Los de la 1.10.2 de un contenido ya guardado se conservan en un sitio con una sola cuenta; los de un contenido nuevo nunca guardado, o todos si hay varias cuentas, se borran después de la actualización: guarda los cambios en curso antes de actualizar.
 - **Modo Visual**: la página tal como se ve con tu tema, editable ahí mismo ([detalles](#modo-visual)).
 
 ### 🧩 Todo lo demás
@@ -600,7 +600,7 @@ Después, para conectar tu Drive:
 - Por encima del número elegido (8 por defecto), las más antiguas van a la **papelera** de tu Drive.
 - **Hacer copia de seguridad ahora** lanza un envío inmediato. Los sitios grandes se envían en partes de 4 MB: si tu proveedor limita el tiempo de ejecución, el envío se retoma donde se quedó (deja la página abierta, sigue sola).
 - Las copias automáticas se hacen cuando un administrador abre el panel. Para que se hagan aunque nadie entre, copia la **dirección de la tarea programada** (Seguridad › Copias de seguridad en Google Drive › Copias de seguridad a hora fija) en la tarea programada (cron) de tu proveedor o en [cron-job.org](https://cron-job.org), cada hora: solo lanza una copia cuando toca. No compartas esta dirección.
-- La tarjeta indica quién conectó la cuenta («conectado por …»). Si se elimina a ese administrador o se le baja de rol, la conexión se retira y las copias se detienen hasta que un administrador vuelva a conectar Google Drive. Un cambio de contraseña no desconecta nada. Una conexión hecha antes de la 1.10.3 se señala: desconecta y vuelve a conectar Google Drive para que Éclair sepa qué administrador la estableció.
+- La tarjeta indica quién conectó la cuenta («conectado por …»). Si se elimina a ese administrador o se le baja de rol, la conexión se retira y las copias se detienen hasta que un administrador vuelva a conectar Google Drive. Un cambio de contraseña no desconecta nada. Una conexión hecha antes de la 1.10.3 (o rehecha por una versión anterior) se retira del mismo modo, porque Éclair no sabe qué administrador la estableció: las copias se detienen hasta que un administrador vuelva a conectar Google Drive, lo que registra su cuenta.
 - El token de acceso está cifrado en tu servidor. **Desconectar Google Drive** lo revoca, y una nueva conexión revoca la anterior; también puedes retirar el acceso desde tu cuenta de Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Las copias ya enviadas se quedan en tu Drive.
 
 ### Restaurar una copia de seguridad
@@ -734,6 +734,8 @@ Para retirar una versión, se anuncia de nuevo un archivo más antiguo (ya prese
 ```bash
 ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<versión>
 ```
+
+El archivo debe ser el ya firmado para esa versión: su SHA-256 y su tamaño deben coincidir con un anuncio de esa versión en el historial Git de `dist/latest.json` (verificado con la clave pública). Si no, no se firma nada, salvo que indiques su huella esperada, anotada al publicarla: `ECLAIR_EXPECT_SHA256=<sha256>`.
 
 Una versión firmada solo se construye en un repositorio Git e incluye solo los archivos versionados; el commit de origen se anota en el manifiesto. Las fuentes de las traducciones (`i18n/*.php`) deben seguir siendo simples arrays de textos literales: se leen como datos, nunca se ejecutan.
 

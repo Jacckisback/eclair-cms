@@ -134,7 +134,7 @@ final class Redirects
         if (!$rows) {
             return 0;
         }
-        return (int) Store::locked(function () use ($rows, $auto): int {
+        return (int) Store::locked(function () use ($rows, $auto, $admin): int {
             $list = self::all();
             $touched = [];
             $reset = [];
@@ -148,8 +148,9 @@ final class Redirects
                         $gone[] = $r['from'];
                         continue;
                     }
-                    // Évite les chaînes : A→B puis B→C devient A→C.
-                    if ($r['to'] === $row['from']) {
+                    // Évite les chaînes : A→B puis B→C devient A→C, sauf pour une adresse que l'appelant n'a pas le droit de
+                    // rediriger (adresse /.well-known/ posée par un administrateur) : sa cible ne change pas.
+                    if ($r['to'] === $row['from'] && self::allowed((string) $r['from'], $admin)) {
                         $r['to'] = $row['to'];
                         $moved[] = $r['from'];
                     }

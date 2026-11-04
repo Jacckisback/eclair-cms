@@ -104,7 +104,7 @@ O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicia
 - **Links internos assistidos**: enquanto você digita um link, o editor sugere suas páginas e artigos (links internos em 2 segundos).
 - **Colagem inteligente** do Word, do Google Docs ou de uma página web: títulos, listas, tabelas e negritos viram blocos limpos.
 - Salvamento com `Ctrl+S`, rascunho local de segurança (nada se perde se a conexão cair), prévia real antes de publicar, **histórico das últimas 20 versões**, publicação agendada.
-  - Esse rascunho de segurança pertence à conta conectada e é apagado quando você sai: ele nunca é oferecido a outra conta que use o mesmo navegador. Os da 1.10.2 são mantidos em um site com uma única conta; com várias contas, são apagados depois da atualização: salve as edições em andamento antes de atualizar.
+  - Esse rascunho de segurança pertence à conta conectada e é apagado quando você sai: ele nunca é oferecido a outra conta que use o mesmo navegador. Os da 1.10.2 de um conteúdo já salvo são mantidos em um site com uma única conta; os de um conteúdo novo nunca salvo, ou todos com várias contas, são apagados depois da atualização: salve as edições em andamento antes de atualizar.
 - **Modo Visual**: a página do jeito que ela aparece com o seu tema, editável ali mesmo ([detalhes](#modo-visual)).
 
 ### 🧩 Todo o resto
@@ -600,7 +600,7 @@ Depois, para conectar o seu Drive:
 - Quando o número escolhido (8 por padrão) é ultrapassado, os mais antigos vão para a **lixeira** do seu Drive.
 - **Fazer backup agora** inicia um envio imediato. Os sites grandes são enviados em partes de 4 MB: se a hospedagem limita o tempo de execução, o envio continua de onde parou (deixe a página aberta: ela continua sozinha).
 - Os backups automáticos são enviados quando um administrador abre o painel. Para que sejam enviados mesmo sem visitas, copie o **endereço da tarefa agendada** (Segurança › Backups no Google Drive › Backups em horário fixo) e cole-o na tarefa agendada (cron) da sua hospedagem ou no [cron-job.org](https://cron-job.org), para ser chamado a cada hora: ele só inicia um backup quando é o momento de fazer um. Não compartilhe esse endereço.
-- O cartão mostra quem conectou a conta (“conectado por …”). Se esse administrador for excluído ou rebaixado, a conexão é removida e os backups param até que um administrador conecte o Google Drive de novo. Uma troca de senha não desconecta nada. Uma conexão feita antes da 1.10.3 é sinalizada: desconecte e conecte de novo o Google Drive para que o Éclair saiba qual administrador a criou.
+- O cartão mostra quem conectou a conta (“conectado por …”). Se esse administrador for excluído ou rebaixado, a conexão é removida e os backups param até que um administrador conecte o Google Drive de novo. Uma troca de senha não desconecta nada. Uma conexão feita antes da 1.10.3 (ou refeita por uma versão anterior) é removida da mesma forma, porque o Éclair não sabe qual administrador a criou: os backups param até que um administrador conecte o Google Drive de novo, o que registra a conta dele.
 - O token de acesso fica criptografado no seu servidor. **Desconectar o Google Drive** revoga esse token, e uma nova conexão revoga a anterior; você também pode retirar o acesso pela sua conta Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Os backups já enviados continuam no seu Drive.
 
 ### Restaurar um backup
@@ -734,6 +734,8 @@ Para retirar uma versão, o mantenedor anuncia de novo um arquivo zip mais antig
 ```bash
 ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<versão>
 ```
+
+O arquivo deve ser o já assinado para essa versão: o SHA-256 e o tamanho devem corresponder a um anúncio dessa versão no histórico Git de `dist/latest.json` (verificado com a chave pública). Caso contrário, nada é assinado, a menos que você informe a impressão digital esperada, anotada na publicação: `ECLAIR_EXPECT_SHA256=<sha256>`.
 
 Uma versão assinada só é gerada em um checkout Git e só inclui os arquivos versionados; o commit de origem é registrado no manifesto. As fontes das traduções (`i18n/*.php`) precisam continuar sendo arrays simples de textos literais: elas são lidas como dados, nunca executadas.
 

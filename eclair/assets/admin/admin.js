@@ -133,8 +133,9 @@
   // Clé « eclair-draft-<site>|<compte>-<contenu> » : <site> est le dossier du site (deux sites Éclair à la même adresse,
   // l'un en sous-dossier, ne touchent jamais aux brouillons l'un de l'autre) ; D.me est le compte connecté (vide sans
   // session). La copie d'un autre compte n'est jamais proposée : elle est effacée dès qu'une page de l'administration
-  // s'ouvre. Celles d'avant la 1.10.3 (sans site ni compte) sont reprises par le seul compte d'un site qui n'en a qu'un
-  // (D.solo), sinon effacées. Seules ces clés sont touchées : la préférence « eclair-mode » et le site public restent.
+  // s'ouvre. Celles d'avant la 1.10.3 (sans site ni compte) d'un contenu existant sont reprises par le seul compte d'un site
+  // qui n'en a qu'un (D.solo) ; les autres sont effacées. Seules ces clés sont touchées : la préférence « eclair-mode » et le
+  // site public restent.
   const DRAFT = 'eclair-draft-';
   const SITE = DRAFT + encodeURIComponent(D.base || '/') + '|';
   const legacy = (k) => k.startsWith(DRAFT) && !k.includes('|');
@@ -156,15 +157,18 @@
         all.filter((k) => k && (legacy(k) || (k.startsWith(SITE) && !(keep && k.startsWith(SITE + keep + '-'))))).forEach((k) => localStorage.removeItem(k));
       } catch (e) { /* stockage indisponible */ }
     },
-    // Site à un seul compte : les copies d'avant la 1.10.3 (« eclair-draft-<contenu> ») lui reviennent, rien ne se perd.
+    // Site à un seul compte : les copies d'avant la 1.10.3 d'un contenu existant (« eclair-draft-<id> ») lui reviennent.
+    // Celles d'un nouveau contenu (« eclair-draft-new-<type> ») sont effacées : sans site ni compte, elles peuvent venir d'un
+    // autre site Éclair à la même adresse ou d'un compte supprimé, et ne sont jamais attribuées à ce compte.
     adopt: () => {
       try {
         const all = [];
         for (let i = 0; i < localStorage.length; i++) all.push(localStorage.key(i));
         all.filter((k) => k && legacy(k)).forEach((k) => {
           const b = JSON.parse(localStorage.getItem(k) || 'null');
-          const target = SITE + D.me + '-' + k.slice(DRAFT.length);
-          if (b && typeof b.t === 'number' && b.data && typeof b.data === 'object' && !localStorage.getItem(target)) {
+          const id = k.slice(DRAFT.length);
+          const target = SITE + D.me + '-' + id;
+          if (!id.startsWith('new-') && b && typeof b.t === 'number' && b.data && typeof b.data === 'object' && !localStorage.getItem(target)) {
             localStorage.setItem(target, JSON.stringify({ t: b.t, u: D.me, data: b.data }));
           }
           localStorage.removeItem(k);

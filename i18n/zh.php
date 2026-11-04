@@ -1554,4 +1554,5 @@ return [
     'Le site compte déjà {n} brouillons : publie ou supprime-en avant d’en créer d’autres avec l’IA.' => '网站已有 {n} 篇草稿：请先发布或删除一些，再用 AI 创建新的草稿。',
     'Enregistrement impossible : le verrou des données (data/.lock) ne fonctionne pas. Supprime ce fichier par FTP (Éclair le recrée), ou demande à ton hébergeur si le verrouillage des fichiers (flock) est disponible.' => '无法保存：数据锁（data/.lock）无法使用。请通过 FTP 删除此文件（Éclair 会重新创建），或询问你的主机商是否支持文件锁定（flock）。',
     'Connexion faite avant la 1.10.3 : déconnecte puis reconnecte Google Drive pour qu’Éclair sache quel administrateur l’a établie.' => '此连接建立于 1.10.3 之前：请断开并重新连接 Google Drive，让 Éclair 知道是哪位管理员建立的。',
+    'Google Drive a été déconnecté : cette connexion date d’avant la 1.10.3 et Éclair ne sait pas quel administrateur l’a établie. Un administrateur doit le reconnecter pour reprendre les sauvegardes.' => 'Google Drive 已断开连接：此连接建立于 1.10.3 之前，Éclair 不知道是哪位管理员建立的。需要由管理员重新连接，才能恢复备份。',
 ];

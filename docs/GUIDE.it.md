@@ -104,7 +104,7 @@ La bacheca mostra una checklist «Primi passi»: logo e colore, home page, primo
 - **Link interni assistiti**: mentre scrivi un link, l’editor ti propone le tue pagine e i tuoi articoli (link interni in 2 secondi).
 - **Incolla intelligente** da Word, Google Docs o una pagina web: titoli, elenchi, tabelle e grassetti diventano blocchi puliti.
 - Salvataggio con `Ctrl+S`, bozza locale di riserva (non si perde nulla se cade la connessione), anteprima reale prima della pubblicazione, **cronologia delle ultime 20 versioni**, pubblicazione programmata.
-  - Questa bozza di riserva appartiene all’account connesso e viene cancellata quando esci: non viene mai proposta a un altro account che usa lo stesso browser. Quelle della 1.10.2 vengono mantenute su un sito con un solo account; con più account vengono cancellate dopo l’aggiornamento: salva le modifiche in corso prima di aggiornare.
+  - Questa bozza di riserva appartiene all’account connesso e viene cancellata quando esci: non viene mai proposta a un altro account che usa lo stesso browser. Quelle della 1.10.2 relative a un contenuto già salvato vengono mantenute su un sito con un solo account; quelle di un nuovo contenuto mai salvato, o tutte con più account, vengono cancellate dopo l’aggiornamento: salva le modifiche in corso prima di aggiornare.
 - **Modalità Visuale**: la pagina così come appare con il tuo tema, modificabile direttamente lì ([dettagli](#modalità-visuale)).
 
 ### 🧩 Tutto il resto
@@ -600,7 +600,7 @@ Poi, per collegare il tuo Drive:
 - Oltre il numero scelto (8 di default), i più vecchi finiscono nel **cestino** del tuo Drive.
 - **Esegui il backup ora** avvia subito un invio. I siti grandi vengono inviati a blocchi da 4 MB: se il provider limita il tempo di esecuzione, l’invio riprende da dove si era interrotto (tieni la pagina aperta, continua da sola).
 - I backup automatici partono quando un amministratore apre il pannello. Perché partano anche senza visite, copia l’**indirizzo dell’attività pianificata** (Sicurezza › Backup su Google Drive › Backup a orari fissi) in un’attività pianificata (cron) del tuo provider o su [cron-job.org](https://cron-job.org), da eseguire ogni ora: avvia un backup solo quando ne è previsto uno. Tieni questo indirizzo per te.
-- La scheda indica chi ha collegato l’account («collegato da …»). Se quell’amministratore viene eliminato o declassato, il collegamento viene rimosso e i backup si fermano finché un amministratore non ricollega Google Drive. Un cambio di password non scollega nulla. Un collegamento effettuato prima della 1.10.3 viene segnalato: scollega e ricollega Google Drive perché Éclair sappia quale amministratore l’ha creato.
+- La scheda indica chi ha collegato l’account («collegato da …»). Se quell’amministratore viene eliminato o declassato, il collegamento viene rimosso e i backup si fermano finché un amministratore non ricollega Google Drive. Un cambio di password non scollega nulla. Un collegamento effettuato prima della 1.10.3 (o rifatto da una versione precedente) viene rimosso allo stesso modo, perché Éclair non sa quale amministratore l’ha creato: i backup si fermano finché un amministratore non ricollega Google Drive, il che registra il suo account.
 - Il token di accesso è cifrato sul tuo server. **Scollega Google Drive** lo revoca, e un nuovo collegamento revoca il precedente; puoi anche revocare l’accesso dal tuo account Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). I backup già inviati restano nel tuo Drive.
 
 ### Ripristinare un backup
@@ -734,6 +734,8 @@ Per ritirare una versione, si annuncia di nuovo un archivio più vecchio (già i
 ```bash
 ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<versione>
 ```
+
+L’archivio deve essere quello già firmato per quella versione: SHA-256 e dimensione devono corrispondere a un annuncio di quella versione nella cronologia Git di `dist/latest.json` (verificato con la chiave pubblica). Altrimenti non viene firmato nulla, a meno che tu non indichi l’impronta attesa, annotata alla pubblicazione: `ECLAIR_EXPECT_SHA256=<sha256>`.
 
 Una versione firmata si costruisce solo in un checkout Git e include solo i file tracciati; il commit di origine viene annotato nel manifest. Le sorgenti delle traduzioni (`i18n/*.php`) devono restare semplici array di testi letterali: vengono lette come dati, mai eseguite.
 

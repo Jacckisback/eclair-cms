@@ -211,8 +211,8 @@ if (function_exists('sodium_crypto_sign_keypair') && class_exists('ZipArchive'))
         $zip->close();
         return $file;
     };
-    $c1Run = static function (array $args, bool $key = true) use ($c1Build, $c1Secret): array {
-        $env = ['PATH' => (string) getenv('PATH')] + ($key ? ['ECLAIR_SIGNING_KEY' => base64_encode($c1Secret)] : []);
+    $c1Run = static function (array $args, bool $key = true, array $extra = []) use ($c1Build, $c1Secret): array {
+        $env = ['PATH' => (string) getenv('PATH')] + ($key ? ['ECLAIR_SIGNING_KEY' => base64_encode($c1Secret)] : []) + $extra;
         $p = proc_open(array_merge([PHP_BINARY, $c1Build . '/tools/build.php'], $args), [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $c1Build, $env);
         $out = (string) stream_get_contents($pipes[1]) . (string) stream_get_contents($pipes[2]);
         return ['rc' => proc_close($p), 'out' => $out];
@@ -243,11 +243,12 @@ if (function_exists('sodium_crypto_sign_keypair') && class_exists('ZipArchive'))
     $c1Bare = is_array($second) ? (string) base64_decode((string) ($second['channel']['v2']['signature'] ?? '')) : '';
     check('format 2 signé avec son contexte : la signature seule de l’annonce ne vaut pas', strlen($c1Bare) === SODIUM_CRYPTO_SIGN_BYTES
         && !sodium_crypto_sign_verify_detached($c1Bare, (string) $second['channel']['v2']['payload'], $c1Public));
-    // Retrait : la 7.7.8, publiée puis retirée ; la 7.7.7 est annoncée de nouveau, avec un numéro plus grand.
-    $c1Archive('7.7.8');
-    $res3 = $c1Run(['--resign=7.7.8']);
+    // Retrait : la 7.7.8, publiée puis retirée ; la 7.7.7 est annoncée de nouveau, avec un numéro plus grand. Hors d'un dépôt
+    // Git (aucun historique signé de dist/latest.json), le mainteneur donne l'empreinte attendue de chaque archive.
+    $c1New = $c1Archive('7.7.8');
+    $res3 = $c1Run(['--resign=7.7.8'], true, ['ECLAIR_EXPECT_SHA256' => (string) hash_file('sha256', $c1New)]);
     $third = $c1Read();
-    $res4 = $c1Run(['--resign=7.7.7']);
+    $res4 = $c1Run(['--resign=7.7.7'], true, ['ECLAIR_EXPECT_SHA256' => (string) hash_file('sha256', $c1Old)]);
     $fourth = $c1Read();
     check('--resign=<version> : retrait par une nouvelle annonce (numéro plus grand), annonce d’origine refaite pour les anciens sites', $res3['rc'] === 0 && $res4['rc'] === 0
         && is_array($third) && is_array($fourth) && $third['fields']['version'] === '7.7.8' && $fourth['fields']['version'] === '7.7.7' && $fourth['serial'] > $third['serial']
@@ -571,7 +572,8 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
             && str_contains($body, 'Google Drive a été déconnecté'), substr(strip_tags($body), 0, 200));
         check('compte de connexion supprimé : plus de sauvegarde automatique signalée aux pages', !str_contains($a2->req('GET', '/gestion')['body'], '"driveDue":true'));
 
-        // Connexion faite avec la 1.10.2 (compte de connexion non noté) : elle continue ; il est noté à la reconnexion suivante.
+        // Connexion faite avec la 1.10.2 (compte de connexion non noté) : aucune sauvegarde ne part et elle est retirée (depuis
+        // la 1.10.4) ; la reconnexion par un administrateur note son compte.
         $post($a2, ['action' => 'connect']);
         $patch(['pending' => ['next' => 0]]);
         $api($a2, 'drive/poll');
@@ -581,7 +583,11 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         $patch(['ok' => time() - 8 * 86400, 'attempt' => time() - 8 * 86400]);
         $count = $uploads();
         $cron = client($port)->req('GET', '/_eclair/backup/' . ($key[1] ?? 'x'));
-        check('connexion de la 1.10.2 (sans compte noté) : les sauvegardes continuent', trim($cron['body']) === 'done' && $uploads() === $count + 1 && $bound(), trim($cron['body']));
+        check('connexion de la 1.10.2 (sans compte noté) : aucune sauvegarde ne part, connexion retirée jusqu’à la reconnexion', trim($cron['body']) === 'error'
+            && $uploads() === $count && !$bound(), trim($cron['body']));
+        $post($a2, ['action' => 'connect']);
+        $patch(['pending' => ['next' => 0]]);
+        $api($a2, 'drive/poll');
         // Reconnexion par-dessus une connexion existante : l'envoi en cours vers l'ancien compte est abandonné.
         @mkdir($copy . '/cache/backups', 0700, true);
         file_put_contents($copy . '/cache/backups/sauvegarde-0123456789abcdef.zip', 'archive en cours');

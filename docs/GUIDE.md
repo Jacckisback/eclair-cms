@@ -104,7 +104,7 @@ Le tableau de bord affiche une checklist « Premiers pas » : logo et couleur, p
 - **Liens internes assistés** : en tapant un lien, l'éditeur propose tes pages et articles (maillage interne en 2 secondes).
 - **Collage intelligent** depuis Word, Google Docs ou une page web : titres, listes, tableaux et gras sont convertis en blocs propres.
 - Enregistrement `Ctrl+S`, brouillon local de secours (rien n'est perdu en cas de coupure), aperçu réel avant publication, **historique des 20 dernières versions**, publication programmée.
-  - Ce brouillon de secours appartient au compte connecté et s'efface à la déconnexion : il n'est jamais proposé à un autre compte qui utilise le même navigateur. Ceux de la 1.10.2 sont repris sur un site à un seul compte ; s'il y a plusieurs comptes, ils sont effacés après la mise à jour : enregistre tes modifications en cours avant de mettre à jour.
+  - Ce brouillon de secours appartient au compte connecté et s'efface à la déconnexion : il n'est jamais proposé à un autre compte qui utilise le même navigateur. Ceux de la 1.10.2 qui portent sur un contenu déjà enregistré sont repris sur un site à un seul compte ; ceux d'un nouveau contenu jamais enregistré, ou tous s'il y a plusieurs comptes, sont effacés après la mise à jour : enregistre tes modifications en cours avant de mettre à jour.
 - **Mode Visuel** : la page telle qu'elle s'affiche avec ton thème, modifiable sur place ([détails](#mode-visuel)).
 
 ### 🧩 Le reste
@@ -600,7 +600,7 @@ Ensuite, pour connecter ton Drive :
 - Au-delà du nombre choisi (8 par défaut), les plus anciennes partent dans la **corbeille** de ton Drive.
 - **Sauvegarder maintenant** lance un envoi immédiat. Les gros sites partent par morceaux de 4 Mo : si l'hébergeur limite la durée d'exécution, l'envoi reprend là où il s'était arrêté (garde la page ouverte, elle continue toute seule).
 - Les sauvegardes automatiques partent quand un administrateur ouvre l'administration. Pour qu'elles partent même sans visite, copie l'**adresse de tâche planifiée** (Sécurité › Sauvegardes sur Google Drive › Sauvegardes à heure fixe) dans la tâche planifiée (cron) de ton hébergeur ou sur [cron-job.org](https://cron-job.org), toutes les heures : elle ne lance une sauvegarde que lorsqu'elle est due. Garde cette adresse pour toi.
-- La carte indique qui a connecté le compte (« connecté par … »). Si cet administrateur est supprimé ou rétrogradé, la connexion est retirée et les sauvegardes s'arrêtent jusqu'à ce qu'un administrateur reconnecte Google Drive. Un changement de mot de passe ne déconnecte rien. Une connexion faite avant la 1.10.3 est signalée : déconnecte puis reconnecte Google Drive pour qu'Éclair sache quel administrateur l'a établie.
+- La carte indique qui a connecté le compte (« connecté par … »). Si cet administrateur est supprimé ou rétrogradé, la connexion est retirée et les sauvegardes s'arrêtent jusqu'à ce qu'un administrateur reconnecte Google Drive. Un changement de mot de passe ne déconnecte rien. Une connexion faite avant la 1.10.3 (ou refaite par une version antérieure) est retirée de la même façon, car Éclair ne sait pas quel administrateur l'a établie : les sauvegardes s'arrêtent jusqu'à ce qu'un administrateur reconnecte Google Drive, ce qui note son compte.
 - Le jeton d'accès est chiffré sur ton serveur. **Déconnecter Google Drive** le révoque, et une nouvelle connexion révoque l'ancienne ; tu peux aussi retirer l'accès depuis ton compte Google ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Les sauvegardes déjà envoyées restent dans ton Drive.
 
 ### Restaurer une sauvegarde
@@ -734,6 +734,8 @@ Pour retirer une version, on annonce de nouveau une archive plus ancienne (déj�
 ```bash
 ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<version>
 ```
+
+L'archive doit être celle déjà signée pour cette version : son empreinte SHA-256 et sa taille doivent correspondre à une annonce de cette version dans l'historique Git de `dist/latest.json` (vérifiée avec la clé publique). Sinon, rien n'est signé, sauf si tu donnes son empreinte attendue, relevée à sa publication : `ECLAIR_EXPECT_SHA256=<sha256>`.
 
 Une version signée ne se construit que dans un dépôt Git et n'inclut que les fichiers suivis ; le commit source est noté dans le manifeste. Les sources des traductions (`i18n/*.php`) doivent rester de simples tableaux de textes littéraux : elles sont lues comme des données, jamais exécutées.
 

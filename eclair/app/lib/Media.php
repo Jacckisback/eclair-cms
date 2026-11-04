@@ -463,10 +463,16 @@ final class Media
         if (is_file(ECLAIR_ROOT . $path)) {
             return ['url' => $path, 'w' => 1200, 'h' => 630];
         }
-        if (!self::gd() || $m['w'] < 600 || $m['ext'] === 'gif') {
+        // Échec déjà constaté (image trop grande pour la mémoire de l'hébergement, ou illisible) : l'original sert d'image de
+        // partage, sans nouvel essai à chaque page.
+        $failed = ECLAIR_ROOT . '/media/' . $m['file'] . '-og.none';
+        if (!self::gd() || $m['w'] < 600 || $m['ext'] === 'gif' || is_file($failed)) {
             return ['url' => self::url($m), 'w' => (int) $m['w'], 'h' => (int) $m['h']];
         }
         try {
+            // Même budget mémoire que l'envoi : un décodage qui ne peut pas tenir n'est pas tenté (l'erreur fatale qu'il
+            // provoquerait ne se rattrape pas : la page ne s'afficherait pas et n'entrerait jamais en cache).
+            self::memory((int) $m['w'], (int) $m['h']);
             $src = self::load($m);
             $og = self::cover($src, 1200, 630);
             $flat = imagecreatetruecolor(1200, 630);
@@ -477,6 +483,7 @@ final class Media
             return ['url' => $path, 'w' => 1200, 'h' => 630];
         } catch (\Throwable $e) {
             Log::error($e);
+            @touch($failed);
             return ['url' => self::url($m), 'w' => (int) $m['w'], 'h' => (int) $m['h']];
         }
     }
@@ -568,6 +575,7 @@ final class Media
         if (!array_filter((array) Store::read('media', []), fn ($x) => is_array($x) && isset($x['file'], $x['ext']) && self::url($x) === $og)) {
             $files[] = $og;
         }
+        $files[] = '/media/' . $m['file'] . '-og.none';
         foreach ($m['webp'] ?? [] as $width) {
             $files[] = self::webpUrl($m, (int) $width);
         }

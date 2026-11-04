@@ -41,16 +41,19 @@ final class AiImage
         $size = self::FORMATS[$format] ?? self::FORMATS['landscape'];
         $key = Ai::imageKey($provider);
         extend_time(300);
+        // Dépense due dès que le fournisseur a accepté le travail (coût annoncé, sinon prix de liste) : null avant.
+        $owed = null;
         try {
             [$bytes, $cost] = match ($provider) {
-                'openai' => self::openai($key, $model, $prompt, $size[0]),
-                'bfl' => self::bfl($key, $model, $prompt, $size[1]),
-                default => self::ideogram($key, $model, $prompt, $size[2]),
+                'openai' => self::openai($key, $model, $prompt, $size[0], $owed),
+                'bfl' => self::bfl($key, $model, $prompt, $size[1], $owed),
+                default => self::ideogram($key, $model, $prompt, $size[2], $owed),
             };
         } catch (\RuntimeException $e) {
-            // Fenêtre fermée pendant la création : le fournisseur a sans doute déjà facturé l'image.
-            if (connection_aborted()) {
-                Ai::charge($user['id'], $price);
+            // Image refusée par le filtre du fournisseur, échec après l'envoi ou fenêtre fermée pendant la création : le
+            // fournisseur a sans doute déjà facturé l'image, qui compte donc dans le budget du mois.
+            if ($owed !== null || connection_aborted()) {
+                Ai::charge($user['id'], $owed ?? $price);
             }
             throw $e;
         }
@@ -63,35 +66,43 @@ final class AiImage
     }
 
     /** OpenAI Images : réponse en base64, coût calculé sur les jetons quand ils sont fournis. */
-    private static function openai(string $key, string $model, string $prompt, string $size): array
+    private static function openai(string $key, string $model, string $prompt, string $size, ?float &$owed): array
     {
         $res = Ai::request('POST', Ai::endpoint('openai') . '/v1/images/generations', [
             'Authorization: Bearer ' . $key, 'Content-Type: application/json',
         ], ['model' => $model, 'prompt' => $prompt, 'size' => $size, 'quality' => 'medium', 'output_format' => 'webp', 'output_compression' => 85, 'n' => 1], 240);
         $json = json_decode($res['body'], true);
         $b64 = is_array($json) ? (string) ($json['data'][0]['b64_json'] ?? '') : '';
+        $u = is_array($json) ? (array) ($json['usage'] ?? []) : [];
+        $cost = isset($u['output_tokens']) ? ((int) ($u['input_tokens'] ?? 0) * 5 + (int) $u['output_tokens'] * 30) / 1_000_000 : null;
+        if ($res['status'] === 200) {
+            // Image créée (et facturée) par OpenAI, même si sa réponse est inutilisable.
+            $owed = $cost ?? Ai::IMAGES['openai'][2];
+        }
         if ($res['status'] !== 200 || $b64 === '') {
             throw new \RuntimeException(Ai::failure('openai', $res));
         }
-        $u = (array) ($json['usage'] ?? []);
-        $cost = isset($u['output_tokens']) ? ((int) ($u['input_tokens'] ?? 0) * 5 + (int) $u['output_tokens'] * 30) / 1_000_000 : null;
         return [(string) base64_decode($b64, true), $cost];
     }
 
     /** FLUX (Black Forest Labs) : tâche asynchrone, suivie sur l'adresse de suivi renvoyée, puis téléchargée aussitôt. */
-    private static function bfl(string $key, string $model, string $prompt, string $ratio): array
+    private static function bfl(string $key, string $model, string $prompt, string $ratio, ?float &$owed): array
     {
         $res = Ai::request('POST', Ai::endpoint('bfl') . '/v1/' . $model, [
             'x-key: ' . $key, 'Content-Type: application/json', 'Accept: application/json',
         ], ['prompt' => $prompt, 'aspect_ratio' => $ratio, 'resolution' => '1k'], 60);
         $job = json_decode($res['body'], true);
         $poll = is_array($job) ? (string) ($job['polling_url'] ?? '') : '';
+        $cost = is_array($job) && is_numeric($job['cost'] ?? null) ? (float) $job['cost'] / 100 : null;
+        if ($res['status'] < 300 && $poll !== '') {
+            // Travail accepté : facturé même si l'image est ensuite refusée par le filtre ou n'arrive jamais.
+            $owed = $cost ?? Ai::IMAGES['bfl'][2];
+        }
         // La clé ne part que vers Black Forest Labs (ou l'adresse configurée), à une adresse IP vérifiée.
         $pin = $poll !== '' && self::official($poll, 'bfl', 'bfl.ai') ? self::pin($poll) : null;
         if ($res['status'] >= 300 || $pin === null) {
             throw new \RuntimeException(Ai::failure('bfl', $res));
         }
-        $cost = is_numeric($job['cost'] ?? null) ? (float) $job['cost'] / 100 : null;
         $until = time() + 180;
         do {
             usleep(1_500_000);
@@ -115,13 +126,17 @@ final class AiImage
     }
 
     /** Ideogram (API v2) : formulaire multipart, adresse de l'image à télécharger aussitôt. */
-    private static function ideogram(string $key, string $model, string $prompt, string $ratio): array
+    private static function ideogram(string $key, string $model, string $prompt, string $ratio, ?float &$owed): array
     {
         $res = Ai::request('POST', Ai::endpoint('ideogram') . '/v2/image/generate/' . $model, ['Api-Key: ' . $key, 'Accept: application/json'], [
             'prompt' => $prompt, 'aspect_ratio' => $ratio, 'rendering_speed' => 'default', 'magic_prompt' => 'off', 'num_images' => '1',
         ], 180, true);
         $json = json_decode($res['body'], true);
         $image = is_array($json) ? (array) ($json['data'][0] ?? []) : [];
+        if ($res['status'] === 200 && $image) {
+            // Image créée (et facturée), même si le filtre la refuse ou si son téléchargement échoue.
+            $owed = Ai::IMAGES['ideogram'][2];
+        }
         if ($res['status'] === 422 || ($image && empty($image['is_image_safe']))) {
             throw new \RuntimeException(t('Image refusée par le filtre de sécurité de {name} : reformule la demande.', ['name' => Ai::IMAGES['ideogram'][0]]));
         }

@@ -12,6 +12,8 @@
  * Scénarios (mot-clé dans le dernier message de la personne) : ARTICLE (image puis brouillon), EQUIPE (recherche
  * puis ajout d'un membre), MODIFIE <id> (retouche d'un brouillon), EDITEUR (modification du contenu ouvert),
  * DOUBLE <id> (deux modifications de suite), PIEGE (texte malveillant), REFUS (refus de sécurité) ; sinon une simple réponse texte.
+ * Images (mot-clé dans la description) : MODERE (image refusée par le filtre du fournisseur après l'envoi), PERDUE (Ideogram :
+ * image créée mais introuvable au téléchargement).
  */
 declare(strict_types=1);
 
@@ -396,13 +398,19 @@ if ($path === '/v1/flux-3-image' && $method === 'POST') {
         fail('unexpected FLUX request', 422);
     }
     header('Content-Type: application/json');
-    echo json_encode(['id' => 'job1', 'polling_url' => $base . '/v1/get_result?id=job1', 'cost' => 4.8]);
+    $job = str_contains((string) ($body['prompt'] ?? ''), 'MODERE') ? 'mod1' : 'job1';
+    echo json_encode(['id' => $job, 'polling_url' => $base . '/v1/get_result?id=' . $job, 'cost' => 4.8]);
     exit;
 }
 
 if ($path === '/v1/get_result') {
     if ($header('x-key') !== 'bfl-test-key-0123456789') {
         fail('Not authenticated', 401);
+    }
+    if (($_GET['id'] ?? '') === 'mod1') {
+        header('Content-Type: application/json');
+        echo json_encode(['id' => 'mod1', 'status' => 'Content Moderated']);
+        exit;
     }
     $count = (int) @file_get_contents($dir . '/poll') + 1;
     file_put_contents($dir . '/poll', (string) $count);
@@ -419,13 +427,17 @@ if (preg_match('~^/v2/image/generate/ideogram-3$~', $path) && $method === 'POST'
         fail('unexpected Ideogram request: ' . json_encode($_POST), 422);
     }
     header('Content-Type: application/json');
-    echo json_encode(['generation_id' => 'g1', 'data' => [['prompt' => $_POST['prompt'], 'resolution' => '1312x736', 'is_image_safe' => true, 'url' => $base . '/delivery/ideo.png']]]);
+    echo json_encode(['generation_id' => 'g1', 'data' => [['prompt' => $_POST['prompt'], 'resolution' => '1312x736', 'is_image_safe' => !str_contains($_POST['prompt'], 'MODERE'),
+        'url' => $base . (str_contains($_POST['prompt'], 'PERDUE') ? '/delivery/perdue.png' : '/delivery/ideo.png')]]]);
     exit;
 }
 
 if (str_starts_with($path, '/delivery/')) {
     if ($header('x-key') !== '' || $header('api-key') !== '') {
         fail('provider key must never be sent to delivery URLs', 400);
+    }
+    if ($path === '/delivery/perdue.png') {
+        fail('image expired', 404);
     }
     $jpeg = str_ends_with($path, '.jpg');
     header('Content-Type: ' . ($jpeg ? 'image/jpeg' : 'image/png'));

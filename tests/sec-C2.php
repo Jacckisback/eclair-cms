@@ -152,10 +152,16 @@ safe('afterLogout', () => { const s = storage(start()); page('', '?bye=1', s); r
 safe('expired', () => { const s = storage(start()); page('', '?next=%2Fedit%2Fdd462d991e', s); return s.keys(); });
 safe('logout', () => { const s = storage(start()); page(A, '', s, true).logout(); return s.keys(); });
 safe('solo', () => {
-  const s = storage(start());
-  page(A, '', s, false, true);
-  const adopted = JSON.parse(s.getItem(SITE + A + '-new-page') || 'null');
-  return [s.keys(), adopted && adopted.u, adopted && adopted.data.title, JSON.parse(s.getItem(SITE + A + '-dd462d991e') || 'null').data.title];
+  // Copies de la 1.10.2 : celle d'un contenu existant revient au seul compte ; celle d'un nouveau contenu (« new-<type> »),
+  // dont l'auteur ne peut pas être connu (autre site Éclair à la même adresse, compte supprimé), est effacée.
+  const s = storage(Object.assign(start(), {
+    'eclair-draft-new-post': JSON.stringify({ t: 1, data: { title: 'nouvel article, auteur inconnu' } }),
+    'eclair-draft-ab12cd34ef': JSON.stringify({ t: 1, data: { title: 'ancien format, contenu existant' } }),
+  }));
+  const a = page(A, '', s, false, true).E.drafts;
+  const kept = a.get(a.key({ id: 'ab12cd34ef', type: 'page' }));
+  return [s.keys(), a.get(a.key({ type: 'post' })), a.get(a.key({ id: '', type: 'page' })), kept && kept.u, kept && kept.data.title,
+    JSON.parse(s.getItem(SITE + A + '-dd462d991e') || 'null').data.title];
 });
 safe('keys', () => {
   const a = page(A, '', storage()).E.drafts;
@@ -287,8 +293,8 @@ if ($node === '') {
     check('brouillons (JS) : page de connexion après déconnexion, plus aucun brouillon de ce site, préférences et autre site gardés', ($js['afterLogout'] ?? null) === ['cle-du-site', $other, 'eclair-mode'], $show('afterLogout'));
     check('brouillons (JS) : session expirée, rien d’effacé (le compte peut revenir les retrouver)', count((array) ($js['expired'] ?? [])) === 7, $show('expired'));
     check('brouillons (JS) : déconnexion, tous les brouillons de ce site effacés, ceux d’un autre site Éclair à la même adresse gardés', ($js['logout'] ?? null) === ['cle-du-site', $other, 'eclair-mode'], $show('logout'));
-    check('brouillons (JS) : site à un seul compte, brouillons de la 1.10.2 repris par ce compte (rien de perdu), ceux d’un autre compte effacés',
-        ($js['solo'] ?? null) === [['cle-du-site', $other, $mine, $site . 'aaaaaaaaaa-new-page', 'eclair-mode'], 'aaaaaaaaaa', 'ancien format, nouvelle page', 'de A'], $show('solo'));
+    check('brouillons (JS) : site à un seul compte, copie 1.10.2 d’un contenu existant reprise par ce compte, celles d’un nouveau contenu (auteur inconnu) et d’un autre compte effacées',
+        ($js['solo'] ?? null) === [['cle-du-site', $other, $site . 'aaaaaaaaaa-ab12cd34ef', $mine, 'eclair-mode'], null, null, 'aaaaaaaaaa', 'ancien format, contenu existant', 'de A'], $show('solo'));
     check('brouillons (JS) : clé propre au site et au compte, aucune sans compte connecté', ($js['keys'] ?? null) === [$mine, $site . 'aaaaaaaaaa-new-page', ''], $show('keys'));
     check('brouillons (JS) : seule une copie écrite par ce compte est proposée', ($js['author'] ?? null) === ['texte de A', null, null], $show('author'));
     check('brouillons (JS) : un autre compte du même navigateur ne se voit rien proposer', ($js['otherAccount'] ?? null) === [null, null, []], $show('otherAccount'));

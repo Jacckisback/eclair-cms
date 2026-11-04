@@ -104,7 +104,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 - **Assisted internal links**: as you type a link, the editor suggests your pages and posts (internal linking in 2 seconds).
 - **Smart paste** from Word, Google Docs or a web page: headings, lists, tables and bold text become clean blocks.
 - `Ctrl+S` to save, local backup draft (nothing is lost if the connection drops), real preview before publishing, **history of the last 20 versions**, scheduled publishing.
-  - This backup draft belongs to the signed-in account and is erased when you log out: it's never offered to another account using the same browser. Those saved by 1.10.2 are kept on a site with a single account; with several accounts, they are erased after the update: save any open edits before updating.
+  - This backup draft belongs to the signed-in account and is erased when you log out: it's never offered to another account using the same browser. Those saved by 1.10.2 for content that was already saved are kept on a site with a single account; those for new, never-saved content, or all of them with several accounts, are erased after the update: save any open edits before updating.
 - **Visual mode**: the page as it actually looks with your theme, editable right there ([details](#visual-mode)).
 
 ### 🧩 Everything else
@@ -600,7 +600,7 @@ Then, to connect your Drive:
 - Beyond the number you chose (8 by default), the oldest ones go to your Drive's **trash**.
 - **Back up now** starts an upload right away. Large sites are sent in 4 MB chunks: if your host limits execution time, the upload resumes where it left off (keep the page open, it carries on by itself).
 - Automatic backups run when an administrator opens the admin. To have them run even without a visit, copy the **scheduled task URL** (Security › Google Drive backups › Backups on a fixed schedule) into your host's scheduled task (cron) or into [cron-job.org](https://cron-job.org), to run every hour: it only starts a backup when one is due. Keep this URL to yourself.
-- The card shows who connected the account (“connected by …”). If that administrator is deleted or demoted, the connection is removed and backups stop until an administrator reconnects Google Drive. A password change doesn't disconnect anything. A connection made before 1.10.3 is flagged: disconnect and reconnect Google Drive so Éclair knows which administrator set it up.
+- The card shows who connected the account (“connected by …”). If that administrator is deleted or demoted, the connection is removed and backups stop until an administrator reconnects Google Drive. A password change doesn't disconnect anything. A connection made before 1.10.3 (or redone by an earlier version) is removed the same way, since Éclair doesn't know which administrator set it up: backups stop until an administrator reconnects Google Drive, which records their account.
 - The access token is encrypted on your server. **Disconnect Google Drive** revokes it, and a new connection revokes the old one; you can also remove access from your Google account ([myaccount.google.com/connections](https://myaccount.google.com/connections)). Backups already sent stay in your Drive.
 
 ### Restore a backup
@@ -734,6 +734,8 @@ To withdraw a release, announce an older archive again (already in `dist/`) with
 ```bash
 ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<version>
 ```
+
+The archive must be the one already signed for that version: its SHA-256 and size must match an announcement of that version in the Git history of `dist/latest.json` (checked with the public key). Otherwise nothing is signed, unless you give its expected fingerprint, noted when it was published: `ECLAIR_EXPECT_SHA256=<sha256>`.
 
 A signed release can only be built in a Git checkout and only includes tracked files; the source commit is recorded in the manifest. Translation sources (`i18n/*.php`) must stay plain arrays of literal strings: they are read as data, never executed.
 
