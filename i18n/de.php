@@ -592,6 +592,7 @@ return [
     'Fichiers manquants' => 'Fehlende Dateien',
     'Fichiers modifiés' => 'Geänderte Dateien',
     'Fichiers personnalisés conservés tels quels : {f}.' => 'Angepasste Dateien unverändert beibehalten: {f}.',
+    'Fichiers modifiés depuis la mise à jour, conservés tels quels : {f}. Leur version d’avant est rangée dans cache/update.' => 'Seit dem Update geänderte Dateien unverändert beibehalten: {f}. Ihre vorherige Version liegt in cache/update.',
     'Fichiers suspects' => 'Verdächtige Dateien',
     'Filet fin' => 'Feine Linie',
     'Filets entre les sections' => 'Linien zwischen den Abschnitten',

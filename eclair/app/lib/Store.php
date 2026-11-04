@@ -166,12 +166,19 @@ final class Store
     /** Écrit un fichier de façon atomique. */
     /**
      * Écrit un fichier de façon atomique, lisible uniquement par PHP (0600).
-     * Le fichier temporaire ne porte l'extension .php que s'il commence par la ligne de protection.
+     * Le fichier temporaire ne porte l'extension .php que s'il commence par la ligne de protection. Il est créé privé
+     * (masque 0077 le temps de l'écriture) : jamais lisible par un autre compte, même un instant, avant ses droits définitifs.
      */
     public static function atomic(string $file, string $content): void
     {
         $tmp = $file . '.' . bin2hex(random_bytes(4)) . (str_starts_with($content, self::GUARD) ? '.tmp.php' : '.tmp');
-        if (@file_put_contents($tmp, $content, LOCK_EX) !== strlen($content)) {
+        $mask = umask(0077);
+        try {
+            $written = @file_put_contents($tmp, $content, LOCK_EX);
+        } finally {
+            umask($mask);
+        }
+        if ($written !== strlen($content)) {
             @unlink($tmp);
             throw new \RuntimeException("Impossible d'écrire « " . basename($file) . ' » : vérifie les droits du dossier.');
         }
@@ -188,6 +195,12 @@ final class Store
         $private = str_starts_with($dir, ECLAIR_DATA) || str_starts_with($dir, ECLAIR_ROOT . '/cache');
         if (!is_dir($dir) && !@mkdir($dir, $private ? 0700 : 0755, true) && !is_dir($dir)) {
             throw new \RuntimeException('Impossible de créer le dossier ' . basename($dir) . '.');
+        }
+        // Dossier des données livré avec l'archive (il garde les droits de l'envoi par FTP, souvent 755 ou 777) : resserré
+        // au mieux à 0700 dès qu'Éclair s'en sert (installation comprise), sans échec là où l'hébergeur le refuse.
+        $data = rtrim(ECLAIR_DATA, '/\\');
+        if (rtrim($dir, '/\\') === $data && $data !== '' && (@fileperms($dir) & 0077) !== 0) {
+            @chmod($dir, 0700);
         }
     }
 

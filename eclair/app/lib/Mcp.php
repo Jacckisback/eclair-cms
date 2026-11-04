@@ -553,4 +553,19 @@ final class Mcp
         });
         Log::security('mcp_revoked', ['id' => $id === '' ? 'all' : $id]);
     }
+
+    /**
+     * Coupe toutes les connexions d'un compte et ses autorisations en cours (accès retirés : Auth::revokeAccess). Effacées,
+     * et non plus seulement refusées par la version du compte, une sauvegarde restaurée ne peut plus les réveiller.
+     */
+    public static function revokeUser(string $uid): void
+    {
+        if (!Store::exists(self::DATA)) {
+            return; // aucune connexion n'a jamais été faite
+        }
+        self::change(function (array &$d) use ($uid): void {
+            $d['grants'] = array_filter($d['grants'], static fn (array $g): bool => (string) ($g['user'] ?? '') !== $uid);
+            $d['codes'] = array_filter($d['codes'], static fn (array $c): bool => (string) ($c['user'] ?? '') !== $uid);
+        });
+    }
 }

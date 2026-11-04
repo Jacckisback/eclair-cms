@@ -109,6 +109,9 @@ final class Cache
             Store::ensureDir(ECLAIR_ROOT . '/cache');
             Store::atomic(ECLAIR_ROOT . '/cache/runtime.php', Store::GUARD . json_encode($data));
         } catch (\Throwable $e) {
+            // Nouvelle génération impossible à publier : l'ancienne ne doit plus servir de pages (le chemin rapide se ferme
+            // jusqu'à la prochaine purge réussie, l'application répond à sa place).
+            @unlink(ECLAIR_ROOT . '/cache/runtime.php');
             Log::error($e);
         }
     }

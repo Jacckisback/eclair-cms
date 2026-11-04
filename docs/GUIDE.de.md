@@ -563,7 +563,7 @@ Danach holt **Zur vorherigen Version zurückkehren** (auf derselben Seite) die a
 
 Gut zu wissen:
 
-- Eine `.htaccess`, die du geändert hast (oder die dein Hoster ergänzt hat), **bleibt erhalten**; die neue Vorlage wird unter `cache/update/htaccess-<version>.txt` abgelegt, damit du vergleichen kannst.
+- Eine `.htaccess`, die du geändert hast (oder die dein Hoster ergänzt hat), **bleibt erhalten**; die neue Vorlage wird unter `cache/update/htaccess-<version>.txt` abgelegt, damit du vergleichen kannst. Ebenso behält **Zur vorherigen Version zurückkehren** eine seit dem Update geänderte `.htaccess` oder Ordnerschutzdatei: Ihre vorherige Version wird in `cache/update/` abgelegt, und die Seite weist dich darauf hin.
 - Von Hand geänderte Dateien von Éclair (Theme …) werden durch ihre neue Version ersetzt: Die Seite „Updates“ listet sie vor der Installation auf. Für dauerhafte Anpassungen nimm **Eigenes CSS** (Einstellungen › Design).
 - Wenn dein Hoster verhindert, dass sich der Server selbst aufruft, installiert Éclair das Update, ohne es kontrollieren zu können, und sagt dir das: Öffne deine Website, um sie zu prüfen, und kehre bei Bedarf zur vorherigen Version zurück.
 - Konnte die automatische Rückkehr nicht vollständig abgeschlossen werden, sagt die Seite das („Wiederherstellung unvollständig“) und bittet dich, den Inhalt von `cache/update/previous` per FTP an seinen Platz zurückzukopieren (siehe [Fehlerbehebung](#fehlerbehebung)).
@@ -638,7 +638,7 @@ Melde dich innerhalb von 24 Stunden **mit dieser E-Mail-Adresse und diesem neuen
 
 **Google Drive: „Zugriff auf Google Drive entzogen“**: Die Berechtigung wurde im Google-Konto entzogen (oder ist abgelaufen). Klicke auf **Google Drive verbinden**: Derselbe Ordner wird weiterverwendet.
 
-**„Installation gesperrt“**: Das Zeitfenster von 2 Stunden nach dem ersten Aufruf ist abgelaufen. Lösche `data/install-window.php` per FTP und lade die Seite neu.
+**„Installation gesperrt“**: Das Zeitfenster von 2 Stunden nach dem ersten Aufruf ist abgelaufen, oder die Website war schon installiert und `data/site.php` ist verschwunden (eine Neuinstallation verlangt immer FTP-Zugang; deine Konten, Schlüssel und Inhalte bleiben erhalten). Lösche `data/install-window.php` per FTP und lade die Seite neu.
 
 **Adresse der Website nicht verifiziert (Seite „Sicherheit“)**: Dein Server kann sich unter der Adresse der Website nicht selbst aufrufen (Firewall des Hosters, DNS noch nicht verbreitet …). Die Website funktioniert normal, aber ohne Weiterleitung auf die offizielle Adresse (mit/ohne www). Klicke auf „Adresse der Website verifizieren“, sobald die Domain eingerichtet ist.
 

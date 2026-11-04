@@ -67,6 +67,9 @@ final class AdminUpdate
                     Admin::back('update', t('Mot de passe incorrect.'), 'bad');
                 }
                 $result = Update::rollback();
+                if ($result['ok'] && $result['kept']) {
+                    Session::flash('warn', t('Fichiers modifiés depuis la mise à jour, conservés tels quels : {f}. Leur version d’avant est rangée dans cache/update.', ['f' => implode(', ', $result['kept'])]));
+                }
                 $result['ok']
                     ? Admin::back('update', t('Retour à la version {v} effectué. Tes contenus n’ont pas bougé.', ['v' => $result['version']]))
                     : Admin::back('update', $result['error'], 'bad');

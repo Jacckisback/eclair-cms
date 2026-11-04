@@ -189,12 +189,35 @@ final class Installer
         ]) ?? throw new \RuntimeException(t('Cette adresse e-mail est déjà utilisée.'));
         Starter::create($type, $lang, $user, $name);
         Media::icons(null, (string) Settings::get('appearance.accent'));
-        @unlink(Backup::dataDir() . '/install-window.php');
         // Les visiteurs ne seront redirigés vers cette adresse que si elle mène vraiment à ce site.
         Settings::verifyUrl();
         Cache::purge();
         Auth::login($user);
         Log::security('install', ['email' => $user['email']]);
+        // En dernier (un échec avant laisse la fenêtre ouverte pour réessayer) : la fenêtre est gardée, refermée pour de bon.
+        // Si data/site.php disparaît, l'installateur reste verrouillé tant que ce fichier n'a pas été supprimé par FTP.
+        self::close();
+    }
+
+    /** Referme pour de bon la fenêtre d'installation (première visite datée de 0) : la rouvrir demande l'accès FTP. */
+    private static function close(): void
+    {
+        Store::atomic(Backup::dataDir() . '/install-window.php', Store::GUARD . '0');
+    }
+
+    /**
+     * Site installé avant la 1.10.4, qui supprimait la fenêtre à la fin de l'installation : refermée de même à la première
+     * visite de l'administration, pour qu'une réinstallation après la perte de data/site.php demande aussi l'accès FTP.
+     */
+    public static function seal(): void
+    {
+        if (!is_file(Backup::dataDir() . '/install-window.php')) {
+            try {
+                self::close();
+            } catch (\Throwable) {
+                // dossier des données en lecture seule : nouvel essai à la prochaine visite
+            }
+        }
     }
 
     /** Fichiers de données que l'installation peut créer, déjà présents avant elle. */

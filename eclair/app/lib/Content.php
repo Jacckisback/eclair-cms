@@ -195,53 +195,62 @@ final class Content
      */
     public static function save(array $data, array $user, ?callable $expect = null): array
     {
-        $result = Store::locked(function () use ($data, $user, $expect): array {
-            self::$index = null;
-            $index = self::index();
-            $id = preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '';
-            $old = $id !== '' && isset($index[$id]) ? self::get($id) : null;
-            if ($expect !== null && !$expect($old)) {
-                throw new \UnexpectedValueException('Contenu modifié entre-temps.');
-            }
-            if ($old === null && count($index) >= self::MAX_ITEMS) {
-                throw new \OverflowException(t('Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.', ['n' => self::MAX_ITEMS]));
-            }
-            $item = self::build($data, $user, $old, $index);
-            $id = $item['id'];
-            $entry = self::entry($item);
-            $oldEntry = $index[$id] ?? null;
-            $index[$id] = $entry;
-            // Index de recherche préparé (et sa taille vérifiée) avant toute écriture : un refus ne laisse rien à moitié enregistré.
-            $search = self::searchTexts($index, $id, $item['status'] === 'published' ? Blocks::text($item['blocks']) : null);
-            if ($old !== null) {
-                self::addRevision($old);
-                if ($oldEntry !== null && self::visible($oldEntry)) {
-                    $from = self::path($oldEntry);
-                    $to = self::path($entry);
-                    if ($from !== $to && $from !== '/') {
-                        Redirects::add($from, $to, true);
+        // Dès la première écriture, le cache est vidé même si une écriture suivante échoue (index de recherche sur un disque
+        // plein…) : une page dépubliée n'y reste jamais servie.
+        $written = false;
+        try {
+            $result = Store::locked(function () use ($data, $user, $expect, &$written): array {
+                self::$index = null;
+                $index = self::index();
+                $id = preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '';
+                $old = $id !== '' && isset($index[$id]) ? self::get($id) : null;
+                if ($expect !== null && !$expect($old)) {
+                    throw new \UnexpectedValueException('Contenu modifié entre-temps.');
+                }
+                if ($old === null && count($index) >= self::MAX_ITEMS) {
+                    throw new \OverflowException(t('Le site compte déjà {n} contenus, le maximum : supprime ceux qui ne servent plus avant d’en créer d’autres.', ['n' => self::MAX_ITEMS]));
+                }
+                $item = self::build($data, $user, $old, $index);
+                $id = $item['id'];
+                $entry = self::entry($item);
+                $oldEntry = $index[$id] ?? null;
+                $index[$id] = $entry;
+                // Index de recherche préparé (et sa taille vérifiée) avant toute écriture : un refus ne laisse rien à moitié enregistré.
+                $search = self::searchTexts($index, $id, $item['status'] === 'published' ? Blocks::text($item['blocks']) : null);
+                $written = true;
+                if ($old !== null) {
+                    self::addRevision($old);
+                    if ($oldEntry !== null && self::visible($oldEntry)) {
+                        $from = self::path($oldEntry);
+                        $to = self::path($entry);
+                        if ($from !== $to && $from !== '/') {
+                            Redirects::add($from, $to, true);
+                        }
                     }
                 }
+                // L'index décide de ce qui est en ligne. Un contenu qui le quitte (brouillon, date future) y est inscrit avant d'être
+                // écrit : une écriture interrompue (disque plein…) laisse toujours la version la moins visible, jamais un brouillon public.
+                if ($old !== null && !self::visible($entry)) {
+                    Store::write('index', $index);
+                    Store::write('content/' . $id, $item);
+                } else {
+                    Store::write('content/' . $id, $item);
+                    Store::write('index', $index);
+                }
+                self::$index = $index;
+                if ($search !== null) {
+                    Store::write('search', $search);
+                }
+                if ($item['status'] !== 'draft') {
+                    Redirects::remove(self::path($entry));
+                }
+                return $item;
+            });
+        } finally {
+            if ($written) {
+                Cache::purge();
             }
-            // L'index décide de ce qui est en ligne. Un contenu qui le quitte (brouillon, date future) y est inscrit avant d'être
-            // écrit : une écriture interrompue (disque plein…) laisse toujours la version la moins visible, jamais un brouillon public.
-            if ($old !== null && !self::visible($entry)) {
-                Store::write('index', $index);
-                Store::write('content/' . $id, $item);
-            } else {
-                Store::write('content/' . $id, $item);
-                Store::write('index', $index);
-            }
-            self::$index = $index;
-            if ($search !== null) {
-                Store::write('search', $search);
-            }
-            if ($item['status'] !== 'draft') {
-                Redirects::remove(self::path($entry));
-            }
-            return $item;
-        });
-        Cache::purge();
+        }
         return $result;
     }
 
@@ -366,38 +375,46 @@ final class Content
 
     public static function delete(string $id, string $redirectTo = ''): void
     {
-        Store::locked(function () use ($id, $redirectTo): void {
-            self::$index = null;
-            $index = self::index();
-            if (!isset($index[$id])) {
-                return;
+        // Dès la première écriture, le cache est vidé même si une écriture suivante échoue (voir save()).
+        $written = false;
+        try {
+            Store::locked(function () use ($id, $redirectTo, &$written): void {
+                self::$index = null;
+                $index = self::index();
+                if (!isset($index[$id])) {
+                    return;
+                }
+                $entry = $index[$id];
+                $written = true;
+                // Le fichier d'abord : s'il ne peut pas être supprimé (droits du dossier), rien ne change et l'erreur est signalée,
+                // au lieu d'un fichier orphelin qu'une reconstruction de l'index remettrait en ligne.
+                Store::delete('content/' . $id);
+                if (is_file(Store::file('content/' . $id))) {
+                    throw new \RuntimeException("Impossible de supprimer « content/" . $id . '.php » : vérifie les droits du dossier.');
+                }
+                if (self::visible($entry) && $redirectTo !== '') {
+                    Redirects::add(self::path($entry), $redirectTo, false);
+                }
+                unset($index[$id]);
+                Store::write('index', $index);
+                self::$index = $index;
+                foreach (Store::names('revisions/' . $id) as $rev) {
+                    Store::delete($rev);
+                }
+                @rmdir(ECLAIR_DATA . '/revisions/' . $id);
+                $search = self::searchTexts($index, $id, null);
+                if ($search !== null) {
+                    Store::write('search', $search);
+                }
+                if (Settings::get('home') === $id) {
+                    Settings::save(['home' => '']);
+                }
+            });
+        } finally {
+            if ($written) {
+                Cache::purge();
             }
-            $entry = $index[$id];
-            // Le fichier d'abord : s'il ne peut pas être supprimé (droits du dossier), rien ne change et l'erreur est signalée,
-            // au lieu d'un fichier orphelin qu'une reconstruction de l'index remettrait en ligne.
-            Store::delete('content/' . $id);
-            if (is_file(Store::file('content/' . $id))) {
-                throw new \RuntimeException("Impossible de supprimer « content/" . $id . '.php » : vérifie les droits du dossier.');
-            }
-            if (self::visible($entry) && $redirectTo !== '') {
-                Redirects::add(self::path($entry), $redirectTo, false);
-            }
-            unset($index[$id]);
-            Store::write('index', $index);
-            self::$index = $index;
-            foreach (Store::names('revisions/' . $id) as $rev) {
-                Store::delete($rev);
-            }
-            @rmdir(ECLAIR_DATA . '/revisions/' . $id);
-            $search = self::searchTexts($index, $id, null);
-            if ($search !== null) {
-                Store::write('search', $search);
-            }
-            if (Settings::get('home') === $id) {
-                Settings::save(['home' => '']);
-            }
-        });
-        Cache::purge();
+        }
     }
 
     public static function duplicate(string $id, array $user): ?array
@@ -451,10 +468,17 @@ final class Content
     public static function reindex(): array
     {
         return Store::locked(function (): array {
+            $previous = Store::read('index');
             $index = [];
             foreach (Store::names('content') as $name) {
                 $item = Store::read($name);
                 if (is_array($item) && isset($item['id'], $item['blocks'])) {
+                    // Fichier que l'index lisible ne connaît pas (laissé par une suppression ratée avant la 1.10.3) : il revient
+                    // en brouillon, à relire, et jamais en ligne avec son ancien statut. Sans index lisible, rien ne change.
+                    if (is_array($previous) && !isset($previous[$item['id']]) && ($item['status'] ?? '') !== 'draft') {
+                        $item['status'] = 'draft';
+                        Store::write($name, $item);
+                    }
                     $index[$item['id']] = self::entry($item);
                 }
             }

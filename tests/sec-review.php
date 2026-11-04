@@ -112,6 +112,8 @@ if (!in_array('--unit', $argv, true)) {
         $rvContent = count(glob($rvCopy . '/data/content/*.php') ?: []);
         @unlink($rvCopy . '/data/site.php');
         @unlink($rvCopy . '/cache/runtime.php');
+        // Fenêtre d'installation gardée, refermée (1.10.4) : la réinstallation demande de la supprimer par FTP.
+        @unlink($rvCopy . '/data/install-window.php');
         $again = $install(client($rvPort2), 'camille@example.com');
         $errors = (array) (json_decode($again['body'], true)['errors'] ?? []);
         check('installation relancée avec l’e-mail d’un compte existant : refusée avant toute écriture, rien d’effacé',

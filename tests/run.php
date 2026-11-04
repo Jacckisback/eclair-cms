@@ -428,7 +428,9 @@ if (!in_array('--unit', $argv, true)) {
         check('installation', str_contains($install['body'], '"ok":true'), $install['body']);
         $site = json_decode(substr((string) file_get_contents($copy . '/data/site.php'), strlen(Store::GUARD)), true);
         check('adresse vérifiée par le serveur lui-même', ($site['security']['verified'] ?? '') === $base, json_encode($site['security'] ?? null));
-        check('fenêtre d’installation refermée', !is_file($copy . '/data/install-window.php'));
+        // Gardée, refermée pour de bon (1.10.4) : si data/site.php disparaît, l'installateur reste verrouillé sans l'accès FTP.
+        check('fenêtre d’installation refermée', is_file($copy . '/data/install-window.php')
+            && time() - (int) Store::strip((string) file_get_contents($copy . '/data/install-window.php')) >= 7200);
         check('fichiers de données privés (0600)', (fileperms($copy . '/data/users.php') & 0777) === 0600);
         $reinstall = $c->req('POST', '/', $c->token($r['body']), ['Accept: application/json']);
         check('installateur désactivé après installation', !str_contains($reinstall['body'], '"ok":true'));
@@ -658,6 +660,7 @@ require __DIR__ . '/sec-C1.php';
 require __DIR__ . '/sec-B1.php';
 require __DIR__ . '/sec-A.php';
 require __DIR__ . '/sec-review.php';
+require __DIR__ . '/sec-r2-a.php';
 
 exec('rm -rf ' . escapeshellarg(ECLAIR_DATA));
 echo "\n" . ($failed ? '❌ ' . count($failed) . ' échec(s), ' : '✅ ') . $passed . " vérifications réussies\n";

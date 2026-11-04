@@ -39,6 +39,7 @@ final class Admin
             }
             Http::redirect(admin_url('login') . ($route !== '/' ? '?next=' . rawurlencode($route) : ''));
         }
+        Installer::seal();
         if ($method === 'POST' && !Security::checkCsrf()) {
             if (str_starts_with($route, '/api/') || Req::wantsJson()) {
                 Http::json(['ok' => false, 'error' => t('Jeton de sécurité expiré : recharge la page.')], 419);

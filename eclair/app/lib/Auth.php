@@ -315,7 +315,23 @@ final class Auth
     /** Déconnecte tous les appareils d'un compte (incrémente sa version de session). */
     public static function revokeAll(string $id): ?array
     {
-        return Users::update($id, fn (array $u): array => ['ver' => (int) ($u['ver'] ?? 1) + 1] + $u);
+        $saved = Users::update($id, fn (array $u): array => ['ver' => (int) ($u['ver'] ?? 1) + 1] + $u);
+        if ($saved !== null) {
+            self::revokeAccess($id);
+        }
+        return $saved;
+    }
+
+    /**
+     * Accès d'un compte retirés (déconnexion générale ou des autres appareils, nouveau mot de passe, réinitialisation par un
+     * administrateur ou par FTP, compte supprimé) : ses connexions MCP et ses autres sessions sont effacées, pas seulement
+     * refusées par la version du compte. Une sauvegarde restaurée remet data/users.php avec l'ancienne version, mais jamais
+     * data/ai/ ni data/sessions/ : elle ne peut donc plus les réveiller.
+     */
+    public static function revokeAccess(string $id): void
+    {
+        Mcp::revokeUser($id);
+        Session::revokeUser($id);
     }
 
     /**
@@ -499,12 +515,15 @@ final class Auth
             return;
         }
         $hash = Security::hashPassword($password);
-        Users::update($user['id'], fn (array $u): array => [
+        $saved = Users::update($user['id'], fn (array $u): array => [
             'pass' => $hash,
             'ver' => (int) ($u['ver'] ?? 1) + 1,
             'must_change' => false,
             'totp' => ['on' => false, 'secret' => '', 'last' => 0, 'recovery' => []],
         ] + $u);
+        if ($saved !== null) {
+            self::revokeAccess((string) $user['id']);
+        }
         Log::security('ftp_reset', ['email' => $email]);
     }
 

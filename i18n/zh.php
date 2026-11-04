@@ -592,6 +592,7 @@ return [
     'Fichiers manquants' => '缺失文件',
     'Fichiers modifiés' => '已修改的文件',
     'Fichiers personnalisés conservés tels quels : {f}.' => '以下自定义文件已原样保留：{f}。',
+    'Fichiers modifiés depuis la mise à jour, conservés tels quels : {f}. Leur version d’avant est rangée dans cache/update.' => '以下文件在更新后被修改过，已原样保留：{f}。它们之前的版本保存在 cache/update 中。',
     'Fichiers suspects' => '可疑文件',
     'Filet fin' => '细边框',
     'Filets entre les sections' => '分区之间加细线',

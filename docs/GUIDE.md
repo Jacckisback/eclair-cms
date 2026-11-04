@@ -563,7 +563,7 @@ Ensuite, **Revenir à la version précédente** (même page) remet l'ancienne ve
 
 Bon à savoir :
 
-- Un `.htaccess` que tu as modifié (ou que ton hébergeur a complété) est **conservé** ; le nouveau modèle est rangé dans `cache/update/htaccess-<version>.txt` pour que tu puisses comparer.
+- Un `.htaccess` que tu as modifié (ou que ton hébergeur a complété) est **conservé** ; le nouveau modèle est rangé dans `cache/update/htaccess-<version>.txt` pour que tu puisses comparer. De même, **Revenir à la version précédente** garde un `.htaccess` ou une protection de dossier modifiés depuis la mise à jour : leur version d'avant est rangée dans `cache/update/` et la page te le signale.
 - Les fichiers d'Éclair modifiés à la main (thème…) sont remplacés par leur nouvelle version : la page Mises à jour les liste avant l'installation. Pour une retouche durable, utilise le **CSS personnalisé** (Réglages › Apparence).
 - Si ton hébergeur empêche le serveur de s'appeler lui-même, Éclair installe la mise à jour sans pouvoir la contrôler et te le dit : ouvre ton site pour vérifier, et reviens en arrière si besoin.
 - Si le retour automatique n'a pas pu se faire en entier, la page le dit (« Retour incomplet ») et t'indique de remettre en place par FTP le contenu de `cache/update/previous` (voir [Dépannage](#dépannage)).
@@ -638,7 +638,7 @@ Dans les 24 heures, **connecte-toi avec cet e-mail et ce nouveau mot de passe** 
 
 **Google Drive : « Accès à Google Drive retiré »** : l'autorisation a été retirée depuis le compte Google (ou a expiré). Clique sur **Connecter Google Drive** : le même dossier est réutilisé.
 
-**« Installation verrouillée »** : la fenêtre de 2 heures après la première visite est passée. Supprime `data/install-window.php` par FTP et recharge la page.
+**« Installation verrouillée »** : la fenêtre de 2 heures après la première visite est passée, ou le site a déjà été installé et `data/site.php` a disparu (réinstaller demande toujours l'accès FTP : tes comptes, clés et contenus sont gardés). Supprime `data/install-window.php` par FTP et recharge la page.
 
 **« Adresse non vérifiée » (page Sécurité)** : ton serveur n'arrive pas à s'appeler lui-même sur l'adresse du site (pare-feu de l'hébergeur, DNS pas encore propagé…). Le site fonctionne normalement, mais sans redirection vers l'adresse officielle (www / sans www). Clique sur « Vérifier l'adresse du site » une fois le domaine en place.
 
