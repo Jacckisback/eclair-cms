@@ -68,6 +68,8 @@ final class Settings
         ],
         'geo' => [
             'ai' => 'open',
+            // Visites des robots d'IA notées (Robots IA) : heure, robot, adresse ; ni IP ni visiteur humain.
+            'ai_log' => true,
             'llms' => true,
             'llms_full' => true,
             'markdown' => true,

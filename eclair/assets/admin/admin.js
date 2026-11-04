@@ -306,6 +306,7 @@
     }).catch(() => {});
   }
   $$('[data-width]').forEach((el) => requestAnimationFrame(() => { el.style.width = el.dataset.width + '%'; }));
+  $$('[data-height]').forEach((el) => requestAnimationFrame(() => { el.style.height = el.dataset.height + '%'; }));
   $$('[data-strength]').forEach((input) => input.addEventListener('input', () => {
     const v = input.value;
     let score = (v.length >= 10) + (v.length >= 14) + (/[A-Z]/.test(v) && /[a-z]/.test(v)) + (/\d|[^\w]/.test(v));

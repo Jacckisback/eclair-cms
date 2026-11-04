@@ -84,6 +84,7 @@ final class Admin
             'GET /messages' => [AdminSite::class, 'messages', 'messages'],
             'POST /messages' => [AdminSite::class, 'messageAction', 'messages'],
             'GET /redirects' => [AdminSite::class, 'redirects', 'redirects'],
+            'GET /ai-visits' => [AdminSite::class, 'aiVisits', 'content'],
             'POST /redirects' => [AdminSite::class, 'saveRedirect', 'redirects'],
             'GET /settings' => [AdminSettings::class, 'page', 'settings'],
             'POST /settings' => [AdminSettings::class, 'save', 'settings'],
@@ -348,6 +349,8 @@ final class Admin
             'improve' => array_slice(array_filter($improve, fn ($e) => $e['score']['seo'] < 80 || $e['score']['geo'] < 80), 0, 5, true),
             // Réservé aux administrateurs : version de PHP, administrateurs sans double authentification… (rien qu'un rédacteur puisse régler).
             'health' => $user['role'] === 'admin' ? self::health($user) : [],
+            // Robots IA des 30 derniers jours (rien si la mesure est coupée).
+            'ai' => Settings::get('geo.ai_log') ? AiVisits::report(30) : null,
         ], t('Tableau de bord'));
     }
 

@@ -875,3 +875,20 @@ tr.leaving{animation:leave .22s var(--ease) forwards}
 @keyframes toast-out{to{opacity:0;transform:translateY(8px)}}
 @keyframes tick{from{opacity:0;transform:scale(.3)}60%{transform:scale(1.25)}}
 [data-motion=off] *,[data-motion=off] ::backdrop{animation:none!important;transition:none!important}
+
+/* ── Robots IA : visites par usage (consultation à la demande, indexation, entraînement) ── */
+.ai-kind,.ai-tag,.ai-day i{--k:var(--brand)}
+.ai-kind[data-kind=search],.ai-tag[data-kind=search],.ai-day i[data-kind=search]{--k:var(--ok)}
+.ai-kind[data-kind=train],.ai-tag[data-kind=train],.ai-day i[data-kind=train]{--k:var(--faint)}
+.ai-kind h2{display:flex;align-items:center;gap:.5rem;font-size:var(--fs-3)}
+.ai-kind .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--k);flex:none}
+.ai-num{font-size:var(--fs-8);font-weight:700;margin:.2rem 0 .4rem;line-height:1}
+.ai-tag{display:inline-block;padding:.05rem .5rem;border-radius:999px;font-size:var(--fs-1);font-weight:600;color:var(--k);background:color-mix(in oklch,var(--k) 12%,transparent);white-space:nowrap}
+.ai-tag[data-kind=train]{color:var(--muted)}
+.ai-days{display:flex;align-items:flex-end;gap:2px;height:8rem;padding-top:.5rem}
+.ai-day{flex:1;height:100%;display:flex;flex-direction:column-reverse;min-width:2px}
+.ai-day i{display:block;height:0;background:var(--k);transition:height .5s var(--ease)}
+.ai-path{max-width:18rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ai-bot b{white-space:nowrap}
+.ai-unread{margin:.5rem 0 0;padding-left:1.1rem}
+.ai-unread li{margin:.2rem 0}

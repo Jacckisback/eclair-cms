@@ -23,6 +23,17 @@ define('ECLAIR_ROOT', __DIR__);
         return;
     }
     $rt = json_decode(substr($raw, (int) strpos($raw, "\n") + 1), true);
+    // Visites des robots d'IA (Réglages › IA & GEO, voir app/lib/AiVisits.php) : seulement l'heure, le robot et l'adresse,
+    // jamais d'IP ni de visiteur humain. Une seule expression sur l'agent ; journal du mois borné à 4 Mo.
+    if (is_array($rt) && is_string($rt['ai'] ?? null) && is_string($rt['ai_re'] ?? null)
+        && preg_match($rt['ai_re'], (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), $bot)) {
+        $log = $rt['ai'] . '/' . gmdate('Y-m') . '.php';
+        $size = @filesize($log);
+        if ($size === false || $size < 4194304) {
+            $uri = substr((string) preg_replace('~[\x00-\x20\x7f]+~', '', explode('?', (string) ($_SERVER['REQUEST_URI'] ?? '/'), 2)[0]), 0, 300);
+            @file_put_contents($log, ($size === false ? "<?php exit; ?>\n" : '') . time() . "\t" . $bot[0] . "\t" . $uri . "\n", FILE_APPEND | LOCK_EX);
+        }
+    }
     // Cache d'une autre version (mise à jour par FTP) : l'application le vide et le régénère.
     if (!is_array($rt) || empty($rt['on']) || ($rt['v'] ?? '') !== ECLAIR_VERSION || (!empty($rt['expires']) && time() >= $rt['expires'])) {
         return;

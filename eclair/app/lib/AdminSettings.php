@@ -228,6 +228,7 @@ final class AdminSettings
                     'llms_full' => Req::bool('llms_full'),
                     'markdown' => Req::bool('markdown'),
                     'signal' => Req::bool('signal'),
+                    'ai_log' => Req::bool('ai_log'),
                     'about' => Sanitize::multiline(Req::input('about'), 3000),
                 ]];
                 break;
