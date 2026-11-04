@@ -45,6 +45,8 @@ final class Ai
         'openai' => 'https://api.openai.com',
         'bfl' => 'https://api.bfl.ai',
         'ideogram' => 'https://api.ideogram.ai',
+        // Index et captures d'Internet Archive (Ancien site) : pas une IA, mais remplaçable de la même façon pour les tests.
+        'wayback' => 'https://web.archive.org',
     ];
 
     /* ───────────────────────────── Réglages ───────────────────────────── */

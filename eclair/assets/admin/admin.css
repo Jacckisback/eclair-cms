@@ -96,7 +96,7 @@ legend.label{padding:0}
 .field>label,.label{display:block;font-weight:600;font-size:var(--fs-3);margin-bottom:.35rem}
 .hint{display:block;color:var(--muted);font-size:var(--fs-2);line-height:1.45;margin-top:.35rem}
 .error-text{display:block;color:var(--bad);font-size:var(--fs-2);margin-top:.35rem;font-weight:600}
-input[type=text],input[type=email],input[type=password],input[type=url],input[type=search],input[type=number],input[type=datetime-local],input[type=tel],select,textarea{
+input[type=text],input[type=email],input[type=password],input[type=url],input[type=search],input[type=number],input[type=date],input[type=datetime-local],input[type=tel],select,textarea{
   width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--field);border-radius:var(--r-ctl);padding:.55rem .75rem;transition:border-color .15s,box-shadow .15s}
 input:hover,select:hover,textarea:hover{border-color:color-mix(in oklch,var(--field),var(--ink) 30%)}
 textarea{min-height:5.5rem;resize:vertical;line-height:1.5}
@@ -242,7 +242,7 @@ table.list tbody tr:hover td{background:color-mix(in oklch,var(--panel-2) 75%,tr
   .shell.nav-open .sidebar{transform:none}
   .menu-toggle{display:inline-flex;margin-bottom:1.25rem}
   .main{padding-top:1rem}
-  input[type=text],input[type=email],input[type=password],input[type=url],input[type=search],input[type=number],input[type=tel],select,textarea{font-size:1rem}
+  input[type=text],input[type=email],input[type=password],input[type=url],input[type=search],input[type=number],input[type=date],input[type=tel],select,textarea{font-size:1rem}
 }
 
 /* Onglets et filtres */
@@ -957,3 +957,19 @@ tr.leaving{animation:leave .22s var(--ease) forwards}
   .plan-form{grid-template-columns:1fr}
 }
 .plan-head{flex-wrap:wrap;gap:.25rem 1rem}
+
+/* ── Ancien site (Wayback Machine) : recherche, liste des anciennes adresses, reconstruction ── */
+.wb-scan{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:.75rem 1rem;align-items:end}
+.wb-rules{margin:1rem 0 0;padding-left:1.1rem;color:var(--muted)}
+.wb-rules li{margin:.25rem 0}
+.wb-table th:first-child,.wb-table td:first-child{width:2rem}
+.wb-path a{display:block;max-width:28rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-table small{display:block}
+.wb-error{color:var(--bad)}
+.wb-error:empty{display:none}
+.wb-go{display:grid;grid-template-columns:minmax(0,1fr);gap:.5rem;margin-top:1rem}
+.wb-buttons{display:flex;flex-wrap:wrap;gap:.5rem}
+.wb-buttons .btn{white-space:normal;text-align:left}
+.wb-card h2{display:flex;align-items:center;gap:.5rem}
+.wb-card h2 svg{width:1.1rem;height:1.1rem;color:var(--brand)}
+@media (max-width:600px){.wb-table th:nth-child(n+3):nth-child(-n+4),.wb-table td:nth-child(n+3):nth-child(-n+4){display:none}.wb-table th,.wb-table td{padding:.6rem .4rem}.wb-table th:first-child,.wb-table td:first-child{width:1.5rem}.wb-path a{max-width:7rem}}

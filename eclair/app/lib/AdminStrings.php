@@ -78,6 +78,8 @@ final class AdminStrings
             // Mode Visuel
             'Aperçu modifiable', 'Ajouter un bloc au-dessus', 'Ajouter un bloc en dessous', 'Outils du bloc',
             'Voir la mise à jour',
+            // Ancien site (Wayback Machine)
+            'Coche au moins une adresse.', 'Page {n} sur {total} : {path}…', '{n} pages reconstruites en brouillon.',
         ];
         $out = [];
         foreach ($keys as $k) {
