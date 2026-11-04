@@ -80,12 +80,7 @@ $siteLang = array_key_exists($lang, Content::LANGS) ? $lang : 'fr';
         <?php foreach (Content::LANGS as $code => $name): ?><option value="<?= e($code) ?>"<?= $code === $siteLang ? ' selected' : '' ?>><?= e($name) ?></option><?php endforeach ?></select></label>
       <div class="field"><span class="label"><?= e(t('Quel genre de site ?')) ?></span>
         <div class="choices two">
-          <?php foreach ([
-              'business' => ['store', t('Site vitrine'), t('Entreprise, artisan, association : accueil, services, contact, blog.')],
-              'blog' => ['pen', t('Blog'), t('Des articles avant tout, avec catégories et flux RSS.')],
-              'freelance' => ['briefcase', t('Freelance / portfolio'), t('Ta présentation, tes compétences, ton blog d’expert.')],
-              'landing' => ['target', t('Page unique'), t('Une page de vente ou de lancement, avec formulaire.')],
-          ] as $k => [$icon, $label, $desc]): ?>
+          <?php foreach (\Eclair\Usage::all() as $k => [$icon, $label, $desc]): ?>
             <label class="choice"><input type="radio" name="site_type" value="<?= e($k) ?>"<?= $k === 'business' ? ' checked' : '' ?>>
               <span><span class="ico"><?= Icons::svg($icon) ?></span><b><?= e($label) ?></b><small><?= e($desc) ?></small></span></label>
           <?php endforeach ?>

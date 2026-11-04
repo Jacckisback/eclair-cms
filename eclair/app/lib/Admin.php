@@ -346,27 +346,35 @@ final class Admin
                 'url' => $legal ? admin_url('edit/' . $legal['id']) : ''],
             ['done' => Settings::get('seo.google') !== '', 'label' => t('Relier ton site à Google Search Console'), 'hint' => t('Suis tes clics et tes positions dans Google.'), 'url' => admin_url('settings?tab=seo')],
         ];
+        // Étape propre à l'usage du site (média, affiliation, ancien site), juste après l'installation.
+        if ($step = Usage::step($user)) {
+            array_splice($todo, 1, 0, [$step]);
+        }
         $recent = $index;
         uasort($recent, fn ($a, $b) => $b['updated'] <=> $a['updated']);
         $improve = array_filter($published, fn ($e) => !$e['noindex']);
         uasort($improve, fn ($a, $b) => ($a['score']['seo'] + $a['score']['geo']) <=> ($b['score']['seo'] + $b['score']['geo']));
+        $stats = [
+            'posts' => count(array_filter($published, fn ($e) => $e['type'] === 'post')),
+            'pages' => count(array_filter($published, fn ($e) => $e['type'] === 'page')),
+            'drafts' => count(array_filter($index, fn ($e) => $e['status'] === 'draft')),
+            'messages' => Messages::unread(),
+            'seo' => $scores ? (int) round(array_sum($scores) / count($scores)) : 0,
+            'geo' => $geo ? (int) round(array_sum($geo) / count($geo)) : 0,
+        ];
+        $ai = Settings::get('geo.ai_log') ? AiVisits::report(30) : null;
         self::view('dashboard', [
             'todo' => $todo,
             'onboarding' => !Settings::get('onboarding.done'),
-            'stats' => [
-                'posts' => count(array_filter($published, fn ($e) => $e['type'] === 'post')),
-                'pages' => count(array_filter($published, fn ($e) => $e['type'] === 'page')),
-                'drafts' => count(array_filter($index, fn ($e) => $e['status'] === 'draft')),
-                'messages' => Messages::unread(),
-                'seo' => $scores ? (int) round(array_sum($scores) / count($scores)) : 0,
-                'geo' => $geo ? (int) round(array_sum($geo) / count($geo)) : 0,
-            ],
+            'stats' => $stats,
+            // Outils de l'usage du site (Réglages › Général), en tête du tableau de bord ; rien sans usage précisé.
+            'usage' => Usage::card($user, $stats, $ai),
             'recent' => array_slice($recent, 0, 6, true),
             'improve' => array_slice(array_filter($improve, fn ($e) => $e['score']['seo'] < 80 || $e['score']['geo'] < 80), 0, 5, true),
             // Réservé aux administrateurs : version de PHP, administrateurs sans double authentification… (rien qu'un rédacteur puisse régler).
             'health' => $user['role'] === 'admin' ? self::health($user) : [],
             // Robots IA des 30 derniers jours (rien si la mesure est coupée).
-            'ai' => Settings::get('geo.ai_log') ? AiVisits::report(30) : null,
+            'ai' => $ai,
         ], t('Tableau de bord'));
     }
 

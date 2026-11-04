@@ -48,6 +48,21 @@ $meter = static fn (int $s): string => '<meter min="0" max="100" low="50" high="
 
   <div class="dash-grid">
     <div class="dash-main">
+      <?php if ($v['usage']): ?>
+      <section class="card usage" aria-labelledby="usage-title">
+        <div class="card-head">
+          <div><h2 id="usage-title"><?= e($v['usage']['title']) ?></h2>
+            <p class="muted small"><?= e(t('Les outils de ton usage, en premier. Tu peux en changer dans Réglages › Général.')) ?></p></div>
+        </div>
+        <div class="usage-tiles">
+          <?php foreach ($v['usage']['tiles'] as [$icon, $label, $state, $url, $tone]): ?>
+            <a class="usage-tile" href="<?= e($url) ?>"><span class="usage-ico"><?= Icons::svg($icon) ?></span><span class="usage-name"><?= e($label) ?></span>
+              <span class="usage-state<?= $tone !== '' ? ' ' . e($tone) : '' ?>"><?= e($state) ?></span></a>
+          <?php endforeach ?>
+        </div>
+      </section>
+      <?php endif ?>
+
       <?php if ($v['onboarding']): ?>
       <section class="card onboard" aria-labelledby="onboard-title">
         <div class="card-head">
