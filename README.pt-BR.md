@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip"><img src="https://img.shields.io/badge/baixar-v1.11.0-5b3cbc?style=for-the-badge" alt="Baixar o Éclair 1.11.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip"><img src="https://img.shields.io/badge/baixar-v1.12.0-5b3cbc?style=for-the-badge" alt="Baixar o Éclair 1.12.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 ou superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/banco_de_dados-nenhum-14122b?style=for-the-badge" alt="Sem banco de dados">
@@ -63,7 +63,7 @@ O WordPress faz de tudo, mas precisa de um banco de dados, de plugins para SEO, 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraleve</h3>
-      Sem banco de dados: seu conteúdo fica em arquivos protegidos. Um arquivo de <b>627 KB</b>, zero dependências, zero cookies no site público.
+      Sem banco de dados: seu conteúdo fica em arquivos protegidos. Um arquivo de <b>659 KB</b>, zero dependências, zero cookies no site público.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facílimo</h3>
@@ -115,6 +115,8 @@ Escreva o que você precisa, como se estivesse falando com um colega: *“Escrev
     </td>
   </tr>
 </table>
+
+**Calendário editorial.** Seus próximos artigos em um calendário: adicione suas ideias ou deixe a IA propor outras com base no seu site (atividade, categorias, artigos já escritos, páginas que as IA mais leem) e redigir cada uma como rascunho com um clique. O custo de cada chamada aparece em tokens e em dólares, antes e depois. Opcional, a **redação automática** prepara os rascunhos alguns dias antes da data; você revisa e agenda.
 
 Ativação em 5 minutos e preços detalhados: veja o [guia, seção Assistente de IA](docs/GUIDE.pt-BR.md#assistente-de-ia).
 
@@ -264,7 +266,7 @@ Como usar: [guia, seção Atualizar, fazer backup, mudar de hospedagem](docs/GUI
 |---|---|---|
 | **Instalação** | Criar um banco de dados MySQL e depois rodar o assistente | ✅ Enviar a pasta e responder a 4 perguntas |
 | **Banco de dados** | MySQL obrigatório | ✅ Nenhum (arquivos protegidos) |
-| **Arquivo para baixar** | ≈ 35 MB[^wp] | ✅ 627 KB |
+| **Arquivo para baixar** | ≈ 35 MB[^wp] | ✅ 659 KB |
 | **SEO, sitemap, dados estruturados** | Um plugin para instalar e manter | ✅ Integrado |
 | **GEO: llms.txt, Markdown, robôs de IA** | Plugins, raramente completos | ✅ Integrado |
 | **Páginas públicas** | Geradas a cada visita, a menos que você use um plugin de cache | ✅ Servidas a partir de um cache estático |
@@ -317,6 +319,7 @@ Em uma hospedagem compartilhada de verdade, some a latência de rede e a inicial
         <li><code>/llms.txt</code> e <code>/llms-full.txt</code> gerados automaticamente (proposta <a href="https://llmstxt.org/">llmstxt.org</a>).</li>
         <li><b>Versão Markdown de cada página</b>: adicione <code>.md</code> a qualquer endereço.</li>
         <li><b>Regras para robôs de IA em um clique</b>: aberto, só citações ou fechado, para 30 robôs (GPTBot, ClaudeBot, PerplexityBot…).</li>
+        <li><b>Robôs IA</b>: quais IA leem suas páginas, quais páginas e para quê (responder a uma pergunta, indexar, treinar), sem IP nem cookies.</li>
         <li>Bloco <b>“O essencial”</b> no início de cada artigo: o resumo que as IAs gostam de citar.</li>
         <li><b>Pontuação GEO</b>: FAQ, subtítulos em forma de pergunta, números concretos, fontes, autor identificado (E-E-A-T)…</li>
       </ul>
@@ -375,7 +378,7 @@ Todos os detalhes no [guia, seção Segurança](docs/GUIDE.pt-BR.md#segurança).
   <img src="docs/images/pt-BR/install.webp" alt="Instalação em três etapas: enviar a pasta, responder a quatro perguntas, o site está no ar" width="100%">
 </p>
 
-1. **Baixe** o arquivo [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) (627 KB) e descompacte-o.
+1. **Baixe** o arquivo [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) (659 KB) e descompacte-o.
 2. **Envie o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…), incluindo os arquivos ocultos `.htaccess`.
 3. **Abra o endereço do seu site**: o assistente começa. Quatro perguntas, um pouco de confete, e seu site está no ar com as primeiras páginas.
 

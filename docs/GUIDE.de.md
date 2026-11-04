@@ -15,7 +15,7 @@ Alles, was du wissen musst, um Éclair zu installieren, zu nutzen, abzusichern u
 5. [Art Directions](#art-directions) (inklusive [Feinschliff mit einem Klick](#feinschliff-mit-einem-klick), [Meine Richtung mit KI entwerfen](#meine-richtung-mit-ki-entwerfen) und dem [Design-Score](#design-score))
 6. [Themes](#themes)
 7. [Shop](#shop)
-8. [KI-Assistent](#ki-assistent) (inklusive [Eine Seite mit KI erstellen](#eine-seite-mit-ki-erstellen))
+8. [KI-Assistent](#ki-assistent) (inklusive [Eine Seite mit KI erstellen](#eine-seite-mit-ki-erstellen) und [Redaktionsplan](#redaktionsplan))
 9. [MCP-Connector (Claude und ChatGPT)](#mcp-connector-claude-und-chatgpt)
 10. [Sicherheit](#sicherheit)
 11. [Aktualisieren, sichern, umziehen](#aktualisieren-sichern-umziehen) (inklusive [Update mit einem Klick](#update-mit-einem-klick) und [Backups auf Google Drive](#backups-auf-google-drive))
@@ -37,7 +37,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) (627 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) (659 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -96,6 +96,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 - Block **„Das Wichtigste“**: die Zusammenfassung, die KI gern zitiert, am Anfang des Artikels.
 - **GEO-Score** im Editor: Zusammenfassung, direkte Einleitung, FAQ, Zwischenüberschriften als Fragen, Listen und Tabellen, konkrete Zahlen, externe Quellen, erkennbarer Autor (E-E-A-T), kurze Absätze, Aktualität.
 - Autorenseiten mit Biografie und Profilen (`sameAs`), sichtbare Veröffentlichungs- und Aktualisierungsdaten.
+- **KI-Bots** (Menü der Verwaltung): welche KIs deine Seiten lesen (ChatGPT-User, Claude-User, OAI-SearchBot, PerplexityBot, GPTBot, ClaudeBot …), welche Seiten und wozu: Abruf auf Anfrage (jemand hat eine Frage gestellt, ein mögliches Zitat), Indexierung durch eine Antwortmaschine oder Training. Besuche pro Tag, pro Bot und pro Seite, Abrufe der robots.txt, veröffentlichte Seiten, die noch nie gelesen wurden, samt Tipps, ein Hinweis, wenn Trainings-Bots trotz robots.txt kommen, und eine Karte im Dashboard. `index.php` notiert nur Uhrzeit, Bot und Adresse, nie eine IP-Adresse oder menschliche Besucher; das Protokoll ist auf 4 MB pro Monat begrenzt und wird nach 13 Monaten gelöscht; die Messung lässt sich unter Einstellungen › KI & GEO abschalten. Die Identität ist die, die der Bot selbst angibt.
 
 ### ✍️ Block-Editor
 
@@ -126,6 +127,8 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Theme, Logo, Farbe, Schriften ändern | Einstellungen › Design |
 | Eigenes CSS hinzufügen | Einstellungen › Design › Eigenes CSS |
 | Mikroanimationen ein- oder ausschalten | Einstellungen › Design › Mikroanimationen (Website) · Mein Profil › Oberfläche (Verwaltung) |
+| Sehen, welche KIs meine Website lesen | **KI-Bots** |
+| Meine Artikel planen, von der KI vorschlagen und schreiben lassen | **Planung** |
 | Den Shop öffnen | Einstellungen › Shop |
 | Ein Produkt hinzufügen | Inhalte › **+ Produkt** |
 | Die Startseite festlegen | Einstellungen › Allgemein |
@@ -393,6 +396,16 @@ In einem neuen Inhalt (Seite, Beitrag oder Produkt) stellt der Bereich **✨ Mit
 3. Nach 20 bis 60 Sekunden öffnet sich der Entwurf im **visuellen Modus**: Titel, Adresse, SEO-Titel und Meta-Beschreibung, „Das Wichtigste“, Fokus-Keyphrase und ein Layout aus Abschnitten (Hero, Vorteile, Zwischenüberschriften, Listen, Hinweisboxen, FAQ, Buttons, Team, Kontaktformular, neueste Beiträge oder Produkte), mit einer einzigen H1: dem Titel des Hero-Blocks.
 
 Die KI stützt sich auf dein Redaktionsprofil, die Liste deiner veröffentlichten Seiten und Beiträge (damit die Links auf Seiten zeigen, die es wirklich gibt) und deine 30 neuesten Bilder. Sie erfindet keine Fakten: Fehlende Preise, Zahlen, Namen oder Öffnungszeiten bleiben als **„[Zu ergänzen: …]“** stehen und werden vom Tab „Analyse“ gezählt, bis du sie ausfüllst. Der Entwurf wird nie veröffentlicht: Lies ihn durch, ergänze ihn und veröffentliche ihn dann. Hat die Website bereits 500 Entwürfe, bittet dich der Bereich zuerst, einige zu veröffentlichen oder zu löschen, bevor etwas ausgegeben wird.
+
+### Redaktionsplan
+
+Menü **Planung**: deine nächsten Artikel in einem Monatskalender (veröffentlicht, eingeplant, Entwürfe, Ideen) und eine Liste „Demnächst“.
+
+- **Idee hinzufügen** von Hand: Titel, geplantes Datum, Keyword, Kategorie, Blickwinkel und Notizen zum Schreiben.
+- **Ideen mit KI vorschlagen**: 4 bis 12 Ideen anhand deiner Website (Tätigkeit, Kategorien, bereits geschriebene Artikel, von KIs meistgelesene Seiten unter KI-Bots) und eines optionalen Themas. Sie werden auf die nächsten freien Tage verteilt, im gewählten Rhythmus (1 bis 5 pro Woche). Nichts wird veröffentlicht.
+- **Schreiben**: Die KI schreibt die Idee als vollständigen Entwurf, mit derselben Technik wie „Mit KI erstellen“, dann öffnet sich der Editor. Prüfe ihn, fülle die „[Zu ergänzen: …]“-Stellen aus, plane ihn ein.
+- **Kosten**: Jede Schaltfläche zeigt die geschätzten Kosten (≈ 0,035 $ pro Ideenserie und ≈ 0,08 $ pro Artikel mit Claude Sonnet 5.5); danach werden die verbrauchten Tokens und Dollar bei der Idee und in der Summe der Planung notiert und auf das Budget des Assistenten angerechnet.
+- **Automatisches Schreiben** (Administratoren, standardmäßig aus): Die KI schreibt die fällige Idee 1 bis 14 Tage vor ihrem Datum, eine nach der anderen, im Rahmen des Budgets, wenn ein Administrator die Verwaltung öffnet. Um davon unabhängig zu sein, lass die angezeigte geheime Adresse stündlich aufrufen (Cron deines Hosters, cron-job.org …). „Ohne Prüfung einplanen“ gibt es, ist aber nicht empfohlen: Google bestraft massenhaft veröffentlichte Texte ohne menschliche Prüfung, und ein Artikel, der noch „Zu ergänzen“ enthält, wartet immer auf deine Prüfung.
 
 ### Feinschliff im Editor
 
@@ -708,6 +721,8 @@ tests/shop.php           Themes und Shop (Produktseiten, Stripe, PayPal, Revolut
 tests/mcp.php            MCP-Connector (OAuth, PKCE, Protokoll, Widerruf) und Wahl der KI
 tests/design.php         Art Directions (Kontraste, CSS, Schriften, präparierte Einstellungen, KI) und Design-Score
 tests/ux.php             Bedienbarkeit von 1.11 (Rückgängig/Wiederholen, Bestätigungsfenster, Leiste des visuellen Modus, Mikroanimationen)
+tests/ai-visits.php      KI-Bots von 1.12 (Erkennung, Protokoll von index.php ohne IP, Obergrenze, Seite und Karte)
+tests/plan.php           Redaktionsplan von 1.12 (Termine, Ideen und Texte der KI, Kosten, automatisches Schreiben, geplante Aufgabe)
 tests/update.php         Update mit einem Klick (simulierter signierter Kanal: Signatur, präpariertes Archiv, Syntax, automatische und manuelle Rückkehr)
 tests/drive.php          Backups auf Google Drive (tests/fake-google.php: simuliertes OAuth und simuliertes Drive, Upload in Teilen, Wiederaufnahme)
 tests/sec-*.php          Sicherheits-Regressionstests von 1.10.3
@@ -748,7 +763,7 @@ Eine signierte Version lässt sich nur in einem Git-Checkout bauen und enthält 
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (leg dir eine Kopie an: Die Integritätsprüfung meldet diese Dateien als geändert, und ein Update ersetzt sie; die Seite „Updates“ listet sie vorher auf). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 630 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
+Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (leg dir eine Kopie an: Die Integritätsprüfung meldet diese Dateien als geändert, und ein Update ersetzt sie; die Seite „Updates“ listet sie vorher auf). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 660 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
 
 ---
 

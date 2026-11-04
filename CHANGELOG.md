@@ -2,12 +2,34 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 1.12.0 — 2026-11-04
+
+GEO and editorial release: see which AIs read your site and why, and plan your articles in a calendar where the AI suggests ideas and writes drafts, with the cost of every call shown in tokens and dollars. Nothing is ever published without you. Public pages stay identical to the byte. Sites on 1.11.x update in one click from Administration › Updates, after a backup.
 
 ### Added
 
 - **Editorial calendar (Administration › Planner).** Your next articles, day by day, in a month calendar (published, scheduled, drafts and ideas) and an "Upcoming" list. Add ideas by hand (title, planned date, keyword, category, angle), or let the AI suggest 4 to 12 at a time from what the site already holds (business, categories, articles written, pages AI bots read most, an optional theme), placed on the next free days at the pace you choose. One click writes an idea as a complete draft, with the same engine as "Create your page with AI"; it never publishes. Every AI call shows its cost in tokens and dollars, on the idea and in a planner total, and counts towards the AI assistant's monthly budget; buttons show the estimated cost before you click. **Automatic writing** (administrators, off by default) writes the due ideas 1 to 14 days before their date, one at a time, within the budget, when an administrator opens the admin or through a secret scheduled-task address. "Schedule without review" is available but not recommended (Google penalises unreviewed bulk content), and an article that still contains "To complete" markers always waits for a human.
 - **AI bots (Administration › AI bots).** See which AIs read your site, which pages and why, over 7, 30 or 90 days: on-demand lookups (ChatGPT-User, Claude-User, Perplexity-User… someone asked an AI and it came to read your page, a potential citation), answer-engine indexing (OAI-SearchBot, Claude-SearchBot, PerplexityBot…) and model training (GPTBot, ClaudeBot, CCBot, Bytespider…). Visits per day, per bot and per page, robots.txt reads, published pages no AI has read yet (with what to do about them), and a warning when training bots come despite a robots.txt that asks them not to. A summary card sits on the dashboard. Recorded by `index.php` before anything else, so cached pages are counted too: one regular expression on the user agent, then one line (time, bot, address without query string) appended to `data/ai/YYYY-MM.php`. No IP address, no human visitor, no cookie; each month's log is capped at 4 MB and deleted after 13 months. On by default, switchable in Settings › AI & GEO. Identity is as declared by each bot.
+
+### Changed
+
+- **"Create your page with AI"** and the planner now share the same writing engine (`AdminAi::composeItem`): same prompt, same safeguards, same draft. Behaviour is unchanged.
+- The admin menu gains **Planner** and **AI bots**, between Redirects and the Administration group.
+
+### Still guaranteed
+
+- **Your content does not move**, and your public pages stay identical to the byte: AI bot tracking adds no tag, script or cookie, and runs before the page is served.
+- **The AI never publishes on its own** unless an administrator explicitly turns on "Schedule without review", and even then not while "To complete" markers remain.
+- **Automated checks** on the source and on the archive.
+- The 1.11.x → 1.12.0 update is signed (Ed25519) and verified before anything is touched, with automatic rollback.
+
+### For maintainers
+
+- New files: `app/lib/AiVisits.php`, `app/lib/Plan.php`, `app/lib/AdminPlan.php`, `app/admin/views/ai-visits.php`, `app/admin/views/plan.php`. New data: `data/ai/YYYY-MM.php` (AI bot log, guarded PHP file, 4 MB a month, 13 months), `data/plan.php` (ideas and automatic-writing settings).
+- `index.php` fast path: when `cache/runtime.php` carries `ai` and `ai_re` (written by `Cache::runtime()` while `geo.ai_log` is on), one regular expression on the user agent, then one appended line. New setting `geo.ai_log` (default `true`).
+- New routes: `GET /plan`, `POST /plan`, `POST /api/plan/ideas`, `POST /api/plan/write`, `POST /api/plan/tick` (admin), `GET /ai-visits`, and the public secret address `/_eclair/plan/<key>` (scheduled task, rate-limited). `AiChat::ask()` now also returns `usage` (tokens). New helpers `month_names()` and `fmt_month()`; new icons `calendar` and `chevron-left`.
+- 52 new checks: `tests/ai-visits.php` (22) and `tests/plan.php` (30, with the fake AI provider). The suite passes on the source and on the built archive (1,034 checks).
+- Archive: 659 KB (+32 KB, of which about half is translations), 1.28 MB once unzipped. README banners and installation visuals show the new size in all 7 languages.
 
 ## 1.11.0 — 2026-11-04
 

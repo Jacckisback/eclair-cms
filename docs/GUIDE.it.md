@@ -15,7 +15,7 @@ Tutto quello che c’è da sapere per installare, usare, proteggere e mantenere 
 5. [Direzioni artistiche](#direzioni-artistiche) (compresi i [Ritocchi in un clic](#ritocchi-in-un-clic), [Immagina la mia direzione con l’IA](#immagina-la-mia-direzione-con-lia) e il [Punteggio Design](#punteggio-design))
 6. [Temi](#temi)
 7. [Negozio](#negozio)
-8. [Assistente IA](#assistente-ia) (compreso [Creare una pagina con l’IA](#creare-una-pagina-con-lia))
+8. [Assistente IA](#assistente-ia) (compreso [Creare una pagina con l’IA](#creare-una-pagina-con-lia) e il [Piano editoriale](#piano-editoriale))
 9. [Connettore MCP (Claude e ChatGPT)](#connettore-mcp-claude-e-chatgpt)
 10. [Sicurezza](#sicurezza)
 11. [Aggiornare, fare backup, traslocare](#aggiornare-fare-backup-traslocare) (compresi l’[Aggiornamento in un clic](#aggiornamento-in-un-clic) e i [Backup su Google Drive](#backup-su-google-drive))
@@ -37,7 +37,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) (627 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) (659 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
@@ -96,6 +96,7 @@ La bacheca mostra una checklist «Primi passi»: logo e colore, home page, primo
 - Blocco **«In breve»**: il riassunto che le IA citano volentieri, mostrato in apertura dell’articolo.
 - **Punteggio GEO** nell’editor: riassunto, introduzione diretta, FAQ, sottotitoli in forma di domanda, elenchi e tabelle, dati concreti, fonti esterne, autore identificato (E-E-A-T), paragrafi brevi, aggiornamento.
 - Pagine autore con biografia e profili (`sameAs`), date di pubblicazione e di aggiornamento visibili.
+- **Bot IA** (menu dell’amministrazione): quali IA leggono le tue pagine (ChatGPT-User, Claude-User, OAI-SearchBot, PerplexityBot, GPTBot, ClaudeBot…), quali pagine e per quale scopo: consultazione su richiesta (qualcuno ha fatto una domanda, una citazione in potenza), indicizzazione di un motore di risposta o addestramento. Visite al giorno, per bot e per pagina, letture del robots.txt, pagine pubblicate mai lette con cosa fare, avviso se i bot di addestramento passano nonostante il robots.txt, e una scheda nella bacheca. `index.php` annota solo l’ora, il bot e l’indirizzo, mai l’IP né i visitatori umani; registro limitato a 4 MB al mese e cancellato dopo 13 mesi; misurazione disattivabile in Impostazioni › IA e GEO. L’identità è quella dichiarata dal bot.
 
 ### ✍️ Editor a blocchi
 
@@ -126,6 +127,8 @@ Libreria media (trascina e rilascia, testi alternativi, rilevamento delle immagi
 | Cambiare tema, logo, colore, font | Impostazioni › Aspetto |
 | Aggiungere il mio CSS | Impostazioni › Aspetto › CSS personalizzato |
 | Attivare o disattivare le micro-animazioni | Impostazioni › Aspetto › Micro-animazioni (sito) · Il mio profilo › Interfaccia (amministrazione) |
+| Vedere quali IA leggono il mio sito | **Bot IA** |
+| Pianificare i miei articoli, farli proporre e scrivere dall’IA | **Pianificazione** |
 | Aprire il negozio | Impostazioni › Negozio |
 | Aggiungere un prodotto | Contenuti › **+ Prodotto** |
 | Scegliere la home page | Impostazioni › Generali |
@@ -393,6 +396,16 @@ In un nuovo contenuto (pagina, articolo o prodotto), il riquadro **✨ Crea con 
 3. Dopo un’attesa da 20 a 60 secondi, la bozza si apre in **modalità Visuale**: titolo, indirizzo, titolo SEO e meta description, «L’essenziale», frase chiave e un’impaginazione in sezioni (banner, punti di forza, sottotitoli, elenchi, riquadri, FAQ, pulsanti, team, modulo di contatto, ultimi articoli o prodotti), con un solo H1: il titolo del banner.
 
 L’IA si basa sul tuo profilo editoriale, sull’elenco delle tue pagine e dei tuoi articoli pubblicati (per link che esistono davvero) e sulle tue 30 immagini più recenti. Non inventa alcun fatto: prezzi, cifre, nomi o orari mancanti restano nella forma **«[Da completare: …]»**, conteggiati dalla scheda Analisi finché non li compili. La bozza non viene mai pubblicata: rileggi, completa, poi pubblica. Se il sito ha già 500 bozze, il riquadro ti chiede prima di pubblicarne o eliminarne alcune, senza spendere nulla.
+
+### Piano editoriale
+
+Menu **Pianificazione**: i tuoi prossimi articoli in un calendario mensile (pubblicati, programmati, bozze, idee) e un elenco «In arrivo».
+
+- **Aggiungi un’idea** a mano: titolo, data prevista, parola chiave, categoria, taglio e note per la scrittura.
+- **Proponi idee con l’IA**: da 4 a 12 idee in base al tuo sito (attività, categorie, articoli già scritti, pagine più lette dalle IA in Bot IA) e a un tema facoltativo. Vengono collocate nei prossimi giorni liberi, al ritmo scelto (da 1 a 5 a settimana). Non viene pubblicato nulla.
+- **Scrivi**: l’IA scrive l’idea come bozza completa, con lo stesso motore di «Crea con l’IA», poi si apre l’editor. Rileggi, completa i «[Da completare: …]», programma.
+- **Costo**: ogni pulsante mostra il costo stimato (≈ 0,035 $ per serie di idee e ≈ 0,08 $ per articolo con Claude Sonnet 5.5); dopo, i token e i dollari spesi vengono annotati sull’idea e nel totale della pianificazione, e conteggiati nel budget dell’assistente.
+- **Scrittura automatica** (amministratori, disattivata per impostazione predefinita): l’IA scrive l’idea in scadenza da 1 a 14 giorni prima della data, una alla volta, nel budget, quando un amministratore apre l’amministrazione. Per non dipenderne, fai chiamare ogni ora l’indirizzo segreto indicato (cron del tuo hosting, cron-job.org…). «Programma senza rilettura» esiste ma è sconsigliato: Google penalizza i testi pubblicati in serie senza revisione umana, e un articolo che contiene ancora «Da completare» attende sempre la tua rilettura.
 
 ### Ritocchi nell’editor
 
@@ -708,6 +721,8 @@ tests/shop.php           temi e negozio (schede, Stripe, PayPal, Revolut, JSON-L
 tests/mcp.php            connettore MCP (OAuth, PKCE, protocollo, revoca) e scelta dell’IA
 tests/design.php         direzioni artistiche (contrasti, CSS, caratteri, impostazioni trappola, IA) e punteggio Design
 tests/ux.php             usabilità della 1.11 (annulla/ripeti, finestre di conferma, barra della modalità Visuale, micro-animazioni)
+tests/ai-visits.php      bot IA della 1.12 (riconoscimento, registro scritto da index.php senza IP, limite, pagina e scheda)
+tests/plan.php           piano editoriale della 1.12 (date libere, idee e scrittura con l’IA, costo, scrittura automatica, attività pianificata)
 tests/update.php         aggiornamento in un clic (finto canale firmato: firma, archivio trappola, sintassi, ritorno automatico e manuale)
 tests/drive.php          backup su Google Drive (tests/fake-google.php: finto OAuth e finto Drive, invio a blocchi, ripresa)
 tests/sec-*.php          test di non regressione della sicurezza della 1.10.3
@@ -748,7 +763,7 @@ Una versione firmata si costruisce solo in un checkout Git e include solo i file
 
 `PHP_CLI_SERVER_WORKERS` permette al sito di chiamare se stesso (verifica del suo indirizzo): con un solo processo, la verifica semplicemente fallisce e i reindirizzamenti all’indirizzo ufficiale restano disattivati.
 
-Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnala questi file come modificati, e un aggiornamento li sostituisce; la pagina Aggiornamenti li elenca prima di farlo). Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 630 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
+Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnala questi file come modificati, e un aggiornamento li sostituisce; la pagina Aggiornamenti li elenca prima di farlo). Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 660 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
 
 ---
 
