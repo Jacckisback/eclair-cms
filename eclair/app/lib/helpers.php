@@ -119,10 +119,9 @@ function word_count(string $text): int
     return $text === '' ? 0 : count(preg_split('/[\s\x{00A0}\x{202F}]+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: []);
 }
 
-/** Date lisible dans la langue demandée : « 28 octobre 2026 ». */
-function fmt_date(int $ts, ?string $lang = null, bool $time = false): string
+/** Noms des mois dans une langue (anglais par défaut). */
+function month_names(string $lang): array
 {
-    $lang = $lang ?: (string) Settings::get('lang', 'fr');
     static $months = [
         'fr' => ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
         'es' => ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
@@ -131,8 +130,15 @@ function fmt_date(int $ts, ?string $lang = null, bool $time = false): string
         'it' => ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
         'pt' => ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
     ];
+    return $months[$lang] ?? $months['en'];
+}
+
+/** Date lisible dans la langue demandée : « 28 octobre 2026 ». */
+function fmt_date(int $ts, ?string $lang = null, bool $time = false): string
+{
+    $lang = $lang ?: (string) Settings::get('lang', 'fr');
     [$d, $m, $y] = array_map('intval', explode(' ', date('j n Y', $ts)));
-    $month = ($months[$lang] ?? $months['en'])[$m - 1];
+    $month = month_names($lang)[$m - 1];
     $out = match ($lang) {
         'fr' => ($d === 1 ? '1er' : $d) . " $month $y",
         'es', 'pt' => "$d de $month de $y",
@@ -142,6 +148,14 @@ function fmt_date(int $ts, ?string $lang = null, bool $time = false): string
         default => "$d $month $y",
     };
     return $time ? $out . ' · ' . date('H:i', $ts) : $out;
+}
+
+/** Mois et année : « novembre 2026 », « 2026年11月 ». */
+function fmt_month(int $ts, string $lang): string
+{
+    [$m, $y] = array_map('intval', explode(' ', date('n Y', $ts)));
+    $name = month_names($lang)[$m - 1];
+    return $lang === 'zh' ? "{$y}年{$m}月" : (in_array($lang, ['es', 'pt'], true) ? "$name de $y" : "$name $y");
 }
 
 /** Durée relative courte pour l'administration : « il y a 5 min ». */

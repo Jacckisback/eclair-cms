@@ -461,17 +461,18 @@ PROMPT;
             'effort' => $effort,
             'format' => $schema,
         ]);
+        $usage = (array) ($res['usage'] ?? []);
         if (!$res['ok']) {
-            return ['ok' => false, 'error' => $res['error'], 'cost' => $res['cost'] ?? 0.0];
+            return ['ok' => false, 'error' => $res['error'], 'cost' => $res['cost'] ?? 0.0, 'usage' => $usage];
         }
         if ($res['stop'] === 'refusal') {
-            return ['ok' => false, 'error' => t('L’IA a refusé cette demande (filtre de sécurité du fournisseur). Reformule-la autrement.'), 'cost' => $res['cost']];
+            return ['ok' => false, 'error' => t('L’IA a refusé cette demande (filtre de sécurité du fournisseur). Reformule-la autrement.'), 'cost' => $res['cost'], 'usage' => $usage];
         }
         $text = trim((string) $res['text']);
         $text = (string) preg_replace('/^```(?:json)?\s*|\s*```$/', '', $text);
         $data = json_decode($text, true);
         return is_array($data)
-            ? ['ok' => true, 'data' => $data, 'cost' => $res['cost']]
-            : ['ok' => false, 'error' => t('Réponse inattendue de l’IA : réessaie.'), 'cost' => $res['cost']];
+            ? ['ok' => true, 'data' => $data, 'cost' => $res['cost'], 'usage' => $usage]
+            : ['ok' => false, 'error' => t('Réponse inattendue de l’IA : réessaie.'), 'cost' => $res['cost'], 'usage' => $usage];
     }
 }

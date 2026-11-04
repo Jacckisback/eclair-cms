@@ -422,6 +422,26 @@ final class AdminAi
         $slot = self::start($user); // verrou gardé jusqu’à la fin de la demande
         session_write_close();
         extend_time(300);
+        $fields = [];
+        foreach (['goal' => 300, 'audience' => 300, 'tone' => 200, 'sections' => 500] as $k => $max) {
+            $fields[$k] = $field($k, $max);
+        }
+        $res = self::composeItem($user, $type, $lang, $brief, $fields);
+        Ai::charge($user['id'], (float) $res['cost']);
+        if (!$res['ok']) {
+            Http::json(['ok' => false, 'error' => $res['error']], $res['status'] ?? 502);
+        }
+        $item = $res['item'];
+        Http::json(['ok' => true, 'id' => $item['id'], 'edit' => admin_url('edit/' . $item['id']) . '?visual']);
+    }
+
+    /**
+     * Compose un brouillon complet en un appel (sections, textes, SEO) : « Crée ta page avec l'IA » et le planning éditorial.
+     * $fields : goal, audience, tone, sections ; $extra : champs ajoutés au brouillon (catégorie…). Ne compte pas la dépense.
+     * Renvoie ok + item, ou ok=false + error ; toujours cost et usage (jetons).
+     */
+    public static function composeItem(array $user, string $type, string $lang, string $brief, array $fields = [], array $extra = []): array
+    {
         $todo = Analyzer::TODO[$lang] ?? Analyzer::TODO['en'];
         $kind = ['page' => 'website page', 'post' => 'blog article', 'product' => 'product sheet for the shop'][$type];
         $task = "Compose a complete $kind for this website from the person's brief, as a sequence of layout sections, ready for them to review.\n"
@@ -439,8 +459,8 @@ final class AdminAi
         $list = static fn (string $t): string => implode("\n", array_map(fn ($e) => '- ' . $e['title'] . ' | ' . Content::path($e),
             array_slice(array_filter($index, fn ($e) => $e['type'] === $t), 0, 60))) ?: '(none)';
         $images = array_slice(Media::all(), 0, 30);
-        $input = "# Brief\n" . $brief . "\n\nGoal: " . ($field('goal', 300) ?: '(not given)') . "\nAudience: " . ($field('audience', 300) ?: '(not given)')
-            . "\nTone: " . ($field('tone', 200) ?: '(the editorial profile)') . "\nWished sections: " . ($field('sections', 500) ?: '(your choice)')
+        $input = "# Brief\n" . $brief . "\n\nGoal: " . ($fields['goal'] ?? '' ?: '(not given)') . "\nAudience: " . ($fields['audience'] ?? '' ?: '(not given)')
+            . "\nTone: " . ($fields['tone'] ?? '' ?: '(the editorial profile)') . "\nWished sections: " . ($fields['sections'] ?? '' ?: '(your choice)')
             . "\nContent language: " . Content::LANGS[$lang] . "\n\n# Site inventory (internal links: these paths only)\n## Pages (title | path)\n" . $list('page')
             . "\n## Articles (title | path)\n" . $list('post') . "\n\n# Images of the media library (id | description): the only images you may use\n"
             . (implode("\n", array_map(fn ($m) => '- ' . $m['id'] . ' | ' . ($m['alt'] !== '' ? $m['alt'] : $m['name']), $images)) ?: '(none)');
@@ -449,17 +469,20 @@ final class AdminAi
             'title' => $str, 'slug' => $str, 'seo_title' => $str, 'seo_description' => $str, 'summary' => $str, 'keyword' => $str,
             'sections' => ['type' => 'array', 'items' => AiTools::sectionSchema()],
         ], 'required' => ['title', 'slug', 'seo_title', 'seo_description', 'summary', 'keyword', 'sections'], 'additionalProperties' => false]);
-        self::charged($user, $res);
+        if (!$res['ok']) {
+            return $res;
+        }
         $d = $res['data'];
         try {
-            $item = AiTools::draft(['type' => $type, 'lang' => $lang, 'body' => ''] + array_intersect_key($d, array_flip(['title', 'slug', 'seo_title', 'seo_description', 'summary', 'keyword', 'sections'])), $user);
+            $item = AiTools::draft(['type' => $type, 'lang' => $lang, 'body' => ''] + $extra
+                + array_intersect_key($d, array_flip(['title', 'slug', 'seo_title', 'seo_description', 'summary', 'keyword', 'sections'])), $user);
         } catch (\OverflowException $e) {
-            Http::json(['ok' => false, 'error' => $e->getMessage()], 422);
+            return ['ok' => false, 'error' => $e->getMessage(), 'status' => 422, 'cost' => $res['cost'], 'usage' => $res['usage']];
         }
         if (is_string($item)) {
-            Http::json(['ok' => false, 'error' => t('Réponse inattendue de l’IA : réessaie.')], 502);
+            return ['ok' => false, 'error' => t('Réponse inattendue de l’IA : réessaie.'), 'cost' => $res['cost'], 'usage' => $res['usage']];
         }
-        Http::json(['ok' => true, 'id' => $item['id'], 'edit' => admin_url('edit/' . $item['id']) . '?visual']);
+        return ['ok' => true, 'item' => $item, 'cost' => $res['cost'], 'usage' => $res['usage']];
     }
 
     /* ───────────────────────── Imagine ma direction ───────────────────────── */

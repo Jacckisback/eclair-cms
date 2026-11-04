@@ -892,3 +892,68 @@ tr.leaving{animation:leave .22s var(--ease) forwards}
 .ai-bot b{white-space:nowrap}
 .ai-unread{margin:.5rem 0 0;padding-left:1.1rem}
 .ai-unread li{margin:.2rem 0}
+
+/* ── Planning éditorial : calendrier du mois, idées à venir ── */
+.plan-chip,.plan-dot{--k:var(--faint)}
+.plan-chip[data-kind=draft],.plan-dot[data-kind=draft]{--k:var(--warn)}
+.plan-chip[data-kind=scheduled],.plan-dot[data-kind=scheduled]{--k:var(--brand)}
+.plan-chip[data-kind=published],.plan-dot[data-kind=published]{--k:var(--ok)}
+.plan-ai h2{display:flex;align-items:center;gap:.5rem}
+.plan-ai h2 svg{width:1.1rem;height:1.1rem;color:var(--brand)}
+.plan-ideas{display:grid;grid-template-columns:auto auto minmax(12rem,1fr) auto;gap:.75rem;align-items:end;margin:.75rem 0}
+.plan-ideas small,.plan-actions small{font-weight:500;opacity:.8}
+.plan-nav{display:flex;gap:.25rem}
+.plan-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.plan-wd{font-size:var(--fs-1);font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:.2rem .4rem}
+.plan-day{min-height:6.2rem;padding:.35rem;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;gap:3px;min-width:0}
+.plan-day.past{background:var(--panel-2)}
+.plan-day.today{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.plan-date{font-size:var(--fs-1);color:var(--muted)}
+.plan-day.today .plan-date b{color:var(--brand)}
+.plan-full{display:none}
+.plan-chip{display:block;padding:.15rem .4rem;border-radius:6px;font-size:var(--fs-1);line-height:1.35;color:var(--ink);text-decoration:none;background:color-mix(in oklch,var(--k) 14%,transparent);border-left:3px solid var(--k);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plan-chip[data-kind=idea]{background:transparent;border:1px dashed var(--line);border-left:3px dashed var(--k)}
+.plan-chip:hover{background:color-mix(in oklch,var(--k) 24%,transparent)}
+.plan-legend{display:flex;flex-wrap:wrap;gap:1rem;margin:.75rem 0 0}
+.plan-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.plan-dot{width:.6rem;height:.6rem;border-radius:3px;background:var(--k)}
+.plan-list{list-style:none;margin:0;padding:0}
+.plan-item{display:grid;grid-template-columns:10rem minmax(0,1fr) auto;gap:1rem;align-items:start;padding:.9rem 0;border-top:1px solid var(--line)}
+.plan-item:first-child{border-top:0}
+.plan-item:target{background:var(--brand-soft);border-radius:10px;padding-inline:.6rem}
+.plan-when{font-size:var(--fs-2);font-weight:600;display:flex;flex-direction:column;gap:.3rem;align-items:flex-start}
+.plan-what{display:flex;flex-wrap:wrap;gap:.35rem .5rem;align-items:center;min-width:0}
+.plan-what>b{flex:1 1 100%;font-size:var(--fs-3)}
+.plan-what>small,.plan-what>p{flex:1 1 100%;margin:0}
+.plan-error{display:flex;gap:.4rem;align-items:center;color:var(--bad)}
+.plan-error svg{width:1rem;height:1rem;flex:none}
+.plan-actions{display:flex;gap:.4rem;align-items:flex-start;flex-wrap:wrap;justify-content:flex-end}
+.plan-edit{position:relative}
+.plan-edit>summary{list-style:none}
+.plan-edit>summary::-webkit-details-marker{display:none}
+.plan-edit[open]>.plan-form{position:absolute;right:0;top:calc(100% + .4rem);z-index:20;width:min(30rem,85vw);padding:1rem;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg)}
+.plan-form{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.plan-form .plan-wide,.plan-form>div{grid-column:1/-1}
+.plan-auto{display:grid;gap:.75rem;margin:.75rem 0}
+.plan-cron summary{cursor:pointer;color:var(--brand);font-weight:600}
+.plan-cron input{width:100%;margin-top:.4rem}
+.plan-spend{display:grid;gap:.4rem;margin:1rem 0 0;padding-top:.75rem;border-top:1px solid var(--line)}
+.plan-spend div{display:flex;justify-content:space-between;gap:1rem}
+.plan-spend dt{color:var(--muted)}
+.plan-spend dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+@media (max-width:860px){
+  .plan-ideas{grid-template-columns:1fr 1fr}
+  .plan-theme,.plan-ideas>div{grid-column:1/-1}
+  .plan-item{grid-template-columns:1fr}
+  .plan-actions{justify-content:flex-start}
+  .plan-edit[open]>.plan-form{left:0;right:auto}
+}
+@media (max-width:640px){
+  .plan-grid{grid-template-columns:1fr}
+  .plan-wd,.plan-pad,.plan-day.empty{display:none}
+  .plan-day{min-height:0}
+  .plan-full{display:inline}
+  .plan-date b{display:none}
+  .plan-form{grid-template-columns:1fr}
+}
+.plan-head{flex-wrap:wrap;gap:.25rem 1rem}
