@@ -1,0 +1,9 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
+/* Blocs d'annonces (AdSense), ajoutés seulement quand la publicité est en service : place réservée (la page ne saute pas),
+   étiquette exigée par Google, bloc laissé vide par Google masqué, rien à l'impression. */
+.ad{margin:2.5rem 0;padding:.75rem 0 1rem;border-block:1px solid var(--line);min-height:19rem}
+.ad-label{margin:0 0 .6rem;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ad .adsbygoogle{display:block}
+.ad:has(ins[data-ad-status="unfilled"]){display:none}
+@media print{.ad{display:none}}

@@ -23,14 +23,16 @@ final class Security
      * En-têtes communs + politique adaptée au contexte (site public, admin, texte brut).
      * Ils dépendent des réglages, jamais de la requête : une page mise en cache sert les mêmes à tous.
      */
-    public static function headers(string $mode, string $styleHash = ''): array
+    public static function headers(string $mode, string $styleHash = '', string $nonce = ''): array
     {
         $https = self::httpsOnly();
+        $ads = $mode === 'site' && $nonce !== '';
         $h = [
             'X-Content-Type-Options: nosniff',
             'Referrer-Policy: strict-origin-when-cross-origin',
             'Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()',
-            'Cross-Origin-Opener-Policy: same-origin',
+            // Page avec publicité : les fenêtres ouvertes par un clic sur une annonce gardent leur lien avec la page.
+            'Cross-Origin-Opener-Policy: ' . ($ads ? 'same-origin-allow-popups' : 'same-origin'),
         ];
         if ($https && Settings::get('security.hsts')) {
             $h[] = 'Strict-Transport-Security: max-age=31536000';
@@ -42,6 +44,13 @@ final class Security
             $h[] = 'X-Frame-Options: DENY';
             $h[] = 'X-Robots-Tag: noindex, nofollow';
             $h[] = 'Cache-Control: no-store, private';
+        } elseif ($ads) {
+            // Page avec publicité (Ads) : la politique stricte que Google documente pour AdSense (nonce, 'strict-dynamic' ;
+            // 'unsafe-inline', https: et http: ne servent qu'aux navigateurs anciens, les autres les ignorent). Le reste n'est
+            // pas restreint : le code publicitaire charge cadres, styles et images de domaines qui changent.
+            $h[] = "Content-Security-Policy: object-src 'none'; script-src 'nonce-" . $nonce . "' 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https: http:; "
+                . "base-uri 'none'; frame-ancestors 'self'" . ($https ? '; upgrade-insecure-requests' : '');
+            $h[] = 'X-Frame-Options: SAMEORIGIN';
         } elseif ($mode === 'site') {
             $style = $styleHash !== '' ? " 'sha256-" . $styleHash . "'" : '';
             $h[] = "Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'" . $style . '; '

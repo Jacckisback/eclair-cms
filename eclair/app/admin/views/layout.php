@@ -26,6 +26,7 @@ $nav = [
     ['plan', 'plan', 'calendar', t('Planning'), 'content'],
       ['ai-visits', 'ai-visits', 'bot', t('Robots IA'), 'content'],
     ['affiliate', 'affiliate', 'bag', t('Affiliation'), 'content'],
+    ['discover', 'discover', 'compass', t('Discover'), 'content'],
 ];
 $adminNav = [
     ['settings', 'settings', 'settings', t('Réglages'), 'settings'],

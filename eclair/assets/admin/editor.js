@@ -925,6 +925,7 @@
     f('f-noindex').checked = !!it.seo.noindex;
     f('f-hide-title').checked = !!it.options.hide_title;
     f('f-wide').checked = !!it.options.wide;
+    if (f('f-noads')) f('f-noads').checked = !!it.options.noads;
     f('f-toc').value = it.options.toc || 'auto';
     if (f('f-category')) f('f-category').value = it.category || '';
     f('f-author').value = it.author;
@@ -961,7 +962,9 @@
       canonical: f('f-canonical').value.trim(),
       noindex: f('f-noindex').checked,
     },
-    options: { hide_title: f('f-hide-title').checked, wide: f('f-wide').checked, toc: f('f-toc').value },
+    // « Sans publicité » : la case n'existe que si la publicité est en service ; sinon le choix enregistré est gardé.
+    options: { hide_title: f('f-hide-title').checked, wide: f('f-wide').checked, toc: f('f-toc').value,
+      noads: f('f-noads') ? f('f-noads').checked : !!(item.options && item.options.noads) },
     blocks: blocks().map((b) => b._read()),
   });
 

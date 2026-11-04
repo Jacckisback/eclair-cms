@@ -658,6 +658,7 @@ require __DIR__ . '/ai-visits.php';
 require __DIR__ . '/plan.php';
 require __DIR__ . '/wayback.php';
 require __DIR__ . '/affiliate.php';
+require __DIR__ . '/discover.php';
 require __DIR__ . '/update.php';
 require __DIR__ . '/drive.php';
 require __DIR__ . '/sec-C2.php';

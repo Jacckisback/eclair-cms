@@ -57,6 +57,12 @@ final class Site
                     self::file($path, Shop::feed(), 'application/rss+xml; charset=utf-8', ['X-Robots-Tag: noindex']);
                 }
                 break;
+            case '/ads.txt':
+                $ads = Ads::txt();
+                if ($ads !== null) {
+                    self::file($path, $ads, 'text/plain; charset=utf-8');
+                }
+                break;
             case '/favicon.ico':
                 $icon = ECLAIR_ROOT . '/media/site/icon-32.png';
                 if (is_file($icon)) {
@@ -213,7 +219,15 @@ final class Site
         $category = $isPost ? Categories::get($item['category']) : null;
         $featured = $isPost ? Media::get($item['image']) : null;
         $h1InContent = ($blocks[0]['type'] ?? '') === 'hero' && $item['options']['hide_title'];
-        $html = Affiliate::mark(Blocks::html($blocks, ['lang' => $lang, 'h1' => $h1InContent, 'eager' => !$featured, 'page' => $item['id'], 'edit' => self::$edit]), $blocks, $lang);
+        // Publicité (Ads) : blocs d'annonces entre les blocs du texte, scripts AdSense et nonce de la politique de sécurité.
+        $ads = Ads::wanted($item, $preview || self::$preview || self::$edit);
+        $places = $ads ? Ads::places($blocks) : [];
+        // Sans annonces automatiques ni bloc à placer (article court), la page reste sans code AdSense.
+        $ads = $ads && ($places || Settings::get('ads.auto'));
+        $nonce = $ads ? Ads::nonce() : '';
+        $units = $ads ? array_fill_keys($places, Ads::unit($lang, $nonce)) : [];
+        $html = Affiliate::mark(Blocks::html($blocks, ['lang' => $lang, 'h1' => $h1InContent, 'eager' => !$featured, 'page' => $item['id'], 'edit' => self::$edit,
+            'after' => $units]), $blocks, $lang);
         $toc = Blocks::toc($blocks, $lang);
         $tocMode = $item['options']['toc'];
         $showToc = $tocMode === 'on' ? (bool) $toc : ($tocMode === 'auto' && $isPost && count($toc) >= 3);
@@ -268,6 +282,8 @@ final class Site
             'canonical' => $item['seo']['canonical'] !== '' ? $item['seo']['canonical'] : absolute_url($path),
             'noindex' => $item['seo']['noindex'] || $preview,
             'image' => $image,
+            // Grande image d'origine (1200 px de large au moins), non recadrée : celle que Google Discover recommande.
+            'large' => $featured && (int) $featured['w'] >= Discover::WIDTH ? Media::url($featured) : '',
             'type' => $isPost ? 'article' : 'website',
             'published' => $item['date'],
             'modified' => max((int) $item['date'], (int) $item['updated']),
@@ -279,6 +295,9 @@ final class Site
             'markdown' => $item['seo']['noindex'] ? '' : Seo::mdPath($path),
             'words' => $words,
         ]);
+        if ($ads) {
+            $head .= "\n" . Ads::head($nonce);
+        }
         $page = Theme::render('single', [
             'lang' => $lang,
             'head' => $head,
@@ -298,8 +317,9 @@ final class Site
             'words' => $words,
             'h1_in_content' => $h1InContent,
             'edit' => self::$edit,
+            'nonce' => $nonce,
         ]);
-        self::html($page, 200, $preview ? null : $path);
+        self::html($page, 200, $preview ? null : $path, $nonce);
     }
 
     /* ─────────────────────────────── Boutique ─────────────────────────────── */
@@ -643,8 +663,11 @@ final class Site
 
     /* ─────────────────────────────── Sortie ─────────────────────────────── */
 
-    /** Envoie une page HTML ; si $cachePath est fourni, la page est mise en cache statique. */
-    private static function html(string $html, int $status, ?string $cachePath): never
+    /**
+     * Envoie une page HTML ; si $cachePath est fourni, la page est mise en cache statique. $nonce : page avec publicité,
+     * dont la politique de sécurité autorise les scripts qui portent ce jeton (gardé avec la page en cache).
+     */
+    private static function html(string $html, int $status, ?string $cachePath, string $nonce = ''): never
     {
         if (self::$preview) {
             $cachePath = null;
@@ -658,7 +681,7 @@ final class Site
         }
         $headers = array_merge(
             ['Content-Type: text/html; charset=utf-8', 'Cache-Control: ' . ($cachePath !== null ? 'public, max-age=0, must-revalidate' : 'no-store')],
-            Security::headers('site', Theme::hash(Theme::css())),
+            Security::headers('site', Theme::hash(Theme::css()), $nonce),
             self::$edit ? ['X-Robots-Tag: noindex, nofollow'] : []
         );
         if ($status === 200 && $cachePath !== null) {

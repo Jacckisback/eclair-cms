@@ -259,6 +259,8 @@ final class Blocks
                 default => '',
             };
             $out .= $edit ? self::tag($html !== '' ? $html : self::placeholder($b), 'eb', (string) $i) : $html;
+            // HTML à insérer après ce bloc (blocs d'annonces, voir Ads::places) : toujours entre deux blocs.
+            $out .= !$edit && is_string($ctx['after'][$i] ?? null) ? $ctx['after'][$i] : '';
         }
         self::$edit = false;
         return $out;
