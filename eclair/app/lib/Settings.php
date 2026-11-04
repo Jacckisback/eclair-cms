@@ -39,6 +39,8 @@ final class Settings
             'dark' => 'auto',
             'footer' => '',
             'credit' => true,
+            // Micro-animations du site : activées à l'installation ; un site d'avant la 1.11 garde sa page à l'octet près.
+            'motion' => false,
             'direction' => [],
         ],
         'seo' => [

@@ -169,7 +169,8 @@ if (!in_array('--unit', $argv, true)) {
             $page = $c->req('GET', '/gestion/settings?tab=appearance');
             return $c->req('POST', '/gestion/settings', $c->token($page['body']) + $fields + ['tab' => 'appearance', 'theme' => $orig['theme'], 'header' => $orig['header'],
                 'cards' => $orig['cards'], 'logo' => $orig['logo'], 'favicon' => $orig['favicon'], 'accent' => $orig['accent'], 'font_head' => $orig['font_head'],
-                'font_body' => $orig['font_body'], 'dark' => $orig['dark'], 'footer' => $orig['footer'], 'credit' => $orig['credit'] ? '1' : '', 'custom_css' => '']);
+                'font_body' => $orig['font_body'], 'dark' => $orig['dark'], 'footer' => $orig['footer'], 'credit' => $orig['credit'] ? '1' : '',
+                'motion' => $orig['motion'] ? '1' : '', 'custom_css' => '']);
         };
         $stored = static fn (): array => json_decode(substr((string) file_get_contents($copy . '/data/site.php'), strlen(Store::GUARD)), true)['appearance']['direction'] ?? ['?'];
 
@@ -259,6 +260,8 @@ if (!in_array('--unit', $argv, true)) {
             && ($ds[1]['display'] ?? '') === 'system' && ($ds[1]['name'] ?? '') === 'Nuit de cuisson');
         check('IA : demande guidée (méthode, liste fermée des polices, présentation du site)', str_contains($sent, 'Avoid the category default') && str_contains($sent, 'big-shoulders-display')
             && str_contains($sent, 'Pain au levain') && str_contains($sent, '"enum"'), substr($sent, 0, 400));
+        check('IA (1.11) : palettes brunes, beiges ou sable réservées aux métiers qui en sont faits, une direction au plus',
+            str_contains($sent, 'Brown, beige, tan, sand') && str_contains($sent, 'in one direction at most'));
         $usage = json_decode(substr((string) @file_get_contents($copy . '/data/ai/usage.php'), strlen(Store::GUARD)), true);
         check('IA : dépense comptée', array_sum(array_column($usage['months'] ?? [], 'cost')) > 0, json_encode($usage));
         $users = json_decode(substr((string) file_get_contents($copy . '/data/users.php'), strlen(Store::GUARD)), true);

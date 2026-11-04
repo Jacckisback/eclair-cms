@@ -9,8 +9,15 @@
 [data-ef][contenteditable]:empty::before{content:attr(data-ph);opacity:.45}
 [data-ef$=media],[data-ef=image]{cursor:pointer}
 .eb-empty{margin:1rem 0;padding:1.4rem 1rem;border:2px dashed #cecafd;border-radius:10px;color:#5b3cbc;text-align:center;font:600 .95rem/1.4 system-ui,sans-serif;cursor:pointer}
-.ev-bar{position:absolute;z-index:2147483647;display:flex;gap:2px;padding:3px;background:#16152b;border-radius:9px;box-shadow:0 6px 20px rgb(0 0 0 / .28)}
+.ev-bar{position:absolute;z-index:2147483647;display:flex;align-items:center;gap:2px;padding:4px;background:#16152b;border-radius:10px;box-shadow:0 6px 20px rgb(0 0 0 / .28);animation:ev-in .14s ease-out}
 .ev-bar[hidden],.ev-bar [hidden]{display:none}
-.ev-bar button{all:unset;box-sizing:border-box;min-width:30px;height:30px;padding:0 7px;border-radius:7px;color:#fff;font:600 14px/30px system-ui,sans-serif;text-align:center;cursor:pointer}
+.ev-bar button{all:unset;box-sizing:border-box;display:grid;place-items:center;width:32px;height:32px;border-radius:7px;color:#fff;cursor:pointer;transition:background .12s,color .12s}
+.ev-bar svg{width:17px;height:17px}
 .ev-bar button:hover{background:rgb(255 255 255 / .16)}
+.ev-bar button:active{transform:scale(.92)}
+.ev-bar [data-op=ai]{color:#ffc928}
+.ev-bar [data-op=del]:hover{background:#e5484d;color:#fff}
 .ev-bar button:focus-visible{outline:2px solid #ffc928;outline-offset:-2px}
+.ev-sep{width:1px;height:18px;margin:0 3px;background:rgb(255 255 255 / .22)}
+@keyframes ev-in{from{opacity:0;transform:translateY(4px)}}
+@media (prefers-reduced-motion:reduce){.ev-bar,.ev-bar button{animation:none;transition:none}}

@@ -75,6 +75,9 @@ final class AdminSettings
         if (preg_match('/^#[0-9a-f]{6}\z/i', $q('accent'))) {
             $look['accent'] = strtolower($q('accent'));
         }
+        if (in_array($q('motion'), ['0', '1'], true)) {
+            $look['motion'] = $q('motion') === '1';
+        }
         foreach (['font_head', 'font_body'] as $k) {
             if (isset(Theme::FONTS[$q($k)])) {
                 $look[$k] = $q($k);
@@ -160,6 +163,7 @@ final class AdminSettings
                     'dark' => Req::input('dark') === 'light' ? 'light' : 'auto',
                     'footer' => Sanitize::multiline(Req::input('footer'), 500),
                     'credit' => Req::bool('credit'),
+                    'motion' => Req::bool('motion'),
                 ]];
                 // Direction artistique : les valeurs du formulaire (JavaScript), sinon la direction livrée cochée.
                 $d = [];

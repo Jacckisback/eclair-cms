@@ -18,6 +18,10 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
   <header class="editor-top">
     <a class="btn btn-ghost btn-icon" href="<?= e(admin_url('content')) ?>" title="<?= e(t('Retour aux contenus')) ?>" aria-label="<?= e(t('Retour aux contenus')) ?>"><?= Icons::svg('back') ?></a>
     <span class="badge" id="status-badge"></span>
+    <span class="hist">
+      <button class="btn btn-ghost btn-sm btn-icon" type="button" id="btn-undo" disabled aria-label="<?= e(t('Annuler la dernière action')) ?>"><?= Icons::svg('undo') ?></button>
+      <button class="btn btn-ghost btn-sm btn-icon" type="button" id="btn-redo" disabled aria-label="<?= e(t('Rétablir')) ?>"><?= Icons::svg('redo') ?></button>
+    </span>
     <span class="status" id="save-status" aria-live="polite"></span>
     <span class="spacer"></span>
     <div class="seg" role="group" aria-label="<?= e(t('Mode d’édition')) ?>">

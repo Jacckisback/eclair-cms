@@ -285,6 +285,12 @@ final class Theme
         return 'theme-' . $a['theme'] . ($a['header'] === 'center' ? ' hdr-center' : '') . ($a['cards'] === 'list' ? ' cards-list' : '');
     }
 
+    /** Micro-animations (Réglages › Apparence), avant le CSS personnalisé ; coupées, rien n'est ajouté (page à l'octet près). */
+    private static function motion(array $a): string
+    {
+        return empty($a['motion']) ? '' : "\n" . (string) file_get_contents(ECLAIR_ROOT . '/app/theme/motion.css');
+    }
+
     /** CSS du thème, personnalisé et minifié, destiné à être inséré dans la page. */
     public static function css(): string
     {
@@ -294,7 +300,7 @@ final class Theme
         $a = self::look();
         if ($d = self::direction()) {
             // Direction artistique : thème de base sans son mode sombre automatique (la direction choisit clair ou sombre).
-            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css')) . Design::css($d);
+            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css')) . Design::css($d) . self::motion($a);
             $custom = self::custom();
             $css .= $custom !== '' ? "\n" . $custom : '';
             if (!self::$shop && !Shop::enabled()) {
@@ -313,6 +319,7 @@ final class Theme
         if ($a['theme'] !== 'eclair') {
             $css .= (string) @file_get_contents(ECLAIR_ROOT . '/app/theme/themes/' . $a['theme'] . '.css');
         }
+        $css .= self::motion($a);
         // CSS personnalisé du site, après le thème : il l'emporte et suit les mêmes repères (mode sombre, boutique).
         $custom = self::custom();
         if ($custom !== '') {

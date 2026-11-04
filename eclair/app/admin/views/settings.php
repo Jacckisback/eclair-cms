@@ -228,6 +228,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         <option value="light"<?= $s['appearance']['dark'] === 'light' ? ' selected' : '' ?>><?= e(t('Toujours clair')) ?></option></select></label>
     </div>
     <label class="field"><span class="label"><?= e(t('Texte du pied de page')) ?></span><textarea name="footer" rows="2"><?= e($s['appearance']['footer']) ?></textarea></label>
+    <?= $sw('motion', !empty($s['appearance']['motion']), t('Micro-animations'), t('Cartes, atouts et images apparaissent en glissant au défilement ; boutons et images réagissent au survol. Sans script ni ralentissement, et coupées pour les visiteurs qui préfèrent moins de mouvement.')) ?>
     <?= $sw('credit', (bool) $s['appearance']['credit'], t('Afficher « Propulsé par ⚡ Éclair »')) ?>
     <label class="field"><span class="label"><?= e(t('CSS personnalisé')) ?></span>
       <textarea name="custom_css" rows="8" class="code" spellcheck="false" autocomplete="off"><?= e(Theme::custom()) ?></textarea>

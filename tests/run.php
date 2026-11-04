@@ -427,6 +427,7 @@ if (!in_array('--unit', $argv, true)) {
         ], ['Accept: application/json']);
         check('installation', str_contains($install['body'], '"ok":true'), $install['body']);
         $site = json_decode(substr((string) file_get_contents($copy . '/data/site.php'), strlen(Store::GUARD)), true);
+        check('nouveau site : micro-animations activées par défaut (1.11)', ($site['appearance']['motion'] ?? null) === true);
         check('adresse vérifiée par le serveur lui-même', ($site['security']['verified'] ?? '') === $base, json_encode($site['security'] ?? null));
         // Gardée, refermée pour de bon (1.10.4) : si data/site.php disparaît, l'installateur reste verrouillé sans l'accès FTP.
         check('fenêtre d’installation refermée', is_file($copy . '/data/install-window.php')
@@ -652,6 +653,7 @@ require __DIR__ . '/ai.php';
 require __DIR__ . '/shop.php';
 require __DIR__ . '/mcp.php';
 require __DIR__ . '/design.php';
+require __DIR__ . '/ux.php';
 require __DIR__ . '/update.php';
 require __DIR__ . '/drive.php';
 require __DIR__ . '/sec-C2.php';

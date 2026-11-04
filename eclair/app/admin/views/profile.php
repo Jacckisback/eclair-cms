@@ -30,6 +30,12 @@ $on = !empty($me['totp']['on']);
     <button class="btn btn-primary" type="submit"><?= e(t('Enregistrer le profil')) ?></button>
   </form>
 
+  <section class="card">
+    <h2><?= e(t('Interface')) ?></h2>
+    <label class="switch"><span><strong><?= e(t('Micro-animations')) ?></strong><small><?= e(t('De petits mouvements montrent ce qui vient de changer (bloc ajouté, déplacé, supprimé…). Réglage propre à ce navigateur ; le mode « réduire les animations » du système les coupe toujours.')) ?></small></span>
+      <input type="checkbox" data-motion-toggle checked></label>
+  </section>
+
   <form class="card" id="mot-de-passe" method="post" action="<?= e(admin_url('profile')) ?>">
     <?= Security::csrfField() ?><input type="hidden" name="action" value="password">
     <h2><?= e(t('Mot de passe')) ?></h2>
