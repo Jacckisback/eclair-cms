@@ -80,6 +80,8 @@ final class AdminStrings
             'Voir la mise à jour',
             // Ancien site (Wayback Machine)
             'Coche au moins une adresse.', 'Page {n} sur {total} : {path}…', '{n} pages reconstruites en brouillon.',
+            // Affiliation
+            'Coche au moins un lien.',
         ];
         $out = [];
         foreach ($keys as $k) {

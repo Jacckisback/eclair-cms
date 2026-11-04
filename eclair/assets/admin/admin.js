@@ -362,6 +362,19 @@
     });
   }
 
+  /* ── Affiliation : article rédigé par l'IA à partir des liens cochés, ouvert ensuite dans l'éditeur ── */
+  const affWrite = $('[data-aff-write]');
+  if (affWrite) {
+    affWrite.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const links = $$('[data-aff-pick]:checked').map((b) => b.value);
+      if (!links.length) { toast(t('Coche au moins un lien.'), 'bad'); return; }
+      const f = new FormData(affWrite);
+      planRun($('button', affWrite), affWrite.dataset.wait, 'api/affiliate/write',
+        { links, format: f.get('format'), keyword: f.get('keyword') }, (json) => { location.href = json.edit; });
+    });
+  }
+
   /* ── Nouvelle version d'Éclair : vérification discrète, deux fois par jour au plus (administrateurs) ── */
   if (D.updateCheck) {
     api('api/update/check', {}, { quiet: true }).then((json) => {

@@ -124,6 +124,11 @@ function composed(string $input): array
             $s(['type' => 'button', 'button' => 'Nous écrire', 'url' => '/contact']),
             $s(['type' => 'contact', 'title' => 'Une question ?']),
             $s(['type' => 'inconnu', 'title' => 'Ignoré']),
+            // Affiliation : liens par adresses provisoires (un connu, un inconnu, une adresse hors lien), le second produit oublié.
+            ...(str_contains($input, 'https://aff.invalid/1') ? [
+                $s(['type' => 'button', 'button' => 'Voir l’offre', 'url' => 'https://aff.invalid/1']),
+                $s(['type' => 'paragraph', 'text' => 'Notre préféré : [le premier](https://aff.invalid/1). Un lien inconnu : [fantôme](https://aff.invalid/9). Adresse seule : https://aff.invalid/3 fin.']),
+            ] : []),
         ],
     ];
 }

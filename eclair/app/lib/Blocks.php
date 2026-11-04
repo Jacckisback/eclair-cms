@@ -17,7 +17,7 @@ final class Blocks
         'paragraph', 'heading', 'list', 'quote', 'image', 'callout', 'faq', 'table',
         'button', 'video', 'code', 'divider', 'hero', 'features', 'team', 'posts', 'products', 'contact',
     ];
-    private const CALLOUTS = ['info' => 'ℹ️', 'tip' => '💡', 'warning' => '⚠️', 'success' => '✅', 'note' => '📝'];
+    public const CALLOUTS = ['info' => 'ℹ️', 'tip' => '💡', 'warning' => '⚠️', 'success' => '✅', 'note' => '📝'];
     private const RESERVED_IDS = ['main', 'top', 'toc', 'menu', 'contenu', 'content', 'search', 'site-nav'];
     /** Rendu du mode Visuel en cours (aperçu d'édition de l'administration). */
     private static bool $edit = false;

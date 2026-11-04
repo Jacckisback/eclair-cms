@@ -596,7 +596,7 @@ final class Seo
             $url = absolute_url(Content::path($entry));
             $author = Users::find($item['author']);
             $cat = Categories::get($item['category']);
-            $html = $absolutize(Blocks::html($item['blocks'], ['lang' => $item['lang']]));
+            $html = $absolutize(Affiliate::mark(Blocks::html($item['blocks'], ['lang' => $item['lang']]), $item['blocks'], $item['lang']));
             $items .= '<item><title>' . self::xml($item['title']) . '</title><link>' . self::xml($url) . '</link>'
                 . '<guid isPermaLink="true">' . self::xml($url) . '</guid><pubDate>' . date(DATE_RSS, (int) $item['date']) . '</pubDate>'
                 . ($author ? '<dc:creator>' . self::xml($author['name']) . '</dc:creator>' : '')
