@@ -2,7 +2,9 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 1.13.0 — 2026-11-04
+
+Netlinking and affiliate release: give the old addresses of your domain a page again with the Wayback Machine, and manage your affiliate links with the advertising disclosure added for you. Everything the AI writes stays a draft until you publish it. Sites without affiliate links keep their public pages identical to the byte. Sites on 1.12.x update in one click from Administration › Updates, after a backup.
 
 ### Added
 
@@ -14,15 +16,20 @@ All notable changes to Éclair CMS are recorded here. Release notes for each ver
 
 - Date fields in the admin (Planner, Old site) now look like the other fields.
 
+### Still guaranteed
+
+- **Your content does not move.** The old site and affiliate links only add drafts, redirects and links that you review.
+- **Public pages stay identical to the byte** on sites without affiliate links; the disclosure and `rel="sponsored nofollow"` only appear where an affiliate link is.
+- **The AI never publishes on its own**, and copies nothing from an archived page or a merchant: it writes new text from a title, a name and your notes.
+- **Automated checks** on the source and on the archive.
+- The 1.12.x → 1.13.0 update is signed (Ed25519) and verified before anything is touched, with automatic rollback.
+
 ### For maintainers
 
-- New files: `app/lib/Wayback.php`, `app/lib/AdminWayback.php`, `app/admin/views/wayback.php`. New data: `data/wayback.php` (old addresses, their state and cost).
-- New routes (`settings` right): `GET /wayback`, `POST /wayback`, `POST /api/wayback/scan`, `POST /api/wayback/build`. The archive address (`https://web.archive.org`) can be replaced through `ECLAIR_AI_ENDPOINTS['wayback']`, as the tests do.
-- 35 new checks in `tests/wayback.php`, with a fake Wayback Machine (`tests/fake-wayback.php`) and the fake AI provider. The suite passes on the source and on the built archive (1,069 checks).
-- Archive: 675 KB (+17 KB, of which 7 KB are translations).
+- Old site: new files `app/lib/Wayback.php`, `app/lib/AdminWayback.php`, `app/admin/views/wayback.php`; new data `data/wayback.php` (old addresses, their state and cost). New routes (`settings` right): `GET /wayback`, `POST /wayback`, `POST /api/wayback/scan`, `POST /api/wayback/build`. The archive address (`https://web.archive.org`) can be replaced through `ECLAIR_AI_ENDPOINTS['wayback']`, as the tests do.
 - Affiliate links: new files `app/lib/Affiliate.php`, `app/lib/AdminAffiliate.php`, `app/admin/views/affiliate.php`; new data `data/affiliate.php`. New routes (`content` right): `GET /affiliate`, `POST /affiliate`, `POST /api/affiliate/write`. `Affiliate::mark()` is applied in `Site::single`, `Site::product` and `Seo::feed`; `AdminAi::composeItem` accepts `$fields['links']` (external links the brief allows); `Blocks::CALLOUTS` is now public. New theme strings `aff_title`, `aff_note`, `aff_button`.
-- 30 new checks in `tests/affiliate.php`; the fake AI provider answers with temporary affiliate addresses when the brief holds them. The suite passes on the source and on the built archive (1,099 checks).
-- Archive: 691 KB (+16 KB for affiliate links, of which 6 KB are translations).
+- 65 new checks: `tests/wayback.php` (35, with a fake Wayback Machine in `tests/fake-wayback.php`) and `tests/affiliate.php` (30); the fake AI provider answers with temporary affiliate addresses when the brief holds them. The suite passes on the source and on the built archive (1,099 checks).
+- Archive: 691 KB (+32 KB, of which 13 KB are translations), 1.33 MB once unzipped. README banners and installation visuals show the new size in all 7 languages.
 
 ## 1.12.0 — 2026-11-04
 

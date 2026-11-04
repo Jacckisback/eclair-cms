@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip"><img src="https://img.shields.io/badge/download-v1.12.0-5b3cbc?style=for-the-badge" alt="Download Éclair 1.12.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip"><img src="https://img.shields.io/badge/download-v1.13.0-5b3cbc?style=for-the-badge" alt="Download Éclair 1.13.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -63,7 +63,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>659 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>691 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -266,7 +266,7 @@ How to use it: [guide, Updating, backing up, moving section](docs/GUIDE.en.md#up
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 659 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 691 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -310,6 +310,8 @@ On real shared hosting, add your host's network latency and PHP startup time.
         <li><b>JSON-LD structured data</b>: Organization or LocalBusiness, BlogPosting, FAQPage, BreadcrumbList, author…</li>
         <li>Sitemap with images and <code>hreflang</code>, full RSS feed, Open Graph with a <b>generated share image</b>.</li>
         <li><b>Automatic 301 redirects</b> when a URL changes, plus a redirect manager to migrate an old site.</li>
+        <li><b>Old site</b>: the Wayback Machine finds the addresses your domain used to have, and the AI gives each one a brand-new page, so the links still pointing to them count again.</li>
+        <li><b>Affiliate links</b>: advertising disclosure and <code>rel="sponsored"</code> added for you (Amazon statement included); the AI turns them into a comparison or a buying guide, as a draft.</li>
         <li><b>IndexNow</b>: Bing and other compatible engines are notified every time you publish.</li>
       </ul>
     </td>
@@ -378,7 +380,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.12.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.12.0.zip) archive (659 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.13.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.13.0.zip) archive (691 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 
