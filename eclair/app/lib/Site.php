@@ -213,7 +213,7 @@ final class Site
         $category = $isPost ? Categories::get($item['category']) : null;
         $featured = $isPost ? Media::get($item['image']) : null;
         $h1InContent = ($blocks[0]['type'] ?? '') === 'hero' && $item['options']['hide_title'];
-        $html = Blocks::html($blocks, ['lang' => $lang, 'h1' => $h1InContent, 'eager' => !$featured, 'page' => $item['id'], 'edit' => self::$edit]);
+        $html = Affiliate::mark(Blocks::html($blocks, ['lang' => $lang, 'h1' => $h1InContent, 'eager' => !$featured, 'page' => $item['id'], 'edit' => self::$edit]), $blocks, $lang);
         $toc = Blocks::toc($blocks, $lang);
         $tocMode = $item['options']['toc'];
         $showToc = $tocMode === 'on' ? (bool) $toc : ($tocMode === 'auto' && $isPost && count($toc) >= 3);
@@ -314,7 +314,7 @@ final class Site
         $category = Categories::get($item['category']);
         $images = Shop::images($item);
         $blocks = $item['blocks'];
-        $html = Blocks::html($blocks, ['lang' => $lang, 'h1' => false, 'eager' => !$images, 'page' => $item['id'], 'edit' => self::$edit]);
+        $html = Affiliate::mark(Blocks::html($blocks, ['lang' => $lang, 'h1' => false, 'eager' => !$images, 'page' => $item['id'], 'edit' => self::$edit]), $blocks, $lang);
         $crumbs = [['name' => (string) Settings::get('name'), 'path' => '/'], ['name' => Shop::title($lang), 'path' => Shop::path()]];
         if ($category) {
             $crumbs[] = ['name' => $category['name'], 'path' => Categories::path($category)];

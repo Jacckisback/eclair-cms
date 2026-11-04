@@ -25,6 +25,7 @@ $nav = [
     ['wayback', 'wayback', 'clock', t('Ancien site'), 'settings'],
     ['plan', 'plan', 'calendar', t('Planning'), 'content'],
       ['ai-visits', 'ai-visits', 'bot', t('Robots IA'), 'content'],
+    ['affiliate', 'affiliate', 'bag', t('Affiliation'), 'content'],
 ];
 $adminNav = [
     ['settings', 'settings', 'settings', t('Réglages'), 'settings'],

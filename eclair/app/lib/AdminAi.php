@@ -449,7 +449,8 @@ final class AdminAi
             . '- Adapt the structure to the goal: to get contacts, quotes or sales, a hero with a call-to-action button to an existing page, the offer (features), '
             . 'reassurance, a FAQ and a contact form; to inform, H2 headings with short paragraphs, lists and a FAQ; an article reads as an article (introduction, '
             . "H2 sections, some phrased as questions, lists, FAQ, a closing call to action). Follow the wished sections when given, in that order. 5 to 14 sections.\n"
-            . "- Links: only paths from the site inventory below; never invent a path or an external address. Images: only ids from the image list below, else leave media empty.\n"
+            . '- Links: only paths from the site inventory below' . (($fields['links'] ?? '') !== '' ? ', and ' . $fields['links'] : '')
+            . "; never invent a path or an external address. Images: only ids from the image list below, else leave media empty.\n"
             . '- Never invent facts about the business (prices, figures, names, clients, testimonials, addresses, opening hours…): where one is needed, write the '
             . "visible marker \"[$todo : what is missing]\" and go on.\n"
             . '- Write in ' . Content::LANGS[$lang] . ", with the voice of the editorial profile and the tone asked. Text fields accept Markdown inline.\n"

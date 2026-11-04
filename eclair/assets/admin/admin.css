@@ -973,3 +973,19 @@ tr.leaving{animation:leave .22s var(--ease) forwards}
 .wb-card h2{display:flex;align-items:center;gap:.5rem}
 .wb-card h2 svg{width:1.1rem;height:1.1rem;color:var(--brand)}
 @media (max-width:600px){.wb-table th:nth-child(n+3):nth-child(-n+4),.wb-table td:nth-child(n+3):nth-child(-n+4){display:none}.wb-table th,.wb-table td{padding:.6rem .4rem}.wb-table th:first-child,.wb-table td:first-child{width:1.5rem}.wb-path a{max-width:7rem}}
+
+/* ── Affiliation : liens, article rédigé par l'IA, mention publicitaire ── */
+.aff-card h2{display:flex;align-items:center;gap:.5rem}
+.aff-card h2 svg{width:1.1rem;height:1.1rem;color:var(--brand)}
+.aff-write{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.75rem 1rem;align-items:end}
+.aff-write .btn{white-space:normal;text-align:left}
+.aff-write .btn small{white-space:nowrap}
+.aff-list{list-style:none;margin:0;padding:0}
+.aff-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.75rem;align-items:start;padding:.85rem 0;border-bottom:1px solid var(--line)}
+.aff-item:last-child{border-bottom:0}
+.aff-item>input{margin-top:.25rem}
+.aff-what p{margin:.3rem 0 0}
+.aff-url{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aff-form{display:grid;gap:.75rem}
+.aff-rules{margin:1rem 0 0;padding-left:1.1rem}
+.aff-rules li{margin:.25rem 0}
