@@ -180,6 +180,9 @@ $symbol = Shop::CURRENCIES[Shop::currency()];
         <h3><?= e(t('Mise en page')) ?></h3>
         <label class="check"><input type="checkbox" id="f-hide-title"><span><?= e(t('Masquer le titre (le titre du premier bandeau devient le H1)')) ?></span></label>
         <label class="check"><input type="checkbox" id="f-wide"><span><?= e(t('Pleine largeur')) ?></span></label>
+        <?php if ($isPost && \Eclair\Ads::active()): ?>
+          <label class="check"><input type="checkbox" id="f-noads"><span><?= e(t('Sans publicité sur cet article')) ?></span></label>
+        <?php endif ?>
         <label class="field"><span class="label"><?= e(t('Sommaire')) ?></span>
           <select id="f-toc"><option value="auto"><?= e(t('Automatique (articles de 3 intertitres et plus)')) ?></option><option value="on"><?= e(t('Toujours')) ?></option><option value="off"><?= e(t('Jamais')) ?></option></select></label>
       </div>

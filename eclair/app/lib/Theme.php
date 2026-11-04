@@ -69,6 +69,8 @@ final class Theme
         'callout_tip' => ['Astuce', 'Consejo', 'Tip', 'Tipp', 'Consiglio', 'Dica'],
         'callout_warning' => ['Attention', 'Atención', 'Warning', 'Achtung', 'Attenzione', 'Atenção'],
         'callout_success' => ['À retenir', 'Para recordar', 'Remember', 'Merken', 'Da ricordare', 'Para lembrar'],
+        // Publicité (AdSense) : seules étiquettes permises par Google au-dessus d'une annonce (support.google.com/adsense/answer/4533986).
+        'ad_label' => ['Publicités', 'Anuncios', 'Advertisements', 'Werbung', 'Pubblicità', 'Publicidade'],
         // Affiliation : titre et texte de la mention publicitaire, bouton d'un produit que l'IA n'a pas relié.
         'aff_title' => ['Liens d’affiliation', 'Enlaces de afiliado', 'Affiliate links', 'Affiliate-Links', 'Link di affiliazione', 'Links de afiliado'],
         'aff_note' => ['Cette page contient des liens d’affiliation : si vous achetez par l’un d’eux, nous percevons une commission, sans surcoût pour vous.',
@@ -294,6 +296,12 @@ final class Theme
         return 'theme-' . $a['theme'] . ($a['header'] === 'center' ? ' hdr-center' : '') . ($a['cards'] === 'list' ? ' cards-list' : '');
     }
 
+    /** Blocs d'annonces (menu Discover › Publicité) : seulement quand la publicité est en service, sinon rien (page à l'octet près). */
+    private static function ads(): string
+    {
+        return Ads::active() ? "\n" . (string) file_get_contents(ECLAIR_ROOT . '/app/theme/ads.css') : '';
+    }
+
     /** Micro-animations (Réglages › Apparence), avant le CSS personnalisé ; coupées, rien n'est ajouté (page à l'octet près). */
     private static function motion(array $a): string
     {
@@ -309,7 +317,7 @@ final class Theme
         $a = self::look();
         if ($d = self::direction()) {
             // Direction artistique : thème de base sans son mode sombre automatique (la direction choisit clair ou sombre).
-            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css')) . Design::css($d) . self::motion($a);
+            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css')) . Design::css($d) . self::motion($a) . self::ads();
             $custom = self::custom();
             $css .= $custom !== '' ? "\n" . $custom : '';
             if (!self::$shop && !Shop::enabled()) {
@@ -328,7 +336,7 @@ final class Theme
         if ($a['theme'] !== 'eclair') {
             $css .= (string) @file_get_contents(ECLAIR_ROOT . '/app/theme/themes/' . $a['theme'] . '.css');
         }
-        $css .= self::motion($a);
+        $css .= self::motion($a) . self::ads();
         // CSS personnalisé du site, après le thème : il l'emporte et suit les mêmes repères (mode sombre, boutique).
         $custom = self::custom();
         if ($custom !== '') {

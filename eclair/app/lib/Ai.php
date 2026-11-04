@@ -47,6 +47,8 @@ final class Ai
         'ideogram' => 'https://api.ideogram.ai',
         // Index et captures d'Internet Archive (Ancien site) : pas une IA, mais remplaçable de la même façon pour les tests.
         'wayback' => 'https://web.archive.org',
+        // Flux public des tendances du jour de Google Trends (Discover), remplaçable de même.
+        'trends' => 'https://trends.google.com',
     ];
 
     /* ───────────────────────────── Réglages ───────────────────────────── */

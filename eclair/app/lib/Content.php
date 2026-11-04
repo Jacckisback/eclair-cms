@@ -320,6 +320,8 @@ final class Content
                 'hide_title' => !empty($options['hide_title']),
                 'toc' => in_array($toc, ['auto', 'on', 'off'], true) ? $toc : 'auto',
                 'wide' => !empty($options['wide']),
+                // « Sans publicité » (éditeur, quand la publicité est en service) : aucune annonce sur ce contenu.
+                'noads' => !empty($options['noads']),
             ],
         ];
         if ($type === 'product') {

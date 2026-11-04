@@ -115,6 +115,10 @@ final class Seo
                 $h[] = '<meta name="' . $name . '" content="' . e($code) . '">';
             }
         }
+        // Compte AdSense du site (validation du site par Google, même sans publicité sur la page d'accueil).
+        if (($adsense = Ads::client()) !== '') {
+            $h[] = '<meta name="google-adsense-account" content="ca-' . e($adsense) . '">';
+        }
         if (Settings::get('blog.enabled')) {
             $h[] = '<link rel="alternate" type="application/rss+xml" title="' . e($site) . '" href="' . e(path_to('/feed.xml')) . '">';
         }
@@ -207,8 +211,11 @@ final class Seo
             if (!empty($ctx['author'])) {
                 $article['author'] = self::person($ctx['author']);
             }
-            if (!empty($ctx['image'])) {
-                $article['image'] = [absolute_url($ctx['image']['url'])];
+            // Image d'origine en premier quand elle fait 1200 px de large ou plus : Google Discover la recadre lui-même et
+            // déconseille un format imposé automatiquement ; l'image de partage (1200×630) suit.
+            $images = array_filter([($ctx['large'] ?? '') !== '' ? absolute_url($ctx['large']) : '', !empty($ctx['image']) ? absolute_url($ctx['image']['url']) : '']);
+            if ($images) {
+                $article['image'] = array_values(array_unique($images));
             }
             if (!empty($ctx['category'])) {
                 $article['articleSection'] = $ctx['category']['name'];
@@ -240,7 +247,7 @@ final class Seo
         return ['@context' => 'https://schema.org', '@graph' => $graph];
     }
 
-    private static function pageType(?array $item): string
+    public static function pageType(?array $item): string
     {
         $slug = (string) ($item['slug'] ?? '');
         $last = basename($slug);

@@ -3,7 +3,7 @@
 // Copyright (c) 2026 Thierry Gustin
 /**
  * Gabarit principal du site public.
- * Variables : $v['lang'], $v['head'], $v['css'], $v['content'], $v['current'], $v['id'], $v['class']
+ * Variables : $v['lang'], $v['head'], $v['css'], $v['content'], $v['current'], $v['id'], $v['class'], $v['nonce'] (page avec publicité)
  */
 defined('ECLAIR') || exit;
 
@@ -31,7 +31,7 @@ $hasIcon = is_file(ECLAIR_ROOT . '/media/site/icon-32.png');
 <link rel="apple-touch-icon" href="<?= e(path_to('/media/site/icon-180.png')) ?>">
 <?php endif ?>
 <?= Theme::preload() ?><style><?= $v['css'] ?></style>
-<script src="<?= e(asset('site/site.js')) ?>" defer></script>
+<script src="<?= e(asset('site/site.js')) ?>" defer<?= !empty($v['nonce']) ? ' nonce="' . e($v['nonce']) . '"' : '' ?>></script>
 </head>
 <body class="<?= e(trim(($v['class'] ?? '') . ' ' . Theme::bodyClass())) ?>"<?= !empty($v['id']) ? ' data-id="' . e($v['id']) . '"' : '' ?> data-edit="<?= e(Theme::t('edit', $lang)) ?>">
 <a class="skip" href="#main"><?= e(Theme::t('skip', $lang)) ?></a>
