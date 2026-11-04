@@ -5,7 +5,7 @@
   const E = window.Eclair;
   const root = document.getElementById('editor');
   if (!E || !root || !E.D.editor) return;
-  const { D, t, api, toast, pickMedia, upload, h, $, $$, dropEvents, drafts } = E;
+  const { D, t, api, toast, pickMedia, upload, h, $, $$, dropEvents, drafts, askUser, deleting } = E;
   const cfg = D.editor;
   const media = cfg.media || {};
   let item = cfg.item;
@@ -127,11 +127,13 @@
       Object.assign(iconBtn('grip', t('Déplacer'), null), { className: 'grip' }));
     el.append(h('span', { class: 'block-label', text: TYPES[type][1] }), tools, bar, body);
     const extra = h('span', { class: 'row' });
+    // La croix de suppression est mise à l'écart des autres outils (filet, rouge au survol) : pas de clic malheureux.
     bar.append(extra,
       iconBtn('up', t('Monter'), () => move(el, -1)),
       iconBtn('down', t('Descendre'), () => move(el, 1)),
-      iconBtn('copy', t('Dupliquer'), () => { const copy = makeBlock(el._read()); el.after(copy); changed(); }),
-      iconBtn('trash', t('Supprimer'), () => removeBlock(el)));
+      iconBtn('copy', t('Dupliquer'), () => { const copy = makeBlock(el._read()); el.after(copy); flash(copy, true); changed(); }),
+      // Le clavier reste au même endroit : le bloc précédent (ou le premier) reprend le focus.
+      Object.assign(iconBtn('x', t('Supprimer le bloc'), () => { const prev = removeBlock(el) || blocks()[0]; prev?._focus?.(true); }), { className: 'del' }));
     RENDER[type](el, body, data, extra);
     bindDrag(el);
     return el;
@@ -230,7 +232,7 @@
       const add = (q = '', a = '') => {
         const qi = input(q, t('Question'), { class: 'q' });
         const ai = rich(a, t('Réponse'));
-        const row = h('div', { class: 'item-row' }, qi, ai, h('span', { class: 'item-del' }, iconBtn('x', t('Supprimer'), () => { row.remove(); changed(); })));
+        const row = h('div', { class: 'item-row' }, qi, ai, h('span', { class: 'item-del' }, iconBtn('x', t('Supprimer'), () => dropRow(row))));
         items.append(row);
         return qi;
       };
@@ -335,7 +337,7 @@
         const icon = input(i.icon, t('Icône'), { maxlength: '8', class: 'icon-input' });
         const ti = input(i.title, t('Titre'));
         const tx = rich(i.text, t('Écris ici…'));
-        const row = h('div', { class: 'item-row' }, h('div', { class: 'row' }, icon, ti), tx, h('span', { class: 'item-del' }, iconBtn('x', t('Supprimer'), () => { row.remove(); changed(); })));
+        const row = h('div', { class: 'item-row' }, h('div', { class: 'row' }, icon, ti), tx, h('span', { class: 'item-del' }, iconBtn('x', t('Supprimer'), () => dropRow(row))));
         row._read = () => ({ icon: icon.value.trim(), title: ti.value.trim(), text: cleanHtml(tx) });
         grid.append(row);
       };
@@ -366,7 +368,7 @@
         drawPic();
         const row = h('div', { class: 'item-row member-row' }, h('div', { class: 'member-side' }, pic, drop),
           h('div', { class: 'member-fields' }, h('div', { class: 'row' }, name, role), bio, link),
-          h('span', { class: 'item-del' }, iconBtn('x', t('Supprimer'), () => { row.remove(); changed(); })));
+          h('span', { class: 'item-del' }, iconBtn('x', t('Supprimer'), () => dropRow(row))));
         row._read = () => ({ name: name.value.trim(), role: role.value.trim(), bio: cleanHtml(bio), media: state.media, link: link.value.trim() });
         grid.append(row);
       };
@@ -423,13 +425,22 @@
     changed();
     return el;
   };
+  // Repère bref (le jaune de l'éclair) sur un bloc ajouté, déplacé ou rétabli : on voit tout de suite ce qui a bougé.
+  const flash = (el, isNew = false) => {
+    el.classList.remove('flash', 'is-new');
+    void el.offsetWidth;
+    el.classList.add('flash', ...(isNew ? ['is-new'] : []));
+    setTimeout(() => el.classList.remove('flash', 'is-new'), 900);
+  };
   const move = (el, dir) => {
     const target = dir < 0 ? el.previousElementSibling : el.nextElementSibling;
     if (!target) return;
     if (dir < 0) target.before(el); else target.after(el);
     el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    flash(el);
     changed();
   };
+  // Suppression sans fenêtre de confirmation : elle s'annule (notification, bouton ↶ ou Ctrl/Cmd+Z).
   const removeBlock = (el, silent = false) => {
     const prev = el.previousElementSibling;
     const next = el.nextElementSibling;
@@ -438,9 +449,17 @@
     if (!blocks().length) insertBlock(TYPES.paragraph[3](), null, false);
     changed();
     if (!silent) {
-      toast(t('Bloc supprimé.'), '', { label: t('Annuler'), run: () => { const back = makeBlock(data); if (prev && prev.isConnected) prev.after(back); else if (next && next.isConnected) next.before(back); else container.prepend(back); changed(); } });
+      toast(t('Bloc supprimé.'), '', { label: t('Annuler'), run: () => { const back = makeBlock(data); if (prev && prev.isConnected) prev.after(back); else if (next && next.isConnected) next.before(back); else container.prepend(back); flash(back, true); changed(); } });
     }
     return prev;
+  };
+  // Élément d'un bloc (question, atout, membre de l'équipe, variante) : retiré de la même façon, annulable.
+  const dropRow = (row) => {
+    const box = row.parentNode;
+    const next = row.nextSibling;
+    row.remove();
+    changed();
+    toast(t('Élément supprimé.'), '', { label: t('Annuler'), run: () => { if (box.isConnected) { box.insertBefore(row, next && next.parentNode === box ? next : null); flash(row, true); changed(); } } });
   };
   const focusEditable = (el, end) => {
     if (!el) return;
@@ -482,6 +501,7 @@
       if (!dragged || dragged === el) return;
       e.preventDefault();
       if (el.classList.contains('drop-after')) el.after(dragged); else el.before(dragged);
+      flash(dragged);
       changed();
     });
   }
@@ -652,7 +672,8 @@
     const choose = (type) => {
       const data = TYPES[type][3]();
       const el = replace && block ? replaceBlock(block, data) : insertBlock(data, block || null);
-      if (first) container.prepend(el);
+      if (first) { container.prepend(el); changed(); }
+      flash(el, true);
       vNew(el);
       closeInserter();
     };
@@ -837,7 +858,7 @@
     const price = input(showAmount(v.price), t('Prix'), { inputmode: 'decimal', class: 'v-price' });
     const link = input(v.link, t('Lien de paiement'), { type: 'url', spellcheck: 'false' });
     const avail = select(v.availability || 'in_stock', AVAIL, t('Disponibilité'));
-    const row = h('div', { class: 'variant-row' }, label, price, link, avail, iconBtn('x', t('Supprimer'), () => { row.remove(); changed(); }));
+    const row = h('div', { class: 'variant-row' }, label, price, link, avail, iconBtn('x', t('Supprimer'), () => dropRow(row)));
     row._read = () => ({ label: label.value.trim(), price: price.value.trim(), link: link.value.trim(), availability: avail.value });
     return row;
   }
@@ -1049,14 +1070,81 @@
     el.replaceChildren(...(kind ? [ico(kind === 'bad' ? 'alert' : 'check')] : []), text);
   };
   let vQuiet = false;
-  function changed() {
+  // src : l'évènement de saisie, ou la clé du champ modifié en mode Visuel (regroupe la frappe dans l'historique).
+  function changed(src) {
     serp();
     analyze();
     if (!vQuiet && root.classList.contains('is-visual')) rerender();
     status(isDirty() ? '● ' + t('Modifications non enregistrées') : '');
     clearTimeout(localTimer);
     localTimer = setTimeout(() => { if (isDirty()) drafts.set(storeKey, serialize()); }, 800);
+    track(src);
   }
+
+  /* ───────────── Historique : annuler, rétablir (Ctrl/Cmd+Z, Ctrl/Cmd+Maj+Z ou Ctrl+Y, boutons ↶ ↷) ───────────── */
+  // Chaque modification garde l'état précédent : blocs ajoutés, déplacés, dupliqués ou supprimés, éléments retirés, réglages,
+  // retouches de l'IA, en mode Blocs comme en mode Visuel. La frappe dans un même champ forme une seule étape tant qu'elle ne
+  // s'interrompt pas plus de 3 secondes. Dans le champ où l'on est en train d'écrire, Ctrl+Z reste celui du navigateur.
+  const past = [];
+  const future = [];
+  const ids = new WeakMap();
+  const typed = new WeakSet();
+  let now = '';
+  let lastKey = '';
+  let lastAt = 0;
+  let queued = null;
+  let replay = false;
+  let idN = 0;
+  const undoBtn = $('#btn-undo');
+  const redoBtn = $('#btn-redo');
+  const keyOf = (el) => { if (!ids.has(el)) ids.set(el, 'f' + ++idN); return ids.get(el); };
+  const histBtns = () => { undoBtn.disabled = !past.length; redoBtn.disabled = !future.length; };
+  // Regroupées en fin de tâche : une opération qui touche plusieurs blocs (collage, suppression du dernier bloc) = une étape.
+  function track(src) {
+    if (replay || !now) return;
+    const key = typeof src === 'string' ? src : !src || !src.target ? '' : /^history/.test(src.inputType || '') ? '~' : keyOf(src.target);
+    if (queued !== null) { if (queued !== key) queued = ''; return; }
+    queued = key;
+    queueMicrotask(() => {
+      const k = queued;
+      queued = null;
+      const s = JSON.stringify(serialize());
+      if (s === now) return;
+      // « ~ » : Ctrl+Z du navigateur dans un champ ; l'état suit sans créer d'étape.
+      if (k !== '~') {
+        if (!(k && k === lastKey && Date.now() - lastAt < 3000)) { past.push(now); if (past.length > 60) past.shift(); }
+        future.length = 0;
+      }
+      lastKey = k;
+      lastAt = Date.now();
+      now = s;
+      histBtns();
+    });
+  }
+  const restore = (s) => {
+    const d = JSON.parse(s);
+    const y = [scrollY, $('.canvas').scrollTop];
+    replay = true;
+    load({ ...item, ...d, date_local: d.date });
+    f('f-date').value = d.date;
+    f('f-translation').value = d.translation_of || '';
+    changed();
+    replay = false;
+    now = s;
+    lastKey = '';
+    histBtns();
+    scrollTo(0, y[0]);
+    $('.canvas').scrollTop = y[1];
+  };
+  function undo() { if (past.length) { future.push(now); restore(past.pop()); } }
+  function redo() { if (future.length) { past.push(now); restore(future.pop()); } }
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
+  undoBtn.title = t('Annuler la dernière action') + (mac ? ' (⌘Z)' : ' (Ctrl+Z)');
+  redoBtn.title = t('Rétablir') + (mac ? ' (⇧⌘Z)' : ' (Ctrl+Y)');
+  undoBtn.addEventListener('click', () => undo());
+  redoBtn.addEventListener('click', () => redo());
+  root.addEventListener('focusin', (e) => typed.delete(e.target));
+  root.addEventListener('beforeinput', (e) => typed.add(e.target));
   const updateBadge = () => {
     const st = item.status === 'published' ? (item.date > Date.now() / 1000 ? 'scheduled' : 'published') : 'draft';
     const badge = $('#status-badge');
@@ -1088,7 +1176,7 @@
     if (item.status === 'published') f('f-date').value = item.date_local || '';
     f('f-translation').value = '';
     slugTouched = true;
-    saved = JSON.stringify(serialize());
+    saved = now = JSON.stringify(serialize());
     drafts.drop(storeKey, drafts.key({ type: item.type }), drafts.key(item));
     storeKey = drafts.key(item);
     if (wasNew) history.replaceState(null, '', D.admin + '/edit/' + item.id);
@@ -1101,9 +1189,17 @@
   $('#btn-publish').addEventListener('click', () => save(true));
   f('f-status').addEventListener('change', updateBadge);
   document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); save(false); }
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && document.activeElement?.isContentEditable) { e.preventDefault(); startLink(); }
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && root.classList.contains('is-visual') && !e.target.closest('input, textarea, select, [contenteditable]')) { e.preventDefault(); undo(); }
+    const k = e.key.toLowerCase();
+    if (!(e.ctrlKey || e.metaKey)) return;
+    if (k === 's') { e.preventDefault(); save(false); }
+    if (k === 'k' && document.activeElement?.isContentEditable) { e.preventDefault(); startLink(); }
+    // Annuler / rétablir : celui de l'éditeur, sauf dans le champ où l'on vient d'écrire, hors de l'éditeur ou dans une fenêtre.
+    if ((k === 'z' || k === 'y') && !e.altKey && !$('dialog[open]')) {
+      const field = e.target.closest?.('input, textarea, select, [contenteditable]');
+      if (field && (typed.has(field) || !root.contains(field))) return;
+      e.preventDefault();
+      if (k === 'y' || e.shiftKey) redo(); else undo();
+    }
   });
   window.addEventListener('beforeunload', (e) => { if (isDirty()) { e.preventDefault(); e.returnValue = ''; } });
   root.addEventListener('input', changed);
@@ -1127,10 +1223,10 @@
       if (!res.revisions?.length) list.append(h('p', { class: 'muted', text: t('Aucune révision pour l’instant.') }));
       (res.revisions || []).forEach((r) => list.append(h('div', { class: 'row between item-row' },
         h('span', {}, h('b', { text: r.when }), h('span', { class: 'small muted', text: ' · ' + r.title + ' · ' + r.words + ' ' + t('Mots').toLowerCase() })),
+        // Sans fenêtre de confirmation : la version restaurée s'annule comme toute modification (et rien n'est enregistré).
         h('button', { class: 'btn btn-sm', type: 'button', text: t('Restaurer'), onclick: async () => {
-          if (!confirm(t('Restaurer cette version ?'))) return;
           const rev = await api('api/revision/' + item.id + '/' + r.name);
-          if (rev.ok) { load({ ...rev.item, id: item.id, status: f('f-status').value }); dialog.close(); changed(); toast(t('Version restaurée.'), 'ok'); }
+          if (rev.ok) { load({ ...rev.item, id: item.id, status: f('f-status').value }); dialog.close(); changed(); toast(t('Version restaurée.'), 'ok', { label: t('Annuler'), run: undo }); }
         } }))));
     }
     dialog.showModal();
@@ -1142,9 +1238,9 @@
   });
   $('#btn-delete').addEventListener('click', async () => {
     if (!item.id) { location.href = D.admin + '/content'; return; }
-    if (!confirm(t('Supprimer ce contenu ?'))) return;
-    const redirect = cfg.visible ? (prompt(t('Rediriger l’ancienne adresse vers (facultatif) :'), '/') || '') : '';
-    const res = await api('api/delete', { id: item.id, redirect: redirect === '/' ? '' : redirect });
+    const redirect = await askUser(deleting(titleEl.value.trim() || item.title, !!cfg.visible));
+    if (redirect === null) return;
+    const res = await api('api/delete', { id: item.id, redirect: typeof redirect === 'string' && redirect !== '/' ? redirect : '' });
     if (res.ok) { saved = JSON.stringify(serialize()); location.href = D.admin + '/content'; }
   });
 
@@ -1297,24 +1393,15 @@
 
   /* ───────────── Mode Visuel : le rendu réel du thème, modifiable sur place ───────────── */
   // L'aperçu d'édition (assets/admin/visual.js) n'envoie que des intentions { op, block, field, value } : elles passent par les
-  // fonctions ci-dessus (sauvegarde, brouillon local, révisions et analyse SEO/GEO inchangées) et chaque étape s'annule (Ctrl+Z).
+  // fonctions ci-dessus (sauvegarde, brouillon local, révisions et analyse SEO/GEO inchangées) et chaque étape s'annule
+  // (Ctrl/Cmd+Z, Ctrl/Cmd+Maj+Z, boutons ↶ ↷ : l'historique commun, plus haut).
   const stage = $('#visual');
   const doc = $('.doc');
-  const stack = [];
   let frame = null;
   let next = null;
   let vSel = -1;
   let fresh = false;
-  let lastKey = '';
   let vTimer = 0;
-  const snap = () => { stack.push(JSON.stringify(serialize())); if (stack.length > 50) stack.shift(); lastKey = ''; };
-  function undo() {
-    const s = stack.pop();
-    if (!s) return;
-    const d = JSON.parse(s);
-    load({ ...item, ...d, date_local: d.date });
-    changed();
-  }
   const mark = () => blocks().forEach((b, i) => b.classList.toggle('is-sel', i === vSel));
   function vNew(el) { if (root.classList.contains('is-visual')) { vSel = blocks().indexOf(el); fresh = true; } }
   // Nouveau rendu dans une iframe neuve, montrée une fois prête (ni clignotement, ni entrée d'historique).
@@ -1337,7 +1424,7 @@
   const show = () => { if (frame) frame.remove(); frame = next; next = null; frame.classList.remove('ev-next'); fresh = false; };
   function rerender() { clearTimeout(vTimer); vTimer = setTimeout(render, 400); }
   const labels = () => ({
-    up: t('Monter'), down: t('Descendre'), dup: t('Dupliquer'), del: t('Supprimer'), above: t('Ajouter un bloc au-dessus'),
+    up: t('Monter'), down: t('Descendre'), dup: t('Dupliquer'), del: t('Supprimer le bloc'), above: t('Ajouter un bloc au-dessus'),
     below: t('Ajouter un bloc en dessous'), ai: D.ai ? t('Retoucher avec l’IA') : '', bar: t('Outils du bloc'), write: t('Écris ici…'),
     types: Object.fromEntries(Object.entries(TYPES).map(([k, v]) => [k, v[1]])),
   });
@@ -1365,12 +1452,11 @@
     return D.base ? html.split(' href="' + D.base + '/').join(' href="/') : html;
   };
   const swap = (el, d) => { const n = makeBlock(d); el.replaceWith(n); mark(); return n; };
+  // Texte modifié sur place : la frappe dans un même champ forme une étape de l'historique (clé « v<bloc>:<champ> »).
   const setText = (el, i, path, v) => {
-    const key = i + ':' + path;
     if (i < 0) {
       const field = { title: titleEl, summary: summaryEl }[path];
       if (!field || field.value === v) return;
-      if (key !== lastKey) { snap(); lastKey = key; }
       field.value = v;
       vQuiet = true;
       field.dispatchEvent(new Event('input', { bubbles: true }));
@@ -1379,11 +1465,10 @@
       const d = el._read();
       const val = tidy(d.type, path, v);
       if (get(d, path) === val) return;
-      if (key !== lastKey) { snap(); lastKey = key; }
       if (!put(d, path, val)) return;
       swap(el, d);
       vQuiet = true;
-      changed();
+      changed('v' + i + ':' + path);
     }
     vQuiet = false;
   };
@@ -1391,7 +1476,6 @@
     const x = await pickMedia();
     if (!x) return;
     media[x.id] = x;
-    snap();
     if (i < 0 && path === 'image' && f('f-image-pick')) { item.image = x.id; drawImage(); } else if (el) { const d = el._read(); if (put(d, path, x.id)) swap(el, d); }
     changed();
   };
@@ -1403,11 +1487,10 @@
     aiMenu(anchor.getBoundingClientRect(), async (mode, lang) => {
       toast(t('L’IA retravaille le passage…'));
       const res = await api('api/ai/assist', { task: 'rewrite', mode, lang, html, item: { id: item.id, type: item.type, title: titleEl.value } }).catch(() => ({}));
-      const now = blocks()[i];
-      if (!res.ok || !res.html || !now) return;
-      const nd = now._read();
-      snap();
-      if (nd.type === d.type && put(nd, path, tidy(nd.type, path, res.html))) swap(now, nd);
+      const cur = blocks()[i];
+      if (!res.ok || !res.html || !cur) return;
+      const nd = cur._read();
+      if (nd.type === d.type && put(nd, path, tidy(nd.type, path, res.html))) swap(cur, nd);
       changed();
       toast(t('Passage réécrit.'), 'ok', { label: t('Annuler'), run: undo });
     });
@@ -1430,10 +1513,10 @@
     const el = blocks()[i];
     const op = m.op;
     if (op === 'select') { vSel = el ? i : -1; mark(); } else if (op === 'set') { if (path && typeof v === 'string') setText(el, i, path, v); } else if (op === 'undo') undo();
+    else if (op === 'redo') redo();
     else if (op === 'save') save(false);
     else if (op === 'pick') { if (path) pickFor(el, i, path); } else if (op === 'link') startLink(typeof v === 'string' ? v : '', at(m.rect));
     else if (op === 'ai') { if (el && path) vAi(el, i, path, at(m.rect)); } else if (el && ['move', 'dup', 'del', 'enter', 'add'].includes(op)) {
-      snap();
       if (op === 'move') { move(el, v < 0 ? -1 : 1); vSel = blocks().indexOf(el); }
       if (op === 'dup') { el.after(makeBlock(el._read())); vSel = i + 1; changed(); }
       if (op === 'del') { vSel = -1; removeBlock(el); }
@@ -1456,7 +1539,7 @@
 
   /* ───────────── Démarrage ───────────── */
   load(item);
-  saved = JSON.stringify(serialize());
+  saved = now = JSON.stringify(serialize());
   serp();
   updateBadge();
   if (cfg.analysis) showAnalysis(cfg.analysis);

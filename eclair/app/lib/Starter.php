@@ -332,6 +332,8 @@ final class Starter
                 'description' => $r($s('blog_desc')),
             ],
             'seo' => ['entity' => $type === 'freelance' ? 'Person' : 'Organization', 'entity_name' => $type === 'freelance' ? $user['name'] : ''],
+            // Nouveau site : micro-animations activées par défaut (Réglages › Apparence pour les couper).
+            'appearance' => ['motion' => true],
         ]);
     }
 }

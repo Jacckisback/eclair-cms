@@ -37,7 +37,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.10.3.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip) (619 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) (627 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -106,6 +106,7 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 - Speichern mit `Strg+S`, lokaler Sicherungsentwurf (nichts geht verloren, wenn die Verbindung abbricht), echte Vorschau vor dem Veröffentlichen, **Verlauf der letzten 20 Versionen**, geplante Veröffentlichung.
   - Dieser Sicherungsentwurf gehört zum angemeldeten Konto und wird beim Abmelden gelöscht: Einem anderen Konto im selben Browser wird er nie angeboten. Entwürfe aus 1.10.2 zu bereits gespeicherten Inhalten bleiben auf einer Website mit nur einem Konto erhalten; die zu neuen, nie gespeicherten Inhalten, bei mehreren Konten alle, werden nach dem Update gelöscht: Speichere offene Änderungen, bevor du aktualisierst.
 - **Visueller Modus**: die Seite so, wie sie in deinem Theme aussieht, direkt dort bearbeitbar ([Details](#visueller-modus)).
+- **Rückgängig und Wiederholen**: `Strg+Z` (`Cmd+Z` auf dem Mac) und `Strg+Umschalt+Z` oder `Strg+Y`, oder die Schaltflächen ↶ ↷ in der Leiste, im Modus Blöcke wie im visuellen Modus (60 Schritte). Im Feld, in dem du gerade schreibst, bleibt `Strg+Z` das des Browsers, Buchstabe für Buchstabe. Ein gelöschter Block oder ein gelöschtes Element (FAQ-Frage, Vorteil, Teammitglied, Variante, Menülink) kommt auch mit einem Klick in der Meldung zurück. Was sich nicht rückgängig machen lässt (eine Seite, ein Bild, ein Konto löschen), fragt in einem Fenster nach, in dem „Abbrechen“ den Fokus hat: `Enter` löscht nie versehentlich etwas.
 
 ### 🧩 Alles Weitere
 
@@ -124,6 +125,7 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Eine Seite direkt auf der Website bearbeiten | Schaltfläche **✏️ Bearbeiten** (nur sichtbar, wenn du angemeldet bist) |
 | Theme, Logo, Farbe, Schriften ändern | Einstellungen › Design |
 | Eigenes CSS hinzufügen | Einstellungen › Design › Eigenes CSS |
+| Mikroanimationen ein- oder ausschalten | Einstellungen › Design › Mikroanimationen (Website) · Mein Profil › Oberfläche (Verwaltung) |
 | Den Shop öffnen | Einstellungen › Shop |
 | Ein Produkt hinzufügen | Inhalte › **+ Produkt** |
 | Die Startseite festlegen | Einstellungen › Allgemein |
@@ -135,7 +137,7 @@ Mediathek (Drag-and-drop, Alternativtexte, Erkennung verwendeter Bilder), Menüs
 | Zwei-Faktor-Authentifizierung aktivieren | Mein Profil › Zwei-Faktor-Authentifizierung |
 | Ein Backup herunterladen | Sicherheit › Backup |
 
-Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` Link · `Strg+B` fett · `Strg+I` kursiv · `Enter` neuer Absatz · `Umschalt+Enter` Zeilenumbruch · `Strg+J` KI-Assistent.
+Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` Link · `Strg+B` fett · `Strg+I` kursiv · `Enter` neuer Absatz · `Umschalt+Enter` Zeilenumbruch · `Strg+J` KI-Assistent · `Strg+Z` rückgängig · `Strg+Umschalt+Z` oder `Strg+Y` wiederholen (`Cmd` auf dem Mac).
 
 ---
 
@@ -148,11 +150,11 @@ Tastenkürzel im Editor: `/` Block einfügen · `Strg+S` speichern · `Strg+K` L
 Der visuelle Modus zeigt deine Seite im echten Theme der Website, genau so, wie deine Besucher sie sehen werden, und du bearbeitest sie direkt dort. Wechsle oben im Editor zwischen **Blöcke** und **Visuell**: Deine Wahl wird für das nächste Mal gespeichert.
 
 - **Schreiben**: Klicke auf eine Überschrift, einen Absatz, eine FAQ-Frage, den Text eines Buttons … und tippe los. `Strg+B` fett, `Strg+I` kursiv, `Strg+K` Link (die Seitensuche des Editors öffnet sich). `Enter` bestätigt ein einzeiliges Feld; in einem Absatz legt es den nächsten Absatz an (`Umschalt+Enter` für einen einfachen Zeilenumbruch). Eingefügt wird immer als reiner Text.
-- **Anordnen**: Ein Klick auf einen Block umrahmt ihn und zeigt seine Leiste: ↑ ↓ zum Verschieben, ⧉ zum Duplizieren, ✕ zum Löschen, +↑ und +↓, um einen Block darüber oder darunter hinzuzufügen. Die Leiste lässt sich auch per Tastatur bedienen (`Tab`, dann `Enter`).
+- **Anordnen**: Ein Klick auf einen Block umrahmt ihn und zeigt seine Leiste: zwei Pfeile zum Verschieben, zwei Schaltflächen, um einen Block darüber oder darunter hinzuzufügen, eine zum Duplizieren und, abgesetzt am Ende der Leiste, das Kreuz ✕ zum Löschen (es wird beim Überfahren rot). Die Leiste lässt sich auch per Tastatur bedienen (`Tab`, dann `Enter`); nach `Esc` löscht `Entf` den ausgewählten Block.
 - **Bilder**: Klicke auf ein Bild (Hero, Bildblock, Teamporträt, Beitragsbild), um in der Mediathek ein anderes auszuwählen.
 - **Block-Einstellungen**: Der rechte Bereich zeigt das Formular des ausgewählten Blocks (Link eines Buttons, Anzahl der Beiträge, neue FAQ-Frage …), darunter die Tabs „Dokument“, „SEO“ und „Analyse“.
 - **✨ Feinschliff mit KI** (wenn der Assistent aktiviert ist): den Text des Blocks verbessern, korrigieren, kürzen, ausbauen, vereinfachen, im Tonfall anpassen oder übersetzen.
-- **Rückgängig**: `Strg+Z` (`Cmd+Z` auf dem Mac) geht Schritt für Schritt zurück (bis zu 50 Schritte).
+- **Rückgängig und Wiederholen**: `Strg+Z` (`Cmd+Z` auf dem Mac) oder die Schaltfläche ↶ geht zurück, `Strg+Umschalt+Z` oder `Strg+Y` (Schaltfläche ↷) wiederholt, Schritt für Schritt (bis zu 60 Schritte, gemeinsam für den Modus Blöcke und den visuellen Modus).
 - **Breite**: 📱 390 px, ▭ 768 px oder 🖥 volle Breite, um die Darstellung auf Smartphone und Tablet zu prüfen.
 
 Alles läuft über den gewohnten Editor: Speichern (`Strg+S` funktioniert auch in der Seite), lokaler Sicherungsentwurf, Versionsverlauf, SEO- und GEO-Analyse in Echtzeit. Links, Buttons und Formulare der Seite reagieren während der Bearbeitung nicht. Ein Block, der auf der Website unsichtbar ist (Bild noch nicht ausgewählt, Shop geschlossen …), erscheint als gestrichelter Rahmen, den du im rechten Bereich ausfüllst.
@@ -271,6 +273,8 @@ Wenn du ein Theme auswählst, werden seine Farbe und seine empfohlenen Schriftar
 **Warum das leicht bleibt**: Ein Éclair-Theme ist nur ein Stylesheet von 1,5 bis 3 KB, das zum Basis-Stylesheet hinzukommt. Das HTML ändert sich von Theme zu Theme nicht: Geschwindigkeit, Barrierefreiheit, strukturierte Daten und SEO bleiben gleich. Nur das aktive Theme wird in die Seite eingefügt, und der automatische Dark Mode funktioniert mit jedem Theme.
 
 **Eigenes CSS**: Um über das Theme hinauszugehen (Farbe eines Buttons, Abstände, Stil eines Blocks), füge deine Regeln unter **Einstellungen › Design › Eigenes CSS** ein. Sie werden auf jeder Seite nach dem Theme eingefügt und haben daher Vorrang, und sie werden mit deinen Daten (`data/`) gespeichert: **Éclair-Updates behalten sie bei**. Auch die Markierungen `/*dark*/ … /*/dark*/` funktionieren: Ihre Regeln entfallen, wenn der Dunkelmodus auf „Immer hell“ steht. Aus Sicherheitsgründen werden das Zeichen `<` und `@import`-Regeln entfernt; maximal 64 KB.
+
+**Mikroanimationen** (Einstellungen › Design): Karten, Vorteile, FAQ-Fragen, Hinweisboxen und Bilder gleiten beim Scrollen herein, und Schaltflächen und Bilder reagieren beim Überfahren mit der Maus. Das ist reines CSS (unter 1 KB zusätzlich auf der Seite, kein Skript): Die Elemente gleiten, ohne je durchsichtig zu werden, also keine Layoutverschiebung, kein verblasster Text, nichts wird beim Laden animiert, und der Text bleibt für Google und KI in der Seite. Gemessen: 100 in allen vier Lighthouse-Kategorien, mit und ohne. Für Besucher, die auf ihrem Gerät weniger Bewegung eingestellt haben, und beim Drucken sind sie abgeschaltet. Aktiv auf Websites, die mit 1.11 installiert wurden; auf einer älteren Website bleiben die Seiten bytegenau gleich, bis du sie einschaltest. Die Animationen der Verwaltung schaltest du unter **Mein Profil › Oberfläche** ab (gilt nur für diesen Browser).
 
 ---
 
@@ -703,6 +707,7 @@ tests/fake-ai.php        simulierte KI-Anbieter (Claude, ChatGPT, Bilder): Der A
 tests/shop.php           Themes und Shop (Produktseiten, Stripe, PayPal, Revolut, JSON-LD, Merchant-Center-Feed)
 tests/mcp.php            MCP-Connector (OAuth, PKCE, Protokoll, Widerruf) und Wahl der KI
 tests/design.php         Art Directions (Kontraste, CSS, Schriften, präparierte Einstellungen, KI) und Design-Score
+tests/ux.php             Bedienbarkeit von 1.11 (Rückgängig/Wiederholen, Bestätigungsfenster, Leiste des visuellen Modus, Mikroanimationen)
 tests/update.php         Update mit einem Klick (simulierter signierter Kanal: Signatur, präpariertes Archiv, Syntax, automatische und manuelle Rückkehr)
 tests/drive.php          Backups auf Google Drive (tests/fake-google.php: simuliertes OAuth und simuliertes Drive, Upload in Teilen, Wiederaufnahme)
 tests/sec-*.php          Sicherheits-Regressionstests von 1.10.3
@@ -743,7 +748,7 @@ Eine signierte Version lässt sich nur in einem Git-Checkout bauen und enthält 
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (leg dir eine Kopie an: Die Integritätsprüfung meldet diese Dateien als geändert, und ein Update ersetzt sie; die Seite „Updates“ listet sie vorher auf). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 620 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
+Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (leg dir eine Kopie an: Die Integritätsprüfung meldet diese Dateien als geändert, und ein Update ersetzt sie; die Seite „Updates“ listet sie vorher auf). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 630 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
 
 ---
 

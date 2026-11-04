@@ -1,0 +1,20 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
+/* Micro-animations du site (Réglages › Apparence), ajoutées seulement si elles sont activées. CSS seul ; transformations
+   uniquement (aucun décalage), rien d'animé au chargement ni pour qui préfère moins de mouvement. */
+@media screen and (prefers-reduced-motion:no-preference){
+  .btn:active{transform:scale(.97)}
+  .card-img img{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .card:hover .card-img img{transform:scale(1.04)}
+  .faq details[open]>div{animation:eclair-open .25s ease-out}
+  /* Apparition au défilement (navigateurs récents ; ailleurs, tout est simplement là). Sans transparence : un texte à
+     demi entré dans l'écran reste lisible et son contraste intact (Lighthouse). « translate » et « scale » laissent au
+     thème le soulèvement des cartes au survol. */
+  @supports (animation-timeline:view()){
+    .feature,.card,.faq details,.callout,.content>.img,.video{animation:eclair-in linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
+    .feature:nth-child(3n+2),.card:nth-child(3n+2){animation-range:entry 8% entry 48%}
+    .feature:nth-child(3n),.card:nth-child(3n){animation-range:entry 16% entry 56%}
+  }
+}
+@keyframes eclair-in{from{translate:0 1.75rem;scale:.97}}
+@keyframes eclair-open{from{opacity:0;translate:0 -.3rem}}

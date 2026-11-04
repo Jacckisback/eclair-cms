@@ -37,7 +37,7 @@ O assistente verifica tudo isso para você e explica o que corrigir.
 
 ### Passo a passo
 
-1. Baixe o arquivo [`eclair-cms-1.10.3.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip) (619 KB) e descompacte-o.
+1. Baixe o arquivo [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) (627 KB) e descompacte-o.
 2. Envie **o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…) com o seu programa de FTP (FileZilla…) ou pelo gerenciador de arquivos da hospedagem.
    > ⚠️ Os arquivos `.htaccess` são ocultos: ative “Mostrar arquivos ocultos” para ter certeza de enviá-los.
 3. Abra o endereço do seu site: **o assistente de instalação começa** (em 7 idiomas, incluindo português).
@@ -106,6 +106,7 @@ O painel mostra uma checklist “Primeiros passos”: logo e cor, página inicia
 - Salvamento com `Ctrl+S`, rascunho local de segurança (nada se perde se a conexão cair), prévia real antes de publicar, **histórico das últimas 20 versões**, publicação agendada.
   - Esse rascunho de segurança pertence à conta conectada e é apagado quando você sai: ele nunca é oferecido a outra conta que use o mesmo navegador. Os da 1.10.2 de um conteúdo já salvo são mantidos em um site com uma única conta; os de um conteúdo novo nunca salvo, ou todos com várias contas, são apagados depois da atualização: salve as edições em andamento antes de atualizar.
 - **Modo Visual**: a página do jeito que ela aparece com o seu tema, editável ali mesmo ([detalhes](#modo-visual)).
+- **Desfazer e refazer**: `Ctrl+Z` (`Cmd+Z` no Mac) e `Ctrl+Shift+Z` ou `Ctrl+Y`, ou os botões ↶ ↷ da barra, no modo Blocos como no modo Visual (60 passos). No campo em que você está escrevendo, `Ctrl+Z` continua sendo o do navegador, letra por letra. Um bloco ou item excluído (pergunta do FAQ, diferencial, membro da equipe, variante, link do menu) também volta com um clique no aviso. O que não pode ser desfeito (excluir uma página, uma imagem, uma conta) pede confirmação em uma janela em que “Cancelar” tem o foco: `Enter` nunca exclui nada por engano.
 
 ### 🧩 Todo o resto
 
@@ -124,6 +125,7 @@ Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das ima
 | Editar uma página a partir do site | Botão **✏️ Editar** (visível só quando você está logado) |
 | Mudar tema, logo, cor, fontes | Configurações › Aparência |
 | Adicionar meu próprio CSS | Configurações › Aparência › CSS personalizado |
+| Ativar ou desativar as microanimações | Configurações › Aparência › Microanimações (site) · Meu perfil › Interface (administração) |
 | Abrir a loja | Configurações › Loja |
 | Adicionar um produto | Conteúdos › **+ Produto** |
 | Escolher a página inicial | Configurações › Geral |
@@ -135,7 +137,7 @@ Biblioteca de mídia (arrastar e soltar, textos alternativos, detecção das ima
 | Ativar a autenticação em dois fatores | Meu perfil › Autenticação de dois fatores |
 | Baixar um backup | Segurança › Backup |
 
-Atalhos do editor: `/` inserir um bloco · `Ctrl+S` salvar · `Ctrl+K` link · `Ctrl+B` negrito · `Ctrl+I` itálico · `Enter` novo parágrafo · `Shift+Enter` quebra de linha · `Ctrl+J` assistente de IA.
+Atalhos do editor: `/` inserir um bloco · `Ctrl+S` salvar · `Ctrl+K` link · `Ctrl+B` negrito · `Ctrl+I` itálico · `Enter` novo parágrafo · `Shift+Enter` quebra de linha · `Ctrl+J` assistente de IA · `Ctrl+Z` desfazer · `Ctrl+Shift+Z` ou `Ctrl+Y` refazer (`Cmd` no Mac).
 
 ---
 
@@ -148,11 +150,11 @@ Atalhos do editor: `/` inserir um bloco · `Ctrl+S` salvar · `Ctrl+K` link · `
 O modo Visual mostra a sua página com o tema real do site, exatamente como os seus visitantes vão vê-la, e deixa você editá-la ali mesmo. Alterne entre **Blocos** e **Visual** no topo do editor: a sua escolha fica guardada para a próxima vez.
 
 - **Escrever**: clique em um título, um parágrafo, uma pergunta do FAQ, o texto de um botão… e digite. `Ctrl+B` negrito, `Ctrl+I` itálico, `Ctrl+K` link (a busca de páginas do editor se abre). `Enter` confirma um campo de uma linha; em um parágrafo, cria o parágrafo seguinte (`Shift+Enter` para uma simples quebra de linha). O que você cola entra como texto simples.
-- **Organizar**: um clique em um bloco o destaca com um contorno e mostra a sua barra: ↑ ↓ para movê-lo, ⧉ para duplicá-lo, ✕ para excluí-lo, +↑ e +↓ para adicionar um bloco acima ou abaixo. A barra também funciona pelo teclado (`Tab` e depois `Enter`).
+- **Organizar**: um clique em um bloco o destaca com um contorno e mostra a sua barra: duas setas para movê-lo, dois botões para adicionar um bloco acima ou abaixo, um para duplicá-lo e, à parte no fim da barra, o ✕ para excluí-lo (fica vermelho ao passar o mouse). A barra também funciona pelo teclado (`Tab` e depois `Enter`); depois de `Esc`, `Delete` exclui o bloco selecionado.
 - **Imagens**: clique em uma imagem (bloco de destaque, bloco de imagem, retrato da equipe, imagem destacada de um artigo) para escolher outra na biblioteca de mídia.
 - **Configurações do bloco**: o painel da direita mostra o formulário do bloco escolhido (link de um botão, número de artigos, nova pergunta do FAQ…) e, em seguida, as abas Documento, SEO e Análise.
 - **✨ Retoques com IA** (se o assistente estiver ativado): melhorar, corrigir, encurtar, desenvolver, simplificar, mudar o tom ou traduzir o texto do bloco.
-- **Desfazer**: `Ctrl+Z` (`Cmd+Z` no Mac) desfaz passo a passo (até 50 passos).
+- **Desfazer e refazer**: `Ctrl+Z` (`Cmd+Z` no Mac) ou o botão ↶ desfaz, `Ctrl+Shift+Z` ou `Ctrl+Y` (botão ↷) refaz, passo a passo (até 60 passos, comuns aos modos Blocos e Visual).
 - **Largura**: 📱 390 px, ▭ 768 px ou 🖥 largura total, para conferir o resultado no celular e no tablet.
 
 Tudo passa pelo editor de sempre: salvamento (`Ctrl+S` também funciona dentro da página), rascunho local de segurança, histórico de versões, análise de SEO e GEO em tempo real. Os links, botões e formulários da página não reagem durante a edição. Um bloco invisível no site (imagem ainda não escolhida, loja fechada…) aparece como uma moldura pontilhada, para você preencher pelo painel da direita.
@@ -271,6 +273,8 @@ Escolher um tema aplica a cor e as fontes recomendadas dele: você pode alterá-
 **Por que é leve**: um tema do Éclair é só uma folha de estilo de 1,5 a 3 KB, somada à folha de estilo base. O HTML não muda de um tema para outro: a velocidade, a acessibilidade, os dados estruturados e o SEO continuam iguais. Só o tema ativo é inserido na página, e o modo escuro automático funciona com todos eles.
 
 **CSS personalizado**: para ir além do tema (a cor de um botão, os espaçamentos, o estilo de um bloco), cole suas regras em **Configurações › Aparência › CSS personalizado**. Elas são adicionadas depois do tema em todas as páginas, então têm prioridade, e ficam guardadas com os seus dados (`data/`): **as atualizações do Éclair as mantêm**. Os marcadores `/*dark*/ … /*/dark*/` também funcionam: as regras deles somem quando o modo escuro está em “Sempre claro”. Por segurança, o caractere `<` e as regras `@import` são removidos; máximo de 64 KB.
+
+**Microanimações** (Configurações › Aparência): cartões, diferenciais, perguntas do FAQ, quadros de destaque e imagens aparecem deslizando ao rolar a página, e botões e imagens reagem ao passar o mouse. É só CSS (menos de 1 KB a mais na página, sem script): os elementos deslizam sem nunca ficar transparentes, então nenhum deslocamento de layout, nenhum texto desbotado, nada animado no carregamento, e o texto continua na página para o Google e as IAs. Medido: 100 nas quatro categorias do Lighthouse, com ou sem. Ficam desativadas para os visitantes que pediram menos movimento ao seu dispositivo, e na impressão. Ativadas nos sites instalados com a 1.11; num site mais antigo, as páginas continuam idênticas byte a byte enquanto você não as ativar. As animações da administração se desativam em **Meu perfil › Interface** (configuração própria deste navegador).
 
 ---
 
@@ -703,6 +707,7 @@ tests/fake-ai.php        provedores de IA falsos (Claude, ChatGPT, imagens): o a
 tests/shop.php           temas e loja (páginas de produto, Stripe, PayPal, Revolut, JSON-LD, feed do Merchant Center)
 tests/mcp.php            conector MCP (OAuth, PKCE, protocolo, revogação) e escolha da IA
 tests/design.php         direções de arte (contrastes, CSS, fontes, configurações maliciosas, IA) e pontuação de design
+tests/ux.php             usabilidade da 1.11 (desfazer/refazer, janelas de confirmação, barra do modo Visual, microanimações)
 tests/update.php         atualização em um clique (canal assinado falso: assinatura, arquivo zip malicioso, sintaxe, volta automática e manual)
 tests/drive.php          backups no Google Drive (tests/fake-google.php: OAuth e Drive falsos, envio em partes, retomada)
 tests/sec-*.php          testes de não regressão da segurança da 1.10.3
@@ -743,7 +748,7 @@ Uma versão assinada só é gerada em um checkout Git e só inclui os arquivos v
 
 `PHP_CLI_SERVER_WORKERS` permite que o site chame a si mesmo (verificação do endereço): com um único processo, a verificação simplesmente falha e os redirecionamentos para o endereço oficial continuam desativados.
 
-Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade aponta esses arquivos como modificados, e uma atualização os substitui; a página Atualizações lista esses arquivos antes de fazer isso). No arquivo zip, o PHP é compactado (`php -w`, sem comentários), as telas do painel são comprimidas (lidas via zlib) e o JavaScript e o CSS do painel são enxugados (o arquivo zip tem cerca de 620 KB): o código-fonte comentado está no GitHub. Os arquivos do site público (temas, `site.js`) são entregues como estão.
+Para uma mudança de estilo, prefira o **CSS personalizado** (Configurações › Aparência): ele sobrevive às atualizações. Para ir além, o tema é personalizado editando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (guarde uma cópia: a verificação de integridade aponta esses arquivos como modificados, e uma atualização os substitui; a página Atualizações lista esses arquivos antes de fazer isso). No arquivo zip, o PHP é compactado (`php -w`, sem comentários), as telas do painel são comprimidas (lidas via zlib) e o JavaScript e o CSS do painel são enxugados (o arquivo zip tem cerca de 630 KB): o código-fonte comentado está no GitHub. Os arquivos do site público (temas, `site.js`) são entregues como estão.
 
 ---
 

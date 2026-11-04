@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.4.zip"><img src="https://img.shields.io/badge/download-v1.10.4-5b3cbc?style=for-the-badge" alt="Download Éclair 1.10.2"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip"><img src="https://img.shields.io/badge/download-v1.11.0-5b3cbc?style=for-the-badge" alt="Download Éclair 1.11.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 or later">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="No database">
@@ -63,7 +63,7 @@ WordPress can do everything, but it needs a database, plugins for SEO, security 
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultra-light</h3>
-      No database: your content lives in protected files. A <b>621 KB</b> download, zero dependencies, zero cookies on the public site.
+      No database: your content lives in protected files. A <b>627 KB</b> download, zero dependencies, zero cookies on the public site.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Dead simple</h3>
@@ -139,7 +139,7 @@ Already working in Claude or ChatGPT? Connect them to your site with the built-i
   <img src="docs/images/en/frame-visual.webp" alt="The editor's Visual mode: the page is displayed with the site's theme, the “Features” block is selected with its toolbar (move up, move down, duplicate, delete, add, edit with AI) and its form in the right-hand panel" width="100%">
 </p>
 
-In the editor, switch from **Blocks** to **Visual**: your page appears with your theme, exactly as your visitors will see it, and you edit it right there. Click a heading or a paragraph to type in it, or an image to change it. A small toolbar moves, duplicates, deletes or adds a block; ✨ touches up the passage with AI. Check how it looks at mobile, tablet or desktop width, and undo with Ctrl+Z.
+In the editor, switch from **Blocks** to **Visual**: your page appears with your theme, exactly as your visitors will see it, and you edit it right there. Click a heading or a paragraph to type in it, or an image to change it. A small toolbar moves, duplicates, deletes or adds a block; ✨ touches up the passage with AI. Check how it looks at mobile, tablet or desktop width. Everything can be undone and redone, here as in Blocks mode: `Ctrl+Z` / `Cmd+Z` or the ↶ ↷ buttons; a deleted block comes back with one click from the notification, and what cannot be undone (a page, an image) asks for confirmation first.
 
 **Not sure where to start?** In a new piece of content, open **Create with AI** and describe your page: its goal, its audience, its tone, the sections you want. The AI composes a complete draft (hero, features, FAQ, call to action, title and description for Google) in your site's voice, linking to your real pages and using your images. It makes nothing up: anything missing is marked “[To complete: …]”, and the analysis reminds you until it's filled in. The draft opens directly in Visual mode.
 
@@ -200,7 +200,7 @@ The method and its safeguards are adapted from [Impeccable](https://github.com/p
   <img src="docs/images/en/themes.webp" alt="The same site in Éclair's 6 themes: Éclair, Editorial, Atelier, Studio, Shop and Contrast" width="100%">
 </p>
 
-**6 built-in themes**, to choose from in Settings › Appearance with a **live preview** of your real site, on desktop or mobile, before you save: Éclair, Editorial, Atelier, Studio, Shop and Contrast. Centered header or not, posts and products in a grid or a list, your choice of color and fonts. Each theme is just a 1.5 to 3 KB stylesheet: the HTML stays the same, and so do speed, accessibility and SEO. For your own tweaks, a **Custom CSS** field is added after the theme and stays in place through updates.
+**6 built-in themes**, to choose from in Settings › Appearance with a **live preview** of your real site, on desktop or mobile, before you save: Éclair, Editorial, Atelier, Studio, Shop and Contrast. Centered header or not, posts and products in a grid or a list, your choice of color and fonts. Each theme is just a 1.5 to 3 KB stylesheet: the HTML stays the same, and so do speed, accessibility and SEO. For your own tweaks, a **Custom CSS** field is added after the theme and stays in place through updates. **Micro-animations** option: cards, features and images slide in as visitors scroll, in CSS only (under 1 KB, no script), with nothing animated on page load; they are turned off for visitors who prefer less motion.
 
 <p align="center">
   <img src="docs/images/shop.webp" alt="An Éclair product page: photo gallery, strikethrough price, variants, Buy now button linked to Stripe, shipping and returns; on the right, the catalog on mobile" width="100%">
@@ -264,7 +264,7 @@ How to use it: [guide, Updating, backing up, moving section](docs/GUIDE.en.md#up
 |---|---|---|
 | **Installation** | Create a MySQL database, then run the wizard | ✅ Upload the folder, answer 4 questions |
 | **Database** | MySQL required | ✅ None (protected files) |
-| **Download size** | ≈ 35 MB[^wp] | ✅ 621 KB |
+| **Download size** | ≈ 35 MB[^wp] | ✅ 627 KB |
 | **SEO, sitemap, structured data** | A plugin to install and maintain | ✅ Built in |
 | **GEO: llms.txt, Markdown, AI bots** | Plugins, rarely complete | ✅ Built in |
 | **Public pages** | Generated on every visit, unless you add a cache plugin | ✅ Served from a static cache |
@@ -375,7 +375,7 @@ Full details in the [guide, Security section](docs/GUIDE.en.md#security).
   <img src="docs/images/en/install.webp" alt="Installation in three steps: upload the folder, answer four questions, the site is live" width="100%">
 </p>
 
-1. **Download** the [`eclair-cms-1.10.4.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.4.zip) archive (621 KB) and unzip it.
+1. **Download** the [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) archive (627 KB) and unzip it.
 2. **Upload the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…), hidden `.htaccess` files included.
 3. **Open your site's URL**: the setup wizard starts. Four questions, some confetti, and your site is live with its first pages.
 

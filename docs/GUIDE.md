@@ -37,7 +37,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.10.3.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip) (619 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) (627 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -106,6 +106,7 @@ Le tableau de bord affiche une checklist « Premiers pas » : logo et couleur, p
 - Enregistrement `Ctrl+S`, brouillon local de secours (rien n'est perdu en cas de coupure), aperçu réel avant publication, **historique des 20 dernières versions**, publication programmée.
   - Ce brouillon de secours appartient au compte connecté et s'efface à la déconnexion : il n'est jamais proposé à un autre compte qui utilise le même navigateur. Ceux de la 1.10.2 qui portent sur un contenu déjà enregistré sont repris sur un site à un seul compte ; ceux d'un nouveau contenu jamais enregistré, ou tous s'il y a plusieurs comptes, sont effacés après la mise à jour : enregistre tes modifications en cours avant de mettre à jour.
 - **Mode Visuel** : la page telle qu'elle s'affiche avec ton thème, modifiable sur place ([détails](#mode-visuel)).
+- **Annuler et rétablir** : `Ctrl+Z` (`Cmd+Z` sur Mac) et `Ctrl+Maj+Z` ou `Ctrl+Y`, ou les boutons ↶ ↷ de la barre, en mode Blocs comme en mode Visuel (60 étapes). Dans le champ où tu écris, `Ctrl+Z` reste celui du navigateur, lettre par lettre. Un bloc ou un élément supprimé (question de FAQ, atout, membre de l'équipe, variante, lien de menu) revient aussi d'un clic sur « Annuler » dans la notification. Ce qui ne s'annule pas (supprimer une page, une image, un compte) demande confirmation dans une fenêtre où « Annuler » a le focus : `Entrée` ne supprime jamais rien par mégarde.
 
 ### 🧩 Le reste
 
@@ -124,6 +125,7 @@ Médiathèque (glisser-déposer, textes alternatifs, détection des images utili
 | Modifier une page depuis le site | Bouton **✏️ Modifier** (visible seulement quand tu es connecté) |
 | Changer de thème, logo, couleur, polices | Réglages › Apparence |
 | Ajouter mon propre CSS | Réglages › Apparence › CSS personnalisé |
+| Activer ou couper les micro-animations | Réglages › Apparence › Micro-animations (site) · Mon profil › Interface (administration) |
 | Ouvrir la boutique | Réglages › Boutique |
 | Ajouter un produit | Contenus › **+ Produit** |
 | Choisir la page d'accueil | Réglages › Général |
@@ -135,7 +137,7 @@ Médiathèque (glisser-déposer, textes alternatifs, détection des images utili
 | Activer la double authentification | Mon profil › Double authentification |
 | Télécharger une sauvegarde | Sécurité › Sauvegarde |
 
-Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl+K` lien · `Ctrl+B` gras · `Ctrl+I` italique · `Entrée` nouveau paragraphe · `Maj+Entrée` retour à la ligne · `Ctrl+J` assistant IA.
+Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl+K` lien · `Ctrl+B` gras · `Ctrl+I` italique · `Entrée` nouveau paragraphe · `Maj+Entrée` retour à la ligne · `Ctrl+J` assistant IA · `Ctrl+Z` annuler · `Ctrl+Maj+Z` ou `Ctrl+Y` rétablir (`Cmd` sur Mac).
 
 ---
 
@@ -148,11 +150,11 @@ Raccourcis de l'éditeur : `/` insérer un bloc · `Ctrl+S` enregistrer · `Ctrl
 Le mode Visuel affiche ta page avec le vrai thème du site, exactement comme tes visiteurs la verront, et te laisse la modifier sur place. Bascule entre **Blocs** et **Visuel** en haut de l'éditeur : ton choix est retenu pour la prochaine fois.
 
 - **Écrire** : clique sur un titre, un paragraphe, une question de FAQ, le texte d'un bouton… et tape. `Ctrl+B` gras, `Ctrl+I` italique, `Ctrl+K` lien (la recherche de pages de l'éditeur s'ouvre). `Entrée` valide un champ d'une ligne ; dans un paragraphe, elle crée le paragraphe suivant (`Maj+Entrée` pour un simple retour à la ligne). Le collage se fait en texte brut.
-- **Organiser** : un clic sur un bloc l'entoure et affiche sa barre : ↑ ↓ pour le déplacer, ⧉ pour le dupliquer, ✕ pour le supprimer, +↑ et +↓ pour ajouter un bloc au-dessus ou en dessous. La barre se manie aussi au clavier (`Tab`, puis `Entrée`).
+- **Organiser** : un clic sur un bloc l'entoure et affiche sa barre : deux flèches pour le déplacer, deux boutons pour ajouter un bloc au-dessus ou en dessous, un pour le dupliquer et, à part au bout de la barre, la croix ✕ pour le supprimer (elle rougit au survol). La barre se manie aussi au clavier (`Tab`, puis `Entrée`) ; après `Échap`, `Suppr` supprime le bloc sélectionné.
 - **Images** : clique sur une image (bannière, bloc image, portrait de l'équipe, image à la une d'un article) pour en choisir une autre dans la médiathèque.
 - **Réglages du bloc** : le panneau de droite montre le formulaire du bloc choisi (lien d'un bouton, nombre d'articles, nouvelle question de FAQ…), puis les onglets Document, SEO et Analyse.
 - **✨ Retouches IA** (si l'assistant est activé) : améliorer, corriger, raccourcir, développer, simplifier, changer de ton ou traduire le texte du bloc.
-- **Annuler** : `Ctrl+Z` (`Cmd+Z` sur Mac) revient en arrière, étape par étape (jusqu'à 50 étapes).
+- **Annuler et rétablir** : `Ctrl+Z` (`Cmd+Z` sur Mac) ou le bouton ↶ revient en arrière, `Ctrl+Maj+Z` ou `Ctrl+Y` (bouton ↷) rétablit, étape par étape (jusqu'à 60 étapes, communes aux modes Blocs et Visuel).
 - **Largeur** : 📱 390 px, ▭ 768 px ou 🖥 pleine largeur, pour vérifier le rendu sur mobile et tablette.
 
 Tout passe par l'éditeur habituel : enregistrement (`Ctrl+S` fonctionne aussi dans la page), brouillon local de secours, historique des versions, analyse SEO et GEO en direct. Les liens, boutons et formulaires de la page ne réagissent pas pendant l'édition. Un bloc invisible sur le site (image pas encore choisie, boutique fermée…) apparaît comme un cadre pointillé, à remplir depuis le panneau.
@@ -271,6 +273,8 @@ Choisir un thème applique sa couleur et ses polices conseillées : tu peux les 
 **Pourquoi c'est léger** : un thème Éclair n'est qu'une feuille de style de 1,5 à 3 Ko, ajoutée à celle de base. Le HTML ne change pas d'un thème à l'autre : la vitesse, l'accessibilité, les données structurées et le référencement restent identiques. Seul le thème actif est inséré dans la page, et le mode sombre automatique fonctionne avec chacun.
 
 **CSS personnalisé** : pour aller plus loin que le thème (couleur d'un bouton, espacements, style d'un bloc), colle tes règles dans **Réglages › Apparence › CSS personnalisé**. Elles sont ajoutées après le thème dans chaque page, donc elles l'emportent, et elles sont rangées avec tes données (`data/`) : **les mises à jour d'Éclair les conservent**. Les repères `/*dark*/ … /*/dark*/` fonctionnent aussi : leurs règles disparaissent quand le mode sombre est réglé sur « Toujours clair ». Par sécurité, le caractère `<` et les règles `@import` sont retirés ; 64 Ko maximum.
+
+**Micro-animations** (Réglages › Apparence) : cartes, atouts, questions de FAQ, encadrés et images apparaissent en glissant au défilement, et boutons et images réagissent au survol. C'est du CSS seul (moins de 1 Ko ajouté à la page, aucun script) : les éléments glissent sans jamais devenir transparents, donc aucun décalage de mise en page, aucun texte pâli, rien d'animé au chargement, et le texte reste dans la page pour Google et les IA. Mesuré : 100 dans les quatre catégories de Lighthouse, avec ou sans. Elles sont coupées pour les visiteurs qui ont demandé moins de mouvement à leur appareil, et à l'impression. Activées sur les sites installés avec la 1.11 ; sur un site plus ancien, les pages restent identiques à l'octet près tant que tu ne les actives pas. Les animations de l'administration se coupent, elles, dans **Mon profil › Interface** (réglage propre à ce navigateur).
 
 ---
 
@@ -703,6 +707,7 @@ tests/fake-ai.php        faux fournisseurs d'IA (Claude, ChatGPT, images) : l'as
 tests/shop.php           thèmes et boutique (fiches, Stripe, PayPal, Revolut, JSON-LD, flux Merchant Center)
 tests/mcp.php            connecteur MCP (OAuth, PKCE, protocole, révocation) et choix de l'IA
 tests/design.php         directions artistiques (contrastes, CSS, polices, réglages piégés, IA) et Score Design
+tests/ux.php             ergonomie de la 1.11 (annuler/rétablir, fenêtres de confirmation, barre du mode Visuel, micro-animations)
 tests/update.php         mise à jour en un clic (faux canal signé : signature, archive piégée, syntaxe, retour automatique et manuel)
 tests/drive.php          sauvegardes Google Drive (tests/fake-google.php : faux OAuth et faux Drive, envoi par morceaux, reprise)
 tests/sec-*.php          tests de non-régression de la sécurité de la 1.10.3
@@ -743,7 +748,7 @@ Une version signée ne se construit que dans un dépôt Git et n'inclut que les 
 
 `PHP_CLI_SERVER_WORKERS` permet au site de s'appeler lui-même (vérification de son adresse) : avec un seul processus, la vérification échoue simplement et les redirections vers l'adresse officielle restent désactivées.
 
-Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une copie : le contrôle d'intégrité signale ces fichiers comme modifiés, et une mise à jour les remplace ; la page Mises à jour les liste avant de le faire). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 620 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
+Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une copie : le contrôle d'intégrité signale ces fichiers comme modifiés, et une mise à jour les remplace ; la page Mises à jour les liste avant de le faire). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 630 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
 
 ---
 

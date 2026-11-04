@@ -4,7 +4,7 @@
 (() => {
   const E = window.Eclair;
   if (!E || !E.D.ai) return;
-  const { D, t, api, toast, upload, h, $, $$ } = E;
+  const { D, t, api, toast, upload, h, $, $$, askUser } = E;
   const AI = D.ai;
   const mem = {
     get: (k) => { try { return sessionStorage.getItem('eclair-ai-' + k); } catch (e) { return null; } },
@@ -198,7 +198,7 @@
       const row = h('div', { class: 'ai-history-row' + (c.id === chatId ? ' current' : '') },
         h('button', { type: 'button', class: 'ai-history-open', onclick: () => { history.hidden = true; loadChat(c.id); } }, h('b', { text: c.title }), h('small', { text: c.when })),
         iconBtn('trash', t('Supprimer'), async () => {
-          if (!confirm(t('Supprimer cette conversation ?'))) return;
+          if (!(await askUser({ title: t('Supprimer cette conversation ?'), text: c.title, ok: t('Supprimer'), danger: true }))) return;
           await api('api/ai/forget', { id: c.id });
           row.remove();
           if (c.id === chatId) reset(false);
@@ -342,7 +342,7 @@
       toast(res.visible ? t('Publié ✓') : t('Programmé ✓'), 'ok', res.visible ? { label: t('Voir'), run: () => window.open(res.url, '_blank', 'noopener') } : null);
     };
     card.append(h('div', { class: 'ai-publish' },
-      btn(t('Publier maintenant'), () => confirm(t('Publier « {title} » maintenant ?').replace('{title}', c.title)) && go(''), 'btn btn-sm btn-primary'),
+      btn(t('Publier maintenant'), async () => { if (await askUser({ title: t('Publier « {title} » maintenant ?').replace('{title}', c.title), ok: t('Publier') })) go(''); }, 'btn btn-sm btn-primary'),
       h('span', { class: 'small muted', text: t('ou') }), when, btn(t('Programmer'), () => when.value && go(when.value))));
   }
 

@@ -12,9 +12,20 @@
   const send = (m) => P.postMessage(m, O);
   // Champs simples : texte brut seulement (repli sur « true » + garde-fous si le navigateur ne connaît pas plaintext-only).
   const PT = (() => { const d = D.createElement('div'); try { d.contentEditable = 'plaintext-only'; } catch (e) { /* ancien navigateur */ } return d.contentEditable === 'plaintext-only' ? 'plaintext-only' : 'true'; })();
-  const OPS = [['up', '↑'], ['down', '↓'], ['dup', '⧉'], ['del', '✕'], ['above', '+↑'], ['below', '+↓'], ['ai', '']];
-  // Icône de l'assistant IA, dessinée comme dans l'administration.
-  const SPARK = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>';
+  // Outils du bloc en icônes dessinées, comme dans l'administration (tracés Lucide, licence ISC) : aucun caractère spécial
+  // qui s'afficherait en petit carré selon la police. Groupes séparés par un filet ; la croix de suppression est à part, au
+  // bout, rouge au survol. « | » : filet. Les tracés sont des constantes de ce fichier, jamais un message reçu.
+  const OPS = [
+    ['up', '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>'],
+    ['down', '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>'],
+    ['|'],
+    ['above', '<path d="M12 3v6"/><path d="M9 6h6"/><rect x="4" y="13" width="16" height="8" rx="2"/>'],
+    ['below', '<rect x="4" y="3" width="16" height="8" rx="2"/><path d="M12 15v6"/><path d="M9 18h6"/>'],
+    ['dup', '<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/>'],
+    ['ai', '<path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/>'],
+    ['|'],
+    ['del', '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'],
+  ];
   let L = {};
   let cur = null;
   let last = null;
@@ -122,8 +133,13 @@
     const mod = e.ctrlKey || e.metaKey;
     const k = (e.key || '').toLowerCase();
     const f = fieldOf(e.target);
-    if (mod && !e.shiftKey && (k === 'z' || k === 's')) { e.preventDefault(); commit(f); send({ op: k === 'z' ? 'undo' : 'save' }); return; }
-    if (!f || !f.isContentEditable) { if (k === 'escape') select(null); return; }
+    if (mod && (k === 'z' || k === 'y' || k === 's')) { e.preventDefault(); commit(f); send({ op: k === 's' ? 'save' : k === 'y' || e.shiftKey ? 'redo' : 'undo' }); return; }
+    // Hors d'un champ (après Échap), Suppr ou Retour arrière supprime le bloc sélectionné ; Ctrl/Cmd+Z le rétablit.
+    if (!f || !f.isContentEditable) {
+      if (k === 'escape') select(null);
+      else if ((k === 'delete' || k === 'backspace') && cur && !mod) { e.preventDefault(); act('del', bar.querySelector('[data-op=del]') || cur); }
+      return;
+    }
     if (mod && (k === 'b' || k === 'i' || k === 'k')) {
       e.preventDefault();
       if (isRich(f)) { if (k === 'k') link(f); else D.execCommand(k === 'b' ? 'bold' : 'italic'); }
@@ -148,10 +164,11 @@
     if (m.op === 'init' && m.labels && typeof m.labels === 'object') {
       L = m.labels;
       bar.setAttribute('aria-label', String(L.bar || ''));
-      bar.replaceChildren(...OPS.filter(([op]) => op !== 'ai' || L.ai).map(([op, text]) => {
-        const b = D.createElement('button');
+      bar.replaceChildren(...OPS.filter(([op]) => op !== 'ai' || L.ai).map(([op, d]) => {
+        const b = D.createElement(op === '|' ? 'span' : 'button');
+        if (op === '|') { b.className = 'ev-sep'; return b; }
         b.type = 'button';
-        if (op === 'ai') b.innerHTML = SPARK; else b.textContent = text;
+        b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
         b.dataset.op = op;
         b.title = String(L[op] || op);
         b.setAttribute('aria-label', b.title);
@@ -159,7 +176,7 @@
         return b;
       }));
       D.body.append(bar);
-      D.querySelectorAll('.eb-empty').forEach((el) => { el.textContent = '＋ ' + String((L.types || {})[el.dataset.et] || ''); });
+      D.querySelectorAll('.eb-empty').forEach((el) => { el.textContent = '+ ' + String((L.types || {})[el.dataset.et] || ''); });
       D.querySelectorAll('[data-ef]').forEach((f) => { if (!blockOf(f) && !isMedia(f)) editable(f, true); });
       scrollTo(0, +m.scroll || 0);
       const b = D.querySelector('[data-eb="' + (m.block | 0) + '"]');

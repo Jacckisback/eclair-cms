@@ -7,6 +7,9 @@
   const t = (s) => (D.i18n && D.i18n[s]) || s;
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  // Micro-animations de l'interface coupées dans ce navigateur (Mon profil) ; « réduire les animations » du système les coupe aussi.
+  const still = () => { try { return localStorage.getItem('eclair-motion') === 'off'; } catch (e) { return false; } };
+  if (still()) document.documentElement.dataset.motion = 'off';
   const h = (tag, attrs = {}, ...children) => {
     const el = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {
@@ -33,13 +36,45 @@
   const state = (el, ok, text) => { el.dataset.state = ok ? 'ok' : 'bad'; el.replaceChildren(icon(ok ? 'circle-check' : 'alert'), document.createTextNode(text)); };
 
   /* ── Notifications ── */
+  // Une notification qui propose une action (« Annuler ») reste affichée tant que la souris ou le clavier est dessus.
   const toast = (message, type = '', action = null) => {
     const box = $('#toasts') || document.body.appendChild(h('div', { class: 'toasts', id: 'toasts' }));
     const el = h('div', { class: 'toast ' + type, role: type === 'bad' ? 'alert' : 'status' }, h('span', { text: message }));
-    if (action) el.append(h('button', { type: 'button', text: action.label, onclick: () => { action.run(); el.remove(); } }));
+    const out = () => { el.classList.add('out'); setTimeout(() => el.remove(), 180); };
+    if (action) el.append(h('button', { type: 'button', text: action.label, onclick: () => { action.run(); out(); } }));
     box.append(el);
-    setTimeout(() => el.remove(), action ? 8000 : 4200);
+    let timer = setTimeout(out, action ? 8000 : 4200);
+    if (action) ['pointerenter', 'focusin', 'pointerleave', 'focusout'].forEach((ev, i) => el.addEventListener(ev, () => { clearTimeout(timer); if (i > 1) timer = setTimeout(out, 3000); }));
   };
+
+  /* ── Confirmation : fenêtre de l'administration, à la place de confirm() et prompt() du navigateur ── */
+  // askUser({ title, text, items, ok, danger, fields: [{ label, value, placeholder, hint, required }] }) → promesse : null si
+  // annulé ; sinon true, le texte saisi, ou la liste des textes s'il y a plusieurs champs.
+  // Action risquée : bouton rouge et focus sur « Annuler », pour qu'Entrée ne supprime jamais rien par mégarde.
+  let asked = 0;
+  const askUser = (o) => new Promise((resolve) => {
+    const id = 'ask-' + ++asked;
+    const fields = o.fields || [];
+    const inputs = fields.map((f) => h('input', { type: 'text', value: f.value || '', placeholder: f.placeholder || '', required: !!f.required, autocomplete: 'off', spellcheck: 'false' }));
+    const cancel = h('button', { class: 'btn', type: 'button', text: t('Annuler'), onclick: () => dialog.close() });
+    const ok = h('button', { class: 'btn ' + (o.danger ? 'btn-bad' : 'btn-primary'), value: 'ok', text: o.ok || t('Confirmer') });
+    const dialog = h('dialog', { class: 'small ask', 'aria-labelledby': id }, h('form', { method: 'dialog' },
+      h('div', { class: 'dialog-body' }, o.danger ? icon('alert', 'ask-ico') : null, h('h2', { id, text: o.title }),
+        o.text ? h('p', { class: 'muted', text: o.text }) : null,
+        o.items ? h('ul', {}, o.items.map((x) => h('li', { text: x }))) : null,
+        fields.map((f, i) => h('label', { class: 'field' }, h('span', { class: 'label', text: f.label }), inputs[i], f.hint ? h('span', { class: 'hint', text: f.hint }) : null))),
+      h('div', { class: 'dialog-foot' }, cancel, ok)));
+    const values = () => (inputs.length > 1 ? inputs.map((x) => x.value.trim()) : inputs.length ? inputs[0].value.trim() : true);
+    dialog.addEventListener('close', () => { dialog.remove(); resolve(dialog.returnValue === 'ok' ? values() : null); });
+    document.body.append(dialog);
+    dialog.showModal();
+    (inputs[0] || (o.danger ? cancel : ok)).focus();
+  });
+  // Suppression d'un contenu : une seule fenêtre, avec la redirection facultative de son adresse publique (évite une 404).
+  const deleting = (title, visible) => ({
+    title: t('Supprimer ce contenu ?'), text: '« ' + title + ' » · ' + t('Cette action est définitive.'), ok: t('Supprimer'), danger: true,
+    fields: visible ? [{ label: t('Rediriger l’ancienne adresse vers (facultatif)'), placeholder: '/…', hint: t('Une page proche évite une erreur 404 aux visiteurs et à Google. Laisse vide si aucune ne convient.') }] : [],
+  });
 
   /* ── Appels à l'API (JSON + jeton CSRF) ── */
   const api = async (path, body = null, opts = {}) => {
@@ -183,7 +218,7 @@
     drafts.clear(D.me);
   } else if (/[?&]bye=1(&|$)/.test(location.search)) drafts.clear();
 
-  window.Eclair = { D, t, api, toast, upload, pickMedia, h, $, $$, dropEvents, drafts };
+  window.Eclair = { D, t, api, toast, upload, pickMedia, h, $, $$, dropEvents, drafts, askUser, deleting };
 
   /* ── Comportements généraux ── */
   document.addEventListener('click', (e) => {
@@ -203,13 +238,30 @@
   });
   // Déconnexion : les brouillons de secours partent avec la session.
   $$('form[data-logout]').forEach((form) => form.addEventListener('submit', () => drafts.clear()));
-  // Confirmation avant une action irréversible (sur le formulaire, ou sur le bouton qui l'envoie).
-  $$('form').forEach((form) => form.addEventListener('submit', (e) => {
-    const text = (e.submitter && e.submitter.dataset.confirm) || form.dataset.confirm;
-    if (text && !confirm(text)) { e.preventDefault(); return; }
+  // Mon profil › Micro-animations : réglage propre à ce navigateur, appliqué tout de suite.
+  $$('[data-motion-toggle]').forEach((box) => {
+    box.checked = !still();
+    box.addEventListener('change', () => {
+      try { if (box.checked) localStorage.removeItem('eclair-motion'); else localStorage.setItem('eclair-motion', 'off'); } catch (e) { /* stockage indisponible */ }
+      if (box.checked) delete document.documentElement.dataset.motion; else document.documentElement.dataset.motion = 'off';
+    });
+  });
+  // Confirmation avant une action irréversible (sur le formulaire, ou sur le bouton qui l'envoie), puis envoi par le même
+  // bouton : son nom et sa valeur font partie de la demande.
+  $$('form').forEach((form) => form.addEventListener('submit', async (e) => {
+    const by = e.submitter;
+    const text = (by && by.dataset.confirm) || form.dataset.confirm;
+    if (text && !form.eclairOk) {
+      e.preventDefault();
+      if (!(await askUser({ title: text, ok: by && (by.textContent.trim() || by.getAttribute('aria-label')), danger: true }))) return;
+      form.eclairOk = true;
+      form.requestSubmit(by && by.form === form ? by : null);
+      form.eclairOk = false;
+      return;
+    }
     // Opération longue (mise à jour) : bouton occupé, pas de second envoi.
-    const busy = e.submitter && e.submitter.dataset.busy;
-    if (busy) setTimeout(() => { e.submitter.disabled = true; e.submitter.textContent = busy; });
+    const busy = by && by.dataset.busy;
+    if (busy) setTimeout(() => { by.disabled = true; by.textContent = busy; });
   }));
 
   /* ── Sauvegardes Google Drive : autorisation par code, envoi qui avance tout seul ── */
@@ -292,11 +344,14 @@
     }
     const del = e.target.closest('[data-delete]');
     if (del) {
-      if (!confirm(t('Supprimer ce contenu ?') + '\n« ' + del.dataset.title + ' »')) return;
-      let redirect = '';
-      if (del.dataset.visible) redirect = prompt(t('Rediriger l’ancienne adresse vers (facultatif) :'), '/') || '';
-      const res = await api('api/delete', { id: del.dataset.delete, redirect: redirect === '/' ? '' : redirect });
-      if (res.ok) { del.closest('tr')?.remove(); toast(t('Contenu supprimé.'), 'ok'); }
+      const redirect = await askUser(deleting(del.dataset.title, !!del.dataset.visible));
+      if (redirect === null) return;
+      const res = await api('api/delete', { id: del.dataset.delete, redirect: typeof redirect === 'string' && redirect !== '/' ? redirect : '' });
+      if (res.ok) {
+        const row = del.closest('tr');
+        if (row) { row.classList.add('leaving'); setTimeout(() => row.remove(), 220); }
+        toast(t('Contenu supprimé.'), 'ok');
+      }
     }
   });
 
@@ -343,10 +398,10 @@
       $('#md-alt').after(gen);
     }
     $('#md-delete').addEventListener('click', async () => {
-      if (!confirm(t('Supprimer définitivement ?'))) return;
+      if (!(await askUser({ title: t('Supprimer définitivement ?'), text: current.name, ok: t('Supprimer'), danger: true }))) return;
       let res = await api('api/media/delete', { id: current.id });
       if (!res.ok && res.used) {
-        if (!confirm(t('Cette image est utilisée ici :') + '\n• ' + res.used.join('\n• ') + '\n\n' + t('Supprimer quand même ?'))) return;
+        if (!(await askUser({ title: t('Supprimer quand même ?'), text: t('Cette image est utilisée ici :'), items: res.used, ok: t('Supprimer'), danger: true }))) return;
         res = await api('api/media/delete', { id: current.id, force: true });
       }
       if (res.ok) { media = media.filter((m) => m.id !== current.id); render(); detail.close(); }
@@ -385,13 +440,18 @@
       const li = e.target.closest('li');
       if (e.target.closest('[data-up]') && li.previousElementSibling) li.parentNode.insertBefore(li, li.previousElementSibling);
       if (e.target.closest('[data-down]') && li.nextElementSibling) li.parentNode.insertBefore(li.nextElementSibling, li);
-      if (e.target.closest('[data-remove]')) li.remove();
+      // Élément retiré : annulable depuis la notification (rien n'est enregistré avant « Enregistrer »).
+      if (e.target.closest('[data-remove]')) {
+        const box = li.parentNode;
+        const next = li.nextSibling;
+        li.remove();
+        toast(t('Élément supprimé.'), '', { label: t('Annuler'), run: () => { if (box.isConnected) box.insertBefore(li, next && next.parentNode === box ? next : null); } });
+      }
       const addLink = e.target.closest('[data-add-link]');
       if (addLink) {
-        const label = prompt(t('Texte du bouton'));
-        if (!label) return;
-        const url = prompt(t('Adresse (URL)'), 'https://');
-        if (url) add(addLink.closest('[data-menu]'), { type: 'link', id: '', url, title: url, kind: t('Lien'), label });
+        askUser({ title: t('Lien'), ok: t('Ajouter'), fields: [{ label: t('Texte du bouton'), required: true }, { label: t('Adresse (URL)'), value: 'https://', required: true }] }).then((v) => {
+          if (v && v[0] && v[1]) add(addLink.closest('[data-menu]'), { type: 'link', id: '', url: v[1], title: v[1], kind: t('Lien'), label: v[0] });
+        });
       }
     });
     const add = (section, item) => {
@@ -579,7 +639,7 @@
       });
     }
     const show = () => {
-      const q = new URLSearchParams({ header: field('header').value, cards: field('cards').value, path: $('#preview-page').value });
+      const q = new URLSearchParams({ header: field('header').value, cards: field('cards').value, motion: field('motion').checked ? '1' : '0', path: $('#preview-page').value });
       if (style() === 'direction' && picked()) {
         const d = current();
         field('direction').value = encode(d);
@@ -620,7 +680,7 @@
       field('cards').value = d.cards;
       refresh();
     }));
-    ['accent', 'font_head', 'font_body', 'header', 'cards', 'dark'].forEach((name) => {
+    ['accent', 'font_head', 'font_body', 'header', 'cards', 'dark', 'motion'].forEach((name) => {
       field(name).addEventListener('input', refresh);
       field(name).addEventListener('change', refresh);
     });
@@ -657,7 +717,7 @@
     if (profile) profile.addEventListener('click', async () => {
       const status = $('[data-ai-profile-status]', aiSettings);
       const fields = $$('textarea[name^=profile_]', aiSettings);
-      if (fields.some((x) => x.value.trim()) && !confirm(t('Remplacer le profil actuel par celui rédigé par l’IA ?'))) return;
+      if (fields.some((x) => x.value.trim()) && !(await askUser({ title: t('Remplacer le profil actuel par celui rédigé par l’IA ?'), ok: t('Remplacer') }))) return;
       profile.disabled = true;
       status.textContent = t('L’IA lit ton site… (20 à 60 secondes)');
       const res = await api('api/ai/profile', {}, { quiet: true }).catch(() => ({}));

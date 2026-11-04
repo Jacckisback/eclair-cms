@@ -497,6 +497,9 @@ final class AdminAi
             . "3. Make the three directions genuinely different: light or dark ground, warm or cool, serif, sans or condensed headings, calm or bold layouts. At most one dark direction.\n"
             . "4. Avoid the category default (what every competitor does: navy and gold for lawyers, purple gradients for tech, beige and sage for wellness…) and also its predictable opposite. "
             . "Avoid the generic AI look: purple, indigo or violet accents, cyan on near-black, cream with terracotta by reflex, pastel everything.\n"
+            // Tic connu des modèles (Claude compris) : des palettes brunes, beiges ou sable, très visibles en haut de page.
+            . "5. Brown, beige, tan, sand, ochre, khaki, rust and espresso tones are an AI reflex too: use them only if the business is literally made of them "
+            . "(wood, leather, coffee, clay, bread…), and then in one direction at most. The other directions take clearer, more contrasted colours from their reference.\n"
             . "# Values\n"
             . "- Colours as #rrggbb. ground: page background. surface: a close tone of the ground for bands and cards (same light or dark side). ink: text, strongly contrasted on ground and surface. "
             . "muted: secondary text, still readable. accent: one confident colour, used sparingly for buttons and links. No gradients.\n"

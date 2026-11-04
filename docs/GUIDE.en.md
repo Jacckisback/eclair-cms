@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.10.3.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.10.3.zip) archive (619 KB) and unzip it.
+1. Download the [`eclair-cms-1.11.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.11.0.zip) archive (627 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -106,6 +106,7 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 - `Ctrl+S` to save, local backup draft (nothing is lost if the connection drops), real preview before publishing, **history of the last 20 versions**, scheduled publishing.
   - This backup draft belongs to the signed-in account and is erased when you log out: it's never offered to another account using the same browser. Those saved by 1.10.2 for content that was already saved are kept on a site with a single account; those for new, never-saved content, or all of them with several accounts, are erased after the update: save any open edits before updating.
 - **Visual mode**: the page as it actually looks with your theme, editable right there ([details](#visual-mode)).
+- **Undo and redo**: `Ctrl+Z` (`Cmd+Z` on a Mac) and `Ctrl+Shift+Z` or `Ctrl+Y`, or the ↶ ↷ buttons in the bar, in Blocks mode as in Visual mode (60 steps). In the field you are typing in, `Ctrl+Z` stays the browser's own, letter by letter. A deleted block or item (FAQ question, feature, team member, variant, menu link) also comes back with one click in the notification. What cannot be undone (deleting a page, an image, an account) asks for confirmation in a dialog where “Cancel” has the focus: `Enter` never deletes anything by mistake.
 
 ### 🧩 Everything else
 
@@ -124,6 +125,7 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Edit a page from the site | **✏️ Edit** button (visible only when you're logged in) |
 | Change the theme, logo, color, fonts | Settings › Appearance |
 | Add my own CSS | Settings › Appearance › Custom CSS |
+| Turn micro-animations on or off | Settings › Appearance › Micro-animations (site) · My profile › Interface (admin) |
 | Open the shop | Settings › Shop |
 | Add a product | Content › **+ Product** |
 | Choose the home page | Settings › General |
@@ -135,7 +137,7 @@ Media library (drag and drop, alt text, detection of images in use), drag-and-dr
 | Turn on two-factor authentication | My profile › Two-factor authentication |
 | Download a backup | Security › Backup |
 
-Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+B` bold · `Ctrl+I` italic · `Enter` new paragraph · `Shift+Enter` line break · `Ctrl+J` AI assistant.
+Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+B` bold · `Ctrl+I` italic · `Enter` new paragraph · `Shift+Enter` line break · `Ctrl+J` AI assistant · `Ctrl+Z` undo · `Ctrl+Shift+Z` or `Ctrl+Y` redo (`Cmd` on a Mac).
 
 ---
 
@@ -148,11 +150,11 @@ Editor shortcuts: `/` insert a block · `Ctrl+S` save · `Ctrl+K` link · `Ctrl+
 Visual mode displays your page with the site's real theme, exactly as your visitors will see it, and lets you edit it right there. Switch between **Blocks** and **Visual** at the top of the editor: your choice is remembered for next time.
 
 - **Write**: click a heading, a paragraph, a FAQ question, a button's text… and type. `Ctrl+B` bold, `Ctrl+I` italic, `Ctrl+K` link (the editor's page search opens). `Enter` confirms a single-line field; in a paragraph, it creates the next paragraph (`Shift+Enter` for a simple line break). Pasted content comes in as plain text.
-- **Arrange**: clicking a block outlines it and shows its toolbar: ↑ ↓ to move it, ⧉ to duplicate it, ✕ to delete it, +↑ and +↓ to add a block above or below. The toolbar also works with the keyboard (`Tab`, then `Enter`).
+- **Arrange**: clicking a block outlines it and shows its toolbar: two arrows to move it, two buttons to add a block above or below, one to duplicate it and, set apart at the end, the ✕ cross to delete it (it turns red on hover). The toolbar also works with the keyboard (`Tab`, then `Enter`); after `Esc`, `Delete` removes the selected block.
 - **Images**: click an image (hero, image block, team portrait, a post's featured image) to choose another one from the media library.
 - **Block settings**: the right-hand panel shows the selected block's form (a button's link, number of posts, new FAQ question…), followed by the Document, SEO and Analysis tabs.
 - **✨ AI touch-ups** (if the assistant is turned on): improve, fix, shorten, expand, simplify, change the tone or translate the block's text.
-- **Undo**: `Ctrl+Z` (`Cmd+Z` on a Mac) goes back one step at a time (up to 50 steps).
+- **Undo and redo**: `Ctrl+Z` (`Cmd+Z` on a Mac) or the ↶ button goes back, `Ctrl+Shift+Z` or `Ctrl+Y` (↷ button) redoes, one step at a time (up to 60 steps, shared by Blocks and Visual modes).
 - **Width**: 📱 390 px, ▭ 768 px or 🖥 full width, to check how it looks on mobile and tablet.
 
 Everything goes through the usual editor: saving (`Ctrl+S` also works inside the page), local backup draft, version history, live SEO and GEO analysis. The page's links, buttons and forms don't respond while you're editing. A block that's invisible on the site (image not chosen yet, shop closed…) appears as a dotted frame, which you fill in from the panel.
@@ -271,6 +273,8 @@ Choosing a theme applies its recommended color and fonts: you can change them la
 **Why it stays light**: an Éclair theme is just a 1.5 to 3 KB stylesheet, added to the base one. The HTML doesn't change from one theme to another: speed, accessibility, structured data and SEO stay exactly the same. Only the active theme is inlined in the page, and the automatic dark mode works with each of them.
 
 **Custom CSS**: to go further than the theme (a button color, spacing, a block style), paste your rules into **Settings › Appearance › Custom CSS**. They are added after the theme on every page, so they take precedence, and they are stored with your data (`data/`): **Éclair updates keep them**. The `/*dark*/ … /*/dark*/` markers work too: their rules disappear when dark mode is set to “Always light”. For safety, the `<` character and `@import` rules are removed; 64 KB max.
+
+**Micro-animations** (Settings › Appearance): cards, features, FAQ questions, callouts and images slide in as visitors scroll, and buttons and images respond on hover. It's CSS only (under 1 KB added to the page, no script): elements slide in without ever turning transparent, so no layout shift, no faded text, nothing animated on page load, and the text stays in the page for Google and AI. Measured: 100 in all four Lighthouse categories, with or without. They're turned off for visitors who asked their device for less motion, and when printing. On for sites installed with 1.11; on an older site, pages stay identical down to the byte until you turn them on. The admin's own animations are turned off in **My profile › Interface** (a setting for this browser only).
 
 ---
 
@@ -703,6 +707,7 @@ tests/fake-ai.php        fake AI providers (Claude, ChatGPT, images): the assist
 tests/shop.php           themes and shop (product pages, Stripe, PayPal, Revolut, JSON-LD, Merchant Center feed)
 tests/mcp.php            MCP connector (OAuth, PKCE, protocol, revocation) and choosing the AI
 tests/design.php         art directions (contrast, CSS, fonts, booby-trapped settings, AI) and Design score
+tests/ux.php             1.11 usability (undo/redo, confirmation dialogs, Visual mode toolbar, micro-animations)
 tests/update.php         one-click update (fake signed channel: signature, booby-trapped archive, syntax, automatic and manual rollback)
 tests/drive.php          Google Drive backups (tests/fake-google.php: fake OAuth and fake Drive, chunked upload, resume)
 tests/sec-*.php          1.10.3 security regression tests
@@ -743,7 +748,7 @@ A signed release can only be built in a Git checkout and only includes tracked f
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 620 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 630 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

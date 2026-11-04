@@ -2,6 +2,42 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## 1.11.0 — 2026-11-04
+
+Usability release for the page builder and the admin: undo and redo everywhere, deletions you can take back, the admin's own confirmation dialogs, a redrawn Visual mode toolbar, an orange that is no longer brown, and optional micro-animations. Existing public sites stay identical to the byte unless their owner turns the micro-animations on. Sites on 1.10.x update in one click from Administration › Updates, after a backup.
+
+### Added
+
+- **Undo and redo everywhere in the editor.** Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z (or Ctrl+Y) and two new ↶ ↷ buttons in the editor bar undo and redo every change, in Blocks mode as in Visual mode: blocks added, moved, duplicated or deleted, items removed from a FAQ, features, team or variants, settings, AI rewrites, restored versions. Typing in one field is one step until a 3-second pause; inside the field you are typing in, Ctrl/Cmd+Z stays the browser's own, letter by letter. Up to 60 steps.
+- **Deletions can be undone from a notification.** Deleting a block or an item (FAQ question, feature, team member, variant, menu item) shows "Deleted · Undo"; the notification stays while the pointer or keyboard is on it.
+- **Visual mode: Delete key.** After Esc, Delete or Backspace removes the selected block (and Ctrl/Cmd+Z brings it back).
+- **Micro-animations.** In the admin: dialogs, menus and notifications appear and leave smoothly, and a block that is added, moved, duplicated or restored flashes briefly in the lightning yellow, so you see at once what changed. They can be turned off per browser in My profile › Interface, and the system's "reduce motion" setting always turns them off. On the public site, a new **Appearance › Micro-animations** switch makes cards, features, FAQ answers and images slide in on scroll and adds a few hover effects: CSS only (under 1 KB, no script), transforms only (no layout shift, and text is never faded, so its contrast holds at every instant), nothing animated on page load, off for visitors who prefer less motion. Measured with Lighthouse 12 on the demo site: 100 in all four categories, on mobile and desktop, with the animations on or off. On for new sites; existing sites keep their exact pages until the switch is turned on.
+
+### Changed
+
+- **Confirmations use the admin's own dialog** instead of the browser's `confirm()` and `prompt()`: red button for risky actions, focus on "Cancel" so Enter never deletes by mistake, Esc to close. Deleting a page or post now asks once, with the optional redirect of its address in the same dialog (and a hint to avoid a 404). Adding a custom menu link asks for its text and address in one dialog. Restoring a version no longer asks for confirmation: it can be undone.
+- **Visual mode toolbar redrawn.** Drawn icons replace the text characters (↑ ↓ ⧉ ✕ +↑ +↓), which some fonts showed as small squares. Tools are grouped (move · add above, add below, duplicate · delete), the delete cross sits apart at the end and turns red on hover, and buttons are larger (32 px).
+- **Blocks mode toolbar.** The delete button is now a cross, set apart from the other tools and red on hover, labelled "Delete block"; after a deletion, the keyboard focus goes to the previous block.
+- **"Needs attention" colour no longer brown.** Average SEO/GEO scores, warnings and meters use a clear orange (text 4.7:1 on its background, fills 3:1) instead of a brown that showed above the fold of the dashboard and editor.
+- **Content filters stay on one line** (All, Pages, Posts, Products, Drafts, Scheduled) and scroll sideways when space runs out, on phones included.
+- **"Imagine my art direction" with AI** no longer defaults to brown, beige or sand palettes: they are kept for businesses literally made of them (wood, leather, coffee, clay, bread), in one direction at most.
+
+### Fixed
+
+- Dark mode: the "Recommended" tag of the installer and settings choices was a dark brown pill; it now uses the lightning yellow.
+
+### Still guaranteed
+
+- **Your content does not move**, and your public site stays identical to the byte as long as the micro-animations stay off (they are only on for sites installed with 1.11.0).
+- **Automated checks** on the source and on the archive.
+- The 1.10.x → 1.11.0 update is signed (Ed25519) and verified before anything is touched, with automatic rollback.
+
+### For maintainers
+
+- New file `app/theme/motion.css` (appended to the inline style only when `appearance.motion` is on, before the custom CSS). New setting `appearance.motion` (default `false`; set to `true` by the installer).
+- 18 new checks: `tests/ux.php` (16), plus one in `tests/run.php` (new sites start with micro-animations) and one in `tests/design.php` (art-direction prompt); `tests/design.php` also posts the new `motion` field with the Appearance form. The suite passes on the source and on the built archive (982 checks).
+- Archive: 627 KB (+6 KB), 1.22 MB once unzipped. README banners and installation visuals show the new size in all 7 languages.
+
 ## 1.10.4 — 2026-11-04
 
 Security release. A second, deeper audit of 1.10.3 confirmed the 1.10.2 fixes held and surfaced a new, smaller set of issues, all closed here: one high-severity issue in the release tooling (not in any installed site), one medium-severity issue (Google Drive), four low-severity issues, and six host-dependent hardening items. One further lead on reserved redirects is fixed as a precaution. Sites on 1.10.0–1.10.3 update in one click from Administration › Updates, after a backup.
