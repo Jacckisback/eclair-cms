@@ -1917,4 +1917,6 @@ return [
     '{n} redirections' => '{n} 条重定向',
     'À lancer' => '待开始',
     '{found} adresses · {built} pages neuves' => '{found} 个地址 · {built} 个新页面',
+    'Fichier .htaccess' => '.htaccess 文件',
+    'Absent : sans lui, seul l’accueil s’affiche et l’administration tombe en erreur 404. Il est dans le dossier « eclair » de l’archive, mais son nom commence par un point, donc il est souvent caché (sur Mac : Cmd + Maj + point). Envoie-le à côté de index.php, puis recharge cette page.' => '缺失：没有它，只会显示首页，后台会出现 404 错误。它位于压缩包的“eclair”文件夹中，但文件名以点开头，因此常被隐藏（Mac 上按 Cmd + Shift + 句点显示）。请把它上传到 index.php 旁边，然后重新加载此页面。',
 ];

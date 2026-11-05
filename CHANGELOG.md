@@ -2,6 +2,12 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Changed
+
+- **Installation: missing `.htaccess` detected.** On Apache or LiteSpeed, when the `.htaccess` file was not uploaded (its name starts with a dot, so it is often hidden on a Mac or skipped by an FTP client), the hosting check now stops the installation with a clear message: where the file is in the archive, how to show it, and where to upload it. Before, the installation went through, but only the home page worked and the administration ended in the server's 404 page.
+
 ## 1.14.0 — 2026-11-04
 
 Google Discover release: get your posts ready for Google's Discover feed, find ideas in today's trends, show compliant AdSense ads on posts, and let the dashboard adapt to what the site is for (media, affiliate, old site to relaunch, business site…). Nothing changes on public pages until ads are turned on, apart from the structured data of posts with a large featured image. Sites on 1.13.x update in one click from Administration › Updates, after a backup.

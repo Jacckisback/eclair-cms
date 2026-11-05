@@ -74,6 +74,13 @@ final class Installer
         return time() - (int) Store::strip((string) @file_get_contents($file)) < self::WINDOW;
     }
 
+    /** Serveur Apache ou LiteSpeed (qui lisent le .htaccess) et .htaccess d'Éclair absent de $root ? */
+    public static function htaccessMissing(string $root, string $software): bool
+    {
+        $apache = (bool) preg_match('/apache|litespeed/i', $software) || PHP_SAPI === 'apache2handler' || PHP_SAPI === 'litespeed';
+        return $apache && !is_file($root . '/.htaccess');
+    }
+
     /** Diagnostic du serveur, présenté de façon rassurante. */
     public static function checks(): array
     {
@@ -90,6 +97,11 @@ final class Installer
         foreach (['data' => Backup::dataDir(), 'cache' => ECLAIR_ROOT . '/cache', 'media' => ECLAIR_ROOT . '/media'] as $name => $dir) {
             $ok = self::writable($dir);
             $add(t('Dossier « {d} » accessible en écriture', ['d' => $name]), $ok ? 'ok' : 'error', $ok ? '' : t('Donne les droits d’écriture (755) à ce dossier via ton FTP.'));
+        }
+        // Apache ou LiteSpeed sans le .htaccess d'Éclair (fichier caché, souvent oublié à l'envoi) : seul l'accueil s'afficherait,
+        // l'administration et toutes les autres pages tomberaient sur la page 404 du serveur. On bloque avant l'installation.
+        if (self::htaccessMissing(ECLAIR_ROOT, (string) ($_SERVER['SERVER_SOFTWARE'] ?? ''))) {
+            $add(t('Fichier .htaccess'), 'error', t('Absent : sans lui, seul l’accueil s’affiche et l’administration tombe en erreur 404. Il est dans le dossier « eclair » de l’archive, mais son nom commence par un point, donc il est souvent caché (sur Mac : Cmd + Maj + point). Envoie-le à côté de index.php, puis recharge cette page.'));
         }
         $add(t('Connexion sécurisée (HTTPS)'), Req::isHttps() ? 'ok' : 'warn', Req::isHttps() ? '' : t('Active le certificat SSL gratuit (Let’s Encrypt) de ton hébergeur, puis recharge en https://.'));
         $add(t('Chiffrement des mots de passe'), defined('PASSWORD_ARGON2ID') ? 'ok' : 'ok', defined('PASSWORD_ARGON2ID') ? 'Argon2id' : 'Bcrypt');

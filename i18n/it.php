@@ -1917,4 +1917,6 @@ return [
     '{n} redirections' => '{n} reindirizzamenti',
     'À lancer' => 'Da avviare',
     '{found} adresses · {built} pages neuves' => '{found} indirizzi · {built} pagine nuove',
+    'Fichier .htaccess' => 'File .htaccess',
+    'Absent : sans lui, seul l’accueil s’affiche et l’administration tombe en erreur 404. Il est dans le dossier « eclair » de l’archive, mais son nom commence par un point, donc il est souvent caché (sur Mac : Cmd + Maj + point). Envoie-le à côté de index.php, puis recharge cette page.' => 'Assente: senza di esso si vede solo la home e l’amministrazione finisce in errore 404. Si trova nella cartella «eclair» dell’archivio, ma il suo nome inizia con un punto, quindi è spesso nascosto (su Mac: Cmd + Maiusc + punto). Caricalo accanto a index.php, poi ricarica questa pagina.',
 ];
