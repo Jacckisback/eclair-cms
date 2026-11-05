@@ -2,11 +2,18 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 1.14.1 — 2026-11-05
+
+Fix release: the installation now stops with a clear message when the `.htaccess` file was not uploaded. Sites on 1.14.0 update in one click from Administration › Updates, after a backup.
 
 ### Changed
 
 - **Installation: missing `.htaccess` detected.** On Apache or LiteSpeed, when the `.htaccess` file was not uploaded (its name starts with a dot, so it is often hidden on a Mac or skipped by an FTP client), the hosting check now stops the installation with a clear message: where the file is in the archive, how to show it, and where to upload it. Before, the installation went through, but only the home page worked and the administration ended in the server's 404 page.
+
+### For maintainers
+
+- New `Installer::htaccessMissing()`; 1 new check in `tests/usage.php`. The suite passes on the source and on the built archive (1,159 checks).
+- Archive: 731 KB (+1 KB), 1.39 MB once unzipped. README banners and installation visuals show the new size in all 7 languages.
 
 ## 1.14.0 — 2026-11-04
 
