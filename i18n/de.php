@@ -1917,4 +1917,6 @@ return [
     '{n} redirections' => '{n} Weiterleitungen',
     'À lancer' => 'Noch zu starten',
     '{found} adresses · {built} pages neuves' => '{found} Adressen · {built} neue Seiten',
+    'Fichier .htaccess' => '.htaccess-Datei',
+    'Absent : sans lui, seul l’accueil s’affiche et l’administration tombe en erreur 404. Il est dans le dossier « eclair » de l’archive, mais son nom commence par un point, donc il est souvent caché (sur Mac : Cmd + Maj + point). Envoie-le à côté de index.php, puis recharge cette page.' => 'Fehlt: Ohne sie erscheint nur die Startseite, und die Administration endet mit einem 404-Fehler. Sie liegt im Ordner „eclair“ des Archivs, ihr Name beginnt aber mit einem Punkt, deshalb ist sie oft versteckt (auf dem Mac: Cmd + Umschalt + Punkt). Lade sie neben index.php hoch und lade diese Seite neu.',
 ];

@@ -20,6 +20,12 @@ sort($typeKeys);
 check('7 usages proposés, ceux de l’installation : vitrine, blog, freelance, page unique, média, affiliation, ancien site', $usageKeys === $typeKeys
     && count($usageKeys) === 7 && array_key_first(Usage::all()) === 'business' && array_intersect(['media', 'affiliate', 'revival'], Starter::TYPES) === ['media', 'affiliate', 'revival']);
 
+$htDir = sys_get_temp_dir() . '/eclair-ht-' . getmypid();
+@mkdir($htDir);
+check('installation : .htaccess absent sur Apache ou LiteSpeed signalé, jamais sur nginx ni quand il est là', \Eclair\Installer::htaccessMissing($htDir, 'Apache/2.4.62 (Unix)')
+    && \Eclair\Installer::htaccessMissing($htDir, 'LiteSpeed') && !\Eclair\Installer::htaccessMissing($htDir, 'nginx/1.27') && !\Eclair\Installer::htaccessMissing(ECLAIR_ROOT, 'Apache'));
+@rmdir($htDir);
+
 /* ─────────────────────────── Parcours HTTP ─────────────────────────── */
 if (in_array('--unit', $argv, true)) {
     return;
