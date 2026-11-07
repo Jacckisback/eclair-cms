@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Copyright (c) 2026 Thierry Gustin
+#
+# Tests d'Éclair sur chaque branche de PHP prise en charge (8.1 minimum annoncé), sur les sources ET sur l'archive
+# construite. Aucun secret : l'archive est construite sans clé (jamais signée ni annoncée).
+name: Tests
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: sodium, zip, curl, mbstring, gd, zlib, intl
+          ini-values: zend.assertions=1, memory_limit=512M
+          coverage: none
+      - name: Tests sur les sources
+        run: php tests/run.php
+      - name: Construction de l'archive (sans clé, non signée)
+        run: env -u ECLAIR_SIGNING_KEY php tools/build.php
+      - name: Tests sur l'archive construite
+        run: |
+          version=$(sed -n "s/.*define('ECLAIR_VERSION', '\([^']*\)').*/\1/p" eclair/index.php)
+          mkdir -p "$RUNNER_TEMP/archive"
+          unzip -q "dist/eclair-cms-$version.zip" -d "$RUNNER_TEMP/archive"
+          ECLAIR_TEST_ROOT="$RUNNER_TEMP/archive/eclair" php tests/run.php
