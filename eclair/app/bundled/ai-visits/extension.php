@@ -23,15 +23,7 @@ return new class {
         $report = AiVisits::report($days);
         $v = ['days' => $days, 'report' => $report, 'unread' => $report['total'] ? AiVisits::unread($report) : [],
             'on' => (bool) Settings::get('geo.ai_log'), 'policy' => (string) Settings::get('geo.ai')];
-        ob_start();
-        try {
-            (static function (array $v): void {
-                include __DIR__ . '/lib/page.php';
-            })($v);
-        } finally {
-            $html = (string) ob_get_clean();
-        }
-        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Robots IA'), 'ext' => 'ai-visits'], t('Robots IA'));
+        Admin::extensionPage('ai-visits', __DIR__ . '/lib/page.php', $v, t('Robots IA'));
     }
 
     /** Rapport des $days derniers jours (tableau de bord, planning éditorial). */

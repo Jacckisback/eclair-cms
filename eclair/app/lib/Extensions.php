@@ -62,6 +62,17 @@ final class Extensions
     {
         Store::write('extensions', $state);
         self::$state = $state;
+        // Index des routes publiques des fonctions actives (data/ext-public.php), présent seulement s'il y en a : les pages
+        // publiques ne chargent ce registre que dans ce cas (aucune fonction livrée n'en déclare aujourd'hui).
+        $public = [];
+        foreach ((array) ($state['items'] ?? []) as $item) {
+            if (($item['status'] ?? '') === 'active') {
+                foreach ((array) ($item['manifest']['routes']['public'] ?? []) as $r) {
+                    $public[] = (string) ($r['path'] ?? '');
+                }
+            }
+        }
+        $public ? Store::write('ext-public', $public) : Store::delete('ext-public');
     }
 
     /**

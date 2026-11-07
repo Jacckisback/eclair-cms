@@ -3,12 +3,30 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Planning;
+
+use Eclair\AdminAi;
+use Eclair\Ai;
+use Eclair\AiChat;
+use Eclair\AiTools;
+use Eclair\Analyzer;
+use Eclair\Blocks;
+use Eclair\Categories;
+use Eclair\Content;
+use Eclair\Extensions;
+use Eclair\Http;
+use Eclair\Keys;
+use Eclair\RateLimit;
+use Eclair\Req;
+use Eclair\Sanitize;
+use Eclair\Settings;
+use Eclair\Store;
+use Eclair\Users;
 
 defined('ECLAIR') || exit;
 
 /**
- * Planning éditorial : les articles à venir, chacun avec sa date prévue. Une idée s'ajoute à la main ou est proposée par
+ * Fonction « Planning éditorial » (livrée avec Éclair) : les articles à venir, chacun avec sa date prévue. Une idée s'ajoute à la main ou est proposée par
  * l'IA d'après le site (activité, catégories, articles déjà écrits, pages que les IA lisent le plus) ; l'IA la rédige
  * ensuite en brouillon, sur demande ou toute seule quelques jours avant sa date (mode automatique). Le coût de chaque
  * appel (jetons et dollars) est noté sur l'idée et compté dans le budget de l'assistant.
@@ -60,8 +78,7 @@ final class Plan
     /** Date valide (AAAA-MM-JJ) ou chaîne vide. */
     public static function day(string $raw): string
     {
-        $raw = trim($raw);
-        return preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $raw, $m) && checkdate((int) $m[2], (int) $m[3], (int) $m[1]) ? $raw : '';
+        return valid_day($raw);
     }
 
     /** Ajoute ou modifie une idée (champs nettoyés). Renvoie l'idée, ou un message si le planning est plein. */
@@ -227,7 +244,7 @@ final class Plan
 
     public static function tokens(array $usage): int
     {
-        return array_sum(array_map(fn ($v) => max(0, (int) $v), array_intersect_key($usage, array_flip(['in', 'out', 'cache_read', 'cache_write']))));
+        return Ai::tokens($usage);
     }
 
     /**

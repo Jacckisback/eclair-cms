@@ -9,8 +9,8 @@ use Eclair\Ai;
 use Eclair\AiChat;
 use Eclair\Categories;
 use Eclair\Content;
+use Eclair\Extensions;
 use Eclair\Log;
-use Eclair\Plan;
 use Eclair\Sanitize;
 use Eclair\Settings;
 use Eclair\Store;
@@ -129,6 +129,9 @@ final class Trends
     public static function propose(array $trends, string $geo): array
     {
         $trends = array_slice(array_values(array_filter($trends, fn (mixed $t): bool => is_array($t) && ($t['title'] ?? '') !== '')), 0, self::MAX_ITEMS);
+        if (!Extensions::enabled('planning')) {
+            return ['ok' => false, 'error' => t('Les idées vont dans le planning éditorial : ajoute d’abord la fonction « Planning éditorial ».'), 'cost' => 0.0, 'tokens' => 0];
+        }
         if (!$trends) {
             return ['ok' => false, 'error' => t('Charge d’abord les tendances du jour.'), 'cost' => 0.0, 'tokens' => 0];
         }
@@ -136,7 +139,7 @@ final class Trends
         $index = Content::index();
         $titles = implode("\n", array_map(fn (array $e): string => '- ' . $e['title'], array_slice(array_filter($index,
             fn (array $e): bool => $e['status'] !== 'draft' && in_array($e['type'], ['post', 'page'], true)), 0, 80))) ?: '(none)';
-        $planned = implode("\n", array_map(fn (array $i): string => '- ' . $i['title'], array_slice(Plan::all(), 0, 60))) ?: '(none)';
+        $planned = implode("\n", array_map(fn (array $i): string => '- ' . $i['title'], array_slice((array) self::planning('all'), 0, 60))) ?: '(none)';
         $cats = implode("\n", array_map(fn (array $c): string => '- ' . $c['id'] . ' | ' . $c['name'], Categories::of('post'))) ?: '(none)';
         $list = implode("\n", array_map(fn (array $t, int $i): string => ($i + 1) . '. ' . $t['title'] . ($t['traffic'] !== '' ? ' (' . $t['traffic'] . ' searches)' : '')
             . ($t['news'] ? ' — headlines: ' . implode(' | ', array_map(fn (array $n): string => $n['title'] . ($n['source'] !== '' ? ' (' . $n['source'] . ')' : ''),
@@ -155,7 +158,7 @@ final class Trends
             'ideas' => ['type' => 'array', 'items' => ['type' => 'object', 'properties' => ['title' => $str, 'keyword' => $str, 'brief' => $str, 'category' => $str, 'trend' => $str, 'why' => $str],
                 'required' => ['title', 'keyword', 'brief', 'category', 'trend', 'why'], 'additionalProperties' => false]],
         ], 'required' => ['ideas'], 'additionalProperties' => false]);
-        $tokens = Plan::tokens($res['usage'] ?? []);
+        $tokens = Ai::tokens($res['usage'] ?? []);
         if (!$res['ok']) {
             return ['ok' => false, 'error' => $res['error'], 'cost' => (float) $res['cost'], 'tokens' => $tokens];
         }
@@ -170,8 +173,8 @@ final class Trends
             $why = Sanitize::text((string) ($idea['why'] ?? ''), 200);
             $brief = Sanitize::multiline((string) ($idea['brief'] ?? ''), 1100) . ($why !== '' ? "\n" . $why : '')
                 . (in_array($trend, $known, true) ? "\n" . t('Tendance Google du jour ({geo}) : {trend}', ['geo' => $geo, 'trend' => $trend]) : '');
-            $r = Plan::put(['title' => $idea['title'] ?? '', 'keyword' => $idea['keyword'] ?? '', 'brief' => $brief, 'category' => $idea['category'] ?? '',
-                'date' => date('Y-m-d'), 'source' => 'ai', 'cost' => (float) $res['cost'] / count($ideas), 'tokens' => intdiv($tokens, count($ideas))]);
+            $r = self::planning('put', [['title' => $idea['title'] ?? '', 'keyword' => $idea['keyword'] ?? '', 'brief' => $brief, 'category' => $idea['category'] ?? '',
+                'date' => date('Y-m-d'), 'source' => 'ai', 'cost' => (float) $res['cost'] / count($ideas), 'tokens' => intdiv($tokens, count($ideas))]]);
             $added += is_array($r) ? 1 : 0;
         }
         return ['ok' => true, 'added' => $added, 'cost' => (float) $res['cost'], 'tokens' => $tokens];
@@ -182,13 +185,23 @@ final class Trends
     {
         $news = implode("\n", array_map(fn (array $n): string => '- ' . $n['title'] . ($n['source'] !== '' ? ' (' . $n['source'] . ')' : '') . ' ' . $n['url'],
             array_slice((array) ($trend['news'] ?? []), 0, 3)));
-        return Plan::put([
+        if (!Extensions::enabled('planning')) {
+            return t('Les idées vont dans le planning éditorial : ajoute d’abord la fonction « Planning éditorial ».');
+        }
+        $r = self::planning('put', [[
             'title' => (string) ($trend['title'] ?? ''),
             'keyword' => mb_substr((string) ($trend['title'] ?? ''), 0, 80),
             'brief' => t('Tendance Google du jour ({geo}) : {trend}', ['geo' => $geo, 'trend' => (string) ($trend['title'] ?? '')])
                 . ((string) ($trend['traffic'] ?? '') !== '' ? ' · ' . t('{n} recherches', ['n' => (string) $trend['traffic']]) : '') . "\n"
                 . t('Angle à trouver : relie-la à ce que fait ton site, sans rapporter l’actualité elle-même.') . ($news !== '' ? "\n" . $news : ''),
             'date' => date('Y-m-d'),
-        ]);
+        ]]);
+        return is_array($r) || is_string($r) ? $r : t('Le planning éditorial n’a pas répondu : réessaie.');
+    }
+
+    /** Fonction « Planning éditorial » (livrée, appelée par le point d'accroche du noyau) : null si elle n'est pas active. */
+    private static function planning(string $method, array $args = []): mixed
+    {
+        return Extensions::invoke('planning', $method, $args);
     }
 }

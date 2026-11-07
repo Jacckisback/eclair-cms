@@ -10,7 +10,7 @@ use Eclair\Ads;
 use Eclair\Ai;
 use Eclair\Auth;
 use Eclair\Http;
-use Eclair\Plan;
+use Eclair\Extensions;
 use Eclair\Req;
 use Eclair\Session;
 use Eclair\Settings;
@@ -35,20 +35,13 @@ final class AdminDiscover
             'geo' => $geo,
             'trends' => Trends::cached($geo),
             'ai' => $ai,
-            'ideasCost' => $ai ? Plan::ideasCost(Ai::provider()) : '',
+            'ideasCost' => $ai ? Ai::money(round(Ai::cost(Ai::provider(), Ai::model(Ai::provider()), ['in' => 5000, 'out' => 2500]), 3)) : '',
+            'planning' => Extensions::enabled('planning'),
             'adsActive' => Ads::active(),
             'adsAdmin' => Auth::can('settings'),
             'blog' => (bool) Settings::get('blog.enabled'),
         ];
-        ob_start();
-        try {
-            (static function (array $v): void {
-                include __DIR__ . '/page.php';
-            })($v);
-        } finally {
-            $html = (string) ob_get_clean();
-        }
-        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Google Discover'), 'ext' => 'discover'], t('Google Discover'));
+        Admin::extensionPage('discover', __DIR__ . '/page.php', $v, t('Google Discover'));
     }
 
     /** Formulaires sans JavaScript : pays des tendances, tendance ajoutée au planning. */
@@ -95,8 +88,8 @@ final class AdminDiscover
         if (!$trends) {
             Http::json(['ok' => false, 'error' => t('Charge d’abord les tendances du jour.')], 422);
         }
-        if (count(Plan::all()) >= Plan::MAX) {
-            Http::json(['ok' => false, 'error' => t('Le planning compte déjà {n} idées : supprime celles qui ne servent plus.', ['n' => Plan::MAX])], 422);
+        if (Extensions::invoke('planning', 'full') === true) {
+            Http::json(['ok' => false, 'error' => t('Le planning compte déjà {n} idées : supprime celles qui ne servent plus.', ['n' => 300])], 422);
         }
         $slot = Ai::slot($user['id']);
         if ($slot === null) {

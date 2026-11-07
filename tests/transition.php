@@ -88,6 +88,11 @@ use Eclair\Themes;
         $affData = Store::GUARD . json_encode(['links' => ['a1' => ['id' => 'a1', 'name' => 'Tour Shimpo', 'url' => 'https://www.amazon.fr/dp/B0T?tag=atelier-21',
             'program' => 'amazon', 'notes' => '', 'created' => time() - 86400]], 'disclosure' => '']);
         file_put_contents($copy . '/data/affiliate.php', $affData);
+        // Idée planifiée en 1.14.1 (site vitrine) : le planning doit lui rester, avec son adresse de tâche planifiée.
+        $planData = Store::GUARD . json_encode(['items' => ['p1' => ['id' => 'p1', 'title' => 'Émailler sans four', 'date' => '2031-01-15', 'keyword' => '',
+            'brief' => '', 'category' => '', 'content' => '', 'source' => 'manual', 'cost' => 0, 'tokens' => 0, 'error' => '', 'tried' => 0, 'created' => time() - 3600]],
+            'auto' => ['on' => false, 'lead' => 3, 'publish' => false, 'by' => '']]);
+        file_put_contents($copy . '/data/plan.php', $planData);
         // Robots IA (mesure active par défaut en 1.x) : une visite notée avant la mise à jour doit rester, la mesure continuer.
         $gpt = ['User-Agent: Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)'];
         client($port)->req('GET', '/', [], $gpt);
@@ -151,6 +156,8 @@ use Eclair\Themes;
             && str_contains($c->req('GET', '/gestion/ads')['body'], 'name="action" value="ads"'));
         check('liens d’affiliation de la 1.14.1 : fonction installée, liens intacts', is_file($copy . '/site/extensions/affiliate/extension.json')
             && str_contains($c->req('GET', '/gestion/x/affiliate')['body'], 'Tour Shimpo') && (string) file_get_contents($copy . '/data/affiliate.php') === $affData);
+        check('planning de la 1.14.1 : fonction installée, idée gardée et affichée', is_file($copy . '/site/extensions/planning/extension.json')
+            && str_contains($c->req('GET', '/gestion/x/planning?m=2031-01')['body'], 'Émailler sans four') && (string) file_get_contents($copy . '/data/plan.php') === $planData);
         foreach ($pages as $p => $status) {
             check("page $p : même statut qu’avant ($status)", $c->req('GET', $p)['status'] === $status);
         }

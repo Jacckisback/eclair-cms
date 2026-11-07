@@ -5,11 +5,11 @@ declare(strict_types=1);
 
 namespace EclairExt\Affiliate;
 
+use Eclair\Ai;
 use Eclair\AdminAi;
 use Eclair\Affiliate;
 use Eclair\Cache;
 use Eclair\Content;
-use Eclair\Plan;
 use Eclair\Sanitize;
 use Eclair\Settings;
 use Eclair\Store;
@@ -120,7 +120,7 @@ final class Links
             . '- Genuinely useful to the reader, in your own words. Do not write any advertising disclosure: the site adds it automatically.';
         $res = AdminAi::composeItem($user, Settings::get('blog.enabled') ? 'post' : 'page', (string) Settings::get('lang'), $brief,
             ['goal' => 'Help the reader choose the right product, honestly', 'links' => 'the product links given in the brief']);
-        $tokens = Plan::tokens($res['usage'] ?? []);
+        $tokens = Ai::tokens($res['usage'] ?? []);
         if (!$res['ok']) {
             return ['ok' => false, 'error' => (string) $res['error'], 'cost' => (float) $res['cost'], 'tokens' => $tokens];
         }

@@ -106,14 +106,19 @@ $titleBadge = static fn (string $why): array => match ($why) {
                   <a class="small" href="<?= e($news['url']) ?>" target="_blank" rel="noopener noreferrer"><?= e($news['title']) ?><?= $news['source'] !== '' ? ' · ' . e($news['source']) : '' ?></a>
                 <?php endforeach ?>
               </div>
+              <?php if ($v['planning']): ?>
               <form method="post" action="<?= e(admin_url('x/discover')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="trend"><input type="hidden" name="n" value="<?= (int) $i ?>">
                 <button class="btn btn-sm" type="submit"><?= Icons::svg('plus') ?><?= e(t('Ajouter au planning')) ?></button></form>
+              <?php endif ?>
             </li>
           <?php endforeach ?>
         </ol>
       <?php endif ?>
       <p class="small muted"><?= e(t('Source : Google Trends, lu à {time}. Une nouvelle lecture est possible une heure après.', ['time' => date('H:i', (int) $v['trends']['fetched'])])) ?></p>
-      <?php if ($v['ai'] && $v['trends']['items']): ?>
+      <?php if (!$v['planning'] && $v['trends']['items']): ?>
+        <p class="small muted"><?= e(t('Pour garder une tendance comme idée d’article, ajoute la fonction « Planning éditorial ».')) ?> <a href="<?= e(admin_url('extensions')) ?>"><?= e(t('Ajouter la fonction')) ?></a></p>
+      <?php endif ?>
+      <?php if ($v['ai'] && $v['planning'] && $v['trends']['items']): ?>
         <div class="dc-ideas">
           <button class="btn btn-primary" type="button" data-dc-ideas data-wait="<?= e(t('L’IA trie les tendances…')) ?>"><?= Icons::svg('spark') ?><?= e(t('Proposer des idées pour mon site')) ?> <small>· ~<?= e($v['ideasCost']) ?></small></button>
           <p class="small muted"><?= e(t('L’IA ne garde que les tendances qui touchent ton sujet (souvent aucune) et propose au plus {n} idées d’articles utiles et durables, jamais un article d’actualité. Elles arrivent dans le planning, à la date d’aujourd’hui.', ['n' => Trends::IDEAS])) ?></p>

@@ -41,15 +41,7 @@ final class AdminAffiliate
             'admin' => Auth::can('settings'),
             'blog' => (bool) Settings::get('blog.enabled'),
         ];
-        ob_start();
-        try {
-            (static function (array $v): void {
-                include __DIR__ . '/page.php';
-            })($v);
-        } finally {
-            $html = (string) ob_get_clean();
-        }
-        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Affiliation'), 'ext' => 'affiliate'], t('Affiliation'));
+        Admin::extensionPage('affiliate', __DIR__ . '/page.php', $v, t('Affiliation'));
     }
 
     /** Formulaires sans JavaScript : ajouter, modifier, retirer un lien ; mention publicitaire (administrateurs). */

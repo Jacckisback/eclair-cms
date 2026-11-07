@@ -183,6 +183,12 @@ try {
     $calls = count(file($trDir . '/log.jsonl') ?: []);
     $api('x/discover/trends', []);
     check('au plus une lecture par heure et par pays', count(file($trDir . '/log.jsonl') ?: []) === $calls && str_contains((string) file_get_contents($trDir . '/log.jsonl'), 'geo=FR'));
+    $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'deactivate', 'id' => 'planning', 'confirm' => '1']);
+    $noPlan = $c->req('GET', '/gestion/x/discover')['body'];
+    check('sans la fonction Planning : tendances affichées, « Ajouter au planning » remplacé par l’invitation à l’ajouter', str_contains($noPlan, 'pain au levain maison')
+        && !str_contains($noPlan, 'value="trend"') && str_contains($noPlan, 'ajoute la fonction « Planning éditorial »'));
+    $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'activate', 'id' => 'planning']);
+    $page = $c->req('GET', '/gestion/x/discover');
     $c->req('POST', '/gestion/x/discover', $c->token($page['body']) + ['action' => 'trend', 'n' => '0']);
     $ideas = array_values(array_filter($read('plan')['items'] ?? [], fn ($i) => $i['title'] === 'pain au levain maison'));
     check('« Ajouter au planning » : idée datée d’aujourd’hui, avec la presse pour contexte', count($ideas) === 1 && $ideas[0]['date'] === date('Y-m-d')

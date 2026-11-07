@@ -2055,4 +2055,7 @@ return [
     'Publicité AdSense active sur les articles.' => 'AdSense ads active on posts.',
     'Publicité AdSense : inactive.' => 'AdSense ads: inactive.',
     'Régler la publicité' => 'Ad settings',
+    'Les idées vont dans le planning éditorial : ajoute d’abord la fonction « Planning éditorial ».' => 'Ideas go into the editorial calendar: add the “Editorial calendar” feature first.',
+    'Le planning éditorial n’a pas répondu : réessaie.' => 'The editorial calendar did not respond: try again.',
+    'Pour garder une tendance comme idée d’article, ajoute la fonction « Planning éditorial ».' => 'To keep a trend as an article idea, add the “Editorial calendar” feature.',
 ];

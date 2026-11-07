@@ -175,6 +175,13 @@ function ago(int $ts): string
  * Allonge la durée d'exécution permise, si l'hébergeur le permet. Une fonction désactivée par l'hébergeur n'existe plus
  * depuis PHP 8 : l'appeler directement arrêterait tout.
  */
+/** Date valide (AAAA-MM-JJ) ou chaîne vide. */
+function valid_day(string $raw): string
+{
+    $raw = trim($raw);
+    return preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $raw, $m) && checkdate((int) $m[2], (int) $m[3], (int) $m[1]) ? $raw : '';
+}
+
 function extend_time(int $seconds): bool
 {
     return function_exists('set_time_limit') && @set_time_limit($seconds);

@@ -2055,4 +2055,7 @@ return [
     'Publicité AdSense active sur les articles.' => 'AdSense-Werbung in den Beiträgen aktiv.',
     'Publicité AdSense : inactive.' => 'AdSense-Werbung: inaktiv.',
     'Régler la publicité' => 'Werbung einstellen',
+    'Les idées vont dans le planning éditorial : ajoute d’abord la fonction « Planning éditorial ».' => 'Ideen landen im Redaktionsplan: Füge zuerst die Funktion „Redaktionsplan“ hinzu.',
+    'Le planning éditorial n’a pas répondu : réessaie.' => 'Der Redaktionsplan hat nicht geantwortet: Versuche es erneut.',
+    'Pour garder une tendance comme idée d’article, ajoute la fonction « Planning éditorial ».' => 'Um einen Trend als Artikelidee zu behalten, füge die Funktion „Redaktionsplan“ hinzu.',
 ];

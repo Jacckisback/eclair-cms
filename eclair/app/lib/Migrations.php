@@ -26,6 +26,7 @@ final class Migrations
         '2026-11-ai-visits-extension' => 'aiVisitsExtension',
         '2026-11-discover-extension' => 'discoverExtension',
         '2026-11-affiliate-extension' => 'affiliateExtension',
+        '2026-11-planning-extension' => 'planningExtension',
     ];
     private const RETRY = 600;
 
@@ -218,6 +219,26 @@ final class Migrations
         $r = Extensions::add('affiliate');
         if (!$r['ok']) {
             throw new \RuntimeException('Fonction « Affiliation » non installée : ' . (string) $r['error']);
+        }
+        return ['installed' => true];
+    }
+
+    /**
+     * « Planning éditorial » est devenu une fonction optionnelle : les sites qui avaient des idées planifiées, la rédaction
+     * automatique ou un usage tourné vers les articles (blog, freelance, média, affiliation) la reçoivent installée et
+     * activée ; l'adresse de tâche planifiée de la 1.x continue de servir.
+     */
+    private static function planningExtension(): array
+    {
+        $d = Store::read('plan', []);
+        $used = is_array($d) && (!empty($d['items']) || !empty($d['auto']['on']));
+        if (!$used && !in_array((string) Settings::get('usage'), ['blog', 'freelance', 'media', 'affiliate'], true)) {
+            return ['installed' => false];
+        }
+        Themes::ensure();
+        $r = Extensions::add('planning');
+        if (!$r['ok']) {
+            throw new \RuntimeException('Fonction « Planning éditorial » non installée : ' . (string) $r['error']);
         }
         return ['installed' => true];
     }

@@ -2055,4 +2055,7 @@ return [
     'Publicité AdSense active sur les articles.' => 'Publicidade AdSense ativa nos artigos.',
     'Publicité AdSense : inactive.' => 'Publicidade AdSense: inativa.',
     'Régler la publicité' => 'Configurar a publicidade',
+    'Les idées vont dans le planning éditorial : ajoute d’abord la fonction « Planning éditorial ».' => 'As ideias vão para o calendário editorial: adiciona primeiro a função «Calendário editorial».',
+    'Le planning éditorial n’a pas répondu : réessaie.' => 'O calendário editorial não respondeu: tenta de novo.',
+    'Pour garder une tendance comme idée d’article, ajoute la fonction « Planning éditorial ».' => 'Para guardar uma tendência como ideia de artigo, adiciona a função «Calendário editorial».',
 ];

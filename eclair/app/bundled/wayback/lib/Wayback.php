@@ -17,7 +17,6 @@ use Eclair\Store;
 use Eclair\AiImage;
 use Eclair\Analyzer;
 use Eclair\Blocks;
-use Eclair\Plan;
 use Eclair\Sanitize;
 
 defined('ECLAIR') || exit;
@@ -130,7 +129,7 @@ final class Wayback
         if ($domain === '') {
             return ['ok' => false, 'error' => t('Indique d’abord l’adresse de ton site dans Réglages : seule l’archive de ce domaine peut être reconstruite.')];
         }
-        $date = Plan::day($date);
+        $date = valid_day($date);
         $res = self::get(Ai::endpoint('wayback') . '/cdx/search/cdx?url=' . rawurlencode($domain) . '&matchType=domain&output=json&fl=original,timestamp'
             . '&filter=statuscode:200&filter=mimetype:text/html&collapse=urlkey&limit=' . self::ROWS . ($date !== '' ? '&to=' . str_replace('-', '', $date) : ''), 120, 4_000_000);
         if (($error = self::failed($res)) !== null) {
@@ -221,7 +220,7 @@ final class Wayback
             . 'and must not try to reproduce it. Never mention the archive, the old website or its former owner, and never reuse a brand or company name from the old title: '
             . 'this website belongs to its current owner.';
         $res = AdminAi::composeItem($user, $u['type'], $lang, $brief, ['goal' => 'Give visitors arriving through old links a genuinely useful page on this topic'], ['slug' => $u['slug']]);
-        $tokens = Plan::tokens($res['usage'] ?? []);
+        $tokens = Ai::tokens($res['usage'] ?? []);
         if (!$res['ok']) {
             self::patch($path, ['error' => (string) $res['error'], 'cost' => (float) $u['cost'] + (float) $res['cost'], 'tokens' => (int) $u['tokens'] + $tokens]);
             return ['cost' => (float) $res['cost'], 'tokens' => $tokens] + self::fail((string) $res['error'], true);

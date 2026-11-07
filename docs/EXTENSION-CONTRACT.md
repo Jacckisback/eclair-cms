@@ -4,7 +4,7 @@ Une **fonction** (nom affiché dans l’administration) ou **capacité** (nom te
 
 ## 1. Principes
 
-* **Rien n’est chargé quand rien n’est actif.** Le registre lit un seul fichier (`data/extensions.php`) sur les requêtes non servies par le cache, et rien sur le chemin rapide. Aucun dossier n’est parcouru à chaque requête : le manifeste est enregistré à l’activation. Le code d’une fonction n’est chargé que si une de ses routes, cartes, blocs ou tâches est demandé.
+* **Rien n’est chargé quand rien n’est actif.** Les pages publiques ne lisent le registre que si une fonction active déclare une route publique (index `data/ext-public.php`) ; l’administration lit un seul fichier (`data/extensions.php`) ; rien sur le chemin rapide. Aucun dossier n’est parcouru à chaque requête : le manifeste est enregistré à l’activation. Le code d’une fonction n’est chargé que si une de ses routes, cartes, blocs ou tâches est demandé.
 * **Le noyau garde les protections.** Contrôle d’accès et CSRF des routes d’administration, validation des réglages et des champs de blocs, en-têtes SEO (titre, canonical unique, robots, JSON-LD) et de sécurité (CSP) des pages publiques, échappement des cartes du tableau de bord.
 * **Désactiver ne détruit rien.** Supprimer le code est une deuxième opération, effacer les données une troisième.
 * **Le code d’une fonction est du code de confiance** : il s’exécute avec les droits de l’application. Le manifeste décrit un contrat (droits applicatifs, fichiers et empreintes, provenance) ; ce n’est **pas** un bac à sable. Importer une fonction demande le droit Sécurité et le mot de passe.
@@ -71,6 +71,8 @@ return new class {
 
 `$ctx` : `id`, `settings` (valeurs validées), `lang`, `data` (préfixe `Store`). Jamais de secret du noyau.
 
+Une page d’administration complète peut être rendue par `Eclair\Admin::extensionPage($id, $fichierDeVue, $v, $titre)` : la vue reçoit `$v` et prend place dans la mise en page de l’administration.
+
 **Tout ce que la fonction affiche doit être échappé avec `e()`** (le HTML qu’elle renvoie est inséré tel quel). Une exception dans un appel est journalisée ; la page continue de s’afficher sans l’apport de la fonction.
 
 ## 5. Blocs et désactivation sans perte
@@ -94,7 +96,7 @@ Les mises à jour du noyau ne touchent jamais `site/extensions/` : une fonction 
 
 ## 7. Fonctions livrées avec Éclair
 
-Certaines fonctions sont maintenues avec le noyau et livrées dans son archive signée, sous `app/bundled/<id>/` (aujourd’hui : `wayback` « Ancien site », `drive` « Sauvegardes Google Drive », `ai-visits` « Robots IA », `discover` « Google Discover », `affiliate` « Affiliation »). Elles ne sont **jamais chargées** tant que le site ne les a pas ajoutées (Fonctions › Ajouter, ou préréglage d’un usage, ou migration pour les sites qui les utilisaient). Une mise à jour du noyau met à jour celles que le site a ajoutées (`Extensions::syncBundled`) et ne réinstalle jamais celles qui ont été retirées. Pour des raisons de compatibilité avec la 1.x, le noyau peut appeler une fonction livrée active par `Extensions::invoke()` (adresse historique d’une tâche planifiée, envoi dû en arrière-plan, réglages du journal des robots IA tenu par `index.php`, rapport affiché au tableau de bord et dans le planning, contrôles Discover des tuiles du tableau de bord) ; ce point d’accroche n’est pas ouvert aux autres fonctions.
+Certaines fonctions sont maintenues avec le noyau et livrées dans son archive signée, sous `app/bundled/<id>/` (aujourd’hui : `wayback` « Ancien site », `drive` « Sauvegardes Google Drive », `ai-visits` « Robots IA », `discover` « Google Discover », `affiliate` « Affiliation », `planning` « Planning éditorial »). Elles ne sont **jamais chargées** tant que le site ne les a pas ajoutées (Fonctions › Ajouter, ou préréglage d’un usage, ou migration pour les sites qui les utilisaient). Une mise à jour du noyau met à jour celles que le site a ajoutées (`Extensions::syncBundled`) et ne réinstalle jamais celles qui ont été retirées. Pour des raisons de compatibilité avec la 1.x, le noyau peut appeler une fonction livrée active par `Extensions::invoke()` (adresse historique d’une tâche planifiée, envoi dû en arrière-plan, réglages du journal des robots IA tenu par `index.php`, rapport affiché au tableau de bord et dans le planning, contrôles Discover des tuiles du tableau de bord, idées ajoutées au planning par Discover) ; ce point d’accroche n’est pas ouvert aux autres fonctions.
 
 ## 8. Découverte
 
@@ -105,5 +107,5 @@ Certaines fonctions sont maintenues avec le noyau et livrées dans son archive s
 * **Contributions SEO** (balises, données structurées) : pas encore ouvertes aux fonctions. Une page publique d’une fonction reçoit l’en-tête SEO standard du noyau (une seule canonical, JSON-LD `WebPage`).
 * **Types de contenu** propres à une fonction : non pris en charge ; utilisez des blocs et des pages.
 * **Politique CSP par fonction** (ex. publicité) : la publicité existante garde son mécanisme actuel (`Ads`, nonce par page) ; l’ouverture de ce mécanisme aux fonctions n’est pas faite.
-* Les fonctions historiques du noyau AdSense, planning, boutique, IA et MCP **ne sont pas encore extraites** (Wayback, Google Drive, robots IA, Discover avec les tendances et la gestion de l’affiliation le sont)
+* Les fonctions historiques du noyau AdSense, boutique, IA et MCP **ne sont pas encore extraites** (Wayback, Google Drive, robots IA, Discover avec les tendances, la gestion de l’affiliation et le planning le sont)
 * **Filtre de rendu** : non ouvert aux fonctions. L’affiliation n’en a pas eu besoin : le marquage de ses liens (mention publicitaire, `rel="sponsored"`) est une obligation légale attachée aux pages publiées, gardée volontairement au noyau pour qu’aucun retrait de fonction ne la supprime : voir `docs/STATUS-2.md`.

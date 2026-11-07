@@ -58,16 +58,7 @@ final class AdminWayback
             'budget' => (float) Ai::config()['budget'],
             'blog' => (bool) Settings::get('blog.enabled'),
         ];
-        // Vue de la fonction rendue ici, puis placée telle quelle dans la mise en page de l'administration.
-        ob_start();
-        try {
-            (static function (array $v): void {
-                include __DIR__ . '/page.php';
-            })($v);
-        } finally {
-            $html = (string) ob_get_clean();
-        }
-        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Ancien site'), 'ext' => 'wayback'], t('Ancien site'));
+        Admin::extensionPage('wayback', __DIR__ . '/page.php', $v, t('Ancien site'));
     }
 
     /** Formulaires sans JavaScript : publier les brouillons reconstruits, effacer la liste. */

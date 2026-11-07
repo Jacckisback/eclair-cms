@@ -147,7 +147,12 @@ function shipped(string $root, string $rel): string
     return match (true) {
         // Le modèle de configuration reste lisible : ses commentaires sont son mode d'emploi.
         $rel === 'eclair-config.exemple.php' => (string) file_get_contents($path),
-        str_starts_with($rel, 'app/admin/views/') || $rel === 'app/install/view.php' => eclair_compact_view(php_strip_whitespace($path)),
+        // Vues de l'administration, y compris celles des fonctions livrées (app/bundled/<id>/lib/page.php).
+        str_starts_with($rel, 'app/admin/views/') || $rel === 'app/install/view.php' || preg_match('~^app/bundled/[a-z0-9-]+/lib/page\.php$~', $rel)
+            => eclair_compact_view(php_strip_whitespace($path)),
+        // Manifestes des fonctions livrées : même contenu, sans mise en forme.
+        (bool) preg_match('~^app/bundled/[a-z0-9-]+/extension\.json$~', $rel)
+            => json_encode(json_decode((string) file_get_contents($path), true, 64, JSON_THROW_ON_ERROR), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
         $rel === 'app/bundled/drive/lib/Drive.php' => eclair_google(php_strip_whitespace($path)),
         str_ends_with($rel, '.php') => php_strip_whitespace($path),
         $admin && str_ends_with($rel, '.js') => eclair_minify_js((string) file_get_contents($path)),

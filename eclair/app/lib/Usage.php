@@ -29,7 +29,13 @@ final class Usage
     }
 
     /** Fonctions livrées que chaque usage ajoute (préréglage) : usage => [id => nom affiché]. */
-    public const PRESETS = ['revival' => ['wayback' => 'Ancien site'], 'media' => ['discover' => 'Google Discover'], 'affiliate' => ['affiliate' => 'Affiliation']];
+    public const PRESETS = [
+        'blog' => ['planning' => 'Planning éditorial'],
+        'freelance' => ['planning' => 'Planning éditorial'],
+        'media' => ['discover' => 'Google Discover', 'planning' => 'Planning éditorial'],
+        'affiliate' => ['affiliate' => 'Affiliation', 'planning' => 'Planning éditorial'],
+        'revival' => ['wayback' => 'Ancien site'],
+    ];
 
     /** Fonctions livrées utiles à un usage (celles qui existent dans cette version). */
     public static function extensions(string $usage): array
@@ -80,9 +86,12 @@ final class Usage
         if ($ai !== null) {
             $tiles['bots'] = ['bot', t('Robots IA'), t('{n} visites en 30 jours', ['n' => $ai['total']]), admin_url('x/ai-visits'), ''];
         }
+        // Planning éditorial : fonction optionnelle depuis la 2.0 ; absente, la tuile propose de l'ajouter.
         if (in_array($usage, ['blog', 'freelance', 'media', 'affiliate'], true)) {
-            $planned = count(array_filter(Plan::all(), fn (array $i): bool => in_array(Plan::state($i), ['idea', 'draft'], true)));
-            $tiles['plan'] = ['calendar', t('Planning'), $planned ? t('{n} idées à venir', ['n' => $planned]) : t('Aucune idée à venir'), admin_url('plan'), $planned ? '' : 'warn'];
+            $planned = Extensions::enabled('planning') ? Extensions::invoke('planning', 'upcoming') : null;
+            $tiles['plan'] = is_int($planned)
+                ? ['calendar', t('Planning'), $planned ? t('{n} idées à venir', ['n' => $planned]) : t('Aucune idée à venir'), admin_url('x/planning'), $planned ? '' : 'warn']
+                : ['calendar', t('Planning'), t('À ajouter'), admin_url('extensions'), 'warn'];
         }
         // Discover est une fonction optionnelle depuis la 2.0 : sa tuile n'apparaît que si le site l'a ajoutée.
         if (in_array($usage, ['blog', 'media', 'affiliate', 'revival'], true) && ($posts = self::discover()) !== null) {

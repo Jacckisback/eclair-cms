@@ -22,7 +22,6 @@ $nav = [
     ['menus', 'menus', 'menu', t('Menus'), 'menus'],
     ['messages', 'messages', 'mail', t('Messages'), 'messages'],
     ['redirects', 'redirects', 'redirect', t('Redirections'), 'redirects'],
-    ['plan', 'plan', 'calendar', t('Planning'), 'content'],
     ['ads', 'ads', 'target', t('Publicité'), 'settings'],
 ];
 // Entrées des capacités actives (droit vérifié par Extensions::nav, comme par la route elle-même).
@@ -105,6 +104,6 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
   </main>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale(), 'driveDue' => $user['role'] === 'admin' && \Eclair\Extensions::invoke('drive', 'due') === true, 'planDue' => $user['role'] === 'admin' && \Eclair\Plan::due() !== null]) ?>
+<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale(), 'driveDue' => $user['role'] === 'admin' && \Eclair\Extensions::invoke('drive', 'due') === true, 'planDue' => $user['role'] === 'admin' && \Eclair\Extensions::invoke('planning', 'due') === true]) ?>
 </body>
 </html>

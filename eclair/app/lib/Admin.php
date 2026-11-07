@@ -84,11 +84,6 @@ final class Admin
             'GET /messages' => [AdminSite::class, 'messages', 'messages'],
             'POST /messages' => [AdminSite::class, 'messageAction', 'messages'],
             'GET /redirects' => [AdminSite::class, 'redirects', 'redirects'],
-            'GET /plan' => [AdminPlan::class, 'page', 'content'],
-            'POST /plan' => [AdminPlan::class, 'action', 'content'],
-            'POST /api/plan/ideas' => [AdminPlan::class, 'ideas', 'content'],
-            'POST /api/plan/write' => [AdminPlan::class, 'write', 'content'],
-            'POST /api/plan/tick' => [AdminPlan::class, 'tick', 'settings'],
             'GET /ads' => [AdminAds::class, 'page', 'settings'],
             'POST /ads' => [AdminAds::class, 'save', 'settings'],
             'POST /redirects' => [AdminSite::class, 'saveRedirect', 'redirects'],
@@ -156,6 +151,20 @@ final class Admin
     }
 
     /* ─────────────────────────────── Rendu ─────────────────────────────── */
+
+    /** Page d'une fonction : sa vue ($file, qui reçoit $v) rendue, puis placée telle quelle dans la mise en page. */
+    public static function extensionPage(string $ext, string $file, array $v, string $title): never
+    {
+        ob_start();
+        try {
+            (static function (string $file, array $v): void {
+                include $file;
+            })($file, $v);
+        } finally {
+            $html = (string) ob_get_clean();
+        }
+        self::view('extension', ['html' => $html, 'raw' => true, 'title' => $title, 'ext' => $ext], $title);
+    }
 
     public static function view(string $name, array $v = [], string $title = '', int $status = 200): never
     {

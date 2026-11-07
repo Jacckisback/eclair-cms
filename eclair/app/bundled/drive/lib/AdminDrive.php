@@ -23,15 +23,7 @@ final class AdminDrive
     public static function page(array $user): never
     {
         $v = ['drive' => Drive::status()];
-        ob_start();
-        try {
-            (static function (array $v): void {
-                include __DIR__ . '/page.php';
-            })($v);
-        } finally {
-            $html = (string) ob_get_clean();
-        }
-        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Sauvegardes sur Google Drive'), 'ext' => 'drive'], t('Sauvegardes sur Google Drive'));
+        Admin::extensionPage('drive', __DIR__ . '/page.php', $v, t('Sauvegardes sur Google Drive'));
     }
 
     public static function action(array $user): never

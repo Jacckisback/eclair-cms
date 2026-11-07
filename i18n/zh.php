@@ -2055,4 +2055,7 @@ return [
     'Publicité AdSense active sur les articles.' => 'AdSense 广告已在文章中启用。',
     'Publicité AdSense : inactive.' => 'AdSense 广告：未启用。',
     'Régler la publicité' => '广告设置',
+    'Les idées vont dans le planning éditorial : ajoute d’abord la fonction « Planning éditorial ».' => '想法会进入编辑日历：请先添加“编辑日历”功能。',
+    'Le planning éditorial n’a pas répondu : réessaie.' => '编辑日历没有响应：请重试。',
+    'Pour garder une tendance comme idée d’article, ajoute la fonction « Planning éditorial ».' => '要把某个趋势保存为文章想法，请添加“编辑日历”功能。',
 ];

@@ -3,7 +3,21 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Planning;
+
+use Eclair\Admin;
+use Eclair\AdminAi;
+use Eclair\Ai;
+use Eclair\AiTools;
+use Eclair\Auth;
+use Eclair\Categories;
+use Eclair\Content;
+use Eclair\Http;
+use Eclair\Req;
+use Eclair\Sanitize;
+use Eclair\Session;
+use Eclair\Settings;
+use Eclair\Users;
 
 defined('ECLAIR') || exit;
 
@@ -29,7 +43,7 @@ final class AdminPlan
             $tokens += (int) $item['tokens'];
         }
         $auto = Plan::auto();
-        Admin::view('plan', [
+        $v = [
             'first' => $first,
             'days' => Plan::month(date('Y-m', $first)),
             // À venir : idées et brouillons ; les articles publiés restent dans le calendrier.
@@ -49,7 +63,8 @@ final class AdminPlan
             'cron' => Auth::can('settings') ? Plan::cronUrl() : '',
             'categories' => Categories::of('post'),
             'blog' => (bool) Settings::get('blog.enabled'),
-        ], t('Planning éditorial'));
+        ];
+        Admin::extensionPage('planning', __DIR__ . '/page.php', $v, t('Planning éditorial'));
     }
 
     /** Formulaires sans JavaScript : ajouter, modifier, supprimer une idée ; réglages du mode automatique. */
@@ -57,7 +72,7 @@ final class AdminPlan
     {
         $action = Req::input('action');
         $id = preg_replace('/[^a-z0-9]/', '', Req::input('id')) ?? '';
-        $back = 'plan' . (preg_match('/^\d{4}-\d{2}$/', Req::input('m')) ? '?m=' . Req::input('m') : '');
+        $back = 'x/planning' . (preg_match('/^\d{4}-\d{2}$/', Req::input('m')) ? '?m=' . Req::input('m') : '');
         if ($action === 'delete') {
             Plan::remove($id);
             Admin::back($back, t('Idée supprimée.'));

@@ -266,6 +266,12 @@ final class Ai
         return ($n('in') * $in + $n('out') * $out + $n('cache_read') * $cached + $n('cache_write') * $write) / 1_000_000;
     }
 
+    /** Jetons consommés par un appel (entrée, sortie, cache), d'après l'usage renvoyé par Ai::request. */
+    public static function tokens(array $usage): int
+    {
+        return array_sum(array_map(fn ($v) => max(0, (int) $v), array_intersect_key($usage, array_flip(['in', 'out', 'cache_read', 'cache_write']))));
+    }
+
     public static function money(float $amount): string
     {
         $digits = $amount > 0 && $amount < 0.1 ? 3 : 2;

@@ -58,8 +58,9 @@ final class App
             Extensions::invoke('drive', 'cron', [$m[1]]);
         }
         // Tâche planifiée du planning éditorial (adresse secrète) : rédige l'idée due, s'il y en a une.
+        // Adresse historique (1.x), toujours valable : servie par la fonction « planning » si le site l'a ajoutée.
         if (preg_match('~^/_eclair/plan/([a-f0-9]{32})$~', $path, $m)) {
-            Plan::cron($m[1]);
+            Extensions::invoke('planning', 'cron', [$m[1]]);
         }
         // Tâches planifiées des capacités optionnelles (adresse secrète, Extensions::taskUrl()).
         if (preg_match('~^/_eclair/tasks/([a-f0-9]{32})$~', $path, $m)) {
@@ -69,8 +70,8 @@ final class App
         if (str_starts_with($path, '/_eclair/') || str_starts_with($path, '/.well-known/')) {
             Mcp::handle($path);
         }
-        // Routes publiques des capacités actives : sans aucune fonction ajoutée, leur registre n'est même pas chargé.
-        if (Store::exists('extensions')) {
+        // Routes publiques des capacités actives : sans fonction active qui en déclare, leur registre n'est même pas chargé.
+        if (Store::exists('ext-public')) {
             Extensions::route($path);
         }
         Site::handle($path);

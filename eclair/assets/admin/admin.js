@@ -304,15 +304,15 @@
     planIdeas.addEventListener('submit', (ev) => {
       ev.preventDefault();
       const f = new FormData(planIdeas);
-      planRun($('button', planIdeas), planIdeas.dataset.wait, 'api/plan/ideas',
+      planRun($('button', planIdeas), planIdeas.dataset.wait, 'x/planning/ideas',
         { count: Number(f.get('count')), week: Number(f.get('week')), theme: f.get('theme') }, () => location.reload());
     });
   }
   $$('[data-plan-write]').forEach((btn) => btn.addEventListener('click', () => {
-    planRun(btn, btn.dataset.wait, 'api/plan/write', { id: btn.dataset.planWrite }, (json) => { location.href = json.edit; });
+    planRun(btn, btn.dataset.wait, 'x/planning/write', { id: btn.dataset.planWrite }, (json) => { location.href = json.edit; });
   }));
   if (D.planDue) {
-    api('api/plan/tick', {}, { quiet: true }).then((json) => { if (json && json.text) toast(json.text, 'ok'); }).catch(() => {});
+    api('x/planning/tick', {}, { quiet: true }).then((json) => { if (json && json.text) toast(json.text, 'ok'); }).catch(() => {});
   }
 
   /* ── Ancien site (Wayback Machine) : recherche dans l'archive, puis une adresse à la fois jusqu'à la fin ou l'arrêt ── */

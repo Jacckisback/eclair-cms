@@ -1,7 +1,7 @@
 <?php
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Thierry Gustin
-/** Planning éditorial : calendrier du mois, idées à venir, propositions et rédaction par l'IA (voir app/lib/Plan.php). */
+/** Planning éditorial : calendrier du mois, idées à venir, propositions et rédaction par l'IA (voir Plan.php). */
 defined('ECLAIR') || exit;
 
 use Eclair\Ai;
@@ -59,9 +59,9 @@ $count = (int) date('t', $first);
     <div class="card-head">
       <h2 id="plan-month"><?= e(fmt_month($first, $lang)) ?></h2>
       <nav class="plan-nav" aria-label="<?= e(t('Mois')) ?>">
-        <a class="btn btn-sm btn-ghost btn-icon" href="<?= e(admin_url('plan?m=' . $prev)) ?>" aria-label="<?= e(t('Mois précédent')) ?>"><?= Icons::svg('chevron-left') ?></a>
-        <a class="btn btn-sm btn-ghost" href="<?= e(admin_url('plan')) ?>"><?= e(t('Aujourd’hui')) ?></a>
-        <a class="btn btn-sm btn-ghost btn-icon" href="<?= e(admin_url('plan?m=' . $next)) ?>" aria-label="<?= e(t('Mois suivant')) ?>"><?= Icons::svg('chevron') ?></a>
+        <a class="btn btn-sm btn-ghost btn-icon" href="<?= e(admin_url('x/planning?m=' . $prev)) ?>" aria-label="<?= e(t('Mois précédent')) ?>"><?= Icons::svg('chevron-left') ?></a>
+        <a class="btn btn-sm btn-ghost" href="<?= e(admin_url('x/planning')) ?>"><?= e(t('Aujourd’hui')) ?></a>
+        <a class="btn btn-sm btn-ghost btn-icon" href="<?= e(admin_url('x/planning?m=' . $next)) ?>" aria-label="<?= e(t('Mois suivant')) ?>"><?= Icons::svg('chevron') ?></a>
       </nav>
     </div>
     <ol class="plan-grid">
@@ -112,7 +112,7 @@ $count = (int) date('t', $first);
                 <?php endif ?>
                 <details class="plan-edit">
                   <summary class="btn btn-sm btn-ghost"><?= e(t('Modifier')) ?></summary>
-                  <form method="post" action="<?= e(admin_url('plan')) ?>" class="plan-form"><?= Security::csrfField() ?>
+                  <form method="post" action="<?= e(admin_url('x/planning')) ?>" class="plan-form"><?= Security::csrfField() ?>
                     <input type="hidden" name="action" value="save"><input type="hidden" name="id" value="<?= e($item['id']) ?>"><input type="hidden" name="m" value="<?= e($ym) ?>">
                     <label class="field"><span class="label"><?= e(t('Titre')) ?></span><input type="text" name="title" maxlength="200" required value="<?= e($item['title']) ?>"></label>
                     <label class="field"><span class="label"><?= e(t('Date prévue')) ?></span><input type="date" name="date" value="<?= e($item['date']) ?>"></label>
@@ -126,7 +126,7 @@ $count = (int) date('t', $first);
                   </form>
                 </details>
               <?php endif ?>
-              <form method="post" action="<?= e(admin_url('plan')) ?>" data-confirm="<?= e(t('Retirer cette idée du planning ? Le brouillon déjà rédigé, s’il existe, est gardé.')) ?>"><?= Security::csrfField() ?>
+              <form method="post" action="<?= e(admin_url('x/planning')) ?>" data-confirm="<?= e(t('Retirer cette idée du planning ? Le brouillon déjà rédigé, s’il existe, est gardé.')) ?>"><?= Security::csrfField() ?>
                 <input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= e($item['id']) ?>"><input type="hidden" name="m" value="<?= e($ym) ?>">
                 <button class="btn btn-sm btn-ghost btn-icon btn-danger" type="submit" aria-label="<?= e(t('Retirer du planning')) ?>"><?= Icons::svg('x') ?></button></form>
             </div>
@@ -139,7 +139,7 @@ $count = (int) date('t', $first);
   <div class="grid-2">
     <section class="card" id="plan-add" aria-labelledby="plan-add-title">
       <h2 id="plan-add-title"><?= e(t('Ajouter une idée')) ?></h2>
-      <form method="post" action="<?= e(admin_url('plan')) ?>" class="plan-form"><?= Security::csrfField() ?>
+      <form method="post" action="<?= e(admin_url('x/planning')) ?>" class="plan-form"><?= Security::csrfField() ?>
         <input type="hidden" name="action" value="add"><input type="hidden" name="m" value="<?= e($ym) ?>">
         <label class="field plan-wide"><span class="label"><?= e(t('Titre ou sujet')) ?></span><input type="text" name="title" maxlength="200" required></label>
         <label class="field"><span class="label"><?= e(t('Date prévue')) ?></span><input type="date" name="date" min="<?= e($today) ?>"></label>
@@ -157,7 +157,7 @@ $count = (int) date('t', $first);
       <h2 id="plan-auto-title"><?= e(t('Rédaction automatique')) ?></h2>
       <p class="small muted"><?= e(t('Quelques jours avant la date prévue, l’IA rédige l’idée en brouillon, sans que tu aies à cliquer. Tu relis, tu complètes, tu programmes.')) ?></p>
       <?php if ($v['admin']): ?>
-        <form method="post" action="<?= e(admin_url('plan')) ?>" class="plan-auto"><?= Security::csrfField() ?>
+        <form method="post" action="<?= e(admin_url('x/planning')) ?>" class="plan-auto"><?= Security::csrfField() ?>
           <input type="hidden" name="action" value="auto"><input type="hidden" name="m" value="<?= e($ym) ?>">
           <label class="switch"><span><strong><?= e(t('Rédiger automatiquement')) ?></strong>
             <small><?= e($v['auto']['on'] && $v['autoBy'] !== '' ? t('Activée par {name}, dans le budget IA du mois.', ['name' => $v['autoBy']]) : t('Dans le budget IA du mois, une idée à la fois.')) ?></small></span>
