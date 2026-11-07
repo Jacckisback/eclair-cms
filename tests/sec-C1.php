@@ -471,14 +471,14 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         $file = $copy . '/data/sessions/' . hash('sha256', $m[1] ?? '') . '.php';
         file_put_contents($file, (string) preg_replace('~sudo\|i:\d+;~', 'sudo|i:0;', (string) @file_get_contents($file)));
     };
-    $page = static fn (object $who): string => $who->req('GET', '/gestion/security')['body'];
+    $page = static fn (object $who): string => $who->req('GET', '/gestion/x/drive')['body'];
     $post = static function (object $who, array $fields) use ($page): string {
-        $who->req('POST', '/gestion/drive', $who->token($page($who)) + $fields);
+        $who->req('POST', '/gestion/x/drive', $who->token($page($who)) + $fields);
         return $page($who);
     };
     $api = static function (object $who, string $path): array {
         preg_match('~"csrf":"([a-f0-9]+)"~', $who->req('GET', '/gestion')['body'], $m);
-        return json_decode($who->req('POST', '/gestion/api/' . $path, '{}', ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . ($m[1] ?? '')])['body'], true) ?: [];
+        return json_decode($who->req('POST', '/gestion/x/' . $path, '{}', ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . ($m[1] ?? '')])['body'], true) ?: [];
     };
     try {
         $a = client($port);
@@ -488,6 +488,9 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
             'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
         ], ['Accept: application/json']);
         $a->login('camille@example.com', 'Un-mot-de-passe-solide');
+        // 2.0 : Sauvegardes Google Drive est une fonction livrée, ajoutée ici (Fonctions › Ajouter).
+        $extPage = $a->req('GET', '/gestion/extensions');
+        $a->req('POST', '/gestion/extensions', $a->token($extPage['body']) + ['action' => 'add', 'id' => 'drive']);
         $post($a, ['action' => 'app', 'client_id' => '123-test.apps.googleusercontent.com', 'client_secret' => 'secret-de-test', 'confirm_password' => 'Un-mot-de-passe-solide']);
         // Second administrateur : Dominique, dont la confirmation du mot de passe est ancienne.
         $list = $a->req('GET', '/gestion/users');
@@ -564,8 +567,9 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         check('compte de connexion rétrogradé : tâche planifiée sans envoi, jeton révoqué, connexion retirée', trim($cron['body']) === 'error' && $uploads() === $count
             && !$bound() && $glog('POST /revoke') === $revokes + 1 && !isset($drive()['by']), trim($cron['body']));
         $body = $page($b2);
+        // 2.0 : l'invitation est sur la page de la fonction Drive, l'événement dans le journal de la page Sécurité.
         check('page Sécurité : les administrateurs sont invités à reconnecter Google Drive, événement au journal', str_contains($body, 'Reconnecte-le pour reprendre les sauvegardes')
-            && str_contains($body, 'Connecter Google Drive') && str_contains($body, 'le compte qui l’avait connecté n’est plus administrateur'));
+            && str_contains($body, 'Connecter Google Drive') && str_contains($b2->req('GET', '/gestion/security')['body'], 'le compte qui l’avait connecté n’est plus administrateur'));
         // Reconnecté par Dominique, puis son compte est supprimé : la sauvegarde à la demande ne part plus.
         $post($b2, ['action' => 'connect']);
         $patch(['pending' => ['next' => 0]]);

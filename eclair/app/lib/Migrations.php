@@ -22,6 +22,7 @@ final class Migrations
         '2026-11-site-dir' => 'siteDir',
         '2026-11-legacy-theme' => 'legacyTheme',
         '2026-11-wayback-extension' => 'waybackExtension',
+        '2026-11-drive-extension' => 'driveExtension',
     ];
     private const RETRY = 600;
 
@@ -132,6 +133,24 @@ final class Migrations
         $r = Extensions::add('wayback');
         if (!$r['ok']) {
             throw new \RuntimeException('Fonction « Ancien site » non installée : ' . (string) $r['error']);
+        }
+        return ['installed' => true];
+    }
+
+    /**
+     * Sauvegardes Google Drive devenues une fonction optionnelle : les sites qui avaient commencé à la configurer
+     * (data/drive.php : application, connexion ou envoi) la reçoivent installée et activée, leur réglage intact.
+     */
+    private static function driveExtension(): array
+    {
+        $file = Backup::dataDir() . '/drive.php';
+        if (!is_file($file)) {
+            return ['installed' => false];
+        }
+        Themes::ensure();
+        $r = Extensions::add('drive');
+        if (!$r['ok']) {
+            throw new \RuntimeException('Fonction « Sauvegardes Google Drive » non installée : ' . (string) $r['error']);
         }
         return ['installed' => true];
     }

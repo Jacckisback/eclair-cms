@@ -133,7 +133,7 @@ function eclair_google(string $code): string
     }
     $out = str_replace(["const CLIENT_ID = ''", "const CLIENT_SECRET = ''"], ["const CLIENT_ID = '$id'", "const CLIENT_SECRET = '$secret'"], $code, $count);
     if ($count !== 2) {
-        fwrite(STDERR, "✗ Identifiants Google : emplacement introuvable dans app/lib/Drive.php.\n");
+        fwrite(STDERR, "✗ Identifiants Google : emplacement introuvable dans app/bundled/drive/lib/Drive.php.\n");
         exit(1);
     }
     return $out;
@@ -148,7 +148,7 @@ function shipped(string $root, string $rel): string
         // Le modèle de configuration reste lisible : ses commentaires sont son mode d'emploi.
         $rel === 'eclair-config.exemple.php' => (string) file_get_contents($path),
         str_starts_with($rel, 'app/admin/views/') || $rel === 'app/install/view.php' => eclair_compact_view(php_strip_whitespace($path)),
-        $rel === 'app/lib/Drive.php' => eclair_google(php_strip_whitespace($path)),
+        $rel === 'app/bundled/drive/lib/Drive.php' => eclair_google(php_strip_whitespace($path)),
         str_ends_with($rel, '.php') => php_strip_whitespace($path),
         $admin && str_ends_with($rel, '.js') => eclair_minify_js((string) file_get_contents($path)),
         $admin && str_ends_with($rel, '.css') => eclair_minify_css((string) file_get_contents($path)),
@@ -342,7 +342,7 @@ TXT);
     }
     $zip->close();
     printf("✓ Archive : %s (%s Ko, %s octets une fois décompressée)\n", $zipFile, round(filesize($zipFile) / 1024), number_format($size, 0, ',', ' '));
-    echo str_contains(shipped($root, 'app/lib/Drive.php'), "CLIENT_ID = ''")
+    echo str_contains(shipped($root, 'app/bundled/drive/lib/Drive.php'), "CLIENT_ID = ''")
         ? "ℹ ECLAIR_GOOGLE_CLIENT_ID / ECLAIR_GOOGLE_CLIENT_SECRET absents : pas d'application Google intégrée, chaque site crée la sienne (guide dans Sécurité › Google Drive).\n"
         : "✓ Application Google intégrée : Google Drive se connecte en un clic, sans créer d'application\n";
 }

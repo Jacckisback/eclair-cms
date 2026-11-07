@@ -3,7 +3,20 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Drive;
+
+use Eclair\Auth;
+use Eclair\Backup;
+use Eclair\Http;
+use Eclair\Keys;
+use Eclair\Log;
+use Eclair\RateLimit;
+use Eclair\Req;
+use Eclair\Session;
+use Eclair\Settings;
+use Eclair\Store;
+use Eclair\Users;
+use Eclair\Vault;
 
 defined('ECLAIR') || exit;
 

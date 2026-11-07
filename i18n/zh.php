@@ -2048,4 +2048,6 @@ return [
     'Maintenues avec Éclair et mises à jour avec lui, elles ne sont chargées que si tu les ajoutes.' => '随 Éclair 一起维护和更新，只有在你添加后才会加载。',
     'Fonction « {n} » ajoutée pour cet usage : tu peux la retirer dans Fonctions.' => '已为此用途添加功能“{n}”：你可以在“功能”中移除它。',
     'À ajouter' => '待添加',
+    'Envoie automatiquement une sauvegarde de ton site dans ton Google Drive. Fonction facultative : la sauvegarde téléchargeable de la page Sécurité fonctionne sans elle.' => '自动将网站备份发送到你的 Google Drive。可选功能：没有它，安全页面中的可下载备份也能正常使用。',
+    'Ajouter la fonction' => '添加功能',
 ];

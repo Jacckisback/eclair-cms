@@ -28,8 +28,10 @@ function review_child(string $code, array $args): array
 
 /* ───────────── Google Drive : fenêtre de la connexion, administrateur lié à la connexion ───────────── */
 section('Relecture 1.10.3 : connexion Google Drive (fenêtre depuis son lancement, administrateur lié à la connexion)');
-$rvLive = method_exists(Eclair\Drive::class, 'live') ? new ReflectionMethod(Eclair\Drive::class, 'live') : null;
-$rvBinder = method_exists(Eclair\Drive::class, 'binder') ? new ReflectionMethod(Eclair\Drive::class, 'binder') : null;
+// 2.0 : Google Drive est une fonction livrée (app/bundled/drive).
+require_once ECLAIR_ROOT . '/app/bundled/drive/lib/Drive.php';
+$rvLive = method_exists(EclairExt\Drive\Drive::class, 'live') ? new ReflectionMethod(EclairExt\Drive\Drive::class, 'live') : null;
+$rvBinder = method_exists(EclairExt\Drive\Drive::class, 'binder') ? new ReflectionMethod(EclairExt\Drive\Drive::class, 'binder') : null;
 $rvLive?->setAccessible(true);
 $rvBinder?->setAccessible(true);
 check('connexion lancée il y a 1 minute (mot de passe saisi 14 minutes plus tôt) : toujours en cours, code affiché',

@@ -3,14 +3,36 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Drive;
+
+use Eclair\Admin;
+use Eclair\Auth;
+use Eclair\Http;
+use Eclair\Req;
+use Eclair\Session;
+use Eclair\Settings;
 
 defined('ECLAIR') || exit;
 
 /** Sauvegardes Google Drive : connexion par code, réglages, sauvegarde à la demande, avancement en arrière-plan. */
 final class AdminDrive
 {
-    private const BACK = 'security#drive';
+    private const BACK = 'x/drive';
+
+    /** Page de la fonction : état de la connexion, réglages, envoi (vue lib/page.php). */
+    public static function page(array $user): never
+    {
+        $v = ['drive' => Drive::status()];
+        ob_start();
+        try {
+            (static function (array $v): void {
+                include __DIR__ . '/page.php';
+            })($v);
+        } finally {
+            $html = (string) ob_get_clean();
+        }
+        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Sauvegardes sur Google Drive'), 'ext' => 'drive'], t('Sauvegardes sur Google Drive'));
+    }
 
     public static function action(array $user): never
     {

@@ -70,6 +70,9 @@ use Eclair\Themes;
             'urls' => ['/notre-histoire' => ['type' => 'page', 'slug' => 'notre-histoire', 'ts' => '20190101000000', 'raw' => 'http://ancien.test/notre-histoire',
                 'exact' => true, 'selected' => true, 'content' => '', 'error' => '', 'cost' => 0, 'tokens' => 0]]]);
         file_put_contents($copy . '/data/wayback.php', $wbData);
+        // Google Drive commencé en 1.14.1 (état propre à l'installation, jamais sauvegardé) : la fonction doit rester disponible.
+        $driveData = Store::GUARD . json_encode(['schedule' => 'weekly', 'keep' => 5]);
+        file_put_contents($copy . '/data/drive.php', $driveData);
         array_map('unlink', glob($copy . '/cache/pages/*[0-9a-f]') ?: []);
         $home = $c->req('GET', '/')['body'];
         check('1.14.1 personnalisée : gabarit et CSS du thème modifiés sur le disque, CSS servi', str_contains((string) file_get_contents($copy . '/app/theme/layout.php'), 'PERSO-LAYOUT')
@@ -119,6 +122,8 @@ use Eclair\Themes;
         check('« Ancien site » utilisé en 1.14.1 : fonction installée, active, données intactes', is_file($copy . '/site/extensions/wayback/extension.json')
             && $c->req('GET', '/gestion/x/wayback')['status'] === 200 && str_contains($c->req('GET', '/gestion/x/wayback')['body'], 'notre-histoire')
             && (string) file_get_contents($copy . '/data/wayback.php') === $wbData);
+        check('Google Drive configuré en 1.14.1 : fonction installée, active, réglage gardé', is_file($copy . '/site/extensions/drive/extension.json')
+            && $c->req('GET', '/gestion/x/drive')['status'] === 200 && str_contains((string) file_get_contents($copy . '/data/drive.php'), '"weekly"'));
         foreach ($pages as $p => $status) {
             check("page $p : même statut qu’avant ($status)", $c->req('GET', $p)['status'] === $status);
         }

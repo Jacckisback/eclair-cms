@@ -574,6 +574,19 @@ final class Extensions
         }
     }
 
+    /**
+     * Point d'accroche du noyau vers une fonction livrée active (adresse historique d'une tâche, envoi dû en arrière-plan) :
+     * null si la fonction est absente ou n'a pas cette méthode. Réservé aux fonctions livrées avec Éclair, dont le noyau
+     * connaît le contrat ; les autres fonctions passent par leur manifeste.
+     */
+    public static function invoke(string $id, string $method, array $args = []): mixed
+    {
+        if (!self::enabled($id) || !isset(self::bundled()[$id])) {
+            return null;
+        }
+        return self::call($id, $method, $args);
+    }
+
     /** Route publique d'une capacité active : page rendue dans le thème, en-têtes SEO et de sécurité du noyau. */
     public static function route(string $path): void
     {

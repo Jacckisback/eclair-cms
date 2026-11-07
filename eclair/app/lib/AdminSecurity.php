@@ -37,7 +37,6 @@ final class AdminSecurity
             'zip' => class_exists('ZipArchive'),
             'gd' => Media::gd(),
             'verified' => Settings::verified(),
-            'drive' => Drive::status(),
         ], t('Sécurité'));
     }
 

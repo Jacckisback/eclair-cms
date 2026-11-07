@@ -53,8 +53,9 @@ final class App
             Http::redirect(admin_url('edit/' . $m[1]));
         }
         // Tâche planifiée des sauvegardes Google Drive (adresse secrète).
+        // Adresse historique (1.x), toujours valable : servie par la fonction « drive » si le site l'a ajoutée.
         if (preg_match('~^/_eclair/backup/([a-f0-9]{32})$~', $path, $m)) {
-            Drive::cron($m[1]);
+            Extensions::invoke('drive', 'cron', [$m[1]]);
         }
         // Tâche planifiée du planning éditorial (adresse secrète) : rédige l'idée due, s'il y en a une.
         if (preg_match('~^/_eclair/plan/([a-f0-9]{32})$~', $path, $m)) {

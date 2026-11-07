@@ -102,6 +102,9 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
     run(['rm', '-rf', $root . '-zip']);
     $r = ['label' => $label, 'zip' => filesize($zipFile)];
     [$r['installed'], $r['files']] = dir_size($root);
+    // Fonctions livrées (app/bundled/) : dans l'archive, mais jamais chargées tant que le site ne les ajoute pas.
+    [$r['bundled']] = dir_size($root . '/app/bundled');
+    $r['installed'] -= $r['bundled'];
     [$r['lang'], $r['lang_files']] = dir_size($root . '/app/lang');
     $r['lang_each'] = (int) round($r['lang'] / max(1, $r['lang_files']));
     [$r['lib'], $r['classes']] = dir_size($root . '/app/lib', '~\.php$~');
@@ -147,6 +150,8 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
         // Second rendu à froid : la mémoire retenue est la plus basse des deux (un premier passage peut compiler davantage).
         $purge();
         $routes['home_cold_again'] = http($port, 'GET', '/');
+        $purge();
+        $routes['home_cold_third'] = http($port, 'GET', '/');
         $article = '';
         if (preg_match_all('~href="(/[a-z0-9-]+/[a-z0-9-]+)"~', $home['body'], $mm)) {
             $article = $mm[1][0];
@@ -164,7 +169,7 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
         $lines = array_values(array_filter(array_map(static fn (string $l): ?array => json_decode($l, true), file($log) ?: [])));
         // Chaque parcours est apparié à la première ligne non utilisée de la même adresse (les appels internes du site à
         // lui-même, comme la vérification de son adresse, ajoutent des lignes).
-        $paths = ['home_cold' => '/', 'home_warm' => '/', 'home_cold_again' => '/', 'post_cold' => $article, 'post_warm' => $article, '404' => null, 'sitemap' => '/sitemap.xml',
+        $paths = ['home_cold' => '/', 'home_warm' => '/', 'home_cold_again' => '/', 'home_cold_third' => '/', 'post_cold' => $article, 'post_warm' => $article, '404' => null, 'sitemap' => '/sitemap.xml',
             'login' => '/gestion/login', 'admin' => '/gestion', 'editor' => '/gestion/new/post'];
         $used = [];
         foreach (array_keys($routes) as $k) {
@@ -180,10 +185,10 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
             $r['route'][$k] = ['status' => $routes[$k]['status'], 'mem' => (int) ($m['mem'] ?? 0), 'files' => (int) ($m['files'] ?? 0),
                 'ms' => round((float) ($m['ms'] ?? $routes[$k]['time'] * 1000), 1), 'bytes' => strlen($routes[$k]['body'])];
         }
-        if (isset($r['route']['home_cold_again'])) {
-            $again = $r['route']['home_cold_again'];
-            unset($r['route']['home_cold_again']);
-            if ($again['mem'] > 0 && $again['mem'] < $r['route']['home_cold']['mem']) {
+        foreach (['home_cold_again', 'home_cold_third'] as $extra) {
+            $again = $r['route'][$extra] ?? null;
+            unset($r['route'][$extra]);
+            if ($again !== null && $again['mem'] > 0 && $again['mem'] < $r['route']['home_cold']['mem']) {
                 $r['route']['home_cold'] = $again;
             }
         }
@@ -228,7 +233,8 @@ $ko = static fn (int $b): string => number_format($b / 1024, 1, ',', ' ') . ' Ko
 $delta = static fn (int|float $a, int|float $b): string => $a == 0 ? '' : sprintf('%+.1f %%', ($b - $a) / $a * 100);
 $rows = [
     ['Archive ZIP du noyau', $before['zip'], $after['zip'], 'ko'],
-    ['Taille installée', $before['installed'], $after['installed'], 'ko'],
+    ['Taille installée (noyau, hors fonctions livrées)', $before['installed'], $after['installed'], 'ko'],
+    ['Fonctions livrées non chargées (app/bundled)', $before['bundled'], $after['bundled'], 'ko'],
     ['Fichiers installés', $before['files'], $after['files'], 'n'],
     ['Classes PHP (app/lib)', $before['classes'], $after['classes'], 'n'],
     ['Code PHP (app/lib)', $before['lib'], $after['lib'], 'ko'],
@@ -253,7 +259,7 @@ foreach (array_keys($after['route']) as $k) {
 $intro = "Mesures produites par `php tools/measure.php" . ($pages ? " --pages=$pages" : '') . "` le " . gmdate('Y-m-d H:i') . " UTC, PHP " . PHP_VERSION
     . ", serveur intégré de PHP" . ($pages ? ", site de $pages articles ajoutés" : ', site neuf (type blog)') . ".\n"
     . "Durées indicatives (machine de mesure) ; mémoire = pointe PHP de la requête ; fichiers = fichiers PHP inclus (`get_included_files`).\n"
-    . "« _cold » : cache de pages vidé (accueil : le plus léger de deux rendus à froid) ; « _warm » : page servie par le chemin rapide d'index.php.\n\n";
+    . "« _cold » : cache de pages vidé (accueil : le plus léger de trois rendus à froid) ; « _warm » : page servie par le chemin rapide d'index.php.\n\n";
 echo $intro . $md;
 if ($write) {
     file_put_contents($repo . '/docs/MEASURES.md', "# Mesures d’Éclair\n\n" . $intro . $md

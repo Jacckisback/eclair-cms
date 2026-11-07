@@ -2048,4 +2048,6 @@ return [
     'Maintenues avec Éclair et mises à jour avec lui, elles ne sont chargées que si tu les ajoutes.' => 'Mantidas e atualizadas com o Éclair, só são carregadas se as adicionar.',
     'Fonction « {n} » ajoutée pour cet usage : tu peux la retirer dans Fonctions.' => 'Funcionalidade «{n}» adicionada para esta utilização: pode removê-la em Funcionalidades.',
     'À ajouter' => 'Por adicionar',
+    'Envoie automatiquement une sauvegarde de ton site dans ton Google Drive. Fonction facultative : la sauvegarde téléchargeable de la page Sécurité fonctionne sans elle.' => 'Envia automaticamente uma cópia de segurança do seu site para o seu Google Drive. Funcionalidade opcional: a cópia transferível da página Segurança funciona sem ela.',
+    'Ajouter la fonction' => 'Adicionar a funcionalidade',
 ];

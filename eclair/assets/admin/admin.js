@@ -268,13 +268,13 @@
   const drivePoll = $('[data-drive-poll]');
   if (drivePoll) {
     const every = Math.max(5, Number(drivePoll.dataset.drivePoll) || 5) * 1000;
-    const ask = () => api('api/drive/poll', {}, { quiet: true })
+    const ask = () => api('x/drive/poll', {}, { quiet: true })
       .then((json) => (json && json.state && json.state !== 'pending' ? location.reload() : setTimeout(ask, every)))
       .catch(() => setTimeout(ask, every * 2));
     setTimeout(ask, every);
   }
   const driveRun = $('[data-drive-run]');
-  const driveTick = () => api('api/drive/tick', {}, { quiet: true });
+  const driveTick = () => api('x/drive/tick', {}, { quiet: true });
   if (driveRun) {
     const bar = $('progress', driveRun);
     const label = $('[data-drive-label]', driveRun);
