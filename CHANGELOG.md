@@ -17,11 +17,16 @@ Multilingual and mobile release: a site can now be published in several language
 - **Splash screen and installable site (Settings › Appearance).** On the first page of a visit, the site icon and name show for under a second, then fade out; the page loads underneath and is never blocked (the splash ignores taps and disappears even without JavaScript). The site also serves `/manifest.webmanifest` (name, icons 192/512, colors), so it can be installed on a phone's home screen with its icon and native splash.
 - New sites have the mobile menu and splash screen on; existing sites keep them off until they choose.
 
+### Changed
+
+- **Feature cards with drawn icons (art directions):** a short mark that is not an emoji (`4`, `A1`, `20 %`) now stays visible, as text, instead of disappearing; useful for numbered steps and price packs.
+- On a multilingual site, the "Read in" line under the title gives way to the header language switcher, which also leads to the translation of pages hidden from search engines (legal notice, thank-you page).
+
 ### For maintainers
 
 - New `Langs` class (prefixes, per-language home pages and texts, switcher links); `Content::path()`, `Content::latest()`, `Content::search()`, `Menus::items()` and `Categories::path()` take the language into account only when the site has several languages.
 - New public files `app/theme/langs.css`, `mobile.css`, `splash.css`, `assets/site/menu.js` and `splash.js`, each added to a page only when its feature is used. `site.js`, `theme.css` and the themes are unchanged; the 1.6.0 public reference still matches byte for byte.
-- New `tests/langs.php` (14 checks); the suite passes (1,174 checks).
+- New `tests/langs.php` (15 checks); the suite passes on the source and on the built archive (1,175 checks).
 
 ## 1.14.1 — 2026-11-05
 

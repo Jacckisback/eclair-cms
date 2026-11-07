@@ -57,7 +57,7 @@ $edit = !empty($v['edit']);
         <span><?= e(Theme::t('reading', $lang, ['n' => Content::readingTime($v['words'])])) ?></span>
       </p>
     <?php endif ?>
-    <?php if ($v['translations']): ?>
+    <?php if ($v['translations'] && !\Eclair\Langs::enabled()): ?>
       <p class="langs"><span><?= e(Theme::t('read_in', $lang)) ?> :</span>
         <?php foreach ($v['translations'] as $code => $t): ?>
           <?php if ($t['id'] !== $item['id']): ?>

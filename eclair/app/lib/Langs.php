@@ -132,9 +132,15 @@ final class Langs
      */
     public static function links(string $lang, string $id = '', string $current = ''): array
     {
+        // Traductions publiées, pages non indexées comprises (mentions légales, remerciements) : le lecteur reste sur la même page.
         $translations = [];
-        if ($id !== '' && ($entry = Content::index()[$id] ?? null)) {
-            $translations = array_map(fn (array $t): string => Content::path($t), Content::translations($entry));
+        $group = $id !== '' ? (string) (Content::index()[$id]['tgroup'] ?? '') : '';
+        if ($group !== '') {
+            foreach (Content::published() as $other) {
+                if (($other['tgroup'] ?? '') === $group) {
+                    $translations[$other['lang']] = Content::path($other);
+                }
+            }
         }
         $blog = Settings::get('blog.enabled') && ($current === self::blogPath($lang) || str_starts_with($current, self::blogPath($lang) . '/'));
         $out = [];

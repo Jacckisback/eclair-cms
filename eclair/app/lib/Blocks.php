@@ -408,7 +408,10 @@ final class Blocks
         $icons = ($d['features'] ?? '') === 'numbers' ? 'none' : ($d['icons'] ?? 'emoji');
         foreach ($b['items'] as $n => $item) {
             $icon = $icons === 'emoji' || $item['icon'] === '' ? '' : ($icons === 'line' ? Design::icon($item['icon']) : '');
-            $out .= '<div class="feature">' . ($icons !== 'emoji' ? ($icon !== '' ? '<span class="feature-icon" aria-hidden="true">' . $icon . '</span>' : '')
+            // Icônes dessinées : un repère court qui n'est pas un émoji (« 4 », « A1 », « 20 % ») reste affiché, en texte.
+            $mark = $icons === 'line' && $icon === '' && preg_match('/^[\p{L}\p{N}€$£%+.,\-]{1,5}$/u', $item['icon']) ? $item['icon'] : '';
+            $out .= '<div class="feature">' . ($icons !== 'emoji' ? ($icon !== '' ? '<span class="feature-icon" aria-hidden="true">' . $icon . '</span>'
+                : ($mark !== '' ? '<span class="feature-icon feature-mark">' . e($mark) . '</span>' : ''))
                 : ($item['icon'] !== '' ? '<span class="feature-icon" aria-hidden="true"' . self::ef('items.' . $n . '.icon') . '>' . e($item['icon']) . '</span>' : ''))
                 . ($item['title'] !== '' ? '<h3' . self::ef('items.' . $n . '.title') . '>' . e($item['title']) . '</h3>' : '')
                 . ($item['text'] !== '' ? '<p' . self::ef('items.' . $n . '.text', true) . '>' . self::rich($item['text']) . '</p>' : '') . '</div>';

@@ -19,6 +19,11 @@ check('site à une langue : ni préfixe ni sélecteur', !Langs::enabled() && Lan
 $clean = Langs::clean('fr', ['en', 'fr', 'xx', 'en', 'es'], ['en' => ['name' => '<b>Site</b>', 'home' => 'inexistant'], 'xx' => ['name' => 'x']]);
 check('langues ajoutées nettoyées : connues, sans doublon ni langue du site', $clean['languages'] === ['en', 'es'] && !isset($clean['i18n']['xx'])
     && $clean['i18n']['en']['home'] === '' && !str_contains($clean['i18n']['en']['name'], '<'));
+\Eclair\Theme::preview(['direction' => \Eclair\Design::find('nocturne')]);
+$cards = \Eclair\Blocks::html(\Eclair\Blocks::normalize([['type' => 'features', 'title' => '', 'items' => [['icon' => '4', 'title' => 'Pack', 'text' => '88 €'], ['icon' => '🎯', 'title' => 'But', 'text' => 'x']]]]));
+\Eclair\Theme::preview([]);
+check('atouts en icônes dessinées : un repère court (« 4 ») reste affiché et lisible, un émoji devient une icône', str_contains($cards, '<span class="feature-icon feature-mark">4</span>')
+    && str_contains($cards, '<span class="feature-icon" aria-hidden="true"><svg'));
 check('icônes de menu : toutes dessinées', array_filter(Menus::ICONS, fn (string $n): bool => !\Eclair\Icons::has($n)) === []);
 
 if (!in_array('--unit', $argv, true)) {
@@ -73,7 +78,7 @@ if (!in_array('--unit', $argv, true)) {
         $blogFr = $get('/blog');
         check('blog par langue : /en/blog liste l’article anglais, /blog seulement les français', $blogEn['status'] === 200 && str_contains($blogEn['body'], 'Getting started with Eclair')
             && str_contains($blogEn['body'], 'Journal') && !str_contains($blogFr['body'], 'Getting started with Eclair') && str_contains($blogFr['body'], 'hreflang="en" href="https://eclair.test/en/blog"'),
-            json_encode([$blogEn['status'], str_contains($blogEn['body'], 'Getting started'), str_contains($blogEn['body'], 'Journal'), str_contains($blogFr['body'], 'Getting started'), $blogFr['status']]) . substr($blogFr['body'], 0, 1500));
+            json_encode([$blogEn['status'], $blogFr['status']]));
         check('catégorie anglaise sous /en/blog, absente de /blog', $get('/en/blog/guides-en')['status'] === 200 && $get('/blog/guides-en')['status'] === 404);
         check('recherche par langue (/en/search)', $get('/en/search?q=Eclair')['status'] === 200 && str_contains($get('/en/search?q=Getting')['body'], 'Getting started'));
         check('menu de la langue du site traduit sur une page anglaise (À propos → About us)', str_contains($about['body'], 'href="/en/about"'));
