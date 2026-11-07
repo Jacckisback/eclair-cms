@@ -55,3 +55,26 @@ jobs:
           ECLAIR_TEST_ROOT="$RUNNER_TEMP/archive/eclair" php tests/run.php
       - name: Mesures et budgets
         run: php tools/measure.php --check
+
+  servers:
+    name: Apache et Nginx réels
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Apache + mod_php, Nginx + PHP-FPM (paquets Ubuntu, PHP 8.3)
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq apache2 libapache2-mod-php8.3 nginx php8.3-fpm php8.3-cli \
+            php8.3-curl php8.3-gd php8.3-mbstring php8.3-zip php8.3-intl php8.3-xml
+          sudo systemctl stop nginx apache2 || true
+          sudo systemctl start php8.3-fpm
+      - name: Construction de l'archive (sans clé, non signée)
+        run: env -u ECLAIR_SIGNING_KEY /usr/bin/php8.3 tools/build.php
+      - name: Vérifications sur les serveurs
+        run: |
+          version=$(sed -n "s/.*define('ECLAIR_VERSION', '\([^']*\)').*/\1/p" eclair/index.php)
+          sudo PATH="/usr/bin:$PATH" bash tools/ci-servers.sh "dist/eclair-cms-$version.zip"

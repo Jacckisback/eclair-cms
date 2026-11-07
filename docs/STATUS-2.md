@@ -20,10 +20,11 @@ Branche : `claude/hopeful-thompson-8kqj2g`, partie de `main` @ `90bb968` (1.14.1
 | Rendu public à l’octet près (4 sites de départ, test existant) | Inchangé |
 | `php tools/measure.php --check` | Budgets respectés (après relèvement justifié de l’archive, voir CHANGELOG) |
 | Lint JavaScript de l’éditeur (`node`) | Syntaxe valide |
+| **Vrais serveurs** (`tools/ci-servers.sh`, aussi dans la CI) : Apache 2.4.58 + mod_php 8.3 avec le `.htaccess` livré, Apache avec le `.htaccess` de la 1.14.1 gardé, Nginx 1.24 + PHP-FPM avec les règles du guide et celles de `UPGRADE-2.md` | **37/37 vérifications dans chacun des 3 cas** : installation, cache, en-têtes de sécurité, adresses exactes (« / » final, `.html`, accents), 21 fichiers sensibles ou piégés jamais servis ni exécutés |
 
 Non exécutés ici (à faire avant publication) :
 
-* **Apache / LiteSpeed / Nginx réels** : seuls le serveur intégré de PHP et `tools/router.php` (qui reproduit les règles) ont été utilisés. Les règles `.htaccess` ajoutées (`site/themes`, `site/extensions`, `site/assets`) et les règles Nginx de `UPGRADE-2.md` restent à vérifier sur de vrais serveurs.
+* **LiteSpeed réel** : non vérifié (Apache 2.4 et Nginx le sont, voir plus bas). LiteSpeed lit le même `.htaccess` qu’Apache.
 * **Parcours FTP** avec `cache/legacy-app/` : code écrit (`Migrations::LEGACY`), **non couvert par un test automatique**.
 * **Tests visuels** (captures avant/après), **accessibilité** automatisée (clavier, contrastes, mouvement réduit) des nouveaux écrans d’administration (Thèmes, Fonctions, restauration) : non faits. Le rendu public, lui, est vérifié à l’octet près.
 * **Navigateur** : l’éditeur (bloc conservé, blocs de fonctions) n’a été vérifié que par les tests HTTP et le lint, pas dans un navigateur.

@@ -735,10 +735,12 @@ location / { try_files $uri /index.php$is_args$args; }
 location = /index.php {
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root/index.php;
-    fastcgi_pass unix:/run/php/php-fpm.sock;
+    fastcgi_pass unix:/run/php/php-fpm.sock;   # adapte : /run/php/php8.3-fpm.sock sous Debian et Ubuntu
 }
 location ~ \.php$ { return 404; }
 ```
+
+Éclair 2.0 ajoute deux règles, à placer en tête : voir [UPGRADE-2.md §4](UPGRADE-2.md#nginx). Cette configuration est vérifiée par la CI sur un vrai Nginx (`tools/ci-servers.sh`).
 
 ---
 

@@ -54,11 +54,13 @@ location ~ ^/site/(themes|extensions)(/|$)    { return 404; }
 location ~ ^/site/assets/.*\.(php\d?|phtml|phar|inc|html?)$ { return 404; }
 location ~ /\.(?!well-known/)                 { return 404; }
 location ~ \.(php\d?|phtml|phar|inc)$         { return 404; }   # sauf index.php, servi par le bloc ci-dessous
-location = /index.php { include fastcgi_params; fastcgi_param SCRIPT_FILENAME $document_root/index.php; fastcgi_pass php; }
+location = /index.php { include fastcgi_params; fastcgi_param SCRIPT_FILENAME $document_root/index.php; fastcgi_pass php; }   # php : ton PHP-FPM, ex. unix:/run/php/php8.3-fpm.sock
 location / { try_files $uri /index.php$is_args$args; }
 ```
 
 Les règles des médias (`media/`) du guide existant restent valables.
+
+Ces règles, celles du guide et le `.htaccess` (livré, ou celui d’une 1.x gardé sans la ligne `site/`) sont vérifiés sur de **vrais Apache 2.4 + mod_php et Nginx + PHP-FPM** par la CI (`tools/ci-servers.sh`, `tests/servers.php`) : fichiers de `data/`, `app/`, `cache/`, `site/themes/`, `site/extensions/` jamais servis, PHP et HTML déposés dans `site/assets/` ou `media/` jamais exécutés, adresses exactes et accentuées servies.
 
 ## 5. Ce qui a changé pour les intégrateurs
 
