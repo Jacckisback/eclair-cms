@@ -63,6 +63,12 @@ final class Site
                     self::file($path, $ads, 'text/plain; charset=utf-8');
                 }
                 break;
+            case '/manifest.webmanifest':
+                // Site installable sur l'écran d'accueil (écran de démarrage activé) : nom, icônes et couleurs du site.
+                if (Settings::get('appearance.splash')) {
+                    self::file($path, self::manifest(), 'application/manifest+json; charset=utf-8', ['X-Robots-Tag: noindex']);
+                }
+                break;
             case '/favicon.ico':
                 $icon = ECLAIR_ROOT . '/media/site/icon-32.png';
                 if (is_file($icon)) {
@@ -84,6 +90,32 @@ final class Site
             }
         }
         self::route($path);
+    }
+
+    /** Manifeste d'application web : le téléphone en tire l'icône, le nom et l'écran de démarrage du site installé. */
+    private static function manifest(): string
+    {
+        $name = (string) Settings::get('name');
+        // Fond : la dernière couleur --bg du CSS du site (thème, direction, puis CSS personnalisé), blanc à défaut.
+        preg_match_all('/--bg:(#[0-9a-fA-F]{3,8})\b/', Theme::css(), $m);
+        $icons = [];
+        foreach ([192, 512] as $size) {
+            if (is_file(ECLAIR_ROOT . '/media/site/icon-' . $size . '.png')) {
+                $icons[] = ['src' => path_to('/media/site/icon-' . $size . '.png'), 'sizes' => $size . 'x' . $size, 'type' => 'image/png', 'purpose' => 'any'];
+            }
+        }
+        return (string) json_encode([
+            'name' => $name,
+            'short_name' => mb_strlen($name) > 14 ? mb_substr($name, 0, 14) : $name,
+            'description' => (string) (Settings::get('description') ?: Settings::get('tagline')),
+            'lang' => (string) Settings::get('lang'),
+            'start_url' => path_to('/'),
+            'scope' => path_to('/'),
+            'display' => 'standalone',
+            'background_color' => end($m[1]) ?: '#ffffff',
+            'theme_color' => Theme::look()['accent'],
+            'icons' => $icons,
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 
     /** Une seule URL par contenu : protocole, domaine, slash final, majuscules, index.php. */
@@ -125,38 +157,44 @@ final class Site
 
     private static function route(string $path): never
     {
-        $words = Theme::words();
-        $home = (string) Settings::get('home');
+        // Site multilingue : une langue ajoutée a ses adresses sous son préfixe (/en, /en/blog…). Sinon, la langue du site.
+        $lang = Langs::split($path)[0];
+        $root = Langs::home($lang);
+        $words = Theme::words($lang);
+        $home = Langs::homeId($lang);
         $index = Content::index();
         $blogOn = (bool) Settings::get('blog.enabled');
-        $blog = Content::blogPath();
+        $blog = Langs::blogPath($lang);
 
-        if ($path === '/') {
+        if ($path === $root) {
             if ($home !== '' && isset($index[$home]) && Content::visible($index[$home])) {
                 self::single($index[$home]);
             }
-            self::listing('blog', 1);
+            if ($root === '/' || $blogOn) {
+                self::listing('blog', 1, null, $lang);
+            }
         }
-        if ($home !== '' && isset($index[$home]) && '/' . $index[$home]['slug'] === $path) {
-            Http::redirect(path_to('/'), 301);
+        if ($home !== '' && isset($index[$home]) && '/' . $index[$home]['slug'] === $path && $path !== $root) {
+            Http::redirect(path_to($root), 301);
         }
-        if ($path === '/' . $words['search'] && Settings::get('search')) {
-            self::search();
+        if ($path === Langs::prefix($lang) . '/' . $words['search'] && Settings::get('search')) {
+            self::search($lang);
         }
         if ($blogOn && ($path === $blog || str_starts_with($path, $blog . '/'))) {
             $rest = substr($path, strlen($blog));
             $page = preg_quote($words['page'], '~');
             if ($rest === '') {
                 if ($home === '') {
-                    Http::redirect(path_to('/'), 301);
+                    Http::redirect(path_to($root), 301);
                 }
-                self::listing('blog', 1);
+                self::listing('blog', 1, null, $lang);
             }
             // Numéros de page sans zéro en tête (« /page/01 » n'existe pas) : un seul rendu, une seule entrée de cache par page.
             if (preg_match('~^/' . $page . '/([1-9]\d{0,5})$~', $rest, $m)) {
-                self::listing('blog', (int) $m[1]);
+                self::listing('blog', (int) $m[1], null, $lang);
             }
-            if (preg_match('~^/' . preg_quote($words['author'], '~') . '/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m)) {
+            // Pages d'auteur : à l'adresse du blog de la langue du site seulement (elles listent les articles de toutes les langues).
+            if (!Langs::extra($lang) && preg_match('~^/' . preg_quote($words['author'], '~') . '/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m)) {
                 $user = Users::findBySlug($m[1]);
                 // Page d'auteur seulement pour une personne qui a publié (comme le plan du site) : les autres comptes restent invisibles.
                 if ($user && array_filter(Content::published('post'), fn (array $p): bool => $p['author'] === $user['id'])) {
@@ -165,8 +203,8 @@ final class Site
             }
             if (preg_match('~^/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m)) {
                 $cat = Categories::bySlug($m[1], 'post');
-                if ($cat) {
-                    self::listing('category', (int) ($m[2] ?? 1), $cat);
+                if ($cat && Langs::ofCategory($cat) === $lang) {
+                    self::listing('category', (int) ($m[2] ?? 1), $cat, $lang);
                 }
             }
         }
@@ -232,10 +270,12 @@ final class Site
         $tocMode = $item['options']['toc'];
         $showToc = $tocMode === 'on' ? (bool) $toc : ($tocMode === 'auto' && $isPost && count($toc) >= 3);
 
-        $crumbs = [['name' => (string) Settings::get('name'), 'path' => '/']];
+        // Langue de navigation (fil d'Ariane, articles liés) : celle du contenu si c'est une langue du site, sinon celle du site.
+        $nav = Langs::valid($lang);
+        $crumbs = [['name' => Langs::text('name', $nav), 'path' => Langs::home($nav)]];
         if ($isPost) {
-            if (Settings::get('home') !== '') {
-                $crumbs[] = ['name' => (string) Settings::get('blog.title'), 'path' => Content::blogPath()];
+            if (Langs::homeId($nav) !== '') {
+                $crumbs[] = ['name' => Langs::text('blog_title', $nav), 'path' => Langs::blogPath($nav)];
             }
             if ($category) {
                 $crumbs[] = ['name' => $category['name'], 'path' => Categories::path($category)];
@@ -244,21 +284,22 @@ final class Site
             $segments = explode('/', $item['slug']);
             for ($i = 1; $i < count($segments); $i++) {
                 $parent = Content::findByPath('/' . implode('/', array_slice($segments, 0, $i)));
-                if ($parent) {
+                // Une page « en/about » a pour parent l'accueil anglais (/en), déjà en tête du fil d'Ariane.
+                if ($parent && !(Langs::extra($nav) && Content::path($parent) === $crumbs[0]['path'])) {
                     $crumbs[] = ['name' => $parent['title'], 'path' => Content::path($parent)];
                 }
             }
         }
-        if ($path !== '/') {
+        if ($path !== $crumbs[0]['path']) {
             $crumbs[] = ['name' => $item['title'], 'path' => $path];
         }
 
         $related = [];
         if ($isPost) {
-            $related = $category ? Content::latest(3, $category['id'], $item['id']) : [];
+            $related = $category ? Content::latest(3, $category['id'], $item['id'], $nav) : [];
             if (count($related) < 3) {
                 $ids = array_column($related, 'id');
-                foreach (Content::latest(6, '', $item['id']) as $p) {
+                foreach (Content::latest(6, '', $item['id'], $nav) as $p) {
                     if (count($related) < 3 && !in_array($p['id'], $ids, true)) {
                         $related[] = $p;
                     }
@@ -506,15 +547,16 @@ final class Site
 
     /* ─────────────────────────────── Listes ─────────────────────────────── */
 
-    private static function listing(string $kind, int $page, ?array $subject = null): never
+    private static function listing(string $kind, int $page, ?array $subject = null, string $lang = ''): never
     {
-        $lang = (string) Settings::get('lang');
-        $words = Theme::words();
-        $blog = Content::blogPath();
-        $isHome = $kind === 'blog' && Settings::get('home') === '';
-        $posts = array_values(Content::published('post'));
-        $crumbs = [['name' => (string) Settings::get('name'), 'path' => '/']];
-        $blogCrumb = Settings::get('home') !== '' ? ['name' => (string) Settings::get('blog.title'), 'path' => $blog] : null;
+        // Sur un site multilingue, chaque langue a son blog (/blog, /en/blog) et ses catégories ; les pages d'auteur les listent toutes.
+        $lang = $lang !== '' ? $lang : Langs::main();
+        $words = Theme::words($lang);
+        $blog = Langs::blogPath($lang);
+        $isHome = $kind === 'blog' && Langs::homeId($lang) === '';
+        $posts = array_values(array_filter(Content::published('post'), fn (array $p): bool => $kind === 'author' || Langs::matches($p, $lang)));
+        $crumbs = [['name' => Langs::text('name', $lang), 'path' => Langs::home($lang)]];
+        $blogCrumb = Langs::homeId($lang) !== '' ? ['name' => Langs::text('blog_title', $lang), 'path' => $blog] : null;
 
         if ($kind === 'category') {
             $posts = array_values(array_filter($posts, fn ($p) => $p['category'] === $subject['id']));
@@ -531,11 +573,11 @@ final class Site
             $description = trim($subject['job'] . ($subject['job'] !== '' && $subject['bio'] !== '' ? "\n" : '') . $subject['bio']);
             $crumbs = array_merge($crumbs, array_filter([$blogCrumb]), [['name' => $title, 'path' => $base]]);
         } else {
-            $base = $isHome ? '/' : $blog;
-            $title = $isHome ? (string) Settings::get('name') : (string) Settings::get('blog.title');
-            $tagline = (string) Settings::get('tagline');
+            $base = $isHome ? Langs::home($lang) : $blog;
+            $title = $isHome ? Langs::text('name', $lang) : Langs::text('blog_title', $lang);
+            $tagline = Langs::text('tagline', $lang);
             $seoTitle = $isHome ? ($tagline !== '' ? $title . ' · ' . $tagline : $title) : Seo::format($title);
-            $description = (string) ($isHome ? (Settings::get('description') ?: Settings::get('tagline')) : Settings::get('blog.description'));
+            $description = $isHome ? (Langs::text('description', $lang) ?: $tagline) : Langs::text('blog_description', $lang);
             if (!$isHome) {
                 $crumbs[] = ['name' => $title, 'path' => $base];
             }
@@ -571,6 +613,8 @@ final class Site
             'author' => $kind === 'author' ? $subject : null,
             'prev' => $page > 1 ? $pagePath($page - 1) : null,
             'next' => $page < $pages ? $pagePath($page + 1) : null,
+            // Blog d'un site multilingue : ses versions dans les autres langues (première page seulement).
+            'alternates' => $kind === 'blog' && $page === 1 && Langs::enabled() ? self::blogAlternates() : [],
         ]);
         $html = Theme::render('list', [
             'lang' => $lang,
@@ -592,18 +636,28 @@ final class Site
         self::html($html, 200, $path);
     }
 
-    private static function search(): never
+    /** Adresse de la première page du blog de chaque langue (l'accueil quand il liste les articles). */
+    private static function blogAlternates(): array
     {
-        $lang = (string) Settings::get('lang');
+        $out = [];
+        foreach (Langs::all() as $code) {
+            $out[$code] = Langs::homeId($code) === '' ? Langs::home($code) : Langs::blogPath($code);
+        }
+        return $out;
+    }
+
+    private static function search(string $lang = ''): never
+    {
+        $lang = $lang !== '' ? $lang : Langs::main();
         $query = Sanitize::text(Req::query('q'), 100);
-        $results = $query !== '' ? Content::search($query) : [];
+        $results = $query !== '' ? Content::search($query, 30, Langs::enabled() ? $lang : '') : [];
         $title = Theme::t('search', $lang);
         $head = Seo::head([
             'kind' => 'search',
             'lang' => $lang,
             'title' => Seo::format($query !== '' ? $title . ' : ' . $query : $title),
             'description' => '',
-            'canonical' => absolute_url('/' . Theme::words()['search']),
+            'canonical' => absolute_url(Langs::prefix($lang) . '/' . Theme::words($lang)['search']),
             'noindex' => true,
             'breadcrumbs' => [],
         ]);
@@ -611,7 +665,7 @@ final class Site
             'lang' => $lang,
             'head' => $head,
             'css' => Theme::css(),
-            'current' => '/' . Theme::words()['search'],
+            'current' => Langs::prefix($lang) . '/' . Theme::words($lang)['search'],
             'class' => 'is-search',
             'title' => $title,
             'description' => '',
@@ -629,7 +683,7 @@ final class Site
 
     public static function notFound(): never
     {
-        $lang = (string) Settings::get('lang');
+        $lang = Langs::split(Req::path())[0];
         $head = Seo::head([
             'kind' => '404',
             'lang' => $lang,

@@ -337,7 +337,7 @@ final class Starter
             ],
             'seo' => ['entity' => $type === 'freelance' ? 'Person' : 'Organization', 'entity_name' => $type === 'freelance' ? $user['name'] : ''],
             // Nouveau site : micro-animations activées par défaut (Réglages › Apparence pour les couper).
-            'appearance' => ['motion' => true],
+            'appearance' => ['motion' => true, 'mobile_menu' => true, 'splash' => true],
         ]);
     }
 }

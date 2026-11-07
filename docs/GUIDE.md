@@ -37,7 +37,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.14.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.1.zip) (731 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-1.15.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.15.0.zip) (744 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -90,7 +90,8 @@ Le tableau de bord affiche une checklist « Premiers pas » : logo et couleur, p
 - Une seule adresse par contenu : redirections HTTPS, www/sans www, slash final, majuscules, `index.php`.
 - **IndexNow** : Bing, Yandex, Seznam… sont prévenus à chaque publication.
 - Vérification Google Search Console et Bing Webmaster Tools (colle la balise `<meta>`, Éclair extrait le code).
-- Multilingue : langue par contenu, liaison des traductions et balises `hreflang` automatiques.
+- Multilingue : langue par contenu, liaison des traductions et balises `hreflang` automatiques. Depuis la 1.15, **Réglages › Général › Langues du site** ajoute des langues : chacune a ses adresses (`/en`, `/en/blog`, `/en/blog/<article>`), son accueil, ses textes (nom, slogan, pied de page, blog), ses catégories et ses menus (Menus), et un sélecteur de langue apparaît dans l'en-tête.
+- Mobile (1.15, Réglages › Apparence) : **menu plein écran** avec une icône par élément (choisie dans Menus), recherche et choix de la langue ; **écran de démarrage** à la première visite et site installable sur l'écran d'accueil d'un téléphone (manifeste, icône).
 - Typographie française automatique (espaces insécables avant `: ; ! ?` et dans les guillemets).
 
 ### 🤖 GEO (moteurs de réponse IA)
@@ -812,7 +813,7 @@ Une version signée ne se construit que dans un dépôt Git et n'inclut que les 
 
 `PHP_CLI_SERVER_WORKERS` permet au site de s'appeler lui-même (vérification de son adresse) : avec un seul processus, la vérification échoue simplement et les redirections vers l'adresse officielle restent désactivées.
 
-Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une copie : le contrôle d'intégrité signale ces fichiers comme modifiés, et une mise à jour les remplace ; la page Mises à jour les liste avant de le faire). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 731 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
+Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une copie : le contrôle d'intégrité signale ces fichiers comme modifiés, et une mise à jour les remplace ; la page Mises à jour les liste avant de le faire). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 744 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
 
 ---
 

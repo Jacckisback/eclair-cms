@@ -40,7 +40,7 @@
 
 ### 安装步骤
 
-1. 下载安装包 [`eclair-cms-1.14.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.1.zip)（731 KB）并解压。
+1. 下载安装包 [`eclair-cms-1.15.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.15.0.zip)（744 KB）并解压。
 2. 使用 FTP 软件（如 FileZilla）或主机的文件管理器，把 **`eclair` 文件夹里的内容**上传到主机的公开目录（`public_html`、`www`……）。
    > ⚠️ `.htaccess` 是隐藏文件：请开启“显示隐藏文件”，确保它们也被上传。
 3. 打开你的网站地址：**安装向导随即启动**（支持 7 种语言，包括简体中文）。
@@ -93,7 +93,8 @@
 - 每个内容只有一个地址：自动处理 HTTPS、带或不带 www、末尾斜杠、大写字母和 `index.php` 的重定向。
 - **IndexNow**：每次发布都会通知 Bing、Yandex、Seznam 等搜索引擎。
 - 支持 Google Search Console 和 Bing Webmaster Tools 验证（粘贴 `<meta>` 标签即可，Éclair 会自动提取验证码）。
-- 多语言：每个内容可设置语言，关联各语言版本并自动生成 `hreflang` 标签。
+- 多语言：每个内容可设置语言，关联各语言版本并自动生成 `hreflang` 标签。自 1.15 起，可在 **设置 › 常规 › 网站语言** 中添加语言：每种语言拥有自己的网址（`/en`、`/en/blog`、`/en/blog/<文章>`）、首页、文本（名称、标语、页脚、博客）、分类和菜单（菜单），页眉中会出现语言切换器。
+- 移动端（1.15，设置 › 外观）：**全屏菜单**，每个菜单项一个图标（在“菜单”中选择），附带搜索和语言选择；首次访问时显示**启动画面**，网站还可安装到手机主屏幕（manifest、图标）。
 - 法语内容自动应用法语排版规范（在 `: ; ! ?` 前和 « » 引号内加不换行空格）。
 
 ### 🤖 GEO（AI 问答引擎）
@@ -815,7 +816,7 @@ ECLAIR_SIGNING_KEY=… php tools/build.php --resign=<版本>
 
 `PHP_CLI_SERVER_WORKERS` 让网站能够访问自身（用于验证网站地址）：如果只有一个进程，验证会直接失败，重定向到正式地址的功能将保持关闭。
 
-如果只是调整样式，建议使用**自定义 CSS**（设置 › 外观）：它在更新后依然保留。如需更深入地定制主题，请修改 `app/theme/*.php`、`app/theme/theme.css` 和 `app/theme/themes/*.css`（记得保留一份副本：完整性检查会把这些文件标记为已修改，而且更新时它们会被替换；更新页面会在替换之前列出这些文件）。安装包中的 PHP 代码经过精简（`php -w`，去除了注释），后台视图经过压缩（通过 zlib 读取），后台的 JavaScript 和 CSS 也经过精简（安装包约 731 KB）：带注释的源代码在 GitHub 上。公开网站的文件（主题、`site.js`）则原样发布。
+如果只是调整样式，建议使用**自定义 CSS**（设置 › 外观）：它在更新后依然保留。如需更深入地定制主题，请修改 `app/theme/*.php`、`app/theme/theme.css` 和 `app/theme/themes/*.css`（记得保留一份副本：完整性检查会把这些文件标记为已修改，而且更新时它们会被替换；更新页面会在替换之前列出这些文件）。安装包中的 PHP 代码经过精简（`php -w`，去除了注释），后台视图经过压缩（通过 zlib 读取），后台的 JavaScript 和 CSS 也经过精简（安装包约 744 KB）：带注释的源代码在 GitHub 上。公开网站的文件（主题、`site.js`）则原样发布。
 
 ---
 

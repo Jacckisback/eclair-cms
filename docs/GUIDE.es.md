@@ -37,7 +37,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 
 ### Pasos
 
-1. Descarga el archivo [`eclair-cms-1.14.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.1.zip) (731 KB) y descomprímelo.
+1. Descarga el archivo [`eclair-cms-1.15.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.15.0.zip) (744 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
 3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
@@ -90,7 +90,8 @@ El panel muestra una lista de «Primeros pasos»: logo y color, página de inici
 - Una sola dirección por contenido: redirecciones de HTTPS, con o sin www, barra final, mayúsculas, `index.php`.
 - **IndexNow**: Bing, Yandex, Seznam… reciben un aviso en cada publicación.
 - Verificación de Google Search Console y Bing Webmaster Tools (pega la etiqueta `<meta>` y Éclair extrae el código).
-- Multilingüe: idioma por contenido, enlace entre traducciones y etiquetas `hreflang` automáticas.
+- Multilingüe: idioma por contenido, enlace entre traducciones y etiquetas `hreflang` automáticas. Desde la 1.15, **Ajustes › General › Idiomas del sitio** añade idiomas: cada uno tiene sus direcciones (`/en`, `/en/blog`, `/en/blog/<artículo>`), su página de inicio, sus textos (nombre, eslogan, pie de página, blog), sus categorías y sus menús (Menús), y aparece un selector de idioma en la cabecera.
+- Móvil (1.15, Ajustes › Apariencia): **menú a pantalla completa** con un icono por elemento (se elige en Menús), búsqueda y elección de idioma; **pantalla de inicio** en la primera visita y sitio instalable en la pantalla de inicio de un móvil (manifiesto, icono).
 - Tipografía francesa automática para los contenidos en francés (espacios de no separación antes de `: ; ! ?` y dentro de las comillas « »).
 
 ### 🤖 GEO (motores de respuesta IA)
@@ -812,7 +813,7 @@ Una versión firmada solo se construye en un repositorio Git e incluye solo los 
 
 `PHP_CLI_SERVER_WORKERS` permite que el sitio se llame a sí mismo (verificación de su dirección): con un solo proceso, la verificación simplemente falla y las redirecciones a la dirección oficial siguen desactivadas.
 
-Para un cambio de estilo, mejor el **CSS personalizado** (Ajustes › Apariencia): sobrevive a las actualizaciones. Para ir más allá, el tema se personaliza modificando `app/theme/*.php`, `app/theme/theme.css` y `app/theme/themes/*.css` (guarda una copia: el control de integridad marca esos archivos como modificados, y una actualización los sustituye; la página Actualizaciones los enumera antes de hacerlo). En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios), las vistas del panel están comprimidas (se leen con zlib) y el JavaScript y el CSS del panel están aligerados (el archivo ocupa unos 731 KB): el código fuente comentado está en GitHub. Los archivos del sitio público (temas, `site.js`) se entregan tal cual.
+Para un cambio de estilo, mejor el **CSS personalizado** (Ajustes › Apariencia): sobrevive a las actualizaciones. Para ir más allá, el tema se personaliza modificando `app/theme/*.php`, `app/theme/theme.css` y `app/theme/themes/*.css` (guarda una copia: el control de integridad marca esos archivos como modificados, y una actualización los sustituye; la página Actualizaciones los enumera antes de hacerlo). En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios), las vistas del panel están comprimidas (se leen con zlib) y el JavaScript y el CSS del panel están aligerados (el archivo ocupa unos 744 KB): el código fuente comentado está en GitHub. Los archivos del sitio público (temas, `site.js`) se entregan tal cual.
 
 ---
 

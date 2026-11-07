@@ -1,0 +1,13 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
+/* Écran de démarrage (Réglages › Apparence) : à la première page d'une visite, icône et nom du site moins d'une seconde.
+   Il ne bloque jamais rien (pointer-events:none, la page se charge dessous) et s'efface seul, même sans JavaScript ;
+   splash.js le retire des pages suivantes de la visite. */
+.splash{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:var(--bg);pointer-events:none;animation:eclair-splash-out .38s cubic-bezier(.23,1,.32,1) .72s both}
+.splash-in{display:grid;justify-items:center;gap:1rem;animation:eclair-splash-in .5s cubic-bezier(.23,1,.32,1) both}
+.splash img{width:6rem;height:6rem;border-radius:1.5rem;box-shadow:0 12px 32px -8px rgb(0 0 0/.22),0 0 0 1px rgb(0 0 0/.04)}
+.splash-name{color:var(--text);font-family:var(--font-head);font-size:1.4rem;font-weight:700;letter-spacing:-.015em}
+.no-splash .splash{display:none}
+@keyframes eclair-splash-in{from{opacity:0;transform:translateY(6px) scale(.96)}}
+@keyframes eclair-splash-out{to{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.splash{animation-duration:.2s;animation-delay:.4s}.splash-in{animation:none}}

@@ -573,6 +573,7 @@
       $$('[data-menu]', menusForm).forEach((section) => {
         out[section.dataset.menu] = $$('[data-list] li', section).map((li) => ({
           type: li.dataset.type, id: li.dataset.id, url: li.dataset.url, label: $('[data-label]', li).value,
+          icon: $('[data-icon]', li) ? $('[data-icon]', li).value : '',
         }));
       });
       $('#menus-json').value = JSON.stringify(out);

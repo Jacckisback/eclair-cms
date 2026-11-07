@@ -1,0 +1,7 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
+/* Sélecteur de langue de l'en-tête (site multilingue, voir Langs) : ajouté seulement quand le site a plusieurs langues. */
+.lang-switch{display:flex;align-items:center;gap:2px;padding:3px;margin-left:.25rem;border-radius:999px;background:var(--bg-soft)}
+.lang-switch a{padding:.32rem .58rem;border-radius:999px;color:var(--muted);font-size:.78rem;font-weight:650;letter-spacing:.04em;line-height:1;text-decoration:none;transition:color .15s ease,background-color .15s ease}
+.lang-switch a[aria-current]{background:var(--card,var(--bg));color:var(--text);box-shadow:0 1px 2px rgb(0 0 0/.08),0 0 0 1px rgb(0 0 0/.04)}
+@media (hover:hover) and (pointer:fine){.lang-switch a:not([aria-current]):hover{color:var(--text)}}

@@ -1,0 +1,49 @@
+/* SPDX-License-Identifier: AGPL-3.0-only
+   Copyright (c) 2026 Thierry Gustin */
+/* Menu mobile plein écran (Réglages › Apparence) : ajouté seulement s'il est activé. Sous 52rem, le menu de l'en-tête laisse
+   place à un bouton ; le menu s'ouvre en plein écran, une grande zone à toucher et une icône par élément. Seuls opacity et
+   transform s'animent : courbe « ease-out » marquée à l'ouverture, sortie plus rapide, rien pour qui préfère moins de mouvement. */
+:root{--mnav-ease:cubic-bezier(.23,1,.32,1);--mnav-drawer:cubic-bezier(.32,.72,0,1)}
+html{-webkit-tap-highlight-color:transparent}
+.nav-toggle{display:none}
+@media (max-width:52rem){
+  .site-header .site-nav,.site-header .lang-switch{display:none}
+  .header-inner{flex-wrap:nowrap}
+  .nav-toggle{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex:none;width:2.75rem;height:2.75rem;margin:0 -.4rem 0 auto;padding:0;border:0;border-radius:.8rem;background:transparent;color:var(--text);cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:transform .14s var(--mnav-ease),background-color .14s ease}
+  .nav-toggle span{display:block;width:1.3rem;height:2px;border-radius:2px;background:currentColor}
+  .nav-toggle span+span{width:.9rem;margin-left:.4rem}
+  .nav-toggle:active{transform:scale(.94);background:var(--bg-soft)}
+}
+.site-header{padding-top:env(safe-area-inset-top,0px)}
+.mnav{position:fixed;inset:0;z-index:100}
+.mnav[hidden]{display:none}
+.mnav-panel{position:absolute;inset:0;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);padding:max(.6rem,env(safe-area-inset-top,0px)) max(1.25rem,env(safe-area-inset-right,0px)) calc(1.25rem + env(safe-area-inset-bottom,0px)) max(1.25rem,env(safe-area-inset-left,0px));opacity:0;transform:translateY(14px);transition:opacity .22s var(--mnav-ease),transform .42s var(--mnav-drawer)}
+.mnav.is-open .mnav-panel{opacity:1;transform:none}
+.mnav.is-closing .mnav-panel{transition-duration:.16s,.16s;transition-timing-function:ease-out}
+.mnav-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:3.6rem;margin-bottom:.75rem}
+.mnav-brand{display:flex;align-items:center;gap:.65rem;color:var(--text);font-family:var(--font-head);font-weight:700;font-size:1.08rem;text-decoration:none}
+.mnav-brand img{width:2rem;height:2rem;border-radius:.55rem}
+.mnav-close{display:grid;place-items:center;width:2.75rem;height:2.75rem;margin-right:-.4rem;padding:0;border:0;border-radius:999px;background:var(--bg-soft);color:var(--text);font-size:1.3rem;cursor:pointer;touch-action:manipulation;transition:transform .14s var(--mnav-ease)}
+.mnav-close:active{transform:scale(.92)}
+.mnav-body{display:flex;flex:1;flex-direction:column}
+.mnav-list{display:grid;gap:.25rem;list-style:none;margin:0;padding:0}
+.mnav-list li{margin:0;opacity:0;transform:translateY(10px);transition:opacity .3s var(--mnav-ease),transform .4s var(--mnav-ease)}
+.mnav.is-open .mnav-list li{opacity:1;transform:none}
+.mnav.is-open .mnav-list li:nth-child(2){transition-delay:30ms}.mnav.is-open .mnav-list li:nth-child(3){transition-delay:60ms}
+.mnav.is-open .mnav-list li:nth-child(4){transition-delay:90ms}.mnav.is-open .mnav-list li:nth-child(5){transition-delay:120ms}
+.mnav.is-open .mnav-list li:nth-child(6){transition-delay:150ms}.mnav.is-open .mnav-list li:nth-child(7){transition-delay:180ms}
+.mnav.is-open .mnav-list li:nth-child(n+8){transition-delay:200ms}
+.mnav.is-closing .mnav-list li{transition:none}
+.mnav-list a{display:flex;align-items:center;gap:.9rem;min-height:3.6rem;padding:.55rem .6rem;border-radius:1.1rem;color:var(--text);font-size:1.12rem;font-weight:600;letter-spacing:-.01em;text-decoration:none;touch-action:manipulation;-webkit-touch-callout:none;transition:transform .12s var(--mnav-ease),background-color .12s ease}
+.mnav-list a:active{transform:scale(.98);background:var(--bg-soft)}
+.mnav-ic{display:grid;place-items:center;flex:none;width:2.6rem;height:2.6rem;border-radius:.85rem;background:color-mix(in srgb,var(--accent) 11%,transparent);color:var(--link-c,var(--accent));font-size:1.2rem}
+.mnav-list a[aria-current] .mnav-ic{background:var(--accent);color:var(--on-accent)}
+.mnav-label{flex:1;min-width:0}
+.mnav-go{display:grid;color:var(--muted);opacity:.55;font-size:1.05rem}
+.mnav-langs{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-top:auto;padding-top:1.1rem;border-top:1px solid var(--line)}
+.mnav-langs .mnav-ic{width:2.2rem;height:2.2rem;margin-right:.2rem;background:var(--bg-soft);color:var(--muted)}
+.mnav-langs a{padding:.55rem .9rem;border-radius:999px;background:var(--bg-soft);color:var(--text);font-weight:600;font-size:.95rem;text-decoration:none;touch-action:manipulation}
+.mnav-langs a[aria-current]{background:var(--text);color:var(--bg)}
+body.mnav-open{overflow:hidden}
+@media (hover:hover) and (pointer:fine){.mnav-list a:hover{background:var(--bg-soft)}}
+@media (prefers-reduced-motion:reduce){.mnav-panel,.mnav-list li{transform:none!important;transition-property:opacity!important}}

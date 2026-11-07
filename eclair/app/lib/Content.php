@@ -74,9 +74,11 @@ final class Content
         return $out;
     }
 
-    public static function latest(int $count, string $category = '', string $exclude = ''): array
+    /** Derniers articles ; sur un site multilingue, ceux de la langue demandée seulement ($lang). */
+    public static function latest(int $count, string $category = '', string $exclude = '', string $lang = ''): array
     {
-        $posts = array_filter(self::published('post'), fn ($p) => ($category === '' || $p['category'] === $category) && $p['id'] !== $exclude);
+        $posts = array_filter(self::published('post'), fn ($p) => ($category === '' || $p['category'] === $category) && $p['id'] !== $exclude
+            && ($lang === '' || Langs::matches($p, $lang)));
         return array_slice(array_values($posts), 0, $count);
     }
 
@@ -85,6 +87,16 @@ final class Content
     {
         if ($entry['type'] === 'page' && $entry['id'] === Settings::get('home')) {
             return '/';
+        }
+        // Site multilingue : accueil et articles d'une langue ajoutée sous son préfixe (/en, /en/blog/<article>).
+        $lang = (string) ($entry['lang'] ?? '');
+        if ($lang !== '' && Langs::extra($lang)) {
+            if ($entry['type'] === 'page' && $entry['id'] === Langs::homeId($lang)) {
+                return '/' . $lang;
+            }
+            if ($entry['type'] === 'post') {
+                return '/' . $lang . self::blogPath() . '/' . $entry['slug'];
+            }
         }
         return match ($entry['type']) {
             'post' => self::blogPath() . '/' . $entry['slug'],
@@ -155,7 +167,8 @@ final class Content
     }
 
     /** Recherche plein texte simple, pondérée (titre > résumé > texte). */
-    public static function search(string $query, int $limit = 30): array
+    /** Recherche dans les contenus publiés ; sur un site multilingue, dans ceux de la langue demandée ($lang). */
+    public static function search(string $query, int $limit = 30, string $lang = ''): array
     {
         $terms = self::terms($query);
         if (!$terms) {
@@ -164,7 +177,7 @@ final class Content
         $texts = Store::read('search', []);
         $results = [];
         foreach (self::published() as $id => $entry) {
-            if ($entry['noindex'] ?? false) {
+            if (($entry['noindex'] ?? false) || ($lang !== '' && !Langs::matches($entry, $lang))) {
                 continue;
             }
             $title = mb_strtolower($entry['title']);

@@ -37,7 +37,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-1.14.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.1.zip) (731 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-1.15.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.15.0.zip) (744 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -90,7 +90,8 @@ Das Dashboard zeigt eine Checkliste „Erste Schritte“: Logo und Farbe, Starts
 - Eine einzige Adresse pro Inhalt: Weiterleitungen für HTTPS, mit/ohne www, abschließenden Schrägstrich, Großbuchstaben, `index.php`.
 - **IndexNow**: Bing, Yandex, Seznam … werden bei jeder Veröffentlichung benachrichtigt.
 - Verifizierung für Google Search Console und Bing Webmaster Tools (füge das `<meta>`-Tag ein, Éclair liest den Code aus).
-- Mehrsprachig: Sprache pro Inhalt, verknüpfte Übersetzungen und automatische `hreflang`-Tags.
+- Mehrsprachig: Sprache pro Inhalt, verknüpfte Übersetzungen und automatische `hreflang`-Tags. Seit 1.15 fügt **Einstellungen › Allgemein › Sprachen der Website** Sprachen hinzu: Jede erhält eigene Adressen (`/en`, `/en/blog`, `/en/blog/<beitrag>`), Startseite, Texte (Name, Slogan, Fußzeile, Blog), Kategorien und Menüs (Menüs), und im Kopfbereich erscheint eine Sprachauswahl.
+- Mobil (1.15, Einstellungen › Design): **Vollbildmenü** mit einem Symbol pro Eintrag (in Menüs wählbar), Suche und Sprachauswahl; **Startbildschirm** beim ersten Besuch und eine Website, die sich auf dem Startbildschirm eines Smartphones installieren lässt (Manifest, Symbol).
 - Automatische französische Typografie für französische Inhalte (geschützte Leerzeichen vor `: ; ! ?` und in « »-Anführungszeichen).
 
 ### 🤖 GEO (KI-Antwortmaschinen)
@@ -812,7 +813,7 @@ Eine signierte Version lässt sich nur in einem Git-Checkout bauen und enthält 
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (leg dir eine Kopie an: Die Integritätsprüfung meldet diese Dateien als geändert, und ein Update ersetzt sie; die Seite „Updates“ listet sie vorher auf). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 731 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
+Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr passt du das Theme an, indem du `app/theme/*.php`, `app/theme/theme.css` und `app/theme/themes/*.css` bearbeitest (leg dir eine Kopie an: Die Integritätsprüfung meldet diese Dateien als geändert, und ein Update ersetzt sie; die Seite „Updates“ listet sie vorher auf). Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 744 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
 
 ---
 

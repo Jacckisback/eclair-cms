@@ -104,6 +104,19 @@ final class AdminSettings
         return ['hints' => $hints, 'usage' => Ai::usage(), 'crypto' => Vault::available(), 'mcp' => Mcp::grants(), 'mcp_url' => Mcp::url()];
     }
 
+    /** Adresses publiques des articles et catégories d'articles, qui dépendent des langues du site. */
+    private static function langPaths(): array
+    {
+        $out = [];
+        foreach (Content::published('post') as $id => $e) {
+            $out['c' . $id] = Content::path($e);
+        }
+        foreach (Categories::of('post') as $c) {
+            $out['k' . $c['id']] = Categories::path($c);
+        }
+        return $out;
+    }
+
     public static function save(array $user): never
     {
         $tab = in_array(Req::input('tab'), self::TABS, true) ? Req::input('tab') : 'general';
@@ -137,6 +150,7 @@ final class AdminSettings
                     'home' => $home === '' || (Content::index()[$home]['type'] ?? '') === 'page' ? $home : '',
                     'search' => Req::bool('search'),
                     'usage' => in_array(Req::input('usage'), Starter::TYPES, true) ? Req::input('usage') : '',
+                ] + Langs::clean(isset(Content::LANGS[Req::input('lang')]) ? Req::input('lang') : $s['lang'], Req::inputArray('languages'), Req::inputArray('i18n')) + [
                     'blog' => [
                         'enabled' => Req::bool('blog_enabled'),
                         'base' => in_array($base, [$s['admin_path'], 'media', 'assets', 'app', 'data', 'cache', 'products', ltrim(Shop::path(), '/')], true) ? 'blog' : $base,
@@ -165,6 +179,8 @@ final class AdminSettings
                     'footer' => Sanitize::multiline(Req::input('footer'), 500),
                     'credit' => Req::bool('credit'),
                     'motion' => Req::bool('motion'),
+                    'mobile_menu' => Req::bool('mobile_menu'),
+                    'splash' => Req::bool('splash'),
                 ]];
                 // Direction artistique : les valeurs du formulaire (JavaScript), sinon la direction livrée cochée.
                 $d = [];
@@ -324,7 +340,20 @@ final class AdminSettings
                 }
                 break;
         }
+        // Langues du site changées : les articles et catégories qui changent d'adresse (/blog/x ↔ /en/blog/x) sont redirigés.
+        $before = $tab === 'general' ? self::langPaths() : [];
         Settings::save($patch);
+        if ($before) {
+            $moves = [];
+            foreach (self::langPaths() as $key => $path) {
+                if (isset($before[$key]) && $before[$key] !== $path) {
+                    $moves[] = [$before[$key], $path];
+                }
+            }
+            if ($moves) {
+                Redirects::addMany($moves, true);
+            }
+        }
         Log::security('settings_saved', ['tab' => $tab]);
         if (isset($patch['url']) && $patch['url'] !== $s['url'] && !Settings::verifyUrl()) {
             Session::flash('warn', t('Je n’ai pas pu vérifier que {url} mène bien à ce site : en attendant, personne n’est redirigé vers cette adresse. Vérifie-la depuis la page Sécurité.', ['url' => $patch['url']]));

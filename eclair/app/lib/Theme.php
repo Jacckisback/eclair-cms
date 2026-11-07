@@ -100,6 +100,9 @@ final class Theme
         'full_content' => ['Tout le contenu en Markdown', 'Todo el contenido en Markdown', 'Full content in Markdown', 'Gesamter Inhalt in Markdown', 'Tutto il contenuto in Markdown', 'Todo o conteúdo em Markdown'],
         'read_in' => ['Lire en', 'Leer en', 'Read in', 'Lesen auf', 'Leggi in', 'Ler em'],
         'edit' => ['Modifier', 'Editar', 'Edit', 'Bearbeiten', 'Modifica', 'Editar'],
+        'language' => ['Langue', 'Idioma', 'Language', 'Sprache', 'Lingua', 'Idioma'],
+        'open_menu' => ['Ouvrir le menu', 'Abrir el menú', 'Open menu', 'Menü öffnen', 'Apri il menu', 'Abrir o menu'],
+        'close_menu' => ['Fermer le menu', 'Cerrar el menú', 'Close menu', 'Menü schließen', 'Chiudi il menu', 'Fechar o menu'],
         'social' => ['Réseaux sociaux', 'Redes sociales', 'Social media', 'Soziale Medien', 'Social', 'Redes sociais'],
         'shop' => ['Boutique', 'Tienda', 'Shop', 'Shop', 'Negozio', 'Loja'],
         'products' => ['Produits', 'Productos', 'Products', 'Produkte', 'Prodotti', 'Produtos'],
@@ -305,7 +308,12 @@ final class Theme
     /** Micro-animations (Réglages › Apparence), avant le CSS personnalisé ; coupées, rien n'est ajouté (page à l'octet près). */
     private static function motion(array $a): string
     {
-        return empty($a['motion']) ? '' : "\n" . (string) file_get_contents(ECLAIR_ROOT . '/app/theme/motion.css');
+        $css = empty($a['motion']) ? '' : "\n" . (string) file_get_contents(ECLAIR_ROOT . '/app/theme/motion.css');
+        // 1.15 : sélecteur de langue, menu mobile plein écran et écran de démarrage, chacun seulement s'il sert.
+        foreach (['langs' => Langs::enabled(), 'mobile' => !empty($a['mobile_menu']), 'splash' => !empty($a['splash'])] as $file => $on) {
+            $css .= $on ? "\n" . (string) file_get_contents(ECLAIR_ROOT . '/app/theme/' . $file . '.css') : '';
+        }
+        return $css;
     }
 
     /** CSS du thème, personnalisé et minifié, destiné à être inséré dans la page. */

@@ -19,6 +19,9 @@ final class Settings
         'timezone' => 'Europe/Paris',
         'admin_path' => 'admin',
         'home' => '',
+        // Site multilingue (voir Langs) : langues ajoutées à celle du site, et par langue son accueil et ses textes.
+        'languages' => [],
+        'i18n' => [],
         'blog' => [
             'enabled' => true,
             'base' => 'blog',
@@ -41,6 +44,10 @@ final class Settings
             'credit' => true,
             // Micro-animations du site : activées à l'installation ; un site d'avant la 1.11 garde sa page à l'octet près.
             'motion' => false,
+            // Menu mobile plein écran à icônes et écran de démarrage (1.15) : activés à l'installation ; un site d'avant
+            // la 1.15 garde sa page à l'octet près tant qu'il ne les active pas.
+            'mobile_menu' => false,
+            'splash' => false,
             'direction' => [],
         ],
         'seo' => [
@@ -177,6 +184,7 @@ final class Settings
             Store::write('site', $merged);
         });
         self::$data = null;
+        Langs::forget();
         Cache::purge();
     }
 
@@ -217,6 +225,7 @@ final class Settings
     public static function forget(): void
     {
         self::$data = null;
+        Langs::forget();
     }
 
     /** Chemins réservés par le routeur (non utilisables comme slug racine). */

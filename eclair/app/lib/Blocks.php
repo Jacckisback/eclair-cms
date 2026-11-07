@@ -440,14 +440,14 @@ final class Blocks
         if (!Settings::get('blog.enabled')) {
             return '';
         }
-        $posts = Content::latest($b['count'], $b['category']);
+        $posts = Content::latest($b['count'], $b['category'], '', $lang);
         if (!$posts) {
             return '';
         }
         $title = $b['title'] !== '' ? $b['title'] : Theme::t('latest_posts', $lang);
         return '<section class="posts-block"><h2' . ($anchor !== '' ? ' id="' . e($anchor) . '"' : '') . self::ef('title') . '>' . e($title) . '</h2>'
             . Theme::cards($posts, $lang)
-            . '<p class="more"><a href="' . e(path_to(Content::blogPath())) . '">' . e(Theme::t('all_posts', $lang)) . " →</a></p></section>\n";
+            . '<p class="more"><a href="' . e(path_to(Langs::blogPath(Langs::valid($lang)))) . '">' . e(Theme::t('all_posts', $lang)) . " →</a></p></section>\n";
     }
 
     /** Derniers produits de la boutique (tous, ou ceux d'une catégorie). */
@@ -836,7 +836,7 @@ final class Blocks
 
     private static function mdPosts(array $b, string $lang): string
     {
-        $posts = Settings::get('blog.enabled') ? Content::latest($b['count'], $b['category']) : [];
+        $posts = Settings::get('blog.enabled') ? Content::latest($b['count'], $b['category'], '', $lang) : [];
         if (!$posts) {
             return '';
         }

@@ -49,6 +49,35 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
       <label class="field"><span class="label"><?= e(t('Fuseau horaire')) ?></span><select name="timezone">
         <?php foreach (DateTimeZone::listIdentifiers() as $tz): ?><option<?= $s['timezone'] === $tz ? ' selected' : '' ?>><?= e($tz) ?></option><?php endforeach ?></select></label>
     </div>
+    <fieldset class="field">
+      <legend class="label"><?= e(t('Langues du site')) ?></legend>
+      <span class="hint"><?= e(t('Ajoute des langues : chacune a son accueil, son blog et ses adresses (/en, /en/blog…), un sélecteur de langue apparaît dans l’en-tête et les traductions sont reliées (hreflang). Relie chaque traduction à son original dans l’éditeur.')) ?></span>
+      <div class="row">
+        <?php foreach (Content::LANGS as $code => $name): if ($code === $s['lang']) continue; ?>
+          <label class="check"><input type="checkbox" name="languages[]" value="<?= e($code) ?>"<?= in_array($code, (array) $s['languages'], true) ? ' checked' : '' ?>> <?= e($name) ?></label>
+        <?php endforeach ?>
+      </div>
+    </fieldset>
+    <?php foreach ((array) $s['languages'] as $code): if (!isset(Content::LANGS[$code]) || $code === $s['lang']) continue; $row = (array) ($s['i18n'][$code] ?? []); ?>
+      <details class="field">
+        <summary><b><?= e(Content::LANGS[$code]) ?></b> · <?= e(t('accueil et textes du site dans cette langue')) ?></summary>
+        <label class="field"><span class="label"><?= e(t('Page d’accueil')) ?> (/<?= e($code) ?>)</span><select name="i18n[<?= e($code) ?>][home]">
+          <option value=""><?= e(t('Les derniers articles du blog')) ?></option>
+          <?php foreach ($v['pages'] as $p): ?><option value="<?= e($p['id']) ?>"<?= ($row['home'] ?? '') === $p['id'] ? ' selected' : '' ?>><?= e($p['title']) ?></option><?php endforeach ?>
+        </select></label>
+        <div class="grid-2">
+          <label class="field"><span class="label"><?= e(t('Nom du site')) ?></span><input type="text" name="i18n[<?= e($code) ?>][name]" value="<?= e($row['name'] ?? '') ?>" maxlength="100" placeholder="<?= e($s['name']) ?>"></label>
+          <label class="field"><span class="label"><?= e(t('Slogan')) ?></span><input type="text" name="i18n[<?= e($code) ?>][tagline]" value="<?= e($row['tagline'] ?? '') ?>" maxlength="160"></label>
+        </div>
+        <label class="field"><span class="label"><?= e(t('Description de l’accueil (méta-description)')) ?></span><textarea name="i18n[<?= e($code) ?>][description]" rows="2" maxlength="320"><?= e($row['description'] ?? '') ?></textarea></label>
+        <label class="field"><span class="label"><?= e(t('Texte du pied de page')) ?></span><textarea name="i18n[<?= e($code) ?>][footer]" rows="2"><?= e($row['footer'] ?? '') ?></textarea></label>
+        <div class="grid-2">
+          <label class="field"><span class="label"><?= e(t('Titre du blog')) ?></span><input type="text" name="i18n[<?= e($code) ?>][blog_title]" value="<?= e($row['blog_title'] ?? '') ?>" maxlength="80"></label>
+          <label class="field"><span class="label"><?= e(t('Présentation du blog')) ?></span><input type="text" name="i18n[<?= e($code) ?>][blog_description]" value="<?= e($row['blog_description'] ?? '') ?>"></label>
+        </div>
+        <span class="hint"><?= e(t('Laissé vide, un texte reprend celui de la langue du site.')) ?></span>
+      </details>
+    <?php endforeach ?>
     <label class="field"><span class="label"><?= e(t('Usage du site')) ?></span><select name="usage">
       <option value=""><?= e(t('Non précisé')) ?></option>
       <?php foreach (\Eclair\Usage::all() as $key => [, $label]): ?><option value="<?= e($key) ?>"<?= $s['usage'] === $key ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach ?>
@@ -232,6 +261,8 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         <option value="light"<?= $s['appearance']['dark'] === 'light' ? ' selected' : '' ?>><?= e(t('Toujours clair')) ?></option></select></label>
     </div>
     <label class="field"><span class="label"><?= e(t('Texte du pied de page')) ?></span><textarea name="footer" rows="2"><?= e($s['appearance']['footer']) ?></textarea></label>
+    <?= $sw('mobile_menu', !empty($s['appearance']['mobile_menu']), t('Menu mobile plein écran'), t('Sur téléphone, un bouton ouvre le menu en plein écran : grandes zones à toucher, une icône par élément (à choisir dans Menus), recherche et choix de la langue.')) ?>
+    <?= $sw('splash', !empty($s['appearance']['splash']), t('Écran de démarrage'), t('À la première visite, le logo (ou l’icône) et le nom du site s’affichent moins d’une seconde, puis s’effacent. Le site devient aussi installable sur l’écran d’accueil d’un téléphone, avec son icône.')) ?>
     <?= $sw('motion', !empty($s['appearance']['motion']), t('Micro-animations'), t('Cartes, atouts et images apparaissent en glissant au défilement ; boutons et images réagissent au survol. Sans script ni ralentissement, et coupées pour les visiteurs qui préfèrent moins de mouvement.')) ?>
     <?= $sw('credit', (bool) $s['appearance']['credit'], t('Afficher « Propulsé par ⚡ Éclair »')) ?>
     <label class="field"><span class="label"><?= e(t('CSS personnalisé')) ?></span>

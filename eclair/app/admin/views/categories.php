@@ -22,6 +22,11 @@ $kind = $edit['kind'] ?? $v['kind'];
           <label class="field"><span class="label"><?= e(t('Elle regroupe')) ?></span>
             <select name="kind"><option value="post"<?= $kind === 'post' ? ' selected' : '' ?>><?= e(t('Des articles (blog)')) ?></option><option value="product"<?= $kind === 'product' ? ' selected' : '' ?>><?= e(t('Des produits (boutique)')) ?></option></select></label>
         <?php endif ?>
+        <?php if (\Eclair\Langs::enabled() && $kind === 'post'): ?>
+          <label class="field"><span class="label"><?= e(t('Langue')) ?></span><select name="lang">
+            <?php foreach (\Eclair\Langs::all() as $code): ?><option value="<?= e($code) ?>"<?= \Eclair\Langs::ofCategory($edit ?? []) === $code ? ' selected' : '' ?>><?= e(\Eclair\Content::LANGS[$code]) ?></option><?php endforeach ?>
+          </select><span class="hint"><?= e(t('La catégorie regroupe les articles de cette langue, à l’adresse du blog de cette langue.')) ?></span></label>
+        <?php endif ?>
         <label class="field"><span class="label"><?= e(t('Nom')) ?></span><input type="text" name="name" value="<?= e($edit['name'] ?? '') ?>" required maxlength="80"></label>
         <label class="field"><span class="label"><?= e(t('Slug (URL)')) ?></span><input type="text" name="slug" value="<?= e($edit['slug'] ?? '') ?>" placeholder="<?= e(t('automatique')) ?>"></label>
         <label class="field"><span class="label"><?= e(t('Description')) ?></span><textarea name="description" rows="4"><?= e($edit['description'] ?? '') ?></textarea>

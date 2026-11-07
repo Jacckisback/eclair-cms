@@ -51,7 +51,8 @@ final class Categories
 
     public static function path(array $cat): string
     {
-        return (($cat['kind'] ?? 'post') === 'product' ? Shop::path() : Content::blogPath()) . '/' . $cat['slug'];
+        // Site multilingue : une catégorie d'articles d'une langue ajoutée est sous le blog de cette langue (/en/blog/<slug>).
+        return (($cat['kind'] ?? 'post') === 'product' ? Shop::path() : Langs::blogPath(Langs::ofCategory($cat))) . '/' . $cat['slug'];
     }
 
     public static function save(array $data): array
@@ -87,6 +88,11 @@ final class Categories
                 'description' => Sanitize::multiline($data['description'] ?? '', 1000),
                 'seo_title' => Sanitize::text($data['seo_title'] ?? '', 120),
             ];
+            // Langue d'une catégorie d'articles sur un site multilingue ('' : celle du site). Absente sinon (rien ne change).
+            $lang = (string) ($data['lang'] ?? ($existing['lang'] ?? ''));
+            if ($kind === 'post' && Langs::extra($lang)) {
+                $cat['lang'] = $lang;
+            }
             $found = false;
             foreach ($cats as $i => $old) {
                 if ($old['id'] === $cat['id']) {

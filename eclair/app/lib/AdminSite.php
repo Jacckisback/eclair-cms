@@ -33,17 +33,18 @@ final class AdminSite
             }
             return $item + ['title' => $item['url'] ?? '', 'kind' => t('Lien')];
         };
-        Admin::view('menus', [
-            'menus' => ['main' => array_map($resolve, Menus::raw('main')), 'footer' => array_map($resolve, Menus::raw('footer'))],
-            'options' => $options,
-        ], t('Menus'));
+        $menus = [];
+        foreach (Menus::names() as $name) {
+            $menus[$name] = array_map($resolve, Menus::raw($name));
+        }
+        Admin::view('menus', ['menus' => $menus, 'options' => $options], t('Menus'));
     }
 
     public static function saveMenus(array $user): never
     {
         $payload = json_decode(Req::input('menus'), true);
         if (is_array($payload)) {
-            foreach (Menus::NAMES as $name) {
+            foreach (Menus::names() as $name) {
                 Menus::save($name, is_array($payload[$name] ?? null) ? $payload[$name] : []);
             }
         }
@@ -78,6 +79,7 @@ final class AdminSite
                 'description' => Req::input('description'),
                 'seo_title' => Req::input('seo_title'),
                 'kind' => Req::input('kind'),
+                'lang' => Req::input('lang'),
             ]);
         } catch (\RuntimeException $e) {
             Admin::back('categories', $e->getMessage(), 'bad');

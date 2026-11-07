@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.14.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.1.zip) archive (731 KB) and unzip it.
+1. Download the [`eclair-cms-1.15.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.15.0.zip) archive (744 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -90,7 +90,8 @@ The dashboard shows a “Getting started” checklist: logo and color, home page
 - One address per piece of content: redirects for HTTPS, www/non-www, trailing slash, uppercase, `index.php`.
 - **IndexNow**: Bing, Yandex, Seznam… are notified every time you publish.
 - Google Search Console and Bing Webmaster Tools verification (paste the `<meta>` tag, Éclair extracts the code).
-- Multilingual: language per piece of content, linked translations and automatic `hreflang` tags.
+- Multilingual: language per piece of content, linked translations and automatic `hreflang` tags. Since 1.15, **Settings › General › Site languages** adds languages: each one gets its own addresses (`/en`, `/en/blog`, `/en/blog/<post>`), home page, texts (name, tagline, footer, blog), categories and menus (Menus), and a language switcher appears in the header.
+- Mobile (1.15, Settings › Appearance): **full-screen menu** with one icon per item (chosen in Menus), search and language choice; **splash screen** on the first visit and a site that can be installed on a phone's home screen (manifest, icon).
 - Automatic French typography for French content (non-breaking spaces before `: ; ! ?` and inside « » quotes).
 
 ### 🤖 GEO (AI answer engines)
@@ -812,7 +813,7 @@ A signed release can only be built in a Git checkout and only includes tracked f
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 731 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 744 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

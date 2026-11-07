@@ -2,6 +2,27 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## 1.15.0 — 2026-11-07
+
+Multilingual and mobile release: a site can now be published in several languages with its own addresses, menus and blog per language, and phones get a full-screen menu with icons and an optional splash screen. Nothing changes on public pages until these options are turned on. Sites on 1.14.x update in one click from Administration › Updates, after a backup.
+
+### Added
+
+- **Multilingual sites (Settings › General › Site languages).** Add languages to the site language (French, Spanish, English, German, Italian, Portuguese). The site language keeps its addresses (`/`, `/blog`, `/contact`); each added language gets its own under a prefix: home page `/en`, blog `/en/blog`, posts `/en/blog/<post>`, categories `/en/blog/<category>`, search `/en/search`. Pages keep the address you give them (`en/about`). Per language: its home page (a page or its latest posts), and the site name, tagline, home description, footer text and blog title and introduction (left empty, the site-language text is used).
+  - Blog lists, categories, "latest posts" blocks, related posts and search only show the posts of the page's language. Categories have a language. Author pages list every language.
+  - A **language switcher** in the header leads to the translation of the page being read, or to the home page (or blog) of the other language. `hreflang` links, already set between linked translations, now also link the blogs of each language.
+  - **Menus per language** (Menus): an added language can have its own header and footer menus; left empty, the site-language menu is shown with each page replaced by its translation.
+  - Changing the site languages redirects (301) the posts and categories whose address changes.
+- **Full-screen mobile menu (Settings › Appearance).** Below 52rem, the header menu becomes a button that opens the menu full screen: large touch targets, one drawn icon per item (chosen in Menus, or automatic by type: home, page, blog, category, link…), search and language choice, safe areas of notched phones respected. Opening uses a strong ease-out and a short stagger, closing is faster, and visitors who prefer less motion only get a fade. Escape, the back button and focus trapping are handled. Its script (`assets/site/menu.js`, under 2 KB) is only loaded when the menu is on.
+- **Splash screen and installable site (Settings › Appearance).** On the first page of a visit, the site icon and name show for under a second, then fade out; the page loads underneath and is never blocked (the splash ignores taps and disappears even without JavaScript). The site also serves `/manifest.webmanifest` (name, icons 192/512, colors), so it can be installed on a phone's home screen with its icon and native splash.
+- New sites have the mobile menu and splash screen on; existing sites keep them off until they choose.
+
+### For maintainers
+
+- New `Langs` class (prefixes, per-language home pages and texts, switcher links); `Content::path()`, `Content::latest()`, `Content::search()`, `Menus::items()` and `Categories::path()` take the language into account only when the site has several languages.
+- New public files `app/theme/langs.css`, `mobile.css`, `splash.css`, `assets/site/menu.js` and `splash.js`, each added to a page only when its feature is used. `site.js`, `theme.css` and the themes are unchanged; the 1.6.0 public reference still matches byte for byte.
+- New `tests/langs.php` (14 checks); the suite passes (1,174 checks).
+
 ## 1.14.1 — 2026-11-05
 
 Fix release: the installation now stops with a clear message when the `.htaccess` file was not uploaded. Sites on 1.14.0 update in one click from Administration › Updates, after a backup.

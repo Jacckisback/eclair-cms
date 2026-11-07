@@ -597,7 +597,11 @@ if (!in_array('--unit', $argv, true)) {
         check("« $type » : identiques avec une session d’administration", ($now[$type]['admin_same'] ?? false) === true);
     }
     check('HTML de chaque type de bloc identique', capture_blocks(dirname(__DIR__), $fixtures . '/sites/business') === $ref['blocks']);
-    check('CSS et JS publics inchangés (sha256)', capture_public_files(dirname(__DIR__)) === $ref['public_files']);
+    // Les fichiers publics existants restent à l'octet près ; un fichier ajouté depuis (menu.js, splash.js en 1.15) n'est chargé
+    // que par un site qui active sa fonction.
+    $files = capture_public_files(dirname(__DIR__));
+    check('CSS et JS publics inchangés (sha256)', array_intersect_key($files, $ref['public_files']) === $ref['public_files']
+        && array_keys(array_diff_key($files, $ref['public_files'])) === ['eclair/assets/site/menu.js', 'eclair/assets/site/splash.js']);
 
     section('Mode Visuel : seulement dans l’aperçu de l’administration');
     [$vcopy, $vport, $vserver] = capture_serve(dirname(__DIR__), $fixtures . '/sites/business', 'visual');
@@ -654,6 +658,7 @@ require __DIR__ . '/shop.php';
 require __DIR__ . '/mcp.php';
 require __DIR__ . '/design.php';
 require __DIR__ . '/ux.php';
+require __DIR__ . '/langs.php';
 require __DIR__ . '/ai-visits.php';
 require __DIR__ . '/plan.php';
 require __DIR__ . '/wayback.php';
