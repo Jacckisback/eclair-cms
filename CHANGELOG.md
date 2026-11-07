@@ -20,6 +20,9 @@ Multilingual and mobile release: a site can now be published in several language
 ### Changed
 
 - **Feature cards with drawn icons (art directions):** a short mark that is not an emoji (`4`, `A1`, `20 %`) now stays visible, as text, instead of disappearing; useful for numbered steps and price packs.
+- **“Key takeaways” box on or off (Settings › Appearance).** On by default, so existing sites do not change. Switched off, the summary box under the title is not shown; the summary stays in the meta description, the structured data, the feed and the Markdown versions.
+- **New heading font: Fraunces** (soft, warm serif, for schools, publishing, cooking, crafts), next to Courgette.
+- On a multilingual site, the language links also appear in the footer, and the full-screen mobile menu shows the site tagline under the links.
 - **New heading font: Courgette** (warm handwritten script, for schools, cafés, workshops), self-hosted like the other art-direction fonts.
 - **Scroll reveal (micro-animations):** a card still sliding in now stays above the next colored band instead of being cut by it.
 - On a multilingual site, the "Read in" line under the title gives way to the header language switcher, which also leads to the translation of pages hidden from search engines (legal notice, thank-you page).
@@ -28,7 +31,7 @@ Multilingual and mobile release: a site can now be published in several language
 
 - New `Langs` class (prefixes, per-language home pages and texts, switcher links); `Content::path()`, `Content::latest()`, `Content::search()`, `Menus::items()` and `Categories::path()` take the language into account only when the site has several languages.
 - New public files `app/theme/langs.css`, `mobile.css`, `splash.css`, `assets/site/menu.js` and `splash.js`, each added to a page only when its feature is used. `site.js`, `theme.css` and the themes are unchanged; the 1.6.0 public reference still matches byte for byte.
-- New `tests/langs.php` (15 checks); the suite passes on the source and on the built archive (1,175 checks).
+- New `tests/langs.php` (18 checks); the suite passes on the source and on the built archive (1,178 checks).
 
 ## 1.14.1 — 2026-11-05
 

@@ -24,6 +24,9 @@ $cards = \Eclair\Blocks::html(\Eclair\Blocks::normalize([['type' => 'features', 
 \Eclair\Theme::preview([]);
 check('atouts en icônes dessinées : un repère court (« 4 ») reste affiché et lisible, un émoji devient une icône', str_contains($cards, '<span class="feature-icon feature-mark">4</span>')
     && str_contains($cards, '<span class="feature-icon" aria-hidden="true"><svg'));
+check('encadré « L’essentiel » : affiché par défaut (un site existant ne change pas)', Settings::DEFAULTS['appearance']['key_box'] === true
+    && str_contains((string) file_get_contents(ECLAIR_ROOT . '/app/theme/single.php'), "appearance.key_box"));
+check('police Fraunces : proposée aux directions artistiques', isset(\Eclair\Design::FONTS['fraunces']) && \Eclair\Design::FONTS['fraunces'][1] === 600);
 check('icônes de menu : toutes dessinées', array_filter(Menus::ICONS, fn (string $n): bool => !\Eclair\Icons::has($n)) === []);
 
 if (!in_array('--unit', $argv, true)) {
@@ -56,6 +59,7 @@ if (!in_array('--unit', $argv, true)) {
         $site['i18n'] = ['en' => ['home' => 'en0home01', 'name' => 'Business site', 'tagline' => 'Reference', 'blog_title' => 'Journal']];
         $site['appearance']['mobile_menu'] = true;
         $site['appearance']['splash'] = true;
+        $site['appearance']['key_box'] = false;
         $write('site', $site);
         @unlink($copy . '/data/index.php');
         exec('rm -rf ' . escapeshellarg($copy) . '/cache/*');
@@ -69,6 +73,7 @@ if (!in_array('--unit', $argv, true)) {
             && str_contains($fr['body'], 'href="/en" hreflang="en"') && str_contains($fr['body'], 'class="nav-toggle"') && str_contains($fr['body'], 'id="mnav"')
             && str_contains($fr['body'], 'class="splash"') && str_contains($fr['body'], 'rel="manifest"') && str_contains($fr['body'], '/assets/site/menu.js'));
         check('menu mobile : une icône dessinée par élément, aucun style en ligne (CSP)', substr_count($fr['body'], 'class="mnav-ic"') >= 3 && !preg_match('~\sstyle="~', $fr['body']));
+        check('« L’essentiel » masqué par le réglage, résumé gardé dans la méta-description', !str_contains($fr['body'], 'class="key"') && str_contains($fr['body'], 'name="description"'));
         $about = $get('/en/about');
         check('/en/about : traduction de « À propos », fil d’Ariane depuis /en, sans doublon', $about['status'] === 200
             && str_contains($about['body'], 'hreflang="fr" href="https://eclair.test/a-propos"') && substr_count($about['body'], '"item":"https://eclair.test/en"') === 1);

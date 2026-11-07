@@ -48,6 +48,9 @@ final class Settings
             // la 1.15 garde sa page à l'octet près tant qu'il ne les active pas.
             'mobile_menu' => false,
             'splash' => false,
+            // Encadré « L'essentiel » (le résumé) en haut des pages et articles ; il reste dans les données structurées,
+            // le flux et les versions Markdown même quand il n'est pas affiché.
+            'key_box' => true,
             'direction' => [],
         ],
         'seo' => [

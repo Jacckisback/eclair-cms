@@ -179,6 +179,7 @@ final class AdminSettings
                     'footer' => Sanitize::multiline(Req::input('footer'), 500),
                     'credit' => Req::bool('credit'),
                     'motion' => Req::bool('motion'),
+                    'key_box' => Req::bool('key_box'),
                     'mobile_menu' => Req::bool('mobile_menu'),
                     'splash' => Req::bool('splash'),
                 ]];

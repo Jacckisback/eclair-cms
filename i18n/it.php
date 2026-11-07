@@ -1931,4 +1931,6 @@ return [
     'accueil et textes du site dans cette langue' => 'home page e testi del sito in questa lingua',
     'À la première visite, le logo (ou l’icône) et le nom du site s’affichent moins d’une seconde, puis s’effacent. Le site devient aussi installable sur l’écran d’accueil d’un téléphone, avec son icône.' => 'Alla prima visita, il logo (o l\'icona) e il nome del sito compaiono per meno di un secondo, poi svaniscono. Il sito diventa anche installabile sulla schermata Home di un telefono, con la sua icona.',
     'Écran de démarrage' => 'Schermata di avvio',
+    'Encadré « L’essentiel »' => 'Riquadro «In breve»',
+    'Affiche le résumé de chaque page et article dans un encadré sous le titre. Éteint, le résumé reste dans la méta-description, les données structurées et les versions Markdown pour les moteurs et les IA.' => 'Mostra il riassunto di ogni pagina e articolo in un riquadro sotto il titolo. Disattivato, il riassunto resta nella meta descrizione, nei dati strutturati e nelle versioni Markdown per motori di ricerca e IA.',
 ];

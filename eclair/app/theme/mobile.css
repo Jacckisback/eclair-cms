@@ -47,3 +47,4 @@ html{-webkit-tap-highlight-color:transparent}
 body.mnav-open{overflow:hidden}
 @media (hover:hover) and (pointer:fine){.mnav-list a:hover{background:var(--bg-soft)}}
 @media (prefers-reduced-motion:reduce){.mnav-panel,.mnav-list li{transform:none!important;transition-property:opacity!important}}
+.mnav-note{margin:1.2rem 0 0;color:var(--muted);font-size:.9rem;line-height:1.5;text-align:center}

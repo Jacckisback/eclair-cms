@@ -261,6 +261,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         <option value="light"<?= $s['appearance']['dark'] === 'light' ? ' selected' : '' ?>><?= e(t('Toujours clair')) ?></option></select></label>
     </div>
     <label class="field"><span class="label"><?= e(t('Texte du pied de page')) ?></span><textarea name="footer" rows="2"><?= e($s['appearance']['footer']) ?></textarea></label>
+    <?= $sw('key_box', !empty($s['appearance']['key_box']), t('Encadré « L’essentiel »'), t('Affiche le résumé de chaque page et article dans un encadré sous le titre. Éteint, le résumé reste dans la méta-description, les données structurées et les versions Markdown pour les moteurs et les IA.')) ?>
     <?= $sw('mobile_menu', !empty($s['appearance']['mobile_menu']), t('Menu mobile plein écran'), t('Sur téléphone, un bouton ouvre le menu en plein écran : grandes zones à toucher, une icône par élément (à choisir dans Menus), recherche et choix de la langue.')) ?>
     <?= $sw('splash', !empty($s['appearance']['splash']), t('Écran de démarrage'), t('À la première visite, le logo (ou l’icône) et le nom du site s’affichent moins d’une seconde, puis s’effacent. Le site devient aussi installable sur l’écran d’accueil d’un téléphone, avec son icône.')) ?>
     <?= $sw('motion', !empty($s['appearance']['motion']), t('Micro-animations'), t('Cartes, atouts et images apparaissent en glissant au défilement ; boutons et images réagissent au survol. Sans script ni ralentissement, et coupées pour les visiteurs qui préfèrent moins de mouvement.')) ?>

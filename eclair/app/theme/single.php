@@ -72,7 +72,7 @@ $edit = !empty($v['edit']);
     <figure class="featured"<?= Blocks::ea('ef', 'image', $edit) ?>><?= Media::picture($v['featured'], (string) $v['featured']['alt'], '(min-width: 72rem) 68rem, 100vw', true) ?></figure>
   <?php endif ?>
 
-  <?php if ($item['summary'] !== ''): ?>
+  <?php if ($item['summary'] !== '' && \Eclair\Settings::get('appearance.key_box', true)): ?>
     <aside class="key" aria-label="<?= e(Theme::t('key_points', $lang)) ?>">
       <p class="key-title"><?= e(Theme::t('key_points', $lang)) ?></p>
       <p<?= Blocks::ea('ef', 'summary', $edit) ?>><?= nl2br(e($item['summary'])) ?></p>

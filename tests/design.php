@@ -170,7 +170,7 @@ if (!in_array('--unit', $argv, true)) {
             return $c->req('POST', '/gestion/settings', $c->token($page['body']) + $fields + ['tab' => 'appearance', 'theme' => $orig['theme'], 'header' => $orig['header'],
                 'cards' => $orig['cards'], 'logo' => $orig['logo'], 'favicon' => $orig['favicon'], 'accent' => $orig['accent'], 'font_head' => $orig['font_head'],
                 'font_body' => $orig['font_body'], 'dark' => $orig['dark'], 'footer' => $orig['footer'], 'credit' => $orig['credit'] ? '1' : '',
-                'motion' => $orig['motion'] ? '1' : '', 'mobile_menu' => !empty($orig['mobile_menu']) ? '1' : '', 'splash' => !empty($orig['splash']) ? '1' : '', 'custom_css' => '']);
+                'motion' => $orig['motion'] ? '1' : '', 'key_box' => !empty($orig['key_box']) ? '1' : '', 'mobile_menu' => !empty($orig['mobile_menu']) ? '1' : '', 'splash' => !empty($orig['splash']) ? '1' : '', 'custom_css' => '']);
         };
         $stored = static fn (): array => json_decode(substr((string) file_get_contents($copy . '/data/site.php'), strlen(Store::GUARD)), true)['appearance']['direction'] ?? ['?'];
 

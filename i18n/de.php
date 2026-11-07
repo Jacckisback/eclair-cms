@@ -1931,4 +1931,6 @@ return [
     'accueil et textes du site dans cette langue' => 'Startseite und Texte der Website in dieser Sprache',
     'À la première visite, le logo (ou l’icône) et le nom du site s’affichent moins d’une seconde, puis s’effacent. Le site devient aussi installable sur l’écran d’accueil d’un téléphone, avec son icône.' => 'Beim ersten Besuch erscheinen Logo (oder Symbol) und Name der Website weniger als eine Sekunde lang und blenden dann aus. Die Website lässt sich außerdem mit ihrem Symbol auf dem Startbildschirm eines Smartphones installieren.',
     'Écran de démarrage' => 'Startbildschirm',
+    'Encadré « L’essentiel »' => 'Kasten „Das Wichtigste“',
+    'Affiche le résumé de chaque page et article dans un encadré sous le titre. Éteint, le résumé reste dans la méta-description, les données structurées et les versions Markdown pour les moteurs et les IA.' => 'Zeigt die Zusammenfassung jeder Seite und jedes Beitrags in einem Kasten unter dem Titel. Ausgeschaltet bleibt sie in der Meta-Beschreibung, den strukturierten Daten und den Markdown-Versionen für Suchmaschinen und KI.',
 ];

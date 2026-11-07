@@ -1931,4 +1931,6 @@ return [
     'accueil et textes du site dans cette langue' => 'home page and site texts in this language',
     'À la première visite, le logo (ou l’icône) et le nom du site s’affichent moins d’une seconde, puis s’effacent. Le site devient aussi installable sur l’écran d’accueil d’un téléphone, avec son icône.' => 'On the first visit, the logo (or icon) and the site name show for less than a second, then fade out. The site also becomes installable on a phone\'s home screen, with its icon.',
     'Écran de démarrage' => 'Splash screen',
+    'Encadré « L’essentiel »' => '“Key takeaways” box',
+    'Affiche le résumé de chaque page et article dans un encadré sous le titre. Éteint, le résumé reste dans la méta-description, les données structurées et les versions Markdown pour les moteurs et les IA.' => 'Shows the summary of each page and post in a box under the title. When off, the summary stays in the meta description, the structured data and the Markdown versions for search engines and AI.',
 ];

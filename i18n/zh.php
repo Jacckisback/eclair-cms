@@ -1931,4 +1931,6 @@ return [
     'accueil et textes du site dans cette langue' => '此语言的首页和网站文本',
     'À la première visite, le logo (ou l’icône) et le nom du site s’affichent moins d’une seconde, puis s’effacent. Le site devient aussi installable sur l’écran d’accueil d’un téléphone, avec son icône.' => '首次访问时，网站标志（或图标）和名称显示不到一秒后淡出。网站还可以连同图标安装到手机主屏幕。',
     'Écran de démarrage' => '启动画面',
+    'Encadré « L’essentiel »' => '“要点”框',
+    'Affiche le résumé de chaque page et article dans un encadré sous le titre. Éteint, le résumé reste dans la méta-description, les données structurées et les versions Markdown pour les moteurs et les IA.' => '在标题下方的框中显示每个页面和文章的摘要。关闭后，摘要仍保留在元描述、结构化数据和 Markdown 版本中，供搜索引擎和 AI 使用。',
 ];

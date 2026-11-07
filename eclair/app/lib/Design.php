@@ -41,6 +41,7 @@ final class Design
         'syne' => ['Syne', 700, 'sans', 'expressive : studio, art, mode'],
         'unbounded' => ['Unbounded', 700, 'sans', 'large et ronde : technologie, jeu, jeunesse'],
         'fredoka' => ['Fredoka', 600, 'rounded', 'arrondie : enfants, crèche, loisirs'],
+        'fraunces' => ['Fraunces', 600, 'serif', 'serif douce et chaleureuse : école, édition, cuisine, artisanat'],
         'courgette' => ['Courgette', 400, 'script', 'manuscrite chaleureuse : cours, école, café, atelier'],
         'sora' => ['Sora', 700, 'sans', 'géométrique : jeune entreprise, finance'],
     ];

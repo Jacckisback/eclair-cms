@@ -110,6 +110,8 @@ $active = static fn (array $item): bool => $item['path'] !== '' && ($item['path'
       </div>
       <?php endif ?>
     </nav>
+    <?php $tag = Langs::text('tagline', $lang); ?>
+    <?php if ($tag !== ''): ?><p class="mnav-note"><?= e($tag) ?></p><?php endif ?>
   </div>
 </div>
 <?php endif ?>
@@ -146,6 +148,11 @@ $active = static fn (array $item): bool => $item['path'] !== '' && ($item['path'
   </div>
   <div class="wrap footer-bottom">
     <p>© <?= date('Y') ?> <?= e($site['seo']['entity_name'] ?: $site['name']) ?></p>
+<?php if ($langs): ?>
+    <nav class="footer-langs" aria-label="<?= e(Theme::t('language', $lang)) ?>">
+      <?php foreach ($langs as $code => $l): ?><a href="<?= e(path_to($l['path'])) ?>" hreflang="<?= e($code) ?>" lang="<?= e($code) ?>"<?= $l['current'] ? ' aria-current="true"' : '' ?>><?= e($l['name']) ?></a><?php endforeach ?>
+    </nav>
+<?php endif ?>
     <?php if ($site['appearance']['credit']): ?><p><?= e(Theme::t('powered', $lang)) ?> ⚡ Éclair</p><?php endif ?>
   </div>
 </footer>
