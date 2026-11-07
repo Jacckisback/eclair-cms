@@ -665,7 +665,7 @@ final class Ai
                 return strlen($chunk);
             },
             CURLOPT_NOPROGRESS => self::$tick === null,
-            CURLOPT_XFERINFOFUNCTION => static function () use (&$lastTick): int {
+            curl_progress_option() => static function () use (&$lastTick): int {
                 if (microtime(true) - $lastTick < 5) {
                     return 0;
                 }

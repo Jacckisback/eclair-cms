@@ -295,7 +295,7 @@ final class Update
             CURLOPT_FOLLOWLOCATION => false, CURLOPT_CONNECTTIMEOUT => 8, CURLOPT_TIMEOUT => $file !== null ? 120 : 15, CURLOPT_FAILONERROR => true,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | (str_starts_with(self::channel(), 'http://') ? CURLPROTO_HTTP : 0),
             CURLOPT_USERAGENT => 'Eclair/' . ECLAIR_VERSION, CURLOPT_NOPROGRESS => false,
-            CURLOPT_XFERINFOFUNCTION => static fn ($h, $total, $done): int => $done > $max ? 1 : 0,
+            curl_progress_option() => static fn ($h, $total, $done): int => $done > $max ? 1 : 0,
         ] + ($out !== null ? [CURLOPT_FILE => $out] : [CURLOPT_RETURNTRANSFER => true]));
         $body = curl_exec($ch);
         $ok = $body !== false && curl_getinfo($ch, CURLINFO_RESPONSE_CODE) === 200;
@@ -823,7 +823,7 @@ final class Update
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false, CURLOPT_TIMEOUT => 10, CURLOPT_CONNECTTIMEOUT => 4,
             CURLOPT_USERAGENT => 'Eclair/' . ECLAIR_VERSION . ' (verification)', CURLOPT_NOPROGRESS => false,
-            CURLOPT_XFERINFOFUNCTION => static fn ($h, $total, $done): int => $done > 4000000 ? 1 : 0,
+            curl_progress_option() => static fn ($h, $total, $done): int => $done > 4000000 ? 1 : 0,
         ]);
         $body = curl_exec($ch);
         $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
