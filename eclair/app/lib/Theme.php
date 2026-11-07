@@ -206,6 +206,15 @@ final class Theme
 
     public static function partial(string $name, array $v): string
     {
+        // Gabarit remplacé par le thème du site (site/themes/<id>/templates/) : en cas d'erreur, celui du noyau prend le relais.
+        $site = Themes::template($name);
+        if ($site !== null) {
+            try {
+                return self::include($site, $v);
+            } catch (\Throwable $e) {
+                Themes::failed($name, $e);
+            }
+        }
         // Archive : la vue de l'installation est compressée (gzip, lue par zlib) ; les gabarits du site, jamais.
         $file = ECLAIR_ROOT . '/app/theme/' . $name . '.php';
         if (is_file($file . '.gz')) {
@@ -216,13 +225,22 @@ final class Theme
             }
             $file = 'compress.zlib://' . $file . '.gz';
         }
+        return self::include($file, $v);
+    }
+
+    /** Exécute un gabarit avec ses seules variables ($v) et renvoie sa sortie. */
+    private static function include(string $file, array $v): string
+    {
+        $level = ob_get_level();
         ob_start();
         try {
             (static function (string $__file, array $v): void {
                 include $__file;
             })($file, $v);
         } catch (\Throwable $e) {
-            ob_end_clean();
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
             throw $e;
         }
         return (string) ob_get_clean();
@@ -278,6 +296,9 @@ final class Theme
         self::$preview = $look;
         self::$css = null;
         self::$direction = false;
+        if (isset($look['site_theme']) && is_string($look['site_theme'])) {
+            Themes::preview($look['site_theme']);
+        }
     }
 
     /** Styles de la boutique pour cette page, même boutique fermée (aperçu d'une fiche produit dans l'éditeur). */
@@ -299,13 +320,13 @@ final class Theme
     /** Blocs d'annonces (menu Discover › Publicité) : seulement quand la publicité est en service, sinon rien (page à l'octet près). */
     private static function ads(): string
     {
-        return Ads::active() ? "\n" . (string) file_get_contents(ECLAIR_ROOT . '/app/theme/ads.css') : '';
+        return Ads::active() ? "\n" . Themes::coreCss('ads.css') : '';
     }
 
     /** Micro-animations (Réglages › Apparence), avant le CSS personnalisé ; coupées, rien n'est ajouté (page à l'octet près). */
     private static function motion(array $a): string
     {
-        return empty($a['motion']) ? '' : "\n" . (string) file_get_contents(ECLAIR_ROOT . '/app/theme/motion.css');
+        return empty($a['motion']) ? '' : "\n" . Themes::coreCss('motion.css');
     }
 
     /** CSS du thème, personnalisé et minifié, destiné à être inséré dans la page. */
@@ -317,7 +338,7 @@ final class Theme
         $a = self::look();
         if ($d = self::direction()) {
             // Direction artistique : thème de base sans son mode sombre automatique (la direction choisit clair ou sombre).
-            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css')) . Design::css($d) . self::motion($a) . self::ads();
+            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', Themes::coreCss('theme.css')) . Design::css($d) . self::motion($a) . self::ads() . Themes::css();
             $custom = self::custom();
             $css .= $custom !== '' ? "\n" . $custom : '';
             if (!self::$shop && !Shop::enabled()) {
@@ -332,11 +353,12 @@ final class Theme
             . ';--link-dark:' . self::readable($accent, '#121218')
             . ';--font:' . (self::FONTS[$a['font_body'] ?? 'system'][1] ?? self::FONTS['system'][1])
             . ';--font-head:' . (self::FONTS[$a['font_head'] ?? 'system'][1] ?? self::FONTS['system'][1]) . '}';
-        $css = (string) file_get_contents(ECLAIR_ROOT . '/app/theme/theme.css');
+        $css = Themes::coreCss('theme.css');
         if ($a['theme'] !== 'eclair') {
-            $css .= (string) @file_get_contents(ECLAIR_ROOT . '/app/theme/themes/' . $a['theme'] . '.css');
+            $css .= Themes::coreCss('themes/' . $a['theme'] . '.css');
         }
-        $css .= self::motion($a) . self::ads();
+        // Thème du site (site/themes/<id>/) : après le thème de base, avant le CSS personnalisé, qui garde le dernier mot.
+        $css .= self::motion($a) . self::ads() . Themes::css();
         // CSS personnalisé du site, après le thème : il l'emporte et suit les mêmes repères (mode sombre, boutique).
         $custom = self::custom();
         if ($custom !== '') {
@@ -382,7 +404,7 @@ final class Theme
      * aucun « < » (la balise ne peut pas être refermée), aucun @import (pas de requête bloquante),
      * aucun caractère de contrôle, et une taille bornée.
      */
-    public static function cleanCss(string $css): string
+    public static function cleanCss(string $css, int $max = self::CUSTOM_MAX): string
     {
         $css = str_replace(["\r\n", "\r", '<'], ["\n", "\n", ''], Sanitize::utf8($css));
         $css = (string) preg_replace('/[\x00-\x08\x0B-\x1F\x7F]/', '', $css);
@@ -392,7 +414,7 @@ final class Theme
             $before = $css;
             $css = (string) preg_replace(['/@import\b[^;{}]*;?/i', '/(?:^|[;{}])\s*\K@[\w-]*\\\\[^;{}]*;?/'], '', $css);
         } while ($css !== $before);
-        return trim(mb_strcut($css, 0, self::CUSTOM_MAX, 'UTF-8'));
+        return trim(mb_strcut($css, 0, $max, 'UTF-8'));
     }
 
     public static function minify(string $css): string

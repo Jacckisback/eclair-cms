@@ -79,6 +79,7 @@
     el.setAttribute('height', '1em');
     return el;
   };
+  const RENDER_EXT = {};
   const TYPES = {
     paragraph: ['pilcrow', t('Texte'), t('Paragraphe de texte'), () => ({ type: 'paragraph', text: '' })],
     heading: ['heading', t('Intertitre'), t('Titre de section (H2, H3, H4)'), () => ({ type: 'heading', level: 2, text: '', anchor: '' })],
@@ -100,6 +101,12 @@
     contact: ['mail', t('Formulaire de contact'), t('Formulaire anti-spam intégré'), () => ({ type: 'contact', title: '', button: '' })],
   };
   const RICH = ['paragraph', 'heading', 'quote'];
+  // Blocs des fonctions actives (capacités) : formulaire généré à partir des champs déclarés ; le serveur les valide.
+  Object.entries(cfg.extBlocks || {}).forEach(([type, def]) => {
+    const empty = () => Object.fromEntries([['type', type], ...def.fields.map((f) => [f.key, f.type === 'bool' ? false : (f.default ?? '')])]);
+    TYPES[type] = ['spark', def.label || type, def.label || type, empty];
+    RENDER_EXT[type] = def;
+  });
 
   /* ───────────── Outils de saisie ───────────── */
   const rich = (html, placeholder, cls = '') => {
@@ -117,15 +124,31 @@
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   /* ───────────── Création d'un bloc ───────────── */
+  const extRender = (def) => (el, body, d) => {
+    const inputs = def.fields.map((f) => {
+      let field;
+      if (f.type === 'textarea') field = h('textarea', { rows: '3', maxlength: String(f.max), 'aria-label': f.label, text: d[f.key] ?? '' });
+      else if (f.type === 'bool') field = h('input', { type: 'checkbox', checked: !!d[f.key], 'aria-label': f.label });
+      else if (f.type === 'select') field = select(d[f.key] ?? f.options[0], Object.fromEntries(f.options.map((o) => [o, o])), f.label);
+      else field = input(d[f.key] ?? '', f.label, { maxlength: String(f.max), type: f.type === 'number' ? 'number' : 'text' });
+      field.addEventListener('input', () => changed());
+      body.append(h('label', { class: 'field' }, h('span', { class: 'label', text: f.label }), field));
+      return [f, field];
+    });
+    el._read = () => Object.fromEntries([['type', d.type], ...inputs.map(([f, field]) => [f.key, f.type === 'bool' ? field.checked : field.value])]);
+    el._focus = () => inputs[0]?.[1].focus();
+  };
+  // Bloc d'une fonction absente ou désactivée (capacité) : conservé tel quel, jamais transformé en paragraphe.
+  const FOREIGN = /^[a-z][a-z0-9-]{0,39}(\/[a-z][a-z0-9-]{0,39})?$/;
   const makeBlock = (data) => {
-    const type = TYPES[data.type] ? data.type : 'paragraph';
+    const type = TYPES[data.type] ? data.type : (typeof data.type === 'string' && FOREIGN.test(data.type) ? 'preserved' : 'paragraph');
     const el = h('div', { class: 'block b-' + type, 'data-type': type });
     const body = h('div', { class: 'block-body' });
     const bar = h('div', { class: 'block-bar' });
     const tools = h('div', { class: 'block-tools' },
       iconBtn('plus', t('Ajouter un bloc'), (e) => openInserter(e.currentTarget, el, false)),
       Object.assign(iconBtn('grip', t('Déplacer'), null), { className: 'grip' }));
-    el.append(h('span', { class: 'block-label', text: TYPES[type][1] }), tools, bar, body);
+    el.append(h('span', { class: 'block-label', text: type === 'preserved' ? t('Bloc conservé') : TYPES[type][1] }), tools, bar, body);
     const extra = h('span', { class: 'row' });
     // La croix de suppression est mise à l'écart des autres outils (filet, rouge au survol) : pas de clic malheureux.
     bar.append(extra,
@@ -134,12 +157,19 @@
       iconBtn('copy', t('Dupliquer'), () => { const copy = makeBlock(el._read()); el.after(copy); flash(copy, true); changed(); }),
       // Le clavier reste au même endroit : le bloc précédent (ou le premier) reprend le focus.
       Object.assign(iconBtn('x', t('Supprimer le bloc'), () => { const prev = removeBlock(el) || blocks()[0]; prev?._focus?.(true); }), { className: 'del' }));
-    RENDER[type](el, body, data, extra);
+    (RENDER[type] || extRender(RENDER_EXT[type]))(el, body, data, extra);
     bindDrag(el);
     return el;
   };
 
   const RENDER = {
+    preserved(el, body, d) {
+      const keep = d.preserved ? { type: d.type, preserved: true, data: d.data || {} }
+        : { type: d.type, preserved: true, data: Object.fromEntries(Object.entries(d).filter(([k]) => k !== 'type')) };
+      body.append(h('p', { class: 'hint', text: t('Bloc « {type} » : la fonction qui l’affiche n’est pas active sur ce site. Il est conservé tel quel, sans être affiché. Réactive la fonction pour le retrouver.').replace('{type}', d.type) }));
+      el._read = () => keep;
+      el._focus = () => el.focus();
+    },
     paragraph(el, body, d) {
       const ed = rich(d.text, t('Écris ou tape « / » pour choisir un bloc…'));
       body.append(ed);

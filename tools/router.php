@@ -9,7 +9,7 @@ $root = rtrim($_SERVER['DOCUMENT_ROOT'], '/');
 $path = rawurldecode((string) parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 // Sans tenir compte de la casse : sur un disque qui l'ignore (macOS, Windows), /DATA/ mène au dossier data/.
 // Médias : les mêmes extensions refusées que media/.htaccess (et le guide Nginx).
-if (preg_match('#^/(app|data|cache)(/|$)#i', $path) || preg_match('#(^|/)\.(?!well-known/)#', $path)
+if (preg_match('#^/(app|data|cache)(/|$)#i', $path) || preg_match('#^/site/(themes|extensions)(/|$)#i', $path) || preg_match('#(^|/)\.(?!well-known/)#', $path)
     || (preg_match('#\.(php\d?|phtml|phar|inc)$#i', $path) && $path !== '/index.php')
     || (stripos($path, '/media/') === 0 && (preg_match('#\.(php\d?|phtml|phar|inc|pl|py|cgi|sh|asp|aspx|jsp|s?html?|xht(ml)?|svgz?|xml|m?js)$#i', $path) || is_dir($root . $path)))) {
     http_response_code(404);

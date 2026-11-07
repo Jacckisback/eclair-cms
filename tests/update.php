@@ -26,7 +26,7 @@ function eclair_code(string $root): array
     $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
     foreach ($it as $path => $info) {
         $rel = str_replace('\\', '/', substr((string) $path, strlen($root) + 1));
-        if ($info->isFile() && (!preg_match('~^(data|cache|media)/~', $rel) || preg_match('~^(data|cache|cache/pages|media)/(\.htaccess|index\.html)$~', $rel))
+        if ($info->isFile() && !str_starts_with($rel, 'site/') && (!preg_match('~^(data|cache|media)/~', $rel) || preg_match('~^(data|cache|cache/pages|media)/(\.htaccess|index\.html)$~', $rel))
             && $rel !== 'app/manifest.php' && $rel !== 'eclair-config.php') {
             $files[$rel] = (string) file_get_contents((string) $path);
         }

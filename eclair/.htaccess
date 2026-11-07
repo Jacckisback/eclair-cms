@@ -13,6 +13,8 @@
     RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
     # Dossiers internes jamais accessibles depuis le web
     RewriteRule ^(app|data|cache)(/|$) - [R=404,L]
+    # Thèmes et capacités du site (gabarits, manifestes) : jamais servis ; leurs actifs publiés sont dans site/assets/
+    RewriteRule ^site/(themes|extensions)(/|$) - [R=404,L]
     # Fichiers cachés (.git, .env…) sauf .well-known
     RewriteRule (^|/)\.(?!well-known/) - [R=404,L]
     # Aucun script PHP exécutable en dehors d'index.php

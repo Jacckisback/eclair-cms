@@ -75,6 +75,12 @@ $events = [
         <?= \Eclair\Admin::partial('partials/confirm', []) ?>
         <button class="btn btn-primary" type="submit"<?= $v['zip'] ? '' : ' disabled' ?>><?= Icons::svg('download') ?><?= e(t('Télécharger une sauvegarde')) ?></button></form>
       <?php if (!$v['zip']): ?><p class="hint"><?= e(t('Extension zip indisponible : copie les dossiers data/ et media/ par FTP.')) ?></p><?php endif ?>
+      <h3><?= e(t('Restaurer une sauvegarde')) ?></h3>
+      <p class="small muted"><?= e(t('Remet en place les contenus, réglages, comptes, images et thèmes d’une sauvegarde, ici ou sur une nouvelle installation. Les clés d’API, les connexions et les sessions de cette installation ne changent pas.')) ?></p>
+      <form method="post" action="<?= e(admin_url('restore')) ?>" enctype="multipart/form-data" data-confirm="<?= e(t('Restaurer cette sauvegarde ? Les fichiers qu’elle contient remplacent ceux du site.')) ?>"><?= Security::csrfField() ?>
+        <label class="field"><span class="label"><?= e(t('Fichier de sauvegarde (.zip)')) ?></span><input type="file" name="backup" accept=".zip" required></label>
+        <?= \Eclair\Admin::partial('partials/confirm', []) ?>
+        <button class="btn" type="submit"<?= $v['zip'] ? '' : ' disabled' ?>><?= Icons::svg('upload') ?><?= e(t('Restaurer')) ?></button></form>
     </section>
     <section class="card">
       <h2><?= e(t('Sessions et blocages')) ?></h2>

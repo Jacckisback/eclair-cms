@@ -36,6 +36,8 @@ final class App
             Installer::handle();
         }
 
+        // Migrations de la version installée (identifiées, idempotentes, sous verrou) : une lecture quand tout est fait.
+        Migrations::run();
         date_default_timezone_set((string) Settings::get('timezone') ?: 'UTC');
         I18n::setLang((string) Settings::get('lang', 'fr'));
 
@@ -58,10 +60,16 @@ final class App
         if (preg_match('~^/_eclair/plan/([a-f0-9]{32})$~', $path, $m)) {
             Plan::cron($m[1]);
         }
+        // Tâches planifiées des capacités optionnelles (adresse secrète, Extensions::taskUrl()).
+        if (preg_match('~^/_eclair/tasks/([a-f0-9]{32})$~', $path, $m)) {
+            Extensions::tick($m[1]);
+        }
         // Connecteur MCP (Claude, ChatGPT) et sa découverte OAuth : rien ne répond tant qu'il est désactivé.
         if (str_starts_with($path, '/_eclair/') || str_starts_with($path, '/.well-known/')) {
             Mcp::handle($path);
         }
+        // Routes publiques des capacités actives (rien n'est chargé quand aucune n'est active).
+        Extensions::route($path);
         Site::handle($path);
     }
 

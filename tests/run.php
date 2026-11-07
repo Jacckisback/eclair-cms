@@ -13,6 +13,7 @@ define('ECLAIR', true);
 define('ECLAIR_VERSION', 'test');
 define('ECLAIR_ROOT', getenv('ECLAIR_TEST_ROOT') ?: dirname(__DIR__) . '/eclair'); // ECLAIR_TEST_ROOT : tester une archive décompressée
 define('ECLAIR_DATA', sys_get_temp_dir() . '/eclair-test-data-' . getmypid());
+define('ECLAIR_SITE', sys_get_temp_dir() . '/eclair-test-site-' . getmypid());
 define('ECLAIR_DEBUG', true);
 define('ECLAIR_TESTING', true);
 
@@ -145,10 +146,12 @@ $blocks = Blocks::normalize([
     ['type' => 'video', 'url' => 'https://evil.example/video'],
     ['type' => 'table', 'head' => true, 'rows' => [['A', 'B'], ['1', '<img src=x onerror=1>2']]],
 ]);
-check('normalisation', array_column($blocks, 'type') === ['heading', 'heading', 'paragraph', 'list', 'faq', 'video', 'table'], implode(',', array_column($blocks, 'type')));
+// 2.0 : un bloc d'un type inconnu (fonction absente) est conservé, borné, et jamais rendu ; les blocs du noyau invalides disparaissent.
+check('normalisation', array_column($blocks, 'type') === ['heading', 'heading', 'paragraph', 'unknown', 'list', 'faq', 'video', 'table'], implode(',', array_column($blocks, 'type')));
+check('bloc inconnu conservé sans être interprété', $blocks[3] === ['type' => 'unknown', 'preserved' => true, 'data' => ['text' => 'x']]);
 check('niveau de titre borné', $blocks[1]['level'] === 2);
-check('liste sans éléments vides', $blocks[3]['items'] === ['Un', 'Deux']);
-check('FAQ filtrée', count($blocks[4]['items']) === 1);
+check('liste sans éléments vides', $blocks[4]['items'] === ['Un', 'Deux']);
+check('FAQ filtrée', count($blocks[5]['items']) === 1);
 $html = Blocks::html($blocks, ['lang' => 'fr']);
 check('ancres uniques', str_contains($html, 'id="pourquoi"') && str_contains($html, 'id="pourquoi-2"'));
 check('aucun script rendu', !preg_match('~<script|onerror|javascript:~i', $html));
@@ -254,6 +257,8 @@ RateLimit::release('unit');
 RateLimit::release('unit');
 $after = [RateLimit::attempt('unit', 3, 600), RateLimit::attempt('unit', 3, 600), RateLimit::attempt('unit', 3, 600), RateLimit::attempt('unit', 3, 600)];
 check('une tentative réussie est rendue', $after === [true, true, true, false]);
+// Clé de test débloquée : elle ne doit pas figurer dans les listes des tests suivants (ordre des fichiers propre à chaque disque).
+RateLimit::clear('unit');
 
 Log::security('test', ['email' => str_repeat('a', 5000) . '<?php echo 1; ?>']);
 $logFile = ECLAIR_DATA . '/logs/security.php';
@@ -661,6 +666,9 @@ require __DIR__ . '/affiliate.php';
 require __DIR__ . '/discover.php';
 require __DIR__ . '/usage.php';
 require __DIR__ . '/update.php';
+require __DIR__ . '/transition.php';
+require __DIR__ . '/themes.php';
+require __DIR__ . '/extensions.php';
 require __DIR__ . '/drive.php';
 require __DIR__ . '/sec-C2.php';
 require __DIR__ . '/sec-B2.php';

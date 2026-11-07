@@ -1,0 +1,14 @@
+{
+  "schema": "eclair-theme/1",
+  "id": "atelier-lumiere",
+  "name": "Atelier Lumière (exemple)",
+  "version": "1.0.0",
+  "contract": 1,
+  "parent": "eclair",
+  "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
+  "description": "Exemple minimal de thème du site : un gabarit de liste remplacé, une feuille de style ajoutée, un actif déclaré.",
+  "templates": ["404"],
+  "styles": ["styles/site.css"],
+  "overrides": {},
+  "assets": ["assets/img/motif.svg"]
+}

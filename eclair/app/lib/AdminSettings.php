@@ -89,6 +89,10 @@ final class AdminSettings
         if ($d) {
             Design::fetchFont($d['display']);
         }
+        // Thème du site essayé avec les vrais contenus (« - » : thème du noyau) ; absent, celui qui est actif.
+        if ($q('site_theme') === '-' || preg_match('~^[a-z0-9][a-z0-9-]{0,39}$~', $q('site_theme'))) {
+            $look['site_theme'] = $q('site_theme') === '-' ? '' : $q('site_theme');
+        }
         Theme::preview($look);
         $path = $q('path');
         Site::preview(preg_match('~^/[a-z0-9/_-]*$~', $path) ? $path : '/');

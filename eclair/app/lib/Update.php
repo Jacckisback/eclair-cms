@@ -45,9 +45,15 @@ final class Update
     private const UNPACKED = 40000000;
     private const EVERY = 43200;
     private const RETRY = 3600;
-    /** Entrées de l'archive qu'une mise à jour peut poser : le code et les fichiers de protection des dossiers (jamais les données). */
+    /**
+     * Entrées de l'archive qu'une mise à jour peut poser : le code et les fichiers de protection des dossiers (jamais les
+     * données). Le dossier propre au site (site/ : thèmes, capacités, actifs) n'y figure pas et n'y figurera jamais : une
+     * archive du noyau qui contient site/ est refusée (OWNED).
+     */
     private const SHIPPED = '~^(app/|assets/|index\.php$|\.htaccess$|eclair-config\.exemple\.php$|(data|cache|cache/pages|media)/(\.htaccess|index\.html)$)~';
     private const CODE = ['app', 'assets'];
+    /** Dossiers qui n'appartiennent pas au noyau : une archive du noyau qui y écrit est refusée en entier. */
+    private const OWNED = '~^(site|data|media)/(?!(\.htaccess|index\.html)$)~';
 
     /** Fichiers hors code changés depuis la mise à jour, gardés tels quels par le dernier retour en arrière (restore()). */
     private static array $kept = [];
@@ -454,6 +460,14 @@ final class Update
         // Ancien code mis de côté : dossiers déplacés d'un coup (renommage), fichiers de la racine copiés en .txt
         // (aucun point d'entrée exécutable dans le cache), comme les fichiers hors code que l'échange va remplacer.
         $prev = self::dir() . '/previous';
+        // Copie gardée de l'ancien code : les gabarits et actifs personnalisés qu'elle contient (installation 1.x) sont
+        // rangés dans un thème du site avant qu'elle ne soit remplacée. Échec : rien n'est modifié.
+        try {
+            Migrations::rescue();
+        } catch (\Throwable $e) {
+            Log::error($e);
+            return ['ok' => false, 'error' => t('Impossible de mettre de côté les personnalisations du thème : rien n’a été modifié. Vérifie l’espace disque.')];
+        }
         self::remove($prev);
         Store::ensureDir($prev);
         if (!@copy(ECLAIR_ROOT . '/index.php', $prev . '/index.php.txt') || (is_file(ECLAIR_ROOT . '/.htaccess') && !@copy(ECLAIR_ROOT . '/.htaccess', $prev . '/htaccess.txt'))
@@ -725,6 +739,9 @@ final class Update
                     return t('Archive refusée : chemin suspect.');
                 }
                 $rel = substr($name, 7);
+                if (str_starts_with($name, 'eclair/') && preg_match(self::OWNED, $rel)) {
+                    return t('Archive refusée : un paquet du noyau ne peut pas écrire dans {p}.', ['p' => '/' . explode('/', $rel)[0]]);
+                }
                 if (!str_starts_with($name, 'eclair/') || !preg_match(self::SHIPPED, $rel)) {
                     continue;
                 }
@@ -834,7 +851,7 @@ final class Update
     /** Charge depuis l'ancien code les classes dont la fin de la requête aura besoin (le dossier app/ va changer). */
     private static function preload(): void
     {
-        foreach ([Disk::class, Loopback::class, Keys::class, Log::class, Store::class, Settings::class, Session::class, Http::class, Req::class, I18n::class, Auth::class, Admin::class] as $class) {
+        foreach ([Disk::class, Loopback::class, Keys::class, Log::class, Store::class, Settings::class, Session::class, Http::class, Req::class, I18n::class, Auth::class, Admin::class, Migrations::class, Themes::class] as $class) {
             class_exists($class);
         }
         t('Mises à jour');

@@ -1,0 +1,69 @@
+# Refonte 2.0 : bilan, contrôles exécutés et état de reprise
+
+Branche : `claude/hopeful-thompson-8kqj2g`, partie de `main` @ `90bb968` (1.14.1). Version des sources : **2.0.0, non publiée**. La fusion dans `main`, l’annonce sur le canal public et la release restent des décisions du mainteneur.
+
+**La refonte n’est pas terminée.** Les étapes 1 à 5 sont livrées et testées ; les étapes 6 à 9 restent à faire (voir §3). Cette branche est un état intermédiaire utilisable : elle peut être publiée telle quelle comme 2.0 « transition » (aucune fonction retirée, apparence identique), ou poursuivie avant publication.
+
+## 1. Contrôles exécutés (7 novembre 2026, PHP 8.3.6)
+
+| Contrôle | Résultat |
+|---|---|
+| Suite d’origine sur 1.14.1 (avant toute modification) | 1 159 vérifications réussies |
+| `php tests/run.php` (sources, branche) | **1 280 vérifications réussies** |
+| Même suite sur l’archive construite sans clé, décompressée (`ECLAIR_TEST_ROOT`) | **1 278 vérifications réussies** (les 2 tests du validateur CLI ne s’appliquent qu’au dépôt) |
+| Transition depuis la **vraie** archive `dist/eclair-cms-1.14.1.zip`, mise à jour par **son propre updater** | Réussie : gabarit, CSS du thème et actif personnalisés conservés et servis, `.htaccess` modifié gardé, statuts des pages identiques |
+| Mise à jour suivante par le nouvel updater, archive piégée écrivant dans `site/`, retour 2.0.1 → 2.0.0 | `site/` identique à l’octet près (empreinte) ; archive piégée refusée |
+| Retour 2.0.0 → 1.14.1 | L’ancien code retrouve ses gabarits personnalisés ; `site/` conservé |
+| Sauvegarde sur une installation, restauration sur une **autre** | Thème identique (empreinte), contenus et comptes de la source, coffre de la cible gardé, archive piégée refusée |
+| Fonction absente / désactivée / réactivée | Blocs conservés sans rendu ni exécution, aucune perte de données, confirmation demandée avant de casser des pages publiques |
+| Rendu public à l’octet près (4 sites de départ, test existant) | Inchangé |
+| `php tools/measure.php --check` | Budgets respectés (après relèvement justifié de l’archive, voir CHANGELOG) |
+| Lint JavaScript de l’éditeur (`node`) | Syntaxe valide |
+
+Non exécutés ici (à faire avant publication) :
+
+* **CI GitHub** : le workflow est écrit mais n’a pas encore tourné ; PHP 8.1, 8.2, 8.4 et 8.5 n’ont **pas** été testés localement (seul 8.3.6 est disponible dans cet environnement).
+* **Apache / LiteSpeed / Nginx réels** : seuls le serveur intégré de PHP et `tools/router.php` (qui reproduit les règles) ont été utilisés. Les règles `.htaccess` ajoutées (`site/themes`, `site/extensions`, `site/assets`) et les règles Nginx de `UPGRADE-2.md` restent à vérifier sur de vrais serveurs.
+* **Parcours FTP** avec `cache/legacy-app/` : code écrit (`Migrations::LEGACY`), **non couvert par un test automatique**.
+* **Tests visuels** (captures avant/après), **accessibilité** automatisée (clavier, contrastes, mouvement réduit) des nouveaux écrans d’administration (Thèmes, Fonctions, restauration) : non faits. Le rendu public, lui, est vérifié à l’octet près.
+* **Navigateur** : l’éditeur (bloc conservé, blocs de fonctions) n’a été vérifié que par les tests HTTP et le lint, pas dans un navigateur.
+* **Performances sur plusieurs tailles de site** : l’outil le permet (`--pages=N`), seule la mesure « site neuf » a été produite.
+
+## 2. Point de sécurité découvert pendant le travail
+
+La **clé privée de signature du mainteneur** (`ECLAIR_SIGNING_KEY`) est présente dans l’environnement d’exécution de cette session cloud. Avec l’ancien `tools/build.php`, sa seule présence suffisait à signer : une construction de test a ainsi produit une annonce authentiquement signée pour une 2.0.0 non relue, **dans une copie temporaire, supprimée aussitôt, jamais poussée**. Corrections :
+
+* `tools/build.php` ne signe plus qu’avec `--sign` (ou `--resign`) ; sinon la clé est ignorée et l’archive reste une archive de test non annoncée (test ajouté dans `tests/sec-C1.php`) ;
+* la CI n’utilise aucun secret.
+
+**Action recommandée au mainteneur** : retirer cette variable de l’environnement cloud (elle n’a rien à faire dans un environnement où du code non relu s’exécute), et envisager une rotation de la clé si cet environnement a pu être utilisé par d’autres sessions.
+
+## 3. Avancement par étape de la mission
+
+| Étape | État |
+|---|---|
+| 1. Référence, cartographie, validation initiale | Fait (`ARCHITECTURE-2.md`, `MEASURES.md`) |
+| 2. CI sources + archives, fixtures, caractérisation | Workflow écrit, non exécuté ; tests de caractérisation de la transition faits |
+| 3. Protection du thème, sauvegarde/restauration, transition de l’updater | **Fait et testé** |
+| 4. Contrats de contenu, blocs, interfaces communes | Blocs inconnus conservés ; schéma de contenu ; **routes communes non faites** |
+| 5. Registre minimal et cycle de vie des capacités | **Fait et testé** (routes, menu, cartes, réglages, blocs, actifs, tâches, migrations, dépendances, impact). Manquent : contributions SEO, types de contenu, CSP par fonction |
+| 6. Extraction des fonctions, langues et actifs | **Non commencé**. Aucune des fonctions listées (Discover, Trends, AdSense, affiliation, Wayback, planning, robots IA, boutique, Drive, IA, MCP) n’est encore extraite ; les traductions restent les 6 langues livrées ensemble |
+| 7. Routage pour la migration (chemin exact, alias `?p=`, `.html`, Unicode, cache des paramètres) | **Non commencé** |
+| 8. Contrats des skills et démonstrations | Fait : contrats, schémas, validateur, exemples, guide, découverte. Manque : outil MCP de proposition d’apparence (droit distinct de la rédaction) |
+| 9. Validation globale, packaging, documentation | Documentation de transition faite ; archive candidate construite sans clé (non versionnée) ; procédure de signature inchangée hormis `--sign` |
+
+Le gain de légèreté visé par la mission viendra des étapes 6 et 7 : aujourd’hui l’archive pèse **775 Ko (+6 %)** car le noyau porte encore toutes les fonctions spécialisées **plus** les nouveaux mécanismes. Les traductions (266 Ko pour 6 langues, 44 Ko utiles par site) et les fonctions spécialisées (IA ~190 Ko de PHP, Drive 40 Ko, boutique, Wayback, Discover…) sont les gisements principaux.
+
+## 4. Reprise : ordre recommandé
+
+1. **Lancer la CI** (pousser la branche suffit) et corriger ce qui casse sur 8.1 / 8.5.
+2. **Étape 6, première extraction** : commencer par une fonction peu couplée et sans données critiques — Wayback (`Wayback`, `AdminWayback`, vue `wayback`, route `/wayback`, test `tests/wayback.php`) — en paquet `site/extensions/wayback/`, avec une migration du noyau qui l’installe et l’active automatiquement sur les sites qui l’utilisaient (données `data/wayback*`) : ces sites gardent la fonction, les nouveaux sites ne la reçoivent pas. Il faudra pour cela un mécanisme de **paquets de compatibilité** livrés avec le noyau pendant la transition (dossier `app/bundled/<id>/` copié dans `site/extensions/` par migration), car l’ancien updater n’accepte que `app/` et `assets/`.
+3. Puis AiVisits, Trends+Discover, Affiliate, Plan, Drive (garder la sauvegarde locale), Ads (avec CSP par page), Shop (vérifier l’impact sur les URL publiques), IA et MCP (séparer les opérations de contenu sûres des fournisseurs).
+4. **Traductions par langue** : livrer la langue choisie à l’installation + paquets de langues installables (provenance vérifiée, repli sur le français).
+5. **Étape 7** : définition commune des routes, chemin exact, alias WordPress résolus avant le cache, paramètres marketing sans variantes de cache ; puis services d’import WXR (simulation, reprise, idempotence).
+
+## 5. Incompatibilités connues
+
+* Un bloc d’un type inconnu n’est plus supprimé à l’enregistrement : il est conservé (`preserved`). Un outil externe qui relisait les contenus en supposant que seuls des blocs du noyau existent doit ignorer ces blocs.
+* `tools/build.php` exige `--sign` pour signer (les scripts de publication du mainteneur doivent l’ajouter).
+* Une fonction peut déclarer une route publique : elle est prioritaire sur un contenu créé ensuite à la même adresse (le conflit n’est vérifié qu’à l’activation).

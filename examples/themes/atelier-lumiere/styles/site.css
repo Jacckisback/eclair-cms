@@ -1,0 +1,8 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* Copyright (c) 2026 Thierry Gustin */
+/* Variables et classes du contrat 1 (docs/THEME-CONTRACT.md) : --accent, --font, --font-head, .site-header, .wrap… */
+:root{--radius:14px}
+.site-header{border-bottom:3px solid var(--accent)}
+.atelier-404{text-align:center;padding:3rem 0}
+.atelier-404 .motif{width:72px;height:72px;margin:0 auto 1rem}
+@media (prefers-reduced-motion:no-preference){.atelier-404 .motif{transition:transform .3s}.atelier-404 .motif:hover{transform:rotate(8deg)}}

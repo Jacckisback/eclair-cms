@@ -1,0 +1,15 @@
+{
+  "_doc": "Budgets vérifiés par php tools/measure.php --check (CI). Octets sauf mention. Fixés le 2026-11-07 à partir des mesures de docs/MEASURES.md, avec une marge de 3 à 10 %. Tout relèvement doit être expliqué dans le CHANGELOG (coût et nécessité). 2026-11-07 (2.0.0) : zip 790000 → 805000 et installé 1470000 → 1510000, pour les thèmes du site (Themes, AdminThemes, Packages), le registre des fonctions (Extensions, AdminExtensions), les migrations et la restauration en ligne : environ +20 Ko compressés, nécessaires à la protection des thèmes et au retrait futur des fonctions spécialisées, qui doit ensuite faire baisser ces budgets.",
+  "budgets": {
+    "zip": 805000,
+    "installed": 1510000,
+    "lang_each": 46000,
+    "home_html": 23000,
+    "home_css": 18500,
+    "home_js": 3000,
+    "home_fonts": 0,
+    "home_warm_files": 1,
+    "home_cold_files": 30,
+    "home_cold_mem": 2097152
+  }
+}
