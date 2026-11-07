@@ -196,3 +196,12 @@ function json_script(mixed $data): string
 {
     return (string) json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
 }
+
+/**
+ * Option cURL du rappel de progression : CURLOPT_XFERINFOFUNCTION n'existe que depuis PHP 8.2 ; en PHP 8.1, l'ancienne
+ * CURLOPT_PROGRESSFUNCTION reçoit les mêmes arguments utiles (poignée, total et reçu en téléchargement).
+ */
+function curl_progress_option(): int
+{
+    return defined('CURLOPT_XFERINFOFUNCTION') ? (int) constant('CURLOPT_XFERINFOFUNCTION') : CURLOPT_PROGRESSFUNCTION;
+}
