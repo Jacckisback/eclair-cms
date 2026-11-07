@@ -28,9 +28,14 @@ $nav = [
     ['affiliate', 'affiliate', 'bag', t('Affiliation'), 'content'],
     ['discover', 'discover', 'compass', t('Discover'), 'content'],
 ];
+// Entrées des capacités actives (droit vérifié par Extensions::nav, comme par la route elle-même).
+foreach (\Eclair\Extensions::nav() as [$extPath, $extIcon, $extLabel, $extRight]) {
+    $nav[] = [$extPath, $extPath, $extIcon, $extLabel, $extRight];
+}
 $adminNav = [
     ['settings', 'settings', 'settings', t('Réglages'), 'settings'],
     ['themes', 'themes', 'panel', t('Thèmes'), 'settings'],
+    ['extensions', 'extensions', 'plus', t('Fonctions'), 'settings'],
     ['users', 'users', 'users', t('Utilisateurs'), 'users'],
     ['security', 'security', 'shield', t('Sécurité'), 'security'],
     ['update', 'update', 'refresh', t('Mises à jour'), 'security'],

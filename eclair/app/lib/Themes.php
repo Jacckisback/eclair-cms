@@ -28,15 +28,15 @@ final class Themes
     public const SUPPORTED = [1];
     public const SCHEMA = 'eclair-theme/1';
     /** Gabarits que le contrat 1 permet de remplacer, avec les variables qu'ils reçoivent (docs/THEME-CONTRACT.md). */
-    public const TEMPLATES = ['layout', 'single', 'list', 'cards', 'product', 'products', '404'];
+    public const TEMPLATES = ['layout', 'single', 'list', 'cards', 'product', 'products', '404', 'extension'];
     /** Fichiers CSS du noyau qu'un thème peut remplacer (le reste du CSS reste celui du noyau). */
     public const OVERRIDES = ['theme.css', 'motion.css', 'ads.css', 'themes/atelier.css', 'themes/boutique.css', 'themes/contraste.css', 'themes/editorial.css', 'themes/studio.css'];
     /** Actifs publiables (jamais de script serveur, jamais de HTML). */
     public const ASSET_TYPES = ['css' => 'text/css', 'js' => 'text/javascript', 'svg' => 'image/svg+xml', 'png' => 'image/png', 'jpg' => 'image/jpeg',
         'jpeg' => 'image/jpeg', 'webp' => 'image/webp', 'avif' => 'image/avif', 'gif' => 'image/gif', 'woff2' => 'font/woff2', 'ico' => 'image/x-icon'];
-    private const MAX_FILES = 300;
-    private const MAX_FILE = 2097152;
-    private const MAX_TOTAL = 20971520;
+    public const MAX_FILES = 300;
+    public const MAX_FILE = 2097152;
+    public const MAX_TOTAL = 20971520;
     private const MAX_CSS = 262144;
     private const ID = '~^[a-z0-9][a-z0-9-]{0,39}$~';
     private const SEMVER = '~^\d{1,3}\.\d{1,3}\.\d{1,3}$~';
@@ -576,61 +576,10 @@ final class Themes
         return ['ok' => true, 'id' => $id, 'version' => (string) $m['version']];
     }
 
-    /**
-     * Installe un thème depuis une archive ZIP (paquet produit par Éclair Design, un skill ou un intégrateur). Chaque entrée
-     * est vérifiée avant toute écriture : chemin sûr (ni « .. », ni chemin absolu, ni fichier caché), aucun lien symbolique,
-     * tailles bornées (archive « bombe » refusée), puis le dossier décompressé passe la validation complète du contrat.
-     * theme.json est attendu à la racine de l'archive ou dans un unique dossier de premier niveau.
-     */
+    /** Installe un thème depuis une archive ZIP vérifiée (voir Packages::installZip). */
     public static function installZip(string $file): array
     {
-        if (!class_exists('ZipArchive')) {
-            return ['ok' => false, 'error' => t('Extension PHP {n} absente : active-la dans le panneau PHP de ton hébergeur.', ['n' => 'zip'])];
-        }
-        $zip = new \ZipArchive();
-        if ($zip->open($file) !== true) {
-            return ['ok' => false, 'error' => t('Archive illisible : rien n’a été modifié.')];
-        }
-        self::ensure();
-        $stage = self::dir() . '/.upload-' . bin2hex(random_bytes(4));
-        try {
-            $total = 0;
-            $entries = [];
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $stat = $zip->statIndex($i);
-                $name = (string) ($stat['name'] ?? '');
-                if ($name === '' || str_ends_with($name, '/')) {
-                    continue;
-                }
-                $zip->getExternalAttributesIndex($i, $os, $attr);
-                if ($os === \ZipArchive::OPSYS_UNIX && (($attr >> 16) & 0170000) === 0120000) {
-                    return ['ok' => false, 'error' => t('Lien symbolique refusé : {f}.', ['f' => $name])];
-                }
-                if (!self::safePath($name) || str_starts_with(basename($name), '.')) {
-                    return ['ok' => false, 'error' => t('Archive refusée : chemin suspect.')];
-                }
-                $total += (int) ($stat['size'] ?? 0);
-                if (count($entries) >= self::MAX_FILES || (int) ($stat['size'] ?? 0) > self::MAX_FILE || $total > self::MAX_TOTAL) {
-                    return ['ok' => false, 'error' => t('Paquet trop volumineux ({n} fichiers, 2 Mo par fichier, 20 Mo en tout au plus).', ['n' => self::MAX_FILES])];
-                }
-                $entries[$i] = $name;
-            }
-            $roots = array_unique(array_map(static fn (string $n): string => str_contains($n, '/') ? explode('/', $n)[0] : '', $entries));
-            $prefix = in_array('theme.json', $entries, true) ? '' : (count($roots) === 1 && $roots[0] !== '' && in_array($roots[0] . '/theme.json', $entries, true) ? $roots[0] . '/' : null);
-            if ($prefix === null) {
-                return ['ok' => false, 'error' => t('Fichier theme.json absent ou illisible.')];
-            }
-            foreach ($entries as $i => $name) {
-                $data = $zip->getFromIndex($i);
-                if (!is_string($data) || !Disk::place($stage . '/' . substr($name, strlen($prefix)), $data)) {
-                    return ['ok' => false, 'error' => t('Décompression impossible : espace disque ou droits insuffisants. Rien n’a été modifié.')];
-                }
-            }
-            return self::install($stage);
-        } finally {
-            $zip->close();
-            self::removeTree($stage);
-        }
+        return Packages::installZip($file, 'theme');
     }
 
     /** Versions gardées d'un thème (les plus récentes d'abord). */

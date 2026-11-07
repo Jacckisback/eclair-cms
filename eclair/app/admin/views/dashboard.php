@@ -63,6 +63,14 @@ $meter = static fn (int $s): string => '<meter min="0" max="100" low="50" high="
       </section>
       <?php endif ?>
 
+      <?php foreach (\Eclair\Extensions::cards($v['user']) as $card): ?>
+      <section class="card ext-card" data-ext="<?= e($card['ext']) ?>">
+        <h2><?= e($card['title']) ?></h2>
+        <?php if ($card['text'] !== ''): ?><p class="small"><?= e($card['text']) ?></p><?php endif ?>
+        <?php if ($card['link'] !== ''): ?><p><a href="<?= e(admin_url($card['link'])) ?>"><?= e(t('Ouvrir')) ?><?= Icons::svg('arrow') ?></a></p><?php endif ?>
+      </section>
+      <?php endforeach ?>
+
       <?php if ($v['onboarding']): ?>
       <section class="card onboard" aria-labelledby="onboard-title">
         <div class="card-head">

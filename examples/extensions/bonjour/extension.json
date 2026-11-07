@@ -1,0 +1,31 @@
+{
+  "schema": "eclair-extension/1",
+  "id": "bonjour",
+  "name": "Bonjour (exemple)",
+  "version": "1.0.0",
+  "description": "Exemple minimal de fonction optionnelle : une page publique, un réglage, un bloc, une carte du tableau de bord, une page d'administration, une tâche et une migration.",
+  "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
+  "depends": {},
+  "provides": ["bonjour"],
+  "entry": "extension.php",
+  "routes": {
+    "public": [{ "method": "GET", "path": "/bonjour", "handler": "page", "cache": true }],
+    "admin": [{ "method": "GET", "path": "", "handler": "adminPage", "right": "content" }]
+  },
+  "nav": [{ "label": "Bonjour", "path": "", "icon": "spark", "right": "content" }],
+  "dashboard": [{ "handler": "card", "right": "content" }],
+  "settings": [
+    { "key": "message", "type": "text", "label": "Message d'accueil", "default": "Bonjour et bienvenue !", "max": 120 }
+  ],
+  "blocks": [
+    { "type": "bonjour/salut", "label": "Salut", "render": "salut", "fields": [
+      { "key": "name", "type": "text", "label": "Prénom", "max": 60 },
+      { "key": "style", "type": "select", "label": "Style", "options": ["simple", "encadre"] }
+    ] }
+  ],
+  "assets": ["assets/bonjour.css"],
+  "tasks": [{ "handler": "daily", "every": 86400 }],
+  "migrations": ["001-compteur"],
+  "data": { "schema": 1 },
+  "provenance": { "source": "https://github.com/Jacckisback/eclair-cms/tree/main/examples/extensions/bonjour", "license": "AGPL-3.0-only" }
+}

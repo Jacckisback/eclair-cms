@@ -106,6 +106,9 @@ final class Admin
             'POST /settings' => [AdminSettings::class, 'save', 'settings'],
             'GET /appearance/preview' => [AdminSettings::class, 'preview', 'settings'],
             'GET /themes' => [AdminThemes::class, 'page', 'settings'],
+            'GET /extensions' => [AdminExtensions::class, 'page', 'settings'],
+            'POST /extensions' => [AdminExtensions::class, 'action', 'settings'],
+            'GET /api/capabilities' => [AdminExtensions::class, 'describe', 'settings'],
             'POST /themes' => [AdminThemes::class, 'action', 'settings'],
             'GET /users' => [AdminUsers::class, 'list', 'users'],
             'POST /users' => [AdminUsers::class, 'create', 'users'],
@@ -148,6 +151,18 @@ final class Admin
                 array_shift($args);
                 $class::$fn($user, ...$args);
                 exit;
+            }
+        }
+        // Routes des capacités actives (/x/<id>/…) : même contrôle d'accès, CSRF déjà vérifié plus haut pour les POST.
+        if (str_starts_with($route, '/x/')) {
+            foreach (Extensions::adminRoutes() as $pattern => [$id, $fn, $area]) {
+                [$m, $regex] = explode(' ', $pattern, 2);
+                if (($m === $method || ($m === 'GET' && $method === 'HEAD')) && preg_match('~^' . $regex . '$~', $route)) {
+                    if (!Auth::can($area)) {
+                        self::forbidden();
+                    }
+                    Extensions::admin($id, $fn, $user);
+                }
             }
         }
         self::view('error', ['title' => t('Page introuvable'), 'text' => t('Cette page de l’administration n’existe pas.')], t('Page introuvable'), 404);

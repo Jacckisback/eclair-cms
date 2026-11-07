@@ -680,6 +680,22 @@ final class Site
         self::html($html, $status, null);
     }
 
+    /**
+     * Page publique d'une capacité ($page : title, content, description) : rendue dans le thème du site, avec l'en-tête
+     * SEO (titre, canonical, robots, données structurées) et les en-têtes de sécurité du noyau. La capacité fournit le
+     * contenu, jamais les métadonnées : une seule balise canonical, des données structurées cohérentes.
+     */
+    public static function extension(string $path, array $page, bool $cache): never
+    {
+        $lang = (string) Settings::get('lang');
+        $title = mb_substr((string) ($page['title'] ?? ''), 0, 150);
+        $head = Seo::head(['kind' => 'extension', 'lang' => $lang, 'title' => Seo::format($title), 'description' => mb_substr((string) ($page['description'] ?? ''), 0, 300),
+            'canonical' => absolute_url($path), 'noindex' => !empty($page['noindex']), 'breadcrumbs' => []]);
+        $content = '<section class="wrap ext-page">' . (string) $page['content'] . '</section>';
+        $html = Theme::render('extension', ['lang' => $lang, 'head' => $head, 'css' => Theme::css(), 'current' => $path, 'class' => 'is-extension', 'content' => $content, 'inner' => $content]);
+        self::html($html, 200, $cache ? $path : null);
+    }
+
     /* ─────────────────────────────── Sortie ─────────────────────────────── */
 
     /**

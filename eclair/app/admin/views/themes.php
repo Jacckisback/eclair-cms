@@ -26,7 +26,7 @@ $preview = static fn (string $id): string => admin_url('appearance/preview') . '
     <p class="hint"><?= e(t('Toujours disponible, mis à jour avec Éclair. Ses couleurs et polices se règlent dans Réglages › Apparence.')) ?></p>
     <p><a class="btn btn-sm" href="<?= e($preview('')) ?>" target="_blank" rel="noopener"><?= Icons::svg('eye') ?><?= e(t('Aperçu')) ?></a>
     <?php if ($v['active'] !== ''): ?>
-      <form method="post" action="<?= e(admin_url('themes')) ?>" style="display:inline"><?= Security::csrfField() ?><input type="hidden" name="action" value="deactivate"><button class="btn btn-sm" type="submit"><?= e(t('Revenir au thème de base')) ?></button></form>
+      <form method="post" action="<?= e(admin_url('themes')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="deactivate"><button class="btn btn-sm" type="submit"><?= e(t('Revenir au thème de base')) ?></button></form>
     <?php endif ?></p>
   </section>
 
@@ -41,7 +41,7 @@ $preview = static fn (string $id): string => admin_url('appearance/preview') . '
     <?php endif ?>
     <p><a class="btn btn-sm" href="<?= e($preview($id)) ?>" target="_blank" rel="noopener"><?= Icons::svg('eye') ?><?= e(t('Aperçu avec tes contenus')) ?></a>
     <?php if ($v['active'] !== $id && !$theme['errors']): ?>
-      <form method="post" action="<?= e(admin_url('themes')) ?>" style="display:inline"><?= Security::csrfField() ?><input type="hidden" name="action" value="activate"><input type="hidden" name="id" value="<?= e($id) ?>"><button class="btn btn-sm btn-primary" type="submit"><?= Icons::svg('check') ?><?= e(t('Activer')) ?></button></form>
+      <form method="post" action="<?= e(admin_url('themes')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="activate"><input type="hidden" name="id" value="<?= e($id) ?>"><button class="btn btn-sm btn-primary" type="submit"><?= Icons::svg('check') ?><?= e(t('Activer')) ?></button></form>
     <?php endif ?></p>
   </section>
   <?php endforeach ?>

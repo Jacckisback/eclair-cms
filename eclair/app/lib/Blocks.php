@@ -28,11 +28,43 @@ final class Blocks
     {
         $out = [];
         foreach (is_array($blocks) ? array_slice($blocks, 0, 2000) : [] as $block) {
-            if (is_array($block) && ($clean = self::one($block)) !== null) {
+            if (is_array($block) && ($clean = self::one($block) ?? self::preserve($block)) !== null) {
                 $out[] = $clean;
             }
         }
         return $out;
+    }
+
+    /** Type d'un bloc fourni par une capacité (« boutique/variante ») ou disparu : nom simple, borné. */
+    private const FOREIGN = '~^[a-z][a-z0-9-]{0,39}(/[a-z][a-z0-9-]{0,39})?$~';
+    /** Taille maximale des données d'un bloc conservé (JSON), et profondeur. */
+    private const PRESERVED_MAX = 32768;
+
+    /**
+     * Bloc d'un type que ce site ne sait pas afficher (capacité absente, désactivée ou incompatible) : conservé tel quel,
+     * borné (32 Ko de JSON, 8 niveaux), jamais affiché ni exécuté, et rendu intact à chaque enregistrement. Ses données sont
+     * rangées dans « data » : aucun service commun (analyse, export, IA) ne les lit comme celles d'un bloc connu. Un type du
+     * noyau resté invalide (paragraphe vide…) n'est jamais conservé ainsi : il disparaît comme avant.
+     */
+    public static function preserve(array $b): ?array
+    {
+        $type = (string) ($b['type'] ?? '');
+        if (!preg_match(self::FOREIGN, $type) || in_array($type, self::TYPES, true)) {
+            return null;
+        }
+        $data = !empty($b['preserved']) && is_array($b['data'] ?? null) ? $b['data'] : array_diff_key($b, ['type' => true, 'preserved' => true]);
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE, 8);
+        if (!is_string($json) || strlen($json) > self::PRESERVED_MAX) {
+            return null;
+        }
+        $data = json_decode($json, true);
+        return ['type' => $type, 'preserved' => true, 'data' => is_array($data) ? $data : []];
+    }
+
+    /** Données d'origine d'un bloc conservé (pour la capacité qui le reprend), ou le bloc lui-même. */
+    public static function original(array $b): array
+    {
+        return !empty($b['preserved']) && is_array($b['data'] ?? null) ? ['type' => (string) $b['type']] + $b['data'] : $b;
     }
 
     private static function one(array $b): ?array
@@ -197,7 +229,8 @@ final class Blocks
             case 'contact':
                 return ['type' => 'contact', 'title' => $s('title', 150), 'button' => $s('button', 40)];
         }
-        return null;
+        // Bloc d'une capacité active : champs déclarés, validés par le noyau. Sinon null (conservé par preserve()).
+        return in_array($type, self::TYPES, true) ? null : Extensions::normalizeBlock($b);
     }
 
     /**
@@ -256,7 +289,8 @@ final class Blocks
                 'posts' => self::postsHtml($b, $anchors[$i] ?? '', $lang),
                 'products' => self::productsHtml($b, $anchors[$i] ?? '', $lang),
                 'contact' => self::contactHtml($b, (string) ($ctx['page'] ?? ''), $lang),
-                default => '',
+                // Bloc d'une capacité : rendu par elle si elle est active ; bloc conservé (capacité absente) : rien.
+                default => Extensions::renderBlock($b, ['lang' => $lang, 'page' => (string) ($ctx['page'] ?? '')]),
             };
             $out .= $edit ? self::tag($html !== '' ? $html : self::placeholder($b), 'eb', (string) $i) : $html;
             // HTML à insérer après ce bloc (blocs d'annonces, voir Ads::places) : toujours entre deux blocs.

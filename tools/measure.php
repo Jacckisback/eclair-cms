@@ -144,6 +144,9 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
         $home = http($port, 'GET', '/');
         $routes['home_cold'] = $home;
         $routes['home_warm'] = http($port, 'GET', '/');
+        // Second rendu à froid : la mémoire retenue est la plus basse des deux (un premier passage peut compiler davantage).
+        $purge();
+        $routes['home_cold_again'] = http($port, 'GET', '/');
         $article = '';
         if (preg_match_all('~href="(/[a-z0-9-]+/[a-z0-9-]+)"~', $home['body'], $mm)) {
             $article = $mm[1][0];
@@ -161,7 +164,7 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
         $lines = array_values(array_filter(array_map(static fn (string $l): ?array => json_decode($l, true), file($log) ?: [])));
         // Chaque parcours est apparié à la première ligne non utilisée de la même adresse (les appels internes du site à
         // lui-même, comme la vérification de son adresse, ajoutent des lignes).
-        $paths = ['home_cold' => '/', 'home_warm' => '/', 'post_cold' => $article, 'post_warm' => $article, '404' => null, 'sitemap' => '/sitemap.xml',
+        $paths = ['home_cold' => '/', 'home_warm' => '/', 'home_cold_again' => '/', 'post_cold' => $article, 'post_warm' => $article, '404' => null, 'sitemap' => '/sitemap.xml',
             'login' => '/gestion/login', 'admin' => '/gestion', 'editor' => '/gestion/new/post'];
         $used = [];
         foreach (array_keys($routes) as $k) {
@@ -176,6 +179,13 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
             }
             $r['route'][$k] = ['status' => $routes[$k]['status'], 'mem' => (int) ($m['mem'] ?? 0), 'files' => (int) ($m['files'] ?? 0),
                 'ms' => round((float) ($m['ms'] ?? $routes[$k]['time'] * 1000), 1), 'bytes' => strlen($routes[$k]['body'])];
+        }
+        if (isset($r['route']['home_cold_again'])) {
+            $again = $r['route']['home_cold_again'];
+            unset($r['route']['home_cold_again']);
+            if ($again['mem'] > 0 && $again['mem'] < $r['route']['home_cold']['mem']) {
+                $r['route']['home_cold'] = $again;
+            }
         }
         // Poids du HTML public : CSS en ligne, JavaScript du site.
         $html = $home['body'];
@@ -243,7 +253,7 @@ foreach (array_keys($after['route']) as $k) {
 $intro = "Mesures produites par `php tools/measure.php" . ($pages ? " --pages=$pages" : '') . "` le " . gmdate('Y-m-d H:i') . " UTC, PHP " . PHP_VERSION
     . ", serveur intégré de PHP" . ($pages ? ", site de $pages articles ajoutés" : ', site neuf (type blog)') . ".\n"
     . "Durées indicatives (machine de mesure) ; mémoire = pointe PHP de la requête ; fichiers = fichiers PHP inclus (`get_included_files`).\n"
-    . "« _cold » : cache de pages vidé ; « _warm » : page servie par le chemin rapide d'index.php.\n\n";
+    . "« _cold » : cache de pages vidé (accueil : le plus léger de deux rendus à froid) ; « _warm » : page servie par le chemin rapide d'index.php.\n\n";
 echo $intro . $md;
 if ($write) {
     file_put_contents($repo . '/docs/MEASURES.md', "# Mesures d’Éclair\n\n" . $intro . $md

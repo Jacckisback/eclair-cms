@@ -146,10 +146,12 @@ $blocks = Blocks::normalize([
     ['type' => 'video', 'url' => 'https://evil.example/video'],
     ['type' => 'table', 'head' => true, 'rows' => [['A', 'B'], ['1', '<img src=x onerror=1>2']]],
 ]);
-check('normalisation', array_column($blocks, 'type') === ['heading', 'heading', 'paragraph', 'list', 'faq', 'video', 'table'], implode(',', array_column($blocks, 'type')));
+// 2.0 : un bloc d'un type inconnu (fonction absente) est conservé, borné, et jamais rendu ; les blocs du noyau invalides disparaissent.
+check('normalisation', array_column($blocks, 'type') === ['heading', 'heading', 'paragraph', 'unknown', 'list', 'faq', 'video', 'table'], implode(',', array_column($blocks, 'type')));
+check('bloc inconnu conservé sans être interprété', $blocks[3] === ['type' => 'unknown', 'preserved' => true, 'data' => ['text' => 'x']]);
 check('niveau de titre borné', $blocks[1]['level'] === 2);
-check('liste sans éléments vides', $blocks[3]['items'] === ['Un', 'Deux']);
-check('FAQ filtrée', count($blocks[4]['items']) === 1);
+check('liste sans éléments vides', $blocks[4]['items'] === ['Un', 'Deux']);
+check('FAQ filtrée', count($blocks[5]['items']) === 1);
 $html = Blocks::html($blocks, ['lang' => 'fr']);
 check('ancres uniques', str_contains($html, 'id="pourquoi"') && str_contains($html, 'id="pourquoi-2"'));
 check('aucun script rendu', !preg_match('~<script|onerror|javascript:~i', $html));
@@ -664,6 +666,7 @@ require __DIR__ . '/usage.php';
 require __DIR__ . '/update.php';
 require __DIR__ . '/transition.php';
 require __DIR__ . '/themes.php';
+require __DIR__ . '/extensions.php';
 require __DIR__ . '/drive.php';
 require __DIR__ . '/sec-C2.php';
 require __DIR__ . '/sec-B2.php';

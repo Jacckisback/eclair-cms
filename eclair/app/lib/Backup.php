@@ -14,7 +14,7 @@ defined('ECLAIR') || exit;
 final class Backup
 {
     /** Jamais dans une sauvegarde : sessions, compteurs, conversations IA, secrets (coffre des clés), état des services. */
-    private const SKIP = '~^data/(sessions/|limits/|ai/|reset\.php$|vault\.php$|drive\.php$|update\.php$)~';
+    private const SKIP = '~^data/(sessions/|limits/|ai/|reset\.php$|vault\.php$|drive\.php$|update\.php$|ext/[^/]+/secrets)~';
     /** Les mêmes, désignés sur le disque (dossiers terminés par « / ») : comparés à l'emplacement réel de chaque fichier. */
     private const SECRET = ['sessions/', 'limits/', 'ai/', 'reset.php', 'vault.php', 'drive.php', 'update.php'];
     /** Dossiers de travail du site (installation en cours d'un thème) : jamais sauvegardés. */
