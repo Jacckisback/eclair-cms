@@ -104,7 +104,7 @@ final class Affiliate
 
     public static function remove(string $id): void
     {
-        self::change(function (array &$d) use ($id): null {
+        self::change(function (array &$d) use ($id): mixed {
             unset($d['links'][$id]);
             return null;
         });
@@ -113,7 +113,7 @@ final class Affiliate
     /** Mention personnalisée, sur une ligne (vide : celle du thème, dans la langue de chaque page). */
     public static function setDisclosure(string $text): void
     {
-        self::change(function (array &$d) use ($text): null {
+        self::change(function (array &$d) use ($text): mixed {
             $d['disclosure'] = Sanitize::text($text, 600);
             return null;
         });
