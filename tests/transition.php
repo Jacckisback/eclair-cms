@@ -74,9 +74,9 @@ use Eclair\Themes;
         $driveData = Store::GUARD . json_encode(['schedule' => 'weekly', 'keep' => 5]);
         file_put_contents($copy . '/data/drive.php', $driveData);
         array_map('unlink', glob($copy . '/cache/pages/*[0-9a-f]') ?: []);
+        usleep(2600000); // OPcache du serveur intégré : gabarits modifiés relus au bout de 2 secondes
         $home = $c->req('GET', '/')['body'];
-        check('1.14.1 personnalisée : gabarit et CSS du thème modifiés sur le disque, CSS servi', str_contains((string) file_get_contents($copy . '/app/theme/layout.php'), 'PERSO-LAYOUT')
-            && str_contains($home, 'perso-marque'));
+        check('1.14.1 personnalisée : gabarit et CSS modifiés affichés', str_contains($home, 'PERSO-LAYOUT') && str_contains($home, 'perso-marque'));
         $pages = [];
         foreach (['/', '/gestion/login'] as $p) {
             $pages[$p] = $c->req('GET', $p)['status'];
@@ -203,5 +203,48 @@ use Eclair\Themes;
         proc_terminate($server);
         proc_terminate($chan);
         exec('rm -rf ' . escapeshellarg($copy) . ' ' . escapeshellarg($channel));
+    }
+
+    // 6. Mise à jour par FTP (docs/UPGRADE-2.md §2) : app/ et assets/ déplacés dans cache/legacy-app et cache/legacy-assets,
+    // puis le code 2.0 envoyé par-dessus. Les migrations retrouvent les personnalisations dans ces dossiers.
+    section('Transition par FTP : personnalisations rangées dans cache/legacy-app avant l’envoi du nouveau code');
+    $copy = sys_get_temp_dir() . '/eclair-transition-ftp-' . getmypid();
+    $zip = new ZipArchive();
+    $zip->open($legacyZip);
+    $zip->extractTo($copy . '-zip');
+    $zip->close();
+    rename($copy . '-zip/eclair', $copy);
+    exec('rm -rf ' . escapeshellarg($copy . '-zip'));
+    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4']);
+    try {
+        $c = client($port);
+        $form = $c->req('GET', '/');
+        $c->req('POST', '/', $c->token($form['body']) + [
+            'ui' => 'fr', 'site_name' => 'Atelier FTP', 'site_tagline' => 'Céramique', 'site_lang' => 'fr', 'site_type' => 'business',
+            'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
+        ], ['Accept: application/json']);
+        file_put_contents($copy . '/app/theme/layout.php', str_replace('<a class="skip"', '<!-- PERSO-FTP --><a class="skip"', (string) file_get_contents($copy . '/app/theme/layout.php')));
+        file_put_contents($copy . '/assets/site/ftp.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><rect width="2" height="2"/></svg>');
+        // Ce que la personne fait avec son logiciel FTP : mettre de côté, puis envoyer le contenu de l'archive 2.0.
+        rename($copy . '/app', $copy . '/cache/legacy-app');
+        rename($copy . '/assets', $copy . '/cache/legacy-assets');
+        foreach (eclair_code(ECLAIR_ROOT) as $rel => $content) {
+            if (preg_match('~^(app/|assets/|index\.php$)~', $rel)) {
+                @mkdir(dirname($copy . '/' . $rel), 0755, true);
+                file_put_contents($copy . '/' . $rel, $content);
+            }
+        }
+        file_put_contents($copy . '/app/manifest.php', eclair_manifest('2.0.0', eclair_code(ECLAIR_ROOT)));
+        // OPcache du serveur intégré (revalidate_freq = 2 s) : un fichier modifié n'est relu qu'au bout de 2 secondes,
+        // comme chez un hébergeur ; l'ancien index.php sert encore l'ancienne page en cache pendant ce délai.
+        usleep(2600000);
+        $home = $c->req('GET', '/');
+        check('FTP : site en ligne avec le nouveau code, gabarit personnalisé retrouvé', $home['status'] === 200 && str_contains($home['body'], 'PERSO-FTP'), (string) $home['status']);
+        check('FTP : thème « legacy » créé et activé depuis cache/legacy-app', is_file($copy . '/site/themes/legacy/templates/layout.php')
+            && str_contains((string) @file_get_contents($copy . '/data/theme.php'), '"legacy"'));
+        check('FTP : actif ajouté servi à son ancienne adresse', $c->req('GET', '/assets/site/ftp.svg')['status'] === 200);
+    } finally {
+        proc_terminate($server);
+        exec('rm -rf ' . escapeshellarg($copy));
     }
 })($argv);
