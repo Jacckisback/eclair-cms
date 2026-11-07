@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.1.zip"><img src="https://img.shields.io/badge/download-v1.14.1-5b3cbc?style=for-the-badge" alt="下载 Éclair 1.14.1"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.2.zip"><img src="https://img.shields.io/badge/download-v1.14.2-5b3cbc?style=for-the-badge" alt="下载 Éclair 1.14.2"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 及以上">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/database-none-14122b?style=for-the-badge" alt="无需数据库">
@@ -382,7 +382,7 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
   <img src="docs/images/zh-CN/install.webp" alt="三步完成安装：上传文件夹，回答四个问题，网站上线" width="100%">
 </p>
 
-1. **下载**安装包 [`eclair-cms-1.14.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.1.zip)（731 KB）并解压。
+1. **下载**安装包 [`eclair-cms-1.14.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.2.zip)（731 KB）并解压。
 2. **把 `eclair` 文件夹里的内容上传**到主机的公开目录（`public_html`、`www`……），包括隐藏的 `.htaccess` 文件。
 3. **打开你的网站地址**：安装向导随即启动。回答四个问题，撒一把彩纸，网站就带着第一批页面上线了。
 
