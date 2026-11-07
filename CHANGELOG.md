@@ -2,6 +2,29 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## 2.0.0 — unreleased (work in progress, branch `claude/hopeful-thompson-8kqj2g`)
+
+First stage of the 2.0 architecture: the site's theme now belongs to the site and can never be overwritten by a core update, optional features get a manifest and a lifecycle, and backups can be restored online. Nothing is removed yet: every 1.14.1 feature is still in the core, and the public HTML of existing sites is byte-identical. Status, checks run and what remains: `docs/STATUS-2.md`.
+
+### Added
+
+- **Site themes in `site/themes/<id>/`** (`Themes`, Administration › Themes): versioned rendering contract 1 (the 1.14.1 templates and variables, plus an `extension` template), `theme.json` manifest, full validation before activation (paths, symbolic links, undeclared scripts, PHP syntax read by the server's PHP, sizes), preview with the real content, activation, previous version kept and restored in one click, back to the base theme, ZIP import (Security right and password). A template error falls back to the core template and flags the theme; `ECLAIR_SAFE_THEME` in `eclair-config.php` is the emergency switch. Contract: `docs/THEME-CONTRACT.md`.
+- **Migration from 1.x** (`Migrations`): identified, idempotent, logged migrations (`data/migrations.php`). Templates, theme CSS and `assets/site` files modified or added in a 1.x installation are found in the copy of the old code kept by the updater (or in `cache/legacy-app/` after an FTP update), copied raw to `site/themes/.legacy-originals/`, turned into an activated `legacy` theme; old asset URLs keep working. Tested with the real 1.14.1 archive and its own updater.
+- **Optional features** (`Extensions`, Administration › Features): `extension.json` manifest (`eclair-extension/1`), validation (rights, routes, block namespaces, declared file fingerprints), dependencies, route conflicts, data migrations, public routes rendered in the theme with the core SEO and security headers, admin routes behind the core access control and CSRF, menu entries, dashboard cards, declarative settings, blocks with declared fields, published assets, scheduled tasks (`/_eclair/tasks/<token>`), impact analysis before deactivation, deactivation without data loss, code removal and data erasure as separate steps. Contract: `docs/EXTENSION-CONTRACT.md`; example `examples/extensions/bonjour`.
+- **Blocks of a missing feature are kept**: an unknown block type is no longer dropped on save; it is kept bounded (32 KB of JSON), never rendered nor executed, shown in the editor as a "Kept block", and displayed again as soon as its feature is back.
+- **Online restore** (Security › Restore a backup, `Backup::restore`): on this installation or another one; everything is checked before writing (only `data/`, `media/`, `site/`; safe paths; no symbolic link; no script in media); secrets, sessions, counters, service state and the protection files of the target are never restored; the target keeps its verified address; files are put in place one by one, and running the same restore again finishes an interrupted one. Backups now include `site/`.
+- **For future skills**: `GET /<admin>/api/capabilities` (structured discovery, no secrets), JSON schemas in `docs/schemas/`, `php tools/validate.php <folder|zip> [--json]`, `docs/SKILLS-GUIDE.md`, examples in `examples/`.
+- **CI** (`.github/workflows/tests.yml`): PHP 8.1 to 8.5, tests on the sources and on the archive built without a key, budgets.
+- **Measurements and budgets**: `php tools/measure.php [--check] [--write] [--pages=N]` (archive, installed size, translations, PHP files loaded, memory and time per route, cold and warm cache, HTML/CSS/JS weight), `tools/budgets.json`, `docs/MEASURES.md`.
+- Docs: `docs/ARCHITECTURE-2.md` (file ownership, request path, responsibilities, map of every existing protection to its test), `docs/UPGRADE-2.md` (one-click, FTP, rollback, Apache/LiteSpeed and Nginx rules).
+
+### Changed
+
+- **Updates**: a core archive that writes to `site/`, `data/` or `media/` is refused as a whole; theme customizations in the kept copy of the old code are rescued before it is replaced.
+- **`tools/build.php` signs only with `--sign`** (or `--resign`): a signing key left in the environment no longer turns a test build into an announced release.
+- `.htaccess`: `site/themes/` and `site/extensions/` are never served (also enforced by their own `.htaccess`).
+- Budgets raised for this version: archive 790,000 → 805,000 bytes, installed size 1,470,000 → 1,510,000 bytes (+20 KB compressed for site themes, the feature registry, migrations and online restore). The extraction of the specialised features (next stage) must bring them down.
+
 ## 1.14.1 — 2026-11-05
 
 Fix release: the installation now stops with a clear message when the `.htaccess` file was not uploaded. Sites on 1.14.0 update in one click from Administration › Updates, after a backup.
