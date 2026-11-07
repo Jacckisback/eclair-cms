@@ -34,7 +34,13 @@ final class Site
         if ($_GET !== []) {
             Aliases::handle($path);
         }
-        self::canonical($path);
+        // Adresse exacte d'un contenu repris d'un ancien site (/2024/03/article/, /page.html, accents) : servie telle quelle,
+        // sans retirer le « / » final ni changer la casse ; seuls le domaine officiel et HTTPS restent imposés.
+        $exact = $path !== '/' && !preg_match('~[\\\x00-\x1f\x7f]~', $path) ? Content::byRoute($path) : null;
+        self::canonical($path, $exact !== null);
+        if ($exact !== null) {
+            self::single($exact);
+        }
 
         switch ($path) {
             case '/robots.txt':
@@ -110,7 +116,7 @@ final class Site
     }
 
     /** Une seule URL par contenu : protocole, domaine, slash final, majuscules, index.php. */
-    private static function canonical(string $path): void
+    private static function canonical(string $path, bool $exact = false): void
     {
         // Antislash ou caractère de contrôle : jamais une adresse légitime, et un piège à redirection.
         if (preg_match('~[\\\\\x00-\x1f\x7f]~', $path)) {
@@ -119,15 +125,23 @@ final class Site
         $query = Req::queryString();
         $suffix = $query !== '' ? '?' . $query : '';
         $clean = $path;
-        if ($clean === '/index.php' || str_starts_with($clean, '/index.php/')) {
+        if ($exact) {
+            // Adresse exacte : rien n'est réécrit dans le chemin.
+        } elseif ($clean === '/index.php' || str_starts_with($clean, '/index.php/')) {
             $clean = substr($clean, 10) ?: '/';
         }
-        $clean = (string) preg_replace('~/{2,}~', '/', $clean);
-        if ($clean !== '/' && str_ends_with($clean, '/')) {
-            $clean = rtrim($clean, '/') ?: '/';
-        }
-        if (preg_match('/[A-Z]/', $clean)) {
-            $clean = strtolower($clean);
+        if (!$exact) {
+            $clean = (string) preg_replace('~/{2,}~', '/', $clean);
+            if ($clean !== '/' && str_ends_with($clean, '/')) {
+                $clean = rtrim($clean, '/') ?: '/';
+            }
+            if (preg_match('/[A-Z]/', $clean)) {
+                $clean = strtolower($clean);
+            }
+            // Adresse exacte qui se termine par « / » (WordPress), demandée sans : une seule redirection vers elle.
+            if ($clean !== '/' && ($slashed = Content::byRoute($clean . '/')) !== null) {
+                $clean = (string) $slashed['route'];
+            }
         }
         // Domaine officiel : seulement si l'adresse enregistrée a été vérifiée (elle mène bien à ce site).
         $url = rtrim((string) Settings::get('url'), '/');

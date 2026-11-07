@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Eclair\Aliases;
+use Eclair\Content;
 use Eclair\Store;
 
 (static function (array $argv): void {
@@ -19,6 +20,16 @@ use Eclair\Store;
     $n = Aliases::add(['p:123' => '/a-propos', 'p:9' => '//evil.example', 'x:1' => '/a', 'page_id:45' => '/contact']);
     check('ajout : seules les entrées valides sont gardées', $n === 2 && Aliases::resolve('p:123') === '/a-propos' && Aliases::resolve('p:9') === null);
     Store::delete('aliases');
+
+    section('Adresses exactes d’un ancien site (/2024/03/article/, .html, accents)');
+    check('adresses exactes acceptées : dates, « / » final, .html, accents', Content::cleanRoute('/2024/03/mon-article/') === '/2024/03/mon-article/'
+        && Content::cleanRoute('/cafe-creme.html') === '/cafe-creme.html' && Content::cleanRoute('/café/crème') === '/café/crème' && Content::cleanRoute(' /a ') === '/a');
+    check('adresses exactes refusées : réservées, scripts, remontée, doubles « / », contrôle, trop longues', Content::cleanRoute('/media/x') === ''
+        && Content::cleanRoute('/admin/x') === '' && Content::cleanRoute('/sitemap.xml') === '' && Content::cleanRoute('/a.php') === '' && Content::cleanRoute('/../etc') === ''
+        && Content::cleanRoute('/a//b') === '' && Content::cleanRoute("/a
+b") === '' && Content::cleanRoute('/a?b=1') === '' && Content::cleanRoute('a/b') === ''
+        && Content::cleanRoute('/' . str_repeat('a/', 9) . 'b') === '' && Content::cleanRoute('/') === '' && Content::cleanRoute('/_eclair/x') === '' && Content::cleanRoute('/wp-admin/x') === '');
+    check('url_escape : ASCII inchangé, accents encodés', url_escape('/blog/mon-article?x=1') === '/blog/mon-article?x=1' && url_escape('/café/crème') === '/caf%C3%A9/cr%C3%A8me');
 
     if (in_array('--unit', $argv, true)) {
         return;
@@ -52,6 +63,39 @@ use Eclair\Store;
         check('autre paramètre : page rendue par l’application, contenu identique', $other['status'] === 200 && ($other['headers']['x-cache'] ?? '') !== 'HIT');
         check('page intérieure avec paramètre marketing : servie par le cache', ($v->req('GET', '/a-propos') + [])['status'] === 200
             && ($v->req('GET', '/a-propos?utm_medium=email')['headers']['x-cache'] ?? '') === 'HIT');
+
+        // Adresses exactes (contenus repris d'un ancien site).
+        $c->login('camille@example.com', 'Un-mot-de-passe-solide');
+        $page = $c->req('GET', '/gestion/');
+        preg_match('/"csrf":"([a-f0-9]+)"/', $page['body'], $m);
+        $api = static fn (array $data): array => json_decode($c->req('POST', '/gestion/api/save', (string) json_encode($data),
+            ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . ($m[1] ?? '')])['body'], true) ?: [];
+        $para = [['type' => 'paragraph', 'text' => 'Texte repris de l’ancien site.']];
+        $wp = $api(['type' => 'page', 'title' => 'Article daté', 'status' => 'published', 'route' => '/2024/03/mon-article/', 'blocks' => $para]);
+        $html = $api(['type' => 'page', 'title' => 'Page html', 'status' => 'published', 'route' => '/cafe-creme.html', 'blocks' => $para]);
+        $uni = $api(['type' => 'page', 'title' => 'Page accentuée', 'status' => 'published', 'route' => '/café/crème', 'blocks' => $para]);
+        $dup = $api(['type' => 'page', 'title' => 'Doublon', 'status' => 'published', 'route' => '/2024/03/mon-article', 'blocks' => $para]);
+        $bad = $api(['type' => 'page', 'title' => 'Piège', 'status' => 'published', 'route' => '/gestion/piege', 'blocks' => $para]);
+        check('adresses exactes enregistrées ; doublon (même adresse sans « / ») et adresse réservée abandonnés',
+            ($wp['item']['route'] ?? '') === '/2024/03/mon-article/' && ($html['item']['route'] ?? '') === '/cafe-creme.html' && ($uni['item']['route'] ?? '') === '/café/crème'
+            && ($dup['item']['route'] ?? 'x') === '' && ($bad['item']['route'] ?? 'x') === '', json_encode([$wp['item']['route'] ?? null, $dup['item']['route'] ?? null]));
+        $r = $v->req('GET', '/2024/03/mon-article/');
+        check('/2024/03/mon-article/ servie telle quelle (« / » final gardé), canonical identique', $r['status'] === 200 && str_contains($r['body'], 'Article daté')
+            && str_contains($r['body'], 'rel="canonical" href="http://127.0.0.1:' . $port . '/2024/03/mon-article/"'), (string) $r['status']);
+        check('deuxième visite : servie par le chemin rapide', ($v->req('GET', '/2024/03/mon-article/')['headers']['x-cache'] ?? '') === 'HIT');
+        $r = $v->req('GET', '/2024/03/mon-article');
+        check('sans « / » final : une seule 301 vers l’adresse exacte', $r['status'] === 301 && str_ends_with($r['headers']['location'] ?? '', '/2024/03/mon-article/'));
+        $r = $v->req('GET', '/2024/03/MON-ARTICLE/');
+        check('majuscules : une seule 301 vers l’adresse exacte', $r['status'] === 301 && str_ends_with($r['headers']['location'] ?? '', '/2024/03/mon-article/'),
+            (string) ($r['headers']['location'] ?? ''));
+        check('/cafe-creme.html servie', $v->req('GET', '/cafe-creme.html')['status'] === 200);
+        $r = $v->req('GET', '/caf%C3%A9/cr%C3%A8me');
+        check('adresse accentuée servie (encodée par le navigateur)', $r['status'] === 200 && str_contains($r['body'], 'Page accentuée')
+            && str_contains($r['body'], '/caf%C3%A9/cr%C3%A8me"'), (string) $r['status']);
+        $sitemap = $v->req('GET', '/sitemap.xml')['body'];
+        check('plan du site : adresses exactes, accents encodés', str_contains($sitemap, '/2024/03/mon-article/</loc>') && str_contains($sitemap, '/caf%C3%A9/cr%C3%A8me</loc>')
+            && !str_contains($sitemap, 'café'));
+        check('adresse habituelle d’un contenu à adresse exacte : 404 (une seule adresse par contenu)', $v->req('GET', '/article-date')['status'] === 404);
     } finally {
         proc_terminate($server);
         exec('rm -rf ' . escapeshellarg($copy));

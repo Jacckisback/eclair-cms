@@ -558,6 +558,7 @@ final class Extensions
         if ($m === null || !Themes::safePath((string) $m['entry']) || !is_file($file) || is_link($file)) {
             return self::$loaded[$id] = null;
         }
+        I18n::domain(dirname($file));
         $object = (static function (string $__file) {
             return require $__file;
         })($file);

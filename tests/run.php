@@ -235,6 +235,7 @@ section('Traductions de l’administration');
 require_once dirname(__DIR__) . '/tools/i18n.php';
 $reference = include dirname(__DIR__) . '/i18n/en.php';
 $marks = static fn (string $s): array => [preg_match_all('/\{\w+\}|<\/?[a-z][a-z0-9]*/i', $s, $m) ? array_count_values($m[0]) : [], substr_count($s, "\n")];
+$i18nScopes = eclair_i18n_scopes();
 foreach (array_keys(Eclair\I18n::LANGS) as $lang) {
     if ($lang === 'fr') {
         continue;
@@ -245,10 +246,17 @@ foreach (array_keys(Eclair\I18n::LANGS) as $lang) {
     check("$lang : tous les textes traduits", $gaps === [], implode(' | ', array_slice($gaps, 0, 3)));
     $broken = array_filter(array_keys($dict), static fn ($fr) => trim((string) $dict[$fr]) === '' || $marks((string) $fr) != $marks((string) $dict[$fr]));
     check("$lang : variables, balises et retours à la ligne conservés", $broken === [], implode(' | ', array_slice($broken, 0, 3)));
-    check("$lang : fichier livré à jour (php tools/i18n.php)", is_file($source) && (string) @file_get_contents(ECLAIR_ROOT . "/app/lang/$lang.json.gz") === eclair_i18n_compile($source));
+    $bundledLang = array_filter(glob(ECLAIR_ROOT . "/app/bundled/*/lang/$lang.json.gz") ?: [],
+        static fn (string $f): bool => (string) file_get_contents($f) !== eclair_i18n_compile($source, basename(dirname($f, 2)), $i18nScopes));
+    check("$lang : fichiers livrés à jour, noyau et fonctions (php tools/i18n.php)", is_file($source) && $bundledLang === []
+        && (string) @file_get_contents(ECLAIR_ROOT . "/app/lang/$lang.json.gz") === eclair_i18n_compile($source, 'core', $i18nScopes), implode(' ', $bundledLang));
     Eclair\I18n::setLang($lang);
     check("$lang : interface traduite", t('Réglages') !== 'Réglages' && t('il y a {n} min', ['n' => 5]) !== 'il y a 5 min');
 }
+Eclair\I18n::setLang('en');
+$wpText = 'Lancer l’import';
+check('traductions d’une fonction : hors du fichier du noyau, lues seulement quand son code est chargé', eclair_i18n_owner($wpText, $i18nScopes) === 'wordpress'
+    && t($wpText) === $wpText && (Eclair\I18n::domain(ECLAIR_ROOT . '/app/bundled/wordpress') || true) && t($wpText) === 'Start the import' && t('Réglages') === 'Settings');
 Eclair\I18n::setLang('fr');
 $untranslated = array_values(array_diff(eclair_i18n_texts(), array_keys($reference)));
 check('chaque texte de l’interface a sa traduction (i18n/*.php)', $untranslated === [], implode(' | ', array_slice($untranslated, 0, 4)));
@@ -688,6 +696,7 @@ require __DIR__ . '/transition.php';
 require __DIR__ . '/themes.php';
 require __DIR__ . '/extensions.php';
 require __DIR__ . '/routing.php';
+require __DIR__ . '/wordpress.php';
 require __DIR__ . '/drive.php';
 require __DIR__ . '/sec-C2.php';
 require __DIR__ . '/sec-B2.php';

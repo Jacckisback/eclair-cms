@@ -291,6 +291,26 @@
     driveTick().catch(() => {});
   }
 
+  /* ── Import WordPress : lots successifs jusqu'à la fin, avancement affiché ── */
+  const wpRun = $('[data-wp-run]');
+  if (wpRun) {
+    const btn = $('[data-wp-step]', wpRun);
+    const bar = $('progress', wpRun);
+    const label = $('[data-wp-label]', wpRun);
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      btn.disabled = true;
+      btn.textContent = btn.dataset.wait;
+      const step = () => api('x/wordpress/step', {}).then((json) => {
+        if (!json || !json.ok || json.done) { location.reload(); return; }
+        if (bar) bar.value = json.next;
+        if (label) label.textContent = json.next + ' / ' + json.total;
+        step();
+      }).catch(() => { btn.disabled = false; });
+      step();
+    });
+  }
+
   /* ── Planning éditorial : idées et articles rédigés par l'IA, rédaction automatique en arrière-plan ── */
   const planRun = (btn, wait, path, body, done) => {
     const label = btn.innerHTML;

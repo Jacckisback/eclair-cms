@@ -17,6 +17,7 @@ site/extensions/<id>/
   extension.php       fichier d'entrée : renvoie un objet (voir §4)
   lib/*.php           code complémentaire (seuls fichiers PHP permis en plus de l'entrée)
   assets/…            actifs déclarés, publiés dans site/assets/ext-<id>/
+  lang/<langue>.json.gz  traductions propres à la fonction (format de tools/i18n.php), lues quand son code est chargé
 ```
 
 Données : `data/ext/<id>/…` via `Eclair\Store` (préfixe fourni dans `$ctx['data']`), incluses dans les sauvegardes. Les secrets (clés d’API…) vont dans `data/ext/<id>/secrets.php` (ou un dossier `secrets/`) : jamais sauvegardés ni restaurés, comme le coffre du noyau.
@@ -96,7 +97,7 @@ Les mises à jour du noyau ne touchent jamais `site/extensions/` : une fonction 
 
 ## 7. Fonctions livrées avec Éclair
 
-Certaines fonctions sont maintenues avec le noyau et livrées dans son archive signée, sous `app/bundled/<id>/` (aujourd’hui : `wayback` « Ancien site », `drive` « Sauvegardes Google Drive », `ai-visits` « Robots IA », `discover` « Google Discover », `affiliate` « Affiliation », `planning` « Planning éditorial »). Elles ne sont **jamais chargées** tant que le site ne les a pas ajoutées (Fonctions › Ajouter, ou préréglage d’un usage, ou migration pour les sites qui les utilisaient). Une mise à jour du noyau met à jour celles que le site a ajoutées (`Extensions::syncBundled`) et ne réinstalle jamais celles qui ont été retirées. Pour des raisons de compatibilité avec la 1.x, le noyau peut appeler une fonction livrée active par `Extensions::invoke()` (adresse historique d’une tâche planifiée, envoi dû en arrière-plan, réglages du journal des robots IA tenu par `index.php`, rapport affiché au tableau de bord et dans le planning, contrôles Discover des tuiles du tableau de bord, idées ajoutées au planning par Discover) ; ce point d’accroche n’est pas ouvert aux autres fonctions.
+Certaines fonctions sont maintenues avec le noyau et livrées dans son archive signée, sous `app/bundled/<id>/` (aujourd’hui : `wayback` « Ancien site », `drive` « Sauvegardes Google Drive », `ai-visits` « Robots IA », `discover` « Google Discover », `affiliate` « Affiliation », `planning` « Planning éditorial », `wordpress` « Import WordPress »). Elles ne sont **jamais chargées** tant que le site ne les a pas ajoutées (Fonctions › Ajouter, ou préréglage d’un usage, ou migration pour les sites qui les utilisaient). Une mise à jour du noyau met à jour celles que le site a ajoutées (`Extensions::syncBundled`) et ne réinstalle jamais celles qui ont été retirées. Pour des raisons de compatibilité avec la 1.x, le noyau peut appeler une fonction livrée active par `Extensions::invoke()` (adresse historique d’une tâche planifiée, envoi dû en arrière-plan, réglages du journal des robots IA tenu par `index.php`, rapport affiché au tableau de bord et dans le planning, contrôles Discover des tuiles du tableau de bord, idées ajoutées au planning par Discover) ; ce point d’accroche n’est pas ouvert aux autres fonctions.
 
 ## 8. Découverte
 

@@ -11,7 +11,8 @@ defined('ECLAIR') || exit;
  * Traductions de l'administration. Le texte français sert de référence : les sources lisibles
  * i18n/<langue>.php du dépôt sont compilées par tools/i18n.php en app/lang/<langue>.json.gz
  * (JSON compressé), indexées par l'empreinte CRC32 du texte français. Sans l'extension zlib
- * (très rare), l'administration reste en français.
+ * (très rare), l'administration reste en français. Les textes propres à une fonction livrée sont dans son dossier
+ * (<fonction>/lang/<langue>.json.gz), lus seulement quand son code est chargé (domain()).
  */
 final class I18n
 {
@@ -19,13 +20,33 @@ final class I18n
 
     private static string $lang = 'fr';
     private static ?array $dict = null;
+    /** Dossiers des fonctions chargées qui ont leurs propres traductions, et leur dictionnaire réuni (lu au premier besoin). */
+    private static array $domains = [];
+    private static ?array $extra = null;
+
+    /** Traductions d'une fonction ($dir/lang/<langue>.json.gz), consultées après celles du noyau. */
+    public static function domain(string $dir): void
+    {
+        if (!isset(self::$domains[$dir]) && is_dir($dir . '/lang')) {
+            self::$domains[$dir] = true;
+            self::$extra = null;
+        }
+    }
+
+    private static function load(string $file): array
+    {
+        $raw = @file_get_contents($file);
+        $json = is_string($raw) && function_exists('gzdecode') ? @gzdecode($raw) : false;
+        $dict = is_string($json) ? json_decode($json, true) : null;
+        return is_array($dict) ? $dict : [];
+    }
 
     public static function setLang(string $lang): void
     {
         $lang = isset(self::LANGS[$lang]) ? $lang : 'fr';
         if ($lang !== self::$lang) {
             self::$lang = $lang;
-            self::$dict = null;
+            self::$dict = self::$extra = null;
         }
     }
 
@@ -37,13 +58,19 @@ final class I18n
     public static function t(string $text, array $vars = []): string
     {
         if (self::$lang !== 'fr') {
-            if (self::$dict === null) {
-                $raw = @file_get_contents(ECLAIR_ROOT . '/app/lang/' . self::$lang . '.json.gz');
-                $json = is_string($raw) && function_exists('gzdecode') ? @gzdecode($raw) : false;
-                $dict = is_string($json) ? json_decode($json, true) : null;
-                self::$dict = is_array($dict) ? $dict : [];
+            self::$dict ??= self::load(ECLAIR_ROOT . '/app/lang/' . self::$lang . '.json.gz');
+            $key = hash('crc32b', $text);
+            if (isset(self::$dict[$key])) {
+                $text = self::$dict[$key];
+            } elseif (self::$domains) {
+                if (self::$extra === null) {
+                    self::$extra = [];
+                    foreach (array_keys(self::$domains) as $dir) {
+                        self::$extra += self::load($dir . '/lang/' . self::$lang . '.json.gz');
+                    }
+                }
+                $text = self::$extra[$key] ?? $text;
             }
-            $text = self::$dict[hash('crc32b', $text)] ?? $text;
         }
         if ($vars) {
             $pairs = [];

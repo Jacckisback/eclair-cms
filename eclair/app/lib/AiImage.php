@@ -146,8 +146,11 @@ final class AiImage
         return [self::download((string) $image['url']), null];
     }
 
-    /** Téléchargement d'une image livrée par le fournisseur (https public, 25 Mo maximum, sans redirection ni clé). */
-    private static function download(string $url): string
+    /**
+     * Téléchargement d'une image livrée par le fournisseur, ou reprise d'un ancien site (import WordPress) : https public,
+     * adresse IP vérifiée et imposée, 25 Mo maximum, sans redirection ni clé.
+     */
+    public static function download(string $url): string
     {
         $pin = self::pin($url);
         if ($pin === null) {

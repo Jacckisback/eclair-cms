@@ -189,9 +189,11 @@ try {
         && !str_contains($noPlan, 'value="trend"') && str_contains($noPlan, 'ajoute la fonction « Planning éditorial »'));
     $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'activate', 'id' => 'planning']);
     $page = $c->req('GET', '/gestion/x/discover');
+    // Date du jour dans le fuseau du site (français : Europe/Paris), pas celle du processus de test (UTC).
+    $siteToday = (new DateTimeImmutable('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
     $c->req('POST', '/gestion/x/discover', $c->token($page['body']) + ['action' => 'trend', 'n' => '0']);
     $ideas = array_values(array_filter($read('plan')['items'] ?? [], fn ($i) => $i['title'] === 'pain au levain maison'));
-    check('« Ajouter au planning » : idée datée d’aujourd’hui, avec la presse pour contexte', count($ideas) === 1 && $ideas[0]['date'] === date('Y-m-d')
+    check('« Ajouter au planning » : idée datée d’aujourd’hui, avec la presse pour contexte', count($ideas) === 1 && $ideas[0]['date'] === $siteToday
         && str_contains($ideas[0]['brief'], 'https://journal.example/levain-retour') && str_contains($ideas[0]['brief'], 'sans rapporter l’actualité'));
     $c->req('POST', '/gestion/x/discover', $c->token($page['body']) + ['action' => 'geo', 'geo' => 'ES']);
     $err = $api('x/discover/trends', []);
@@ -210,7 +212,7 @@ try {
     $gen = $api('x/discover/ideas', []);
     $lines = array_values(array_filter(explode("\n", (string) @file_get_contents($aiDir . '/log.jsonl'))));
     $prompt = (string) json_encode(json_decode((string) end($lines), true)['b'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    $today = array_filter($read('plan')['items'] ?? [], fn ($i) => $i['source'] === 'ai' && $i['date'] === date('Y-m-d'));
+    $today = array_filter($read('plan')['items'] ?? [], fn ($i) => $i['source'] === 'ai' && $i['date'] === $siteToday);
     check('idées de l’IA : ajoutées au planning à la date d’aujourd’hui, coût compté', ($gen['json']['ok'] ?? false) === true && ($gen['json']['added'] ?? 0) === 2
         && count($read('plan')['items'] ?? []) === $before + 2 && count($today) === 2 && (float) ($read('ai/usage')['months'][date('Y-m')]['cost'] ?? 0) > 0, $gen['body']);
     check('IA : tendances et presse fournies, jamais d’article d’actualité ni de fait sur l’actualité', str_contains($prompt, 'pain au levain maison (2000+ searches)')

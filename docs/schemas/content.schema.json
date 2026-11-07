@@ -10,6 +10,7 @@
     "status": { "enum": ["draft", "published"], "default": "draft", "description": "Un contenu publié avec une date future est programmé." },
     "title": { "type": "string", "maxLength": 300 },
     "slug": { "type": "string", "pattern": "^[a-z0-9-]*$" },
+    "route": { "type": "string", "maxLength": 300, "description": "Adresse exacte reprise d'un ancien site (/2024/03/article/, /page.html, accents) ; vide : adresse habituelle déduite du type et du slug" },
     "lang": { "type": "string" },
     "summary": { "type": "string" },
     "image": { "type": "string", "description": "Identifiant d'un média." },
