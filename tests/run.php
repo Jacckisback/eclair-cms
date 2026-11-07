@@ -212,6 +212,24 @@ $updateCode = (string) @file_get_contents(ECLAIR_ROOT . '/app/lib/Update.php');
 check('mise à jour en un clic : les opérations sur les fichiers passent par Disk', $updateCode !== '' && !preg_match('~\b(unlink|chmod|file_put_contents|file_get_contents)\b~', $updateCode)
     && str_contains($updateCode, 'Disk::put('));
 
+/* ─────────────── Compatibilité PHP 8.1 (minimum annoncé) : rien de réservé à PHP 8.2+ ─────────────── */
+section('Compatibilité PHP 8.1');
+$php81 = [];
+$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ECLAIR_ROOT . '/app', FilesystemIterator::SKIP_DOTS));
+foreach ($it as $file) {
+    if (!preg_match('~\.php(\.gz)?$~', (string) $file)) {
+        continue;
+    }
+    $code = str_ends_with((string) $file, '.gz') ? (string) gzdecode((string) file_get_contents((string) $file)) : (string) file_get_contents((string) $file);
+    // Commentaires retirés (ils peuvent citer ces noms) ; type de retour null, true ou false seul (PHP 8.2+), constante
+    // cURL de PHP 8.2 utilisée directement.
+    $code = implode('', array_map(static fn ($t): string => is_array($t) ? (in_array($t[0], [T_COMMENT, T_DOC_COMMENT], true) ? '' : $t[1]) : $t, token_get_all($code)));
+    if (preg_match('~(function|fn)\b[^;{]*\)\s*:\s*\??(null|true|false)\s*(\{|=>)~', $code) || preg_match('~(?<![\'"])\bCURLOPT_XFERINFOFUNCTION\b(?![\'"])~', $code)) {
+        $php81[] = substr((string) $file, strlen(ECLAIR_ROOT) + 1);
+    }
+}
+check('aucun type de retour null/true/false seul ni CURLOPT_XFERINFOFUNCTION direct (PHP 8.2+)', $php81 === [], implode(', ', $php81));
+
 /* ───────────────────── Traductions de l'administration ───────────────────── */
 section('Traductions de l’administration');
 require_once dirname(__DIR__) . '/tools/i18n.php';

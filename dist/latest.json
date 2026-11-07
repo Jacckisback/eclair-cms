@@ -1,8 +1,8 @@
 {
-    "payload": "{\"version\":\"1.14.1\",\"date\":\"2026-11-05\",\"url\":\"https://raw.githubusercontent.com/Jacckisback/eclair-cms/main/dist/eclair-cms-1.14.1.zip\",\"sha256\":\"4bb36856000ab286a7fa4d62759454c46a9b4a70be5abda58f9274a795d716e8\",\"size\":748286,\"php\":\"8.1\",\"notes\":\"https://github.com/Jacckisback/eclair-cms/releases/tag/1.14.1\"}",
-    "signature": "PiMcGANpTPoWXEcGFJWq6jxmJpgxifVEJHrag7qTAZDsM33iTDHvpH8o8/WtBcyK3zg9SCcw2OIk0bHPHSDrCQ==",
+    "payload": "{\"version\":\"1.14.2\",\"date\":\"2026-11-07\",\"url\":\"https://raw.githubusercontent.com/Jacckisback/eclair-cms/main/dist/eclair-cms-1.14.2.zip\",\"sha256\":\"386ab36114072458bc748fefadf9dfc11b71397215148c7d501eaa044c194b5f\",\"size\":748370,\"php\":\"8.1\",\"notes\":\"https://github.com/Jacckisback/eclair-cms/releases/tag/1.14.2\"}",
+    "signature": "F+XWxaA8CdvueR28xNd4wwHGs9UtgZQiFi/AT1aVRjfWu8M1Nf88tnJo+QyxiwapTGcvXQOQMhv3D0FST8LFCA==",
     "v2": {
-        "payload": "{\"version\":\"1.14.1\",\"serial\":1793870021,\"expires\":1809422021,\"date\":\"2026-11-05\",\"url\":\"https://raw.githubusercontent.com/Jacckisback/eclair-cms/main/dist/eclair-cms-1.14.1.zip\",\"sha256\":\"4bb36856000ab286a7fa4d62759454c46a9b4a70be5abda58f9274a795d716e8\",\"size\":748286,\"php\":\"8.1\",\"notes\":\"https://github.com/Jacckisback/eclair-cms/releases/tag/1.14.1\"}",
-        "signature": "nl2idL0QEUoOXS+XVfzKPgElCD6+3eHszggjfL+CO2DUWwcBbK+DDJx6/HnQTzZ0zPE0pd3m7pxTwcK7tnPxAA=="
+        "payload": "{\"version\":\"1.14.2\",\"serial\":1794083657,\"expires\":1809635657,\"date\":\"2026-11-07\",\"url\":\"https://raw.githubusercontent.com/Jacckisback/eclair-cms/main/dist/eclair-cms-1.14.2.zip\",\"sha256\":\"386ab36114072458bc748fefadf9dfc11b71397215148c7d501eaa044c194b5f\",\"size\":748370,\"php\":\"8.1\",\"notes\":\"https://github.com/Jacckisback/eclair-cms/releases/tag/1.14.2\"}",
+        "signature": "O5zv4f0+UsRyQWFxNGeOYAldxgdZWH7x464UFdkUCUToSNHvkdbKmYY8L9vLxtTIjwbfE1IYdab4DKRxS7cVBQ=="
     }
 }

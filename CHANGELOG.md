@@ -34,6 +34,24 @@ First stage of the 2.0 architecture: the site's theme now belongs to the site an
 - `.htaccess`: `site/themes/` and `site/extensions/` are never served (also enforced by their own `.htaccess`).
 - Budgets raised for this version: archive 790,000 → 805,000 bytes, installed size 1,470,000 → 1,510,000 bytes (+20 KB compressed for site themes, the feature registry, migrations and online restore). The extraction of the specialised features (next stage) must bring them down.
 
+## 1.14.2 — 2026-11-07
+
+Fix release for sites on **PHP 8.1**, the minimum Éclair supports: on PHP 8.1, version 1.14.1 answered its public pages with an error 500 (except pages already in the cache), and its one-click update and AI assistant did not work. Sites on PHP 8.2 or later are not affected, but get the same fixes.
+
+**How to update on PHP 8.1:** the one-click update of 1.14.1 cannot run on PHP 8.1 (that is one of the fixed bugs). Either switch your hosting to PHP 8.2 or later (recommended: PHP 8.1 no longer receives security fixes), then use Administration › Updates; or update by FTP: upload the content of the `eclair` folder of the archive (contents, settings, accounts and images are in `data/` and `media/`, which the archive does not contain). Sites on PHP 8.2 or later update in one click, after a backup.
+
+### Fixed
+
+- **Public pages on PHP 8.1.** Two functions of the affiliate module declared a return type (`null` alone) that PHP only accepts since 8.2. The file is loaded when pages are rendered, so every page not already in the cache failed with an error 500.
+- **One-click update and AI assistant on PHP 8.1.** The download of an update, the health check that follows it and the calls to AI providers used a cURL option (`CURLOPT_XFERINFOFUNCTION`) that only exists since PHP 8.2. They now use the equivalent option on PHP 8.1.
+
+### Technical details
+
+- New `curl_progress_option()` in `app/lib/helpers.php`: `CURLOPT_XFERINFOFUNCTION` on PHP 8.2+, `CURLOPT_PROGRESSFUNCTION` on PHP 8.1 (same useful arguments). Used by `Update.php` (download, health check) and `Ai.php`.
+- `Affiliate.php`: the two closures passed to `change()` return `mixed`.
+- New check in `tests/run.php`: no standalone `null`/`true`/`false` return type and no direct use of `CURLOPT_XFERINFOFUNCTION` in `app/`. The `unit` rate-limit key used by the tests is cleared after its test (depending on the file order of the disk, it could be listed before the account expected by a security test).
+- New workflow `.github/workflows/tests.yml`: the test suite on PHP 8.1, 8.2, 8.3, 8.4 and 8.5, on the sources and on the archive built without a key. The suite passes on the source and on the built archive (1,160 checks).
+
 ## 1.14.1 — 2026-11-05
 
 Fix release: the installation now stops with a clear message when the `.htaccess` file was not uploaded. Sites on 1.14.0 update in one click from Administration › Updates, after a backup.
