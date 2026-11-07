@@ -40,6 +40,9 @@ jobs:
           coverage: none
       - name: Tests sur les sources
         run: php tests/run.php
+      - name: Diagnostic (seulement en cas d'échec)
+        if: failure()
+        run: php tools/ci-diagnose.php
       - name: Construction de l'archive (sans clé, non signée)
         run: env -u ECLAIR_SIGNING_KEY php tools/build.php
       - name: Tests sur l'archive construite

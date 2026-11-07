@@ -257,6 +257,8 @@ RateLimit::release('unit');
 RateLimit::release('unit');
 $after = [RateLimit::attempt('unit', 3, 600), RateLimit::attempt('unit', 3, 600), RateLimit::attempt('unit', 3, 600), RateLimit::attempt('unit', 3, 600)];
 check('une tentative réussie est rendue', $after === [true, true, true, false]);
+// Clé de test débloquée : elle ne doit pas figurer dans les listes des tests suivants (ordre des fichiers propre à chaque disque).
+RateLimit::clear('unit');
 
 Log::security('test', ['email' => str_repeat('a', 5000) . '<?php echo 1; ?>']);
 $logFile = ECLAIR_DATA . '/logs/security.php';
