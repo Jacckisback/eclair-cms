@@ -2044,4 +2044,8 @@ return [
     'Bloc « {type} » : la fonction qui l’affiche n’est pas active sur ce site. Il est conservé tel quel, sans être affiché. Réactive la fonction pour le retrouver.' => 'Blocco «{type}»: la funzione che lo mostra non è attiva su questo sito. Viene conservato così com’è, senza essere mostrato. Riattiva la funzione per ritrovarlo.',
     'C’est fait.' => 'Fatto.',
     'Choisis d’abord le fichier .zip de la fonction.' => 'Scegli prima il file .zip della funzione.',
+    'Fonctions livrées avec Éclair' => 'Funzioni incluse in Éclair',
+    'Maintenues avec Éclair et mises à jour avec lui, elles ne sont chargées que si tu les ajoutes.' => 'Mantenute e aggiornate con Éclair, vengono caricate solo se le aggiungi.',
+    'Fonction « {n} » ajoutée pour cet usage : tu peux la retirer dans Fonctions.' => 'Funzione «{n}» aggiunta per questo uso: puoi rimuoverla in Funzioni.',
+    'À ajouter' => 'Da aggiungere',
 ];

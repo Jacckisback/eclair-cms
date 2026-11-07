@@ -3,7 +3,16 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Wayback;
+
+use Eclair\AdminAi;
+use Eclair\Ai;
+use Eclair\Content;
+use Eclair\Http;
+use Eclair\Req;
+use Eclair\Session;
+use Eclair\Settings;
+use Eclair\Admin;
 
 defined('ECLAIR') || exit;
 
@@ -34,7 +43,7 @@ final class AdminWayback
             $rows[$path] = $u;
         }
         $imager = $ai ? Ai::imager() : '';
-        Admin::view('wayback', [
+        $v = [
             'domain' => Wayback::domain(),
             'data' => $d,
             'rows' => $rows,
@@ -48,7 +57,17 @@ final class AdminWayback
             'usage' => Ai::usage(),
             'budget' => (float) Ai::config()['budget'],
             'blog' => (bool) Settings::get('blog.enabled'),
-        ], t('Ancien site'));
+        ];
+        // Vue de la fonction rendue ici, puis placée telle quelle dans la mise en page de l'administration.
+        ob_start();
+        try {
+            (static function (array $v): void {
+                include __DIR__ . '/page.php';
+            })($v);
+        } finally {
+            $html = (string) ob_get_clean();
+        }
+        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Ancien site'), 'ext' => 'wayback'], t('Ancien site'));
     }
 
     /** Formulaires sans JavaScript : publier les brouillons reconstruits, effacer la liste. */
@@ -57,14 +76,14 @@ final class AdminWayback
         $action = Req::input('action');
         if ($action === 'publish') {
             [$done, $waiting] = Wayback::publish($user);
-            Admin::back('wayback', trim(($done ? t('{n} pages reconstruites publiées.', ['n' => $done]) : t('Aucune page publiée.'))
+            Admin::back('x/wayback', trim(($done ? t('{n} pages reconstruites publiées.', ['n' => $done]) : t('Aucune page publiée.'))
                 . ($waiting ? ' ' . t('{n} attendent ta relecture : elles contiennent encore « À compléter ».', ['n' => $waiting]) : '')), $done ? 'ok' : 'warn');
         }
         if ($action === 'reset') {
             Wayback::reset();
-            Admin::back('wayback', t('Liste effacée. Les brouillons déjà créés sont gardés.'));
+            Admin::back('x/wayback', t('Liste effacée. Les brouillons déjà créés sont gardés.'));
         }
-        Admin::back('wayback');
+        Admin::back('x/wayback');
     }
 
     /** « Chercher dans l'archive » : l'index d'Internet Archive, pour le domaine de ce site seulement. */

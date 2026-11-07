@@ -69,8 +69,14 @@ try {
 
     settings($copy, ['usage' => 'revival']);
     $dash = $c->req('GET', '/gestion/');
+    // 2.0 : « Ancien site » est une fonction optionnelle ; absente, la tuile propose de l'ajouter.
+    check('ancien site sans la fonction : tuile « À ajouter » vers Fonctions, redirections', str_contains($dash['body'], 'Ton ancien site')
+        && str_contains($dash['body'], 'À ajouter') && str_contains($dash['body'], 'href="/gestion/extensions"') && str_contains($dash['body'], 'href="/gestion/redirects"'));
+    $ext = $c->req('GET', '/gestion/extensions');
+    $c->req('POST', '/gestion/extensions', $c->token($ext['body']) + ['action' => 'add', 'id' => 'wayback']);
+    $dash = $c->req('GET', '/gestion/');
     check('ancien site : recherche dans la Wayback Machine « À lancer », redirections, brouillons, Discover', str_contains($dash['body'], 'Ton ancien site')
-        && str_contains($dash['body'], 'href="/gestion/wayback"') && str_contains($dash['body'], 'À lancer') && str_contains($dash['body'], 'Retrouver les anciennes adresses de ton domaine')
+        && str_contains($dash['body'], 'href="/gestion/x/wayback"') && str_contains($dash['body'], 'À lancer') && str_contains($dash['body'], 'Retrouver les anciennes adresses de ton domaine')
         && str_contains($dash['body'], 'href="/gestion/redirects"'));
 
     settings($copy, ['usage' => 'business']);

@@ -3,7 +3,22 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Wayback;
+
+use Eclair\AdminAi;
+use Eclair\Ai;
+use Eclair\AiTools;
+use Eclair\Content;
+use Eclair\Log;
+use Eclair\Media;
+use Eclair\Redirects;
+use Eclair\Settings;
+use Eclair\Store;
+use Eclair\AiImage;
+use Eclair\Analyzer;
+use Eclair\Blocks;
+use Eclair\Plan;
+use Eclair\Sanitize;
 
 defined('ECLAIR') || exit;
 

@@ -2044,4 +2044,8 @@ return [
     'Bloc « {type} » : la fonction qui l’affiche n’est pas active sur ce site. Il est conservé tel quel, sans être affiché. Réactive la fonction pour le retrouver.' => '区块“{type}”：显示它的功能在此网站上未启用。它被原样保留，不会显示。重新启用该功能即可恢复。',
     'C’est fait.' => '已完成。',
     'Choisis d’abord le fichier .zip de la fonction.' => '请先选择功能的 .zip 文件。',
+    'Fonctions livrées avec Éclair' => 'Éclair 自带的功能',
+    'Maintenues avec Éclair et mises à jour avec lui, elles ne sont chargées que si tu les ajoutes.' => '随 Éclair 一起维护和更新，只有在你添加后才会加载。',
+    'Fonction « {n} » ajoutée pour cet usage : tu peux la retirer dans Fonctions.' => '已为此用途添加功能“{n}”：你可以在“功能”中移除它。',
+    'À ajouter' => '待添加',
 ];

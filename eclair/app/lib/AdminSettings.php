@@ -330,6 +330,17 @@ final class AdminSettings
         }
         Settings::save($patch);
         Log::security('settings_saved', ['tab' => $tab]);
+        // Usage choisi : préréglage qui ajoute les fonctions livrées utiles à cet usage (jamais retirées automatiquement).
+        if (isset($patch['usage']) && $patch['usage'] !== ($s['usage'] ?? '')) {
+            foreach (Usage::extensions((string) $patch['usage']) as $id => $label) {
+                if (!Extensions::enabled($id)) {
+                    $added = Extensions::add($id);
+                    Session::flash($added['ok'] ? 'ok' : 'warn', $added['ok']
+                        ? t('Fonction « {n} » ajoutée pour cet usage : tu peux la retirer dans Fonctions.', ['n' => $label])
+                        : (string) $added['error']);
+                }
+            }
+        }
         if (isset($patch['url']) && $patch['url'] !== $s['url'] && !Settings::verifyUrl()) {
             Session::flash('warn', t('Je n’ai pas pu vérifier que {url} mène bien à ce site : en attendant, personne n’est redirigé vers cette adresse. Vérifie-la depuis la page Sécurité.', ['url' => $patch['url']]));
         }

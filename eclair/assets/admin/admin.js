@@ -321,7 +321,7 @@
     const scan = $('[data-wb-scan]', wb);
     scan.addEventListener('submit', (ev) => {
       ev.preventDefault();
-      planRun($('button', scan), scan.dataset.wait, 'api/wayback/scan', { date: new FormData(scan).get('date') }, () => location.reload());
+      planRun($('button', scan), scan.dataset.wait, (wb.dataset.api || 'api/wayback/') + 'scan', { date: new FormData(scan).get('date') }, () => location.reload());
     });
     const boxes = $$('[data-wb-path]', wb).filter((b) => !b.disabled);
     const all = $('[data-wb-all]', wb);
@@ -342,7 +342,7 @@
         if (stop) break;
         status.textContent = t('Page {n} sur {total} : {path}…').replace('{n}', i + 1).replace('{total}', list.length).replace('{path}', box.value);
         const row = box.closest('tr');
-        const json = await api('api/wayback/build', { path: box.value, image }, { quiet: true })
+        const json = await api((wb.dataset.api || 'api/wayback/') + 'build', { path: box.value, image }, { quiet: true })
           .catch(() => ({ ok: false, stop: true, error: t('Erreur réseau : vérifie ta connexion.') }));
         $('[data-wb-error]', row).textContent = json.ok ? json.note || '' : json.error || '';
         if (json.ok) {

@@ -481,6 +481,59 @@ final class Extensions
         return ['ok' => true, 'id' => $id];
     }
 
+    /* ─────────────────────────────── Fonctions livrées ─────────────────────────────── */
+
+    /**
+     * Fonctions livrées avec le noyau (app/bundled/<id>/) : présentes dans l'archive, signées avec elle, mais jamais
+     * chargées tant que le site ne les a pas ajoutées (copie dans site/extensions/). id => manifeste.
+     */
+    public static function bundled(): array
+    {
+        $out = [];
+        foreach (glob(ECLAIR_ROOT . '/app/bundled/*/extension.json') ?: [] as $file) {
+            $m = json_decode((string) Disk::read($file), true);
+            $id = basename(dirname($file));
+            if (is_array($m) && ($m['id'] ?? '') === $id && preg_match(self::ID, $id)) {
+                $out[$id] = self::normalize($m) + ['dir' => dirname($file)];
+            }
+        }
+        ksort($out);
+        return $out;
+    }
+
+    /** Ajoute une fonction livrée avec Éclair : installation depuis app/bundled/<id>/, puis activation. */
+    public static function add(string $id): array
+    {
+        $b = self::bundled()[$id] ?? null;
+        if ($b === null) {
+            return ['ok' => false, 'error' => t('Fonction introuvable : {id}.', ['id' => $id])];
+        }
+        if (!is_dir(self::dir() . '/' . $id)) {
+            $r = self::install($b['dir']);
+            if (!$r['ok']) {
+                return $r;
+            }
+        }
+        return self::activate($id);
+    }
+
+    /**
+     * Après une mise à jour du noyau : les fonctions livrées que le site a ajoutées reçoivent la version livrée avec ce
+     * noyau (si elle est plus récente). Une fonction retirée ou jamais ajoutée n'est jamais installée par ce biais.
+     */
+    public static function syncBundled(): array
+    {
+        $done = [];
+        foreach (self::bundled() as $id => $b) {
+            $installed = is_file(self::dir() . '/' . $id . '/extension.json') ? json_decode((string) Disk::read(self::dir() . '/' . $id . '/extension.json'), true) : null;
+            if (is_array($installed) && version_compare((string) $b['version'], (string) ($installed['version'] ?? '0'), '>')) {
+                $r = self::install($b['dir']);
+                $done[$id] = $r['ok'] ? (string) $b['version'] : (string) $r['error'];
+            }
+        }
+        return $done;
+    }
+
     /* ─────────────────────────────── Exécution ─────────────────────────────── */
 
     /** Objet de la capacité (fichier d'entrée chargé une fois), ou null. */

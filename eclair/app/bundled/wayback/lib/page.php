@@ -1,14 +1,14 @@
 <?php
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Thierry Gustin
-/** Ancien site (Wayback Machine) : anciennes adresses du domaine, pages neuves écrites par l'IA, publication (voir app/lib/Wayback.php). */
+/** Ancien site (Wayback Machine) : vue de la fonction « wayback » (lib/AdminWayback.php la rend dans la page d'administration). */
 defined('ECLAIR') || exit;
 
 use Eclair\Ai;
 use Eclair\I18n;
 use Eclair\Icons;
 use Eclair\Security;
-use Eclair\Wayback;
+use EclairExt\Wayback\Wayback;
 
 $lang = I18n::lang();
 $d = $v['data'];
@@ -20,7 +20,7 @@ $tokens = static fn (int $n): string => number_format($n, 0, ',', "\u{202F}");
 $open = $v['counts']['todo'] + $v['counts']['error'];
 $posts = count(array_filter($v['rows'], fn (array $u): bool => $u['type'] === 'post'));
 ?>
-<div class="page" data-wayback>
+<div class="page" data-wayback data-api="x/wayback/">
   <div class="topbar">
     <div><h1><?= e(t('Ancien site')) ?></h1><p><?= e(t('Retrouve dans la Wayback Machine les adresses que ce domaine avait autrefois et redonne une page à chacune : les liens qui y mènent encore aboutissent de nouveau.')) ?></p></div>
   </div>
@@ -96,7 +96,7 @@ $posts = count(array_filter($v['rows'], fn (array $u): bool => $u['type'] === 'p
         <h2 id="wb-publish"><?= e(t('Publier')) ?></h2>
         <p class="small muted"><?= e(t('{n} pages reconstruites en brouillon, {p} publiées.', ['n' => $v['counts']['draft'], 'p' => $v['counts']['published']])) ?></p>
         <?php if ($v['counts']['draft']): ?>
-          <form method="post" action="<?= e(admin_url('wayback')) ?>" data-confirm="<?= e(t('Publier les brouillons reconstruits ? Ceux qui contiennent encore « À compléter » restent en brouillon.')) ?>"><?= Security::csrfField() ?>
+          <form method="post" action="<?= e(admin_url('x/wayback')) ?>" data-confirm="<?= e(t('Publier les brouillons reconstruits ? Ceux qui contiennent encore « À compléter » restent en brouillon.')) ?>"><?= Security::csrfField() ?>
             <input type="hidden" name="action" value="publish"><button class="btn btn-primary" type="submit"><?= e(t('Publier les brouillons relus')) ?></button></form>
         <?php endif ?>
         <dl class="plan-spend small">
@@ -107,7 +107,7 @@ $posts = count(array_filter($v['rows'], fn (array $u): bool => $u['type'] === 'p
       <section class="card" aria-labelledby="wb-reset">
         <h2 id="wb-reset"><?= e(t('Nouvelle recherche')) ?></h2>
         <p class="small muted"><?= e(t('Effacer la liste ne supprime aucune page : les brouillons et les redirections déjà créés restent.')) ?></p>
-        <form method="post" action="<?= e(admin_url('wayback')) ?>" data-confirm="<?= e(t('Effacer la liste des anciennes adresses ?')) ?>"><?= Security::csrfField() ?>
+        <form method="post" action="<?= e(admin_url('x/wayback')) ?>" data-confirm="<?= e(t('Effacer la liste des anciennes adresses ?')) ?>"><?= Security::csrfField() ?>
           <input type="hidden" name="action" value="reset"><button class="btn btn-ghost" type="submit"><?= Icons::svg('trash') ?><?= e(t('Effacer la liste')) ?></button></form>
       </section>
     </div>

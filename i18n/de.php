@@ -2044,4 +2044,8 @@ return [
     'Bloc « {type} » : la fonction qui l’affiche n’est pas active sur ce site. Il est conservé tel quel, sans être affiché. Réactive la fonction pour le retrouver.' => 'Block „{type}“: Die Funktion, die ihn anzeigt, ist auf dieser Website nicht aktiv. Er bleibt unverändert erhalten, ohne angezeigt zu werden. Aktiviere die Funktion wieder, um ihn zurückzubekommen.',
     'C’est fait.' => 'Erledigt.',
     'Choisis d’abord le fichier .zip de la fonction.' => 'Wähle zuerst die .zip-Datei der Funktion.',
+    'Fonctions livrées avec Éclair' => 'Mit Éclair gelieferte Funktionen',
+    'Maintenues avec Éclair et mises à jour avec lui, elles ne sont chargées que si tu les ajoutes.' => 'Mit Éclair gepflegt und aktualisiert; sie werden nur geladen, wenn du sie hinzufügst.',
+    'Fonction « {n} » ajoutée pour cet usage : tu peux la retirer dans Fonctions.' => 'Funktion „{n}“ für diese Nutzung hinzugefügt: Du kannst sie unter Funktionen wieder entfernen.',
+    'À ajouter' => 'Hinzuzufügen',
 ];

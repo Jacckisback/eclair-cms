@@ -8,6 +8,11 @@
 defined('ECLAIR') || exit;
 
 use Eclair\Security;
+if (!empty($v['raw'])) {
+    // Page complète fournie par la fonction (sa propre mise en page, comme les pages du noyau).
+    echo $v['html'];
+    return;
+}
 ?>
 <div class="page">
   <div class="topbar"><div><h1><?= e((string) $v['title']) ?></h1></div></div>

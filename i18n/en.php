@@ -2044,4 +2044,8 @@ return [
     'Bloc « {type} » : la fonction qui l’affiche n’est pas active sur ce site. Il est conservé tel quel, sans être affiché. Réactive la fonction pour le retrouver.' => 'Block “{type}”: the feature that displays it is not active on this site. It is kept as is, without being displayed. Reactivate the feature to get it back.',
     'C’est fait.' => 'Done.',
     'Choisis d’abord le fichier .zip de la fonction.' => 'First choose the feature\'s .zip file.',
+    'Fonctions livrées avec Éclair' => 'Features shipped with Éclair',
+    'Maintenues avec Éclair et mises à jour avec lui, elles ne sont chargées que si tu les ajoutes.' => 'Maintained and updated with Éclair, they are only loaded if you add them.',
+    'Fonction « {n} » ajoutée pour cet usage : tu peux la retirer dans Fonctions.' => 'Feature “{n}” added for this use: you can remove it in Features.',
+    'À ajouter' => 'To add',
 ];

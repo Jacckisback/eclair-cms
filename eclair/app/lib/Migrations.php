@@ -21,6 +21,7 @@ final class Migrations
     public const ALL = [
         '2026-11-site-dir' => 'siteDir',
         '2026-11-legacy-theme' => 'legacyTheme',
+        '2026-11-wayback-extension' => 'waybackExtension',
     ];
     private const RETRY = 600;
 
@@ -66,6 +67,17 @@ final class Migrations
                     return;
                 }
             }
+            // Nouvelle version du noyau : les fonctions livrées que le site a ajoutées passent à la version livrée.
+            if (($state['code'] ?? '') !== ECLAIR_VERSION) {
+                try {
+                    $synced = Extensions::syncBundled();
+                    if ($synced) {
+                        $state['bundled'][ECLAIR_VERSION] = $synced;
+                    }
+                } catch (\Throwable $e) {
+                    Log::error($e);
+                }
+            }
             unset($state['retry']);
             $state['code'] = ECLAIR_VERSION;
             self::save($state);
@@ -103,6 +115,25 @@ final class Migrations
     private static function legacyTheme(): array
     {
         return self::rescue();
+    }
+
+    /**
+     * « Ancien site » (Wayback) est devenu une fonction optionnelle : les sites qui l'utilisaient (données présentes, ou
+     * usage « Faire revivre un ancien site ») la reçoivent installée et activée ; les autres ne la chargent plus.
+     */
+    private static function waybackExtension(): array
+    {
+        $data = Store::read('wayback', []);
+        $used = is_array($data) && (!empty($data['urls']) || (int) ($data['scanned'] ?? 0) > 0);
+        if (!$used && (string) Settings::get('usage') !== 'revival') {
+            return ['installed' => false];
+        }
+        Themes::ensure();
+        $r = Extensions::add('wayback');
+        if (!$r['ok']) {
+            throw new \RuntimeException('Fonction « Ancien site » non installée : ' . (string) $r['error']);
+        }
+        return ['installed' => true];
     }
 
     /* ─────────────────────────────── Sauvetage 1.x ─────────────────────────────── */

@@ -28,6 +28,15 @@ final class Usage
         ];
     }
 
+    /** Fonctions livrées que chaque usage ajoute (préréglage) : usage => [id => nom affiché]. */
+    public const PRESETS = ['revival' => ['wayback' => 'Ancien site']];
+
+    /** Fonctions livrées utiles à un usage (celles qui existent dans cette version). */
+    public static function extensions(string $usage): array
+    {
+        return array_intersect_key(self::PRESETS[$usage] ?? [], Extensions::bundled());
+    }
+
     /** Usage du site, ou chaîne vide s'il n'est pas précisé. */
     public static function current(): string
     {
@@ -43,8 +52,8 @@ final class Usage
                 'hint' => t('Grande image de 1200 px, auteur présenté, titre sans excès : ce que Google recommande.'), 'url' => admin_url('discover')],
             'affiliate' => ['done' => Affiliate::links() !== [], 'label' => t('Ajouter ton premier lien d’affiliation'),
                 'hint' => t('La mention publicitaire s’affiche alors d’elle-même sur les pages concernées.'), 'url' => admin_url('affiliate')],
-            'revival' => Auth::can('settings') ? ['done' => Wayback::data()['scanned'] > 0, 'label' => t('Retrouver les anciennes adresses de ton domaine'),
-                'hint' => t('Les liens qui pointent encore vers elles mèneront de nouveau quelque part.'), 'url' => admin_url('wayback')] : null,
+            'revival' => Auth::can('settings') ? ['done' => Extensions::enabled('wayback') && self::revival()['scanned'] > 0, 'label' => t('Retrouver les anciennes adresses de ton domaine'),
+                'hint' => t('Les liens qui pointent encore vers elles mèneront de nouveau quelque part.'), 'url' => admin_url(Extensions::enabled('wayback') ? 'x/wayback' : 'extensions')] : null,
             default => null,
         };
     }
@@ -108,17 +117,30 @@ final class Usage
         return ['usage' => $usage, 'title' => $title, 'tiles' => array_values(array_filter(array_map(fn (string $k): ?array => $tiles[$k] ?? null, $keys)))];
     }
 
-    /** Tuile « Ancien site » (administrateurs seulement, comme la page). */
+    /**
+     * Tuile « Ancien site » (administrateurs seulement, comme la page). La fonction est optionnelle depuis la 2.0 : absente,
+     * la tuile propose de l'ajouter ; présente, elle résume ses données (lues sans charger son code).
+     */
     private static function wayback(): ?array
     {
         if (!Auth::can('settings')) {
             return null;
         }
-        $d = Wayback::data();
+        if (!Extensions::enabled('wayback')) {
+            return ['clock', t('Ancien site'), t('À ajouter'), admin_url('extensions'), 'warn'];
+        }
+        $d = self::revival();
         if ($d['scanned'] === 0) {
-            return ['clock', t('Ancien site'), t('À lancer'), admin_url('wayback'), 'warn'];
+            return ['clock', t('Ancien site'), t('À lancer'), admin_url('x/wayback'), 'warn'];
         }
         $built = count(array_filter($d['urls'], fn (mixed $u): bool => is_array($u) && ($u['content'] ?? '') !== ''));
-        return ['clock', t('Ancien site'), t('{found} adresses · {built} pages neuves', ['found' => count($d['urls']), 'built' => $built]), admin_url('wayback'), ''];
+        return ['clock', t('Ancien site'), t('{found} adresses · {built} pages neuves', ['found' => count($d['urls']), 'built' => $built]), admin_url('x/wayback'), ''];
+    }
+
+    /** Données de la fonction « Ancien site » (data/wayback.php), sans charger son code. */
+    private static function revival(): array
+    {
+        $d = Store::read('wayback', []);
+        return ['scanned' => (int) (is_array($d) ? ($d['scanned'] ?? 0) : 0), 'urls' => is_array($d['urls'] ?? null) ? $d['urls'] : []];
     }
 }

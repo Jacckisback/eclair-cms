@@ -10,6 +10,19 @@ $labels = ['active' => t('Active'), 'disabled' => t('Désactivée'), 'installed'
 ?>
 <div class="page">
   <div class="topbar"><div><h1><?= e(t('Fonctions')) ?></h1><p><?= e(t('Ajoute seulement les fonctions utiles à ton site. Une fonction désactivée garde ses données et ses blocs : tu peux la réactiver à tout moment.')) ?></p></div></div>
+  <?php if ($v['bundled']): ?>
+  <section class="card">
+    <h2><?= e(t('Fonctions livrées avec Éclair')) ?></h2>
+    <p class="hint"><?= e(t('Maintenues avec Éclair et mises à jour avec lui, elles ne sont chargées que si tu les ajoutes.')) ?></p>
+    <?php foreach ($v['bundled'] as $id => $b): ?>
+      <div class="row">
+        <div class="grow"><strong><?= e((string) $b['name']) ?></strong><br><span class="small muted"><?= e((string) $b['description']) ?></span></div>
+        <form method="post" action="<?= e(admin_url('extensions')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="add"><input type="hidden" name="id" value="<?= e($id) ?>">
+          <button class="btn btn-sm btn-primary" type="submit"><?= Icons::svg('plus') ?><?= e(t('Ajouter')) ?></button></form>
+      </div>
+    <?php endforeach ?>
+  </section>
+  <?php endif ?>
   <?php if (!$v['items']): ?>
     <div class="card empty-state"><span class="ico"><?= Icons::svg('plus') ?></span><p><?= e(t('Aucune fonction ajoutée : ton site utilise le noyau d’Éclair, complet pour publier.')) ?></p></div>
   <?php endif ?>

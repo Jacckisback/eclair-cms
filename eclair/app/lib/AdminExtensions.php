@@ -22,7 +22,7 @@ final class AdminExtensions
                 $impact[$id] = Extensions::impact($id);
             }
         }
-        Admin::view('extensions', ['items' => $items, 'impact' => $impact, 'canInstall' => Auth::can('security'), 'tasks' => Extensions::taskUrl()], t('Fonctions'));
+        Admin::view('extensions', ['items' => $items, 'impact' => $impact, 'bundled' => array_diff_key(Extensions::bundled(), $items), 'canInstall' => Auth::can('security'), 'tasks' => Extensions::taskUrl()], t('Fonctions'));
     }
 
     public static function action(array $user): never
@@ -37,6 +37,7 @@ final class AdminExtensions
         }
         $r = match (Req::input('action')) {
             'activate' => Extensions::activate($id),
+            'add' => Extensions::add($id),
             'deactivate' => Extensions::deactivate($id, Req::input('confirm') === '1'),
             'remove' => Extensions::remove($id),
             'purge' => Extensions::purge($id),

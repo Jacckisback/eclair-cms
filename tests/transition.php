@@ -65,6 +65,11 @@ use Eclair\Themes;
         file_put_contents($copy . '/assets/site/perso.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><rect width="4" height="4"/></svg>');
         file_put_contents($copy . '/.htaccess', (string) file_get_contents($copy . '/.htaccess') . "\n# Règle de l'hébergeur (perso)\n");
         $htaccess = (string) file_get_contents($copy . '/.htaccess');
+        // Le site utilisait « Ancien site » (Wayback) en 1.14.1 : ses données doivent survivre et la fonction rester disponible.
+        $wbData = Store::GUARD . json_encode(['domain' => 'ancien.test', 'date' => '2019-06-30', 'scanned' => time() - 3600, 'found' => 1,
+            'urls' => ['/notre-histoire' => ['type' => 'page', 'slug' => 'notre-histoire', 'ts' => '20190101000000', 'raw' => 'http://ancien.test/notre-histoire',
+                'exact' => true, 'selected' => true, 'content' => '', 'error' => '', 'cost' => 0, 'tokens' => 0]]]);
+        file_put_contents($copy . '/data/wayback.php', $wbData);
         array_map('unlink', glob($copy . '/cache/pages/*[0-9a-f]') ?: []);
         $home = $c->req('GET', '/')['body'];
         check('1.14.1 personnalisée : gabarit et CSS du thème modifiés sur le disque, CSS servi', str_contains((string) file_get_contents($copy . '/app/theme/layout.php'), 'PERSO-LAYOUT')
@@ -111,6 +116,9 @@ use Eclair\Themes;
         check('actif personnalisé servi à son ancienne adresse', $svg['status'] === 200 && str_contains($svg['body'], '<svg') && str_contains($svg['headers']['content-type'] ?? '', 'image/svg+xml'),
             $svg['status'] . ' ' . ($svg['headers']['content-type'] ?? ''));
         check('.htaccess personnalisé gardé', (string) file_get_contents($copy . '/.htaccess') === $htaccess);
+        check('« Ancien site » utilisé en 1.14.1 : fonction installée, active, données intactes', is_file($copy . '/site/extensions/wayback/extension.json')
+            && $c->req('GET', '/gestion/x/wayback')['status'] === 200 && str_contains($c->req('GET', '/gestion/x/wayback')['body'], 'notre-histoire')
+            && (string) file_get_contents($copy . '/data/wayback.php') === $wbData);
         foreach ($pages as $p => $status) {
             check("page $p : même statut qu’avant ($status)", $c->req('GET', $p)['status'] === $status);
         }
