@@ -12,6 +12,8 @@
      thème le soulèvement des cartes au survol. */
   @supports (animation-timeline:view()){
     .feature,.card,.faq details,.callout,.content>.img,.video{animation:eclair-in linear both;animation-timeline:view();animation-range:entry 0% entry 40%}
+    /* Pendant l'apparition, l'élément décalé reste au-dessus de la bande de couleur suivante (sinon elle le rogne). */
+    .feature,.card,.faq details{position:relative;z-index:1}
     .feature:nth-child(3n+2),.card:nth-child(3n+2){animation-range:entry 8% entry 48%}
     .feature:nth-child(3n),.card:nth-child(3n){animation-range:entry 16% entry 56%}
   }

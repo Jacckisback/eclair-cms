@@ -604,7 +604,7 @@
     const encode = (d) => btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(d)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     const fill = (d) => $$('[data-d]', box).forEach((el) => { if (d[el.dataset.d] !== undefined) el.value = d[el.dataset.d]; });
     // Vignette dessinée de la direction : couleurs, police (par famille), coins et composition de la bannière.
-    const FAMILY = { serif: 'Georgia,serif', slab: 'Rockwell,Georgia,serif', sans: "'Helvetica Neue',Arial,sans-serif", condensed: "'Arial Narrow',sans-serif", rounded: "ui-rounded,'Arial Rounded MT',sans-serif" };
+    const FAMILY = { serif: 'Georgia,serif', slab: 'Rockwell,Georgia,serif', sans: "'Helvetica Neue',Arial,sans-serif", condensed: "'Arial Narrow',sans-serif", rounded: "ui-rounded,'Arial Rounded MT',sans-serif", script: "'Segoe Script','Brush Script MT',cursive" };
     const SYSTEM = { serif: 'serif', oldstyle: 'serif', rounded: 'rounded' };
     const tag = (name, a, inner) => '<' + name + Object.keys(a).map((k) => ' ' + k + '="' + a[k] + '"').join('') + (inner === undefined ? '/>' : '>' + inner + '</' + name + '>');
     const mock = (d) => {

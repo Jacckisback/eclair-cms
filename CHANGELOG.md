@@ -20,6 +20,8 @@ Multilingual and mobile release: a site can now be published in several language
 ### Changed
 
 - **Feature cards with drawn icons (art directions):** a short mark that is not an emoji (`4`, `A1`, `20 %`) now stays visible, as text, instead of disappearing; useful for numbered steps and price packs.
+- **New heading font: Courgette** (warm handwritten script, for schools, cafés, workshops), self-hosted like the other art-direction fonts.
+- **Scroll reveal (micro-animations):** a card still sliding in now stays above the next colored band instead of being cut by it.
 - On a multilingual site, the "Read in" line under the title gives way to the header language switcher, which also leads to the translation of pages hidden from search engines (legal notice, thank-you page).
 
 ### For maintainers
