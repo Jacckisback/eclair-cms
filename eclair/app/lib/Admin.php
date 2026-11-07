@@ -84,7 +84,6 @@ final class Admin
             'GET /messages' => [AdminSite::class, 'messages', 'messages'],
             'POST /messages' => [AdminSite::class, 'messageAction', 'messages'],
             'GET /redirects' => [AdminSite::class, 'redirects', 'redirects'],
-            'GET /ai-visits' => [AdminSite::class, 'aiVisits', 'content'],
             'GET /plan' => [AdminPlan::class, 'page', 'content'],
             'POST /plan' => [AdminPlan::class, 'action', 'content'],
             'POST /api/plan/ideas' => [AdminPlan::class, 'ideas', 'content'],
@@ -373,7 +372,8 @@ final class Admin
             'seo' => $scores ? (int) round(array_sum($scores) / count($scores)) : 0,
             'geo' => $geo ? (int) round(array_sum($geo) / count($geo)) : 0,
         ];
-        $ai = Settings::get('geo.ai_log') ? AiVisits::report(30) : null;
+        $ai = Settings::get('geo.ai_log') && Store::exists('extensions') ? Extensions::invoke('ai-visits', 'report', [30]) : null;
+        $ai = is_array($ai) ? $ai : null;
         self::view('dashboard', [
             'todo' => $todo,
             'onboarding' => !Settings::get('onboarding.done'),

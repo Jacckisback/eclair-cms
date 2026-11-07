@@ -2051,4 +2051,5 @@ return [
     'Envoie automatiquement une sauvegarde de ton site dans ton Google Drive. Fonction facultative : la sauvegarde téléchargeable de la page Sécurité fonctionne sans elle.' => 'Sends a backup of your site to your Google Drive automatically. Optional feature: the downloadable backup on the Security page works without it.',
     'Ajouter la fonction' => 'Add the feature',
     'Trop d’anciennes adresses à paramètres ({n} au plus) : rien n’a été ajouté au-delà.' => 'Too many old addresses with parameters ({n} at most): nothing was added beyond that.',
+    'La mesure demande la fonction « Robots IA » :' => 'Measurement requires the “AI bots” feature:',
 ];

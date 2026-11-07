@@ -23,7 +23,6 @@ $nav = [
     ['messages', 'messages', 'mail', t('Messages'), 'messages'],
     ['redirects', 'redirects', 'redirect', t('Redirections'), 'redirects'],
     ['plan', 'plan', 'calendar', t('Planning'), 'content'],
-      ['ai-visits', 'ai-visits', 'bot', t('Robots IA'), 'content'],
     ['affiliate', 'affiliate', 'bag', t('Affiliation'), 'content'],
     ['discover', 'discover', 'compass', t('Discover'), 'content'],
 ];

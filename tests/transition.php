@@ -81,6 +81,11 @@ use Eclair\Themes;
         // Google Drive commencé en 1.14.1 (état propre à l'installation, jamais sauvegardé) : la fonction doit rester disponible.
         $driveData = Store::GUARD . json_encode(['schedule' => 'weekly', 'keep' => 5]);
         file_put_contents($copy . '/data/drive.php', $driveData);
+        // Robots IA (mesure active par défaut en 1.x) : une visite notée avant la mise à jour doit rester, la mesure continuer.
+        $gpt = ['User-Agent: Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)'];
+        client($port)->req('GET', '/', [], $gpt);
+        $aiLog = $copy . '/data/ai/' . gmdate('Y-m') . '.php';
+        $aiBefore = substr_count((string) @file_get_contents($aiLog), "\tGPTBot\t");
         array_map('unlink', glob($copy . '/cache/pages/*[0-9a-f]') ?: []);
         $home = $c->req('GET', '/')['body'];
         check('1.14.1 personnalisée : gabarit et CSS modifiés affichés', str_contains($home, 'PERSO-LAYOUT') && str_contains($home, 'perso-marque'));
@@ -131,6 +136,9 @@ use Eclair\Themes;
             && (string) file_get_contents($copy . '/data/wayback.php') === $wbData);
         check('Google Drive configuré en 1.14.1 : fonction installée, active, réglage gardé', is_file($copy . '/site/extensions/drive/extension.json')
             && $c->req('GET', '/gestion/x/drive')['status'] === 200 && str_contains((string) file_get_contents($copy . '/data/drive.php'), '"weekly"'));
+        client($port)->req('GET', '/', [], $gpt);
+        check('Robots IA mesurés en 1.14.1 : fonction installée, journal gardé, mesure poursuivie', $aiBefore === 1 && is_file($copy . '/site/extensions/ai-visits/extension.json')
+            && $c->req('GET', '/gestion/x/ai-visits')['status'] === 200 && substr_count((string) @file_get_contents($aiLog), "\tGPTBot\t") === 2, (string) $aiBefore);
         foreach ($pages as $p => $status) {
             check("page $p : même statut qu’avant ($status)", $c->req('GET', $p)['status'] === $status);
         }

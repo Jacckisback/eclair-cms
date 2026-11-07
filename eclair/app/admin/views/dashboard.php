@@ -176,13 +176,13 @@ $meter = static fn (int $s): string => '<meter min="0" max="100" low="50" high="
       <?php if ($v['ai']): ?>
       <section class="card" aria-labelledby="ai-visits-title">
         <div class="card-head"><h2 id="ai-visits-title"><?= e(t('Robots IA')) ?> <small class="muted"><?= e(t('{n} jours', ['n' => 30])) ?></small></h2>
-          <a class="btn btn-sm" href="<?= e(admin_url('ai-visits')) ?>"><?= e(t('Détail')) ?></a></div>
+          <a class="btn btn-sm" href="<?= e(admin_url('x/ai-visits')) ?>"><?= e(t('Détail')) ?></a></div>
         <?php if (!$v['ai']['total']): ?>
           <p class="muted small"><?= e(t('Aucune visite de robot IA pour l’instant.')) ?></p>
         <?php else: ?>
           <ul class="kv">
             <?php foreach (['user' => t('Consultations à la demande'), 'search' => t('Indexation des moteurs de réponse'), 'train' => t('Entraînement des modèles')] as $k => $label): ?>
-              <li><a href="<?= e(admin_url('ai-visits')) ?>"><span><?= e($label) ?></span><b><?= (int) $v['ai']['kinds'][$k] ?></b></a></li>
+              <li><a href="<?= e(admin_url('x/ai-visits')) ?>"><span><?= e($label) ?></span><b><?= (int) $v['ai']['kinds'][$k] ?></b></a></li>
             <?php endforeach ?>
           </ul>
           <p class="small muted"><?= e(implode(' · ', array_map(fn ($n, $b) => $n . ' ' . $b['count'], array_keys(array_slice($v['ai']['bots'], 0, 3, true)), array_slice($v['ai']['bots'], 0, 3, true)))) ?></p>

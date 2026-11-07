@@ -1,7 +1,7 @@
 <?php
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Thierry Gustin
-/** Robots IA : visites des robots d'IA notées par index.php (voir app/lib/AiVisits.php). */
+/** Robots IA : vue de la fonction « ai-visits » (visites notées par index.php, voir lib/AiVisits.php). */
 defined('ECLAIR') || exit;
 
 use Eclair\Icons;
@@ -20,7 +20,7 @@ $when = static fn (int $ts): string => $ts ? ago($ts) : '—';
     <div><h1><?= e(t('Robots IA')) ?></h1><p><?= e(t('Quelles IA lisent ton site, quelles pages, et pour quel usage.')) ?></p></div>
     <nav class="filters" aria-label="<?= e(t('Période')) ?>">
       <?php foreach ([7, 30, 90] as $d): ?>
-        <a href="<?= e(admin_url('ai-visits?days=' . $d)) ?>"<?= $d === $v['days'] ? ' aria-current="page"' : '' ?>><?= e(t('{n} jours', ['n' => $d])) ?></a>
+        <a href="<?= e(admin_url('x/ai-visits?days=' . $d)) ?>"<?= $d === $v['days'] ? ' aria-current="page"' : '' ?>><?= e(t('{n} jours', ['n' => $d])) ?></a>
       <?php endforeach ?>
     </nav>
   </div>

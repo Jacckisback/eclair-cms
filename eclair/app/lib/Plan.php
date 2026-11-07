@@ -244,8 +244,8 @@ final class Plan
         $planned = implode("\n", array_map(fn ($i) => '- ' . $i['title'], array_slice(self::all(), 0, 80))) ?: '(none)';
         $cats = implode("\n", array_map(fn ($c) => '- ' . $c['id'] . ' | ' . $c['name'], Categories::of('post'))) ?: '(none)';
         $read = '';
-        if (Settings::get('geo.ai_log')) {
-            $report = AiVisits::report(30);
+        $report = Settings::get('geo.ai_log') && Store::exists('extensions') ? Extensions::invoke('ai-visits', 'report', [30]) : null;
+        if (is_array($report)) {
             $read = implode("\n", array_map(fn ($p, $s) => '- ' . $p . ' (' . $s['count'] . ' visits, ' . $s['user'] . ' on demand)', array_keys(array_slice($report['pages'], 0, 8, true)), array_slice($report['pages'], 0, 8, true)));
         }
         $dates = self::slots($n, $perWeek);

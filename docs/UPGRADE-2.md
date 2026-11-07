@@ -14,7 +14,8 @@ La 2.0 range le thème de ton site dans un dossier qui lui appartient (`site/`),
    * création de `site/` et de ses protections ;
    * recherche, dans la copie gardée de l’ancien code, des gabarits, CSS du thème et actifs **modifiés ou ajoutés** (comparés au manifeste signé de ton ancienne version) ;
    * copie brute de tout ce qui est trouvé dans `site/themes/.legacy-originals/`, puis création et activation du thème `legacy`.
-4. Va dans **Thèmes** : un message indique ce qui a été repris, et ce qui est « à vérifier » (fichiers qu’aucun gabarit du contrat ne couvre).
+4. Les fonctions que ton site utilisait et qui sont devenues optionnelles (Ancien site, Sauvegardes Google Drive, Robots IA si la mesure était active) sont ajoutées automatiquement, leurs données intactes. Elles se retirent dans **Fonctions**.
+5. Va dans **Thèmes** : un message indique ce qui a été repris, et ce qui est « à vérifier » (fichiers qu’aucun gabarit du contrat ne couvre).
 
 Ce parcours est testé avec la **vraie archive 1.14.1** et son propre updater (`tests/transition.php`).
 

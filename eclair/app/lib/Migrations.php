@@ -23,6 +23,7 @@ final class Migrations
         '2026-11-legacy-theme' => 'legacyTheme',
         '2026-11-wayback-extension' => 'waybackExtension',
         '2026-11-drive-extension' => 'driveExtension',
+        '2026-11-ai-visits-extension' => 'aiVisitsExtension',
     ];
     private const RETRY = 600;
 
@@ -151,6 +152,25 @@ final class Migrations
         $r = Extensions::add('drive');
         if (!$r['ok']) {
             throw new \RuntimeException('Fonction « Sauvegardes Google Drive » non installée : ' . (string) $r['error']);
+        }
+        return ['installed' => true];
+    }
+
+    /**
+     * « Robots IA » est devenu une fonction optionnelle. En 1.x la mesure était active par défaut : un site installé par
+     * une 1.x (version enregistrée à l'installation antérieure à 2.0, ou absente) qui ne l'avait pas coupée la reçoit
+     * installée et activée, journal existant (data/ai/) repris tel quel. Un site neuf en 2.0 ne la charge pas.
+     */
+    private static function aiVisitsExtension(): array
+    {
+        $installed = (string) Settings::get('version');
+        if (!Settings::get('geo.ai_log') || ($installed !== '' && version_compare($installed, '2.0.0', '>='))) {
+            return ['installed' => false];
+        }
+        Themes::ensure();
+        $r = Extensions::add('ai-visits');
+        if (!$r['ok']) {
+            throw new \RuntimeException('Fonction « Robots IA » non installée : ' . (string) $r['error']);
         }
         return ['installed' => true];
     }

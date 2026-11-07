@@ -3,7 +3,10 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\AiVisits;
+
+use Eclair\Content;
+use Eclair\Req;
 
 defined('ECLAIR') || exit;
 

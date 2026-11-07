@@ -77,7 +77,7 @@ final class Usage
             'drafts' => ['file', t('Brouillons'), $stats['drafts'] ? t('{n} à relire', ['n' => $stats['drafts']]) : t('Aucun'), admin_url('content?status=draft'), $stats['drafts'] ? 'warn' : ''],
         ];
         if ($ai !== null) {
-            $tiles['bots'] = ['bot', t('Robots IA'), t('{n} visites en 30 jours', ['n' => $ai['total']]), admin_url('ai-visits'), ''];
+            $tiles['bots'] = ['bot', t('Robots IA'), t('{n} visites en 30 jours', ['n' => $ai['total']]), admin_url('x/ai-visits'), ''];
         }
         if (in_array($usage, ['blog', 'freelance', 'media', 'affiliate'], true)) {
             $planned = count(array_filter(Plan::all(), fn (array $i): bool => in_array(Plan::state($i), ['idea', 'draft'], true)));
