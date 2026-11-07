@@ -37,7 +37,7 @@ L'assistant vérifie tout cela pour toi et explique quoi corriger.
 
 ### Étapes
 
-1. Télécharge l'archive [`eclair-cms-1.14.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.2.zip) (731 Ko) et décompresse-la.
+1. Télécharge l'archive [`eclair-cms-2.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.0.zip) (833 Ko) et décompresse-la.
 2. Envoie **le contenu du dossier `eclair`** dans le dossier public de ton hébergement (`public_html`, `www`…) avec ton logiciel FTP (FileZilla…) ou le gestionnaire de fichiers de ton hébergeur.
    > ⚠️ Les fichiers `.htaccess` sont cachés : active « Afficher les fichiers cachés » pour être sûr de les envoyer.
 3. Ouvre l'adresse de ton site : **l'assistant d'installation démarre** (en 7 langues).
@@ -814,7 +814,7 @@ Une version signée ne se construit que dans un dépôt Git et n'inclut que les 
 
 `PHP_CLI_SERVER_WORKERS` permet au site de s'appeler lui-même (vérification de son adresse) : avec un seul processus, la vérification échoue simplement et les redirections vers l'adresse officielle restent désactivées.
 
-Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, le thème se personnalise en modifiant `app/theme/*.php`, `app/theme/theme.css` et `app/theme/themes/*.css` (garde une copie : le contrôle d'intégrité signale ces fichiers comme modifiés, et une mise à jour les remplace ; la page Mises à jour les liste avant de le faire). Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 731 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
+Pour un changement de style, préfère le **CSS personnalisé** (Réglages › Apparence) : il survit aux mises à jour. Pour aller plus loin, crée un thème du site dans `site/themes/<id>/` (voir [le contrat des thèmes](THEME-CONTRACT.md)) ou importe-le dans **Thèmes** : les mises à jour n'y touchent jamais. Ne modifie plus `app/theme/`, qu'une mise à jour remplace. Dans l'archive, le PHP est compacté (`php -w`, sans commentaires), les vues de l'administration sont compressées (lues par zlib) et le JavaScript et le CSS de l'administration sont allégés (l'archive tient en environ 833 Ko) : les sources commentées sont sur GitHub. Les fichiers du site public (thèmes, `site.js`) sont livrés tels quels.
 
 ---
 

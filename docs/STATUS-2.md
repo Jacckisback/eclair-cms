@@ -1,6 +1,6 @@
 # Refonte 2.0 : bilan, contrôles exécutés et état de reprise
 
-Branche : `claude/hopeful-thompson-8kqj2g`, partie de `main` @ `90bb968` (1.14.1). Version des sources : **2.0.0, non publiée**. La fusion dans `main`, l’annonce sur le canal public et la release restent des décisions du mainteneur.
+Branche : `claude/hopeful-thompson-8kqj2g`, partie de `main` @ `90bb968` (1.14.1). Version des sources : **2.0.0, publiée le 8 novembre 2026**. La fusion dans `main`, l’annonce sur le canal public et la release restent des décisions du mainteneur.
 
 **État : candidate à la publication**, sous réserve des contrôles du mainteneur (§1, « Non exécutés »). Étapes 1 à 5, 7, 8 et 9 faites et testées ; étape 6 faite pour 7 fonctions (Ancien site, Google Drive, Robots IA, Discover + tendances, affiliation, planning, import WordPress) et pour les traductions. **Reportés après la 2.0, par choix** : extraction d’AdSense (il faudrait laisser une fonction assouplir la CSP des pages publiques, pour ~15 Ko), de la boutique (22 fichiers du noyau l’appellent) et de l’IA/MCP (206 Ko appelés par 23 fichiers ; code déjà chargé seulement quand l’IA sert) : gain faible pour les visiteurs, risque de régression élevé.
 

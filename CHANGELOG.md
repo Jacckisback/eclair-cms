@@ -2,9 +2,9 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## 2.0.0 — unreleased (work in progress, branch `claude/hopeful-thompson-8kqj2g`)
+## 2.0.0 — 2026-11-08
 
-First stage of the 2.0 architecture: the site's theme now belongs to the site and can never be overwritten by a core update, optional features get a manifest and a lifecycle, and backups can be restored online. Nothing is removed yet: every 1.14.1 feature is still in the core, and the public HTML of existing sites is byte-identical. Status, checks run and what remains: `docs/STATUS-2.md`.
+A lighter, safer architecture, with no change to what visitors see: the public HTML of existing sites is byte-identical. **Your theme now belongs to your site** (`site/themes/`) and a core update can never overwrite it; customisations made directly to the 1.x templates are found and kept automatically. **Specialised features become optional** (Features › Add) and are no longer loaded by sites that do not use them: Old site, Google Drive backups, AI bots, Google Discover and trends, Affiliate links, Editorial calendar, and the new **WordPress import**, which keeps every old address working. Sites that used a feature keep it, with its data, after the update. Checked on PHP 8.1 to 8.5, on real Apache and Nginx servers, and with the real one-click updaters of 1.14.1 and 1.14.2. Upgrade guide: [`docs/UPGRADE-2.md`](docs/UPGRADE-2.md). **Before updating: Security › Download a backup.**
 
 ### Added
 
