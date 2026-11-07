@@ -41,7 +41,8 @@ use Eclair\Themes;
     $secret = sodium_crypto_sign_secretkey($pair);
     file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_UPDATE_URL', 'http://127.0.0.1:$chanPort/latest.json');\n"
         . "define('ECLAIR_UPDATE_KEY', '" . base64_encode(sodium_crypto_sign_publickey($pair)) . "');\n");
-    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4']);
+    // Sans OPcache : les fichiers modifiés par le test (gabarits, code envoyé « par FTP ») sont relus aussitôt.
+    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4'], 20000, 30000, ['-d', 'opcache.enable=0']);
     $version = static function () use ($copy): string {
         preg_match("~define\('ECLAIR_VERSION', '([^']+)'\)~", (string) file_get_contents($copy . '/index.php'), $m);
         return $m[1] ?? '';
@@ -74,7 +75,6 @@ use Eclair\Themes;
         $driveData = Store::GUARD . json_encode(['schedule' => 'weekly', 'keep' => 5]);
         file_put_contents($copy . '/data/drive.php', $driveData);
         array_map('unlink', glob($copy . '/cache/pages/*[0-9a-f]') ?: []);
-        usleep(2600000); // OPcache du serveur intégré : gabarits modifiés relus au bout de 2 secondes
         $home = $c->req('GET', '/')['body'];
         check('1.14.1 personnalisée : gabarit et CSS modifiés affichés', str_contains($home, 'PERSO-LAYOUT') && str_contains($home, 'perso-marque'));
         $pages = [];
@@ -173,7 +173,8 @@ use Eclair\Themes;
     [$chanPort, $chan] = start_server(['-t', $channel], ['PHP_CLI_SERVER_WORKERS' => '2'], 40001, 50000);
     file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_UPDATE_URL', 'http://127.0.0.1:$chanPort/latest.json');\n"
         . "define('ECLAIR_UPDATE_KEY', '" . base64_encode(sodium_crypto_sign_publickey($pair)) . "');\n");
-    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4']);
+    // Sans OPcache : les fichiers modifiés par le test (gabarits, code envoyé « par FTP ») sont relus aussitôt.
+    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4'], 20000, 30000, ['-d', 'opcache.enable=0']);
     try {
         $c = client($port);
         $form = $c->req('GET', '/');
@@ -215,7 +216,8 @@ use Eclair\Themes;
     $zip->close();
     rename($copy . '-zip/eclair', $copy);
     exec('rm -rf ' . escapeshellarg($copy . '-zip'));
-    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4']);
+    // Sans OPcache : les fichiers modifiés par le test (gabarits, code envoyé « par FTP ») sont relus aussitôt.
+    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4'], 20000, 30000, ['-d', 'opcache.enable=0']);
     try {
         $c = client($port);
         $form = $c->req('GET', '/');
@@ -235,9 +237,6 @@ use Eclair\Themes;
             }
         }
         file_put_contents($copy . '/app/manifest.php', eclair_manifest('2.0.0', eclair_code(ECLAIR_ROOT)));
-        // OPcache du serveur intégré (revalidate_freq = 2 s) : un fichier modifié n'est relu qu'au bout de 2 secondes,
-        // comme chez un hébergeur ; l'ancien index.php sert encore l'ancienne page en cache pendant ce délai.
-        usleep(2600000);
         $home = $c->req('GET', '/');
         check('FTP : site en ligne avec le nouveau code, gabarit personnalisé retrouvé', $home['status'] === 200 && str_contains($home['body'], 'PERSO-FTP'), (string) $home['status']);
         check('FTP : thème « legacy » créé et activé depuis cache/legacy-app', is_file($copy . '/site/themes/legacy/templates/layout.php')

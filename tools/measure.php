@@ -222,13 +222,7 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
                 $r['route'][$k]['files'] = (int) $cli['files'];
             }
         }
-        foreach (['home_cold_again', 'home_cold_third'] as $extra) {
-            $again = $r['route'][$extra] ?? null;
-            unset($r['route'][$extra]);
-            if ($again !== null && $again['mem'] > 0 && $again['mem'] < $r['route']['home_cold']['mem']) {
-                $r['route']['home_cold'] = $again;
-            }
-        }
+        unset($r['route']['home_cold_again'], $r['route']['home_cold_third']);
         // Poids du HTML public : CSS en ligne, JavaScript du site.
         $html = $home['body'];
         preg_match_all('~<style[^>]*>(.*?)</style>~s', $html, $styles);
@@ -295,8 +289,8 @@ foreach (array_keys($after['route']) as $k) {
 }
 $intro = "Mesures produites par `php tools/measure.php" . ($pages ? " --pages=$pages" : '') . "` le " . gmdate('Y-m-d H:i') . " UTC, PHP " . PHP_VERSION
     . ", serveur intégré de PHP, sans OPcache (coût de compilation compris : majorant)" . ($pages ? ", site de $pages articles ajoutés" : ', site neuf (type blog)') . ".\n"
-    . "Durées indicatives (machine de mesure) ; mémoire = pointe PHP (pages publiques : processus PHP neuf par requête ; administration : serveur intégré, mémoire du processus avant la requête retirée) ; fichiers = fichiers PHP inclus (`get_included_files`).\n"
-    . "« _cold » : cache de pages vidé (accueil : le plus léger de trois rendus à froid) ; « _warm » : page servie par le chemin rapide d'index.php.\n\n";
+    . "Durées indicatives (machine de mesure) ; mémoire = pointe PHP (pages publiques : processus PHP neuf par requête, sans OPcache ; administration : serveur intégré, mémoire du processus avant la requête retirée) ; fichiers = fichiers PHP inclus (`get_included_files`).\n"
+    . "« _cold » : cache de pages vidé  ; « _warm » : page servie par le chemin rapide d'index.php.\n\n";
 echo $intro . $md;
 if ($write) {
     file_put_contents($repo . '/docs/MEASURES.md', "# Mesures d’Éclair\n\n" . $intro . $md

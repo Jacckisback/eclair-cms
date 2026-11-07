@@ -1,5 +1,5 @@
 {
-  "_doc": "Budgets vérifiés par php tools/measure.php --check (CI). Octets sauf mention. Fixés le 2026-11-07 à partir des mesures de docs/MEASURES.md, avec une marge de 3 à 10 %. Tout relèvement doit être expliqué dans le CHANGELOG (coût et nécessité). 2026-11-07 (2.0.0) : zip 790000 → 805000 et installé 1470000 → 1510000, pour les thèmes du site (Themes, AdminThemes, Packages), le registre des fonctions (Extensions, AdminExtensions), les migrations et la restauration en ligne : environ +20 Ko compressés, nécessaires à la protection des thèmes et au retrait futur des fonctions spécialisées, qui doit ensuite faire baisser ces budgets. 2026-11-07 : mémoire mesurée hors mémoire déjà occupée par le processus (coût propre de la requête) ; budget de l'accueil à froid ramené à 200 000 octets (mesure : 158 384). Puis 300 000 : la mémoire varie selon la version de PHP (158 Ko en 8.3, 224 Ko en 8.2 mesurés par la CI) ; reste très en dessous d'une régression comme celle de 2 Mo corrigée le même jour.",
+  "_doc": "Budgets vérifiés par php tools/measure.php --check (CI). Octets sauf mention. Fixés le 2026-11-07 à partir des mesures de docs/MEASURES.md, avec une marge de 3 à 10 %. Tout relèvement doit être expliqué dans le CHANGELOG (coût et nécessité). 2026-11-07 (2.0.0) : zip 790000 → 805000 et installé 1470000 → 1510000, pour les thèmes du site (Themes, AdminThemes, Packages), le registre des fonctions (Extensions, AdminExtensions), les migrations et la restauration en ligne : environ +20 Ko compressés, nécessaires à la protection des thèmes et au retrait futur des fonctions spécialisées, qui doit ensuite faire baisser ces budgets. 2026-11-07 : mémoire mesurée hors mémoire déjà occupée par le processus (coût propre de la requête) ; budget de l'accueil à froid ramené à 200 000 octets (mesure : 158 384). Puis 300 000 : la mémoire varie selon la version de PHP (158 Ko en 8.3, 224 Ko en 8.2 mesurés par la CI) ; reste très en dessous d'une régression comme celle de 2 Mo corrigée le même jour. Puis 2 400 000 : l'accueil à froid est désormais mesuré dans un processus PHP neuf sans OPcache (mesure déterministe : 2 133 592 octets contre 2 045 736 pour la 1.14.1 dans les mêmes conditions, +4 %) ; les valeurs précédentes venaient d'un processus déjà chaud.",
   "budgets": {
     "zip": 805000,
     "installed": 1510000,
@@ -10,6 +10,6 @@
     "home_fonts": 0,
     "home_warm_files": 1,
     "home_cold_files": 30,
-    "home_cold_mem": 300000
+    "home_cold_mem": 2400000
   }
 }

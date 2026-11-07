@@ -302,11 +302,11 @@ check('GIF tronqué refusé', $clean->invoke(null, substr($gif, 0, 40)) === null
  * Serveur PHP intégré sur un port libre : on attend qu'il accepte une connexion, et on change de port s'il n'a pas pu
  * démarrer (port déjà pris), au lieu d'une attente fixe qui échouait parfois sur une machine chargée.
  */
-function start_server(array $args, array $env = [], int $from = 20000, int $to = 30000): array
+function start_server(array $args, array $env = [], int $from = 20000, int $to = 30000, array $ini = []): array
 {
     for ($try = 0; $try < 6; $try++) {
         $port = random_int($from, $to);
-        $server = proc_open(array_merge([PHP_BINARY, '-S', '127.0.0.1:' . $port], $args), [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']],
+        $server = proc_open(array_merge([PHP_BINARY], $ini, ['-S', '127.0.0.1:' . $port], $args), [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']],
             $pipes, null, $env + ['PATH' => (string) getenv('PATH')]);
         for ($i = 0; $i < 50; $i++) {
             if (!proc_get_status($server)['running']) {
