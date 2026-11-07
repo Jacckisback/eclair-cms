@@ -30,6 +30,10 @@ final class Site
             Http::send('Method Not Allowed', 405, ['Allow: GET, HEAD', 'Content-Type: text/plain; charset=utf-8']);
         }
         Cache::checkExpiry();
+        // Alias d'un ancien site (/?p=123…) : avant la canonicalisation (une seule redirection) et sans jamais l'accueil.
+        if ($_GET !== []) {
+            Aliases::handle($path);
+        }
         self::canonical($path);
 
         switch ($path) {

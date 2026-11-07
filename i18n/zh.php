@@ -2050,4 +2050,5 @@ return [
     'À ajouter' => '待添加',
     'Envoie automatiquement une sauvegarde de ton site dans ton Google Drive. Fonction facultative : la sauvegarde téléchargeable de la page Sécurité fonctionne sans elle.' => '自动将网站备份发送到你的 Google Drive。可选功能：没有它，安全页面中的可下载备份也能正常使用。',
     'Ajouter la fonction' => '添加功能',
+    'Trop d’anciennes adresses à paramètres ({n} au plus) : rien n’a été ajouté au-delà.' => '带参数的旧地址过多（最多 {n} 个）：超出部分未被添加。',
 ];

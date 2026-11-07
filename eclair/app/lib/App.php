@@ -69,8 +69,10 @@ final class App
         if (str_starts_with($path, '/_eclair/') || str_starts_with($path, '/.well-known/')) {
             Mcp::handle($path);
         }
-        // Routes publiques des capacités actives (rien n'est chargé quand aucune n'est active).
-        Extensions::route($path);
+        // Routes publiques des capacités actives : sans aucune fonction ajoutée, leur registre n'est même pas chargé.
+        if (Store::exists('extensions')) {
+            Extensions::route($path);
+        }
         Site::handle($path);
     }
 

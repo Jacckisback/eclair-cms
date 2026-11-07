@@ -46,6 +46,17 @@ define('ECLAIR_ROOT', __DIR__);
         || (!empty($rt['host']) && strcasecmp($_SERVER['HTTP_HOST'] ?? '', $rt['host']) !== 0)) {
         return;
     }
+    // Paramètres : seuls les paramètres marketing (même page, aucune variante du cache) laissent servir la page en cache ;
+    // tout autre paramètre (alias /?p=123 d'un ancien site, recherche…) passe par l'application (voir app/lib/Aliases.php).
+    $query = (string) ($_SERVER['QUERY_STRING'] ?? '');
+    if ($query !== '') {
+        parse_str($query, $params);
+        $marketing = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id', 'gclid', 'gbraid', 'wbraid', 'dclid',
+            'fbclid', 'msclkid', 'twclid', 'ttclid', 'li_fat_id', 'igshid', 'yclid', 'mc_cid', 'mc_eid', '_ga', '_gl', 'ref'];
+        if (array_diff(array_keys($params), $marketing) !== []) {
+            return;
+        }
+    }
     $path = rawurldecode((string) parse_url('http://x' . ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH));
     $base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php')), '/.');
     if ($base !== '' && ($path === $base || str_starts_with($path, $base . '/'))) {

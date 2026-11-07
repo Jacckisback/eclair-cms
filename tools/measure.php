@@ -114,12 +114,26 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
 
     $log = $tmp . '/' . $label . '.log';
     @unlink($log);
-    $port = random_int(30001, 39999);
-    $server = proc_open([PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $root, dirname(__DIR__) . '/tools/measure-router.php'],
-        [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']], $pipes, null,
-        ['PATH' => (string) getenv('PATH'), 'PHP_CLI_SERVER_WORKERS' => '4', 'ECLAIR_MEASURE_LOG' => $log]);
-    for ($i = 0; $i < 50 && !@fsockopen('127.0.0.1', $port); $i++) {
-        usleep(100000);
+    // Port libre : un autre serveur (tests lancés en parallèle) peut occuper le premier tiré.
+    $server = null;
+    for ($try = 0; $try < 6 && $server === null; $try++) {
+        $port = random_int(30001, 39999);
+        $proc = proc_open([PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $root, dirname(__DIR__) . '/tools/measure-router.php'],
+            [['pipe', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']], $pipes, null,
+            ['PATH' => (string) getenv('PATH'), 'PHP_CLI_SERVER_WORKERS' => '4', 'ECLAIR_MEASURE_LOG' => $log, 'ECLAIR_MEASURE_DEBUG' => (string) getenv('ECLAIR_MEASURE_DEBUG')]);
+        for ($i = 0; $i < 50 && proc_get_status($proc)['running'] && !@fsockopen('127.0.0.1', $port); $i++) {
+            usleep(100000);
+        }
+        usleep(200000);
+        if (proc_get_status($proc)['running'] && @fsockopen('127.0.0.1', $port)) {
+            $server = $proc;
+        } else {
+            proc_terminate($proc);
+        }
+    }
+    if ($server === null) {
+        fwrite(STDERR, "✗ Serveur de mesure impossible à démarrer.\n");
+        exit(1);
     }
     $jar = $tmp . '/' . $label . '.jar';
     @unlink($jar);
@@ -165,6 +179,10 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
         $routes['login'] = http($port, 'GET', '/gestion/login');
         $routes['admin'] = http($port, 'GET', '/gestion', [], [], $jar);
         $routes['editor'] = http($port, 'GET', '/gestion/new/post', [], [], $jar);
+        if ($routes['home_cold']['status'] !== 200) {
+            fwrite(STDERR, "✗ Mesure impossible ($label) : l'accueil répond " . $routes['home_cold']['status'] . ".\n");
+            exit(1);
+        }
         usleep(200000);
         $lines = array_values(array_filter(array_map(static fn (string $l): ?array => json_decode($l, true), file($log) ?: [])));
         // Chaque parcours est apparié à la première ligne non utilisée de la même adresse (les appels internes du site à
@@ -182,8 +200,27 @@ function measure(string $zipFile, string $label, string $tmp, int $pages): array
                     break;
                 }
             }
+            if (getenv('ECLAIR_MEASURE_DEBUG') && str_starts_with((string) $k, 'home_cold')) {
+                fwrite(STDERR, $label . ' ' . $k . ' mem=' . ($m['mem'] ?? '?') . ' files=' . count((array) ($m['list'] ?? [])) . "\n");
+            }
+            if (getenv('ECLAIR_MEASURE_DEBUG') && $k === 'home_cold') {
+                fwrite(STDERR, $label . ' ' . $k . ' : ' . implode(' ', (array) ($m['list'] ?? [])) . "\n");
+            }
             $r['route'][$k] = ['status' => $routes[$k]['status'], 'mem' => (int) ($m['mem'] ?? 0), 'files' => (int) ($m['files'] ?? 0),
                 'ms' => round((float) ($m['ms'] ?? $routes[$k]['time'] * 1000), 1), 'bytes' => strlen($routes[$k]['body'])];
+        }
+        // Pages publiques à froid : mémoire et fichiers mesurés dans un processus PHP neuf (déterministe), cache vidé avant.
+        foreach (['home_cold' => '/', 'post_cold' => $article, '404' => '/introuvable-mesure', 'sitemap' => '/sitemap.xml'] as $k => $uri) {
+            if ($uri === '' || !isset($r['route'][$k])) {
+                continue;
+            }
+            $purge();
+            [, $out] = run([PHP_BINARY, __DIR__ . '/measure-cli.php', $root, $uri, '127.0.0.1:' . $port]);
+            $cli = json_decode((string) (preg_match('~\{"mem".*\}~', $out, $mm) ? $mm[0] : ''), true);
+            if (is_array($cli)) {
+                $r['route'][$k]['mem'] = (int) $cli['mem'];
+                $r['route'][$k]['files'] = (int) $cli['files'];
+            }
         }
         foreach (['home_cold_again', 'home_cold_third'] as $extra) {
             $again = $r['route'][$extra] ?? null;
@@ -257,8 +294,8 @@ foreach (array_keys($after['route']) as $k) {
     $md .= '| ' . $k . ' | ' . $f($before) . ' | ' . $f($after) . " |\n";
 }
 $intro = "Mesures produites par `php tools/measure.php" . ($pages ? " --pages=$pages" : '') . "` le " . gmdate('Y-m-d H:i') . " UTC, PHP " . PHP_VERSION
-    . ", serveur intégré de PHP" . ($pages ? ", site de $pages articles ajoutés" : ', site neuf (type blog)') . ".\n"
-    . "Durées indicatives (machine de mesure) ; mémoire = pointe PHP de la requête ; fichiers = fichiers PHP inclus (`get_included_files`).\n"
+    . ", serveur intégré de PHP, sans OPcache (coût de compilation compris : majorant)" . ($pages ? ", site de $pages articles ajoutés" : ', site neuf (type blog)') . ".\n"
+    . "Durées indicatives (machine de mesure) ; mémoire = pointe PHP (pages publiques : processus PHP neuf par requête ; administration : serveur intégré, mémoire du processus avant la requête retirée) ; fichiers = fichiers PHP inclus (`get_included_files`).\n"
     . "« _cold » : cache de pages vidé (accueil : le plus léger de trois rendus à froid) ; « _warm » : page servie par le chemin rapide d'index.php.\n\n";
 echo $intro . $md;
 if ($write) {
@@ -279,5 +316,9 @@ if ($checkBudgets) {
         $code = $ok ? $code : 1;
     }
 }
-run(['rm', '-rf', $tmp]);
+if (!getenv('ECLAIR_MEASURE_KEEP')) {
+    run(['rm', '-rf', $tmp]);
+} else {
+    fwrite(STDERR, "Installations gardées : $tmp\n");
+}
 exit($code);

@@ -129,6 +129,7 @@ final class Themes
     {
         self::$active = false;
         self::$css = null;
+        Theme::forgetSite();
     }
 
     /* ─────────────────────────────── Lecture et validation ─────────────────────────────── */

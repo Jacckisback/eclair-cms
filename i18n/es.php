@@ -2050,4 +2050,5 @@ return [
     'À ajouter' => 'Por añadir',
     'Envoie automatiquement une sauvegarde de ton site dans ton Google Drive. Fonction facultative : la sauvegarde téléchargeable de la page Sécurité fonctionne sans elle.' => 'Envía automáticamente una copia de seguridad de tu sitio a tu Google Drive. Función opcional: la copia descargable de la página Seguridad funciona sin ella.',
     'Ajouter la fonction' => 'Añadir la función',
+    'Trop d’anciennes adresses à paramètres ({n} au plus) : rien n’a été ajouté au-delà.' => 'Demasiadas direcciones antiguas con parámetros ({n} como máximo): no se ha añadido nada más allá.',
 ];

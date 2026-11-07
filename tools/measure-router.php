@@ -10,13 +10,16 @@ $__start = microtime(true);
 if (function_exists('memory_reset_peak_usage')) {
     memory_reset_peak_usage();
 }
+// Mémoire déjà occupée par le processus avant la requête : retirée, pour ne mesurer que ce que la requête coûte.
+$__base = memory_get_usage();
 $__log = (string) getenv('ECLAIR_MEASURE_LOG');
-register_shutdown_function(static function () use ($__start, &$__log): void {
+register_shutdown_function(static function () use ($__start, $__base, &$__log): void {
     if ($__log === '') {
         return;
     }
     $files = array_values(array_filter(get_included_files(), static fn (string $f): bool => !str_ends_with($f, 'measure-router.php') && !str_ends_with($f, '/router.php')));
-    @file_put_contents($__log, json_encode(['uri' => $_SERVER['REQUEST_URI'] ?? '', 'mem' => memory_get_peak_usage(), 'files' => count($files),
+    @file_put_contents($__log, json_encode(['uri' => $_SERVER['REQUEST_URI'] ?? '', 'mem' => max(0, memory_get_peak_usage() - $__base), 'files' => count($files),
+        'list' => getenv('ECLAIR_MEASURE_DEBUG') ? array_map('basename', $files) : [],
         'ms' => round((microtime(true) - $__start) * 1000, 2)]) . "\n", FILE_APPEND | LOCK_EX);
 });
 $__result = require __DIR__ . '/router.php';

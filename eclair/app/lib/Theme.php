@@ -204,10 +204,31 @@ final class Theme
         ) ?? $html;
     }
 
+    /** Fichier CSS du noyau, ou son remplacement déclaré par le thème du site. */
+    private static function coreCss(string $name): string
+    {
+        return self::site() ? Themes::coreCss($name) : (string) @file_get_contents(ECLAIR_ROOT . '/app/theme/' . $name);
+    }
+
+    /** Un thème du site est-il actif ou essayé ? (Sans lui, la classe Themes n'est jamais chargée.) */
+    private static ?bool $site = null;
+
+    /** Oublie l'indicateur (thème activé, désactivé ou essayé pendant la requête). */
+    public static function forgetSite(): void
+    {
+        self::$site = null;
+        self::$css = null;
+    }
+
+    private static function site(): bool
+    {
+        return self::$site ??= Store::exists('theme');
+    }
+
     public static function partial(string $name, array $v): string
     {
         // Gabarit remplacé par le thème du site (site/themes/<id>/templates/) : en cas d'erreur, celui du noyau prend le relais.
-        $site = Themes::template($name);
+        $site = self::site() ? Themes::template($name) : null;
         if ($site !== null) {
             try {
                 return self::include($site, $v);
@@ -298,6 +319,7 @@ final class Theme
         self::$direction = false;
         if (isset($look['site_theme']) && is_string($look['site_theme'])) {
             Themes::preview($look['site_theme']);
+            self::$site = true;
         }
     }
 
@@ -320,13 +342,13 @@ final class Theme
     /** Blocs d'annonces (menu Discover › Publicité) : seulement quand la publicité est en service, sinon rien (page à l'octet près). */
     private static function ads(): string
     {
-        return Ads::active() ? "\n" . Themes::coreCss('ads.css') : '';
+        return Ads::active() ? "\n" . self::coreCss('ads.css') : '';
     }
 
     /** Micro-animations (Réglages › Apparence), avant le CSS personnalisé ; coupées, rien n'est ajouté (page à l'octet près). */
     private static function motion(array $a): string
     {
-        return empty($a['motion']) ? '' : "\n" . Themes::coreCss('motion.css');
+        return empty($a['motion']) ? '' : "\n" . self::coreCss('motion.css');
     }
 
     /** CSS du thème, personnalisé et minifié, destiné à être inséré dans la page. */
@@ -338,7 +360,7 @@ final class Theme
         $a = self::look();
         if ($d = self::direction()) {
             // Direction artistique : thème de base sans son mode sombre automatique (la direction choisit clair ou sombre).
-            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', Themes::coreCss('theme.css')) . Design::css($d) . self::motion($a) . self::ads() . Themes::css();
+            $css = (string) preg_replace('~/\*dark\*/.*?/\*/dark\*/~s', '', self::coreCss('theme.css')) . Design::css($d) . self::motion($a) . self::ads() . (self::site() ? Themes::css() : '');
             $custom = self::custom();
             $css .= $custom !== '' ? "\n" . $custom : '';
             if (!self::$shop && !Shop::enabled()) {
@@ -353,12 +375,12 @@ final class Theme
             . ';--link-dark:' . self::readable($accent, '#121218')
             . ';--font:' . (self::FONTS[$a['font_body'] ?? 'system'][1] ?? self::FONTS['system'][1])
             . ';--font-head:' . (self::FONTS[$a['font_head'] ?? 'system'][1] ?? self::FONTS['system'][1]) . '}';
-        $css = Themes::coreCss('theme.css');
+        $css = self::coreCss('theme.css');
         if ($a['theme'] !== 'eclair') {
-            $css .= Themes::coreCss('themes/' . $a['theme'] . '.css');
+            $css .= self::coreCss('themes/' . $a['theme'] . '.css');
         }
         // Thème du site (site/themes/<id>/) : après le thème de base, avant le CSS personnalisé, qui garde le dernier mot.
-        $css .= self::motion($a) . self::ads() . Themes::css();
+        $css .= self::motion($a) . self::ads() . (self::site() ? Themes::css() : '');
         // CSS personnalisé du site, après le thème : il l'emporte et suit les mêmes repères (mode sombre, boutique).
         $custom = self::custom();
         if ($custom !== '') {
