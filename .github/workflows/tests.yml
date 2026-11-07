@@ -42,7 +42,9 @@ jobs:
         run: php tests/run.php
       - name: Diagnostic (seulement en cas d'échec)
         if: failure()
-        run: php tools/ci-diagnose.php
+        run: |
+          php tools/ci-diagnose.php
+          ECLAIR_TEST_DEBUG=1 php tests/run.php 2>&1 | grep -A3 "✗" | head -80 || true
       - name: Construction de l'archive (sans clé, non signée)
         run: env -u ECLAIR_SIGNING_KEY php tools/build.php
       - name: Tests sur l'archive construite

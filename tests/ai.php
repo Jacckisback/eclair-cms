@@ -117,7 +117,9 @@ $fakeDir = sys_get_temp_dir() . '/eclair-fake-ai-' . getmypid();
 // Port libre vérifié (start_server) : jamais le faux serveur d'une autre suite lancée en même temps.
 [$fakePort, $fake] = start_server([__DIR__ . '/fake-ai.php'], ['FAKE_AI_DIR' => $fakeDir, 'PHP_CLI_SERVER_WORKERS' => '4'], 40001, 50000);
 $fakeBase = 'http://127.0.0.1:' . $fakePort;
-file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_AI_ENDPOINTS', ['anthropic' => '$fakeBase', 'openai' => '$fakeBase', 'bfl' => '$fakeBase', 'ideogram' => '$fakeBase']);\n");
+file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_AI_ENDPOINTS', ['anthropic' => '$fakeBase', 'openai' => '$fakeBase', 'bfl' => '$fakeBase', 'ideogram' => '$fakeBase']);\n"
+    // Diagnostic de la CI (ECLAIR_TEST_DEBUG) : messages d'erreur réels dans les réponses au lieu de « Erreur interne ».
+    . (getenv('ECLAIR_TEST_DEBUG') ? "define('ECLAIR_DEBUG', true);\n" : ''));
 usleep(400000);
 $fakeLog = static function () use ($fakeDir): array {
     return array_map(fn ($l) => json_decode($l, true), array_filter(explode("\n", (string) @file_get_contents($fakeDir . '/log.jsonl'))));
