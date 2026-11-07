@@ -56,6 +56,13 @@ use Eclair\Themes;
         ], ['Accept: application/json']);
         $c->login('camille@example.com', 'Un-mot-de-passe-solide');
         $home = $c->req('GET', '/');
+        if (PHP_VERSION_ID < 80200) {
+            // Défaut de la 1.14.1 publiée : sous PHP 8.1, ses pages échouent (type de retour « null » seul dans Affiliate.php)
+            // et son updater ne peut pas télécharger (CURLOPT_XFERINFOFUNCTION). Constaté ici ; la transition par son updater
+            // n'est rejouable qu'en PHP 8.2+, celle par FTP (plus bas) l'est aussi en 8.1.
+            check('PHP 8.1 : la 1.14.1 publiée y est cassée (défaut connu, corrigé en 2.0)', $home['status'] === 500, (string) $home['status']);
+            throw new \RuntimeException('php81');
+        }
         check('1.14.1 installée et en ligne', $home['status'] === 200 && $version() === '1.14.1', (string) $home['status']);
 
         // Personnalisations directes, comme un intégrateur les faisait en 1.x (FTP).
@@ -153,57 +160,64 @@ use Eclair\Themes;
         $body = $post(['action' => 'rollback', 'confirm_password' => 'Un-mot-de-passe-solide']);
         check('retour arrière 2.0.1 → 2.0.0 : site/ intact, apparence gardée', $version() === '2.0.0' && Themes::fingerprint($copy . '/site') === $print
             && str_contains($c->req('GET', '/')['body'], 'PERSO-LAYOUT'), $version());
+    } catch (\RuntimeException $e) {
+        if ($e->getMessage() !== 'php81') {
+            throw $e;
+        }
     } finally {
         proc_terminate($server);
         proc_terminate($chan);
         exec('rm -rf ' . escapeshellarg($copy) . ' ' . escapeshellarg($channel));
     }
 
-    // 5. Retour de la 2.x vers la 1.14.1 avec l'updater 2.x : l'ancien code retrouve ses gabarits personnalisés.
-    section('Transition : retour de la nouvelle architecture vers la 1.14.1');
-    $copy = sys_get_temp_dir() . '/eclair-transition-back-' . getmypid();
-    $zip = new ZipArchive();
-    $zip->open($legacyZip);
-    $zip->extractTo($copy . '-zip');
-    $zip->close();
-    rename($copy . '-zip/eclair', $copy);
-    exec('rm -rf ' . escapeshellarg($copy . '-zip'));
-    @mkdir($channel);
-    file_put_contents($channel . '/index.html', 'canal');
-    [$chanPort, $chan] = start_server(['-t', $channel], ['PHP_CLI_SERVER_WORKERS' => '2'], 40001, 50000);
-    file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_UPDATE_URL', 'http://127.0.0.1:$chanPort/latest.json');\n"
-        . "define('ECLAIR_UPDATE_KEY', '" . base64_encode(sodium_crypto_sign_publickey($pair)) . "');\n");
-    // Sans OPcache : les fichiers modifiés par le test (gabarits, code envoyé « par FTP ») sont relus aussitôt.
-    [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4'], 20000, 30000, ['-d', 'opcache.enable=0']);
-    try {
-        $c = client($port);
-        $form = $c->req('GET', '/');
-        $c->req('POST', '/', $c->token($form['body']) + [
-            'ui' => 'fr', 'site_name' => 'Atelier Retour', 'site_tagline' => 'Céramique', 'site_lang' => 'fr', 'site_type' => 'business',
-            'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
-        ], ['Accept: application/json']);
-        $c->login('camille@example.com', 'Un-mot-de-passe-solide');
-        file_put_contents($copy . '/app/theme/layout.php', str_replace('<a class="skip"', '<!-- PERSO-RETOUR --><a class="skip"', (string) file_get_contents($copy . '/app/theme/layout.php')));
-        $post = static function (array $fields) use ($c): string {
-            $page = $c->req('GET', '/gestion/update');
-            $c->req('POST', '/gestion/update', $c->token($page['body']) + $fields);
-            return $c->req('GET', '/gestion/update')['body'];
-        };
-        eclair_announce($channel, $chanPort, eclair_release($channel, '2.0.0'), $secret);
-        $post(['action' => 'check']);
-        $post(['action' => 'install', 'saved' => '1']);
-        $c->req('GET', '/gestion');
-        check('installation personnalisée passée en 2.0.0, apparence gardée', str_contains($c->req('GET', '/')['body'], 'PERSO-RETOUR'));
-        $post(['action' => 'rollback', 'confirm_password' => 'Un-mot-de-passe-solide']);
-        preg_match("~define\('ECLAIR_VERSION', '([^']+)'\)~", (string) file_get_contents($copy . '/index.php'), $m);
-        array_map('unlink', glob($copy . '/cache/pages/*[0-9a-f]') ?: []);
-        check('retour à la 1.14.1 : son gabarit personnalisé revient avec son code', ($m[1] ?? '') === '1.14.1'
-            && str_contains((string) file_get_contents($copy . '/app/theme/layout.php'), 'PERSO-RETOUR') && str_contains($c->req('GET', '/')['body'], 'PERSO-RETOUR'), $m[1] ?? '');
-        check('retour à la 1.14.1 : site/ conservé (une nouvelle mise à jour le retrouvera)', is_file($copy . '/site/themes/legacy/templates/layout.php'));
-    } finally {
-        proc_terminate($server);
-        proc_terminate($chan);
-        exec('rm -rf ' . escapeshellarg($copy) . ' ' . escapeshellarg($channel));
+    // 5. Retour de la 2.x vers la 1.14.1 (PHP 8.2+ : la 1.14.1 publiée ne fonctionne pas en 8.1).
+    if (PHP_VERSION_ID >= 80200) {
+        // 5. Retour de la 2.x vers la 1.14.1 avec l'updater 2.x : l'ancien code retrouve ses gabarits personnalisés.
+        section('Transition : retour de la nouvelle architecture vers la 1.14.1');
+        $copy = sys_get_temp_dir() . '/eclair-transition-back-' . getmypid();
+        $zip = new ZipArchive();
+        $zip->open($legacyZip);
+        $zip->extractTo($copy . '-zip');
+        $zip->close();
+        rename($copy . '-zip/eclair', $copy);
+        exec('rm -rf ' . escapeshellarg($copy . '-zip'));
+        @mkdir($channel);
+        file_put_contents($channel . '/index.html', 'canal');
+        [$chanPort, $chan] = start_server(['-t', $channel], ['PHP_CLI_SERVER_WORKERS' => '2'], 40001, 50000);
+        file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_UPDATE_URL', 'http://127.0.0.1:$chanPort/latest.json');\n"
+            . "define('ECLAIR_UPDATE_KEY', '" . base64_encode(sodium_crypto_sign_publickey($pair)) . "');\n");
+        // Sans OPcache : les fichiers modifiés par le test (gabarits, code envoyé « par FTP ») sont relus aussitôt.
+        [$port, $server] = start_server(['-t', $copy, dirname(__DIR__) . '/tools/router.php'], ['PHP_CLI_SERVER_WORKERS' => '4'], 20000, 30000, ['-d', 'opcache.enable=0']);
+        try {
+            $c = client($port);
+            $form = $c->req('GET', '/');
+            $c->req('POST', '/', $c->token($form['body']) + [
+                'ui' => 'fr', 'site_name' => 'Atelier Retour', 'site_tagline' => 'Céramique', 'site_lang' => 'fr', 'site_type' => 'business',
+                'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
+            ], ['Accept: application/json']);
+            $c->login('camille@example.com', 'Un-mot-de-passe-solide');
+            file_put_contents($copy . '/app/theme/layout.php', str_replace('<a class="skip"', '<!-- PERSO-RETOUR --><a class="skip"', (string) file_get_contents($copy . '/app/theme/layout.php')));
+            $post = static function (array $fields) use ($c): string {
+                $page = $c->req('GET', '/gestion/update');
+                $c->req('POST', '/gestion/update', $c->token($page['body']) + $fields);
+                return $c->req('GET', '/gestion/update')['body'];
+            };
+            eclair_announce($channel, $chanPort, eclair_release($channel, '2.0.0'), $secret);
+            $post(['action' => 'check']);
+            $post(['action' => 'install', 'saved' => '1']);
+            $c->req('GET', '/gestion');
+            check('installation personnalisée passée en 2.0.0, apparence gardée', str_contains($c->req('GET', '/')['body'], 'PERSO-RETOUR'));
+            $post(['action' => 'rollback', 'confirm_password' => 'Un-mot-de-passe-solide']);
+            preg_match("~define\('ECLAIR_VERSION', '([^']+)'\)~", (string) file_get_contents($copy . '/index.php'), $m);
+            array_map('unlink', glob($copy . '/cache/pages/*[0-9a-f]') ?: []);
+            check('retour à la 1.14.1 : son gabarit personnalisé revient avec son code', ($m[1] ?? '') === '1.14.1'
+                && str_contains((string) file_get_contents($copy . '/app/theme/layout.php'), 'PERSO-RETOUR') && str_contains($c->req('GET', '/')['body'], 'PERSO-RETOUR'), $m[1] ?? '');
+            check('retour à la 1.14.1 : site/ conservé (une nouvelle mise à jour le retrouvera)', is_file($copy . '/site/themes/legacy/templates/layout.php'));
+        } finally {
+            proc_terminate($server);
+            proc_terminate($chan);
+            exec('rm -rf ' . escapeshellarg($copy) . ' ' . escapeshellarg($channel));
+        }
     }
 
     // 6. Mise à jour par FTP (docs/UPGRADE-2.md §2) : app/ et assets/ déplacés dans cache/legacy-app et cache/legacy-assets,

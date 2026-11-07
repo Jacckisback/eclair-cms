@@ -11,7 +11,7 @@ Branche : `claude/hopeful-thompson-8kqj2g`, partie de `main` @ `90bb968` (1.14.1
 | Suite d’origine sur 1.14.1 (avant toute modification) | 1 159 vérifications réussies |
 | `php tests/run.php` (sources, branche) | **1 298 vérifications réussies** |
 | Même suite sur l’archive construite sans clé, décompressée (`ECLAIR_TEST_ROOT`) | **1 296 vérifications réussies** (les 2 tests du validateur CLI ne s’appliquent qu’au dépôt) |
-| CI GitHub, PHP 8.2 à 8.5 (sources, archive, budgets) | **Verte** (run du commit `9621438`) ; PHP 8.1 corrigé ensuite (défaut de la 1.14.1, voir CHANGELOG) |
+| CI GitHub, PHP 8.1 à 8.5 (sources, archive, budgets) | Verte en 8.2–8.5 dès le commit `9621438` ; **deux défauts de la 1.14.1 sous PHP 8.1 trouvés et corrigés** (type de retour `null` seul ; `CURLOPT_XFERINFOFUNCTION`, qui empêche la mise à jour en un clic de la 1.14.1 sous PHP 8.1) |
 | Transition depuis la **vraie** archive `dist/eclair-cms-1.14.1.zip`, mise à jour par **son propre updater** | Réussie : gabarit, CSS du thème et actif personnalisés conservés et servis, `.htaccess` modifié gardé, statuts des pages identiques |
 | Mise à jour suivante par le nouvel updater, archive piégée écrivant dans `site/`, retour 2.0.1 → 2.0.0 | `site/` identique à l’octet près (empreinte) ; archive piégée refusée |
 | Retour 2.0.0 → 1.14.1 | L’ancien code retrouve ses gabarits personnalisés ; `site/` conservé |
@@ -29,7 +29,13 @@ Non exécutés ici (à faire avant publication) :
 * **Navigateur** : l’éditeur (bloc conservé, blocs de fonctions) n’a été vérifié que par les tests HTTP et le lint, pas dans un navigateur.
 * **Performances sur plusieurs tailles de site** : l’outil le permet (`--pages=N`), seule la mesure « site neuf » a été produite.
 
-## 2. Point de sécurité découvert pendant le travail
+## 2. Points découverts pendant le travail
+
+### Sites en PHP 8.1
+
+La 1.14.1 publiée annonce PHP 8.1 mais **ne fonctionne pas sous PHP 8.1** : ses pages publiques répondent en erreur 500 hors cache (type de retour `null` seul dans `Affiliate.php`, chargé au rendu), et la mise à jour en un clic comme l'assistant IA s'arrêtent sur une constante cURL de PHP 8.2. Vérifié par la CI avec la vraie archive 1.14.1. Les sites concernés doivent passer en PHP 8.2+ puis mettre à jour, ou mettre à jour par FTP (testé en 8.1). Corrigé dans la branche ; **à signaler aux utilisateurs dès que possible**, indépendamment de la 2.0 (une 1.14.2 de correctif serait justifiée).
+
+### Clé de signature
 
 La **clé privée de signature du mainteneur** (`ECLAIR_SIGNING_KEY`) est présente dans l’environnement d’exécution de cette session cloud. Avec l’ancien `tools/build.php`, sa seule présence suffisait à signer : une construction de test a ainsi produit une annonce authentiquement signée pour une 2.0.0 non relue, **dans une copie temporaire, supprimée aussitôt, jamais poussée**. Corrections :
 

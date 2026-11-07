@@ -23,7 +23,8 @@ First stage of the 2.0 architecture: the site's theme now belongs to the site an
 
 ### Fixed
 
-- **PHP 8.1 compatibility**: two closures in `Affiliate.php` declared a standalone `null` return type (PHP 8.2+), a fatal error on PHP 8.1, the announced minimum. Present in 1.14.1; found by the new CI.
+- **PHP 8.1 compatibility**: two closures in `Affiliate.php` declared a standalone `null` return type (PHP 8.2+). `Affiliate.php` is loaded when pages are rendered, so **on PHP 8.1, the announced minimum, 1.14.1 answers its public pages with an error 500** (only pages already in the cache are served). Found by the new CI, which runs the real 1.14.1 archive on PHP 8.1.
+- **One-click update and AI assistant on PHP 8.1**: `CURLOPT_XFERINFOFUNCTION` only exists since PHP 8.2; on PHP 8.1 the update download, the post-update health check and the AI provider calls stopped on an undefined constant. Present in 1.14.1: **sites on PHP 8.1 cannot update 1.14.1 in one click** and must update by FTP (`docs/UPGRADE-2.md`). `curl_progress_option()` now picks the available option.
 - Test isolation: the `unit` rate-limit key used by `tests/run.php` is now cleared after its test (it could be listed before the account expected by a security test, depending on the file order of the disk).
 
 ### Changed

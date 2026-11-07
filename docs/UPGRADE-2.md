@@ -6,6 +6,8 @@ La 2.0 range le thème de ton site dans un dossier qui lui appartient (`site/`),
 
 ## 1. Mise à jour en un clic (depuis la 1.10 ou plus récente)
 
+> **Hébergement en PHP 8.1** : la 1.14.1 ne fonctionne pas sous PHP 8.1 (pages publiques en erreur 500 hors cache, mise à jour en un clic impossible ; corrigé dans la 2.0). Passe d'abord en PHP 8.2 ou plus récent dans l'espace client de ton hébergeur (recommandé : 8.1 n'est plus maintenu par le projet PHP) puis mets à jour en un clic, ou mets à jour par FTP (§2), testé aussi en PHP 8.1.
+
 1. Mises à jour › Vérifier, puis Installer.
 2. L’ancien updater pose le nouveau code, garde l’ancien dans `cache/update/previous/`, vérifie que le site répond, et revient tout seul en arrière sinon.
 3. Au premier passage du nouveau code, les migrations s’exécutent (une seule fois, journalisées dans `data/migrations.php`) :
