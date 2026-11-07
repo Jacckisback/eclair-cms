@@ -8,7 +8,10 @@
  */
 declare(strict_types=1);
 
+require_once ECLAIR_ROOT . '/app/bundled/affiliate/lib/Links.php';
+
 use Eclair\Affiliate;
+use EclairExt\Affiliate\Links;
 use Eclair\Store;
 
 section('Affiliation : liens, mention publicitaire, liens marqués');
@@ -29,9 +32,9 @@ try {
     $affHtml = '<p>Voir <a href="https://www.amazon.fr/dp/B01?tag=moi-21&amp;th=1" target="_blank" rel="noopener">ici</a>.</p>'
         . '<p class="btns"><a class="btn btn-primary" href="https://www.fnac.com/a1?awc=123">Fnac</a></p>';
     check('aucun lien enregistré : HTML inchangé, même avec un lien Amazon', Affiliate::mark($affHtml, $affBlocks, 'fr') === $affHtml);
-    check('lien refusé : adresse incomplète ou dangereuse, nom manquant', is_string(Affiliate::put(['name' => 'X', 'url' => 'javascript:alert(1)']))
-        && is_string(Affiliate::put(['name' => 'X', 'url' => 'fnac.com/a1'])) && is_string(Affiliate::put(['name' => ' ', 'url' => 'https://www.fnac.com/a1'])));
-    $affLink = Affiliate::put(['name' => 'Machine Fnac', 'url' => 'https://www.fnac.com/a1?awc=123', 'notes' => "Pour débuter\n12 programmes"]);
+    check('lien refusé : adresse incomplète ou dangereuse, nom manquant', is_string(Links::put(['name' => 'X', 'url' => 'javascript:alert(1)']))
+        && is_string(Links::put(['name' => 'X', 'url' => 'fnac.com/a1'])) && is_string(Links::put(['name' => ' ', 'url' => 'https://www.fnac.com/a1'])));
+    $affLink = Links::put(['name' => 'Machine Fnac', 'url' => 'https://www.fnac.com/a1?awc=123', 'notes' => "Pour débuter\n12 programmes"]);
     check('lien enregistré : programme détecté, notes gardées', is_array($affLink) && $affLink['program'] === 'other' && $affLink['notes'] === "Pour débuter\n12 programmes");
     $affMarked = Affiliate::mark($affHtml, $affBlocks, 'fr');
     check('page avec liens affiliés : mention en tête, avec la phrase Amazon de la boutique', str_starts_with($affMarked, '<aside class="callout callout-info">')
@@ -45,11 +48,11 @@ try {
     $affLinked = Affiliate::mark('<section class="hero"><a class="btn" href="https://www.fnac.com/a1?awc=123">Fnac</a></section>' . "\n", [['url' => 'https://www.fnac.com/a1?awc=123', 'button' => 'Fnac'] + $affHero], 'fr');
     check('bandeau avec un lien affilié : mention au-dessus de lui', str_starts_with($affLinked, '<aside class="callout callout-info">'), $affLinked);
     check('page sans lien affilié : HTML inchangé', Affiliate::mark('<p>x</p>', [['type' => 'paragraph', 'text' => '<a href="https://www.fnac.com/autre">autre</a>']], 'fr') === '<p>x</p>');
-    Affiliate::setDisclosure('Liens sponsorisés : merci de votre soutien.');
+    Links::setDisclosure('Liens sponsorisés : merci de votre soutien.');
     check('mention personnalisée, phrase Amazon de la boutique toujours ajoutée', str_contains(Affiliate::mark($affHtml, $affBlocks, 'es'),
         'Liens sponsorisés : merci de votre soutien. En tant que Partenaire Amazon'));
     $affLinks = [['name' => 'Premier', 'url' => 'https://www.amazon.fr/dp/B01?tag=moi-21&th=1'], ['name' => 'Second', 'url' => 'https://www.fnac.com/a1?awc=123']];
-    $affFilled = Affiliate::fill([
+    $affFilled = Links::fill([
         ['type' => 'button', 'text' => 'Voir', 'url' => 'https://aff.invalid/1'],
         ['type' => 'paragraph', 'text' => '<a href="https://aff.invalid/1">un</a>, <a href="https://aff.invalid/10">dix</a> et https://aff.invalid/2 seul.'],
     ], $affLinks, 'fr');
@@ -59,8 +62,8 @@ try {
         && !str_contains((string) json_encode($affFilled, JSON_UNESCAPED_SLASHES), 'aff.invalid'));
     check('IA : produit qu’elle n’a pas relié → son bouton à la fin', count($affFilled) === 3 && ($affFilled[2]['type'] ?? '') === 'button'
         && ($affFilled[2]['url'] ?? '') === 'https://www.fnac.com/a1?awc=123' && ($affFilled[2]['text'] ?? '') === 'Second : voir l’offre');
-    Affiliate::remove($affLink['id']);
-    Affiliate::setDisclosure('');
+    Links::remove($affLink['id']);
+    Links::setDisclosure('');
 } finally {
     $affBackup === null ? @unlink($affFile) : file_put_contents($affFile, $affBackup);
 }
@@ -85,33 +88,37 @@ try {
         'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
     ], ['Accept: application/json']);
     $c->login('camille@example.com', 'Un-mot-de-passe-solide');
-    $page = $c->req('GET', '/gestion/affiliate');
+    // 2.0 : « Affiliation » est une fonction optionnelle, absente d'un blog neuf.
+    check('2.0, blog neuf : fonction Affiliation absente', $c->req('GET', '/gestion/x/affiliate')['status'] === 404
+        && !str_contains($c->req('GET', '/gestion/')['body'], 'href="/gestion/x/affiliate"'));
+    $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'add', 'id' => 'affiliate']);
+    $page = $c->req('GET', '/gestion/x/affiliate');
     check('page Affiliation : menu, formulaire, mention par défaut, sans attribut style (CSP)', $page['status'] === 200 && str_contains($page['body'], 'name="action" value="add"')
-        && str_contains($page['body'], 'href="/gestion/affiliate"') && str_contains($page['body'], 'si vous achetez par l’un d’eux') && !preg_match('~<[^>]+\sstyle="~', $page['body']));
-    $c->req('POST', '/gestion/affiliate', $c->token($page['body']) + ['action' => 'add', 'name' => 'Piège', 'url' => 'javascript:alert(1)']);
+        && str_contains($page['body'], 'href="/gestion/x/affiliate"') && str_contains($page['body'], 'si vous achetez par l’un d’eux') && !preg_match('~<[^>]+\sstyle="~', $page['body']));
+    $c->req('POST', '/gestion/x/affiliate', $c->token($page['body']) + ['action' => 'add', 'name' => 'Piège', 'url' => 'javascript:alert(1)']);
     check('adresse dangereuse refusée', ($read('affiliate')['links'] ?? []) === []);
-    $page = $c->req('GET', '/gestion/affiliate');
-    $c->req('POST', '/gestion/affiliate', $c->token($page['body']) + ['action' => 'add', 'name' => 'Machine Premier', 'url' => 'https://www.amazon.fr/dp/B01?tag=moi-21&th=1',
+    $page = $c->req('GET', '/gestion/x/affiliate');
+    $c->req('POST', '/gestion/x/affiliate', $c->token($page['body']) + ['action' => 'add', 'name' => 'Machine Premier', 'url' => 'https://www.amazon.fr/dp/B01?tag=moi-21&th=1',
         'notes' => "Pour débuter\n12 programmes"]);
-    $c->req('POST', '/gestion/affiliate', $c->token($page['body']) + ['action' => 'add', 'name' => 'Machine Second', 'url' => 'https://www.fnac.com/a1?awc=123']);
+    $c->req('POST', '/gestion/x/affiliate', $c->token($page['body']) + ['action' => 'add', 'name' => 'Machine Second', 'url' => 'https://www.fnac.com/a1?awc=123']);
     $links = array_column($read('affiliate')['links'] ?? [], null, 'name');
     check('liens ajoutés sans JavaScript, Amazon reconnu', count($links) === 2 && ($links['Machine Premier']['program'] ?? '') === 'amazon'
         && ($links['Machine Premier']['url'] ?? '') === 'https://www.amazon.fr/dp/B01?tag=moi-21&th=1');
-    $page = $c->req('GET', '/gestion/affiliate');
+    $page = $c->req('GET', '/gestion/x/affiliate');
     check('assistant IA coupé : pas de rédaction, invitation à l’activer', !str_contains($page['body'], 'data-aff-write') && str_contains($page['body'], 'settings?tab=ai'));
 
     // Assistant IA activé (faux fournisseur).
     $set = $c->req('GET', '/gestion/settings?tab=ai');
     $c->req('POST', '/gestion/settings', $c->token($set['body']) + ['tab' => 'ai', 'provider' => 'anthropic', 'key_ai_anthropic' => 'sk-ant-test-0123456789',
         'model_anthropic' => 'claude-sonnet-5-5', 'budget' => '10', 'daily' => '60', 'editors' => '1']);
-    $page = $c->req('GET', '/gestion/affiliate');
+    $page = $c->req('GET', '/gestion/x/affiliate');
     check('assistant IA actif : rédaction proposée, coût indicatif affiché', str_contains($page['body'], 'data-aff-write')
         && (bool) preg_match('#Rédiger avec les liens cochés <small>· ~[\d,]+.\$#u', $page['body']));
     preg_match('/"csrf":"([a-f0-9]+)"/', $page['body'], $m);
     $api = static fn (string $path, array $data): array => ($res = $c->req('POST', '/gestion/' . $path, (string) json_encode($data),
         ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . ($m[1] ?? '')])) + ['json' => json_decode($res['body'], true)];
-    check('aucun lien coché : refusé sans appel payant', ($api('api/affiliate/write', ['links' => [], 'format' => 'review'])['json']['ok'] ?? true) === false);
-    $write = $api('api/affiliate/write', ['links' => [$links['Machine Premier']['id'] ?? '', $links['Machine Second']['id'] ?? ''], 'format' => 'compare', 'keyword' => 'machine à pain']);
+    check('aucun lien coché : refusé sans appel payant', ($api('x/affiliate/write', ['links' => [], 'format' => 'review'])['json']['ok'] ?? true) === false);
+    $write = $api('x/affiliate/write', ['links' => [$links['Machine Premier']['id'] ?? '', $links['Machine Second']['id'] ?? ''], 'format' => 'compare', 'keyword' => 'machine à pain']);
     preg_match('~/edit/([a-z0-9]+)~', (string) ($write['json']['edit'] ?? ''), $e);
     $draft = $read('content/' . ($e[1] ?? 'x'));
     check('article rédigé par l’IA : brouillon jamais publié, ouvert dans l’éditeur', ($write['json']['ok'] ?? false) === true && ($draft['status'] ?? '') === 'draft', $write['body']);
@@ -135,14 +142,20 @@ try {
     check('page sans lien affilié : aucune mention', !str_contains($c->req('GET', '/a-propos')['body'], 'Liens d’affiliation'));
     check('flux RSS : mention dans le contenu de l’article', str_contains($c->req('GET', '/feed.xml')['body'], 'Liens d’affiliation'));
 
-    $page = $c->req('GET', '/gestion/affiliate');
-    $c->req('POST', '/gestion/affiliate', $c->token($page['body']) + ['action' => 'disclosure', 'disclosure' => 'Liens sponsorisés : merci de votre soutien.']);
+    $page = $c->req('GET', '/gestion/x/affiliate');
+    $c->req('POST', '/gestion/x/affiliate', $c->token($page['body']) + ['action' => 'disclosure', 'disclosure' => 'Liens sponsorisés : merci de votre soutien.']);
     $again = $c->req('GET', (string) ($pub['json']['url'] ?? '/x'))['body'];
     check('mention personnalisée en ligne aussitôt (pages recalculées), phrase Amazon gardée', str_contains($again, 'merci de votre soutien. En tant que Partenaire Amazon'),
         (preg_match('~<aside class="callout callout-info">.*?</aside>~s', $again, $aside) ? $aside[0] : 'pas de mention') . ' | stocké : ' . ($read('affiliate')['disclosure'] ?? '?'));
-    $page = $c->req('GET', '/gestion/affiliate');
-    $c->req('POST', '/gestion/affiliate', $c->token($page['body']) + ['action' => 'delete', 'id' => $links['Machine Second']['id'] ?? '']);
+    $page = $c->req('GET', '/gestion/x/affiliate');
+    $c->req('POST', '/gestion/x/affiliate', $c->token($page['body']) + ['action' => 'delete', 'id' => $links['Machine Second']['id'] ?? '']);
     check('lien retiré de la liste', count($read('affiliate')['links'] ?? []) === 1);
+
+    // Fonction retirée : la gestion disparaît, mais la mention légale et le marquage des liens restent sur les pages publiées.
+    $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'deactivate', 'id' => 'affiliate', 'confirm' => '1']);
+    $after = $c->req('GET', (string) ($pub['json']['url'] ?? '/x'))['body'];
+    check('fonction Affiliation désactivée : page de gestion retirée, mention et rel="sponsored" toujours servis', $c->req('GET', '/gestion/x/affiliate')['status'] === 404
+        && str_contains($after, 'merci de votre soutien. En tant que Partenaire Amazon') && str_contains($after, 'sponsored nofollow'));
 } finally {
     proc_terminate($server);
     proc_terminate($aiServer);

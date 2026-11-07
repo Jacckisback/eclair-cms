@@ -84,6 +84,10 @@ use Eclair\Themes;
         // Site vitrine qui avait consulté les tendances du jour (Discover) en 1.14.1 : la fonction doit lui rester.
         $trData = Store::GUARD . json_encode(['geo' => 'FR', 'fetched' => time() - 7200, 'items' => []]);
         file_put_contents($copy . '/data/trends.php', $trData);
+        // Liens d'affiliation enregistrés en 1.14.1 : la fonction de gestion doit leur rester.
+        $affData = Store::GUARD . json_encode(['links' => ['a1' => ['id' => 'a1', 'name' => 'Tour Shimpo', 'url' => 'https://www.amazon.fr/dp/B0T?tag=atelier-21',
+            'program' => 'amazon', 'notes' => '', 'created' => time() - 86400]], 'disclosure' => '']);
+        file_put_contents($copy . '/data/affiliate.php', $affData);
         // Robots IA (mesure active par défaut en 1.x) : une visite notée avant la mise à jour doit rester, la mesure continuer.
         $gpt = ['User-Agent: Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)'];
         client($port)->req('GET', '/', [], $gpt);
@@ -145,6 +149,8 @@ use Eclair\Themes;
         check('Discover utilisé en 1.14.1 : fonction installée, données gardées ; réglages AdSense sur la page Publicité du noyau', is_file($copy . '/site/extensions/discover/extension.json')
             && $c->req('GET', '/gestion/x/discover')['status'] === 200 && (string) file_get_contents($copy . '/data/trends.php') === $trData
             && str_contains($c->req('GET', '/gestion/ads')['body'], 'name="action" value="ads"'));
+        check('liens d’affiliation de la 1.14.1 : fonction installée, liens intacts', is_file($copy . '/site/extensions/affiliate/extension.json')
+            && str_contains($c->req('GET', '/gestion/x/affiliate')['body'], 'Tour Shimpo') && (string) file_get_contents($copy . '/data/affiliate.php') === $affData);
         foreach ($pages as $p => $status) {
             check("page $p : même statut qu’avant ($status)", $c->req('GET', $p)['status'] === $status);
         }

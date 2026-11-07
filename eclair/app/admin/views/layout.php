@@ -23,7 +23,6 @@ $nav = [
     ['messages', 'messages', 'mail', t('Messages'), 'messages'],
     ['redirects', 'redirects', 'redirect', t('Redirections'), 'redirects'],
     ['plan', 'plan', 'calendar', t('Planning'), 'content'],
-    ['affiliate', 'affiliate', 'bag', t('Affiliation'), 'content'],
     ['ads', 'ads', 'target', t('Publicité'), 'settings'],
 ];
 // Entrées des capacités actives (droit vérifié par Extensions::nav, comme par la route elle-même).

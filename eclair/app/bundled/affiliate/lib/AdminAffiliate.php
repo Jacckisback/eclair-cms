@@ -3,11 +3,24 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Affiliate;
+
+use Eclair\Admin;
+use Eclair\AdminAi;
+use Eclair\Affiliate;
+use Eclair\Ai;
+use Eclair\AiTools;
+use Eclair\Auth;
+use Eclair\Http;
+use Eclair\Req;
+use Eclair\Sanitize;
+use Eclair\Session;
+use Eclair\Settings;
+use Eclair\Theme;
 
 defined('ECLAIR') || exit;
 
-/** Affiliation dans l'administration : liens, mention publicitaire, article rédigé par l'IA (voir Affiliate). */
+/** Fonction « Affiliation » dans l'administration : liens, mention publicitaire, article rédigé par l'IA (voir Links). */
 final class AdminAffiliate
 {
     public static function page(array $user): never
@@ -17,7 +30,7 @@ final class AdminAffiliate
             Ai::choose((string) ($user['ai'] ?? ''));
         }
         $lang = (string) Settings::get('lang');
-        Admin::view('affiliate', [
+        $v = [
             'links' => Affiliate::links(),
             'disclosure' => Affiliate::data()['disclosure'],
             'note' => Theme::t('aff_note', $lang),
@@ -27,7 +40,16 @@ final class AdminAffiliate
             'model' => $ai ? Ai::label() : '',
             'admin' => Auth::can('settings'),
             'blog' => (bool) Settings::get('blog.enabled'),
-        ], t('Affiliation'));
+        ];
+        ob_start();
+        try {
+            (static function (array $v): void {
+                include __DIR__ . '/page.php';
+            })($v);
+        } finally {
+            $html = (string) ob_get_clean();
+        }
+        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Affiliation'), 'ext' => 'affiliate'], t('Affiliation'));
     }
 
     /** Formulaires sans JavaScript : ajouter, modifier, retirer un lien ; mention publicitaire (administrateurs). */
@@ -36,24 +58,24 @@ final class AdminAffiliate
         $action = Req::input('action');
         $id = preg_replace('/[^a-z0-9]/', '', Req::input('id')) ?? '';
         if ($action === 'add' || $action === 'save') {
-            $r = Affiliate::put(['name' => Req::input('name'), 'url' => Req::input('url'), 'notes' => Req::input('notes')], $action === 'save' ? $id : '');
+            $r = Links::put(['name' => Req::input('name'), 'url' => Req::input('url'), 'notes' => Req::input('notes')], $action === 'save' ? $id : '');
             if (is_string($r)) {
-                Admin::back('affiliate', $r, 'bad');
+                Admin::back('x/affiliate', $r, 'bad');
             }
-            Admin::back('affiliate', $action === 'add' ? t('Lien ajouté.') : t('Lien enregistré.'));
+            Admin::back('x/affiliate', $action === 'add' ? t('Lien ajouté.') : t('Lien enregistré.'));
         }
         if ($action === 'delete') {
-            Affiliate::remove($id);
-            Admin::back('affiliate', t('Lien retiré de la liste.'));
+            Links::remove($id);
+            Admin::back('x/affiliate', t('Lien retiré de la liste.'));
         }
         if ($action === 'disclosure') {
             if (!Auth::can('settings')) {
                 Admin::forbidden();
             }
-            Affiliate::setDisclosure(Req::input('disclosure'));
-            Admin::back('affiliate', t('Mention publicitaire enregistrée.'));
+            Links::setDisclosure(Req::input('disclosure'));
+            Admin::back('x/affiliate', t('Mention publicitaire enregistrée.'));
         }
-        Admin::back('affiliate');
+        Admin::back('x/affiliate');
     }
 
     /** « Rédiger avec les liens cochés » : brouillon écrit par l'IA, ouvert ensuite dans l'éditeur. */
@@ -76,7 +98,7 @@ final class AdminAffiliate
         }
         session_write_close();
         extend_time(300);
-        $res = Affiliate::write(is_array($data['links'] ?? null) ? $data['links'] : [], is_string($data['format'] ?? null) ? $data['format'] : '',
+        $res = Links::write(is_array($data['links'] ?? null) ? $data['links'] : [], is_string($data['format'] ?? null) ? $data['format'] : '',
             Sanitize::text(is_string($data['keyword'] ?? null) ? $data['keyword'] : '', 120), $user);
         Ai::charge($user['id'], (float) $res['cost']);
         if (!$res['ok']) {

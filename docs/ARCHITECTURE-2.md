@@ -42,7 +42,7 @@ Référence de départ : **1.14.1**, commit `90bb96815880da5289834f2f1ba6cec0732
 | **Migrations** | `Migrations` | **Nouveau (2.0)** |
 | Sauvegarde **et restauration** locales | `Backup` | Noyau (restauration ajoutée en 2.0) |
 | Mises à jour signées, récupération | `Update`, `AdminUpdate` | Noyau (périmètre renforcé en 2.0) |
-| Ancien site (Wayback), sauvegardes Google Drive, Robots IA, Google Discover (+ tendances) | `app/bundled/wayback`, `app/bundled/drive`, `app/bundled/ai-visits`, `app/bundled/discover` | **Fonctions livrées** : chargées seulement si le site les a ajoutées |
+| Ancien site (Wayback), sauvegardes Google Drive, Robots IA, Google Discover (+ tendances), Affiliation (gestion des liens, articles par l’IA ; le marquage des pages reste au noyau) | `app/bundled/wayback`, `app/bundled/drive`, `app/bundled/ai-visits`, `app/bundled/discover`, `app/bundled/affiliate` | **Fonctions livrées** : chargées seulement si le site les a ajoutées |
 | Alias d’un ancien site (`?p=`…) | `Aliases` | **Nouveau (2.0)**, noyau |
 | Discover, Trends, AdSense, affiliation, planning, robots IA (statistiques), boutique, fournisseurs d’IA, assistant, MCP | `AdminDiscover`, `Discover`, `Trends`, `Ads`, `Affiliate`, `Plan`, `AiVisits`, `Shop`, `Ai*`, `Mcp` | **Encore dans le noyau** : à extraire (voir STATUS-2.md) |
 

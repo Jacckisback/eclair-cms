@@ -29,7 +29,7 @@ final class Usage
     }
 
     /** Fonctions livrées que chaque usage ajoute (préréglage) : usage => [id => nom affiché]. */
-    public const PRESETS = ['revival' => ['wayback' => 'Ancien site'], 'media' => ['discover' => 'Google Discover']];
+    public const PRESETS = ['revival' => ['wayback' => 'Ancien site'], 'media' => ['discover' => 'Google Discover'], 'affiliate' => ['affiliate' => 'Affiliation']];
 
     /** Fonctions livrées utiles à un usage (celles qui existent dans cette version). */
     public static function extensions(string $usage): array
@@ -52,7 +52,7 @@ final class Usage
                 'hint' => t('Grande image de 1200 px, auteur présenté, titre sans excès : ce que Google recommande.'),
                 'url' => admin_url(Extensions::enabled('discover') ? 'x/discover' : 'extensions')],
             'affiliate' => ['done' => Affiliate::links() !== [], 'label' => t('Ajouter ton premier lien d’affiliation'),
-                'hint' => t('La mention publicitaire s’affiche alors d’elle-même sur les pages concernées.'), 'url' => admin_url('affiliate')],
+                'hint' => t('La mention publicitaire s’affiche alors d’elle-même sur les pages concernées.'), 'url' => admin_url(Extensions::enabled('affiliate') ? 'x/affiliate' : 'extensions')],
             'revival' => Auth::can('settings') ? ['done' => Extensions::enabled('wayback') && self::revival()['scanned'] > 0, 'label' => t('Retrouver les anciennes adresses de ton domaine'),
                 'hint' => t('Les liens qui pointent encore vers elles mèneront de nouveau quelque part.'), 'url' => admin_url(Extensions::enabled('wayback') ? 'x/wayback' : 'extensions')] : null,
             default => null,
@@ -106,10 +106,10 @@ final class Usage
                     mb_strlen((string) ($user['bio'] ?? '')) >= 40 ? 'ok' : 'warn'],
                 'view' => ['eye', t('Voir la page'), t('Ouvrir'), path_to('/'), ''],
                 'ads' => Auth::can('settings') ? ['target', t('Publicité'), Ads::active() ? t('Active sur les articles') : t('Inactive'), admin_url('ads'), Ads::active() ? 'ok' : ''] : null,
-                'links' => ['bag', t('Liens d’affiliation'), ($n = count(Affiliate::links())) ? t('{n} liens', ['n' => $n]) : t('Aucun lien'), admin_url('affiliate'), $n ? '' : 'warn'],
+                'links' => ['bag', t('Liens d’affiliation'), ($n = count(Affiliate::links())) ? t('{n} liens', ['n' => $n]) : t('Aucun lien'), admin_url(Extensions::enabled('affiliate') ? 'x/affiliate' : 'extensions'), $n ? '' : 'warn'],
                 'write' => Ai::allowed($user)
-                    ? ['spark', t('Article par l’IA'), t('Comparatif, guide d’achat'), admin_url('affiliate'), '']
-                    : ['spark', t('Article par l’IA'), t('Active l’assistant IA'), admin_url(Auth::can('settings') ? 'settings?tab=ai' : 'affiliate'), ''],
+                    ? ['spark', t('Article par l’IA'), t('Comparatif, guide d’achat'), admin_url(Extensions::enabled('affiliate') ? 'x/affiliate' : 'extensions'), '']
+                    : ['spark', t('Article par l’IA'), t('Active l’assistant IA'), admin_url(Auth::can('settings') ? 'settings?tab=ai' : (Extensions::enabled('affiliate') ? 'x/affiliate' : 'extensions')), ''],
                 'wayback' => self::wayback(),
                 'redirects' => ['redirect', t('Redirections'), t('{n} redirections', ['n' => count(Redirects::all())]), admin_url('redirects'), ''],
                 default => null,

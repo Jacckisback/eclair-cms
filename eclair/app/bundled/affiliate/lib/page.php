@@ -1,7 +1,7 @@
 <?php
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Thierry Gustin
-/** Affiliation : liens d'affiliation, article rédigé par l'IA, mention publicitaire (voir app/lib/Affiliate.php). */
+/** Vue de la fonction « Affiliation » : liens, article rédigé par l'IA, mention publicitaire (voir Links.php ; marquage des pages : app/lib/Affiliate.php). */
 defined('ECLAIR') || exit;
 
 use Eclair\Icons;
@@ -51,7 +51,7 @@ $host = static fn (string $url): string => (string) preg_replace('/^www\./', '',
             <div class="plan-actions">
               <details class="plan-edit">
                 <summary class="btn btn-sm btn-ghost"><?= e(t('Modifier')) ?></summary>
-                <form method="post" action="<?= e(admin_url('affiliate')) ?>" class="plan-form"><?= Security::csrfField() ?>
+                <form method="post" action="<?= e(admin_url('x/affiliate')) ?>" class="plan-form"><?= Security::csrfField() ?>
                   <input type="hidden" name="action" value="save"><input type="hidden" name="id" value="<?= e($l['id']) ?>">
                   <label class="field plan-wide"><span class="label"><?= e(t('Produit ou offre')) ?></span><input type="text" name="name" maxlength="120" required value="<?= e($l['name']) ?>"></label>
                   <label class="field plan-wide"><span class="label"><?= e(t('Lien d’affiliation')) ?></span><input type="url" name="url" required value="<?= e($l['url']) ?>"></label>
@@ -59,7 +59,7 @@ $host = static fn (string $url): string => (string) preg_replace('/^www\./', '',
                   <div><button class="btn btn-sm btn-primary" type="submit"><?= e(t('Enregistrer')) ?></button></div>
                 </form>
               </details>
-              <form method="post" action="<?= e(admin_url('affiliate')) ?>" data-confirm="<?= e(t('Retirer ce lien de la liste ? Les pages qui le contiennent encore n’afficheront plus la mention publicitaire, sauf pour un lien Amazon avec ton identifiant de partenaire.')) ?>"><?= Security::csrfField() ?>
+              <form method="post" action="<?= e(admin_url('x/affiliate')) ?>" data-confirm="<?= e(t('Retirer ce lien de la liste ? Les pages qui le contiennent encore n’afficheront plus la mention publicitaire, sauf pour un lien Amazon avec ton identifiant de partenaire.')) ?>"><?= Security::csrfField() ?>
                 <input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= e($l['id']) ?>">
                 <button class="btn btn-sm btn-ghost btn-icon btn-danger" type="submit" aria-label="<?= e(t('Retirer le lien')) ?>"><?= Icons::svg('x') ?></button></form>
             </div>
@@ -72,7 +72,7 @@ $host = static fn (string $url): string => (string) preg_replace('/^www\./', '',
   <div class="grid-2">
     <section class="card" id="aff-add" aria-labelledby="aff-add-title">
       <h2 id="aff-add-title"><?= e(t('Ajouter un lien')) ?></h2>
-      <form method="post" action="<?= e(admin_url('affiliate')) ?>" class="aff-form"><?= Security::csrfField() ?>
+      <form method="post" action="<?= e(admin_url('x/affiliate')) ?>" class="aff-form"><?= Security::csrfField() ?>
         <input type="hidden" name="action" value="add">
         <label class="field"><span class="label"><?= e(t('Produit ou offre')) ?></span><input type="text" name="name" maxlength="120" required placeholder="<?= e(t('Ex. : Machine à pain Moulinex Pain Doré')) ?>"></label>
         <label class="field"><span class="label"><?= e(t('Lien d’affiliation')) ?></span><input type="url" name="url" required placeholder="https://"></label>
@@ -85,7 +85,7 @@ $host = static fn (string $url): string => (string) preg_replace('/^www\./', '',
       <h2 id="aff-note-title"><?= e(t('Mention publicitaire')) ?></h2>
       <p class="small muted"><?= e(t('Une publicité doit être clairement identifiable comme telle, en France (LCEN, art. 20) comme en Espagne (LSSI, art. 20). Éclair place cette mention en tête de chaque page qui contient un lien affilié, et dans le flux RSS.')) ?></p>
       <?php if ($v['admin']): ?>
-        <form method="post" action="<?= e(admin_url('affiliate')) ?>" class="aff-form"><?= Security::csrfField() ?>
+        <form method="post" action="<?= e(admin_url('x/affiliate')) ?>" class="aff-form"><?= Security::csrfField() ?>
           <input type="hidden" name="action" value="disclosure">
           <label class="field"><span class="label"><?= e(t('Texte de la mention (vide : texte par défaut, dans la langue de chaque page)')) ?></span>
             <textarea name="disclosure" rows="3" maxlength="600" placeholder="<?= e($v['note']) ?>"><?= e($v['disclosure']) ?></textarea></label>

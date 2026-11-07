@@ -25,6 +25,7 @@ final class Migrations
         '2026-11-drive-extension' => 'driveExtension',
         '2026-11-ai-visits-extension' => 'aiVisitsExtension',
         '2026-11-discover-extension' => 'discoverExtension',
+        '2026-11-affiliate-extension' => 'affiliateExtension',
     ];
     private const RETRY = 600;
 
@@ -197,6 +198,26 @@ final class Migrations
         $r = Extensions::add('discover');
         if (!$r['ok']) {
             throw new \RuntimeException('Fonction « Google Discover » non installée : ' . (string) $r['error']);
+        }
+        return ['installed' => true];
+    }
+
+    /**
+     * « Affiliation » (gestion des liens, articles par l'IA) est devenue une fonction optionnelle : les sites qui avaient
+     * enregistré des liens ou une mention, ou choisi l'usage « affiliation », la reçoivent installée et activée. Le
+     * marquage des pages et la mention publicitaire, eux, restent assurés par le noyau dans tous les cas.
+     */
+    private static function affiliateExtension(): array
+    {
+        $d = Store::read('affiliate', []);
+        $used = is_array($d) && (!empty($d['links']) || (string) ($d['disclosure'] ?? '') !== '');
+        if (!$used && (string) Settings::get('usage') !== 'affiliate') {
+            return ['installed' => false];
+        }
+        Themes::ensure();
+        $r = Extensions::add('affiliate');
+        if (!$r['ok']) {
+            throw new \RuntimeException('Fonction « Affiliation » non installée : ' . (string) $r['error']);
         }
         return ['installed' => true];
     }

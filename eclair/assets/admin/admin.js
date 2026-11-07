@@ -370,7 +370,7 @@
       const links = $$('[data-aff-pick]:checked').map((b) => b.value);
       if (!links.length) { toast(t('Coche au moins un lien.'), 'bad'); return; }
       const f = new FormData(affWrite);
-      planRun($('button', affWrite), affWrite.dataset.wait, 'api/affiliate/write',
+      planRun($('button', affWrite), affWrite.dataset.wait, 'x/affiliate/write',
         { links, format: f.get('format'), keyword: f.get('keyword') }, (json) => { location.href = json.edit; });
     });
   }
