@@ -3,7 +3,17 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Discover;
+
+use Eclair\Ai;
+use Eclair\AiChat;
+use Eclair\Categories;
+use Eclair\Content;
+use Eclair\Log;
+use Eclair\Plan;
+use Eclair\Sanitize;
+use Eclair\Settings;
+use Eclair\Store;
 
 defined('ECLAIR') || exit;
 

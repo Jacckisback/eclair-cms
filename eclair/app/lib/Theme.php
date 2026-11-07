@@ -339,7 +339,7 @@ final class Theme
         return 'theme-' . $a['theme'] . ($a['header'] === 'center' ? ' hdr-center' : '') . ($a['cards'] === 'list' ? ' cards-list' : '');
     }
 
-    /** Blocs d'annonces (menu Discover › Publicité) : seulement quand la publicité est en service, sinon rien (page à l'octet près). */
+    /** Blocs d'annonces (menu Publicité) : seulement quand la publicité est en service, sinon rien (page à l'octet près). */
     private static function ads(): string
     {
         return Ads::active() ? "\n" . self::coreCss('ads.css') : '';

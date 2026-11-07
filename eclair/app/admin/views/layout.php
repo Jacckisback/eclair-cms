@@ -24,7 +24,7 @@ $nav = [
     ['redirects', 'redirects', 'redirect', t('Redirections'), 'redirects'],
     ['plan', 'plan', 'calendar', t('Planning'), 'content'],
     ['affiliate', 'affiliate', 'bag', t('Affiliation'), 'content'],
-    ['discover', 'discover', 'compass', t('Discover'), 'content'],
+    ['ads', 'ads', 'target', t('Publicité'), 'settings'],
 ];
 // Entrées des capacités actives (droit vérifié par Extensions::nav, comme par la route elle-même).
 foreach (\Eclair\Extensions::nav() as [$extPath, $extIcon, $extLabel, $extRight]) {

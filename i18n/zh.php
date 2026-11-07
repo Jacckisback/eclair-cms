@@ -1799,7 +1799,6 @@ return [
     'trop long' => '过长',
     'sans excès' => '得体',
     'Google Discover' => 'Google Discover',
-    'Prépare tes articles pour le fil Discover de Google, trouve des idées dans les tendances du jour et, si tu le souhaites, affiche de la publicité AdSense.' => '让你的文章为 Google Discover 信息流做好准备，从今日趋势中寻找灵感，并可选择展示 AdSense 广告。',
     'Le blog est désactivé : Discover met surtout en avant des articles. Active-le dans Réglages.' => '博客已关闭：Discover 主要推荐文章。请在 设置 中开启。',
     'Prêt pour Discover' => 'Discover 就绪情况',
     'Google n’offre aucun réglage pour « se positionner » sur Discover : un article indexé y est éligible automatiquement. Il recommande de grandes images (1200 px de large au moins, jamais le logo), des titres qui résument le contenu sans sensationnalisme, et des articles utiles dont on sait qui les écrit. Éclair sert déjà la balise des grandes images (max-image-preview:large) et les données structurées ; voici ce qui dépend de toi.' => 'Google 没有提供任何“在 Discover 上排名”的设置：已被收录的文章会自动具备资格。Google 建议使用大图（宽度至少 1200 像素，切勿用徽标）、不靠耸动就能概括内容的标题，以及能看出作者是谁的实用文章。Éclair 已提供大图标记（max-image-preview:large）和结构化数据；以下取决于你。',
@@ -2052,4 +2051,8 @@ return [
     'Ajouter la fonction' => '添加功能',
     'Trop d’anciennes adresses à paramètres ({n} au plus) : rien n’a été ajouté au-delà.' => '带参数的旧地址过多（最多 {n} 个）：超出部分未被添加。',
     'La mesure demande la fonction « Robots IA » :' => '统计需要“AI 机器人”功能：',
+    'Prépare tes articles pour le fil Discover de Google et trouve des idées dans les tendances du jour.' => '为 Google 的 Discover 信息流准备文章，并从今日趋势中寻找灵感。',
+    'Publicité AdSense active sur les articles.' => 'AdSense 广告已在文章中启用。',
+    'Publicité AdSense : inactive.' => 'AdSense 广告：未启用。',
+    'Régler la publicité' => '广告设置',
 ];

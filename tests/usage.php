@@ -51,8 +51,8 @@ try {
     $c->login('camille@example.com', 'Un-mot-de-passe-solide');
     $dash = $c->req('GET', '/gestion/');
     $tiles = preg_match_all('~<a class="usage-tile" href="([^"]+)">.*?<span class="usage-name">([^<]+)</span>~s', $dash['body'], $m) ? array_combine($m[2], $m[1]) : [];
-    check('tableau de bord d’un média : carte « Ton média » avec Discover, tendances, planning, publicité', str_contains($dash['body'], 'Ton média')
-        && array_keys($tiles) === ['Prêt pour Discover', 'Tendances du jour', 'Planning', 'Publicité'] && $tiles['Tendances du jour'] === '/gestion/discover#trends', json_encode($tiles, JSON_UNESCAPED_UNICODE));
+    check('tableau de bord d’un média : fonction Discover ajoutée par le préréglage, carte « Ton média » avec Discover, tendances, planning, publicité', str_contains($dash['body'], 'Ton média')
+        && array_keys($tiles) === ['Prêt pour Discover', 'Tendances du jour', 'Planning', 'Publicité'] && $tiles['Tendances du jour'] === '/gestion/x/discover#trends' && str_contains($dash['body'], 'href="/gestion/x/discover"'), json_encode($tiles, JSON_UNESCAPED_UNICODE));
     preg_match_all('~class="todo-label"[^>]*>([^<]+)<~', $dash['body'], $steps);
     check('« Premiers pas » d’un média : préparer un article pour Discover, juste après l’installation', ($steps[1][1] ?? '') === 'Préparer un article pour Google Discover'
         && count($steps[1]) === 9, json_encode($steps[1], JSON_UNESCAPED_UNICODE));

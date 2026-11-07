@@ -3,7 +3,14 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Discover;
+
+use Eclair\Content;
+use Eclair\Media;
+use Eclair\Security;
+use Eclair\Seo;
+use Eclair\Settings;
+use Eclair\Users;
 
 defined('ECLAIR') || exit;
 

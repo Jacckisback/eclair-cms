@@ -378,11 +378,11 @@
   /* ── Google Discover : tendances du jour (Google Trends), idées que l'IA en tire pour le planning ── */
   const dcTrends = $('[data-dc-trends]');
   if (dcTrends) {
-    dcTrends.addEventListener('click', () => planRun(dcTrends, dcTrends.dataset.wait, 'api/discover/trends', {}, () => location.reload()));
+    dcTrends.addEventListener('click', () => planRun(dcTrends, dcTrends.dataset.wait, 'x/discover/trends', {}, () => location.reload()));
   }
   const dcIdeas = $('[data-dc-ideas]');
   if (dcIdeas) {
-    dcIdeas.addEventListener('click', () => planRun(dcIdeas, dcIdeas.dataset.wait, 'api/discover/ideas', {},
+    dcIdeas.addEventListener('click', () => planRun(dcIdeas, dcIdeas.dataset.wait, 'x/discover/ideas', {},
       (json) => { if (json.added > 0) location.href = D.admin + '/plan'; else location.reload(); }));
   }
 

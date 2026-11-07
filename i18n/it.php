@@ -1799,7 +1799,6 @@ return [
     'trop long' => 'troppo lungo',
     'sans excès' => 'misurato',
     'Google Discover' => 'Google Discover',
-    'Prépare tes articles pour le fil Discover de Google, trouve des idées dans les tendances du jour et, si tu le souhaites, affiche de la publicité AdSense.' => 'Prepara i tuoi articoli per il feed Discover di Google, trova idee nelle tendenze del giorno e, se vuoi, mostra annunci AdSense.',
     'Le blog est désactivé : Discover met surtout en avant des articles. Active-le dans Réglages.' => 'Il blog è disattivato: Discover mette in evidenza soprattutto articoli. Attivalo in Impostazioni.',
     'Prêt pour Discover' => 'Pronto per Discover',
     'Google n’offre aucun réglage pour « se positionner » sur Discover : un article indexé y est éligible automatiquement. Il recommande de grandes images (1200 px de large au moins, jamais le logo), des titres qui résument le contenu sans sensationnalisme, et des articles utiles dont on sait qui les écrit. Éclair sert déjà la balise des grandes images (max-image-preview:large) et les données structurées ; voici ce qui dépend de toi.' => 'Google non offre alcuna impostazione per «posizionarsi» su Discover: un articolo indicizzato è idoneo automaticamente. Raccomanda immagini grandi (almeno 1200 px di larghezza, mai il logo), titoli che riassumano il contenuto senza sensazionalismo e articoli utili di cui si sa chi li scrive. Éclair fornisce già il tag delle immagini grandi (max-image-preview:large) e i dati strutturati; ecco cosa dipende da te.',
@@ -2052,4 +2051,8 @@ return [
     'Ajouter la fonction' => 'Aggiungi la funzione',
     'Trop d’anciennes adresses à paramètres ({n} au plus) : rien n’a été ajouté au-delà.' => 'Troppi vecchi indirizzi con parametri ({n} al massimo): oltre questo limite non è stato aggiunto nulla.',
     'La mesure demande la fonction « Robots IA » :' => 'La misurazione richiede la funzione «Bot IA»:',
+    'Prépare tes articles pour le fil Discover de Google et trouve des idées dans les tendances du jour.' => 'Prepara i tuoi articoli per il feed Discover di Google e trova idee nelle tendenze del giorno.',
+    'Publicité AdSense active sur les articles.' => 'Pubblicità AdSense attiva negli articoli.',
+    'Publicité AdSense : inactive.' => 'Pubblicità AdSense: inattiva.',
+    'Régler la publicité' => 'Imposta la pubblicità',
 ];

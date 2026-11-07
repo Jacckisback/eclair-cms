@@ -1799,7 +1799,6 @@ return [
     'trop long' => 'too long',
     'sans excès' => 'measured',
     'Google Discover' => 'Google Discover',
-    'Prépare tes articles pour le fil Discover de Google, trouve des idées dans les tendances du jour et, si tu le souhaites, affiche de la publicité AdSense.' => 'Get your posts ready for Google’s Discover feed, find ideas in today’s trends and, if you wish, show AdSense ads.',
     'Le blog est désactivé : Discover met surtout en avant des articles. Active-le dans Réglages.' => 'The blog is turned off: Discover mostly features articles. Turn it on in Settings.',
     'Prêt pour Discover' => 'Ready for Discover',
     'Google n’offre aucun réglage pour « se positionner » sur Discover : un article indexé y est éligible automatiquement. Il recommande de grandes images (1200 px de large au moins, jamais le logo), des titres qui résument le contenu sans sensationnalisme, et des articles utiles dont on sait qui les écrit. Éclair sert déjà la balise des grandes images (max-image-preview:large) et les données structurées ; voici ce qui dépend de toi.' => 'Google offers no setting to “rank” in Discover: an indexed article is eligible automatically. It recommends large images (at least 1200 px wide, never the logo), titles that sum up the content without sensationalism, and useful articles whose author is known. Éclair already serves the large-image tag (max-image-preview:large) and the structured data; here is what depends on you.',
@@ -2052,4 +2051,8 @@ return [
     'Ajouter la fonction' => 'Add the feature',
     'Trop d’anciennes adresses à paramètres ({n} au plus) : rien n’a été ajouté au-delà.' => 'Too many old addresses with parameters ({n} at most): nothing was added beyond that.',
     'La mesure demande la fonction « Robots IA » :' => 'Measurement requires the “AI bots” feature:',
+    'Prépare tes articles pour le fil Discover de Google et trouve des idées dans les tendances du jour.' => 'Prepare your posts for Google\'s Discover feed and find ideas in today\'s trends.',
+    'Publicité AdSense active sur les articles.' => 'AdSense ads active on posts.',
+    'Publicité AdSense : inactive.' => 'AdSense ads: inactive.',
+    'Régler la publicité' => 'Ad settings',
 ];

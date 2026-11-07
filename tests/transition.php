@@ -81,6 +81,9 @@ use Eclair\Themes;
         // Google Drive commencé en 1.14.1 (état propre à l'installation, jamais sauvegardé) : la fonction doit rester disponible.
         $driveData = Store::GUARD . json_encode(['schedule' => 'weekly', 'keep' => 5]);
         file_put_contents($copy . '/data/drive.php', $driveData);
+        // Site vitrine qui avait consulté les tendances du jour (Discover) en 1.14.1 : la fonction doit lui rester.
+        $trData = Store::GUARD . json_encode(['geo' => 'FR', 'fetched' => time() - 7200, 'items' => []]);
+        file_put_contents($copy . '/data/trends.php', $trData);
         // Robots IA (mesure active par défaut en 1.x) : une visite notée avant la mise à jour doit rester, la mesure continuer.
         $gpt = ['User-Agent: Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)'];
         client($port)->req('GET', '/', [], $gpt);
@@ -139,6 +142,9 @@ use Eclair\Themes;
         client($port)->req('GET', '/', [], $gpt);
         check('Robots IA mesurés en 1.14.1 : fonction installée, journal gardé, mesure poursuivie', $aiBefore === 1 && is_file($copy . '/site/extensions/ai-visits/extension.json')
             && $c->req('GET', '/gestion/x/ai-visits')['status'] === 200 && substr_count((string) @file_get_contents($aiLog), "\tGPTBot\t") === 2, (string) $aiBefore);
+        check('Discover utilisé en 1.14.1 : fonction installée, données gardées ; réglages AdSense sur la page Publicité du noyau', is_file($copy . '/site/extensions/discover/extension.json')
+            && $c->req('GET', '/gestion/x/discover')['status'] === 200 && (string) file_get_contents($copy . '/data/trends.php') === $trData
+            && str_contains($c->req('GET', '/gestion/ads')['body'], 'name="action" value="ads"'));
         foreach ($pages as $p => $status) {
             check("page $p : même statut qu’avant ($status)", $c->req('GET', $p)['status'] === $status);
         }

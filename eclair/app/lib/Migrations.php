@@ -24,6 +24,7 @@ final class Migrations
         '2026-11-wayback-extension' => 'waybackExtension',
         '2026-11-drive-extension' => 'driveExtension',
         '2026-11-ai-visits-extension' => 'aiVisitsExtension',
+        '2026-11-discover-extension' => 'discoverExtension',
     ];
     private const RETRY = 600;
 
@@ -171,6 +172,31 @@ final class Migrations
         $r = Extensions::add('ai-visits');
         if (!$r['ok']) {
             throw new \RuntimeException('Fonction « Robots IA » non installée : ' . (string) $r['error']);
+        }
+        return ['installed' => true];
+    }
+
+    /**
+     * « Google Discover » (contrôles et tendances du jour) est devenu une fonction optionnelle. En 1.x la page figurait au
+     * menu de tous les sites : ceux qui avaient un blog, un usage tourné vers les articles, ou des tendances déjà chargées
+     * la reçoivent installée et activée (pays des tendances et données gardés). Les réglages de la publicité AdSense, qui
+     * étaient sur la même page, restent au noyau (Publicité). Un site neuf en 2.0 ne la charge que pour l'usage « média ».
+     */
+    private static function discoverExtension(): array
+    {
+        $installed = (string) Settings::get('version');
+        if ($installed !== '' && version_compare($installed, '2.0.0', '>=')) {
+            return ['installed' => false];
+        }
+        $used = Settings::get('blog.enabled') || in_array((string) Settings::get('usage'), ['blog', 'media', 'affiliate', 'revival'], true)
+            || Store::exists('trends') || (string) Settings::get('discover.geo') !== '';
+        if (!$used) {
+            return ['installed' => false];
+        }
+        Themes::ensure();
+        $r = Extensions::add('discover');
+        if (!$r['ok']) {
+            throw new \RuntimeException('Fonction « Google Discover » non installée : ' . (string) $r['error']);
         }
         return ['installed' => true];
     }

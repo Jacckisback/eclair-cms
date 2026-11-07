@@ -201,6 +201,13 @@ final class Installer
             'lang' => I18n::lang(),
         ]) ?? throw new \RuntimeException(t('Cette adresse e-mail est déjà utilisée.'));
         Starter::create($type, $lang, $user, $name);
+        // Préréglage de l'usage : fonctions livrées utiles à ce site (Discover pour un média…), retirables dans Fonctions.
+        if (Usage::extensions($type)) {
+            Themes::ensure();
+            foreach (array_keys(Usage::extensions($type)) as $ext) {
+                Extensions::add($ext);
+            }
+        }
         Media::icons(null, (string) Settings::get('appearance.accent'));
         // Les visiteurs ne seront redirigés vers cette adresse que si elle mène vraiment à ce site.
         Settings::verifyUrl();

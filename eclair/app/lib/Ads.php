@@ -8,7 +8,7 @@ namespace Eclair;
 defined('ECLAIR') || exit;
 
 /**
- * Publicité Google AdSense, sur les articles seulement (menu Discover).
+ * Publicité Google AdSense, sur les articles seulement (menu Publicité).
  *
  * - Rien ne change sur le site tant qu'elle n'est pas en service : il faut l'identifiant d'éditeur, l'activation et la
  *   confirmation que le message de consentement (RGPD) est publié dans AdSense › Confidentialité et messages. Google exige

@@ -306,7 +306,7 @@ final class Site
             'noindex' => $item['seo']['noindex'] || $preview,
             'image' => $image,
             // Grande image d'origine (1200 px de large au moins), non recadrée : celle que Google Discover recommande.
-            'large' => $featured && (int) $featured['w'] >= Discover::WIDTH ? Media::url($featured) : '',
+            'large' => $featured && (int) $featured['w'] >= Media::LARGE ? Media::url($featured) : '',
             'type' => $isPost ? 'article' : 'website',
             'published' => $item['date'],
             'modified' => max((int) $item['date'], (int) $item['updated']),

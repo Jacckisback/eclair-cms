@@ -3,11 +3,21 @@
 // Copyright (c) 2026 Thierry Gustin
 declare(strict_types=1);
 
-namespace Eclair;
+namespace EclairExt\Discover;
+
+use Eclair\Admin;
+use Eclair\Ads;
+use Eclair\Ai;
+use Eclair\Auth;
+use Eclair\Http;
+use Eclair\Plan;
+use Eclair\Req;
+use Eclair\Session;
+use Eclair\Settings;
 
 defined('ECLAIR') || exit;
 
-/** Google Discover dans l'administration : « prêt pour Discover », tendances du jour, publicité AdSense (administrateurs). */
+/** Fonction « Google Discover » dans l'administration : « prêt pour Discover » et tendances du jour. */
 final class AdminDiscover
 {
     public static function page(array $user): never
@@ -18,8 +28,7 @@ final class AdminDiscover
         }
         $geo = Trends::geo();
         $posts = Discover::posts();
-        $latest = array_key_first($posts);
-        Admin::view('discover', [
+        $v = [
             'site' => Discover::site(),
             'posts' => $posts,
             'ready' => count(array_filter($posts, fn (array $p): bool => $p['ready'])),
@@ -27,76 +36,43 @@ final class AdminDiscover
             'trends' => Trends::cached($geo),
             'ai' => $ai,
             'ideasCost' => $ai ? Plan::ideasCost(Ai::provider()) : '',
-            'admin' => Auth::can('settings'),
-            'ads' => Settings::get('ads'),
             'adsActive' => Ads::active(),
-            'adsClient' => Ads::client(),
-            // Adresse d'un article en ligne, pour tester le message de consentement de Google.
-            'testUrl' => $latest !== null ? absolute_url(Content::path($posts[$latest]['entry'])) . '?fc=alwaysshow&fctype=gdpr' : '',
+            'adsAdmin' => Auth::can('settings'),
             'blog' => (bool) Settings::get('blog.enabled'),
-        ], t('Google Discover'));
+        ];
+        ob_start();
+        try {
+            (static function (array $v): void {
+                include __DIR__ . '/page.php';
+            })($v);
+        } finally {
+            $html = (string) ob_get_clean();
+        }
+        Admin::view('extension', ['html' => $html, 'raw' => true, 'title' => t('Google Discover'), 'ext' => 'discover'], t('Google Discover'));
     }
 
-    /** Formulaires sans JavaScript : pays des tendances, tendance ajoutée au planning, publicité (administrateurs). */
+    /** Formulaires sans JavaScript : pays des tendances, tendance ajoutée au planning. */
     public static function action(array $user): never
     {
         $action = Req::input('action');
         if ($action === 'geo') {
             $geo = strtoupper(Req::input('geo'));
             Settings::save(['discover' => ['geo' => in_array($geo, Trends::GEOS, true) ? $geo : '']]);
-            Admin::back('discover#trends');
+            Admin::back('x/discover#trends');
         }
         if ($action === 'trend') {
             $geo = Trends::geo();
             $trend = (Trends::cached($geo)['items'] ?? [])[(int) Req::input('n')] ?? null;
             if (!is_array($trend)) {
-                Admin::back('discover#trends', t('Cette tendance n’est plus à jour : recharge les tendances du jour.'), 'bad');
+                Admin::back('x/discover#trends', t('Cette tendance n’est plus à jour : recharge les tendances du jour.'), 'bad');
             }
             $r = Trends::plan($trend, $geo);
             if (is_string($r)) {
-                Admin::back('discover#trends', $r, 'bad');
+                Admin::back('x/discover#trends', $r, 'bad');
             }
-            Admin::back('discover#trends', t('« {title} » ajouté au planning, à la date d’aujourd’hui.', ['title' => $r['title']]));
+            Admin::back('x/discover#trends', t('« {title} » ajouté au planning, à la date d’aujourd’hui.', ['title' => $r['title']]));
         }
-        if ($action === 'ads') {
-            if (!Auth::can('settings')) {
-                Admin::forbidden();
-            }
-            $raw = Req::input('client');
-            $client = Ads::client($raw);
-            if ($raw !== '' && $client === '') {
-                Admin::back('discover#ads', t('Identifiant d’éditeur invalide : il ressemble à pub-1234567890123456 (dans AdSense › Compte).'), 'bad');
-            }
-            $rawSlot = Req::input('slot');
-            $slot = Ads::slot($rawSlot);
-            if ($rawSlot !== '' && $slot === '') {
-                Admin::back('discover#ads', t('Bloc d’annonces invalide : indique seulement son numéro (data-ad-slot), par exemple 1234567890.'), 'bad');
-            }
-            $enabled = Req::bool('enabled');
-            $consent = Req::bool('consent');
-            $auto = Req::bool('auto');
-            if ($enabled && $client === '') {
-                Admin::back('discover#ads', t('Indique d’abord ton identifiant d’éditeur AdSense.'), 'bad');
-            }
-            if ($enabled && !$consent) {
-                Admin::back('discover#ads', t('Publie d’abord le message de consentement dans AdSense, puis coche la case qui le confirme : sans lui, la publicité n’est pas permise pour les visiteurs européens.'), 'bad');
-            }
-            if ($enabled && !$auto && $slot === '') {
-                Admin::back('discover#ads', t('Choisis les annonces automatiques ou indique un bloc d’annonces.'), 'bad');
-            }
-            $positions = array_values(array_intersect(Ads::POSITIONS, Req::inputArray('positions')));
-            Settings::save(['ads' => [
-                'client' => $client,
-                'enabled' => $enabled,
-                'consent' => $consent,
-                'auto' => $auto,
-                'slot' => $slot,
-                'positions' => $positions,
-                'txt' => Ads::cleanTxt(Req::input('txt')),
-            ]]);
-            Admin::back('discover#ads', $enabled ? t('Publicité activée sur les articles.') : t('Réglages de la publicité enregistrés.'));
-        }
-        Admin::back('discover');
+        Admin::back('x/discover');
     }
 
     /** « Charger les tendances du jour » : lecture du flux de Google Trends (au plus une fois par heure). */
