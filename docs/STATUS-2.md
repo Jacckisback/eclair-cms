@@ -2,7 +2,7 @@
 
 Branche : `claude/hopeful-thompson-8kqj2g`, partie de `main` @ `90bb968` (1.14.1). Version des sources : **2.0.0, non publiée**. La fusion dans `main`, l’annonce sur le canal public et la release restent des décisions du mainteneur.
 
-**La refonte n’est pas terminée.** Les étapes 1 à 5 sont livrées et testées ; les étapes 6 à 9 restent à faire (voir §3). Cette branche est un état intermédiaire utilisable : elle peut être publiée telle quelle comme 2.0 « transition » (aucune fonction retirée, apparence identique), ou poursuivie avant publication.
+**État : candidate à la publication**, sous réserve des contrôles du mainteneur (§1, « Non exécutés »). Étapes 1 à 5, 7, 8 et 9 faites et testées ; étape 6 faite pour 7 fonctions (Ancien site, Google Drive, Robots IA, Discover + tendances, affiliation, planning, import WordPress) et pour les traductions. **Reportés après la 2.0, par choix** : extraction d’AdSense (il faudrait laisser une fonction assouplir la CSP des pages publiques, pour ~15 Ko), de la boutique (22 fichiers du noyau l’appellent) et de l’IA/MCP (206 Ko appelés par 23 fichiers ; code déjà chargé seulement quand l’IA sert) : gain faible pour les visiteurs, risque de régression élevé.
 
 ## 1. Contrôles exécutés (7 novembre 2026, PHP 8.3.6)
 
