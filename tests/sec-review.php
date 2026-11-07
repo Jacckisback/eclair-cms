@@ -183,7 +183,7 @@ if (!in_array('--unit', $argv, true)) {
         symlink($rvOutside, $rvRepo . '/eclair/assets/notes.txt');
         $rvGitRun('add -A && git commit -qm base');
         $rvBuild = static function () use ($rvRepo, $rvSecret): array {
-            $p = proc_open([PHP_BINARY, $rvRepo . '/tools/build.php'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $rvRepo,
+            $p = proc_open([PHP_BINARY, $rvRepo . '/tools/build.php', '--sign'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $rvRepo,
                 ['PATH' => (string) getenv('PATH'), 'ECLAIR_SIGNING_KEY' => base64_encode($rvSecret)]);
             $out = (string) stream_get_contents($pipes[1]) . (string) stream_get_contents($pipes[2]);
             return ['rc' => proc_close($p), 'out' => $out];

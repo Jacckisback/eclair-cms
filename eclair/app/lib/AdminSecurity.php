@@ -126,4 +126,19 @@ final class AdminSecurity
         @unlink($file);
         exit;
     }
+
+    /** Restaure une sauvegarde envoyée (mot de passe confirmé) : voir Backup::restore() pour les garanties. */
+    public static function restore(array $user): never
+    {
+        if (!Auth::confirmed($user)) {
+            Admin::back('security', t('Mot de passe incorrect.'), 'bad');
+        }
+        $tmp = (string) ($_FILES['backup']['tmp_name'] ?? '');
+        if ($tmp === '' || (!is_uploaded_file($tmp) && !(defined('ECLAIR_TESTING') && is_file($tmp)))) {
+            Admin::back('security', t('Choisis d’abord le fichier de sauvegarde (.zip).'), 'bad');
+        }
+        extend_time(300);
+        $r = Backup::restore($tmp);
+        Admin::back('security', $r['ok'] ? t('Sauvegarde restaurée : {n} fichiers remis en place.', ['n' => $r['files']]) : (string) $r['error'], $r['ok'] ? 'ok' : 'bad');
+    }
 }

@@ -30,6 +30,7 @@ $nav = [
 ];
 $adminNav = [
     ['settings', 'settings', 'settings', t('Réglages'), 'settings'],
+    ['themes', 'themes', 'panel', t('Thèmes'), 'settings'],
     ['users', 'users', 'users', t('Utilisateurs'), 'users'],
     ['security', 'security', 'shield', t('Sécurité'), 'security'],
     ['update', 'update', 'refresh', t('Mises à jour'), 'security'],

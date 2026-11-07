@@ -73,6 +73,9 @@ final class Site
         if (IndexNow::enabled() && $path === '/' . IndexNow::key() . '.txt') {
             self::file($path, IndexNow::key(), 'text/plain; charset=utf-8');
         }
+        if (str_starts_with($path, '/assets/')) {
+            self::legacyAsset($path);
+        }
         if (str_ends_with($path, '.md') && Settings::get('geo.markdown')) {
             $target = substr($path, 0, -3);
             $entry = Content::findByPath($target === '/index' ? '/' : $target);
@@ -84,6 +87,22 @@ final class Site
             }
         }
         self::route($path);
+    }
+
+    /**
+     * Actif personnalisé d'une installation 1.x (assets/site/…), rangé par la migration dans le thème « legacy » : servi à
+     * son ancienne adresse, en lecture seule, pour les seuls types d'actifs permis (jamais de script serveur ni de HTML).
+     */
+    private static function legacyAsset(string $path): void
+    {
+        $rel = substr($path, 1);
+        $file = Themes::assetsDir() . '/legacy/' . $rel;
+        $type = Themes::ASSET_TYPES[strtolower(pathinfo($rel, PATHINFO_EXTENSION))] ?? null;
+        if ($type === null || !Themes::safePath($rel) || !is_file($file) || is_link($file)) {
+            return;
+        }
+        Http::send((string) Disk::read($file), 200, ['Content-Type: ' . $type . (str_starts_with($type, 'text/') ? '; charset=utf-8' : ''),
+            'Cache-Control: public, max-age=86400', 'X-Content-Type-Options: nosniff']);
     }
 
     /** Une seule URL par contenu : protocole, domaine, slash final, majuscules, index.php. */

@@ -13,6 +13,7 @@ define('ECLAIR', true);
 define('ECLAIR_VERSION', 'test');
 define('ECLAIR_ROOT', getenv('ECLAIR_TEST_ROOT') ?: dirname(__DIR__) . '/eclair'); // ECLAIR_TEST_ROOT : tester une archive décompressée
 define('ECLAIR_DATA', sys_get_temp_dir() . '/eclair-test-data-' . getmypid());
+define('ECLAIR_SITE', sys_get_temp_dir() . '/eclair-test-site-' . getmypid());
 define('ECLAIR_DEBUG', true);
 define('ECLAIR_TESTING', true);
 
@@ -661,6 +662,8 @@ require __DIR__ . '/affiliate.php';
 require __DIR__ . '/discover.php';
 require __DIR__ . '/usage.php';
 require __DIR__ . '/update.php';
+require __DIR__ . '/transition.php';
+require __DIR__ . '/themes.php';
 require __DIR__ . '/drive.php';
 require __DIR__ . '/sec-C2.php';
 require __DIR__ . '/sec-B2.php';

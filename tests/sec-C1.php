@@ -268,10 +268,17 @@ if (function_exists('sodium_crypto_sign_keypair') && class_exists('ZipArchive'))
     $res8 = $c1Run(['--inconnue=' . base64_encode($c1Secret)]);
     check('--resign sans la clé : refusé ; argument inconnu jamais recopié', $res7['rc'] !== 0 && str_contains($res7['out'], 'ECLAIR_SIGNING_KEY') && $res8['rc'] !== 0 && !$c1Leak($res8['out']), $res7['out'] . $res8['out']);
     // Version signée construite hors d'un dépôt Git : refusée avant toute écriture.
-    $res9 = $c1Run([]);
+    $res9 = $c1Run(['--sign']);
     check('version signée hors d’un dépôt Git : refusée, rien n’est construit', $res9['rc'] !== 0 && str_contains($res9['out'], 'Git') && !is_file($c1Build . '/dist/eclair-cms-7.7.8.zip.tmp')
         && !is_file($c1Build . '/eclair/app/manifest.php'), $res9['out']);
-    check('la clé n’apparaît dans aucune sortie de tools/build.php', !$c1Leak($res['out'] . $res2['out'] . $res3['out'] . $res4['out'] . $res5['out'] . $res6['out'] . $res7['out'] . $res9['out']));
+    // Clé présente dans l'environnement, mais construction sans --sign : archive de test, jamais annoncée (2.0).
+    $kept = (string) @file_get_contents($c1Build . '/dist/latest.json');
+    $res10 = $c1Run([]);
+    check('clé présente sans --sign : ignorée, annonce inchangée, rien n’est signé', str_contains($res10['out'], 'ignorée')
+        && (string) @file_get_contents($c1Build . '/dist/latest.json') === $kept && !str_contains($res10['out'], 'Annonce signée'), $res10['out']);
+    $res11 = $c1Run(['--sign'], false);
+    check('--sign sans la clé : refusé, rien n’est construit', $res11['rc'] !== 0 && str_contains($res11['out'], 'ECLAIR_SIGNING_KEY'), $res11['out']);
+    check('la clé n’apparaît dans aucune sortie de tools/build.php', !$c1Leak($res['out'] . $res2['out'] . $res3['out'] . $res4['out'] . $res5['out'] . $res6['out'] . $res7['out'] . $res9['out'] . $res10['out'] . $res11['out']));
     exec('rm -rf ' . escapeshellarg($c1Build));
 }
 

@@ -26,7 +26,8 @@
  * La clé n'est jamais affichée, et la construction signée n'exécute aucune source de traduction (lues comme des données).
  *
  *   php tools/build.php
- *   ECLAIR_SIGNING_KEY=… php tools/build.php                   (version publiée : archive et annonce signée)
+ *   ECLAIR_SIGNING_KEY=… php tools/build.php --sign            (version publiée : archive et annonce signée)
+ *   (sans --sign, une clé présente dans l'environnement est ignorée : archive de test, jamais annoncée)
  *   ECLAIR_SIGNING_KEY=… php tools/build.php --resign          (annonce actuelle re-signée : nouveau numéro, nouvelle échéance)
  *   ECLAIR_SIGNING_KEY=… php tools/build.php --resign=1.10.3   (retrait : annonce de nouveau la 1.10.3, archive déjà signée, dans dist/)
  *   ECLAIR_EXPECT_SHA256=<sha256> ECLAIR_SIGNING_KEY=… php tools/build.php --resign=1.10.3
@@ -49,14 +50,17 @@ $version = $m[1] ?? 'dev';
 
 // --resign : annonce actuelle re-signée, sans rien construire ; --resign=<version> : cette version, déjà dans dist/, annoncée de nouveau.
 $resign = null;
+$sign = false;
 foreach (array_slice($argv, 1) as $arg) {
-    if ($arg === '--resign') {
+    if ($arg === '--sign') {
+        $sign = true;
+    } elseif ($arg === '--resign') {
         $resign = '';
     } elseif (preg_match('/^--resign=(\d{1,3}\.\d{1,3}\.\d{1,3})$/', $arg, $r)) {
         $resign = $r[1];
     } else {
         // L'argument n'est pas recopié : ce pourrait être la clé, passée là par erreur.
-        fwrite(STDERR, "✗ Option inconnue : seules --resign et --resign=<version> sont acceptées.\n");
+        fwrite(STDERR, "✗ Option inconnue : seules --sign, --resign et --resign=<version> sont acceptées.\n");
         exit(1);
     }
 }
@@ -64,7 +68,17 @@ foreach (array_slice($argv, 1) as $arg) {
 // Clé de signature des annonces (dist/latest.json) : vérifiée avant toute écriture, pour ne jamais laisser une archive et
 // une annonce qui ne se correspondent pas. Elle quitte aussitôt l'environnement (aucun programme lancé ne la reçoit).
 $secret = base64_decode((string) getenv('ECLAIR_SIGNING_KEY'), true);
-$signing = (string) getenv('ECLAIR_SIGNING_KEY') !== '';
+// Signature seulement sur demande explicite (--sign, --resign) : une clé restée dans l'environnement (machine du mainteneur,
+// environnement d'intégration) ne transforme jamais une construction de test en version annoncée.
+$keyPresent = (string) getenv('ECLAIR_SIGNING_KEY') !== '';
+$signing = $keyPresent && ($sign || $resign !== null);
+if ($keyPresent && !$signing) {
+    echo "ℹ ECLAIR_SIGNING_KEY présente mais ignorée : construction de test, non signée (ajoute --sign pour une version publiée).\n";
+}
+if ($sign && !$keyPresent) {
+    fwrite(STDERR, "✗ --sign demande la clé du mainteneur (variable ECLAIR_SIGNING_KEY). Rien n'a été construit.\n");
+    exit(1);
+}
 putenv('ECLAIR_SIGNING_KEY');
 unset($_ENV['ECLAIR_SIGNING_KEY'], $_SERVER['ECLAIR_SIGNING_KEY']);
 $updateCode = (string) file_get_contents($root . '/app/lib/Update.php');
@@ -155,6 +169,10 @@ function distributable(string $root): array
             continue;
         }
         $rel = str_replace('\\', '/', substr((string) $path, strlen($root) + 1));
+        // site/ appartient au site (thèmes, capacités, actifs) : jamais dans une archive du noyau.
+        if (str_starts_with($rel, 'site/')) {
+            continue;
+        }
         $inStorage = preg_match('~^(data|cache|media)/~', $rel);
         $keep = !$inStorage || preg_match('~^(data|cache|media)/(\.htaccess|index\.html)$~', $rel) || $rel === 'cache/pages/index.html';
         if ($keep && $rel !== 'app/manifest.php' && $rel !== 'eclair-config.php' && !str_ends_with($rel, '.DS_Store')) {

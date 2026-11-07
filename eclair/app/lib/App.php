@@ -36,6 +36,8 @@ final class App
             Installer::handle();
         }
 
+        // Migrations de la version installée (identifiées, idempotentes, sous verrou) : une lecture quand tout est fait.
+        Migrations::run();
         date_default_timezone_set((string) Settings::get('timezone') ?: 'UTC');
         I18n::setLang((string) Settings::get('lang', 'fr'));
 
