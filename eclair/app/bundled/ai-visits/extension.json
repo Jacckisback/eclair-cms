@@ -1,0 +1,17 @@
+{
+  "schema": "eclair-extension/1",
+  "id": "ai-visits",
+  "name": "Robots IA",
+  "version": "2.0.0",
+  "description": "Mesure quelles IA lisent tes pages (ChatGPT, Claude, Perplexity, Gemini…) : heure, robot et adresse, sans IP ni visiteur humain. Les règles d'accès des robots IA (robots.txt) restent dans Réglages › IA & GEO, avec ou sans cette fonction.",
+  "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
+  "provides": ["ai-visits"],
+  "entry": "extension.php",
+  "routes": {
+    "public": [],
+    "admin": [{ "method": "GET", "path": "", "handler": "page", "right": "content" }]
+  },
+  "nav": [{ "label": "Robots IA", "path": "", "icon": "bot", "right": "content" }],
+  "data": { "schema": 1 },
+  "provenance": { "source": "Éclair CMS (fonction livrée avec le noyau)", "license": "AGPL-3.0-only" }
+}

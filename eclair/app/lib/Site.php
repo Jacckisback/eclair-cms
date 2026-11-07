@@ -30,7 +30,17 @@ final class Site
             Http::send('Method Not Allowed', 405, ['Allow: GET, HEAD', 'Content-Type: text/plain; charset=utf-8']);
         }
         Cache::checkExpiry();
-        self::canonical($path);
+        // Alias d'un ancien site (/?p=123…) : avant la canonicalisation (une seule redirection) et sans jamais l'accueil.
+        if ($_GET !== []) {
+            Aliases::handle($path);
+        }
+        // Adresse exacte d'un contenu repris d'un ancien site (/2024/03/article/, /page.html, accents) : servie telle quelle,
+        // sans retirer le « / » final ni changer la casse ; seuls le domaine officiel et HTTPS restent imposés.
+        $exact = $path !== '/' && !preg_match('~[\\\x00-\x1f\x7f]~', $path) ? Content::byRoute($path) : null;
+        self::canonical($path, $exact !== null);
+        if ($exact !== null) {
+            self::single($exact);
+        }
 
         switch ($path) {
             case '/robots.txt':
@@ -73,6 +83,9 @@ final class Site
         if (IndexNow::enabled() && $path === '/' . IndexNow::key() . '.txt') {
             self::file($path, IndexNow::key(), 'text/plain; charset=utf-8');
         }
+        if (str_starts_with($path, '/assets/')) {
+            self::legacyAsset($path);
+        }
         if (str_ends_with($path, '.md') && Settings::get('geo.markdown')) {
             $target = substr($path, 0, -3);
             $entry = Content::findByPath($target === '/index' ? '/' : $target);
@@ -86,8 +99,24 @@ final class Site
         self::route($path);
     }
 
+    /**
+     * Actif personnalisé d'une installation 1.x (assets/site/…), rangé par la migration dans le thème « legacy » : servi à
+     * son ancienne adresse, en lecture seule, pour les seuls types d'actifs permis (jamais de script serveur ni de HTML).
+     */
+    private static function legacyAsset(string $path): void
+    {
+        $rel = substr($path, 1);
+        $file = Themes::assetsDir() . '/legacy/' . $rel;
+        $type = Themes::ASSET_TYPES[strtolower(pathinfo($rel, PATHINFO_EXTENSION))] ?? null;
+        if ($type === null || !Themes::safePath($rel) || !is_file($file) || is_link($file)) {
+            return;
+        }
+        Http::send((string) Disk::read($file), 200, ['Content-Type: ' . $type . (str_starts_with($type, 'text/') ? '; charset=utf-8' : ''),
+            'Cache-Control: public, max-age=86400', 'X-Content-Type-Options: nosniff']);
+    }
+
     /** Une seule URL par contenu : protocole, domaine, slash final, majuscules, index.php. */
-    private static function canonical(string $path): void
+    private static function canonical(string $path, bool $exact = false): void
     {
         // Antislash ou caractère de contrôle : jamais une adresse légitime, et un piège à redirection.
         if (preg_match('~[\\\\\x00-\x1f\x7f]~', $path)) {
@@ -96,15 +125,23 @@ final class Site
         $query = Req::queryString();
         $suffix = $query !== '' ? '?' . $query : '';
         $clean = $path;
-        if ($clean === '/index.php' || str_starts_with($clean, '/index.php/')) {
+        if ($exact) {
+            // Adresse exacte : rien n'est réécrit dans le chemin.
+        } elseif ($clean === '/index.php' || str_starts_with($clean, '/index.php/')) {
             $clean = substr($clean, 10) ?: '/';
         }
-        $clean = (string) preg_replace('~/{2,}~', '/', $clean);
-        if ($clean !== '/' && str_ends_with($clean, '/')) {
-            $clean = rtrim($clean, '/') ?: '/';
-        }
-        if (preg_match('/[A-Z]/', $clean)) {
-            $clean = strtolower($clean);
+        if (!$exact) {
+            $clean = (string) preg_replace('~/{2,}~', '/', $clean);
+            if ($clean !== '/' && str_ends_with($clean, '/')) {
+                $clean = rtrim($clean, '/') ?: '/';
+            }
+            if (preg_match('/[A-Z]/', $clean)) {
+                $clean = strtolower($clean);
+            }
+            // Adresse exacte qui se termine par « / » (WordPress), demandée sans : une seule redirection vers elle.
+            if ($clean !== '/' && ($slashed = Content::byRoute($clean . '/')) !== null) {
+                $clean = (string) $slashed['route'];
+            }
         }
         // Domaine officiel : seulement si l'adresse enregistrée a été vérifiée (elle mène bien à ce site).
         $url = rtrim((string) Settings::get('url'), '/');
@@ -283,7 +320,7 @@ final class Site
             'noindex' => $item['seo']['noindex'] || $preview,
             'image' => $image,
             // Grande image d'origine (1200 px de large au moins), non recadrée : celle que Google Discover recommande.
-            'large' => $featured && (int) $featured['w'] >= Discover::WIDTH ? Media::url($featured) : '',
+            'large' => $featured && (int) $featured['w'] >= Media::LARGE ? Media::url($featured) : '',
             'type' => $isPost ? 'article' : 'website',
             'published' => $item['date'],
             'modified' => max((int) $item['date'], (int) $item['updated']),
@@ -659,6 +696,22 @@ final class Site
             . e($same ? $back : path_to('/')) . '">← ' . e(Theme::t('back_home', $lang)) . '</a></p></section>';
         $html = Theme::partial('layout', ['lang' => $lang, 'head' => $head, 'css' => Theme::css(), 'current' => '', 'class' => 'is-message', 'content' => $content]);
         self::html($html, $status, null);
+    }
+
+    /**
+     * Page publique d'une capacité ($page : title, content, description) : rendue dans le thème du site, avec l'en-tête
+     * SEO (titre, canonical, robots, données structurées) et les en-têtes de sécurité du noyau. La capacité fournit le
+     * contenu, jamais les métadonnées : une seule balise canonical, des données structurées cohérentes.
+     */
+    public static function extension(string $path, array $page, bool $cache): never
+    {
+        $lang = (string) Settings::get('lang');
+        $title = mb_substr((string) ($page['title'] ?? ''), 0, 150);
+        $head = Seo::head(['kind' => 'extension', 'lang' => $lang, 'title' => Seo::format($title), 'description' => mb_substr((string) ($page['description'] ?? ''), 0, 300),
+            'canonical' => absolute_url($path), 'noindex' => !empty($page['noindex']), 'breadcrumbs' => []]);
+        $content = '<section class="wrap ext-page">' . (string) $page['content'] . '</section>';
+        $html = Theme::render('extension', ['lang' => $lang, 'head' => $head, 'css' => Theme::css(), 'current' => $path, 'class' => 'is-extension', 'content' => $content, 'inner' => $content]);
+        self::html($html, 200, $cache ? $path : null);
     }
 
     /* ─────────────────────────────── Sortie ─────────────────────────────── */

@@ -15,7 +15,7 @@ final class AdminStrings
         $keys = [
             'Enregistrer', 'Enregistré', 'Enregistrement…', 'Modifications non enregistrées', 'Publier', 'Mettre à jour', 'Programmer',
             'Brouillon', 'Publié', 'Programmé', 'Aperçu', 'Supprimer', 'Dupliquer', 'Monter', 'Descendre', 'Déplacer', 'Annuler',
-            'Bloc supprimé.', 'Rechercher un bloc…', 'Aucun bloc trouvé', 'Ajouter un bloc', 'Écris ou tape « / » pour choisir un bloc…',
+            'Bloc supprimé.', 'Bloc conservé', 'Bloc « {type} » : la fonction qui l’affiche n’est pas active sur ce site. Il est conservé tel quel, sans être affiché. Réactive la fonction pour le retrouver.', 'Rechercher un bloc…', 'Aucun bloc trouvé', 'Ajouter un bloc', 'Écris ou tape « / » pour choisir un bloc…',
             'Titre', 'Intertitre', 'Texte', 'Liste', 'Citation', 'Image', 'Encadré', 'FAQ', 'Tableau', 'Bouton', 'Vidéo', 'Code',
             'Séparateur', 'Bannière', 'Atouts', 'Derniers articles', 'Formulaire de contact',
             'Paragraphe de texte', 'Titre de section (H2, H3, H4)', 'À puces ou numérotée', 'Une phrase mise en avant', 'Depuis la médiathèque',

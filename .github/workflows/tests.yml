@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Copyright (c) 2026 Thierry Gustin
 #
-# Tests d'Éclair sur chaque branche de PHP prise en charge (8.1 minimum annoncé), sur les sources ET sur l'archive
-# construite. Aucun secret : l'archive est construite sans clé (jamais signée ni annoncée).
+# Tests d'Éclair sur chaque branche de PHP prise en charge, sur les sources ET sur l'archive réellement construite.
+# Aucun secret n'est utilisé ni accessible : l'archive est construite sans clé (jamais signée, jamais annoncée) et les
+# tests de mise à jour utilisent des clés de test jetables. Les pull requests venues de forks n'ont donc rien à voler.
 name: Tests
 
 on:
@@ -39,6 +40,11 @@ jobs:
           coverage: none
       - name: Tests sur les sources
         run: php tests/run.php
+      - name: Diagnostic (seulement en cas d'échec)
+        if: failure()
+        run: |
+          php tools/ci-diagnose.php
+          ECLAIR_TEST_DEBUG=1 php tests/run.php 2>&1 | grep -A3 "✗" | head -80 || true
       - name: Construction de l'archive (sans clé, non signée)
         run: env -u ECLAIR_SIGNING_KEY php tools/build.php
       - name: Tests sur l'archive construite
@@ -47,3 +53,28 @@ jobs:
           mkdir -p "$RUNNER_TEMP/archive"
           unzip -q "dist/eclair-cms-$version.zip" -d "$RUNNER_TEMP/archive"
           ECLAIR_TEST_ROOT="$RUNNER_TEMP/archive/eclair" php tests/run.php
+      - name: Mesures et budgets
+        run: php tools/measure.php --check
+
+  servers:
+    name: Apache et Nginx réels
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Apache + mod_php, Nginx + PHP-FPM (paquets Ubuntu, PHP 8.3)
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq apache2 libapache2-mod-php8.3 nginx php8.3-fpm php8.3-cli \
+            php8.3-curl php8.3-gd php8.3-mbstring php8.3-zip php8.3-intl php8.3-xml
+          sudo systemctl stop nginx apache2 || true
+          sudo systemctl start php8.3-fpm
+      - name: Construction de l'archive (sans clé, non signée)
+        run: env -u ECLAIR_SIGNING_KEY /usr/bin/php8.3 tools/build.php
+      - name: Vérifications sur les serveurs
+        run: |
+          version=$(sed -n "s/.*define('ECLAIR_VERSION', '\([^']*\)').*/\1/p" eclair/index.php)
+          sudo PATH="/usr/bin:$PATH" bash tools/ci-servers.sh "dist/eclair-cms-$version.zip"

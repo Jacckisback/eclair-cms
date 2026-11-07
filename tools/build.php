@@ -26,7 +26,8 @@
  * La clé n'est jamais affichée, et la construction signée n'exécute aucune source de traduction (lues comme des données).
  *
  *   php tools/build.php
- *   ECLAIR_SIGNING_KEY=… php tools/build.php                   (version publiée : archive et annonce signée)
+ *   ECLAIR_SIGNING_KEY=… php tools/build.php --sign            (version publiée : archive et annonce signée)
+ *   (sans --sign, une clé présente dans l'environnement est ignorée : archive de test, jamais annoncée)
  *   ECLAIR_SIGNING_KEY=… php tools/build.php --resign          (annonce actuelle re-signée : nouveau numéro, nouvelle échéance)
  *   ECLAIR_SIGNING_KEY=… php tools/build.php --resign=1.10.3   (retrait : annonce de nouveau la 1.10.3, archive déjà signée, dans dist/)
  *   ECLAIR_EXPECT_SHA256=<sha256> ECLAIR_SIGNING_KEY=… php tools/build.php --resign=1.10.3
@@ -49,14 +50,17 @@ $version = $m[1] ?? 'dev';
 
 // --resign : annonce actuelle re-signée, sans rien construire ; --resign=<version> : cette version, déjà dans dist/, annoncée de nouveau.
 $resign = null;
+$sign = false;
 foreach (array_slice($argv, 1) as $arg) {
-    if ($arg === '--resign') {
+    if ($arg === '--sign') {
+        $sign = true;
+    } elseif ($arg === '--resign') {
         $resign = '';
     } elseif (preg_match('/^--resign=(\d{1,3}\.\d{1,3}\.\d{1,3})$/', $arg, $r)) {
         $resign = $r[1];
     } else {
         // L'argument n'est pas recopié : ce pourrait être la clé, passée là par erreur.
-        fwrite(STDERR, "✗ Option inconnue : seules --resign et --resign=<version> sont acceptées.\n");
+        fwrite(STDERR, "✗ Option inconnue : seules --sign, --resign et --resign=<version> sont acceptées.\n");
         exit(1);
     }
 }
@@ -64,7 +68,17 @@ foreach (array_slice($argv, 1) as $arg) {
 // Clé de signature des annonces (dist/latest.json) : vérifiée avant toute écriture, pour ne jamais laisser une archive et
 // une annonce qui ne se correspondent pas. Elle quitte aussitôt l'environnement (aucun programme lancé ne la reçoit).
 $secret = base64_decode((string) getenv('ECLAIR_SIGNING_KEY'), true);
-$signing = (string) getenv('ECLAIR_SIGNING_KEY') !== '';
+// Signature seulement sur demande explicite (--sign, --resign) : une clé restée dans l'environnement (machine du mainteneur,
+// environnement d'intégration) ne transforme jamais une construction de test en version annoncée.
+$keyPresent = (string) getenv('ECLAIR_SIGNING_KEY') !== '';
+$signing = $keyPresent && ($sign || $resign !== null);
+if ($keyPresent && !$signing) {
+    echo "ℹ ECLAIR_SIGNING_KEY présente mais ignorée : construction de test, non signée (ajoute --sign pour une version publiée).\n";
+}
+if ($sign && !$keyPresent) {
+    fwrite(STDERR, "✗ --sign demande la clé du mainteneur (variable ECLAIR_SIGNING_KEY). Rien n'a été construit.\n");
+    exit(1);
+}
 putenv('ECLAIR_SIGNING_KEY');
 unset($_ENV['ECLAIR_SIGNING_KEY'], $_SERVER['ECLAIR_SIGNING_KEY']);
 $updateCode = (string) file_get_contents($root . '/app/lib/Update.php');
@@ -119,7 +133,7 @@ function eclair_google(string $code): string
     }
     $out = str_replace(["const CLIENT_ID = ''", "const CLIENT_SECRET = ''"], ["const CLIENT_ID = '$id'", "const CLIENT_SECRET = '$secret'"], $code, $count);
     if ($count !== 2) {
-        fwrite(STDERR, "✗ Identifiants Google : emplacement introuvable dans app/lib/Drive.php.\n");
+        fwrite(STDERR, "✗ Identifiants Google : emplacement introuvable dans app/bundled/drive/lib/Drive.php.\n");
         exit(1);
     }
     return $out;
@@ -133,8 +147,13 @@ function shipped(string $root, string $rel): string
     return match (true) {
         // Le modèle de configuration reste lisible : ses commentaires sont son mode d'emploi.
         $rel === 'eclair-config.exemple.php' => (string) file_get_contents($path),
-        str_starts_with($rel, 'app/admin/views/') || $rel === 'app/install/view.php' => eclair_compact_view(php_strip_whitespace($path)),
-        $rel === 'app/lib/Drive.php' => eclair_google(php_strip_whitespace($path)),
+        // Vues de l'administration, y compris celles des fonctions livrées (app/bundled/<id>/lib/page.php).
+        str_starts_with($rel, 'app/admin/views/') || $rel === 'app/install/view.php' || preg_match('~^app/bundled/[a-z0-9-]+/lib/page\.php$~', $rel)
+            => eclair_compact_view(php_strip_whitespace($path)),
+        // Manifestes des fonctions livrées : même contenu, sans mise en forme.
+        (bool) preg_match('~^app/bundled/[a-z0-9-]+/extension\.json$~', $rel)
+            => json_encode(json_decode((string) file_get_contents($path), true, 64, JSON_THROW_ON_ERROR), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+        $rel === 'app/bundled/drive/lib/Drive.php' => eclair_google(php_strip_whitespace($path)),
         str_ends_with($rel, '.php') => php_strip_whitespace($path),
         $admin && str_ends_with($rel, '.js') => eclair_minify_js((string) file_get_contents($path)),
         $admin && str_ends_with($rel, '.css') => eclair_minify_css((string) file_get_contents($path)),
@@ -155,6 +174,10 @@ function distributable(string $root): array
             continue;
         }
         $rel = str_replace('\\', '/', substr((string) $path, strlen($root) + 1));
+        // site/ appartient au site (thèmes, capacités, actifs) : jamais dans une archive du noyau.
+        if (str_starts_with($rel, 'site/')) {
+            continue;
+        }
         $inStorage = preg_match('~^(data|cache|media)/~', $rel);
         $keep = !$inStorage || preg_match('~^(data|cache|media)/(\.htaccess|index\.html)$~', $rel) || $rel === 'cache/pages/index.html';
         if ($keep && $rel !== 'app/manifest.php' && $rel !== 'eclair-config.php' && !str_ends_with($rel, '.DS_Store')) {
@@ -324,7 +347,7 @@ TXT);
     }
     $zip->close();
     printf("✓ Archive : %s (%s Ko, %s octets une fois décompressée)\n", $zipFile, round(filesize($zipFile) / 1024), number_format($size, 0, ',', ' '));
-    echo str_contains(shipped($root, 'app/lib/Drive.php'), "CLIENT_ID = ''")
+    echo str_contains(shipped($root, 'app/bundled/drive/lib/Drive.php'), "CLIENT_ID = ''")
         ? "ℹ ECLAIR_GOOGLE_CLIENT_ID / ECLAIR_GOOGLE_CLIENT_SECRET absents : pas d'application Google intégrée, chaque site crée la sienne (guide dans Sécurité › Google Drive).\n"
         : "✓ Application Google intégrée : Google Drive se connecte en un clic, sans créer d'application\n";
 }

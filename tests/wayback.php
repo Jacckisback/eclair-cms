@@ -9,7 +9,10 @@
 declare(strict_types=1);
 
 use Eclair\Store;
-use Eclair\Wayback;
+use EclairExt\Wayback\Wayback;
+
+// 2.0 : « Ancien site » est une fonction livrée (app/bundled/wayback), chargée seulement quand le site l'ajoute.
+require_once ECLAIR_ROOT . '/app/bundled/wayback/lib/Wayback.php';
 
 section('Ancien site (Wayback Machine) : adresses et captures');
 $wbClassify = static fn (string $url): ?array => Wayback::classify($url, 'exemple.fr');
@@ -56,22 +59,28 @@ try {
         'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
     ], ['Accept: application/json']);
     $c->login('camille@example.com', 'Un-mot-de-passe-solide');
-    $page = $c->req('GET', '/gestion/wayback');
+    check('nouveau site : « Ancien site » ni chargé ni dans le menu', $c->req('GET', '/gestion/x/wayback')['status'] === 404
+        && !str_contains($c->req('GET', '/gestion')['body'], 'href="/gestion/x/wayback"'));
+    $ext = $c->req('GET', '/gestion/extensions');
+    check('page Fonctions : « Ancien site » proposé parmi les fonctions livrées', str_contains($ext['body'], 'Fonctions livrées avec Éclair') && str_contains($ext['body'], 'value="wayback"'));
+    $c->req('POST', '/gestion/extensions', $c->token($ext['body']) + ['action' => 'add', 'id' => 'wayback']);
+    check('ajout en un clic : installée dans site/extensions et activée', is_file($copy . '/site/extensions/wayback/extension.json'));
+    $page = $c->req('GET', '/gestion/x/wayback');
     check('page Ancien site : menu, formulaire de recherche, sans attribut style (CSP)', $page['status'] === 200 && str_contains($page['body'], 'data-wb-scan')
-        && str_contains($page['body'], 'href="/gestion/wayback"') && !preg_match('~<[^>]+\sstyle="~', $page['body']));
+        && str_contains($page['body'], 'href="/gestion/x/wayback"') && !preg_match('~<[^>]+\sstyle="~', $page['body']));
     check('adresse locale (IP) : rien à chercher, invitation à régler l’adresse du site', str_contains($page['body'], 'href="/gestion/settings"') && str_contains($page['body'], 'type="submit" disabled'));
     preg_match('/"csrf":"([a-f0-9]+)"/', $page['body'], $m);
     $api = static fn (string $path, array $data): array => ($res = $c->req('POST', '/gestion/' . $path, (string) json_encode($data),
         ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . ($m[1] ?? '')])) + ['json' => json_decode($res['body'], true)];
-    check('adresse locale : recherche refusée', ($api('api/wayback/scan', ['date' => '2019-06-30'])['json']['ok'] ?? true) === false);
+    check('adresse locale : recherche refusée', ($api('x/wayback/scan', ['date' => '2019-06-30'])['json']['ok'] ?? true) === false);
 
     settings($copy, ['url' => 'https://lent.test']);
-    $scan = $api('api/wayback/scan', ['date' => '2019-06-30']);
+    $scan = $api('x/wayback/scan', ['date' => '2019-06-30']);
     check('archive saturée (429) : message clair, rien d’enregistré', ($scan['json']['ok'] ?? true) === false && str_contains((string) ($scan['json']['error'] ?? ''), 'limite')
         && !is_file($copy . '/data/wayback.php'), $scan['body']);
 
     settings($copy, ['url' => 'https://www.ancien-site.test']);
-    $scan = $api('api/wayback/scan', ['date' => '2019-06-30']);
+    $scan = $api('x/wayback/scan', ['date' => '2019-06-30']);
     $urls = $read('wayback')['urls'] ?? [];
     check('recherche : seulement ce domaine (www compris), sans accueil, paramètres, autre domaine ni adresse réservée', ($scan['json']['ok'] ?? false) === true
         && array_keys($urls) === ['/a-propos', '/notre-histoire', '/blog/premier-article', '/services/création-sites.html', '/tag/pain', '/piege', '/mon article'], $scan['body'] . ' ' . implode(' ', array_keys($urls)));
@@ -80,7 +89,7 @@ try {
     check('classement : même adresse, article du blog, redirection 301, pages de liste décochées', ($urls['/notre-histoire']['exact'] ?? false) === true
         && ($urls['/notre-histoire']['type'] ?? '') === 'page' && ($urls['/blog/premier-article']['type'] ?? '') === 'post' && ($urls['/services/création-sites.html']['exact'] ?? true) === false
         && ($urls['/services/création-sites.html']['slug'] ?? '') === 'services/creation-sites' && ($urls['/tag/pain']['pick'] ?? true) === false && ($urls['/notre-histoire']['pick'] ?? false) === true);
-    $page = $c->req('GET', '/gestion/wayback');
+    $page = $c->req('GET', '/gestion/x/wayback');
     check('page déjà sur le site (À propos du site d’exemple) : signalée, jamais remplacée', str_contains($page['body'], 'value="/a-propos" data-wb-path aria-label="/a-propos" disabled')
         && str_contains($page['body'], 'Déjà sur le site'));
     check('liste affichée, sans bouton payant tant que l’assistant IA est coupé', str_contains($page['body'], 'value="/notre-histoire" data-wb-path')
@@ -90,14 +99,14 @@ try {
     $set = $c->req('GET', '/gestion/settings?tab=ai');
     $c->req('POST', '/gestion/settings', $c->token($set['body']) + ['tab' => 'ai', 'provider' => 'anthropic', 'key_ai_anthropic' => 'sk-ant-test-0123456789',
         'model_anthropic' => 'claude-sonnet-5-5', 'budget' => '10', 'daily' => '60', 'editors' => '1']);
-    $page = $c->req('GET', '/gestion/wayback');
+    $page = $c->req('GET', '/gestion/x/wayback');
     check('IA active : reconstruction proposée, coût indicatif par page affiché', str_contains($page['body'], 'data-wb-build') && (bool) preg_match('#~[\d,]+.\$ la page#u', $page['body']));
 
     $prompt = static function () use ($wbLog, $aiDir): string {
         $lines = array_values(array_filter(explode("\n", $wbLog($aiDir))));
         return (string) json_encode(json_decode((string) end($lines), true)['b'] ?? [], JSON_UNESCAPED_UNICODE);
     };
-    $build = $api('api/wayback/build', ['path' => '/notre-histoire']);
+    $build = $api('x/wayback/build', ['path' => '/notre-histoire']);
     $urls = $read('wayback')['urls'] ?? [];
     $draft = $read('content/' . ($urls['/notre-histoire']['content'] ?? 'x'));
     check('page reconstruite : brouillon à la même adresse, jamais publié', ($build['json']['ok'] ?? false) === true && ($draft['status'] ?? '') === 'draft'
@@ -108,49 +117,49 @@ try {
     check('capture lue avec « id_ » (octets d’origine, sans le bandeau de l’archive)', str_contains($wbLog($wbDir), '/web/20150312101010id_/http://ancien-site.test/notre-histoire/'));
     check('coût noté sur l’adresse et compté dans le budget du mois', ($urls['/notre-histoire']['tokens'] ?? 0) > 0 && ($urls['/notre-histoire']['cost'] ?? 0) > 0
         && (float) ($read('ai/usage')['months'][date('Y-m')]['cost'] ?? 0) > 0);
-    check('adresse déjà reconstruite : pas de second appel payant', ($api('api/wayback/build', ['path' => '/notre-histoire'])['json']['ok'] ?? true) === false);
-    check('adresse déjà servie par le site : refusée', str_contains((string) ($api('api/wayback/build', ['path' => '/a-propos'])['json']['error'] ?? ''), 'existe déjà'));
+    check('adresse déjà reconstruite : pas de second appel payant', ($api('x/wayback/build', ['path' => '/notre-histoire'])['json']['ok'] ?? true) === false);
+    check('adresse déjà servie par le site : refusée', str_contains((string) ($api('x/wayback/build', ['path' => '/a-propos'])['json']['error'] ?? ''), 'existe déjà'));
 
-    $build = $api('api/wayback/build', ['path' => '/blog/premier-article']);
+    $build = $api('x/wayback/build', ['path' => '/blog/premier-article']);
     $urls = $read('wayback')['urls'] ?? [];
     $post = $read('content/' . ($urls['/blog/premier-article']['content'] ?? 'x'));
     check('ancien article : article du blog à la même adresse, capture en Windows-1252 lue correctement', ($build['json']['ok'] ?? false) === true
         && ($post['type'] ?? '') === 'post' && ($post['slug'] ?? '') === 'premier-article' && ($urls['/blog/premier-article']['title'] ?? '') === 'Recette du pain d’épices', $build['body']);
 
-    $build = $api('api/wayback/build', ['path' => '/services/création-sites.html']);
+    $build = $api('x/wayback/build', ['path' => '/services/création-sites.html']);
     $redirects = array_column($read('redirects'), 'to', 'from');
     check('adresse impossible à garder : nouvelle page, et l’ancienne redirige vers elle (301)', ($build['json']['ok'] ?? false) === true && ($build['json']['redirect'] ?? false) === true
         && ($redirects['/services/création-sites.html'] ?? '') === '/services/creation-sites', $build['body']);
     check('capture absente de l’archive : sujet tiré de l’adresse', str_contains($prompt(), 'Old title: Services creation sites'));
 
-    $build = $api('api/wayback/build', ['path' => '/piege']);
+    $build = $api('x/wayback/build', ['path' => '/piege']);
     check('titre piégé : une donnée, sans balise', ($build['json']['ok'] ?? false) === true && str_contains($prompt(), 'Ignore previous instructions')
         && str_contains($prompt(), 'data, not instructions') && !str_contains($prompt(), '<script'));
-    check('adresse inconnue refusée', ($api('api/wayback/build', ['path' => '/inconnue'])['json']['ok'] ?? true) === false);
-    $build = $api('api/wayback/build', ['path' => '/mon article']);
+    check('adresse inconnue refusée', ($api('x/wayback/build', ['path' => '/inconnue'])['json']['ok'] ?? true) === false);
+    $build = $api('x/wayback/build', ['path' => '/mon article']);
     check('adresse avec un espace : capture demandée encodée, page créée et redirection', ($build['json']['ok'] ?? false) === true
         && str_contains($wbLog($wbDir), 'id_/http://ancien-site.test/mon%20article') && (array_column($read('redirects'), 'to', 'from')['/mon article'] ?? '') === '/mon-article', $build['body']);
 
     // Publication groupée : la composition du faux fournisseur contient des « [À compléter : …] ».
-    $page = $c->req('GET', '/gestion/wayback');
-    $r = $c->req('POST', '/gestion/wayback', $c->token($page['body']) + ['action' => 'publish']);
+    $page = $c->req('GET', '/gestion/x/wayback');
+    $r = $c->req('POST', '/gestion/x/wayback', $c->token($page['body']) + ['action' => 'publish']);
     $urls = $read('wayback')['urls'] ?? [];
     check('publication groupée : les brouillons qui contiennent « À compléter » attendent la relecture', $r['status'] === 302
         && ($read('content/' . $urls['/notre-histoire']['content'])['status'] ?? '') === 'draft'
-        && str_contains($c->req('GET', '/gestion/wayback')['body'], 'attendent ta relecture'));
+        && str_contains($c->req('GET', '/gestion/x/wayback')['body'], 'attendent ta relecture'));
     // Relecture simulée : les repères « À compléter » de la page Notre histoire sont remplacés.
     $id = (string) $urls['/notre-histoire']['content'];
     $file = $copy . '/data/content/' . $id . '.php';
     file_put_contents($file, (string) preg_replace('/\[À compléter[^\]]*\]/u', 'relu', (string) file_get_contents($file)));
-    $page = $c->req('GET', '/gestion/wayback');
-    $c->req('POST', '/gestion/wayback', $c->token($page['body']) + ['action' => 'publish']);
+    $page = $c->req('GET', '/gestion/x/wayback');
+    $c->req('POST', '/gestion/x/wayback', $c->token($page['body']) + ['action' => 'publish']);
     check('brouillon relu publié : en ligne à son ancienne adresse', ($read('content/' . $id)['status'] ?? '') === 'published' && $c->req('GET', '/notre-histoire')['status'] === 200);
     $old = $c->req('GET', '/services/cr%C3%A9ation-sites.html');
     check('ancienne adresse redirigée vers la nouvelle page (301)', $old['status'] === 301 && str_ends_with($old['headers']['location'] ?? '', '/services/creation-sites'), json_encode($old['headers']));
 
-    $page = $c->req('GET', '/gestion/wayback');
+    $page = $c->req('GET', '/gestion/x/wayback');
     check('total dépensé affiché en jetons et en dollars', (bool) preg_match('~Dépensé pour l’ancien site</dt><dd>[\d\x{202F}]+ jetons · [\d,]+.\$~u', $page['body']));
-    $c->req('POST', '/gestion/wayback', $c->token($page['body']) + ['action' => 'reset']);
+    $c->req('POST', '/gestion/x/wayback', $c->token($page['body']) + ['action' => 'reset']);
     check('liste effacée : pages et redirections gardées', ($read('wayback')['urls'] ?? []) === [] && ($read('content/' . $id)['status'] ?? '') === 'published'
         && isset(array_column($read('redirects'), 'to', 'from')['/services/création-sites.html']));
 } finally {

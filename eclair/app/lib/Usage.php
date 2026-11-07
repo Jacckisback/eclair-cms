@@ -28,6 +28,21 @@ final class Usage
         ];
     }
 
+    /** Fonctions livrées que chaque usage ajoute (préréglage) : usage => [id => nom affiché]. */
+    public const PRESETS = [
+        'blog' => ['planning' => 'Planning éditorial'],
+        'freelance' => ['planning' => 'Planning éditorial'],
+        'media' => ['discover' => 'Google Discover', 'planning' => 'Planning éditorial'],
+        'affiliate' => ['affiliate' => 'Affiliation', 'planning' => 'Planning éditorial'],
+        'revival' => ['wayback' => 'Ancien site'],
+    ];
+
+    /** Fonctions livrées utiles à un usage (celles qui existent dans cette version). */
+    public static function extensions(string $usage): array
+    {
+        return array_intersect_key(self::PRESETS[$usage] ?? [], Extensions::bundled());
+    }
+
     /** Usage du site, ou chaîne vide s'il n'est pas précisé. */
     public static function current(): string
     {
@@ -39,12 +54,13 @@ final class Usage
     public static function step(array $user): ?array
     {
         return match (self::current()) {
-            'media' => ['done' => (bool) array_filter(Discover::posts(), fn (array $p): bool => $p['ready']), 'label' => t('Préparer un article pour Google Discover'),
-                'hint' => t('Grande image de 1200 px, auteur présenté, titre sans excès : ce que Google recommande.'), 'url' => admin_url('discover')],
+            'media' => ['done' => (bool) array_filter(self::discover() ?? [], fn (array $p): bool => $p['ready']), 'label' => t('Préparer un article pour Google Discover'),
+                'hint' => t('Grande image de 1200 px, auteur présenté, titre sans excès : ce que Google recommande.'),
+                'url' => admin_url(Extensions::enabled('discover') ? 'x/discover' : 'extensions')],
             'affiliate' => ['done' => Affiliate::links() !== [], 'label' => t('Ajouter ton premier lien d’affiliation'),
-                'hint' => t('La mention publicitaire s’affiche alors d’elle-même sur les pages concernées.'), 'url' => admin_url('affiliate')],
-            'revival' => Auth::can('settings') ? ['done' => Wayback::data()['scanned'] > 0, 'label' => t('Retrouver les anciennes adresses de ton domaine'),
-                'hint' => t('Les liens qui pointent encore vers elles mèneront de nouveau quelque part.'), 'url' => admin_url('wayback')] : null,
+                'hint' => t('La mention publicitaire s’affiche alors d’elle-même sur les pages concernées.'), 'url' => admin_url(Extensions::enabled('affiliate') ? 'x/affiliate' : 'extensions')],
+            'revival' => Auth::can('settings') ? ['done' => Extensions::enabled('wayback') && self::revival()['scanned'] > 0, 'label' => t('Retrouver les anciennes adresses de ton domaine'),
+                'hint' => t('Les liens qui pointent encore vers elles mèneront de nouveau quelque part.'), 'url' => admin_url(Extensions::enabled('wayback') ? 'x/wayback' : 'extensions')] : null,
             default => null,
         };
     }
@@ -68,17 +84,21 @@ final class Usage
             'drafts' => ['file', t('Brouillons'), $stats['drafts'] ? t('{n} à relire', ['n' => $stats['drafts']]) : t('Aucun'), admin_url('content?status=draft'), $stats['drafts'] ? 'warn' : ''],
         ];
         if ($ai !== null) {
-            $tiles['bots'] = ['bot', t('Robots IA'), t('{n} visites en 30 jours', ['n' => $ai['total']]), admin_url('ai-visits'), ''];
+            $tiles['bots'] = ['bot', t('Robots IA'), t('{n} visites en 30 jours', ['n' => $ai['total']]), admin_url('x/ai-visits'), ''];
         }
+        // Planning éditorial : fonction optionnelle depuis la 2.0 ; absente, la tuile propose de l'ajouter.
         if (in_array($usage, ['blog', 'freelance', 'media', 'affiliate'], true)) {
-            $planned = count(array_filter(Plan::all(), fn (array $i): bool => in_array(Plan::state($i), ['idea', 'draft'], true)));
-            $tiles['plan'] = ['calendar', t('Planning'), $planned ? t('{n} idées à venir', ['n' => $planned]) : t('Aucune idée à venir'), admin_url('plan'), $planned ? '' : 'warn'];
+            $planned = Extensions::enabled('planning') ? Extensions::invoke('planning', 'upcoming') : null;
+            $tiles['plan'] = is_int($planned)
+                ? ['calendar', t('Planning'), $planned ? t('{n} idées à venir', ['n' => $planned]) : t('Aucune idée à venir'), admin_url('x/planning'), $planned ? '' : 'warn']
+                : ['calendar', t('Planning'), t('À ajouter'), admin_url('extensions'), 'warn'];
         }
-        if (in_array($usage, ['blog', 'media', 'affiliate', 'revival'], true)) {
-            $posts = Discover::posts();
+        // Discover est une fonction optionnelle depuis la 2.0 : sa tuile n'apparaît que si le site l'a ajoutée.
+        if (in_array($usage, ['blog', 'media', 'affiliate', 'revival'], true) && ($posts = self::discover()) !== null) {
             $ready = count(array_filter($posts, fn (array $p): bool => $p['ready']));
             $tiles['discover'] = ['compass', t('Prêt pour Discover'), $posts ? t('{ready} articles sur {n}', ['ready' => $ready, 'n' => count($posts)]) : t('Aucun article'),
-                admin_url('discover'), $posts && $ready === count($posts) ? 'ok' : 'warn'];
+                admin_url('x/discover'), $posts && $ready === count($posts) ? 'ok' : 'warn'];
+            $tiles['trends'] = ['chart', t('Tendances du jour'), t('Voir les tendances'), admin_url('x/discover#trends'), ''];
         }
         [$title, $keys] = match ($usage) {
             'business' => [t('Ton site vitrine'), ['messages', 'home', 'bots', 'posts']],
@@ -94,12 +114,11 @@ final class Usage
                 'profile' => ['user', t('Ton profil d’auteur'), mb_strlen((string) ($user['bio'] ?? '')) >= 40 ? t('Complet') : t('À compléter'), admin_url('profile'),
                     mb_strlen((string) ($user['bio'] ?? '')) >= 40 ? 'ok' : 'warn'],
                 'view' => ['eye', t('Voir la page'), t('Ouvrir'), path_to('/'), ''],
-                'trends' => ['chart', t('Tendances du jour'), t('Voir les tendances'), admin_url('discover#trends'), ''],
-                'ads' => ['target', t('Publicité'), Ads::active() ? t('Active sur les articles') : t('Inactive'), admin_url('discover#ads'), Ads::active() ? 'ok' : ''],
-                'links' => ['bag', t('Liens d’affiliation'), ($n = count(Affiliate::links())) ? t('{n} liens', ['n' => $n]) : t('Aucun lien'), admin_url('affiliate'), $n ? '' : 'warn'],
+                'ads' => Auth::can('settings') ? ['target', t('Publicité'), Ads::active() ? t('Active sur les articles') : t('Inactive'), admin_url('ads'), Ads::active() ? 'ok' : ''] : null,
+                'links' => ['bag', t('Liens d’affiliation'), ($n = count(Affiliate::links())) ? t('{n} liens', ['n' => $n]) : t('Aucun lien'), admin_url(Extensions::enabled('affiliate') ? 'x/affiliate' : 'extensions'), $n ? '' : 'warn'],
                 'write' => Ai::allowed($user)
-                    ? ['spark', t('Article par l’IA'), t('Comparatif, guide d’achat'), admin_url('affiliate'), '']
-                    : ['spark', t('Article par l’IA'), t('Active l’assistant IA'), admin_url(Auth::can('settings') ? 'settings?tab=ai' : 'affiliate'), ''],
+                    ? ['spark', t('Article par l’IA'), t('Comparatif, guide d’achat'), admin_url(Extensions::enabled('affiliate') ? 'x/affiliate' : 'extensions'), '']
+                    : ['spark', t('Article par l’IA'), t('Active l’assistant IA'), admin_url(Auth::can('settings') ? 'settings?tab=ai' : (Extensions::enabled('affiliate') ? 'x/affiliate' : 'extensions')), ''],
                 'wayback' => self::wayback(),
                 'redirects' => ['redirect', t('Redirections'), t('{n} redirections', ['n' => count(Redirects::all())]), admin_url('redirects'), ''],
                 default => null,
@@ -108,17 +127,37 @@ final class Usage
         return ['usage' => $usage, 'title' => $title, 'tiles' => array_values(array_filter(array_map(fn (string $k): ?array => $tiles[$k] ?? null, $keys)))];
     }
 
-    /** Tuile « Ancien site » (administrateurs seulement, comme la page). */
+    /** Contrôles « prêt pour Discover » des derniers articles, ou null si la fonction Discover n'est pas active. */
+    private static function discover(): ?array
+    {
+        $posts = Extensions::enabled('discover') ? Extensions::invoke('discover', 'posts') : null;
+        return is_array($posts) ? $posts : null;
+    }
+
+    /**
+     * Tuile « Ancien site » (administrateurs seulement, comme la page). La fonction est optionnelle depuis la 2.0 : absente,
+     * la tuile propose de l'ajouter ; présente, elle résume ses données (lues sans charger son code).
+     */
     private static function wayback(): ?array
     {
         if (!Auth::can('settings')) {
             return null;
         }
-        $d = Wayback::data();
+        if (!Extensions::enabled('wayback')) {
+            return ['clock', t('Ancien site'), t('À ajouter'), admin_url('extensions'), 'warn'];
+        }
+        $d = self::revival();
         if ($d['scanned'] === 0) {
-            return ['clock', t('Ancien site'), t('À lancer'), admin_url('wayback'), 'warn'];
+            return ['clock', t('Ancien site'), t('À lancer'), admin_url('x/wayback'), 'warn'];
         }
         $built = count(array_filter($d['urls'], fn (mixed $u): bool => is_array($u) && ($u['content'] ?? '') !== ''));
-        return ['clock', t('Ancien site'), t('{found} adresses · {built} pages neuves', ['found' => count($d['urls']), 'built' => $built]), admin_url('wayback'), ''];
+        return ['clock', t('Ancien site'), t('{found} adresses · {built} pages neuves', ['found' => count($d['urls']), 'built' => $built]), admin_url('x/wayback'), ''];
+    }
+
+    /** Données de la fonction « Ancien site » (data/wayback.php), sans charger son code. */
+    private static function revival(): array
+    {
+        $d = Store::read('wayback', []);
+        return ['scanned' => (int) (is_array($d) ? ($d['scanned'] ?? 0) : 0), 'urls' => is_array($d['urls'] ?? null) ? $d['urls'] : []];
     }
 }

@@ -35,6 +35,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:400 var(--fs-4)/1.55 va
 ::selection{background:var(--flash);color:var(--on-flash)}
 a{color:var(--brand);text-decoration:none}
 a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
+/* Lien au milieu d'un texte : souligné, jamais distingué par la seule couleur (WCAG 1.4.1). */
+p a:not(.btn),li small a:not(.btn),ul.small a:not(.btn),.hint a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}
 img{max-width:100%;display:block}
 h1,h2,h3{line-height:1.2;font-weight:650;letter-spacing:-.012em;margin:0 0 .5em;text-wrap:balance}
 h1{font-size:var(--fs-7);font-weight:700;letter-spacing:-.022em}
@@ -94,7 +96,7 @@ table,.num{font-variant-numeric:tabular-nums}
 fieldset.field{border:0;padding:0;min-width:0}
 legend.label{padding:0}
 .field>label,.label{display:block;font-weight:600;font-size:var(--fs-3);margin-bottom:.35rem}
-.hint{display:block;color:var(--muted);font-size:var(--fs-2);line-height:1.45;margin-top:.35rem}
+.hint{display:block;color:var(--muted);font-size:var(--fs-2);line-height:1.45;margin-top:.35rem;overflow-wrap:anywhere}
 .error-text{display:block;color:var(--bad);font-size:var(--fs-2);margin-top:.35rem;font-weight:600}
 input[type=text],input[type=email],input[type=password],input[type=url],input[type=search],input[type=number],input[type=date],input[type=datetime-local],input[type=tel],select,textarea{
   width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--field);border-radius:var(--r-ctl);padding:.55rem .75rem;transition:border-color .15s,box-shadow .15s}

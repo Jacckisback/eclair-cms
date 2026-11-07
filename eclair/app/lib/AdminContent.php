@@ -111,6 +111,7 @@ final class AdminContent
                 'categories' => array_map(fn ($c) => ['id' => $c['id'], 'name' => $c['name'], 'kind' => $c['kind']], Categories::all()),
                 'users' => array_values(array_map(fn ($u) => ['id' => $u['id'], 'name' => $u['name']], Users::all())),
                 'langs' => Content::LANGS,
+                'extBlocks' => Extensions::editorBlocks(),
                 'translations' => $translations,
                 'site' => [
                     'name' => Settings::get('name'),

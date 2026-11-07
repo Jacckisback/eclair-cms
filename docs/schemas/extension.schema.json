@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Jacckisback/eclair-cms/docs/schemas/extension.schema.json",
+  "title": "Manifeste d'une fonction optionnelle Éclair (extension.json)",
+  "type": "object",
+  "required": ["schema", "id", "version", "entry"],
+  "additionalProperties": false,
+  "$defs": {
+    "right": { "enum": ["content", "media", "menus", "categories", "messages", "redirects", "settings", "users", "security"] },
+    "handler": { "type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9]{0,40}$" },
+    "field": {
+      "type": "object", "required": ["key"], "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,39}$" },
+        "type": { "enum": ["text", "textarea", "url", "number", "bool", "select"], "default": "text" },
+        "label": { "type": "string", "maxLength": 80 },
+        "max": { "type": "integer", "minimum": 1, "maximum": 20000 },
+        "default": { "type": ["string", "number", "boolean"] },
+        "options": { "type": "array", "items": { "type": "string" }, "maxItems": 50 }
+      }
+    }
+  },
+  "properties": {
+    "schema": { "const": "eclair-extension/1" },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,39}$" },
+    "name": { "type": "string", "maxLength": 80 },
+    "description": { "type": "string", "maxLength": 400 },
+    "version": { "type": "string", "pattern": "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$" },
+    "requires": { "type": "object", "properties": { "eclair": { "type": "string" }, "php": { "type": "string" } }, "additionalProperties": false },
+    "depends": { "type": "object", "additionalProperties": { "type": "string" }, "description": "id => contrainte de version (ex. « ^1.0 »)." },
+    "provides": { "type": "array", "items": { "type": "string" } },
+    "entry": { "type": "string", "pattern": "\\.php$", "description": "Fichier qui renvoie l'objet de la fonction." },
+    "files": { "type": "object", "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "description": "Empreintes SHA-256 ; si présent, tout fichier non listé est refusé." },
+    "routes": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "public": { "type": "array", "items": { "type": "object", "required": ["path", "handler"], "properties": {
+          "method": { "enum": ["GET"] }, "path": { "type": "string", "pattern": "^/[a-z0-9][a-z0-9/-]{0,99}$" }, "handler": { "$ref": "#/$defs/handler" }, "cache": { "type": "boolean" } } } },
+        "admin": { "type": "array", "items": { "type": "object", "required": ["handler", "right"], "properties": {
+          "method": { "enum": ["GET", "POST"] }, "path": { "type": "string", "pattern": "^(/[a-z0-9-]{1,40}){0,3}$" }, "handler": { "$ref": "#/$defs/handler" }, "right": { "$ref": "#/$defs/right" } } } }
+      }
+    },
+    "nav": { "type": "array", "maxItems": 10, "items": { "type": "object", "properties": { "label": { "type": "string" }, "path": { "type": "string" }, "icon": { "type": "string" }, "right": { "$ref": "#/$defs/right" } } } },
+    "dashboard": { "type": "array", "maxItems": 5, "items": { "type": "object", "required": ["handler"], "properties": { "handler": { "$ref": "#/$defs/handler" }, "right": { "$ref": "#/$defs/right" } } } },
+    "settings": { "type": "array", "maxItems": 40, "items": { "$ref": "#/$defs/field" } },
+    "blocks": { "type": "array", "maxItems": 20, "items": { "type": "object", "required": ["type", "render"], "properties": {
+      "type": { "type": "string", "description": "« <id>/<nom> »" }, "label": { "type": "string" }, "render": { "$ref": "#/$defs/handler" },
+      "fields": { "type": "array", "items": { "$ref": "#/$defs/field" } } } } },
+    "assets": { "type": "array", "items": { "type": "string", "pattern": "\\.(css|js|svg|png|jpe?g|webp|avif|gif|woff2|ico)$" } },
+    "tasks": { "type": "array", "maxItems": 5, "items": { "type": "object", "required": ["handler"], "properties": { "handler": { "$ref": "#/$defs/handler" }, "every": { "type": "integer", "minimum": 3600 } } } },
+    "migrations": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9-]{1,40}$" } },
+    "data": { "type": "object", "properties": { "schema": { "type": "integer" } } },
+    "provenance": { "type": "object", "additionalProperties": { "type": ["string", "number"] }, "description": "Source, commit, licence… (informatif ; la vérification porte sur « files »)." }
+  }
+}

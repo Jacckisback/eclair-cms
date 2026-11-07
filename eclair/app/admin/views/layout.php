@@ -22,14 +22,16 @@ $nav = [
     ['menus', 'menus', 'menu', t('Menus'), 'menus'],
     ['messages', 'messages', 'mail', t('Messages'), 'messages'],
     ['redirects', 'redirects', 'redirect', t('Redirections'), 'redirects'],
-    ['wayback', 'wayback', 'clock', t('Ancien site'), 'settings'],
-    ['plan', 'plan', 'calendar', t('Planning'), 'content'],
-      ['ai-visits', 'ai-visits', 'bot', t('Robots IA'), 'content'],
-    ['affiliate', 'affiliate', 'bag', t('Affiliation'), 'content'],
-    ['discover', 'discover', 'compass', t('Discover'), 'content'],
+    ['ads', 'ads', 'target', t('Publicité'), 'settings'],
 ];
+// Entrées des capacités actives (droit vérifié par Extensions::nav, comme par la route elle-même).
+foreach (\Eclair\Extensions::nav() as [$extPath, $extIcon, $extLabel, $extRight]) {
+    $nav[] = [$extPath, $extPath, $extIcon, $extLabel, $extRight];
+}
 $adminNav = [
     ['settings', 'settings', 'settings', t('Réglages'), 'settings'],
+    ['themes', 'themes', 'panel', t('Thèmes'), 'settings'],
+    ['extensions', 'extensions', 'plus', t('Fonctions'), 'settings'],
     ['users', 'users', 'users', t('Utilisateurs'), 'users'],
     ['security', 'security', 'shield', t('Sécurité'), 'security'],
     ['update', 'update', 'refresh', t('Mises à jour'), 'security'],
@@ -102,6 +104,6 @@ $initials = mb_strtoupper(mb_substr((string) $user['name'], 0, 1) . mb_substr((s
   </main>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale(), 'driveDue' => $user['role'] === 'admin' && \Eclair\Drive::due(), 'planDue' => $user['role'] === 'admin' && \Eclair\Plan::due() !== null]) ?>
+<?= \Eclair\Admin::jsData(($v['js'] ?? []) + ['updateCheck' => $user['role'] === 'admin' && \Eclair\Update::stale(), 'driveDue' => $user['role'] === 'admin' && \Eclair\Extensions::invoke('drive', 'due') === true, 'planDue' => $user['role'] === 'admin' && \Eclair\Extensions::invoke('planning', 'due') === true]) ?>
 </body>
 </html>

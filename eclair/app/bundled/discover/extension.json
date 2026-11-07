@@ -1,0 +1,22 @@
+{
+  "schema": "eclair-extension/1",
+  "id": "discover",
+  "name": "Google Discover",
+  "version": "2.0.0",
+  "description": "Vérifie que tes articles ont ce que Google recommande pour son fil Discover (grande image, auteur présenté, titre sans excès) et propose les tendances du jour de Google Trends comme idées pour le planning.",
+  "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
+  "provides": ["discover", "trends"],
+  "entry": "extension.php",
+  "routes": {
+    "public": [],
+    "admin": [
+      { "method": "GET", "path": "", "handler": "page", "right": "content" },
+      { "method": "POST", "path": "", "handler": "action", "right": "content" },
+      { "method": "POST", "path": "/trends", "handler": "trends", "right": "content" },
+      { "method": "POST", "path": "/ideas", "handler": "ideas", "right": "content" }
+    ]
+  },
+  "nav": [{ "label": "Discover", "path": "", "icon": "compass", "right": "content" }],
+  "data": { "schema": 1 },
+  "provenance": { "source": "Éclair CMS (fonction livrée avec le noyau)", "license": "AGPL-3.0-only" }
+}

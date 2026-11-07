@@ -86,6 +86,9 @@ final class Content
         if ($entry['type'] === 'page' && $entry['id'] === Settings::get('home')) {
             return '/';
         }
+        if (($entry['route'] ?? '') !== '') {
+            return (string) $entry['route'];
+        }
         return match ($entry['type']) {
             'post' => self::blogPath() . '/' . $entry['slug'],
             'product' => Shop::path() . '/' . $entry['slug'],
@@ -107,6 +110,60 @@ final class Content
             }
         }
         return null;
+    }
+
+    /** Contenu en ligne dont l'adresse exacte (route) est $path, ou null. */
+    public static function byRoute(string $path): ?array
+    {
+        foreach (self::index() as $entry) {
+            if (($entry['route'] ?? '') === $path && $entry['id'] !== Settings::get('home') && self::visible($entry)) {
+                return $entry;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Adresse exacte valide d'un ancien site, ou '' : commence par « / », segments de lettres (accents compris), chiffres,
+     * « - », « _ », « . » et « ~ », « / » final permis, au plus 8 segments et 300 octets ; jamais « . » ni « .. », jamais
+     * une adresse réservée d'Éclair (administration, médias, actifs, plan du site…), jamais un script (.php).
+     */
+    public static function cleanRoute(string $raw): string
+    {
+        $path = trim($raw);
+        if ($path === '' || $path[0] !== '/' || strlen($path) > 300 || !mb_check_encoding($path, 'UTF-8') || str_contains($path, '//')) {
+            return '';
+        }
+        if (class_exists(\Normalizer::class)) {
+            $path = (string) \Normalizer::normalize($path, \Normalizer::FORM_C);
+        }
+        $segments = explode('/', trim($path, '/'));
+        if ($path === '/' || count($segments) > 8) {
+            return '';
+        }
+        foreach ($segments as $seg) {
+            if ($seg === '.' || $seg === '..' || !preg_match('#^[\p{L}\p{M}\p{N}._~-]{1,120}$#u', $seg)) {
+                return '';
+            }
+        }
+        $first = strtolower($segments[0]);
+        if (in_array($first, Settings::reserved(), true) || in_array(pathinfo($first, PATHINFO_FILENAME), Settings::reserved(), true)
+            || in_array($first, ['site', '.well-known'], true) || preg_match('~\.(php\d?|phtml|phar|inc|md|xml|txt)$~i', $path)) {
+            return '';
+        }
+        return $path;
+    }
+
+    /** Adresse déjà servie par un autre contenu (adresse exacte ou adresse habituelle, avec ou sans « / » final). */
+    public static function routeTaken(string $route, string $id, ?array $index = null): bool
+    {
+        $bare = rtrim($route, '/');
+        foreach ($index ?? self::index() as $e) {
+            if ($e['id'] !== $id && in_array(rtrim(self::path($e), '/'), [$bare], true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Première page publiée trouvée parmi plusieurs slugs possibles. */
@@ -287,6 +344,13 @@ final class Content
             $date = $now;
         }
 
+        // Adresse exacte (migration d'un ancien site : /2024/03/article/, /page.html, accents) : gardée tant qu'on ne la change
+        // pas, abandonnée si elle n'est plus valide ou déjà prise par un autre contenu.
+        $route = array_key_exists('route', $data) ? self::cleanRoute((string) $data['route']) : (string) ($old['route'] ?? '');
+        if ($route !== '' && self::routeTaken($route, $id, $index)) {
+            $route = '';
+        }
+
         $seo = is_array($data['seo'] ?? null) ? $data['seo'] : [];
         $options = is_array($data['options'] ?? null) ? $data['options'] : [];
         $category = preg_replace('/[^a-z0-9]/', '', (string) ($data['category'] ?? '')) ?? '';
@@ -299,6 +363,7 @@ final class Content
             'status' => $status,
             'title' => $title,
             'slug' => $slug,
+            'route' => $route,
             'lang' => $lang,
             'tgroup' => preg_replace('/[^a-z0-9]/', '', (string) ($data['tgroup'] ?? $old['tgroup'] ?? '')) ?? '',
             'blocks' => Blocks::normalize($data['blocks'] ?? []),
@@ -356,7 +421,7 @@ final class Content
             'noindex' => $item['seo']['noindex'],
             'words' => word_count($text),
             'score' => $item['score'] ?? ['seo' => 0, 'geo' => 0],
-        ] + (isset($item['product']) ? self::productEntry($item) : []);
+        ] + (($item['route'] ?? '') !== '' ? ['route' => $item['route']] : []) + (isset($item['product']) ? self::productEntry($item) : []);
     }
 
     /** Résumé d'un produit pour l'index : prix le plus bas (« à partir de » si les variantes diffèrent), disponibilité. */

@@ -84,27 +84,17 @@ final class Admin
             'GET /messages' => [AdminSite::class, 'messages', 'messages'],
             'POST /messages' => [AdminSite::class, 'messageAction', 'messages'],
             'GET /redirects' => [AdminSite::class, 'redirects', 'redirects'],
-            'GET /ai-visits' => [AdminSite::class, 'aiVisits', 'content'],
-            'GET /plan' => [AdminPlan::class, 'page', 'content'],
-            'POST /plan' => [AdminPlan::class, 'action', 'content'],
-            'POST /api/plan/ideas' => [AdminPlan::class, 'ideas', 'content'],
-            'POST /api/plan/write' => [AdminPlan::class, 'write', 'content'],
-            'POST /api/plan/tick' => [AdminPlan::class, 'tick', 'settings'],
-            'GET /wayback' => [AdminWayback::class, 'page', 'settings'],
-            'POST /wayback' => [AdminWayback::class, 'action', 'settings'],
-            'POST /api/wayback/scan' => [AdminWayback::class, 'scan', 'settings'],
-            'POST /api/wayback/build' => [AdminWayback::class, 'build', 'settings'],
-            'GET /affiliate' => [AdminAffiliate::class, 'page', 'content'],
-            'POST /affiliate' => [AdminAffiliate::class, 'action', 'content'],
-            'POST /api/affiliate/write' => [AdminAffiliate::class, 'write', 'content'],
-            'GET /discover' => [AdminDiscover::class, 'page', 'content'],
-            'POST /discover' => [AdminDiscover::class, 'action', 'content'],
-            'POST /api/discover/trends' => [AdminDiscover::class, 'trends', 'content'],
-            'POST /api/discover/ideas' => [AdminDiscover::class, 'ideas', 'content'],
+            'GET /ads' => [AdminAds::class, 'page', 'settings'],
+            'POST /ads' => [AdminAds::class, 'save', 'settings'],
             'POST /redirects' => [AdminSite::class, 'saveRedirect', 'redirects'],
             'GET /settings' => [AdminSettings::class, 'page', 'settings'],
             'POST /settings' => [AdminSettings::class, 'save', 'settings'],
             'GET /appearance/preview' => [AdminSettings::class, 'preview', 'settings'],
+            'GET /themes' => [AdminThemes::class, 'page', 'settings'],
+            'GET /extensions' => [AdminExtensions::class, 'page', 'settings'],
+            'POST /extensions' => [AdminExtensions::class, 'action', 'settings'],
+            'GET /api/capabilities' => [AdminExtensions::class, 'describe', 'settings'],
+            'POST /themes' => [AdminThemes::class, 'action', 'settings'],
             'GET /users' => [AdminUsers::class, 'list', 'users'],
             'POST /users' => [AdminUsers::class, 'create', 'users'],
             'GET /users/([a-z0-9]+)' => [AdminUsers::class, 'edit', 'users'],
@@ -114,12 +104,10 @@ final class Admin
             'GET /security' => [AdminSecurity::class, 'page', 'security'],
             'POST /security' => [AdminSecurity::class, 'action', 'security'],
             'POST /backup' => [AdminSecurity::class, 'backup', 'security'],
+            'POST /restore' => [AdminSecurity::class, 'restore', 'security'],
             'GET /update' => [AdminUpdate::class, 'page', 'security'],
             'POST /update' => [AdminUpdate::class, 'action', 'security'],
             'POST /api/update/check' => [AdminUpdate::class, 'check', 'security'],
-            'POST /drive' => [AdminDrive::class, 'action', 'security'],
-            'POST /api/drive/poll' => [AdminDrive::class, 'poll', 'security'],
-            'POST /api/drive/tick' => [AdminDrive::class, 'tick', 'security'],
             'POST /api/ai/chat' => [AdminAi::class, 'chat', 'content'],
             'GET /api/ai/chats' => [AdminAi::class, 'chats', 'content'],
             'GET /api/ai/chat/([a-z0-9]+)' => [AdminAi::class, 'load', 'content'],
@@ -147,10 +135,36 @@ final class Admin
                 exit;
             }
         }
+        // Routes des capacités actives (/x/<id>/…) : même contrôle d'accès, CSRF déjà vérifié plus haut pour les POST.
+        if (str_starts_with($route, '/x/')) {
+            foreach (Extensions::adminRoutes() as $pattern => [$id, $fn, $area]) {
+                [$m, $regex] = explode(' ', $pattern, 2);
+                if (($m === $method || ($m === 'GET' && $method === 'HEAD')) && preg_match('~^' . $regex . '$~', $route)) {
+                    if (!Auth::can($area)) {
+                        self::forbidden();
+                    }
+                    Extensions::admin($id, $fn, $user);
+                }
+            }
+        }
         self::view('error', ['title' => t('Page introuvable'), 'text' => t('Cette page de l’administration n’existe pas.')], t('Page introuvable'), 404);
     }
 
     /* ─────────────────────────────── Rendu ─────────────────────────────── */
+
+    /** Page d'une fonction : sa vue ($file, qui reçoit $v) rendue, puis placée telle quelle dans la mise en page. */
+    public static function extensionPage(string $ext, string $file, array $v, string $title): never
+    {
+        ob_start();
+        try {
+            (static function (string $file, array $v): void {
+                include $file;
+            })($file, $v);
+        } finally {
+            $html = (string) ob_get_clean();
+        }
+        self::view('extension', ['html' => $html, 'raw' => true, 'title' => $title, 'ext' => $ext], $title);
+    }
 
     public static function view(string $name, array $v = [], string $title = '', int $status = 200): never
     {
@@ -362,7 +376,8 @@ final class Admin
             'seo' => $scores ? (int) round(array_sum($scores) / count($scores)) : 0,
             'geo' => $geo ? (int) round(array_sum($geo) / count($geo)) : 0,
         ];
-        $ai = Settings::get('geo.ai_log') ? AiVisits::report(30) : null;
+        $ai = Settings::get('geo.ai_log') && Store::exists('extensions') ? Extensions::invoke('ai-visits', 'report', [30]) : null;
+        $ai = is_array($ai) ? $ai : null;
         self::view('dashboard', [
             'todo' => $todo,
             'onboarding' => !Settings::get('onboarding.done'),

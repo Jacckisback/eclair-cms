@@ -109,19 +109,6 @@ final class AdminSite
     }
 
     /** Robots IA : quelles IA lisent le site, quelles pages, pour quel usage (journal noté par index.php). */
-    public static function aiVisits(array $user): never
-    {
-        $days = in_array((int) Req::query('days'), [7, 30, 90], true) ? (int) Req::query('days') : 30;
-        $report = AiVisits::report($days);
-        Admin::view('ai-visits', [
-            'days' => $days,
-            'report' => $report,
-            'unread' => $report['total'] ? AiVisits::unread($report) : [],
-            'on' => (bool) Settings::get('geo.ai_log'),
-            'policy' => (string) Settings::get('geo.ai'),
-        ], t('Robots IA'));
-    }
-
     public static function saveRedirect(array $user): never
     {
         if (Req::input('action') === 'delete') {

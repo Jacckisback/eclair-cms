@@ -36,6 +36,8 @@ final class App
             Installer::handle();
         }
 
+        // Migrations de la version installée (identifiées, idempotentes, sous verrou) : une lecture quand tout est fait.
+        Migrations::run();
         date_default_timezone_set((string) Settings::get('timezone') ?: 'UTC');
         I18n::setLang((string) Settings::get('lang', 'fr'));
 
@@ -51,16 +53,26 @@ final class App
             Http::redirect(admin_url('edit/' . $m[1]));
         }
         // Tâche planifiée des sauvegardes Google Drive (adresse secrète).
+        // Adresse historique (1.x), toujours valable : servie par la fonction « drive » si le site l'a ajoutée.
         if (preg_match('~^/_eclair/backup/([a-f0-9]{32})$~', $path, $m)) {
-            Drive::cron($m[1]);
+            Extensions::invoke('drive', 'cron', [$m[1]]);
         }
         // Tâche planifiée du planning éditorial (adresse secrète) : rédige l'idée due, s'il y en a une.
+        // Adresse historique (1.x), toujours valable : servie par la fonction « planning » si le site l'a ajoutée.
         if (preg_match('~^/_eclair/plan/([a-f0-9]{32})$~', $path, $m)) {
-            Plan::cron($m[1]);
+            Extensions::invoke('planning', 'cron', [$m[1]]);
+        }
+        // Tâches planifiées des capacités optionnelles (adresse secrète, Extensions::taskUrl()).
+        if (preg_match('~^/_eclair/tasks/([a-f0-9]{32})$~', $path, $m)) {
+            Extensions::tick($m[1]);
         }
         // Connecteur MCP (Claude, ChatGPT) et sa découverte OAuth : rien ne répond tant qu'il est désactivé.
         if (str_starts_with($path, '/_eclair/') || str_starts_with($path, '/.well-known/')) {
             Mcp::handle($path);
+        }
+        // Routes publiques des capacités actives : sans fonction active qui en déclare, leur registre n'est même pas chargé.
+        if (Store::exists('ext-public')) {
+            Extensions::route($path);
         }
         Site::handle($path);
     }

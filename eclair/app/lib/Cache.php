@@ -107,10 +107,12 @@ final class Cache
         ];
         try {
             // Visites des robots d'IA notées par index.php (Réglages › IA & GEO) : dossier du journal et agents reconnus.
-            if (Settings::get('geo.ai_log')) {
-                Store::ensureDir(AiVisits::dir());
-                $data['ai'] = AiVisits::dir();
-                $data['ai_re'] = AiVisits::pattern();
+            // Journal des robots IA tenu par index.php : seulement si la fonction « Robots IA » est ajoutée et la mesure active.
+            $ai = Settings::get('geo.ai_log') && Store::exists('extensions') ? Extensions::invoke('ai-visits', 'runtime') : null;
+            if (is_array($ai) && is_string($ai['ai'] ?? null) && is_string($ai['ai_re'] ?? null)) {
+                Store::ensureDir($ai['ai']);
+                $data['ai'] = $ai['ai'];
+                $data['ai_re'] = $ai['ai_re'];
             }
             Store::ensureDir(ECLAIR_ROOT . '/cache');
             Store::atomic(ECLAIR_ROOT . '/cache/runtime.php', Store::GUARD . json_encode($data));

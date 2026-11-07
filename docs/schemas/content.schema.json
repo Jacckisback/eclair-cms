@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Jacckisback/eclair-cms/docs/schemas/content.schema.json",
+  "title": "Contenu Éclair envoyé à l'enregistrement (POST /<admin>/api/save) ou produit par un import",
+  "type": "object",
+  "required": ["type", "title"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]{1,40}$" },
+    "type": { "enum": ["page", "post", "product"] },
+    "status": { "enum": ["draft", "published"], "default": "draft", "description": "Un contenu publié avec une date future est programmé." },
+    "title": { "type": "string", "maxLength": 300 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9-]*$" },
+    "route": { "type": "string", "maxLength": 300, "description": "Adresse exacte reprise d'un ancien site (/2024/03/article/, /page.html, accents) ; vide : adresse habituelle déduite du type et du slug" },
+    "lang": { "type": "string" },
+    "summary": { "type": "string" },
+    "image": { "type": "string", "description": "Identifiant d'un média." },
+    "category": { "type": "string" },
+    "author": { "type": "string" },
+    "date": { "type": "integer", "description": "Horodatage Unix de publication." },
+    "seo": { "type": "object" },
+    "options": { "type": "object" },
+    "blocks": {
+      "type": "array", "maxItems": 2000,
+      "items": {
+        "oneOf": [
+          { "type": "object", "required": ["type"], "properties": { "type": { "enum": ["paragraph", "heading", "list", "quote", "image", "callout", "faq", "table", "button", "video", "code", "divider", "hero", "features", "team", "posts", "products", "contact"] } },
+            "description": "Bloc du noyau : ses champs sont normalisés par Blocks::normalize (texte enrichi assaini, adresses vérifiées)." },
+          { "type": "object", "required": ["type"], "properties": { "type": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,39}/[a-z][a-z0-9-]{0,39}$" } },
+            "description": "Bloc d'une fonction active (champs déclarés dans son extension.json)." },
+          { "type": "object", "required": ["type", "preserved", "data"], "properties": { "type": { "type": "string" }, "preserved": { "const": true }, "data": { "type": "object" } },
+            "description": "Bloc conservé d'une fonction absente : renvoyé tel quel (32 Ko de JSON au plus)." }
+        ]
+      }
+    }
+  }
+}

@@ -89,6 +89,10 @@ final class AdminSettings
         if ($d) {
             Design::fetchFont($d['display']);
         }
+        // Thème du site essayé avec les vrais contenus (« - » : thème du noyau) ; absent, celui qui est actif.
+        if ($q('site_theme') === '-' || preg_match('~^[a-z0-9][a-z0-9-]{0,39}$~', $q('site_theme'))) {
+            $look['site_theme'] = $q('site_theme') === '-' ? '' : $q('site_theme');
+        }
         Theme::preview($look);
         $path = $q('path');
         Site::preview(preg_match('~^/[a-z0-9/_-]*$~', $path) ? $path : '/');
@@ -326,6 +330,17 @@ final class AdminSettings
         }
         Settings::save($patch);
         Log::security('settings_saved', ['tab' => $tab]);
+        // Usage choisi : préréglage qui ajoute les fonctions livrées utiles à cet usage (jamais retirées automatiquement).
+        if (isset($patch['usage']) && $patch['usage'] !== ($s['usage'] ?? '')) {
+            foreach (Usage::extensions((string) $patch['usage']) as $id => $label) {
+                if (!Extensions::enabled($id)) {
+                    $added = Extensions::add($id);
+                    Session::flash($added['ok'] ? 'ok' : 'warn', $added['ok']
+                        ? t('Fonction « {n} » ajoutée pour cet usage : tu peux la retirer dans Fonctions.', ['n' => $label])
+                        : (string) $added['error']);
+                }
+            }
+        }
         if (isset($patch['url']) && $patch['url'] !== $s['url'] && !Settings::verifyUrl()) {
             Session::flash('warn', t('Je n’ai pas pu vérifier que {url} mène bien à ce site : en attendant, personne n’est redirigé vers cette adresse. Vérifie-la depuis la page Sécurité.', ['url' => $patch['url']]));
         }

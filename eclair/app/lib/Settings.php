@@ -119,7 +119,7 @@ final class Settings
             'mcp' => false,
             'profile' => ['about' => '', 'audience' => '', 'tone' => '', 'values' => '', 'rules' => '', 'visual' => ''],
         ],
-        // Publicité Google AdSense (menu Discover, voir Ads) : rien n'est chargé tant qu'elle n'est pas activée, avec le message
+        // Publicité Google AdSense (menu Publicité, voir Ads) : rien n'est chargé tant qu'elle n'est pas activée, avec le message
         // de consentement publié dans AdSense. 'auto' : annonces automatiques ; 'slot' : bloc d'annonces placé par Éclair.
         'ads' => [
             'client' => '',
@@ -130,7 +130,7 @@ final class Settings
             'positions' => ['intro', 'end'],
             'txt' => '',
         ],
-        // Google Discover (voir Discover, Trends) : pays des tendances du jour, vide = celui de la langue du site.
+        // Fonction « Google Discover » (app/bundled/discover) : pays des tendances du jour, vide = celui de la langue du site.
         'discover' => ['geo' => ''],
         // Usage du site (Starter::TYPES), choisi à l'installation : le tableau de bord met ses outils en premier (voir Usage).
         'usage' => '',

@@ -1,0 +1,3 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* Copyright (c) 2026 Thierry Gustin */
+.bonjour-salut.encadre{border:2px solid var(--accent);padding:.6rem 1rem;border-radius:10px}

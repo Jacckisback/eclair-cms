@@ -14,6 +14,8 @@ defined('ECLAIR') || exit;
 final class Media
 {
     public const WIDTHS = [480, 800, 1200, 1600];
+    /** Largeur à partir de laquelle l'image d'origine est servie comme « grande image » (recommandation de Google Discover). */
+    public const LARGE = 1200;
     /** Au plus 10 000 images : bien au-delà d'un vrai site (des dizaines de gigaoctets), et chaque page publique relit la liste. */
     public const MAX_ITEMS = 10_000;
     private const MAX = 2000;

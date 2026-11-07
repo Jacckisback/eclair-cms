@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-1.14.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.2.zip) archive (731 KB) and unzip it.
+1. Download the [`eclair-cms-2.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.0.zip) archive (833 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -812,7 +812,7 @@ A signed release can only be built in a Git checkout and only includes tracked f
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, customize the theme by editing `app/theme/*.php`, `app/theme/theme.css` and `app/theme/themes/*.css` (keep a copy: the integrity check flags these files as modified, and an update replaces them; the Updates page lists them before it does). In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 731 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, create a site theme in `site/themes/<id>/` (see [the theme contract](THEME-CONTRACT.md)) or import it in **Themes**: updates never touch it. Do not edit `app/theme/` any more, an update replaces it. In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 833 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

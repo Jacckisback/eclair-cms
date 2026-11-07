@@ -1,0 +1,21 @@
+{
+  "schema": "eclair-extension/1",
+  "id": "affiliate",
+  "name": "Affiliation",
+  "version": "2.0.0",
+  "description": "Tes liens d'affiliation au même endroit, et des comparatifs, tests ou guides d'achat rédigés en brouillon par l'assistant IA à partir de tes notes. La mention publicitaire et le marquage rel=\"sponsored\" des pages restent assurés par Éclair, même sans cette fonction.",
+  "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
+  "provides": ["affiliate"],
+  "entry": "extension.php",
+  "routes": {
+    "public": [],
+    "admin": [
+      { "method": "GET", "path": "", "handler": "page", "right": "content" },
+      { "method": "POST", "path": "", "handler": "action", "right": "content" },
+      { "method": "POST", "path": "/write", "handler": "write", "right": "content" }
+    ]
+  },
+  "nav": [{ "label": "Affiliation", "path": "", "icon": "bag", "right": "content" }],
+  "data": { "schema": 1 },
+  "provenance": { "source": "Éclair CMS (fonction livrée avec le noyau)", "license": "AGPL-3.0-only" }
+}

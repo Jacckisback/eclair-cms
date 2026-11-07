@@ -1,0 +1,22 @@
+{
+  "schema": "eclair-extension/1",
+  "id": "wayback",
+  "name": "Ancien site",
+  "version": "2.0.0",
+  "description": "Retrouve dans la Wayback Machine les anciennes adresses de ton domaine et redonne une page neuve à chacune (avec l’assistant IA), pour que les vieux liens aboutissent de nouveau.",
+  "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
+  "provides": ["wayback", "revival"],
+  "entry": "extension.php",
+  "routes": {
+    "public": [],
+    "admin": [
+      { "method": "GET", "path": "", "handler": "page", "right": "settings" },
+      { "method": "POST", "path": "", "handler": "action", "right": "settings" },
+      { "method": "POST", "path": "/scan", "handler": "scan", "right": "settings" },
+      { "method": "POST", "path": "/build", "handler": "build", "right": "settings" }
+    ]
+  },
+  "nav": [{ "label": "Ancien site", "path": "", "icon": "clock", "right": "settings" }],
+  "data": { "schema": 1 },
+  "provenance": { "source": "Éclair CMS (fonction livrée avec le noyau)", "license": "AGPL-3.0-only" }
+}

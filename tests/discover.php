@@ -9,12 +9,15 @@
  */
 declare(strict_types=1);
 
+require_once ECLAIR_ROOT . '/app/bundled/discover/lib/Discover.php';
+require_once ECLAIR_ROOT . '/app/bundled/discover/lib/Trends.php';
+
 use Eclair\Ads;
-use Eclair\Discover;
 use Eclair\Security;
 use Eclair\Settings;
 use Eclair\Store;
-use Eclair\Trends;
+use EclairExt\Discover\Discover;
+use EclairExt\Discover\Trends;
 
 section('Google Discover : publicité, titres, tendances (unitaire)');
 check('identifiant d’éditeur : « ca-pub- » ou « pub- » et 16 chiffres, sinon refusé', Ads::client('ca-pub-1234567890123456') === 'pub-1234567890123456'
@@ -92,10 +95,17 @@ try {
         'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
     ], ['Accept: application/json']);
     $c->login('camille@example.com', 'Un-mot-de-passe-solide');
-    $page = $c->req('GET', '/gestion/discover');
+    // 2.0 : un blog neuf ne charge pas Discover (fonction optionnelle) ; la publicité a sa page dans le noyau.
+    check('2.0, blog neuf : Discover absent du menu, page Publicité présente', $c->req('GET', '/gestion/x/discover')['status'] === 404
+        && !str_contains($c->req('GET', '/gestion/')['body'], 'href="/gestion/x/discover"') && str_contains($c->req('GET', '/gestion/')['body'], 'href="/gestion/ads"'));
+    $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'add', 'id' => 'discover']);
+    $page = $c->req('GET', '/gestion/x/discover');
     check('page Discover : menu, contrôles, tendances à charger, publicité inactive, sans attribut style (CSP)', $page['status'] === 200
-        && str_contains($page['body'], 'href="/gestion/discover"') && str_contains($page['body'], 'Prêt pour Discover') && str_contains($page['body'], 'data-dc-trends')
-        && str_contains($page['body'], 'name="action" value="ads"') && str_contains($page['body'], 'Inactive') && !preg_match('~<[^>]+\sstyle="~', $page['body']));
+        && str_contains($page['body'], 'href="/gestion/x/discover"') && str_contains($page['body'], 'Prêt pour Discover') && str_contains($page['body'], 'data-dc-trends')
+        && str_contains($page['body'], 'Publicité AdSense : inactive.') && str_contains($page['body'], 'href="/gestion/ads"') && !preg_match('~<[^>]+\sstyle="~', $page['body']));
+    $adsPage = $c->req('GET', '/gestion/ads');
+    check('page Publicité : formulaire AdSense, inactive, sans attribut style (CSP)', $adsPage['status'] === 200 && str_contains($adsPage['body'], 'name="action" value="ads"')
+        && str_contains($adsPage['body'], 'Inactive') && !preg_match('~<[^>]+\sstyle="~', $adsPage['body']));
     preg_match('/"csrf":"([a-f0-9]+)"/', $page['body'], $m);
     $api = static fn (string $path, array $data): array => ($res = $c->req('POST', '/gestion/' . $path, (string) json_encode($data),
         ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . ($m[1] ?? '')])) + ['json' => json_decode($res['body'], true)];
@@ -112,7 +122,7 @@ try {
         && !$hasAds($before['body']) && !str_contains($before['body'], 'google-adsense-account')
         && str_contains((string) ($before['headers']['content-security-policy'] ?? ''), "script-src 'self'"));
 
-    $post = static fn (array $fields): array => $c->req('POST', '/gestion/discover', $c->token($c->req('GET', '/gestion/discover')['body']) + ['action' => 'ads'] + $fields);
+    $post = static fn (array $fields): array => $c->req('POST', '/gestion/ads', $c->token($c->req('GET', '/gestion/ads')['body']) + ['action' => 'ads'] + $fields);
     $post(['client' => 'pub-123', 'enabled' => '1', 'consent' => '1']);
     check('identifiant invalide : refusé, rien d’enregistré', ($read('site')['ads']['client'] ?? '') === '' && !($read('site')['ads']['enabled'] ?? false));
     $post(['client' => 'ca-pub-1234567890123456', 'enabled' => '1', 'auto' => '1']);
@@ -139,7 +149,7 @@ try {
     check('styles des blocs ajoutés, place réservée', str_contains($ad['body'], '.ad{margin:2.5rem 0;') && str_contains($ad['body'], 'min-height:19rem'));
     $again = $visitor->req('GET', $longUrl);
     check('page en cache : même nonce dans l’en-tête et dans la page', $nonceOf($again) === [$hNonce, [$hNonce]] && $again['body'] === $ad['body']);
-    $c->req('POST', '/gestion/discover', $c->token($c->req('GET', '/gestion/discover')['body']) + ['action' => 'geo', 'geo' => 'FR']);
+    $c->req('POST', '/gestion/x/discover', $c->token($c->req('GET', '/gestion/x/discover')['body']) + ['action' => 'geo', 'geo' => 'FR']);
     $fresh = $visitor->req('GET', $longUrl);
     check('cache vidé (réglage changé) : nouveau rendu, nouveau nonce', $nonceOf($fresh)[0] !== '' && $nonceOf($fresh)[0] !== $hNonce && $nonceOf($fresh)[1] === [$nonceOf($fresh)[0]]);
     $shortRes = $visitor->req('GET', (string) ($short['json']['url'] ?? '/x'));
@@ -156,8 +166,8 @@ try {
         && ($md = $visitor->req('GET', $longUrl . '.md'))['status'] === 200 && !$hasAds($md['body']));
     $edit = $c->req('GET', '/gestion/edit/' . ($long['json']['item']['id'] ?? 'x'));
     check('éditeur : case « Sans publicité sur cet article » quand la publicité est en service', str_contains($edit['body'], 'id="f-noads"'));
-    $page = $c->req('GET', '/gestion/discover');
-    check('page Discover : publicité active, lien ads.txt et test du message de consentement', str_contains($page['body'], 'Active sur les articles')
+    $page = $c->req('GET', '/gestion/ads');
+    check('page Publicité : active, lien ads.txt et test du message de consentement', str_contains($page['body'], 'Active sur les articles')
         && str_contains($page['body'], '/ads.txt') && str_contains($page['body'], '?fc=alwaysshow&amp;fctype=gdpr'));
 
     $post(['client' => 'pub-1234567890123456', 'consent' => '1', 'slot' => '1234567890']);
@@ -166,35 +176,43 @@ try {
         && str_contains((string) ($off['headers']['content-security-policy'] ?? ''), "script-src 'self'"));
 
     // Tendances du jour (faux Google Trends).
-    $res = $api('api/discover/trends', []);
-    $page = $c->req('GET', '/gestion/discover');
+    $res = $api('x/discover/trends', []);
+    $page = $c->req('GET', '/gestion/x/discover');
     check('tendances du jour chargées et affichées (presse liée, adresse piégée écartée)', ($res['json']['ok'] ?? false) === true && str_contains($page['body'], 'pain au levain maison')
         && str_contains($page['body'], 'href="https://journal.example/levain-retour"') && !str_contains($page['body'], 'javascript:alert') && str_contains($page['body'], 'Source : Google Trends'), $res['body']);
     $calls = count(file($trDir . '/log.jsonl') ?: []);
-    $api('api/discover/trends', []);
+    $api('x/discover/trends', []);
     check('au plus une lecture par heure et par pays', count(file($trDir . '/log.jsonl') ?: []) === $calls && str_contains((string) file_get_contents($trDir . '/log.jsonl'), 'geo=FR'));
-    $c->req('POST', '/gestion/discover', $c->token($page['body']) + ['action' => 'trend', 'n' => '0']);
+    $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'deactivate', 'id' => 'planning', 'confirm' => '1']);
+    $noPlan = $c->req('GET', '/gestion/x/discover')['body'];
+    check('sans la fonction Planning : tendances affichées, « Ajouter au planning » remplacé par l’invitation à l’ajouter', str_contains($noPlan, 'pain au levain maison')
+        && !str_contains($noPlan, 'value="trend"') && str_contains($noPlan, 'ajoute la fonction « Planning éditorial »'));
+    $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'activate', 'id' => 'planning']);
+    $page = $c->req('GET', '/gestion/x/discover');
+    // Date du jour dans le fuseau du site (français : Europe/Paris), pas celle du processus de test (UTC).
+    $siteToday = (new DateTimeImmutable('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    $c->req('POST', '/gestion/x/discover', $c->token($page['body']) + ['action' => 'trend', 'n' => '0']);
     $ideas = array_values(array_filter($read('plan')['items'] ?? [], fn ($i) => $i['title'] === 'pain au levain maison'));
-    check('« Ajouter au planning » : idée datée d’aujourd’hui, avec la presse pour contexte', count($ideas) === 1 && $ideas[0]['date'] === date('Y-m-d')
+    check('« Ajouter au planning » : idée datée d’aujourd’hui, avec la presse pour contexte', count($ideas) === 1 && $ideas[0]['date'] === $siteToday
         && str_contains($ideas[0]['brief'], 'https://journal.example/levain-retour') && str_contains($ideas[0]['brief'], 'sans rapporter l’actualité'));
-    $c->req('POST', '/gestion/discover', $c->token($page['body']) + ['action' => 'geo', 'geo' => 'ES']);
-    $err = $api('api/discover/trends', []);
+    $c->req('POST', '/gestion/x/discover', $c->token($page['body']) + ['action' => 'geo', 'geo' => 'ES']);
+    $err = $api('x/discover/trends', []);
     check('Google Trends en erreur : message clair, rien d’écrit', ($err['json']['ok'] ?? true) === false && str_contains((string) ($err['json']['error'] ?? ''), 'Google Trends ne répond pas')
         && ($read('site')['discover']['geo'] ?? '') === 'ES');
-    $c->req('POST', '/gestion/discover', $c->token($page['body']) + ['action' => 'geo', 'geo' => 'XX']);
+    $c->req('POST', '/gestion/x/discover', $c->token($page['body']) + ['action' => 'geo', 'geo' => 'XX']);
     check('pays inconnu : celui de la langue du site', ($read('site')['discover']['geo'] ?? 'x') === '' && Trends::GEOS[0] === 'FR');
 
     // Idées de l'IA à partir des tendances (faux fournisseur).
     $set = $c->req('GET', '/gestion/settings?tab=ai');
     $c->req('POST', '/gestion/settings', $c->token($set['body']) + ['tab' => 'ai', 'provider' => 'anthropic', 'key_ai_anthropic' => 'sk-ant-test-0123456789',
         'model_anthropic' => 'claude-sonnet-5-5', 'budget' => '10', 'daily' => '60', 'editors' => '1']);
-    $page = $c->req('GET', '/gestion/discover');
+    $page = $c->req('GET', '/gestion/x/discover');
     check('assistant IA actif : bouton « Proposer des idées pour mon site » avec coût indicatif', (bool) preg_match('#data-dc-ideas[^>]*>.*Proposer des idées pour mon site <small>· ~[\d,]+.\$#u', $page['body']));
     $before = count($read('plan')['items'] ?? []);
-    $gen = $api('api/discover/ideas', []);
+    $gen = $api('x/discover/ideas', []);
     $lines = array_values(array_filter(explode("\n", (string) @file_get_contents($aiDir . '/log.jsonl'))));
     $prompt = (string) json_encode(json_decode((string) end($lines), true)['b'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    $today = array_filter($read('plan')['items'] ?? [], fn ($i) => $i['source'] === 'ai' && $i['date'] === date('Y-m-d'));
+    $today = array_filter($read('plan')['items'] ?? [], fn ($i) => $i['source'] === 'ai' && $i['date'] === $siteToday);
     check('idées de l’IA : ajoutées au planning à la date d’aujourd’hui, coût compté', ($gen['json']['ok'] ?? false) === true && ($gen['json']['added'] ?? 0) === 2
         && count($read('plan')['items'] ?? []) === $before + 2 && count($today) === 2 && (float) ($read('ai/usage')['months'][date('Y-m')]['cost'] ?? 0) > 0, $gen['body']);
     check('IA : tendances et presse fournies, jamais d’article d’actualité ni de fait sur l’actualité', str_contains($prompt, 'pain au levain maison (2000+ searches)')

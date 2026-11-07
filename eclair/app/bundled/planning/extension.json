@@ -1,0 +1,23 @@
+{
+  "schema": "eclair-extension/1",
+  "id": "planning",
+  "name": "Planning éditorial",
+  "version": "2.0.0",
+  "description": "Tes prochains articles, jour par jour : idées ajoutées à la main ou proposées par l'assistant IA d'après ton site, rédigées en brouillon sur demande ou automatiquement quelques jours avant leur date.",
+  "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
+  "provides": ["planning"],
+  "entry": "extension.php",
+  "routes": {
+    "public": [],
+    "admin": [
+      { "method": "GET", "path": "", "handler": "page", "right": "content" },
+      { "method": "POST", "path": "", "handler": "action", "right": "content" },
+      { "method": "POST", "path": "/ideas", "handler": "ideas", "right": "content" },
+      { "method": "POST", "path": "/write", "handler": "write", "right": "content" },
+      { "method": "POST", "path": "/tick", "handler": "tick", "right": "settings" }
+    ]
+  },
+  "nav": [{ "label": "Planning", "path": "", "icon": "calendar", "right": "content" }],
+  "data": { "schema": 1 },
+  "provenance": { "source": "Éclair CMS (fonction livrée avec le noyau)", "license": "AGPL-3.0-only" }
+}

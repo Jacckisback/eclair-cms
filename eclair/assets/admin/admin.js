@@ -268,13 +268,13 @@
   const drivePoll = $('[data-drive-poll]');
   if (drivePoll) {
     const every = Math.max(5, Number(drivePoll.dataset.drivePoll) || 5) * 1000;
-    const ask = () => api('api/drive/poll', {}, { quiet: true })
+    const ask = () => api('x/drive/poll', {}, { quiet: true })
       .then((json) => (json && json.state && json.state !== 'pending' ? location.reload() : setTimeout(ask, every)))
       .catch(() => setTimeout(ask, every * 2));
     setTimeout(ask, every);
   }
   const driveRun = $('[data-drive-run]');
-  const driveTick = () => api('api/drive/tick', {}, { quiet: true });
+  const driveTick = () => api('x/drive/tick', {}, { quiet: true });
   if (driveRun) {
     const bar = $('progress', driveRun);
     const label = $('[data-drive-label]', driveRun);
@@ -291,6 +291,26 @@
     driveTick().catch(() => {});
   }
 
+  /* ── Import WordPress : lots successifs jusqu'à la fin, avancement affiché ── */
+  const wpRun = $('[data-wp-run]');
+  if (wpRun) {
+    const btn = $('[data-wp-step]', wpRun);
+    const bar = $('progress', wpRun);
+    const label = $('[data-wp-label]', wpRun);
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      btn.disabled = true;
+      btn.textContent = btn.dataset.wait;
+      const step = () => api('x/wordpress/step', {}).then((json) => {
+        if (!json || !json.ok || json.done) { location.reload(); return; }
+        if (bar) bar.value = json.next;
+        if (label) label.textContent = json.next + ' / ' + json.total;
+        step();
+      }).catch(() => { btn.disabled = false; });
+      step();
+    });
+  }
+
   /* ── Planning éditorial : idées et articles rédigés par l'IA, rédaction automatique en arrière-plan ── */
   const planRun = (btn, wait, path, body, done) => {
     const label = btn.innerHTML;
@@ -304,15 +324,15 @@
     planIdeas.addEventListener('submit', (ev) => {
       ev.preventDefault();
       const f = new FormData(planIdeas);
-      planRun($('button', planIdeas), planIdeas.dataset.wait, 'api/plan/ideas',
+      planRun($('button', planIdeas), planIdeas.dataset.wait, 'x/planning/ideas',
         { count: Number(f.get('count')), week: Number(f.get('week')), theme: f.get('theme') }, () => location.reload());
     });
   }
   $$('[data-plan-write]').forEach((btn) => btn.addEventListener('click', () => {
-    planRun(btn, btn.dataset.wait, 'api/plan/write', { id: btn.dataset.planWrite }, (json) => { location.href = json.edit; });
+    planRun(btn, btn.dataset.wait, 'x/planning/write', { id: btn.dataset.planWrite }, (json) => { location.href = json.edit; });
   }));
   if (D.planDue) {
-    api('api/plan/tick', {}, { quiet: true }).then((json) => { if (json && json.text) toast(json.text, 'ok'); }).catch(() => {});
+    api('x/planning/tick', {}, { quiet: true }).then((json) => { if (json && json.text) toast(json.text, 'ok'); }).catch(() => {});
   }
 
   /* ── Ancien site (Wayback Machine) : recherche dans l'archive, puis une adresse à la fois jusqu'à la fin ou l'arrêt ── */
@@ -321,7 +341,7 @@
     const scan = $('[data-wb-scan]', wb);
     scan.addEventListener('submit', (ev) => {
       ev.preventDefault();
-      planRun($('button', scan), scan.dataset.wait, 'api/wayback/scan', { date: new FormData(scan).get('date') }, () => location.reload());
+      planRun($('button', scan), scan.dataset.wait, (wb.dataset.api || 'api/wayback/') + 'scan', { date: new FormData(scan).get('date') }, () => location.reload());
     });
     const boxes = $$('[data-wb-path]', wb).filter((b) => !b.disabled);
     const all = $('[data-wb-all]', wb);
@@ -342,7 +362,7 @@
         if (stop) break;
         status.textContent = t('Page {n} sur {total} : {path}…').replace('{n}', i + 1).replace('{total}', list.length).replace('{path}', box.value);
         const row = box.closest('tr');
-        const json = await api('api/wayback/build', { path: box.value, image }, { quiet: true })
+        const json = await api((wb.dataset.api || 'api/wayback/') + 'build', { path: box.value, image }, { quiet: true })
           .catch(() => ({ ok: false, stop: true, error: t('Erreur réseau : vérifie ta connexion.') }));
         $('[data-wb-error]', row).textContent = json.ok ? json.note || '' : json.error || '';
         if (json.ok) {
@@ -370,7 +390,7 @@
       const links = $$('[data-aff-pick]:checked').map((b) => b.value);
       if (!links.length) { toast(t('Coche au moins un lien.'), 'bad'); return; }
       const f = new FormData(affWrite);
-      planRun($('button', affWrite), affWrite.dataset.wait, 'api/affiliate/write',
+      planRun($('button', affWrite), affWrite.dataset.wait, 'x/affiliate/write',
         { links, format: f.get('format'), keyword: f.get('keyword') }, (json) => { location.href = json.edit; });
     });
   }
@@ -378,11 +398,11 @@
   /* ── Google Discover : tendances du jour (Google Trends), idées que l'IA en tire pour le planning ── */
   const dcTrends = $('[data-dc-trends]');
   if (dcTrends) {
-    dcTrends.addEventListener('click', () => planRun(dcTrends, dcTrends.dataset.wait, 'api/discover/trends', {}, () => location.reload()));
+    dcTrends.addEventListener('click', () => planRun(dcTrends, dcTrends.dataset.wait, 'x/discover/trends', {}, () => location.reload()));
   }
   const dcIdeas = $('[data-dc-ideas]');
   if (dcIdeas) {
-    dcIdeas.addEventListener('click', () => planRun(dcIdeas, dcIdeas.dataset.wait, 'api/discover/ideas', {},
+    dcIdeas.addEventListener('click', () => planRun(dcIdeas, dcIdeas.dataset.wait, 'x/discover/ideas', {},
       (json) => { if (json.added > 0) location.href = D.admin + '/plan'; else location.reload(); }));
   }
 

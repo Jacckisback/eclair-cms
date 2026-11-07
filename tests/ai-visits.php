@@ -7,7 +7,9 @@
  */
 declare(strict_types=1);
 
-use Eclair\AiVisits;
+require_once ECLAIR_ROOT . '/app/bundled/ai-visits/lib/AiVisits.php';
+
+use EclairExt\AiVisits\AiVisits;
 use Eclair\Settings;
 
 section('1.12 : Robots IA, reconnaissance et agrégation');
@@ -88,7 +90,14 @@ if (!in_array('--unit', $argv, true)) {
             'ui' => 'fr', 'site_name' => 'Fournil Test', 'site_tagline' => 'Pain au levain à Lyon', 'site_lang' => 'fr', 'site_type' => 'business',
             'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
         ], ['Accept: application/json']);
+        // Site neuf en 2.0 : la mesure n'est pas chargée tant que la fonction n'est pas ajoutée.
         $visitor = client($port);
+        $visitor->req('GET', '/', [], ['User-Agent: Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)']);
+        check('2.0, site neuf : fonction Robots IA absente, rien de noté', !is_file($copy . '/data/ai/' . gmdate('Y-m') . '.php'));
+        $c->login('camille@example.com', 'Un-mot-de-passe-solide');
+        check('réglages : la mesure propose d’ajouter la fonction', str_contains($c->req('GET', '/gestion/settings?tab=geo')['body'], 'La mesure demande la fonction'));
+        $c->req('POST', '/gestion/extensions', $c->token($c->req('GET', '/gestion/extensions')['body']) + ['action' => 'add', 'id' => 'ai-visits']);
+        check('fonction Robots IA ajoutée', str_contains((string) @file_get_contents($copy . '/data/extensions.php'), '"ai-visits"'));
         $human = $visitor->req('GET', '/', [], ['User-Agent: Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/130.0 Safari/537.36']);
         $log = $copy . '/data/ai/' . gmdate('Y-m') . '.php';
         $bot = static fn (string $path, string $agent = 'Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)'): array
@@ -112,16 +121,15 @@ if (!in_array('--unit', $argv, true)) {
         check('journal du mois plein (4 Mo) : plus rien n’est ajouté, le site répond toujours', filesize($log) === AiVisits::MAX && $bot('/')['status'] === 200);
         file_put_contents($log, "<?php exit; ?>\n" . implode("\n", $rows) . "\n");
 
-        $c->login('camille@example.com', 'Un-mot-de-passe-solide');
-        $page = $c->req('GET', '/gestion/ai-visits');
+        $page = $c->req('GET', '/gestion/x/ai-visits');
         check('page Robots IA : robots, usages et pages lues', $page['status'] === 200 && str_contains($page['body'], 'GPTBot') && str_contains($page['body'], 'ChatGPT-User')
             && str_contains($page['body'], 'Entraînement des modèles') && str_contains($page['body'], 'data-height='));
         check('page Robots IA : sans attribut style (CSP de l’administration)', !preg_match('~<[^>]+\sstyle="~', $page['body']));
-        check('page Robots IA : période choisie (7, 30, 90 jours)', $c->req('GET', '/gestion/ai-visits?days=7')['status'] === 200
-            && str_contains($c->req('GET', '/gestion/ai-visits?days=999')['body'], 'aria-current="page">30 jours'));
+        check('page Robots IA : période choisie (7, 30, 90 jours)', $c->req('GET', '/gestion/x/ai-visits?days=7')['status'] === 200
+            && str_contains($c->req('GET', '/gestion/x/ai-visits?days=999')['body'], 'aria-current="page">30 jours'));
         $dash = $c->req('GET', '/gestion/');
-        check('tableau de bord : carte Robots IA avec lien vers le détail', str_contains($dash['body'], 'id="ai-visits-title"') && str_contains($dash['body'], '/gestion/ai-visits'));
-        check('menu de l’administration : entrée Robots IA', str_contains($dash['body'], 'href="/gestion/ai-visits"'));
+        check('tableau de bord : carte Robots IA avec lien vers le détail', str_contains($dash['body'], 'id="ai-visits-title"') && str_contains($dash['body'], '/gestion/x/ai-visits'));
+        check('menu de l’administration : entrée Robots IA', str_contains($dash['body'], 'href="/gestion/x/ai-visits"'));
 
         // Mesure coupée : index.php n'écrit plus rien, la page le dit.
         settings($copy, ['geo' => ['ai_log' => false]]);
@@ -130,7 +138,7 @@ if (!in_array('--unit', $argv, true)) {
         $bot('/');
         $bot('/');
         check('mesure coupée : plus aucune visite notée', (string) file_get_contents($log) === $before);
-        check('mesure coupée : la page invite à la réactiver, la carte disparaît du tableau de bord', str_contains($c->req('GET', '/gestion/ai-visits')['body'], 'La mesure est coupée')
+        check('mesure coupée : la page invite à la réactiver, la carte disparaît du tableau de bord', str_contains($c->req('GET', '/gestion/x/ai-visits')['body'], 'La mesure est coupée')
             && !str_contains($c->req('GET', '/gestion/')['body'], 'id="ai-visits-title"'));
     } finally {
         proc_terminate($server);

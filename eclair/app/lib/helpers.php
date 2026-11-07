@@ -27,13 +27,22 @@ function t(string $text, array $vars = []): string
 /** Chemin public relatif au domaine (tient compte d'une installation en sous-dossier). */
 function path_to(string $path = '/'): string
 {
-    return Req::base() . ($path === '' ? '/' : $path);
+    return Req::base() . url_escape($path === '' ? '/' : $path);
+}
+
+/**
+ * Octets non ASCII et espaces d'une adresse encodés en %XX (adresse exacte accentuée d'un ancien site) : une adresse déjà
+ * ASCII, comme toutes celles que crée Éclair, reste identique à l'octet près.
+ */
+function url_escape(string $path): string
+{
+    return preg_match('/[^\x21-\x7e]/', $path) ? (string) preg_replace_callback('/[^\x21-\x7e]/', static fn (array $m): string => rawurlencode($m[0]), $path) : $path;
 }
 
 /** URL absolue officielle du site (canonical, sitemap, Open Graph…). */
 function absolute_url(string $path = '/'): string
 {
-    return rtrim((string) Settings::get('url'), '/') . ($path === '' ? '/' : $path);
+    return rtrim((string) Settings::get('url'), '/') . url_escape($path === '' ? '/' : $path);
 }
 
 /** URL de l'administration. */
@@ -175,6 +184,13 @@ function ago(int $ts): string
  * Allonge la durée d'exécution permise, si l'hébergeur le permet. Une fonction désactivée par l'hébergeur n'existe plus
  * depuis PHP 8 : l'appeler directement arrêterait tout.
  */
+/** Date valide (AAAA-MM-JJ) ou chaîne vide. */
+function valid_day(string $raw): string
+{
+    $raw = trim($raw);
+    return preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $raw, $m) && checkdate((int) $m[2], (int) $m[3], (int) $m[1]) ? $raw : '';
+}
+
 function extend_time(int $seconds): bool
 {
     return function_exists('set_time_limit') && @set_time_limit($seconds);

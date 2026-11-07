@@ -37,7 +37,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-1.14.2.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-1.14.2.zip) (731 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-2.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.0.zip) (833 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
@@ -812,7 +812,7 @@ Una versione firmata si costruisce solo in un checkout Git e include solo i file
 
 `PHP_CLI_SERVER_WORKERS` permette al sito di chiamare se stesso (verifica del suo indirizzo): con un solo processo, la verifica semplicemente fallisce e i reindirizzamenti all’indirizzo ufficiale restano disattivati.
 
-Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, il tema si personalizza modificando `app/theme/*.php`, `app/theme/theme.css` e `app/theme/themes/*.css` (tieni una copia: il controllo di integrità segnala questi file come modificati, e un aggiornamento li sostituisce; la pagina Aggiornamenti li elenca prima di farlo). Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 731 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
+Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, crea un tema del sito in `site/themes/<id>/` (vedi [il contratto dei temi](THEME-CONTRACT.md)) o importalo in **Temi**: gli aggiornamenti non lo toccano mai. Non modificare più `app/theme/`, che un aggiornamento sostituisce. Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 833 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
 
 ---
 

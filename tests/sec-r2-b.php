@@ -232,7 +232,7 @@ if (!in_array('--unit', $argv, true)) {
             return ['rc' => proc_close($p), 'out' => $out];
         };
         $announced = static fn (): array => json_decode((string) (json_decode((string) @file_get_contents($repo . '/dist/latest.json'), true)['v2']['payload'] ?? ''), true) ?: [];
-        $made = $build();
+        $made = $build(['--sign']);
         $zip = (glob($repo . '/dist/eclair-cms-*.zip') ?: [''])[0];
         $version = preg_match('~eclair-cms-(\d+\.\d+\.\d+)\.zip$~', $zip, $v) ? $v[1] : '';
         $git('add dist/latest.json && git commit -qm publication');

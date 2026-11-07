@@ -28,8 +28,10 @@ function review_child(string $code, array $args): array
 
 /* ───────────── Google Drive : fenêtre de la connexion, administrateur lié à la connexion ───────────── */
 section('Relecture 1.10.3 : connexion Google Drive (fenêtre depuis son lancement, administrateur lié à la connexion)');
-$rvLive = method_exists(Eclair\Drive::class, 'live') ? new ReflectionMethod(Eclair\Drive::class, 'live') : null;
-$rvBinder = method_exists(Eclair\Drive::class, 'binder') ? new ReflectionMethod(Eclair\Drive::class, 'binder') : null;
+// 2.0 : Google Drive est une fonction livrée (app/bundled/drive).
+require_once ECLAIR_ROOT . '/app/bundled/drive/lib/Drive.php';
+$rvLive = method_exists(EclairExt\Drive\Drive::class, 'live') ? new ReflectionMethod(EclairExt\Drive\Drive::class, 'live') : null;
+$rvBinder = method_exists(EclairExt\Drive\Drive::class, 'binder') ? new ReflectionMethod(EclairExt\Drive\Drive::class, 'binder') : null;
 $rvLive?->setAccessible(true);
 $rvBinder?->setAccessible(true);
 check('connexion lancée il y a 1 minute (mot de passe saisi 14 minutes plus tôt) : toujours en cours, code affiché',
@@ -183,7 +185,7 @@ if (!in_array('--unit', $argv, true)) {
         symlink($rvOutside, $rvRepo . '/eclair/assets/notes.txt');
         $rvGitRun('add -A && git commit -qm base');
         $rvBuild = static function () use ($rvRepo, $rvSecret): array {
-            $p = proc_open([PHP_BINARY, $rvRepo . '/tools/build.php'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $rvRepo,
+            $p = proc_open([PHP_BINARY, $rvRepo . '/tools/build.php', '--sign'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $rvRepo,
                 ['PATH' => (string) getenv('PATH'), 'ECLAIR_SIGNING_KEY' => base64_encode($rvSecret)]);
             $out = (string) stream_get_contents($pipes[1]) . (string) stream_get_contents($pipes[2]);
             return ['rc' => proc_close($p), 'out' => $out];

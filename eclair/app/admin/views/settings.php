@@ -298,6 +298,7 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
     <?= $sw('llms_full', (bool) $s['geo']['llms_full'], t('Publier /llms-full.txt'), t('Tout ton contenu en Markdown, dans un seul fichier.')) ?>
     <?= $sw('markdown', (bool) $s['geo']['markdown'], t('Version Markdown de chaque page'), t('Ajoute .md à n’importe quelle URL : un texte propre que les IA lisent sans effort.')) ?>
     <?= $sw('ai_log', (bool) $s['geo']['ai_log'], t('Mesurer les visites des robots IA'), t('Note quelles IA lisent tes pages (heure, robot, adresse), sans IP ni visiteur humain. Résultats dans Robots IA.')) ?>
+    <?php if (!\Eclair\Extensions::enabled('ai-visits')): ?><p class="hint"><?= e(t('La mesure demande la fonction « Robots IA » :')) ?> <a href="<?= e(admin_url('extensions')) ?>"><?= e(t('Ajouter la fonction')) ?></a></p><?php endif ?>
     <?= $sw('signal', (bool) $s['geo']['signal'], t('Ajouter la directive Content-Signal au robots.txt'), t('Proposition de Cloudflare pour exprimer tes préférences d’usage par les IA. Non standard : Lighthouse la signale comme inconnue.')) ?>
     <label class="field"><span class="label"><?= e(t('Présentation de ton activité pour les IA')) ?></span>
       <textarea name="about" rows="6" placeholder="<?= e(t('Qui es-tu, que proposes-tu, pour qui, où, depuis quand ? Des faits vérifiables, des chiffres, tes points forts.')) ?>"><?= e($s['geo']['about']) ?></textarea>

@@ -54,23 +54,26 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
             'user_name' => 'Camille Test', 'user_email' => 'camille@example.com', 'user_pass' => 'Un-mot-de-passe-solide', 'index' => '1', 'ai' => 'open', 'admin_path' => 'gestion',
         ], ['Accept: application/json']);
         $c->login('camille@example.com', 'Un-mot-de-passe-solide');
+        // 2.0 : Sauvegardes Google Drive est une fonction livrée, ajoutée ici (Fonctions › Ajouter).
+        $extPage = $c->req('GET', '/gestion/extensions');
+        $c->req('POST', '/gestion/extensions', $c->token($extPage['body']) + ['action' => 'add', 'id' => 'drive']);
         // Une grande image (5 Mo) : l'archive dépasse un morceau de 4 Mo.
         @mkdir($copy . '/media/2026/11', 0755, true);
         file_put_contents($copy . '/media/2026/11/grande-photo.jpg', "\xFF\xD8\xFF\xE0" . random_bytes(5 * 1048576));
         $post = static function (array $fields) use ($c): string {
-            $page = $c->req('GET', '/gestion/security');
-            $c->req('POST', '/gestion/drive', $c->token($page['body']) + $fields);
-            return $c->req('GET', '/gestion/security')['body'];
+            $page = $c->req('GET', '/gestion/x/drive');
+            $c->req('POST', '/gestion/x/drive', $c->token($page['body']) + $fields);
+            return $c->req('GET', '/gestion/x/drive')['body'];
         };
         $csrf = static function () use ($c): string {
             preg_match('~"csrf":"([a-f0-9]+)"~', $c->req('GET', '/gestion')['body'], $m);
             return $m[1] ?? '';
         };
-        $api = static fn (string $path, array $body = []): array => json_decode($c->req('POST', '/gestion/api/' . $path, (string) json_encode($body ?: new stdClass()),
+        $api = static fn (string $path, array $body = []): array => json_decode($c->req('POST', '/gestion/x/' . $path, (string) json_encode($body ?: new stdClass()),
             ['Accept: application/json', 'Content-Type: application/json', 'X-CSRF-Token: ' . $csrf()])['body'], true) ?: [];
 
         // Sans application Google : guide pas à pas et formulaire, pas encore de connexion possible.
-        $page = $c->req('GET', '/gestion/security')['body'];
+        $page = $c->req('GET', '/gestion/x/drive')['body'];
         check('sans application Google : guide et formulaire proposés', str_contains($page, 'Sauvegardes sur Google Drive') && str_contains($page, 'Enregistrer l’application Google')
             && str_contains($page, 'TVs and Limited Input devices') && str_contains($page, 'https://console.cloud.google.com/auth/clients') && !str_contains($page, 'Connecter Google Drive'));
         $body = $post(['action' => 'app', 'client_id' => 'pas-un-identifiant', 'client_secret' => 'secret-de-test', 'confirm_password' => 'Un-mot-de-passe-solide']);
@@ -80,7 +83,7 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
             && str_contains($body, 'ID client : 123-test.apps.googleusercontent.com') && !str_contains($body, 'secret-de-test'));
         check('code secret de l’application chiffré dans le coffre, jamais en clair', is_file($copy . '/data/vault.php')
             && !str_contains((string) file_get_contents($copy . '/data/vault.php'), 'secret-de-test') && !str_contains((string) file_get_contents($copy . '/data/drive.php'), 'secret-de-test'));
-        $page = $c->req('GET', '/gestion/security')['body'];
+        $page = $c->req('GET', '/gestion/x/drive')['body'];
         check('Sécurité : carte Google Drive, connexion proposée', str_contains($page, 'Sauvegardes sur Google Drive') && str_contains($page, 'Connecter Google Drive'));
 
         // Connexion : code affiché, autorisation attendue, intervalle respecté, puis accordée.
@@ -96,7 +99,7 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         touch($gdir . '/approved');
         $patch(['pending' => ['next' => 0]]);
         $done = $api('drive/poll');
-        $body = $c->req('GET', '/gestion/security')['body'];
+        $body = $c->req('GET', '/gestion/x/drive')['body'];
         check('autorisation accordée : compte et dossier affichés', ($done['state'] ?? '') === 'connected' && str_contains($body, 'Google Drive connecté')
             && str_contains($body, 'camille@gmail.com') && str_contains($body, 'Éclair – Atelier Drive'), (string) json_encode($done));
         check('jeton chiffré dans le coffre, jamais en clair', !str_contains((string) file_get_contents($copy . '/data/vault.php'), 'rt-1')
@@ -180,7 +183,7 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
             return isset($s['since'], $s['by']['since']) && (int) $s['by']['since'] === (int) $s['since'];
         };
         $old = $unbound(null);
-        $body = $c->req('GET', '/gestion/security')['body'];
+        $body = $c->req('GET', '/gestion/x/drive')['body'];
         check('connexion d’avant la 1.10.3 (administrateur non noté) : tâche planifiée en erreur, rien envoyé, jeton révoqué, connexion retirée',
             $old['cron'] === 'error' && $old['sent'] === 0 && $old['revoked'] && $old['left'] === [] && str_contains($old['error'], 'date d’avant la 1.10.3'), json_encode($old));
         check('connexion d’avant la 1.10.3 : un administrateur est invité à reconnecter Google Drive', str_contains($body, 'Un administrateur doit le reconnecter')
@@ -212,7 +215,7 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
         $post(['action' => 'connect']);
         $patch(['pending' => ['next' => 0]]);
         $api('drive/poll');
-        check('reconnexion : même dossier réutilisé', count($gstate()['folders'] ?? []) === $folders && str_contains($c->req('GET', '/gestion/security')['body'], 'camille@gmail.com'));
+        check('reconnexion : même dossier réutilisé', count($gstate()['folders'] ?? []) === $folders && str_contains($c->req('GET', '/gestion/x/drive')['body'], 'camille@gmail.com'));
         $body = $post(['action' => 'disconnect']);
         check('déconnexion : jeton révoqué chez Google, sauvegardes conservées', str_contains($body, 'Google Drive déconnecté') && is_file($gdir . '/revoked')
             && str_contains($body, 'Connecter Google Drive') && count($live()) === 2);
@@ -222,7 +225,7 @@ if (!in_array('--unit', $argv, true) && class_exists('ZipArchive')) {
             && !str_contains($body, 'Connecter Google Drive') && !str_contains((string) file_get_contents($copy . '/data/vault.php'), 'google_app'));
 
         // Téléchargement : même archive, sans secrets.
-        $sec = $c->req('GET', '/gestion/security');
+        $sec = $c->req('GET', '/gestion/x/drive');
         $dl = $c->req('POST', '/gestion/backup', $c->token($sec['body']));
         $tmpZip = sys_get_temp_dir() . '/eclair-dl-' . getmypid() . '.zip';
         file_put_contents($tmpZip, $dl['body']);
