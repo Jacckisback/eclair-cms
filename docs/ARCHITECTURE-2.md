@@ -42,9 +42,11 @@ Référence de départ : **1.14.1**, commit `90bb96815880da5289834f2f1ba6cec0732
 | **Migrations** | `Migrations` | **Nouveau (2.0)** |
 | Sauvegarde **et restauration** locales | `Backup` | Noyau (restauration ajoutée en 2.0) |
 | Mises à jour signées, récupération | `Update`, `AdminUpdate` | Noyau (périmètre renforcé en 2.0) |
-| Discover, Trends, AdSense, affiliation, Wayback, planning, robots IA (statistiques), boutique, Google Drive, fournisseurs d’IA, assistant, MCP | `AdminDiscover`, `Discover`, `Trends`, `Ads`, `Affiliate`, `Wayback`, `Plan`, `AiVisits`, `Shop`, `Drive`, `Ai*`, `Mcp` | **Encore dans le noyau** : à extraire (voir STATUS-2.md) |
+| Ancien site (Wayback), sauvegardes Google Drive | `app/bundled/wayback`, `app/bundled/drive` | **Fonctions livrées** : chargées seulement si le site les a ajoutées |
+| Alias d’un ancien site (`?p=`…) | `Aliases` | **Nouveau (2.0)**, noyau |
+| Discover, Trends, AdSense, affiliation, planning, robots IA (statistiques), boutique, fournisseurs d’IA, assistant, MCP | `AdminDiscover`, `Discover`, `Trends`, `Ads`, `Affiliate`, `Plan`, `AiVisits`, `Shop`, `Ai*`, `Mcp` | **Encore dans le noyau** : à extraire (voir STATUS-2.md) |
 
-Dépendances transverses relevées (à défaire pendant l’extraction) : `Theme` → `Ads`, `Shop`, `Design` ; `Site` → `Shop`, `Ads`, `IndexNow` ; `Cache::runtime` → `AiVisits` ; `App` → `Drive`, `Plan`, `Mcp` ; `Admin` (table des routes) → toutes les pages spécialisées ; `Settings::reserved` → `Shop` ; `Update::preload` → `Admin`.
+Dépendances transverses relevées (à défaire pendant l’extraction) : `Theme` → `Ads`, `Shop`, `Design` ; `Site` → `Shop`, `Ads`, `IndexNow` ; `Cache::runtime` → `AiVisits` ; `App` → `Plan`, `Mcp` (Drive : par `Extensions::invoke`) ; `Admin` (table des routes) → toutes les pages spécialisées ; `Settings::reserved` → `Shop` ; `Update::preload` → `Admin`.
 
 ## 4. Correspondance des protections existantes
 

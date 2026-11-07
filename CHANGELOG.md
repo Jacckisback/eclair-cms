@@ -18,6 +18,14 @@ First stage of the 2.0 architecture: the site's theme now belongs to the site an
 - **Measurements and budgets**: `php tools/measure.php [--check] [--write] [--pages=N]` (archive, installed size, translations, PHP files loaded, memory and time per route, cold and warm cache, HTML/CSS/JS weight), `tools/budgets.json`, `docs/MEASURES.md`.
 - Docs: `docs/ARCHITECTURE-2.md` (file ownership, request path, responsibilities, map of every existing protection to its test), `docs/UPGRADE-2.md` (one-click, FTP, rollback, Apache/LiteSpeed and Nginx rules).
 
+- **Features shipped with Éclair** (`app/bundled/<id>/`): part of the signed archive but never loaded until the site adds them (Features › Add); updated with the core only if the site added them, never reinstalled once removed. **"Old site" (Wayback)** and **Google Drive backups** are now such features: sites that used them get them installed and activated by migration (data unchanged, the 1.x scheduled-task address `/_eclair/backup/<key>` still works); new sites no longer load them. Uses are now presets: choosing "revival" adds "Old site".
+- **WordPress parameter aliases** (`Aliases`): `/?p=`, `/?page_id=`, `/?attachment_id=` (also behind `/index.php`) resolved before the cache and before canonicalisation, in a single 301, never an open redirect; unknown alias: 404, never the home page. The page cache is only served for requests whose parameters are all marketing parameters (`utm_*`, `gclid`, `fbclid`…), which never create cache variants.
+
+### Fixed
+
+- **PHP 8.1 compatibility**: two closures in `Affiliate.php` declared a standalone `null` return type (PHP 8.2+), a fatal error on PHP 8.1, the announced minimum. Present in 1.14.1; found by the new CI.
+- Test isolation: the `unit` rate-limit key used by `tests/run.php` is now cleared after its test (it could be listed before the account expected by a security test, depending on the file order of the disk).
+
 ### Changed
 
 - **Updates**: a core archive that writes to `site/`, `data/` or `media/` is refused as a whole; theme customizations in the kept copy of the old code are rescued before it is replaced.

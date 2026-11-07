@@ -92,11 +92,15 @@ return new class {
 
 Les mises à jour du noyau ne touchent jamais `site/extensions/` : une fonction retirée n’est jamais réinstallée par le noyau.
 
-## 7. Découverte
+## 7. Fonctions livrées avec Éclair
+
+Certaines fonctions sont maintenues avec le noyau et livrées dans son archive signée, sous `app/bundled/<id>/` (aujourd’hui : `wayback` « Ancien site », `drive` « Sauvegardes Google Drive »). Elles ne sont **jamais chargées** tant que le site ne les a pas ajoutées (Fonctions › Ajouter, ou préréglage d’un usage, ou migration pour les sites qui les utilisaient). Une mise à jour du noyau met à jour celles que le site a ajoutées (`Extensions::syncBundled`) et ne réinstalle jamais celles qui ont été retirées. Pour des raisons de compatibilité avec la 1.x, le noyau peut appeler une fonction livrée active par `Extensions::invoke()` (adresse historique d’une tâche planifiée, envoi dû en arrière-plan) ; ce point d’accroche n’est pas ouvert aux autres fonctions.
+
+## 8. Découverte
 
 `GET /<admin>/api/capabilities` (droit Réglages, JSON) : version d’Éclair, version mineure de PHP, contrats (thème, schémas, gabarits, champs), blocs du noyau et des fonctions, fonctions installées (état, compatibilité, routes, blocs), thèmes, droits et langues. Aucun secret, aucun chemin du serveur, aucune donnée personnelle.
 
-## 8. Limites actuelles (2.0.0)
+## 9. Limites actuelles (2.0.0)
 
 * **Contributions SEO** (balises, données structurées) : pas encore ouvertes aux fonctions. Une page publique d’une fonction reçoit l’en-tête SEO standard du noyau (une seule canonical, JSON-LD `WebPage`).
 * **Types de contenu** propres à une fonction : non pris en charge ; utilisez des blocs et des pages.

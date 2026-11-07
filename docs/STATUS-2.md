@@ -9,8 +9,9 @@ Branche : `claude/hopeful-thompson-8kqj2g`, partie de `main` @ `90bb968` (1.14.1
 | Contrôle | Résultat |
 |---|---|
 | Suite d’origine sur 1.14.1 (avant toute modification) | 1 159 vérifications réussies |
-| `php tests/run.php` (sources, branche) | **1 280 vérifications réussies** |
-| Même suite sur l’archive construite sans clé, décompressée (`ECLAIR_TEST_ROOT`) | **1 278 vérifications réussies** (les 2 tests du validateur CLI ne s’appliquent qu’au dépôt) |
+| `php tests/run.php` (sources, branche) | **1 298 vérifications réussies** |
+| Même suite sur l’archive construite sans clé, décompressée (`ECLAIR_TEST_ROOT`) | **1 296 vérifications réussies** (les 2 tests du validateur CLI ne s’appliquent qu’au dépôt) |
+| CI GitHub, PHP 8.2 à 8.5 (sources, archive, budgets) | **Verte** (run du commit `9621438`) ; PHP 8.1 corrigé ensuite (défaut de la 1.14.1, voir CHANGELOG) |
 | Transition depuis la **vraie** archive `dist/eclair-cms-1.14.1.zip`, mise à jour par **son propre updater** | Réussie : gabarit, CSS du thème et actif personnalisés conservés et servis, `.htaccess` modifié gardé, statuts des pages identiques |
 | Mise à jour suivante par le nouvel updater, archive piégée écrivant dans `site/`, retour 2.0.1 → 2.0.0 | `site/` identique à l’octet près (empreinte) ; archive piégée refusée |
 | Retour 2.0.0 → 1.14.1 | L’ancien code retrouve ses gabarits personnalisés ; `site/` conservé |
@@ -22,7 +23,6 @@ Branche : `claude/hopeful-thompson-8kqj2g`, partie de `main` @ `90bb968` (1.14.1
 
 Non exécutés ici (à faire avant publication) :
 
-* **CI GitHub** : le workflow est écrit mais n’a pas encore tourné ; PHP 8.1, 8.2, 8.4 et 8.5 n’ont **pas** été testés localement (seul 8.3.6 est disponible dans cet environnement).
 * **Apache / LiteSpeed / Nginx réels** : seuls le serveur intégré de PHP et `tools/router.php` (qui reproduit les règles) ont été utilisés. Les règles `.htaccess` ajoutées (`site/themes`, `site/extensions`, `site/assets`) et les règles Nginx de `UPGRADE-2.md` restent à vérifier sur de vrais serveurs.
 * **Parcours FTP** avec `cache/legacy-app/` : code écrit (`Migrations::LEGACY`), **non couvert par un test automatique**.
 * **Tests visuels** (captures avant/après), **accessibilité** automatisée (clavier, contrastes, mouvement réduit) des nouveaux écrans d’administration (Thèmes, Fonctions, restauration) : non faits. Le rendu public, lui, est vérifié à l’octet près.
@@ -47,8 +47,8 @@ La **clé privée de signature du mainteneur** (`ECLAIR_SIGNING_KEY`) est prése
 | 3. Protection du thème, sauvegarde/restauration, transition de l’updater | **Fait et testé** |
 | 4. Contrats de contenu, blocs, interfaces communes | Blocs inconnus conservés ; schéma de contenu ; **routes communes non faites** |
 | 5. Registre minimal et cycle de vie des capacités | **Fait et testé** (routes, menu, cartes, réglages, blocs, actifs, tâches, migrations, dépendances, impact). Manquent : contributions SEO, types de contenu, CSP par fonction |
-| 6. Extraction des fonctions, langues et actifs | **Non commencé**. Aucune des fonctions listées (Discover, Trends, AdSense, affiliation, Wayback, planning, robots IA, boutique, Drive, IA, MCP) n’est encore extraite ; les traductions restent les 6 langues livrées ensemble |
-| 7. Routage pour la migration (chemin exact, alias `?p=`, `.html`, Unicode, cache des paramètres) | **Non commencé** |
+| 6. Extraction des fonctions, langues et actifs | **Commencé** : mécanisme des fonctions livrées (`app/bundled/`), **Ancien site (Wayback)** et **Sauvegardes Google Drive** extraits, migrés et testés (y compris par la vraie transition 1.14.1) ; usages devenus préréglages. Restent : Discover/Trends, AdSense, affiliation, planning, robots IA, boutique, IA et MCP, traductions par langue (voir §4) |
+| 7. Routage pour la migration | **Commencé** : alias `?p=`/`?page_id=`/`?attachment_id=` résolus avant le cache, paramètres marketing sans variante de cache (`tests/routing.php`). Restent : chemin exact, `.html`, Unicode, définition commune des routes, import WXR |
 | 8. Contrats des skills et démonstrations | Fait : contrats, schémas, validateur, exemples, guide, découverte. Manque : outil MCP de proposition d’apparence (droit distinct de la rédaction) |
 | 9. Validation globale, packaging, documentation | Documentation de transition faite ; archive candidate construite sans clé (non versionnée) ; procédure de signature inchangée hormis `--sign` |
 
@@ -56,11 +56,13 @@ Le gain de légèreté visé par la mission viendra des étapes 6 et 7 : aujourd
 
 ## 4. Reprise : ordre recommandé
 
-1. **Lancer la CI** (pousser la branche suffit) et corriger ce qui casse sur 8.1 / 8.5.
-2. **Étape 6, première extraction** : commencer par une fonction peu couplée et sans données critiques — Wayback (`Wayback`, `AdminWayback`, vue `wayback`, route `/wayback`, test `tests/wayback.php`) — en paquet `site/extensions/wayback/`, avec une migration du noyau qui l’installe et l’active automatiquement sur les sites qui l’utilisaient (données `data/wayback*`) : ces sites gardent la fonction, les nouveaux sites ne la reçoivent pas. Il faudra pour cela un mécanisme de **paquets de compatibilité** livrés avec le noyau pendant la transition (dossier `app/bundled/<id>/` copié dans `site/extensions/` par migration), car l’ancien updater n’accepte que `app/` et `assets/`.
-3. Puis AiVisits, Trends+Discover, Affiliate, Plan, Drive (garder la sauvegarde locale), Ads (avec CSP par page), Shop (vérifier l’impact sur les URL publiques), IA et MCP (séparer les opérations de contenu sûres des fournisseurs).
-4. **Traductions par langue** : livrer la langue choisie à l’installation + paquets de langues installables (provenance vérifiée, repli sur le français).
-5. **Étape 7** : définition commune des routes, chemin exact, alias WordPress résolus avant le cache, paramètres marketing sans variantes de cache ; puis services d’import WXR (simulation, reprise, idempotence).
+Analyse de couplage faite (nombre de fichiers du noyau qui appellent chaque classe) : Trends 2, Discover 4, Affiliate 4, Drive 4 (fait), Plan 7, Ads 7, Shop 22. Les prochaines extractions demandent d’abord d’ouvrir au contrat des fonctions trois points d’accroche, aujourd’hui absents :
+
+1. **Filtre de rendu** (l’affiliation transforme le HTML des pages : `Affiliate::mark` dans `Site` et `Seo`) ;
+2. **Politique CSP par page** (AdSense : `Ads` dans `Theme`, `Site`, `Blocks`, `Seo`, l’éditeur) ;
+3. **Réglages hébergés ailleurs** (les réglages AdSense sont sur la page Discover ; `Discover::WIDTH` sert au rendu des grandes images, à garder dans le noyau).
+
+Ordre proposé ensuite : Robots IA (actif par défaut, journal dans le chemin rapide d’`index.php` : à extraire en gardant un journal de quelques lignes dans `index.php` activé seulement par `cache/runtime.php`), Discover+Trends (réglages AdSense déplacés dans Réglages), affiliation (filtre de rendu), planning, AdSense (CSP), boutique (22 fichiers : en dernier), IA et MCP (séparer les opérations de contenu sûres des fournisseurs). Puis **traductions par langue** (paquets signés, repli sur le français) et la suite de l’étape 7.
 
 ## 5. Incompatibilités connues
 
