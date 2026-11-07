@@ -27,6 +27,8 @@ check('atouts en icônes dessinées : un repère court (« 4 ») reste affiché 
 check('encadré « L’essentiel » : affiché par défaut (un site existant ne change pas)', Settings::DEFAULTS['appearance']['key_box'] === true
     && str_contains((string) file_get_contents(ECLAIR_ROOT . '/app/theme/single.php'), "appearance.key_box"));
 check('police Fraunces : proposée aux directions artistiques', isset(\Eclair\Design::FONTS['fraunces']) && \Eclair\Design::FONTS['fraunces'][1] === 600);
+check('bandes de couleur : une bande qui en suit une autre ne recouvre pas ses dernières cartes (clip-path sans débord vers le haut)',
+    str_contains((string) file_get_contents(ECLAIR_ROOT . '/app/theme/directions.css'), 'clip-path:inset(0 -100vmax calc(-1 * var(--band)))'));
 check('icônes de menu : toutes dessinées', array_filter(Menus::ICONS, fn (string $n): bool => !\Eclair\Icons::has($n)) === []);
 
 if (!in_array('--unit', $argv, true)) {

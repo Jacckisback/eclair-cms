@@ -81,6 +81,8 @@ h1,h2,.hero-title{text-transform:uppercase;letter-spacing:.004em;line-height:1.0
 /*@sections:bands*/
 .content>:is(.features,.faq,.team,.posts-block,.contact-block){--band:calc(var(--dn) * 2.5rem);background:var(--bg-soft);box-shadow:0 0 0 100vmax var(--bg-soft);clip-path:inset(calc(-1 * var(--band)) -100vmax);padding-block:calc(var(--dn) * clamp(1rem, .5rem + 2vw, 2.5rem));margin-block:var(--band)}
 .content>:is(.features,.faq,.team,.posts-block,.contact-block)+:is(.features,.faq,.team,.posts-block,.contact-block){margin-top:calc(-1 * var(--band))}
+/* Une bande qui en suit une autre ne déborde pas vers le haut : son fond recouvrait la dernière rangée de cartes de la bande précédente. */
+.content>:is(.features,.faq,.team,.posts-block,.contact-block)+:is(.features,.faq,.team,.posts-block,.contact-block){clip-path:inset(0 -100vmax calc(-1 * var(--band)))}
 .content>* .card,.content>.faq details,:where(.content>*) .feature{background:var(--bg)}
 /*@*/
 
