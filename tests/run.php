@@ -230,6 +230,29 @@ foreach ($it as $file) {
 }
 check('aucun type de retour null/true/false seul ni CURLOPT_XFERINFOFUNCTION direct (PHP 8.2+)', $php81 === [], implode(', ', $php81));
 
+// Chaque expression régulière écrite en toutes lettres dans un appel preg_*() doit compiler : une expression invalide ne
+// casse rien de visible (preg_match renvoie false) mais remplit le journal d'erreurs à chaque appel (2.0.0, Site.php).
+$regexes = 0;
+$badRegex = [];
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ECLAIR_ROOT . '/app', FilesystemIterator::SKIP_DOTS)) as $file) {
+    if (!preg_match('~\.php(\.gz)?$~', (string) $file)) {
+        continue;
+    }
+    $code = str_ends_with((string) $file, '.gz') ? (string) gzdecode((string) file_get_contents((string) $file)) : (string) file_get_contents((string) $file);
+    $tk = array_values(array_filter(token_get_all($code), static fn ($t): bool => !is_array($t) || !in_array($t[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)));
+    foreach ($tk as $i => $t) {
+        if (is_array($t) && $t[0] === T_STRING && str_starts_with($t[1], 'preg_') && ($tk[$i + 1] ?? null) === '(' && is_array($tk[$i + 2] ?? null)
+            && $tk[$i + 2][0] === T_CONSTANT_ENCAPSED_STRING && in_array($tk[$i + 3] ?? null, [',', ')'], true) && $tk[$i + 2][1][0] === "'") {
+            $regexes++;
+            $pattern = str_replace(["\\\\", "\\'"], ["\\", "'"], substr($tk[$i + 2][1], 1, -1));
+            if (@preg_match($pattern, '') === false) {
+                $badRegex[] = substr((string) $file, strlen(ECLAIR_ROOT) + 1) . ':' . $tk[$i + 2][2];
+            }
+        }
+    }
+}
+check('toutes les expressions régulières du code compilent (' . $regexes . ' motifs)', $regexes > 200 && $badRegex === [], implode(', ', $badRegex));
+
 /* ───────────────────── Traductions de l'administration ───────────────────── */
 section('Traductions de l’administration');
 require_once dirname(__DIR__) . '/tools/i18n.php';

@@ -2,6 +2,18 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## 2.0.1 — 2026-11-08
+
+Fix release. In 2.0.0, a regular expression added for exact addresses did not compile: pages were served normally, but every page not served from the cache wrote a PHP warning ("range out of order in character class") to the server's error log. Reported by a user; thank you. Sites on 2.0.0 update in one click from Administration › Updates.
+
+### Fixed
+
+- `app/lib/Site.php`: the control-character check before exact addresses is now the same, valid pattern as in canonicalisation. No change in what pages show or which addresses are served.
+
+### For maintainers
+
+- New check: every regular expression written literally in a `preg_*()` call of the code (305 patterns) must compile. It fails on 2.0.0 and passes on 2.0.1.
+
 ## 2.0.0 — 2026-11-08
 
 A lighter, safer architecture, with no change to what visitors see: the public HTML of existing sites is byte-identical. **Your theme now belongs to your site** (`site/themes/`) and a core update can never overwrite it; customisations made directly to the 1.x templates are found and kept automatically. **Specialised features become optional** (Features › Add) and are no longer loaded by sites that do not use them: Old site, Google Drive backups, AI bots, Google Discover and trends, Affiliate links, Editorial calendar, and the new **WordPress import**, which keeps every old address working. Sites that used a feature keep it, with its data, after the update. Checked on PHP 8.1 to 8.5, on real Apache and Nginx servers, and with the real one-click updaters of 1.14.1 and 1.14.2. Upgrade guide: [`docs/UPGRADE-2.md`](docs/UPGRADE-2.md). **Before updating: Security › Download a backup.**
