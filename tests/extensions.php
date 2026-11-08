@@ -138,8 +138,18 @@ use Eclair\Themes;
         $page = $c->req('GET', '/gestion/extensions');
         check('page Fonctions : rien d’installé, import proposé', $page['status'] === 200 && str_contains($page['body'], 'Aucune fonction ajoutée') && str_contains($page['body'], 'name="package"'));
         exec('mkdir -p ' . escapeshellarg($copy . '/site/extensions') . ' && cp -r ' . escapeshellarg($example) . ' ' . escapeshellarg($copy . '/site/extensions/bonjour'));
+        // Le même module déclare explicitement GET (cachable) et POST (jamais cachable).
+        $postManifestFile = $copy . '/site/extensions/bonjour/extension.json';
+        $postManifest = json_decode((string) file_get_contents($postManifestFile), true);
+        $postManifest['routes']['public'][] = ['method' => 'POST', 'path' => '/bonjour', 'handler' => 'page', 'cache' => false];
+        file_put_contents($postManifestFile, json_encode($postManifest, JSON_UNESCAPED_UNICODE));
         $page = $c->req('GET', '/gestion/extensions');
         $c->req('POST', '/gestion/extensions', $c->token($page['body']) + ['action' => 'activate', 'id' => 'bonjour']);
+        $insecurePost = $c->req('POST', '/bonjour');
+        check('POST public sans HTTPS : 403, pas de cache', $insecurePost['status'] === 403
+            && str_contains((string) ($insecurePost['headers']['cache-control'] ?? ''), 'no-store'));
+        $spoofedPost = $c->req('POST', '/bonjour', [], ['X-Forwarded-Proto: https']);
+        check('POST public avec faux X-Forwarded-Proto : toujours 403', $spoofedPost['status'] === 403);
         $pub = $c->req('GET', '/bonjour');
         check('route publique : page dans le thème, en-têtes SEO et sécurité du noyau', $pub['status'] === 200 && str_contains($text($pub), 'Bonjour et bienvenue !')
             && substr_count($pub['body'], 'rel="canonical"') === 1 && str_contains($pub['body'], '<title>') && isset($pub['headers']['content-security-policy']));
