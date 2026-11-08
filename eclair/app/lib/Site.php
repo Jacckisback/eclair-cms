@@ -36,7 +36,7 @@ final class Site
         }
         // Adresse exacte d'un contenu repris d'un ancien site (/2024/03/article/, /page.html, accents) : servie telle quelle,
         // sans retirer le « / » final ni changer la casse ; seuls le domaine officiel et HTTPS restent imposés.
-        $exact = $path !== '/' && !preg_match('~[\\\x00-\x1f\x7f]~', $path) ? Content::byRoute($path) : null;
+        $exact = $path !== '/' && !preg_match('~[\\\\\x00-\x1f\x7f]~', $path) ? Content::byRoute($path) : null;
         self::canonical($path, $exact !== null);
         if ($exact !== null) {
             self::single($exact);

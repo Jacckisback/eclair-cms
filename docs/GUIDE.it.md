@@ -37,7 +37,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-2.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.0.zip) (833 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-2.0.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.1.zip) (833 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).

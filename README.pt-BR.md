@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.0.zip"><img src="https://img.shields.io/badge/baixar-v2.0.0-5b3cbc?style=for-the-badge" alt="Baixar o Éclair 2.0.0"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.1.zip"><img src="https://img.shields.io/badge/baixar-v2.0.1-5b3cbc?style=for-the-badge" alt="Baixar o Éclair 2.0.1"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 ou superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/banco_de_dados-nenhum-14122b?style=for-the-badge" alt="Sem banco de dados">
@@ -382,7 +382,7 @@ Todos os detalhes no [guia, seção Segurança](docs/GUIDE.pt-BR.md#segurança).
   <img src="docs/images/pt-BR/install.webp" alt="Instalação em três etapas: enviar a pasta, responder a quatro perguntas, o site está no ar" width="100%">
 </p>
 
-1. **Baixe** o arquivo [`eclair-cms-2.0.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.0.zip) (833 KB) e descompacte-o.
+1. **Baixe** o arquivo [`eclair-cms-2.0.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.1.zip) (833 KB) e descompacte-o.
 2. **Envie o conteúdo da pasta `eclair`** para a pasta pública da sua hospedagem (`public_html`, `www`…), incluindo os arquivos ocultos `.htaccess`.
 3. **Abra o endereço do seu site**: o assistente começa. Quatro perguntas, um pouco de confete, e seu site está no ar com as primeiras páginas.
 
