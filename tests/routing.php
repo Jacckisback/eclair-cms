@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use Eclair\Aliases;
 use Eclair\Content;
+use Eclair\Site;
 use Eclair\Store;
 
 (static function (array $argv): void {
@@ -30,6 +31,30 @@ use Eclair\Store;
 b") === '' && Content::cleanRoute('/a?b=1') === '' && Content::cleanRoute('a/b') === ''
         && Content::cleanRoute('/' . str_repeat('a/', 9) . 'b') === '' && Content::cleanRoute('/') === '' && Content::cleanRoute('/_eclair/x') === '' && Content::cleanRoute('/wp-admin/x') === '');
     check('url_escape : ASCII inchangé, accents encodés', url_escape('/blog/mon-article?x=1') === '/blog/mon-article?x=1' && url_escape('/café/crème') === '/caf%C3%A9/cr%C3%A8me');
+
+    // Garde de la recherche d'adresse exacte (Site::handle) : en 2.0.0, son motif ne compilait pas (« range out of order »),
+    // un avertissement était journalisé à chaque page publique non mise en cache et la garde ne s'appliquait jamais.
+    $exactUser = ['id' => 'routeauteur', 'role' => 'admin', 'name' => 'Camille Route', 'email' => 'camille@example.com'];
+    $exactItem = Content::save(['type' => 'page', 'status' => 'published', 'title' => 'Route exacte', 'route' => '/2024/03/route-exacte/',
+        'blocks' => [['type' => 'paragraph', 'text' => 'Texte.']]], $exactUser);
+    $warnings = [];
+    set_error_handler(static function (int $no, string $msg) use (&$warnings): bool {
+        $warnings[] = $msg;
+        return true;
+    });
+    try {
+        $found = Site::exactRoute('/2024/03/route-exacte/');
+        $backslash = Site::exactRoute('/2024/03/route-exacte/\\');
+        $control = Site::exactRoute("/2024/03/route-exacte/\x01");
+        $del = Site::exactRoute("/2024/03/route-exacte/\x7f");
+        $home = Site::exactRoute('/');
+    } finally {
+        restore_error_handler();
+    }
+    check('adresse exacte : chemin normal trouvé', ($found['id'] ?? '') === ($exactItem['id'] ?? 'x'), json_encode($found['route'] ?? null));
+    check('adresse exacte : jamais cherchée avec antislash, caractère de contrôle ou pour l’accueil', $backslash === null && $control === null && $del === null && $home === null);
+    check('adresse exacte : motif de la garde valide, aucun avertissement', $warnings === [] && preg_last_error() === PREG_NO_ERROR, implode(' | ', $warnings));
+    Content::delete((string) ($exactItem['id'] ?? ''));
 
     if (in_array('--unit', $argv, true)) {
         return;
@@ -96,6 +121,10 @@ b") === '' && Content::cleanRoute('/a?b=1') === '' && Content::cleanRoute('a/b')
         check('plan du site : adresses exactes, accents encodés', str_contains($sitemap, '/2024/03/mon-article/</loc>') && str_contains($sitemap, '/caf%C3%A9/cr%C3%A8me</loc>')
             && !str_contains($sitemap, 'café'));
         check('adresse habituelle d’un contenu à adresse exacte : 404 (une seule adresse par contenu)', $v->req('GET', '/article-date')['status'] === 404);
+        check('antislash ou caractère de contrôle après une adresse exacte : 404', $v->req('GET', '/2024/03/mon-article/%5C')['status'] === 404
+            && $v->req('GET', '/2024/03/mon-article%01')['status'] === 404);
+        $errors = (string) @file_get_contents($copy . '/data/logs/errors.php');
+        check('aucune erreur preg_match journalisée par les pages publiques', !str_contains($errors, 'preg_match'), mb_substr($errors, 0, 300));
     } finally {
         proc_terminate($server);
         exec('rm -rf ' . escapeshellarg($copy));

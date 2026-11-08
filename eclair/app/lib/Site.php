@@ -36,7 +36,7 @@ final class Site
         }
         // Adresse exacte d'un contenu repris d'un ancien site (/2024/03/article/, /page.html, accents) : servie telle quelle,
         // sans retirer le « / » final ni changer la casse ; seuls le domaine officiel et HTTPS restent imposés.
-        $exact = $path !== '/' && !preg_match('~[\\\x00-\x1f\x7f]~', $path) ? Content::byRoute($path) : null;
+        $exact = self::exactRoute($path);
         self::canonical($path, $exact !== null);
         if ($exact !== null) {
             self::single($exact);
@@ -113,6 +113,15 @@ final class Site
         }
         Http::send((string) Disk::read($file), 200, ['Content-Type: ' . $type . (str_starts_with($type, 'text/') ? '; charset=utf-8' : ''),
             'Cache-Control: public, max-age=86400', 'X-Content-Type-Options: nosniff']);
+    }
+
+    /**
+     * Contenu dont l'adresse exacte (route) est $path, ou null. Jamais cherché pour l'accueil ni pour un chemin
+     * avec antislash ou caractère de contrôle (même motif que canonical(), qui les refuse ensuite).
+     */
+    public static function exactRoute(string $path): ?array
+    {
+        return $path !== '/' && !preg_match('~[\\\\\x00-\x1f\x7f]~', $path) ? Content::byRoute($path) : null;
     }
 
     /** Une seule URL par contenu : protocole, domaine, slash final, majuscules, index.php. */
