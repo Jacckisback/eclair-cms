@@ -86,6 +86,7 @@
 - 简洁的网址，网址变更时**自动 301 重定向**，另有重定向管理器（方便接手旧的 WordPress 或 Wix 网站）。
   - `/.well-known/`、`/_eclair/` 和 `/__eclair/` 下的地址不能被重定向。例外：管理员可以重定向 `change-password` 这类 `/.well-known/…` 地址，但绝不能重定向 `acme-challenge` 或 `pki-validation`。从这些地址出发的旧重定向会标记为“已停用”，可以删除（管理员可以重新创建允许的那些）。
   - 访问重定向不再拖慢网站，使用次数仍然可见。
+- **迁移整个 WordPress 网站**（“WordPress 导入”功能）：在 WordPress 网站上安装 [Eclair Export](https://github.com/Jacckisback/eclair-export) 插件，然后在这里上传它的数据包（或通过 FTP 放到 `data/import/`）。内容、图片、PDF 文档、SEO（Yoast、Rank Math、AIOSEO）、菜单和重定向都会沿用，每个地址保持不变或以 301 重定向，内部链接会被改写。**模拟**会显示将创建的内容而不写入任何东西。通过 SSH：`php app/bundled/wordpress/lib/cli.php import package.zip [--dry-run]`。
 - 编辑器内可设置标题和元描述，并带计数器和**实时 Google 搜索预览**。
 - **实时 SEO 分析**并给出评分：标题和描述长度、关键词（标题、网址、引言、小标题、密度）、字数、结构、替代文本、内部链接、特色图片……
 - 完整的 **JSON-LD 结构化数据**：WebSite（+ 站内搜索）、Organization / Person / LocalBusiness（地址、营业时间、社交主页、退货政策）、WebPage / AboutPage / ContactPage、BlogPosting（作者、日期、栏目）、BreadcrumbList、FAQPage、ProfilePage，商店还有 Product / ProductGroup / Offer（价格、库存、配送）。

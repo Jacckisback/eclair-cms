@@ -156,6 +156,13 @@ final class Site
             Http::redirect('https://' . Req::host() . Req::base() . $clean . $suffix, 301);
         }
         if ($clean !== $path) {
+            // Ancienne adresse redirigée, demandée avec son « / » final ou en majuscules (liens d'un ancien site) : une seule
+            // redirection, directement vers la cible, au lieu de deux à la suite.
+            if (!$exact && $suffix === '' && Content::findByPath($clean) === null && ($redirect = Redirects::lookup($clean)) !== null) {
+                Redirects::hit($clean);
+                $to = $redirect['to'];
+                Http::redirect(str_starts_with($to, '/') ? path_to($to) : $to, (int) $redirect['code']);
+            }
             Http::redirect(path_to($clean) . $suffix, 301);
         }
     }

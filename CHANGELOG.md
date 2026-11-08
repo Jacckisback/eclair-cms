@@ -2,6 +2,25 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Added
+
+- **WordPress import from an Eclair Export package** (feature "WordPress import"): the package made by the [Eclair Export](https://github.com/Jacckisback/eclair-export) WordPress plugin (format `eclair-export` 1.x) is uploaded in one or several parts, or dropped by FTP into `data/import/`. Checked before anything is written (manifest, SHA-256 of every data file, missing parts, only the expected entries are read, sizes bounded). Imported in resumable steps: post and product categories, images (WebP media library), PDF and office documents (copied as is into `media/files/`, header checked), posts, pages, WooCommerce products (catalogue), custom content types (as pages at the same address), SEO title, description, keyword and noindex (Yoast, Rank Math, AIOSEO), home page and site name, menus (one level, 30 links), existing redirections and the ones the move needs (category, tag, author and date archives, feeds, attachment pages, WordPress posts page), `?p=`/`?page_id=`/`?attachment_id=` aliases, internal links and file addresses rewritten to the new ones. Every address is kept exactly; one that Éclair cannot serve is redirected with a 301. Authors are matched with existing accounts (e-mail or slug), otherwise attached to the importing account: no account is created. Re-importing the same package creates no duplicate.
+- **Simulation**: the same import computes what it would create (contents, kept and changed addresses, media, redirections, items not migrated with their reason) without writing anything, then offers "Import for real".
+- **Command line** for SSH migrations in series: `php app/bundled/wordpress/lib/cli.php import package.zip [part2.zip …] [--dry-run] [--drafts] [--no-site] [--no-menus] [--no-remote] [--user=EMAIL] [--json]`. Refuses to run outside the CLI.
+- WXR and package conversion: tables become table blocks (12 columns at most), `<details>` question/answer pairs become one FAQ block, galleries give one image block per image (with their link), video and audio files become links.
+
+### Changed
+
+- `Site`: an old address that is redirected, requested with a trailing slash or in capitals, now goes to its target in **one** 301 instead of two (slash removal then redirection).
+- `Redirects`: an internal target keeps its trailing slash when it is the exact address of a content taken over from an old site (`/our-story/`), so the redirection does not need a second hop.
+
+### For maintainers
+
+- Archive budget raised from 860,000 to 885,000 bytes (measured 852,871 → 878,433, +25.5 KB compressed): package reader, step importer with simulation, command line and translations in 6 languages. Loaded only by the import screen; public pages unchanged (all other budgets met).
+- New test `tests/wordpress-package.php`: a two-part package built in the test, simulation without writing, real import (exact addresses, single 301, local image from a thumbnail address, PDF, rewritten links, FAQ and table, SEO, noindex, home page, menu, redirections, aliases), re-import without duplicate, command line, a hostile entry (`../../evil.php`) never extracted.
+
 ## 2.0.1 — 2026-11-08
 
 Fix release. In 2.0.0, a regular expression added for exact addresses did not compile: pages were served normally, but every page not served from the cache wrote a PHP warning ("range out of order in character class") to the server's error log. Reported by a user; thank you. Sites on 2.0.0 update in one click from Administration › Updates.

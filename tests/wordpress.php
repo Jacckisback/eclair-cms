@@ -53,10 +53,15 @@ use EclairExt\Wordpress\Wxr;
         . '<blockquote><p>Le pain, c’est la vie.</p><cite>Un boulanger</cite></blockquote><script>alert(1)</script><pre>code &lt;b&gt;</pre><hr>'
         . '<table><tr><td>Farine</td><td>500 g</td></tr></table><p><img src="https://cdn.example/b.png" alt="Ailleurs"></p>',
         static fn (string $url): ?string => str_contains($url, 'ancien.example') ? 'media1' : null);
-    check('conversion : titre, paragraphe, liste (sans sous-liste), image légendée, citation, code, séparateur, tableau en texte', array_column($blocks, 'type')
-        === ['heading', 'paragraph', 'list', 'image', 'quote', 'code', 'divider', 'paragraph', 'paragraph']
+    check('conversion : titre, paragraphe, liste (sans sous-liste), image légendée, citation, code, séparateur, tableau', array_column($blocks, 'type')
+        === ['heading', 'paragraph', 'list', 'image', 'quote', 'code', 'divider', 'table', 'paragraph']
         && $blocks[2]['items'] === ['Farine', 'Eau'] && $blocks[3]['media'] === 'media1' && $blocks[3]['caption'] === 'La miche' && $blocks[4]['cite'] === 'Un boulanger'
-        && $blocks[5]['code'] === 'code <b>' && $blocks[7]['text'] === 'Farine · 500 g', json_encode($blocks, JSON_UNESCAPED_UNICODE));
+        && $blocks[5]['code'] === 'code <b>' && $blocks[7]['rows'] === [['Farine', '500 g']], json_encode($blocks, JSON_UNESCAPED_UNICODE));
+    [$more] = Wxr::blocks('<details><summary>Prix ?</summary><p>Sur devis.</p></details><details><summary>Délai ?</summary><p>Une semaine.</p></details>'
+        . '<figure class="wp-block-gallery"><img src="https://ancien.example/a.png" alt="A"><img src="https://ancien.example/b.png" alt="B"></figure>'
+        . '<video src="https://ancien.example/clip.mp4"></video>', static fn (string $url): ?string => 'm' . substr(md5($url), 0, 6));
+    check('conversion : questions-réponses en un bloc FAQ, galerie en images, vidéo en lien', array_column($more, 'type') === ['faq', 'image', 'image', 'paragraph']
+        && count($more[0]['items']) === 2 && $more[0]['items'][1]['q'] === 'Délai ?' && str_contains($more[3]['text'], 'clip.mp4'), json_encode($more, JSON_UNESCAPED_UNICODE));
     check('bilan : image d’un autre site laissée en lien, script écarté, code court compté', $stats === ['images' => 1, 'missed' => 1, 'shortcodes' => 1, 'dropped' => 1]
         && str_contains($blocks[8]['text'], 'href="https://cdn.example/b.png"'), json_encode($stats));
     [$classic] = Wxr::blocks("Première ligne\nsuite.\n\nDeuxième paragraphe.", static fn (): ?string => null);

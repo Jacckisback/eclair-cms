@@ -16,12 +16,16 @@ final class AdminWordpress
 {
     public static function page(array $user): never
     {
-        Admin::extensionPage('wordpress', __DIR__ . '/page.php', ['job' => Importer::job(), 'limit' => self::limit()], t('Import WordPress'));
+        Admin::extensionPage('wordpress', __DIR__ . '/page.php', ['job' => Importer::job(), 'limit' => self::limit(), 'pjob' => PackageImporter::job(),
+            'parts' => array_map('filesize', Package::parts())], t('Import WordPress'));
     }
 
     public static function action(array $user): never
     {
         $action = Req::input('action');
+        if (in_array($action, ['package', 'simulate', 'import', 'pstep', 'pcancel', 'pclear'], true)) {
+            self::package($user, $action);
+        }
         if ($action === 'cancel') {
             Importer::cancel();
             Admin::back('x/wordpress', t('Import abandonné. Les contenus déjà importés sont gardés.'));
@@ -54,11 +58,55 @@ final class AdminWordpress
         Admin::back('x/wordpress');
     }
 
+    /** Paquet Eclair Export : envoi des parties, simulation, import, abandon. */
+    private static function package(array $user, string $action): never
+    {
+        $pjob = PackageImporter::job();
+        $running = $pjob !== null && !$pjob['done'];
+        if ($action === 'pcancel') {
+            PackageImporter::cancel();
+            Admin::back('x/wordpress', t('Import abandonné. Les contenus déjà importés sont gardés.'));
+        }
+        if ($action === 'pclear') {
+            PackageImporter::cancel();
+            Package::clear(true);
+            Admin::back('x/wordpress', t('Paquet retiré du serveur.'));
+        }
+        if ($action === 'pstep') {
+            $job = PackageImporter::step($user);
+            [$n, $total] = PackageImporter::progress($job);
+            Admin::back('x/wordpress', !empty($job['done']) ? t('Import terminé.') : t('{n} contenus sur {total} importés : continue.', ['n' => $n, 'total' => $total]));
+        }
+        if ($running || (($job = Importer::job()) !== null && !$job['done'])) {
+            Admin::back('x/wordpress', t('Un import est déjà en cours : termine-le ou abandonne-le.'), 'bad');
+        }
+        if ($action === 'package') {
+            $n = Package::receive((array) ($_FILES['parts'] ?? []));
+            Admin::back('x/wordpress', is_string($n) ? $n : t('{n} archive(s) reçue(s).', ['n' => $n]), is_string($n) || $n === 0 ? 'bad' : 'ok');
+        }
+        extend_time(120);
+        $manifest = Package::open();
+        if (is_string($manifest)) {
+            Admin::back('x/wordpress', $manifest, 'bad');
+        }
+        if ($manifest['missing']) {
+            Admin::back('x/wordpress', t('Parties manquantes : {list}. Envoie-les aussi (ou dépose-les dans data/import/).', ['list' => implode(', ', $manifest['missing'])]), 'bad');
+        }
+        PackageImporter::start($manifest, ['dry' => $action === 'simulate', 'keep' => Req::bool('keep'), 'site' => Req::bool('site'), 'menus' => Req::bool('menus'), 'remote' => Req::bool('remote')]);
+        Admin::back('x/wordpress', $action === 'simulate' ? t('Simulation prête : lance-la, rien ne sera écrit.') : t('Paquet vérifié : import prêt.'));
+    }
+
     /** Lot suivant (appelé en boucle par la page) : avancement en JSON. */
     public static function step(array $user): never
     {
         session_write_close();
         extend_time(60);
+        $pjob = PackageImporter::job();
+        if ($pjob !== null && !$pjob['done']) {
+            $pjob = PackageImporter::step($user);
+            [$n, $total] = PackageImporter::progress($pjob);
+            Http::json(['ok' => $pjob !== [], 'done' => (bool) ($pjob['done'] ?? true), 'next' => $n, 'total' => $total]);
+        }
         $job = Importer::step($user);
         Http::json(['ok' => $job !== [], 'done' => (bool) ($job['done'] ?? true), 'next' => (int) ($job['next'] ?? 0), 'total' => (int) ($job['total'] ?? 0)]);
     }
