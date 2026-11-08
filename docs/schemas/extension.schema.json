@@ -35,7 +35,7 @@
       "type": "object", "additionalProperties": false,
       "properties": {
         "public": { "type": "array", "items": { "type": "object", "required": ["path", "handler"], "properties": {
-          "method": { "enum": ["GET"] }, "path": { "type": "string", "pattern": "^/[a-z0-9][a-z0-9/-]{0,99}$" }, "handler": { "$ref": "#/$defs/handler" }, "cache": { "type": "boolean" } } } },
+          "method": { "enum": ["GET", "POST"] }, "path": { "type": "string", "pattern": "^/[a-z0-9][a-z0-9/-]{0,99}$" }, "handler": { "$ref": "#/$defs/handler" }, "cache": { "type": "boolean" } } } },
         "admin": { "type": "array", "items": { "type": "object", "required": ["handler", "right"], "properties": {
           "method": { "enum": ["GET", "POST"] }, "path": { "type": "string", "pattern": "^(/[a-z0-9-]{1,40}){0,3}$" }, "handler": { "$ref": "#/$defs/handler" }, "right": { "$ref": "#/$defs/right" } } } }
       }
