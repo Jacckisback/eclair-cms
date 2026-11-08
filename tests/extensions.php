@@ -47,6 +47,23 @@ use Eclair\Themes;
         }
         return $dir;
     };
+    // Contrat POST public expérimental : seules les routes explicites sans cache sont recevables.
+    $publicPostAllowed = $make('public-post-allowed', [
+        'routes' => ['public' => [['method' => 'POST', 'path' => '/connexion-membre', 'handler' => 'page', 'cache' => false]], 'admin' => []],
+        'blocks' => [], 'nav' => [], 'dashboard' => [],
+    ]);
+    check('POST public sans cache : manifeste conforme', Extensions::validate($publicPostAllowed) === [],
+        implode(' | ', Extensions::validate($publicPostAllowed)));
+    $publicPostCached = $make('public-post-cached', [
+        'routes' => ['public' => [['method' => 'POST', 'path' => '/connexion-membre', 'handler' => 'page', 'cache' => true]], 'admin' => []],
+        'blocks' => [], 'nav' => [], 'dashboard' => [],
+    ]);
+    check('POST public avec cache : manifest refusé', Extensions::validate($publicPostCached) !== []);
+    $publicPostBadPath = $make('public-post-internal', [
+        'routes' => ['public' => [['method' => 'POST', 'path' => '/_eclair/member', 'handler' => 'page', 'cache' => false]], 'admin' => []],
+        'blocks' => [], 'nav' => [], 'dashboard' => [],
+    ]);
+    check('POST public sur chemin réservé : refusé', Extensions::validate($publicPostBadPath) !== []);
     $refus = [
         'route publique interne' => $make('interne', ['routes' => ['public' => [['path' => '/app/x', 'handler' => 'page']], 'admin' => []]]),
         'droit inconnu' => $make('droit', ['routes' => ['public' => [], 'admin' => [['path' => '', 'handler' => 'adminPage', 'right' => 'root']]]]),
