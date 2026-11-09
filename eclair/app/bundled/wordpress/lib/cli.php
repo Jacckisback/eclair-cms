@@ -6,11 +6,16 @@
  *
  *   php app/bundled/wordpress/lib/cli.php import paquet.zip [paquet-part2.zip …] [options]
  *
+ * Ou d'un export WordPress (Outils › Exporter), quelle que soit sa taille (lu en flux, sans limite d'envoi ni de durée) :
+ *
+ *   php app/bundled/wordpress/lib/cli.php import export.xml [--drafts] [--no-images] [--user=EMAIL] [--json]
+ *
  *   --dry-run      simulation : affiche ce qui serait créé, n'écrit rien
  *   --drafts       tout importer en brouillon
  *   --no-site      ne pas reprendre la page d'accueil ni le nom du site
  *   --no-menus     garder les menus d'Éclair
  *   --no-remote    ne pas télécharger depuis l'ancien site les médias absents du paquet
+ *   --no-images    (export .xml) ne pas copier les images de l'ancien site dans la médiathèque
  *   --user=EMAIL   compte auteur de l'import (par défaut : le premier administrateur)
  *   --json         bilan en JSON (pour un script)
  *
@@ -40,9 +45,11 @@ require ECLAIR_ROOT . '/app/lib/helpers.php';
 require __DIR__ . '/Wxr.php';
 require __DIR__ . '/Package.php';
 require __DIR__ . '/PackageImporter.php';
+require __DIR__ . '/Importer.php';
 
 use Eclair\Settings;
 use Eclair\Users;
+use EclairExt\Wordpress\Importer;
 use EclairExt\Wordpress\Package;
 use EclairExt\Wordpress\PackageImporter;
 
@@ -62,7 +69,7 @@ $fail = static function (string $message): never {
     exit(1);
 };
 if ($command !== 'import' || !$files) {
-    fwrite(STDERR, "Usage : php app/bundled/wordpress/lib/cli.php import paquet.zip [paquet-part2.zip …] [--dry-run] [--drafts] [--no-site] [--no-menus] [--no-remote] [--user=EMAIL] [--json]\n");
+    fwrite(STDERR, "Usage : php app/bundled/wordpress/lib/cli.php import paquet.zip [paquet-part2.zip …] [--dry-run] [--drafts] [--no-site] [--no-menus] [--no-remote] [--user=EMAIL] [--json]\n        php app/bundled/wordpress/lib/cli.php import export.xml [--drafts] [--no-images] [--user=EMAIL] [--json]\n");
     exit(1);
 }
 if (!Settings::installed()) {
@@ -73,8 +80,40 @@ if ($user === null) {
     $fail('Compte introuvable : précise --user=EMAIL d’un compte existant.');
 }
 $job = PackageImporter::job();
-if ($job !== null && !$job['done']) {
+$wxrJob = Importer::job();
+if (($job !== null && !$job['done']) || ($wxrJob !== null && !$wxrJob['done'])) {
     $fail('Un import est déjà en cours sur ce site : termine-le ou abandonne-le depuis l’administration.');
+}
+$json = isset($opts['json']);
+
+// Export WordPress (.xml) : lu en flux, puis importé lot après lot comme depuis l'administration.
+if (count($files) === 1 && preg_match('~\.xml$~i', $files[0])) {
+    if (!is_file($files[0])) {
+        $fail('Fichier introuvable : ' . $files[0]);
+    }
+    $job = Importer::startFile($files[0], !isset($opts['drafts']), !isset($opts['no-images']));
+    if (is_string($job)) {
+        $fail($job);
+    }
+    $json || fwrite(STDOUT, 'Import de ' . ($job['site'] ?: '?') . "\n");
+    do {
+        $job = Importer::step($user);
+        $json || fwrite(STDOUT, sprintf("\r  contenus   %d / %d   ", (int) ($job['next'] ?? 0), (int) ($job['total'] ?? 0)));
+    } while ($job !== [] && !$job['done']);
+    $r = $job['report'];
+    if ($json) {
+        echo json_encode(['source' => $job['site'], 'report' => $r], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), "\n";
+        exit(0);
+    }
+    echo "\n";
+    printf("  Contenus : %d articles, %d pages (%d déjà présents)\n", $r['posts'], $r['pages'], $r['skipped']);
+    printf("  Adresses : %d gardées à l'identique, %d alias ?p=\n", $r['routes'], $r['aliases']);
+    printf("  Images : %d copiées, %d laissées en lien ; %d codes courts restés en texte, %d éléments non repris\n", $r['images'], $r['missed'], $r['shortcodes'], $r['dropped']);
+    foreach ($r['errors'] as $error) {
+        echo "  ✗ $error\n";
+    }
+    echo "✓ Import terminé.\n";
+    exit(0);
 }
 
 // Les archives données remplacent celles déjà reçues.
@@ -98,7 +137,6 @@ if ($manifest['missing']) {
 $dry = isset($opts['dry-run']);
 PackageImporter::start($manifest, ['dry' => $dry, 'keep' => !isset($opts['drafts']), 'site' => !isset($opts['no-site']),
     'menus' => !isset($opts['no-menus']), 'remote' => !isset($opts['no-remote'])]);
-$json = isset($opts['json']);
 $json || fwrite(STDOUT, ($dry ? 'Simulation' : 'Import') . ' de ' . ($manifest['source']['url'] ?? '?') . "\n");
 do {
     $job = PackageImporter::step($user);

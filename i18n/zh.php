@@ -2163,4 +2163,5 @@ return [
     'Adresse à mesurer invalide : elle doit être publique (https://…).' => '要测速的地址无效：必须是公开地址（https://…）。',
     'Google PageSpeed est saturé pour le moment : réessaie dans quelques minutes.' => 'Google PageSpeed 当前繁忙：请几分钟后再试。',
     'Mesure impossible : Google PageSpeed n’a pas pu charger cette adresse (site hors ligne ou bloqué ?).' => '无法测速：Google PageSpeed 无法加载此地址（网站离线或被拦截？）。',
+    'Fichier d’export incomplet ou abîmé : exporte-le de nouveau depuis WordPress.' => '导出文件不完整或已损坏：请从 WordPress 重新导出。',
 ];

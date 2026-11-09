@@ -299,18 +299,37 @@ function capture_install(string $root, string $type, string $fixtures): void
 }
 
 /** Capture complète du rendu public des sites de référence avec le code courant. */
-function capture_all(string $root, string $fixtures): array
+/**
+ * $lite : les pages publiques sont rendues à partir de l'index léger (data/index-lite.php), comme sur un gros site, au lieu
+ * de l'index complet ; « lite » dit alors si ce fichier a bien été écrit et lu.
+ */
+function capture_all(string $root, string $fixtures, bool $lite = false): array
 {
     $sites = [];
     foreach (['blog', 'business', 'freelance', 'landing'] as $type) {
-        [$copy, $port, $server] = capture_serve($root, $fixtures . '/sites/' . $type, 'site-' . $type);
+        [$copy, $port, $server] = capture_serve($root, $fixtures . '/sites/' . $type, 'site-' . $type . ($lite ? '-lite' : ''));
+        if ($lite) {
+            file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_LITE_FROM', 0);\n");
+        }
         $jar = (string) tempnam(sys_get_temp_dir(), 'jar');
         try {
             $urls = capture_urls($port, $type === 'business' ? ['/', '/tous-les-blocs'] : ['/']);
             $visitor = capture_pages($port, $urls);
+            // Sorties « tout le site » (plan du site, llms.txt, flux) : code HTTP puis corps, pour celles qui existent.
+            $outputs = [];
+            foreach (['/sitemap.xml', '/llms.txt', '/llms-full.txt', '/feed.xml', '/products.xml'] as $u) {
+                $r = capture_req($port, 'GET', $u);
+                if ($r['status'] === 200) {
+                    $outputs[$u] = $r['status'] . "\n" . $r['body'];
+                }
+            }
+            if ($lite) {
+                $sites[$type] = ['visitor' => $visitor, 'outputs' => $outputs, 'lite' => is_file($copy . '/data/index-lite.php')];
+                continue;
+            }
             capture_login($port, $jar);
             $admin = capture_pages($port, $urls, $jar);
-            $sites[$type] = ['visitor' => $visitor, 'admin_same' => $visitor === $admin];
+            $sites[$type] = ['visitor' => $visitor, 'outputs' => $outputs, 'admin_same' => $visitor === $admin];
         } finally {
             proc_terminate($server);
             @unlink($jar);

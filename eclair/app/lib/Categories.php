@@ -118,12 +118,6 @@ final class Categories
     /** Nombre de contenus publiés par catégorie (articles par défaut, ou produits). */
     public static function counts(string $kind = 'post'): array
     {
-        $counts = [];
-        foreach (Content::published($kind) as $entry) {
-            if ($entry['category'] !== '') {
-                $counts[$entry['category']] = ($counts[$entry['category']] ?? 0) + 1;
-            }
-        }
-        return $counts;
+        return Content::tally($kind);
     }
 }

@@ -243,7 +243,7 @@ final class Installer
     /** Fichiers de données que l'installation peut créer, déjà présents avant elle. */
     private static function present(): array
     {
-        $names = array_merge(['site', 'users', 'keys', 'index', 'categories', 'menus', 'search', 'redirects'], Store::names('content'));
+        $names = array_merge(['site', 'users', 'keys', 'index', 'index-lite', 'categories', 'menus', 'search', 'redirects'], Store::names('content'));
         return array_values(array_filter($names, static fn (string $name): bool => Store::exists($name)));
     }
 
@@ -253,7 +253,7 @@ final class Installer
      */
     private static function rollback(array $before): void
     {
-        foreach (array_merge(['site', 'users', 'keys', 'index', 'categories', 'menus', 'search', 'redirects'], Store::names('content')) as $name) {
+        foreach (array_merge(['site', 'users', 'keys', 'index', 'index-lite', 'categories', 'menus', 'search', 'redirects'], Store::names('content')) as $name) {
             if (!in_array($name, $before, true)) {
                 Store::delete($name);
             }

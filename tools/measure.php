@@ -247,9 +247,17 @@ function seed(string $root, int $n): void
     $dir = $root . '/data/content';
     for ($i = 1; $i <= $n; $i++) {
         $id = sprintf('m%06d', $i);
-        $item = ['id' => $id, 'type' => 'post', 'title' => 'Article de mesure ' . $i, 'slug' => 'article-mesure-' . $i, 'status' => 'published',
-            'created' => time() - $i * 3600, 'updated' => time() - $i * 3600, 'published' => time() - $i * 3600, 'author' => '', 'lang' => 'fr',
-            'blocks' => [['type' => 'paragraph', 'text' => str_repeat('Texte de mesure représentatif. ', 40)]]];
+        // Contenu complet, tel que Content::build l'enregistre : un fichier sans « date », « seo » ou « summary » faisait échouer
+        // la reconstruction de l'index, et l'accueil des deux installations mesurées répondait 500 (option --pages inutilisable).
+        $at = time() - $i * 3600;
+        $item = ['id' => $id, 'type' => 'post', 'status' => 'published', 'title' => 'Article de mesure ' . $i, 'slug' => 'article-mesure-' . $i,
+            'route' => '', 'lang' => 'fr', 'tgroup' => '',
+            'blocks' => [['type' => 'paragraph', 'text' => str_repeat('Texte de mesure représentatif. ', 40)]],
+            'summary' => 'Résumé de l’article de mesure ' . $i . '.', 'image' => '', 'category' => '', 'author' => '',
+            'created' => $at, 'date' => $at, 'updated' => $at,
+            'seo' => ['title' => '', 'description' => '', 'keyword' => '', 'canonical' => '', 'noindex' => false],
+            'options' => ['hide_title' => false, 'toc' => 'auto', 'wide' => false, 'noads' => false],
+            'score' => ['seo' => 0, 'geo' => 0]];
         file_put_contents($dir . '/' . $id . '.php', "<?php exit; ?>\n" . json_encode($item));
     }
     @unlink($root . '/data/index.php');

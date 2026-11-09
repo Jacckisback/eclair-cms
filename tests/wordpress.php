@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 require_once ECLAIR_ROOT . '/app/bundled/wordpress/lib/Wxr.php';
 
+use Eclair\Store;
 use EclairExt\Wordpress\Wxr;
 
 (static function (array $argv): void {
@@ -53,9 +54,9 @@ use EclairExt\Wordpress\Wxr;
         . '<blockquote><p>Le pain, c’est la vie.</p><cite>Un boulanger</cite></blockquote><script>alert(1)</script><pre>code &lt;b&gt;</pre><hr>'
         . '<table><tr><td>Farine</td><td>500 g</td></tr></table><p><img src="https://cdn.example/b.png" alt="Ailleurs"></p>',
         static fn (string $url): ?string => str_contains($url, 'ancien.example') ? 'media1' : null);
-    check('conversion : titre, paragraphe, liste (sans sous-liste), image légendée, citation, code, séparateur, tableau', array_column($blocks, 'type')
+    check('conversion : titre, paragraphe, liste (sous-liste à la suite de son élément), image légendée, citation, code, séparateur, tableau', array_column($blocks, 'type')
         === ['heading', 'paragraph', 'list', 'image', 'quote', 'code', 'divider', 'table', 'paragraph']
-        && $blocks[2]['items'] === ['Farine', 'Eau'] && $blocks[3]['media'] === 'media1' && $blocks[3]['caption'] === 'La miche' && $blocks[4]['cite'] === 'Un boulanger'
+        && $blocks[2]['items'] === ['Farine', 'Eau', 'tiède'] && $blocks[3]['media'] === 'media1' && $blocks[3]['caption'] === 'La miche' && $blocks[4]['cite'] === 'Un boulanger'
         && $blocks[5]['code'] === 'code <b>' && $blocks[7]['rows'] === [['Farine', '500 g']], json_encode($blocks, JSON_UNESCAPED_UNICODE));
     [$more] = Wxr::blocks('<details><summary>Prix ?</summary><p>Sur devis.</p></details><details><summary>Délai ?</summary><p>Une semaine.</p></details>'
         . '<figure class="wp-block-gallery"><img src="https://ancien.example/a.png" alt="A"><img src="https://ancien.example/b.png" alt="B"></figure>'
@@ -66,6 +67,65 @@ use EclairExt\Wordpress\Wxr;
         && str_contains($blocks[8]['text'], 'href="https://cdn.example/b.png"'), json_encode($stats));
     [$classic] = Wxr::blocks("Première ligne\nsuite.\n\nDeuxième paragraphe.", static fn (): ?string => null);
     check('éditeur classique (sans balises) : paragraphes retrouvés', count($classic) === 2 && str_contains($classic[0]['text'], 'suite.'));
+    // Article classique qui mêle texte libre et balises : mêmes paragraphes que WordPress à l'affichage (wpautop).
+    [$mixed, $mixedStats] = Wxr::blocks("Intro en <strong>gras</strong> et <a href=\"https://ancien.example/x/\">lien</a>.\nMême paragraphe.\n\n"
+        . '[caption id="attachment_7" align="aligncenter" width="300"]<a href="https://ancien.example/a.png"><img src="https://ancien.example/a-300x200.png" alt="Miche" /></a> La <em>miche</em>[/caption]'
+        . "\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ\n\n[embed]https://vimeo.com/123456[/embed]\n<h2>Titre</h2>\nTexte après le titre.\n"
+        . "<ul>\n<li>Un<ul><li>Sous un</li></ul></li>\n<li>Deux</li>\n</ul>\n<pre>a\n\nb</pre>\n[formulaire id=\"5\"]\n\nFin.",
+        static fn (string $url): ?string => str_contains($url, 'ancien.example') ? 'media1' : null);
+    check('éditeur classique avec balises : paragraphes, légende [caption], vidéos (adresse seule, [embed]), sous-liste, <pre> intact',
+        array_column($mixed, 'type') === ['paragraph', 'image', 'video', 'video', 'heading', 'paragraph', 'list', 'code', 'paragraph', 'paragraph']
+        && str_contains($mixed[0]['text'], '<strong>gras</strong>') && str_contains($mixed[0]['text'], 'Même paragraphe.')
+        && $mixed[1]['caption'] === 'La <em>miche</em>' && ($mixed[1]['link'] ?? '') === 'https://ancien.example/a.png'
+        && $mixed[2]['url'] === 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' && $mixed[3]['url'] === 'https://vimeo.com/123456'
+        && $mixed[5]['text'] === 'Texte après le titre.' && $mixed[6]['items'] === ['Un', 'Sous un', 'Deux'] && $mixed[7]['code'] === "a\n\nb"
+        && $mixedStats['shortcodes'] === 1 && $mixed[9]['text'] === 'Fin.', json_encode($mixed, JSON_UNESCAPED_UNICODE));
+    [$embed] = Wxr::blocks("<!-- wp:paragraph -->\n<p>Deux\nlignes.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:embed -->\n<figure class=\"wp-block-embed\"><div class=\"wp-block-embed__wrapper\">\nhttps://youtu.be/abc123XYZ_0\n</div></figure>\n<!-- /wp:embed -->"
+        . '<p><img src="data:image/gif;base64,R0lGOD" data-lazy-src="https://ancien.example/b.png" alt="B"></p>', static fn (string $url): ?string => str_contains($url, 'ancien.example') ? 'media2' : null);
+    check('éditeur de blocs : paragraphes laissés tels quels, bloc Embed en vidéo, image à chargement différé retrouvée', array_column($embed, 'type') === ['paragraph', 'video', 'image']
+        && !str_contains($embed[0]['text'], '<br') && $embed[2]['media'] === 'media2', json_encode($embed, JSON_UNESCAPED_UNICODE));
+    $meta = static fn (array $pairs): string => implode('', array_map(static fn (string $k, string $v): string => '<wp:postmeta><wp:meta_key>' . $k . '</wp:meta_key><wp:meta_value><![CDATA[' . $v . ']]></wp:meta_value></wp:postmeta>', array_keys($pairs), $pairs));
+    $seoExport = Wxr::parse($wxr($site,
+        $item(31, 'post', 'publish', 'Pain au levain', $site . '/pain/', 'pain', '<p>x</p>', $meta(['_yoast_wpseo_title' => 'Recette du pain au levain maison %%sep%% %%sitename%%',
+            '_yoast_wpseo_metadesc' => 'La recette complète, pas à pas.', '_yoast_wpseo_focuskw' => 'pain au levain', '_yoast_wpseo_meta-robots-noindex' => '1',
+            '_yoast_wpseo_canonical' => $site . '/pain/']))
+        . $item(32, 'post', 'publish', 'Brioche', $site . '/brioche/', 'brioche', '<p>x</p>', $meta(['rank_math_title' => '%title% %sep% %sitename%', 'rank_math_description' => '%excerpt%',
+            'rank_math_focus_keyword' => 'brioche,brioche maison', 'rank_math_robots' => 'a:1:{i:0;s:5:"index";}', 'rank_math_canonical_url' => 'https://autre.example/brioche/']))
+        . $item(33, 'page', 'publish', 'Contact', $site . '/contact/', 'contact', '<p>x</p>', $meta(['_seopress_titles_title' => 'Nous écrire', '_seopress_robots_index' => 'yes']))));
+    $seo = is_array($seoExport) ? array_column($seoExport['items'], 'seo', 'wp') : [];
+    check('référencement repris des extensions (Yoast, Rank Math, SEOPress) : titre et description personnalisés, mot-clé, noindex',
+        ($seo[31] ?? []) === ['title' => 'Recette du pain au levain maison · Le Fournil d’Antan', 'description' => 'La recette complète, pas à pas.', 'keyword' => 'pain au levain', 'canonical' => '', 'noindex' => true]
+        && ($seo[33]['title'] ?? '') === 'Nous écrire' && ($seo[33]['noindex'] ?? false) === true, json_encode($seo, JSON_UNESCAPED_UNICODE));
+    check('référencement : simple modèle de l’extension et variable inconnue non repris, canonical vers un autre site gardée',
+        ($seo[32] ?? []) === ['title' => '', 'description' => '', 'keyword' => 'brioche', 'canonical' => 'https://autre.example/brioche/', 'noindex' => false], json_encode($seo[32] ?? null, JSON_UNESCAPED_UNICODE));
+
+    // Lecture en flux d'un fichier : mêmes contenus que la lecture d'un texte, sans garder l'export en mémoire.
+    $many = '';
+    for ($i = 1; $i <= 130; $i++) {
+        $many .= $item(100 + $i, 'post', 'publish', 'Article ' . $i, $site . '/2024/03/article-' . $i . '/', 'article-' . $i, '<p>Texte ' . $i . '</p>');
+    }
+    $stream = sys_get_temp_dir() . '/eclair-wxr-flux-' . getmypid() . '.xml';
+    file_put_contents($stream, $wxr($site, $many . $item(999, 'attachment', 'inherit', 'a', $site . '/a/', 'a', '', '<wp:attachment_url>' . $site . '/wp-content/uploads/a.png</wp:attachment_url>')));
+    $got = [];
+    $head = Wxr::parseFile($stream, static function (array $it) use (&$got): void {
+        $got[] = $it;
+    });
+    $whole = Wxr::parse((string) file_get_contents($stream));
+    check('fichier lu en flux : mêmes contenus, catégories et fichiers joints que la lecture en mémoire', is_array($head) && is_array($whole) && $got === $whole['items']
+        && $head['count'] === 130 && $head['site'] === $whole['site'] && $head['categories'] === $whole['categories'] && $head['attachments'] === $whole['attachments']
+        && ($got[129]['route'] ?? '') === '/2024/03/article-130/' && Wxr::MAX === Eclair\Content::MAX_ITEMS, is_string($head) ? $head : (string) count($got));
+    // Déclaration DOCTYPE à cheval sur deux morceaux lus (1 Mio) : refusée quand même, avant toute lecture XML.
+    file_put_contents($stream, '<?xml version="1.0"?><!--' . str_repeat('x', 1048576 - 30) . '--><!DOC' . 'TYPE x [<!ENTITY a "b">]><rss/>');
+    $none = static function (array $it): void {
+    };
+    check('fichier en flux : DOCTYPE refusé même à cheval sur deux morceaux, entité seule aussi', is_string(Wxr::parseFile($stream, $none))
+        && str_contains((string) Wxr::parseFile($stream, $none), 'DOCTYPE'));
+    file_put_contents($stream, substr($wxr($site, $many), 0, -900));
+    $cut = Wxr::parseFile($stream, $none);
+    check('fichier tronqué : signalé, jamais importé à moitié sans le dire', is_string($cut) && str_contains($cut, 'incomplet'), is_string($cut) ? $cut : 'accepté');
+    file_put_contents($stream, '<html><body>pas un export</body></html>');
+    check('fichier qui n’est pas un export : refusé', is_string(Wxr::parseFile($stream, $none)) && is_string(Wxr::parseFile($stream . '.absent', $none)));
+    @unlink($stream);
 
     if (in_array('--unit', $argv, true)) {
         return;
@@ -80,7 +140,8 @@ use EclairExt\Wordpress\Wxr;
     $file = sys_get_temp_dir() . '/eclair-wxr-' . getmypid() . '.xml';
     file_put_contents($file, $wxr($old, $item(12, 'post', 'publish', 'Pain au levain', $old . '/2024/03/pain-au-levain/', 'pain-au-levain',
             '<h2>Le levain</h2><p>Un <strong>bon</strong> pain.</p><figure><img src="' . $old . '/wp-content/uploads/2024/03/levain-300x200.png" alt="Levain"></figure>',
-            '<category domain="category" nicename="recettes"><![CDATA[Recettes]]></category><wp:postmeta><wp:meta_key>_thumbnail_id</wp:meta_key><wp:meta_value>99</wp:meta_value></wp:postmeta>')
+            '<category domain="category" nicename="recettes"><![CDATA[Recettes]]></category><wp:postmeta><wp:meta_key>_thumbnail_id</wp:meta_key><wp:meta_value>99</wp:meta_value></wp:postmeta>'
+            . $meta(['_yoast_wpseo_title' => 'Le vrai pain au levain', '_yoast_wpseo_metadesc' => 'Notre méthode, du levain à la cuisson.']))
         . $item(13, 'page', 'publish', 'Café crème', $old . '/caf%c3%a9-cr%c3%a8me/', 'caf%c3%a9-cr%c3%a8me', "Notre café.\n\nNotre crème.")
         . $item(14, 'post', 'publish', 'Liens simples', $old . '/?p=14', 'liens-simples', '<p>Ancien lien à paramètre.</p>')
         . $item(99, 'attachment', 'inherit', 'levain', $old . '/levain/', 'levain', '', '<wp:attachment_url>' . $old . '/wp-content/uploads/2024/03/levain.png</wp:attachment_url>')));
@@ -119,6 +180,8 @@ use EclairExt\Wordpress\Wxr;
         $post = $v->req('GET', '/2024/03/pain-au-levain/');
         check('article servi à son adresse WordPress exacte, contenu converti, image locale', $post['status'] === 200 && str_contains($post['body'], '<h2')
             && str_contains($post['body'], 'Un <strong>bon</strong> pain.') && str_contains($post['body'], '/media/') && !str_contains($post['body'], ':' . $wpPort . '/wp-content'));
+        check('titre et description saisis dans Yoast SEO repris sur la page', str_contains($post['body'], '<title>Le vrai pain au levain</title>')
+            && str_contains($post['body'], '<meta name="description" content="Notre méthode, du levain à la cuisson.">'));
         $log = (string) @file_get_contents($wpDir . '/log.jsonl');
         check('image d’origine téléchargée (pas la vignette -300x200), une seule fois pour l’article et sa une', str_contains($log, '/2024/03/levain.png')
             && !str_contains($log, 'levain-300x200') && substr_count($log, 'levain.png') === 1, $log);
@@ -136,6 +199,41 @@ use EclairExt\Wordpress\Wxr;
         $page = $c->req('GET', '/gestion/x/wordpress');
         check('réimport du même export : aucun doublon, contenus signalés déjà présents', count(glob($copy . '/data/content/*.php') ?: []) === $before
             && str_contains($page['body'], '(3 déjà présents)'));
+        check('import terminé : file d’attente et fichiers joints retirés du disque, fichier de travail réduit au bilan', !is_dir($copy . '/data/ext/wordpress/queue')
+            && !is_file($copy . '/data/ext/wordpress/attachments.php') && filesize($copy . '/data/ext/wordpress/job.php') < 2000);
+
+        // Gros export, en ligne de commande : lu en flux, rangé par paquets de 50, importé sans limite d'envoi ni de durée.
+        $big = '';
+        for ($i = 1; $i <= 120; $i++) {
+            $big .= $item(500 + $i, 'post', 'publish', 'Série ' . $i, $old . '/serie/numero-' . $i . '/', 'numero-' . $i, "Premier paragraphe $i.\n\nSecond paragraphe $i.",
+                $i === 7 ? $meta(['rank_math_description' => 'Description de la série sept.']) : '');
+        }
+        file_put_contents($file, $wxr($old, $big));
+        $cli = escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($copy . '/app/bundled/wordpress/lib/cli.php') . ' import ';
+        exec($cli . escapeshellarg($file) . ' --no-images --json 2>&1', $lines, $code);
+        $bilan = json_decode(implode("\n", $lines), true);
+        check('ligne de commande : export .xml importé (120 articles, adresses gardées)', $code === 0 && ($bilan['report']['posts'] ?? 0) === 120 && ($bilan['report']['routes'] ?? 0) === 120
+            && ($bilan['report']['errors'] ?? null) === [], implode(' ', array_slice($lines, 0, 3)));
+        $serie = $v->req('GET', '/serie/numero-77/');
+        $seven = $v->req('GET', '/serie/numero-7/');
+        check('…contenus servis à leur adresse, paragraphes de l’éditeur classique, description SEO reprise', $serie['status'] === 200
+            && str_contains($serie['body'], '<p>Premier paragraphe 77.</p>') && str_contains($serie['body'], '<p>Second paragraphe 77.</p>')
+            && str_contains($seven['body'], '<meta name="description" content="Description de la série sept.">'));
+        $found = $v->req('GET', '/recherche?q=' . rawurlencode('série 118'));
+        check('…et trouvés par la recherche (index de recherche écrit par lots)', str_contains($found['body'], '/serie/numero-118/'));
+        exec($cli . escapeshellarg($file) . ' --no-images --json 2>&1', $again, $code2);
+        check('ligne de commande : réimport sans doublon', $code2 === 0 && (json_decode(implode("\n", $again), true)['report']['skipped'] ?? 0) === 120);
+        exec($cli . escapeshellarg($file . '.absent.xml') . ' 2>&1', $missing, $code3);
+        check('ligne de commande : fichier introuvable, erreur claire', $code3 === 1 && str_contains(implode(' ', $missing), 'introuvable'));
+
+        // Import commencé par une version précédente (tout l'export dans le fichier de travail) : repris tel quel.
+        $legacy = Wxr::parse($wxr($old, $item(701, 'post', 'publish', 'Ancien format un', $old . '/ancien-format-un/', 'ancien-format-un', '<p>Un.</p>')
+            . $item(702, 'page', 'publish', 'Ancien format deux', $old . '/ancien-format-deux/', 'ancien-format-deux', '<p>Deux.</p>')));
+        file_put_contents($copy . '/data/ext/wordpress/job.php', Store::GUARD . json_encode(['site' => $old, 'title' => 'x', 'categories' => [], 'attachments' => [], 'items' => $legacy['items'],
+            'total' => 2, 'next' => 0, 'keep' => true, 'images' => false, 'started' => time(), 'done' => false,
+            'report' => ['posts' => 0, 'pages' => 0, 'skipped' => 0, 'routes' => 0, 'aliases' => 0, 'images' => 0, 'missed' => 0, 'shortcodes' => 0, 'dropped' => 0, 'errors' => []]]));
+        $c->req('POST', '/gestion/x/wordpress', $c->token($c->req('GET', '/gestion/x/wordpress')['body']) + ['action' => 'step']);
+        check('import commencé avant la mise à jour : terminé sans rien perdre', $v->req('GET', '/ancien-format-un/')['status'] === 200 && $v->req('GET', '/ancien-format-deux/')['status'] === 200);
     } finally {
         proc_terminate($server);
         proc_terminate($wpServer);

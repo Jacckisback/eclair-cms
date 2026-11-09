@@ -418,7 +418,7 @@ final class Extensions
         $contents = [];
         if ($types !== []) {
             foreach (Content::index() as $entry) {
-                $item = Content::get((string) $entry['id']);
+                $item = Content::peek((string) $entry['id']);
                 foreach ((array) ($item['blocks'] ?? []) as $b) {
                     if (in_array($b['type'] ?? '', $types, true)) {
                         $contents[] = ['id' => (string) $entry['id'], 'title' => (string) ($entry['title'] ?? ''), 'status' => (string) ($entry['status'] ?? '')];

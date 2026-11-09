@@ -57,15 +57,14 @@ final class AdminWordpress
                     ? t('Fichier plus lourd que ce que ton hébergeur accepte ({n}) : exporte par type ou par période.', ['n' => self::limit()])
                     : t('Choisis d’abord le fichier .xml exporté depuis WordPress.'), 'bad');
             }
-            $export = Wxr::parse((string) file_get_contents($tmp));
-            if (is_string($export)) {
-                Admin::back('x/wordpress', $export, 'bad');
+            // Lu en flux, contenu par contenu : un gros export ne dépasse ni la mémoire ni le temps d'une requête.
+            session_write_close();
+            extend_time(300);
+            $job = Importer::startFile($tmp, Req::bool('keep'), Req::bool('images'));
+            if (is_string($job)) {
+                Admin::back('x/wordpress', $job, 'bad');
             }
-            if (!$export['items']) {
-                Admin::back('x/wordpress', t('Aucun article ni page dans cet export.'), 'bad');
-            }
-            Importer::start($export, Req::bool('keep'), Req::bool('images'));
-            Admin::back('x/wordpress', t('Export lu : {n} contenus prêts à importer.', ['n' => count($export['items'])]));
+            Admin::back('x/wordpress', t('Export lu : {n} contenus prêts à importer.', ['n' => (int) $job['total']]));
         }
         Admin::back('x/wordpress');
     }

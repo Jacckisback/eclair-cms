@@ -218,7 +218,7 @@ final class Shop
     /** Lien vers une page de la boutique (CGV, livraison et retours…), si elle est publiée. */
     public static function pageLink(string $key): ?array
     {
-        $entry = Content::index()[(string) Settings::get('shop.' . $key)] ?? null;
+        $entry = Content::brief((string) Settings::get('shop.' . $key));
         return $entry && $entry['type'] === 'page' && Content::visible($entry) ? $entry : null;
     }
 

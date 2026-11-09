@@ -22,12 +22,11 @@ final class Menus
     public static function items(string $name): array
     {
         $out = [];
-        $index = Content::index();
         foreach (self::raw($name) as $item) {
             $label = (string) ($item['label'] ?? '');
             switch ($item['type'] ?? '') {
                 case 'content':
-                    $entry = $index[$item['id'] ?? ''] ?? null;
+                    $entry = Content::brief((string) ($item['id'] ?? ''));
                     if ($entry && Content::visible($entry)) {
                         $path = Content::path($entry);
                         $out[] = ['label' => $label !== '' ? $label : $entry['title'], 'href' => path_to($path), 'path' => $path];

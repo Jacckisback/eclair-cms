@@ -603,7 +603,7 @@ final class Media
                 $out[] = $entry['title'];
                 continue;
             }
-            $item = Content::get($entry['id']);
+            $item = Content::peek($entry['id']);
             if ($item && in_array($id, Blocks::media($item['blocks']), true)) {
                 $out[] = $entry['title'];
             }
