@@ -96,6 +96,8 @@ declare(strict_types=1);
     $zip->close();
 
     [$copy, $port, $server] = serve('wp-package');
+    [$psiPort, $psiServer] = start_server([__DIR__ . '/fake-psi.php'], [], 64001, 65000);
+    file_put_contents($copy . '/eclair-config.php', "<?php\ndefined('ECLAIR') || exit;\ndefine('ECLAIR_AI_ENDPOINTS', ['pagespeed' => 'http://127.0.0.1:$psiPort/pagespeedonline/v5']);\n");
     $upload = static function (object $c, array $fields, array $parts): array {
         $post = $fields;
         foreach ($parts as $i => $file) {
@@ -188,6 +190,31 @@ declare(strict_types=1);
         check('menu repris (sous-menu mis à plat)', str_contains($v->req('GET', '/notre-histoire/')['body'], '>Recettes<'));
         check('aucun fichier de l’archive extrait hors des entrées attendues', !is_file($copy . '/evil.php') && !is_file(dirname($copy) . '/evil.php'));
 
+        // Rapport de migration pour le client.
+        $rep = $c->req('GET', '/gestion/x/wordpress/report?lang=fr');
+        check('rapport : page autonome, politique de sécurité propre, sans script', $rep['status'] === 200 && str_contains($rep['body'], 'Rapport de migration vers Éclair')
+            && str_contains($rep['headers']['content-security-policy'] ?? '', "default-src 'none'") && !str_contains($rep['body'], '<script'));
+        check('rapport : contenus, ancienne et nouvelle adresse, adresses vérifiées sans 404', str_contains($rep['body'], 'Pain au levain') && str_contains($rep['body'], '/2024/03/pain-au-levain/')
+            && str_contains($rep['body'], 'Migration réussie') && str_contains($rep['body'], 'Redirections créées') && str_contains($rep['body'], '/ancienne-boutique'));
+        check('rapport : éléments non migrés avec leur raison, liste de contrôle SEO', str_contains($rep['body'], 'clip.mp4') && str_contains($rep['body'], 'expression régulière')
+            && str_contains($rep['body'], 'Liste de contrôle SEO') && str_contains($rep['body'], 'Zéro erreur 404'));
+        check('rapport en espagnol et en anglais', str_contains($c->req('GET', '/gestion/x/wordpress/report?lang=es')['body'], 'Informe de migración a Éclair')
+            && str_contains($c->req('GET', '/gestion/x/wordpress/report?lang=en')['body'], 'Migration report to Éclair'));
+        $dl = $c->req('GET', '/gestion/x/wordpress/report?lang=fr&download=1');
+        check('rapport : téléchargement en fichier HTML', str_contains($dl['headers']['content-disposition'] ?? '', 'attachment; filename="rapport-migration-fournil-ancien-example-'));
+        $page = $c->req('GET', '/gestion/x/wordpress');
+        check('écran : liens vers le rapport, mesures de vitesse, bloc « Préparé par », sans attribut style', str_contains($page['body'], 'x/wordpress/report?lang=es')
+            && str_contains($page['body'], 'name="which"') && str_contains($page['body'], 'name="company"') && !preg_match('~<[^>]+\sstyle="~', $page['body']));
+        $c->req('POST', '/gestion/x/wordpress', $c->token($page['body']) + ['action' => 'branding', 'name' => 'Thierry Test', 'company' => 'Agence <b>Test</b>', 'email' => 'pas-un-email', 'website' => 'javascript:alert(1)']);
+        $c->req('POST', '/gestion/x/wordpress', $c->token($c->req('GET', '/gestion/x/wordpress')['body']) + ['action' => 'speed', 'which' => 'old', 'url' => 'https://www.fournil-ancien.example/']);
+        $c->req('POST', '/gestion/x/wordpress', $c->token($c->req('GET', '/gestion/x/wordpress')['body']) + ['action' => 'speed', 'which' => 'new', 'url' => 'https://www.fournil-neuf.example/']);
+        $bad = $c->req('POST', '/gestion/x/wordpress', $c->token($c->req('GET', '/gestion/x/wordpress')['body']) + ['action' => 'speed', 'which' => 'new', 'url' => 'file:///etc/passwd']);
+        $rep = $c->req('GET', '/gestion/x/wordpress/report?lang=fr')['body'];
+        check('vitesse avant/après : scores et évolution', str_contains($rep, 'Vitesse avant / après') && str_contains($rep, '<td class="n">42</td>') && str_contains($rep, '<strong>98</strong>')
+            && str_contains($rep, '+56 pts') && str_contains($rep, '6,2 s') && str_contains($rep, '1,1 s'));
+        check('vitesse : adresse non web refusée', !str_contains((string) json_encode(Eclair\Store::read('x', null)), 'passwd') && !str_contains($rep, 'passwd'));
+        check('bloc « Préparé par » : texte nettoyé, e-mail et site invalides écartés', str_contains($rep, 'Thierry Test · Agence Test') && !str_contains($rep, 'javascript:') && !str_contains($rep, 'pas-un-email'));
+
         // Réimport : aucun doublon.
         $count = count(glob($copy . '/data/content/*.php') ?: []);
         $page = $c->req('GET', '/gestion/x/wordpress');
@@ -205,6 +232,7 @@ declare(strict_types=1);
         check('ligne de commande : jamais exécutée depuis le web', $web['status'] === 404 || $web['status'] === 403);
     } finally {
         proc_terminate($server);
+        proc_terminate($psiServer);
         exec('rm -rf ' . escapeshellarg($copy) . ' ' . escapeshellarg($tmp));
     }
 })($argv);

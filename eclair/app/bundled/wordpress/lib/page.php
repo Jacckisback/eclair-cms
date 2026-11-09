@@ -57,6 +57,34 @@ $r = $job['report'] ?? [];
       <ul class="small"><?php foreach ($pr['not_migrated'] as [$what, $name, $why]): ?><li><strong><?= e($name) ?></strong> — <?= e($why) ?></li><?php endforeach ?></ul>
     </details>
     <?php endif ?>
+    <?php $b = $v['branding']; $sp = $v['speed']; ?>
+    <h3><?= e(t('Rapport de migration pour le client')) ?></h3>
+    <p class="small muted"><?= e(t('Page aux couleurs d’Éclair : contenus, adresses vérifiées une par une, redirections, éléments non migrés, liste de contrôle SEO et vitesse avant/après. Pour un PDF, ouvre-la puis imprime-la.')) ?></p>
+    <div class="row">
+      <?php foreach (EclairExt\Wordpress\Report::LANGS as $code => $label): ?>
+        <a class="btn" href="<?= e(admin_url('x/wordpress/report?lang=' . $code)) ?>" target="_blank" rel="noopener"><?= e($label) ?></a>
+        <a class="btn btn-ghost" href="<?= e(admin_url('x/wordpress/report?lang=' . $code . '&download=1')) ?>"><?= e(t('Télécharger')) ?></a>
+      <?php endforeach ?>
+    </div>
+    <details><summary><?= e(t('Vitesse avant/après (Google PageSpeed)')) ?></summary>
+      <p class="small muted"><?= e(t('Mesure l’ancien site tant qu’il est encore en ligne, avant de faire pointer le domaine vers Éclair ; mesure ensuite le nouveau. Chaque mesure prend environ une minute.')) ?></p>
+      <?php foreach (['old' => $pj['source'], 'new' => rtrim((string) Eclair\Settings::get('url'), '/') . '/'] as $which => $default): ?>
+      <form method="post" action="<?= e(admin_url('x/wordpress')) ?>" class="row"><?= Security::csrfField() ?><input type="hidden" name="action" value="speed"><input type="hidden" name="which" value="<?= e($which) ?>">
+        <label class="field"><span class="label"><?= e($which === 'old' ? t('Ancien site (WordPress)') : t('Nouveau site (Éclair)')) ?></span><input type="url" name="url" value="<?= e($sp[$which]['url'] ?? $default) ?>" required></label>
+        <button class="btn" type="submit"><?= e(t('Mesurer')) ?></button>
+        <?php if (isset($sp[$which]['score'])): ?><span class="small"><?= e(t('Score {n}/100', ['n' => (int) $sp[$which]['score']])) ?></span><?php endif ?>
+      </form>
+      <?php endforeach ?>
+    </details>
+    <details><summary><?= e(t('Bloc « Préparé par » du rapport')) ?></summary>
+      <form method="post" action="<?= e(admin_url('x/wordpress')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="branding">
+        <?php foreach (['name' => t('Nom'), 'company' => t('Entreprise'), 'email' => t('E-mail'), 'phone' => t('Téléphone'), 'website' => t('Site web')] as $k => $label): ?>
+          <label class="field"><span class="label"><?= e($label) ?></span><input type="text" name="<?= e($k) ?>" value="<?= e($b[$k]) ?>"></label>
+        <?php endforeach ?>
+        <label class="field"><span class="label"><?= e(t('Message du bloc « Et maintenant ? » (vide : texte par défaut)')) ?></span><textarea name="note" rows="2"><?= e($b['note']) ?></textarea></label>
+        <div><button class="btn" type="submit"><?= e(t('Enregistrer')) ?></button></div>
+      </form>
+    </details>
     <?php if ($pj['dry'] && $v['parts']): ?>
     <form method="post" action="<?= e(admin_url('x/wordpress')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="import">
       <?php foreach (['keep', 'site', 'menus', 'remote'] as $opt): ?><input type="hidden" name="<?= e($opt) ?>" value="<?= !empty($pj[$opt]) ? '1' : '' ?>"><?php endforeach ?>

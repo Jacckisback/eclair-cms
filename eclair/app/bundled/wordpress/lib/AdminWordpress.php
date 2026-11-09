@@ -17,12 +17,24 @@ final class AdminWordpress
     public static function page(array $user): never
     {
         Admin::extensionPage('wordpress', __DIR__ . '/page.php', ['job' => Importer::job(), 'limit' => self::limit(), 'pjob' => PackageImporter::job(),
-            'parts' => array_map('filesize', Package::parts())], t('Import WordPress'));
+            'parts' => array_map('filesize', Package::parts()), 'branding' => Report::branding(), 'speed' => Report::speed()], t('Import WordPress'));
     }
 
     public static function action(array $user): never
     {
         $action = Req::input('action');
+        if ($action === 'branding') {
+            Report::saveBranding(['name' => Req::input('name'), 'company' => Req::input('company'), 'email' => Req::input('email'),
+                'phone' => Req::input('phone'), 'website' => Req::input('website'), 'note' => Req::input('note')]);
+            Admin::back('x/wordpress', t('Enregistré.'));
+        }
+        if ($action === 'speed') {
+            session_write_close();
+            extend_time(150);
+            $which = Req::input('which') === 'old' ? 'old' : 'new';
+            $error = Report::measure($which, trim(Req::input('url')));
+            Admin::back('x/wordpress', $error ?? t('Vitesse mesurée.'), $error === null ? 'ok' : 'bad');
+        }
         if (in_array($action, ['package', 'simulate', 'import', 'pstep', 'pcancel', 'pclear'], true)) {
             self::package($user, $action);
         }
@@ -94,6 +106,19 @@ final class AdminWordpress
         }
         PackageImporter::start($manifest, ['dry' => $action === 'simulate', 'keep' => Req::bool('keep'), 'site' => Req::bool('site'), 'menus' => Req::bool('menus'), 'remote' => Req::bool('remote')]);
         Admin::back('x/wordpress', $action === 'simulate' ? t('Simulation prête : lance-la, rien ne sera écrit.') : t('Paquet vérifié : import prêt.'));
+    }
+
+    /** Rapport de migration (page autonome, à imprimer en PDF ; ?download=1 : fichier HTML). */
+    public static function report(array $user): never
+    {
+        $lang = Req::query('lang', 'fr');
+        $html = Report::html($lang);
+        $headers = ['Content-Type: text/html; charset=utf-8', 'X-Content-Type-Options: nosniff', 'Cache-Control: no-store',
+            "Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"];
+        if (Req::query('download') === '1') {
+            $headers[] = 'Content-Disposition: attachment; filename="' . Report::filename() . '"';
+        }
+        Http::send($html, 200, $headers);
     }
 
     /** Lot suivant (appelé en boucle par la page) : avancement en JSON. */

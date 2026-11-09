@@ -45,6 +45,24 @@ final class PackageImporter
     private const IMAGES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     private const DOCS = ['pdf' => '%PDF-', 'docx' => "PK\x03\x04", 'xlsx' => "PK\x03\x04", 'pptx' => "PK\x03\x04", 'odt' => "PK\x03\x04", 'ods' => "PK\x03\x04", 'odp' => "PK\x03\x04"];
     private const MAX_LIST = 500;
+    /** Journal pour le rapport de migration : contenus, redirections, anciennes adresses publiques (bornés). */
+    public const LEDGER = 'ext/wordpress/pledger';
+    private static ?array $ledger = null;
+
+    /** Journal du dernier import (vide s'il n'y en a pas). */
+    public static function ledger(): array
+    {
+        $l = Store::read(self::LEDGER, []);
+        return (is_array($l) ? $l : []) + ['items' => [], 'redirects' => [], 'urls' => []];
+    }
+
+    private static function log(string $list, array $row, int $max): void
+    {
+        self::$ledger ??= self::ledger();
+        if (count(self::$ledger[$list]) < $max) {
+            self::$ledger[$list][] = $row;
+        }
+    }
 
     public static function job(): ?array
     {
@@ -71,6 +89,7 @@ final class PackageImporter
             'report' => self::blankReport(),
         ];
         Store::write(self::JOB, $job);
+        Store::write(self::LEDGER, ['items' => [], 'redirects' => [], 'urls' => []]);
         if ($job['dry']) {
             Store::write(self::DRY, self::map());
         } else {
@@ -143,6 +162,10 @@ final class PackageImporter
                 }
             }
         } finally {
+            if (self::$ledger !== null) {
+                Store::write(self::LEDGER, self::$ledger);
+                self::$ledger = null;
+            }
             Store::write($job['dry'] ? self::DRY : self::MAP, $map);
             Store::write(self::JOB, $job);
         }
@@ -207,6 +230,11 @@ final class PackageImporter
             $job['media_total'] += count($part);
         }
         $job['mchunks'] = $m;
+        foreach (array_slice(Package::csv('urls.csv'), 1, 20000) as $row) {
+            if (isset($row[0]) && preg_match('~^https?://~i', (string) $row[0])) {
+                self::log('urls', [(string) $row[0], (string) ($row[1] ?? '')], 20000);
+            }
+        }
         $seo = (array) Package::data('seo.json');
         Store::write('ext/wordpress/pseo', ['posts' => (array) ($seo['posts'] ?? []), 'terms' => (array) ($seo['terms'] ?? [])]);
         $report = (array) Package::data('report.json');
@@ -490,6 +518,8 @@ final class PackageImporter
             $r['home'] = true;
         }
         $r['routes'] += $item['route'] !== '' ? 1 : 0;
+        $state = $status === 'draft' ? 'draft' : ($front ? 'home' : ($oldPath !== '' && !str_contains($oldPath, '?') && Redirects::normalize($oldPath) !== Redirects::normalize($newPath) ? 'moved' : 'kept'));
+        self::log('items', [$wpType, (string) $item['title'], (string) ($wp['url'] ?? ''), $newPath, $state], 5000);
         if ($oldPath !== '' && !str_contains($oldPath, '?')) {
             $map['paths'][self::key($oldPath)] = $newPath;
             if (Redirects::normalize($oldPath) !== Redirects::normalize($newPath) && $status === 'published') {
@@ -778,6 +808,9 @@ final class PackageImporter
         }
         foreach ($pairs as $kind => $byCode) {
             foreach ($byCode as $code => $list) {
+                foreach ($list as [$from, $to]) {
+                    self::log('redirects', [Redirects::normalize((string) $from), (string) $to, $kind === 'auto' ? 'migration' : 'site', (int) $code], 5000);
+                }
                 if ($job['dry']) {
                     $job['report']['redirects'] += count($list);
                 } elseif ($list) {
