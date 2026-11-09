@@ -9,6 +9,7 @@ require_once __DIR__ . '/lib/Importer.php';
 require_once __DIR__ . '/lib/Package.php';
 require_once __DIR__ . '/lib/PackageImporter.php';
 require_once __DIR__ . '/lib/Report.php';
+require_once __DIR__ . '/lib/Receiver.php';
 require_once __DIR__ . '/lib/AdminWordpress.php';
 
 use EclairExt\Wordpress\AdminWordpress;
@@ -32,5 +33,17 @@ return new class {
     public function report(array $user, array $ctx): never
     {
         AdminWordpress::report($user);
+    }
+
+    /** Bilan du dernier import, lu par l'assistant et par Claude ou ChatGPT (outil get_migration). */
+    public function migration(): ?array
+    {
+        return EclairExt\Wordpress\PackageImporter::brief();
+    }
+
+    /** Réception directe d'un paquet envoyé par l'extension WordPress (/_eclair/import, clé de liaison). */
+    public function receive(): void
+    {
+        EclairExt\Wordpress\Receiver::handle();
     }
 };

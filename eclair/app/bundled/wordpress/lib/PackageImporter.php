@@ -499,6 +499,10 @@ final class PackageImporter
             }
         }
         $thumb = (string) ($map['media'][(int) ($wp['featured_media'] ?? 0)] ?? '');
+        if ($thumb === '' && (string) ($seo['og']['image'] ?? '') !== '') {
+            // Sans image à la une, l'image de partage choisie dans l'extension SEO la remplace : les aperçus sur les réseaux restent les mêmes.
+            $thumb = (string) ($map['urls'][self::key((string) $seo['og']['image'])] ?? '');
+        }
         $lang = (string) ($wp['lang'] ?? '');
         $data = [
             'type' => $type,
@@ -507,6 +511,7 @@ final class PackageImporter
             'route' => $route,
             'status' => $status,
             'date' => (string) ($wp['date_gmt'] ?? ''),
+            'modified' => (string) ($wp['modified_gmt'] ?? ''),
             'blocks' => $blocks ?: [['type' => 'paragraph', 'text' => '']],
             'summary' => (string) ($wp['excerpt'] ?? ''),
             'category' => $category === 'dry' ? '' : $category,
@@ -611,7 +616,7 @@ final class PackageImporter
             if ($count > 0) {
                 try {
                     // La date est renvoyée en texte : Content::build lit une date, pas un horodatage.
-                    Content::save(['blocks' => $blocks, 'date' => gmdate('c', (int) $item['date'])] + $item, $user);
+                    Content::save(['blocks' => $blocks, 'date' => gmdate('c', (int) $item['date']), 'modified' => gmdate('c', (int) $item['updated'])] + $item, $user);
                     $job['report']['links'] += $count;
                 } catch (\Throwable $e) {
                     self::error($job, $item['title'] . ' : ' . $e->getMessage());
@@ -914,6 +919,7 @@ final class PackageImporter
                 $patch['name'] = (string) $settings['name'];
                 $patch['tagline'] = (string) ($settings['description'] ?? '');
             }
+            $patch += self::siteSeo($settings, $map, $job);
             if ($patch) {
                 Settings::save($patch);
             }
@@ -930,6 +936,79 @@ final class PackageImporter
         if (!$job['dry']) {
             Log::security('wordpress_package_import', ['site' => $job['source'], 'posts' => $job['report']['posts'], 'pages' => $job['report']['pages']]);
         }
+    }
+
+    /**
+     * Réglages du site que le référencement perdrait : validation Search Console et Bing, logo, icône, image de partage,
+     * nom de l'organisation, profils sociaux. Jamais à la place d'une valeur déjà saisie dans Éclair.
+     */
+    private static function siteSeo(array $settings, array $map, array &$job): array
+    {
+        $g = (array) (((array) Package::data('seo.json'))['global'] ?? []);
+        $mediaId = static function (mixed $ref) use ($map): string {
+            $m = is_numeric($ref) ? (string) ($map['media'][(int) $ref] ?? '') : (string) ($map['urls'][self::key((string) $ref)] ?? '');
+            return str_starts_with($m, 'm:') ? substr($m, 2) : '';
+        };
+        $want = [
+            'seo.google' => preg_replace('~[^A-Za-z0-9_-]~', '', (string) ($g['verification']['google'] ?? '')),
+            'seo.bing' => preg_replace('~[^A-Za-z0-9_-]~', '', (string) ($g['verification']['bing'] ?? '')),
+            'seo.entity_name' => trim((string) ($g['organization']['name'] ?? '')),
+            'seo.twitter' => ltrim(trim((string) ($g['social']['twitter'] ?? '')), '@'),
+            'seo.image' => $mediaId($g['social']['image'] ?? ''),
+            'appearance.logo' => $mediaId($settings['logo'] ?? 0) ?: $mediaId($g['organization']['logo'] ?? ''),
+            'appearance.favicon' => $mediaId($settings['site_icon'] ?? 0),
+        ];
+        foreach ((array) ($g['social']['profiles'] ?? []) as $url) {
+            $host = strtolower((string) parse_url((string) $url, PHP_URL_HOST));
+            $net = match (true) {
+                str_contains($host, 'linkedin.') => 'linkedin', str_contains($host, 'facebook.') => 'facebook', str_contains($host, 'instagram.') => 'instagram',
+                str_contains($host, 'youtube.') => 'youtube', str_contains($host, 'tiktok.') => 'tiktok', str_contains($host, 'github.') => 'github',
+                $host === 'x.com' || str_ends_with($host, '.x.com') || str_contains($host, 'twitter.') => 'x', default => '',
+            };
+            if ($net !== '' && preg_match('~^https://~i', (string) $url)) {
+                $want['social.' . $net] ??= (string) $url;
+            }
+        }
+        $patch = [];
+        foreach (array_filter($want) as $key => $value) {
+            if ((string) Settings::get($key) === '') {
+                [$group, $name] = explode('.', $key);
+                $patch[$group][$name] = $value;
+                $job['report']['site_seo'] = (int) ($job['report']['site_seo'] ?? 0) + 1;
+            }
+        }
+        return $patch;
+    }
+
+    /**
+     * Bilan du dernier import pour l'assistant et le connecteur MCP (outil get_migration) : ce qui reste à finir à la main,
+     * pour que Claude ou ChatGPT le propose contenu par contenu. Null sans import terminé.
+     */
+    public static function brief(): ?array
+    {
+        $job = self::job();
+        if ($job === null || empty($job['done']) || !empty($job['dry'])) {
+            return null;
+        }
+        $r = $job['report'];
+        $urls = Report::urls(self::ledger());
+        $drafts = [];
+        foreach (self::ledger()['items'] as [$type, $title, , $path, $state]) {
+            if ($state === 'draft' && count($drafts) < 50) {
+                $drafts[] = ['type' => $type, 'title' => $title];
+            }
+        }
+        return [
+            'source' => (string) $job['source'],
+            'finished' => date('Y-m-d', (int) ($job['finished'] ?? time())),
+            'imported' => ['posts' => $r['posts'], 'pages' => $r['pages'], 'products' => $r['products'], 'images' => $r['images'], 'documents' => $r['documents']],
+            'old_addresses' => ['served' => $urls['ok'], 'redirected' => $urls['redirect'], 'not_found' => array_slice($urls['list'], 0, 50)],
+            'internal_links_still_pointing_to_old_site' => $r['links_left'],
+            'shortcodes_left_as_text' => $r['shortcodes'],
+            'imported_as_draft' => $drafts,
+            'to_finish_by_hand' => array_map(static fn (array $n): array => ['kind' => (string) $n[0], 'name' => (string) $n[1], 'reason' => (string) $n[2]], array_slice($r['not_migrated'], 0, 120)),
+            'how_to_help' => 'For each shortcode left as text, find the contents with search_content (query: the shortcode name in brackets), read them with get_content and propose with update_content a replacement by native text or sections (FAQ, table, contact link). Never invent facts; say what cannot be rebuilt.',
+        ];
     }
 
     /** Avancement : [fait, total, étape]. */

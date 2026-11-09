@@ -110,7 +110,8 @@ declare(strict_types=1);
                 'alt' => '', 'parent' => 0, 'date_gmt' => '2024-03-12T08:30:00+00:00', 'missing' => false, 'included' => true, 'sha256' => hash('sha256', $pdf)],
             ['wp_id' => 52, 'url' => $uploads . 'clip.mp4', 'variants' => [], 'file' => 'media/uploads/2024/03/clip.mp4', 'mime' => 'video/mp4', 'parent' => 0, 'included' => false, 'sha256' => ''],
         ]),
-        'seo.json' => json_encode(['global' => [], 'posts' => [
+        'seo.json' => json_encode(['global' => ['verification' => ['google' => 'g-verif_123', 'bing' => 'B1NG"><script>'], 'organization' => ['name' => 'Fournil SARL', 'logo' => $uploads . 'miche.png'],
+            'social' => ['twitter' => '@lefournil', 'image' => $uploads . 'miche-300x188.png', 'profiles' => ['https://www.facebook.com/lefournil', 'javascript:alert(1)', 'https://www.linkedin.com/company/lefournil']]], 'posts' => [
             '12' => ['title' => 'Le vrai pain au levain', 'description' => 'Notre recette de pain au levain.', 'keyword' => 'levain', 'canonical' => '', 'noindex' => false, 'nofollow' => false,
                 'og' => ['title' => 'Partage', 'description' => '', 'image' => ''], 'twitter' => [], 'schema' => ''],
             '22' => ['title' => '', 'description' => '', 'keyword' => '', 'canonical' => '', 'noindex' => true, 'nofollow' => false, 'og' => [], 'twitter' => [], 'schema' => ''],
@@ -181,7 +182,49 @@ declare(strict_types=1);
         $c->req('POST', '/gestion/x/wordpress', $c->token($page['body']) + ['action' => 'simulate', 'keep' => '1', 'site' => '1', 'menus' => '1']);
         $page = $c->req('GET', '/gestion/x/wordpress');
         check('partie manquante signalée, rien n’est lancé', str_contains($page['body'], 'Parties manquantes : eclair-export-fournil-test-part2.zip') && !str_contains($page['body'], 'data-wp-run'));
-        $upload($c, $c->token($page['body']) + ['action' => 'package'], [$tmp . '/eclair-export-fournil-test-part2.zip']);
+        // Envoi direct depuis WordPress : la partie 2 arrive par /_eclair/import, par morceaux, avec une clé de liaison.
+        $part2 = (string) file_get_contents($tmp . '/eclair-export-fournil-test-part2.zip');
+        $send = static fn (string $query, string $body, string $code): array => (static function (array $r): array {
+            return ['status' => $r['status'], 'json' => (array) json_decode($r['body'], true)];
+        })(client($port)->req('POST', '/_eclair/import?' . $query, $body === '' ? '-' : $body, ['Content-Type: application/octet-stream', 'X-Eclair-Code: ' . $code]));
+        $none = $send('op=hello', '', str_repeat('a', 40));
+        check('sans clé de liaison : l’adresse de réception n’existe pas (même réponse que pour une adresse quelconque), même avec un code',
+            $none['status'] === client($port)->req('POST', '/_eclair/nimporte-quoi', '-')['status'] && $none['json'] === [], json_encode($none));
+        $c->req('POST', '/gestion/x/wordpress', $c->token($page['body']) + ['action' => 'link']);
+        $page = $c->req('GET', '/gestion/x/wordpress');
+        preg_match('~value="(eclair1\.([A-Za-z0-9_-]+)\.([a-f0-9]{40}))"~', $page['body'], $k);
+        $code = (string) ($k[3] ?? '');
+        $stored = (string) @file_get_contents($copy . '/data/ext/wordpress/link.php');
+        check('clé de liaison créée : adresse du site dedans, montrée à la personne, seule son empreinte gardée sur le serveur', $code !== ''
+            && base64_decode(strtr((string) $k[2], '-_', '+/')) === 'http://127.0.0.1:' . $port && !str_contains($stored, $code) && str_contains($stored, hash('sha256', $code)), $stored);
+        check('mauvais code refusé (403), requête GET refusée (405)', $send('op=hello', '', str_repeat('b', 40))['status'] === 403
+            && client($port)->req('GET', '/_eclair/import?op=hello', [], ['X-Eclair-Code: ' . $code])['status'] === 405);
+        $hello = $send('op=hello', '', $code);
+        check('bon code : le site annonce son nom, la taille des morceaux et ce qu’il a déjà reçu', $hello['status'] === 200 && ($hello['json']['site'] ?? '') === 'Mon site'
+            && (int) ($hello['json']['chunk'] ?? 0) >= 262144 && isset($hello['json']['received']['eclair-export-fournil-test.zip']), json_encode($hello));
+        $name = 'name=eclair-export-fournil-test-part2.zip';
+        $bad = [$send('op=chunk&name=../../evil.zip&offset=0', $part2, $code)['status'], $send('op=chunk&name=evil.php&offset=0', $part2, $code)['status'],
+            $send('op=chunk&name=eclair-export-x.zip&offset=0', '<?php echo 1;', $code)['status']];
+        check('nom hors du paquet, autre extension, contenu qui n’est pas une archive : refusés, rien n’est écrit', $bad === [400, 400, 400]
+            && !glob($copy . '/data/ext/wordpress/package/parts/eclair-export-x*') && !glob($copy . '/evil*') && !glob($copy . '/data/evil*'), json_encode($bad));
+        $half = intdiv(strlen($part2), 2);
+        $one = $send("op=chunk&$name&offset=0", substr($part2, 0, $half), $code);
+        $again = $send("op=chunk&$name&offset=0", substr($part2, 0, $half), $code);
+        check('premier morceau reçu ; le même renvoyé par erreur : refusé avec la taille déjà reçue (reprise)', $one['status'] === 200 && ($one['json']['size'] ?? 0) === $half
+            && $again['status'] === 409 && ($again['json']['size'] ?? 0) === $half, json_encode([$one, $again]));
+        check('archive incomplète : pas encore visible comme partie du paquet', !is_file($copy . '/data/ext/wordpress/package/parts/eclair-export-fournil-test-part2.zip')
+            && ($send('op=hello', '', $code)['json']['received']['eclair-export-fournil-test-part2.zip']['complete'] ?? null) === false);
+        $send("op=chunk&$name&offset=$half", substr($part2, $half), $code);
+        $wrong = $send("op=finish&$name&sha256=" . str_repeat('0', 64), '', $code);
+        check('empreinte fausse : archive refusée et supprimée', $wrong['status'] === 422 && !glob($copy . '/data/ext/wordpress/package/parts/*part2*'));
+        $send("op=chunk&$name&offset=0", substr($part2, 0, $half), $code);
+        $send("op=chunk&$name&offset=$half", substr($part2, $half), $code);
+        $fin = $send("op=finish&$name&sha256=" . hash('sha256', $part2), '', $code);
+        $done = $send('op=done', '', $code);
+        check('archive entière et empreinte juste : rangée avec les parties du paquet, identique à l’octet près', $fin['status'] === 200 && $done['status'] === 200
+            && (string) @file_get_contents($copy . '/data/ext/wordpress/package/parts/eclair-export-fournil-test-part2.zip') === $part2, json_encode([$fin, $done]));
+        $after = $send('op=hello', '', $code);
+        check('envoi terminé : la clé a servi, l’adresse n’existe plus', $after['status'] === $none['status'] && $after['json'] === [] && !is_file($copy . '/data/ext/wordpress/link.php'));
         $before = count(glob($copy . '/data/content/*.php') ?: []);
 
         // Simulation : rien n'est écrit.
@@ -219,6 +262,25 @@ declare(strict_types=1);
         check('produit WooCommerce : boutique ouverte, servi à son adresse, prix et prix barré', $prod['status'] === 200 && str_contains($prod['body'], 'Miche de campagne')
             && str_contains($prod['body'], '4,50') && str_contains($prod['body'], 'Prix habituel'), (string) $prod['status']);
         check('page d’accueil reprise', str_contains($v->req('GET', '/')['body'], 'Bienvenue au fournil.'));
+        $site = json_decode(substr((string) file_get_contents($copy . '/data/site.php'), strlen(Eclair\Store::GUARD)), true);
+        $home = $v->req('GET', '/')['body'];
+        check('réglages SEO du site repris : validation Search Console et Bing (nettoyée), organisation, compte X, profils sociaux sûrs, logo et image de partage',
+            str_contains($home, '<meta name="google-site-verification" content="g-verif_123">') && ($site['seo']['bing'] ?? '') === 'B1NGscript' && ($site['seo']['entity_name'] ?? '') === 'Fournil SARL'
+            && ($site['seo']['twitter'] ?? '') === 'lefournil' && ($site['social']['facebook'] ?? '') === 'https://www.facebook.com/lefournil'
+            && ($site['social']['linkedin'] ?? '') === 'https://www.linkedin.com/company/lefournil' && !str_contains(json_encode($site['social']), 'javascript')
+            && ($site['appearance']['logo'] ?? '') !== '' && ($site['seo']['image'] ?? '') === $site['appearance']['logo'], json_encode([$site['seo'], $site['social'], $site['appearance']['logo']]));
+        check('date de dernière modification d’origine gardée (dateModified, sitemap), même après la réécriture des liens',
+            str_contains($post['body'], '"dateModified":"2024-03-12T') && str_contains($v->req('GET', '/sitemap.xml')['body'], '<lastmod>2024-03-12'), substr((string) strstr($post['body'], '"dateModified"'), 0, 60));
+        // Outil get_migration de l'assistant et du connecteur MCP : le bilan de l'import, pour finir la migration avec Claude ou ChatGPT.
+        $boot = "define('ECLAIR', true); define('ECLAIR_ROOT', " . var_export($copy, true) . "); define('ECLAIR_VERSION', 'test'); define('ECLAIR_DATA', ECLAIR_ROOT . '/data'); define('ECLAIR_DEBUG', false);"
+            . "spl_autoload_register(static function (string \$c): void { if (strncmp(\$c, 'Eclair\\\\', 7) === 0 && is_file(\$f = ECLAIR_ROOT . '/app/lib/' . str_replace('\\\\', '/', substr(\$c, 7)) . '.php')) { require \$f; } });"
+            . "require ECLAIR_ROOT . '/app/lib/helpers.php'; \$ctx = [];"
+            . "echo json_encode([array_column(Eclair\\AiTools::definitions(), 'name'), Eclair\\AiTools::run('get_migration', [], \$ctx)['result']]);";
+        $tool = (array) json_decode((string) shell_exec(escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($boot) . ' 2>&1'), true);
+        $brief = (array) ($tool[1] ?? []);
+        check('outil get_migration (assistant, Claude, ChatGPT) : proposé après un import, il liste ce qui reste à finir avec la raison', in_array('get_migration', (array) ($tool[0] ?? []), true)
+            && ($brief['source'] ?? '') === $old && ($brief['imported']['posts'] ?? 0) >= 1 && ($brief['shortcodes_left_as_text'] ?? 0) === 1
+            && str_contains(json_encode($brief['to_finish_by_hand'] ?? []), 'contact-form-7') && str_contains(json_encode($brief['to_finish_by_hand'] ?? []), 'clip.mp4'), json_encode($tool));
         check('nom du site repris', str_contains($v->req('GET', '/')['body'], 'Le Fournil'));
         $moved = $v->req('GET', '/contact(1)/');
         $to = (string) parse_url((string) ($moved['headers']['location'] ?? ''), PHP_URL_PATH);

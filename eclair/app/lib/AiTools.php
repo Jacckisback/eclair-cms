@@ -115,6 +115,14 @@ final class AiTools
                 'schema' => ['type' => 'object', 'properties' => ['query' => $str('Keywords; empty for the latest images')], 'additionalProperties' => false],
             ],
         ];
+        // Site repris de WordPress : le bilan du dernier import, pour finir la migration contenu par contenu.
+        if (Store::exists('ext/wordpress/pjob') && Extensions::enabled('wordpress')) {
+            $tools[] = [
+                'name' => 'get_migration',
+                'description' => 'After a WordPress migration: what was imported, the old addresses that no longer answer, the contents imported as drafts and what is left to finish by hand (shortcodes left as text, forms, widgets, files not taken over), with the reason for each. Use it when the user asks to check or finish the migration.',
+                'schema' => ['type' => 'object', 'properties' => new \stdClass()],
+            ];
+        }
         if (Ai::imager() !== '') {
             $tools[] = [
                 'name' => 'generate_image',
@@ -136,6 +144,7 @@ final class AiTools
     {
         return match ($name) {
             'search_content' => t('Recherche dans le site…'),
+            'get_migration' => t('Lecture du bilan de migration…'),
             'get_content' => t('Lecture du contenu…'),
             'create_draft' => t('Rédaction du brouillon…'),
             'update_content' => t('Préparation des modifications…'),
@@ -158,6 +167,7 @@ final class AiTools
         try {
             return match ($name) {
                 'search_content' => ['result' => self::search($in), 'card' => null, 'error' => false],
+                'get_migration' => ['result' => Extensions::invoke('wordpress', 'migration') ?? ['error' => 'No finished WordPress import on this site.'], 'card' => null, 'error' => false],
                 'get_content' => self::read($in, $ctx),
                 'create_draft' => self::create($in, $ctx),
                 'update_content' => self::update($in, $ctx),

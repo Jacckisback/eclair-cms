@@ -101,6 +101,23 @@ $r = $job['report'] ?? [];
       <label class="field"><span class="label"><?= e(t('Parties du paquet (.zip, {n} au plus chacune)', ['n' => $v['limit']])) ?></span><input type="file" name="parts[]" accept=".zip,application/zip" multiple required></label>
       <div><button class="btn" type="submit"><?= Icons::svg('upload') ?><?= e(t('Envoyer')) ?></button></div>
     </form>
+    <h3><?= e(t('Envoi direct depuis WordPress')) ?></h3>
+    <?php if ($v['link'] === null): ?>
+    <p class="small muted"><?= e(t('Le plus simple : WordPress envoie le paquet ici tout seul, sans téléchargement ni FTP, quelle que soit sa taille. Crée une clé, colle-la dans l’extension Eclair Export.')) ?></p>
+    <form method="post" action="<?= e(admin_url('x/wordpress')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="link">
+      <div><button class="btn btn-primary" type="submit"><?= Icons::svg('link') ?><?= e(t('Créer une clé de liaison')) ?></button></div></form>
+    <?php else: ?>
+    <?php if ($v['key'] !== ''): ?>
+    <label class="field"><span class="label"><?= e(t('Clé de liaison (valable jusqu’à {time}, pour un seul envoi)', ['time' => date('H:i', (int) $v['link']['expires'])])) ?></span><input type="text" readonly value="<?= e($v['key']) ?>" onfocus="this.select()"></label>
+    <p class="small muted"><?= e(t('Colle-la dans WordPress : Outils › Exporter vers Éclair › Envoyer vers Éclair. Elle ne permet que de déposer le paquet ici ; l’import se lance ensuite sur cette page.')) ?></p>
+    <?php else: ?>
+    <p class="small muted"><?= e(t('Une clé de liaison est active jusqu’à {time}. Elle n’est montrée qu’à sa création : crées-en une nouvelle si tu ne l’as plus.', ['time' => date('H:i', (int) $v['link']['expires'])])) ?></p>
+    <?php endif ?>
+    <div class="row">
+      <form method="post" action="<?= e(admin_url('x/wordpress')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="link"><button class="btn" type="submit"><?= e(t('Nouvelle clé')) ?></button></form>
+      <form method="post" action="<?= e(admin_url('x/wordpress')) ?>"><?= Security::csrfField() ?><input type="hidden" name="action" value="unlink"><button class="btn btn-ghost" type="submit"><?= e(t('Supprimer la clé')) ?></button></form>
+    </div>
+    <?php endif ?>
     <p class="small muted"><?= e(t('Archives trop lourdes pour ton hébergeur : dépose-les par FTP dans le dossier data/import/ du site, puis recharge cette page.')) ?></p>
     <?php if ($v['parts']): ?>
     <ul class="small"><?php foreach ($v['parts'] as $name => $size): ?><li><?= e($name) ?> — <?= e(human_size((int) $size)) ?></li><?php endforeach ?></ul>
