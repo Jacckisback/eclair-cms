@@ -37,7 +37,7 @@ El asistente lo comprueba todo por ti y te explica qué corregir.
 
 ### Pasos
 
-1. Descarga el archivo [`eclair-cms-2.1.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.1.0.zip) (875 KB) y descomprímelo.
+1. Descarga el archivo [`eclair-cms-2.2.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.2.0.zip) (883 KB) y descomprímelo.
 2. Sube **el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…) con tu programa FTP (FileZilla…) o con el gestor de archivos de tu proveedor.
    > ⚠️ Los archivos `.htaccess` están ocultos: activa «Mostrar archivos ocultos» para asegurarte de subirlos.
 3. Abre la dirección de tu sitio: **arranca el asistente de instalación** (en 7 idiomas).
@@ -813,7 +813,7 @@ Una versión firmada solo se construye en un repositorio Git e incluye solo los 
 
 `PHP_CLI_SERVER_WORKERS` permite que el sitio se llame a sí mismo (verificación de su dirección): con un solo proceso, la verificación simplemente falla y las redirecciones a la dirección oficial siguen desactivadas.
 
-Para un cambio de estilo, mejor el **CSS personalizado** (Ajustes › Apariencia): sobrevive a las actualizaciones. Para ir más lejos, crea un tema del sitio en `site/themes/<id>/` (ver [el contrato de temas](THEME-CONTRACT.md)) o impórtalo en **Temas**: las actualizaciones nunca lo tocan. No modifiques ya `app/theme/`, que una actualización reemplaza. En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios), las vistas del panel están comprimidas (se leen con zlib) y el JavaScript y el CSS del panel están aligerados (el archivo ocupa unos 875 KB): el código fuente comentado está en GitHub. Los archivos del sitio público (temas, `site.js`) se entregan tal cual.
+Para un cambio de estilo, mejor el **CSS personalizado** (Ajustes › Apariencia): sobrevive a las actualizaciones. Para ir más lejos, crea un tema del sitio en `site/themes/<id>/` (ver [el contrato de temas](THEME-CONTRACT.md)) o impórtalo en **Temas**: las actualizaciones nunca lo tocan. No modifiques ya `app/theme/`, que una actualización reemplaza. En el archivo de descarga, el PHP está compactado (`php -w`, sin comentarios), las vistas del panel están comprimidas (se leen con zlib) y el JavaScript y el CSS del panel están aligerados (el archivo ocupa unos 883 KB): el código fuente comentado está en GitHub. Los archivos del sitio público (temas, `site.js`) se entregan tal cual.
 
 ---
 

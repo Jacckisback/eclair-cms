@@ -2,7 +2,7 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 2.2.0 — 2026-11-09
 
 Result of a full review of the code (speed, SEO and GEO, WordPress migration, robustness), then of the work needed to host large sites. Nothing changes in what a page shows: the public rendering stays byte-identical to the reference (same test, now run a second time through the light index).
 
