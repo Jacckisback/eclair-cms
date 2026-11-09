@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.1.zip"><img src="https://img.shields.io/badge/descargar-v2.0.1-5b3cbc?style=for-the-badge" alt="Descargar Éclair 2.0.1"></a>
+  <a href="https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.1.0.zip"><img src="https://img.shields.io/badge/descargar-v2.1.0-5b3cbc?style=for-the-badge" alt="Descargar Éclair 2.1.0"></a>
   <img src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1 o superior">
   <img src="https://img.shields.io/badge/Lighthouse-100-0cce6b?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse 100">
   <img src="https://img.shields.io/badge/base_de_datos-ninguna-14122b?style=for-the-badge" alt="Sin base de datos">
@@ -63,7 +63,7 @@ WordPress lo hace todo, pero necesita una base de datos, plugins para el SEO, la
     </td>
     <td width="33%" valign="top">
       <h3>🪶 Ultraligero</h3>
-      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>833 KB</b>, cero dependencias, cero cookies en el sitio público.
+      Sin base de datos: tu contenido se guarda en archivos protegidos. Un archivo de <b>875 KB</b>, cero dependencias, cero cookies en el sitio público.
     </td>
     <td width="33%" valign="top">
       <h3>😊 Facilísimo</h3>
@@ -266,7 +266,7 @@ Instrucciones de uso: [guía, sección Actualizar, hacer copias de seguridad, mu
 |---|---|---|
 | **Instalación** | Crear una base de datos MySQL y luego lanzar el asistente | ✅ Subir la carpeta y responder 4 preguntas |
 | **Base de datos** | MySQL obligatorio | ✅ Ninguna (archivos protegidos) |
-| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 833 KB |
+| **Archivo de descarga** | ≈ 35 MB[^wp] | ✅ 875 KB |
 | **SEO, sitemap, datos estructurados** | Un plugin que instalar y mantener | ✅ Integrado |
 | **GEO: llms.txt, Markdown, robots de IA** | Plugins, rara vez completos | ✅ Integrado |
 | **Páginas públicas** | Generadas en cada visita, salvo con un plugin de caché | ✅ Servidas desde una caché estática |
@@ -382,7 +382,7 @@ Todos los detalles en la [guía, sección Seguridad](docs/GUIDE.es.md#seguridad)
   <img src="docs/images/es/install.webp" alt="Instalación en tres pasos: subir la carpeta, responder cuatro preguntas, el sitio está en línea" width="100%">
 </p>
 
-1. **Descarga** el archivo [`eclair-cms-2.0.1.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.0.1.zip) (833 KB) y descomprímelo.
+1. **Descarga** el archivo [`eclair-cms-2.1.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.1.0.zip) (875 KB) y descomprímelo.
 2. **Sube el contenido de la carpeta `eclair`** a la carpeta pública de tu hosting (`public_html`, `www`…), incluidos los archivos ocultos `.htaccess`.
 3. **Abre la dirección de tu sitio**: arranca el asistente. Cuatro preguntas, un poco de confeti, y tu sitio está en línea con sus primeras páginas.
 
