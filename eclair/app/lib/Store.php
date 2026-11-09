@@ -22,7 +22,7 @@ final class Store
      * indentation. Sur un site de 3 000 contenus, l'index pèse 27 % de moins et se décode un tiers plus vite ; les autres
      * fichiers (réglages, contenus…) restent indentés, lisibles et comparables à la main.
      */
-    private const COMPACT = ['index' => true, 'search' => true];
+    private const COMPACT = ['index' => true, 'index-lite' => true, 'search' => true];
     /** Réparation d'un fichier de verrou laissée en plan au-delà de ce délai (secondes) : abandonnée, on peut reprendre. */
     private const REPAIR_STALE = 30;
 
@@ -72,6 +72,16 @@ final class Store
         );
         self::atomic($file, self::GUARD . $json);
         self::$memo[$name] = $data;
+    }
+
+    /**
+     * Oublie une donnée gardée en mémoire pour la requête (le fichier reste). Pour les parcours de tous les contenus
+     * (plan du site, reconstruction de l'index) : sans cela, chaque fichier lu restait en mémoire jusqu'à la fin de la requête
+     * (50 Mo pour 3 000 contenus, au-delà de la limite de PHP pour 10 000).
+     */
+    public static function drop(string $name): void
+    {
+        unset(self::$memo[$name]);
     }
 
     public static function delete(string $name): void

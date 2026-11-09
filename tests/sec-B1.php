@@ -25,9 +25,14 @@ if ((int) ini_get('memory_limit') > 0 && (int) ini_get('memory_limit') < 512) {
 $b1Author = ['id' => 'b1auteur', 'role' => 'admin', 'name' => 'Camille B1', 'email' => 'b1@example.com'];
 // Comme une autre requête : rien de ce que ce processus garde en mémoire (index, données lues).
 $b1Forget = static function (): void {
-    $p = new ReflectionProperty(Content::class, 'index');
-    $p->setAccessible(true);
-    $p->setValue(null, null);
+    // Content::forget() oublie aussi ce qui dérive de l'index (index léger, listes triées) ; la réflexion ne sert qu'aux versions sans elle.
+    if (method_exists(Content::class, 'forget')) {
+        Content::forget();
+    } else {
+        $p = new ReflectionProperty(Content::class, 'index');
+        $p->setAccessible(true);
+        $p->setValue(null, null);
+    }
     Store::forget();
 };
 $b1Read = static fn (string $name): mixed => json_decode(Store::strip((string) @file_get_contents(ECLAIR_DATA . '/' . $name . '.php')), true);
@@ -128,7 +133,7 @@ $ctx = $b1Ctx();
 $res = AiTools::run('create_draft', ['type' => 'post', 'title' => 'Encore un brouillon', 'body' => 'Un texte.'], $ctx);
 check('IA : brouillon créé sous la limite', $res['error'] === false && ($res['card']['kind'] ?? '') === 'draft', json_encode($res['result']));
 
-// Index de recherche : rempli presque jusqu'à sa limite, un texte qui le ferait déborder est refusé avant toute écriture.
+// Index de recherche : rempli presque jusqu'à sa limite, un texte qui le ferait déborder n'y entre que par son début.
 $b1Reset();
 $maxSearch = defined(Content::class . '::MAX_SEARCH_BYTES') ? Content::MAX_SEARCH_BYTES : 16_000_000;
 $big = $b1Save(['title' => 'Article à rallonger', 'status' => 'published', 'blocks' => [['type' => 'paragraph', 'text' => 'Court.']]]);
@@ -147,16 +152,31 @@ Store::write('search', $texts);
 unset($texts, $index);
 $b1Forget();
 $before = filesize(ECLAIR_DATA . '/search.php');
-$refused = null;
+// Le texte complet ne tient plus : seul son début entre dans l'index de recherche ; la publication n'est jamais refusée.
+$long = str_repeat('nouveau ', 3749) . 'motfinalb1';
+$saved = null;
 try {
-    $b1Save(['blocks' => [['type' => 'paragraph', 'text' => str_repeat('nouveau ', 3750)]]] + $big);
+    $saved = $b1Save(['blocks' => [['type' => 'paragraph', 'text' => $long]]] + $big);
 } catch (OverflowException $e) {
-    $refused = $e->getMessage();
+    $saved = null;
 }
 $stored = $b1Read('content/' . $big['id']);
-check('index de recherche plafonné : texte refusé avec un message clair', $before < $maxSearch && $refused !== null && str_contains($refused, 'recherche'), (string) $refused);
-check('…sans rien enregistrer à moitié (contenu, révision, index de recherche)', ($stored['blocks'][0]['text'] ?? '') === 'Court.' && Content::revisions($big['id']) === []
-    && filesize(ECLAIR_DATA . '/search.php') === $before);
+$kept = (string) (((array) $b1Read('search'))[$big['id']] ?? '');
+check('index de recherche plein : le contenu est enregistré en entier, jamais refusé', $before < $maxSearch && $saved !== null
+    && str_ends_with((string) ($stored['blocks'][0]['text'] ?? ''), 'motfinalb1'), json_encode($saved === null));
+check('…seul le début du texte entre dans l’index de recherche, qui reste sous sa limite', $kept !== '' && mb_strlen($kept) <= 1500 && str_starts_with($kept, 'nouveau')
+    && filesize(ECLAIR_DATA . '/search.php') <= $maxSearch, mb_strlen($kept) . ' ' . filesize(ECLAIR_DATA . '/search.php'));
+check('…et le contenu reste trouvable par son titre', in_array($big['id'], array_column(Content::search('rallonger'), 'id'), true) && Content::search('motfinalb1') === []);
+// Plus aucune place (pas même pour le début) : le texte n'entre pas, le contenu est publié quand même.
+$texts = (array) $b1Read('search');
+$texts['s000000000'] .= str_repeat('x', max(0, $maxSearch - filesize(ECLAIR_DATA . '/search.php') - 600));
+Store::write('search', $texts);
+unset($texts);
+$b1Forget();
+$fresh = $b1Save(['title' => 'Publié sans place', 'status' => 'published', 'blocks' => [['type' => 'paragraph', 'text' => str_repeat('complet ', 400)]]]);
+check('index de recherche sans aucune place : contenu publié, absent du texte cherchable, index toujours sous sa limite',
+    ($fresh['status'] ?? '') === 'published' && !array_key_exists($fresh['id'], (array) $b1Read('search')) && filesize(ECLAIR_DATA . '/search.php') <= $maxSearch
+    && in_array($fresh['id'], array_column(Content::search('Publié sans place'), 'id'), true), (string) filesize(ECLAIR_DATA . '/search.php'));
 $hidden = null;
 try {
     $hidden = $b1Save(['status' => 'draft'] + $big);

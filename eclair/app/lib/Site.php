@@ -171,17 +171,17 @@ final class Site
     {
         $words = Theme::words();
         $home = (string) Settings::get('home');
-        $index = Content::index();
+        $homeEntry = $home !== '' ? Content::find($home) : null;
         $blogOn = (bool) Settings::get('blog.enabled');
         $blog = Content::blogPath();
 
         if ($path === '/') {
-            if ($home !== '' && isset($index[$home]) && Content::visible($index[$home])) {
-                self::single($index[$home]);
+            if ($homeEntry !== null && Content::visible($homeEntry)) {
+                self::single($homeEntry);
             }
             self::listing('blog', 1);
         }
-        if ($home !== '' && isset($index[$home]) && '/' . $index[$home]['slug'] === $path) {
+        if ($homeEntry !== null && '/' . $homeEntry['slug'] === $path) {
             Http::redirect(path_to('/'), 301);
         }
         if ($path === '/' . $words['search'] && Settings::get('search')) {
@@ -203,7 +203,7 @@ final class Site
             if (preg_match('~^/' . preg_quote($words['author'], '~') . '/([a-z0-9-]+)(?:/' . $page . '/([1-9]\d{0,5}))?$~', $rest, $m)) {
                 $user = Users::findBySlug($m[1]);
                 // Page d'auteur seulement pour une personne qui a publié (comme le plan du site) : les autres comptes restent invisibles.
-                if ($user && array_filter(Content::published('post'), fn (array $p): bool => $p['author'] === $user['id'])) {
+                if ($user && Content::page('post', ['author' => $user['id']])[1] > 0) {
                     self::listing('author', (int) ($m[2] ?? 1), Users::profile($user));
                 }
             }
@@ -556,19 +556,19 @@ final class Site
         $words = Theme::words();
         $blog = Content::blogPath();
         $isHome = $kind === 'blog' && Settings::get('home') === '';
-        $posts = array_values(Content::published('post'));
+        $where = [];
         $crumbs = [['name' => (string) Settings::get('name'), 'path' => '/']];
         $blogCrumb = Settings::get('home') !== '' ? ['name' => (string) Settings::get('blog.title'), 'path' => $blog] : null;
 
         if ($kind === 'category') {
-            $posts = array_values(array_filter($posts, fn ($p) => $p['category'] === $subject['id']));
+            $where = ['category' => $subject['id']];
             $base = Categories::path($subject);
             $title = $subject['name'];
             $seoTitle = $subject['seo_title'] !== '' ? $subject['seo_title'] : Seo::format($title);
             $description = $subject['description'];
             $crumbs = array_merge($crumbs, array_filter([$blogCrumb]), [['name' => $title, 'path' => $base]]);
         } elseif ($kind === 'author') {
-            $posts = array_values(array_filter($posts, fn ($p) => $p['author'] === $subject['id']));
+            $where = ['author' => $subject['id']];
             $base = Theme::authorPath($subject);
             $title = $subject['name'];
             $seoTitle = Seo::format(Theme::t('posts_by', $lang, ['name' => $subject['name']]));
@@ -585,7 +585,8 @@ final class Site
             }
         }
         $per = max(1, (int) Settings::get('blog.per_page', 9));
-        $pages = max(1, (int) ceil(count($posts) / $per));
+        // Seuls les articles de la page demandée sont relus : le reste n'est que compté (index léger).
+        $pages = max(1, (int) ceil(Content::page('post', $where)[1] / $per));
         if ($page < 1 || $page > $pages) {
             self::notFound();
         }
@@ -595,7 +596,7 @@ final class Site
             Http::redirect(path_to($base), 301);
         }
         $path = $pagePath($page);
-        $entries = array_slice($posts, ($page - 1) * $per, $per);
+        [$entries] = Content::page('post', $where, ($page - 1) * $per, $per);
         if ($page > 1) {
             $seoTitle .= ' · ' . Theme::t('page_n', $lang, ['n' => $page]);
         }

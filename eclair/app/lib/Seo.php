@@ -369,7 +369,7 @@ final class Seo
                     continue;
                 }
                 $images = [];
-                $item = Content::get($entry['id']);
+                $item = Content::peek($entry['id']);
                 // L'index n'est qu'un résumé : un contenu dont la version enregistrée n'est pas en ligne n'est jamais listé.
                 if (!$item || !Content::visible($item)) {
                     continue;
@@ -465,7 +465,7 @@ final class Seo
         $published = array_filter(Content::published(), fn ($e) => !$e['noindex']);
         if ($full) {
             foreach ($published as $entry) {
-                $item = Content::get($entry['id']);
+                $item = Content::peek($entry['id']);
                 if ($item && Content::visible($item)) {
                     $out .= "---\n\n" . self::markdown($item, false) . "\n";
                 }
@@ -595,7 +595,7 @@ final class Seo
             $html = (string) preg_replace('~ (?:srcset|sizes)="[^"]*"~', '', $html);
             return (string) preg_replace('~ (href|src)="/(?!/)~', ' $1="' . $origin . '/', $html);
         };
-        $posts = array_slice(array_filter(Content::published('post'), fn ($e) => !$e['noindex']), 0, 20);
+        [$posts] = Content::page('post', ['indexable' => true], 0, 20);
         $items = '';
         foreach ($posts as $entry) {
             $item = Content::get($entry['id']);

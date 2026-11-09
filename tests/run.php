@@ -16,6 +16,9 @@ define('ECLAIR_DATA', sys_get_temp_dir() . '/eclair-test-data-' . getmypid());
 define('ECLAIR_SITE', sys_get_temp_dir() . '/eclair-test-site-' . getmypid());
 define('ECLAIR_DEBUG', true);
 define('ECLAIR_TESTING', true);
+// Index léger lu même par un petit site (en service, seulement à partir d'environ 450 contenus) : tous les tests faits dans
+// ce processus passent ainsi par lui. Les serveurs de test gardent le réglage normal, sauf le second rendu de référence.
+define('ECLAIR_LITE_FROM', 0);
 
 spl_autoload_register(static function (string $class): void {
     $file = ECLAIR_ROOT . '/app/lib/' . substr($class, 7) . '.php';
@@ -671,6 +674,13 @@ if (!in_array('--unit', $argv, true)) {
         check("« $type » : " . count($site['visitor']) . ' pages identiques à l’octet', $diff === [] && count($now[$type]['visitor'] ?? []) === count($site['visitor']), implode(' ', $diff));
         check("« $type » : identiques avec une session d’administration", ($now[$type]['admin_same'] ?? false) === true);
     }
+    // Les mêmes pages, rendues à partir de l'index léger (ce que fait un gros site) : toujours identiques à l'octet.
+    $lite = capture_all(dirname(__DIR__), $fixtures, true);
+    foreach ($ref['sites'] as $type => $site) {
+        $diff = array_keys(array_filter($site['visitor'], fn ($v, $u) => ($lite[$type]['visitor'][$u] ?? null) !== $v, ARRAY_FILTER_USE_BOTH));
+        check("« $type » : identiques à l’octet avec l’index léger", $diff === [] && count($lite[$type]['visitor'] ?? []) === count($site['visitor']) && ($lite[$type]['lite'] ?? false) === true,
+            implode(' ', $diff));
+    }
     check('HTML de chaque type de bloc identique', capture_blocks(dirname(__DIR__), $fixtures . '/sites/business') === $ref['blocks']);
     check('CSS et JS publics inchangés (sha256)', capture_public_files(dirname(__DIR__)) === $ref['public_files']);
 
@@ -751,6 +761,7 @@ require __DIR__ . '/sec-A.php';
 require __DIR__ . '/sec-review.php';
 require __DIR__ . '/sec-r2-a.php';
 require __DIR__ . '/sec-r2-b.php';
+require __DIR__ . '/index-lite.php';
 
 exec('rm -rf ' . escapeshellarg(ECLAIR_DATA));
 echo "\n" . ($failed ? '❌ ' . count($failed) . ' échec(s), ' : '✅ ') . $passed . " vérifications réussies\n";
