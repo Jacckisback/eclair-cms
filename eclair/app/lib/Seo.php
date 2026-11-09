@@ -46,7 +46,9 @@ final class Seo
     public static function format(string $title): string
     {
         $format = (string) Settings::get('seo.title_format', '{title} · {site}');
-        return trim(strtr($format, ['{title}' => $title, '{site}' => (string) Settings::get('name')]), ' ·|-–—');
+        // Séparateurs retirés caractère par caractère (/u), jamais octet par octet : trim() avec « · », « – » ou « — » dans sa
+        // liste entamait le premier caractère d'un titre qui commence par « (guillemet français), “, … ou € (titre abîmé : « � »).
+        return (string) preg_replace('~^[ ·|\-–—]+|[ ·|\-–—]+$~u', '', strtr($format, ['{title}' => $title, '{site}' => (string) Settings::get('name')]));
     }
 
     /* ──────────────────────────────── <head> ─────────────────────────────── */

@@ -84,7 +84,11 @@ define('ECLAIR_ROOT', __DIR__);
     $etag = '"' . ($meta['e'] ?? '') . '"';
     header('ETag: ' . $etag);
     header('X-Cache: HIT');
-    if (trim($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
+    // Validateur tel que le navigateur le renvoie : identique, affaibli (« W/"…" » : Nginx avec gzip, Cloudflare) ou suffixé par
+    // la compression du serveur (« "…-gzip" », « "…-br" » : Apache ; « "…;br" » : LiteSpeed). Sans cela, jamais de 304 derrière eux.
+    $seen = (string) ($_SERVER['HTTP_IF_NONE_MATCH'] ?? '');
+    if ($seen !== '' && preg_match('~^[a-f0-9]{16}$~', (string) ($meta['e'] ?? ''))
+        && preg_match('~(?:^|[\s,])(?:W/)?"' . $meta['e'] . '(?:[-;][a-z]{2,8})?"\s*(?:,|$)~', $seen)) {
         http_response_code(304);
         exit;
     }

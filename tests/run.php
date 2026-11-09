@@ -175,6 +175,14 @@ check('URL vidéo inconnue refusée', Blocks::video('https://evil.example/x') ==
 
 /* ─────────────────────────────── Divers ─────────────────────────────── */
 section('Utilitaires');
+// Séparateurs retirés par caractère, jamais par octet : un titre qui commence par «, “, … ou € reste intact.
+foreach (['« Bonjour » le monde', '“Hello” world', '…et après ?', '€ 10 de réduction', 'Tout sur À'] as $typo) {
+    $formatted = Eclair\Seo::format($typo);
+    check('titre SEO intact : ' . $typo, mb_check_encoding($formatted, 'UTF-8') && str_starts_with($formatted, $typo), bin2hex(substr($formatted, 0, 6)));
+}
+check('titre SEO : séparateurs en trop retirés', Eclair\Seo::format(' — Titre · ') === 'Titre' || str_starts_with(Eclair\Seo::format(' — Titre'), 'Titre'), Eclair\Seo::format(' — Titre · '));
+$cut = excerpt(str_repeat('a', 9) . ' cœ ' . str_repeat('b', 30), 12);
+check('extrait coupé après « œ », « Ó » ou « À » : caractère entier', $cut === str_repeat('a', 9) . ' cœ…' && excerpt('aaaa ÓÀ – ' . str_repeat('b', 30), 8) === 'aaaa ÓÀ…', $cut);
 check('extrait', excerpt('Un texte assez long pour être coupé proprement ici', 20) === 'Un texte assez long…');
 check('nombre de mots', word_count("Un  deux\u{00A0}trois\nquatre") === 4);
 check('redirection normalisée', Redirects::normalize('https://ex.fr/Ancienne-Page/') === '/Ancienne-Page');
@@ -270,9 +278,9 @@ foreach (array_keys(Eclair\I18n::LANGS) as $lang) {
     $broken = array_filter(array_keys($dict), static fn ($fr) => trim((string) $dict[$fr]) === '' || $marks((string) $fr) != $marks((string) $dict[$fr]));
     check("$lang : variables, balises et retours à la ligne conservés", $broken === [], implode(' | ', array_slice($broken, 0, 3)));
     $bundledLang = array_filter(glob(ECLAIR_ROOT . "/app/bundled/*/lang/$lang.json.gz") ?: [],
-        static fn (string $f): bool => (string) file_get_contents($f) !== eclair_i18n_compile($source, basename(dirname($f, 2)), $i18nScopes));
+        static fn (string $f): bool => !eclair_i18n_same($f, eclair_i18n_compile($source, basename(dirname($f, 2)), $i18nScopes)));
     check("$lang : fichiers livrés à jour, noyau et fonctions (php tools/i18n.php)", is_file($source) && $bundledLang === []
-        && (string) @file_get_contents(ECLAIR_ROOT . "/app/lang/$lang.json.gz") === eclair_i18n_compile($source, 'core', $i18nScopes), implode(' ', $bundledLang));
+        && eclair_i18n_same(ECLAIR_ROOT . "/app/lang/$lang.json.gz", eclair_i18n_compile($source, 'core', $i18nScopes)), implode(' ', $bundledLang));
     Eclair\I18n::setLang($lang);
     check("$lang : interface traduite", t('Réglages') !== 'Réglages' && t('il y a {n} min', ['n' => 5]) !== 'il y a 5 min');
 }
@@ -516,6 +524,19 @@ if (!in_array('--unit', $argv, true)) {
         check('page servie depuis le cache', ($again['headers']['x-cache'] ?? '') === 'HIT');
         $etag = $again['headers']['etag'] ?? '';
         check('304 Not Modified', $v->req('GET', '/', [], ['If-None-Match: ' . $etag])['status'] === 304);
+        // Validateur transformé par le serveur ou le CDN (W/ : Nginx avec gzip, Cloudflare ; -gzip, -br : Apache ; ;br : LiteSpeed).
+        $bare = trim($etag, '"');
+        foreach (['W/' . $etag, '"' . $bare . '-gzip"', '"' . $bare . '-br"', '"' . $bare . ';br"', '"autre", W/"' . $bare . '-gzip"'] as $seen) {
+            check('304 avec le validateur ' . $seen, $v->req('GET', '/', [], ['If-None-Match: ' . $seen])['status'] === 304);
+        }
+        foreach (['"' . $bare . '0"', '"x' . $bare . '"', $bare, '"' . substr($bare, 0, 15) . '"'] as $seen) {
+            check('200 avec un autre validateur ' . $seen, $v->req('GET', '/', [], ['If-None-Match: ' . $seen])['status'] === 200);
+        }
+        $searchTag = $v->req('GET', '/recherche?q=eclair')['headers']['etag'] ?? '';
+        check('304 hors cache (page de recherche), validateur affaibli', $searchTag !== ''
+            && $v->req('GET', '/recherche?q=eclair', [], ['If-None-Match: W/' . $searchTag])['status'] === 304
+            && $v->req('GET', '/recherche?q=eclair', [], ['If-None-Match: "' . trim($searchTag, '"') . '-gzip"'])['status'] === 304
+            && $v->req('GET', '/recherche?q=eclair', [], ['If-None-Match: "0000000000000000"'])['status'] === 200);
         $poison = $v->req('GET', '/blog', [], ['X-Forwarded-Proto: https']);
         $plain = $v->req('GET', '/blog');
         check('cache : en-têtes indépendants du protocole annoncé', !str_contains(($poison['headers']['content-security-policy'] ?? '') . ($plain['headers']['content-security-policy'] ?? ''), 'upgrade-insecure'));

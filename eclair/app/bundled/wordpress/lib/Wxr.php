@@ -21,6 +21,16 @@ final class Wxr
      * Export lu : ['site' => adresse de l'ancien site, 'title', 'categories' => [nicename => nom], 'attachments' => [id => url],
      * 'items' => [contenu…]] ; ou un message d'erreur.
      */
+    /** Champs personnalisés de référencement lus dans l'export (Yoast SEO, Rank Math, SEOPress, All in One SEO 3). */
+    private const SEO_KEYS = [
+        '_yoast_wpseo_title' => 1, '_yoast_wpseo_metadesc' => 1, '_yoast_wpseo_focuskw' => 1, '_yoast_wpseo_canonical' => 1, '_yoast_wpseo_meta-robots-noindex' => 1,
+        'rank_math_title' => 1, 'rank_math_description' => 1, 'rank_math_focus_keyword' => 1, 'rank_math_canonical_url' => 1, 'rank_math_robots' => 1,
+        '_seopress_titles_title' => 1, '_seopress_titles_desc' => 1, '_seopress_analysis_target_kw' => 1, '_seopress_robots_canonical' => 1, '_seopress_robots_index' => 1,
+        '_aioseop_title' => 1, '_aioseop_description' => 1, '_aioseop_noindex' => 1,
+    ];
+    /** Balises de bloc : jamais enveloppées dans un paragraphe par autop(). */
+    private const BLOCK_TAGS = 'address|article|aside|audio|blockquote|details|div|dl|dd|dt|embed|fieldset|figcaption|figure|footer|form|h[1-6]|header|hr|iframe|li|main|nav|noscript|object|ol|p|pre|script|section|style|summary|svg|table|tbody|td|tfoot|th|thead|tr|ul|video';
+
     public static function parse(string $xml): array|string
     {
         if (!function_exists('simplexml_load_string') || !class_exists(\DOMDocument::class)) {
@@ -80,10 +90,14 @@ final class Wxr
                 }
             }
             $thumb = 0;
-            foreach ($w->postmeta as $meta) {
-                $m = $meta->children($wpNs);
-                if ((string) $m->meta_key === '_thumbnail_id') {
+            $meta = [];
+            foreach ($w->postmeta as $row) {
+                $m = $row->children($wpNs);
+                $key = (string) $m->meta_key;
+                if ($key === '_thumbnail_id') {
                     $thumb = (int) $m->meta_value;
+                } elseif (isset(self::SEO_KEYS[$key])) {
+                    $meta[$key] = mb_substr(trim((string) $m->meta_value), 0, 1000);
                 }
             }
             $out['items'][] = [
@@ -98,9 +112,52 @@ final class Wxr
                 'excerpt' => trim(strip_tags((string) $item->children($excerptNs)->encoded)),
                 'cats' => array_filter($cats, static fn (string $name, string $slug): bool => $slug !== '', ARRAY_FILTER_USE_BOTH),
                 'thumb' => $thumb,
+                'seo' => self::seo($meta, trim((string) $item->title), $out['title'], $site),
             ];
         }
         return $out;
+    }
+
+    /**
+     * Référencement saisi dans Yoast SEO, Rank Math, SEOPress ou All in One SEO (avant sa version 4), lu dans les champs
+     * personnalisés de l'export : titre, description, mot-clé principal, noindex et canonical. Un titre ou une description
+     * qui n'est que le modèle de l'extension (« %%title%% %%sep%% %%sitename%% ») n'est pas repris : Éclair applique le sien.
+     * Une canonical qui vise l'ancien site est ignorée (Éclair calcule la sienne) ; vers un autre site, elle est gardée.
+     */
+    private static function seo(array $meta, string $title, string $siteName, string $site): array
+    {
+        $pick = static function (array $keys) use ($meta): string {
+            foreach ($keys as $k) {
+                if (($meta[$k] ?? '') !== '') {
+                    return $meta[$k];
+                }
+            }
+            return '';
+        };
+        $norm = static fn (string $t): string => mb_strtolower((string) preg_replace('~[^\p{L}\p{N}]+~u', '', $t));
+        $resolve = static function (string $value) use ($title, $siteName, $norm): string {
+            if ($value === '' || !str_contains($value, '%')) {
+                return $value;
+            }
+            $known = ['title' => $title, 'sitename' => $siteName, 'sitetitle' => $siteName, 'sep' => '·', 'page' => '', 'pagenumber' => '', 'pagetotal' => ''];
+            $text = (string) preg_replace_callback('~%%?([a-z_]+)%%?~i', static fn (array $m): string => $known[strtolower($m[1])] ?? $m[0], $value);
+            $text = (string) preg_replace('~^[ ·|\-–—]+|[ ·|\-–—]+$~u', '', (string) preg_replace('~\s+~u', ' ', $text));
+            // Variable inconnue (%%excerpt%%…) ou simple modèle « titre · site » : rien de personnel à reprendre.
+            return preg_match('~%%?[a-z_]+%%?~i', $text) || in_array($norm($text), [$norm($title), $norm($title . $siteName), $norm($siteName . $title)], true) ? '' : $text;
+        };
+        $canonical = $pick(['_yoast_wpseo_canonical', 'rank_math_canonical_url', '_seopress_robots_canonical']);
+        $host = static fn (string $url): string => (string) preg_replace('~^www\.~', '', strtolower((string) parse_url($url, PHP_URL_HOST)));
+        if (!preg_match('~^https?://~i', $canonical) || $host($canonical) === $host($site)) {
+            $canonical = '';
+        }
+        return [
+            'title' => $resolve($pick(['_yoast_wpseo_title', 'rank_math_title', '_seopress_titles_title', '_aioseop_title'])),
+            'description' => $resolve($pick(['_yoast_wpseo_metadesc', 'rank_math_description', '_seopress_titles_desc', '_aioseop_description'])),
+            'keyword' => trim(explode(',', $pick(['_yoast_wpseo_focuskw', 'rank_math_focus_keyword', '_seopress_analysis_target_kw']))[0]),
+            'canonical' => $canonical,
+            'noindex' => ($meta['_yoast_wpseo_meta-robots-noindex'] ?? '') === '1' || str_contains($meta['rank_math_robots'] ?? '', 'noindex')
+                || ($meta['_seopress_robots_index'] ?? '') === 'yes' || ($meta['_aioseop_noindex'] ?? '') === 'on',
+        ];
     }
 
     /**
@@ -130,12 +187,14 @@ final class Wxr
      */
     public static function blocks(string $html, callable $image): array
     {
+        // Éditeur de blocs : chaque paragraphe a déjà sa balise. Éditeur classique : WordPress les ajoute à l'affichage (wpautop).
+        $classic = !str_contains($html, '<!-- wp:');
+        $html = self::shortcodes($html);
+        // Compté après la conversion des codes courts de WordPress lui-même : ne restent que ceux qui seront laissés en texte.
         $stats = ['images' => 0, 'missed' => 0, 'shortcodes' => preg_match_all('~\[/?[a-z][a-z0-9_-]*(\s[^\]]*)?\]~i', $html), 'dropped' => 0];
         $html = (string) preg_replace('~<!--.*?-->~s', '', $html);
-        // Éditeur classique : paragraphes séparés par des lignes vides, sans balise (wpautop de WordPress).
-        if (!preg_match('~<(p|h[1-6]|ul|ol|blockquote|figure|div|table|pre)\b~i', $html)) {
-            $paras = preg_split('~\R\s*\R~', trim($html)) ?: [];
-            $html = implode('', array_map(static fn (string $p): string => '<p>' . nl2br(trim($p), false) . '</p>', array_filter($paras, static fn (string $p): bool => trim($p) !== '')));
+        if ($classic) {
+            $html = self::autop($html);
         }
         $dom = new \DOMDocument();
         $previous = libxml_use_internal_errors(true);
@@ -150,14 +209,97 @@ final class Wxr
         return [$blocks, $stats];
     }
 
+    /**
+     * Codes courts de WordPress lui-même : [caption] (image et sa légende, éditeur classique) devient une figure, [embed]
+     * laisse son adresse seule sur sa ligne (une vidéo YouTube ou Vimeo devient alors un bloc vidéo).
+     */
+    private static function shortcodes(string $html): string
+    {
+        $html = (string) preg_replace_callback('~\[caption\b([^\]]*)\](.*?)\[/caption\]~is', static function (array $m): string {
+            if (!preg_match('~^\s*((?:<a\b[^>]*>\s*)?<img\b[^>]*>(?:\s*</a>)?)(.*)$~is', $m[2], $p)) {
+                return $m[2];
+            }
+            // Légende : le texte qui suit l'image, ou l'attribut caption="…" (avant WordPress 3.4).
+            $caption = trim($p[2]);
+            if ($caption === '' && preg_match('~\bcaption=(["\'])(.*?)\1~s', $m[1], $c)) {
+                $caption = e(html_entity_decode($c[2], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            }
+            return "\n\n<figure>" . $p[1] . ($caption !== '' ? '<figcaption>' . $caption . '</figcaption>' : '') . "</figure>\n\n";
+        }, $html);
+        return (string) preg_replace('~\[embed\b[^\]]*\]\s*(https?://[^\s\[\]<>"]+)\s*\[/embed\]~i', "\n\n$1\n\n", $html);
+    }
+
+    /**
+     * Paragraphes de l'éditeur classique, comme wpautop de WordPress : le texte séparé par des lignes vides devient des
+     * paragraphes, un simple retour à la ligne un <br>, sans toucher aux blocs (listes, citations, tableaux, <pre>…).
+     * Sans cela, un article classique qui contient ne serait-ce qu'une liste arrivait en un seul paragraphe, ou morcelé à
+     * chaque mot en gras.
+     */
+    private static function autop(string $html): string
+    {
+        $kept = [];
+        $html = (string) preg_replace_callback('~<(pre|script|style)\b.*?</\1>~is', static function (array $m) use (&$kept): string {
+            $kept[] = $m[0];
+            return "\n\n\x02" . (count($kept) - 1) . "\x03\n\n";
+        }, str_replace(["\x02", "\x03"], '', $html));
+        $html = (string) preg_replace('~(<(?:' . self::BLOCK_TAGS . ')\b[^>]*>)~i', "\n\n$1", $html);
+        $html = (string) preg_replace('~(</(?:' . self::BLOCK_TAGS . ')>)~i', "$1\n\n", $html);
+        $out = '';
+        foreach (preg_split('~\R\s*\R~', $html) ?: [] as $chunk) {
+            $chunk = trim($chunk);
+            if ($chunk === '') {
+                continue;
+            }
+            if (preg_match('~^(?:</?(?:' . self::BLOCK_TAGS . ')\b|\x02\d+\x03$)~i', $chunk)) {
+                $out .= $chunk . "\n";
+            } else {
+                $out .= '<p>' . preg_replace('~(?<!>)\R|(?<!<br>|<br/>|<br />)(?<=>)\R~i', "<br>\n", $chunk) . "</p>\n";
+            }
+        }
+        return (string) preg_replace_callback('~\x02(\d+)\x03~', static fn (array $m): string => $kept[(int) $m[1]] ?? '', $out);
+    }
+
+    /** Texte seul : un paragraphe, ou un bloc vidéo si ce n'est que l'adresse d'une vidéo YouTube ou Vimeo (oEmbed de WordPress). */
+    private static function text(string $plain, string $html, array &$blocks): void
+    {
+        $plain = trim($plain);
+        if ($plain !== '' && !preg_match('~\s~u', $plain) && \Eclair\Blocks::video($plain) !== null) {
+            $blocks[] = ['type' => 'video', 'url' => $plain, 'caption' => ''];
+        } elseif ($plain !== '') {
+            $blocks[] = ['type' => 'paragraph', 'text' => $html];
+        }
+    }
+
+    /** Éléments d'une liste ; ceux d'une sous-liste suivent leur élément parent (Éclair n'imbrique pas les listes) au lieu d'être perdus. */
+    private static function items(\DOMElement $list, array &$items): void
+    {
+        foreach (iterator_to_array($list->childNodes) as $li) {
+            if (!$li instanceof \DOMElement || strtolower($li->tagName) !== 'li') {
+                continue;
+            }
+            $subs = [];
+            foreach (array_merge(iterator_to_array($li->getElementsByTagName('ul'), false), iterator_to_array($li->getElementsByTagName('ol'), false)) as $sub) {
+                // Seulement les sous-listes de premier niveau : les suivantes sont parcourues avec leur propre parent.
+                for ($up = $sub->parentNode; $up !== null && $up !== $li && !in_array(strtolower($up->nodeName), ['ul', 'ol'], true); $up = $up->parentNode);
+                if ($up === $li) {
+                    $subs[] = $sub;
+                }
+            }
+            foreach ($subs as $sub) {
+                $sub->parentNode?->removeChild($sub);
+            }
+            $items[] = trim(self::inner($li));
+            foreach ($subs as $sub) {
+                self::items($sub, $items);
+            }
+        }
+    }
+
     private static function walk(\DOMNode $parent, array &$blocks, array &$stats, callable $image): void
     {
         foreach (iterator_to_array($parent->childNodes) as $node) {
             if ($node instanceof \DOMText) {
-                $text = trim($node->textContent);
-                if ($text !== '') {
-                    $blocks[] = ['type' => 'paragraph', 'text' => e($text)];
-                }
+                self::text($node->textContent, e(trim($node->textContent)), $blocks);
                 continue;
             }
             if (!$node instanceof \DOMElement) {
@@ -172,23 +314,14 @@ final class Wxr
                         $img->parentNode?->removeChild($img);
                     }
                     $inner = trim(self::inner($node));
-                    if (trim(strip_tags($inner)) !== '') {
-                        $blocks[] = ['type' => 'paragraph', 'text' => $inner];
-                    }
+                    self::text(html_entity_decode(strip_tags($inner), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $inner, $blocks);
                     break;
                 case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6':
                     $blocks[] = ['type' => 'heading', 'level' => max(2, min(4, (int) $tag[1])), 'text' => trim(self::inner($node))];
                     break;
                 case 'ul': case 'ol':
                     $items = [];
-                    foreach ($node->childNodes as $li) {
-                        if ($li instanceof \DOMElement && strtolower($li->tagName) === 'li') {
-                            foreach (array_merge(iterator_to_array($li->getElementsByTagName('ul'), false), iterator_to_array($li->getElementsByTagName('ol'), false)) as $sub) {
-                                $sub->parentNode?->removeChild($sub);
-                            }
-                            $items[] = trim(self::inner($li));
-                        }
-                    }
+                    self::items($node, $items);
                     $blocks[] = ['type' => 'list', 'style' => $tag, 'items' => $items];
                     break;
                 case 'blockquote':
@@ -314,6 +447,10 @@ final class Wxr
     private static function image(\DOMElement $img, string $caption, array &$blocks, array &$stats, callable $image, string $link = ''): void
     {
         $src = trim((string) $img->getAttribute('src'));
+        // Image à chargement différé (extension de performance) : la vraie adresse est dans un attribut data-.
+        foreach ($src === '' || str_starts_with($src, 'data:') ? ['data-src', 'data-lazy-src', 'data-orig-file'] : [] as $attr) {
+            $src = trim((string) $img->getAttribute($attr)) ?: $src;
+        }
         $alt = trim((string) $img->getAttribute('alt'));
         $media = $src !== '' ? $image($src, $alt) : null;
         if (is_string($media) && $media !== '') {

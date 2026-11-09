@@ -385,7 +385,7 @@ footer{margin-top:26px;color:var(--muted);font-size:12px;text-align:center}
 <section class="cta">
   <div><h2><?= e($T('h_next')) ?></h2><p><?= e($b['note'] !== '' ? $b['note'] : $T('next_default')) ?></p></div>
   <?php if ($b['name'] . $b['company'] . $b['email'] . $b['phone'] . $b['website'] !== ''): ?>
-  <div class="who"><?= e($T('prepared')) ?><br><strong><?= e(trim($b['name'] . ($b['company'] !== '' ? ' · ' . $b['company'] : ''), ' ·')) ?></strong><br>
+  <div class="who"><?= e($T('prepared')) ?><br><strong><?= e((string) preg_replace('~^[ ·]+|[ ·]+$~u', '', $b['name'] . ($b['company'] !== '' ? ' · ' . $b['company'] : ''))) ?></strong><br>
     <?php if ($b['email'] !== ''): ?><a href="mailto:<?= e($b['email']) ?>"><?= e($b['email']) ?></a><br><?php endif ?>
     <?php if ($b['phone'] !== ''): ?><?= e($b['phone']) ?><br><?php endif ?>
     <?php if ($b['website'] !== ''): ?><a href="<?= e($b['website']) ?>"><?= e((string) preg_replace('~^https?://~', '', rtrim($b['website'], '/'))) ?></a><?php endif ?></div>

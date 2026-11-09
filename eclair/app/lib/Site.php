@@ -760,9 +760,10 @@ final class Site
 
     private static function send(string $body, int $status, array $headers): never
     {
-        $etag = '"' . substr(md5($body), 0, 16) . '"';
-        $headers[] = 'ETag: ' . $etag;
-        if ($status === 200 && trim(Req::header('If-None-Match')) === $etag) {
+        $tag = substr(md5($body), 0, 16);
+        $headers[] = 'ETag: "' . $tag . '"';
+        // Même comparaison que le chemin rapide d'index.php : validateur identique, affaibli (W/) ou suffixé par la compression.
+        if ($status === 200 && preg_match('~(?:^|[\s,])(?:W/)?"' . $tag . '(?:[-;][a-z]{2,8})?"\s*(?:,|$)~', Req::header('If-None-Match'))) {
             Http::send('', 304, $headers);
         }
         Http::send($body, $status, $headers);

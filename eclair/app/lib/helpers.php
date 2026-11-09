@@ -118,7 +118,8 @@ function excerpt(string $text, int $max = 160): string
     $cut = mb_substr($text, 0, $max + 1);
     $pos = mb_strrpos($cut, ' ');
     $cut = mb_substr($cut, 0, $pos !== false && $pos > $max * 0.6 ? $pos : $max);
-    return rtrim($cut, " ,;:.!?-–—") . '…';
+    // Par caractère (/u) : rtrim() avec « – » et « — » dans sa liste coupait le dernier octet d'un « œ », d'un « Ó » ou d'un « À ».
+    return preg_replace('~[ ,;:.!?\-–—]+$~u', '', $cut) . '…';
 }
 
 /** Nombre de mots d'un texte brut (gère les accents et les espaces insécables). */

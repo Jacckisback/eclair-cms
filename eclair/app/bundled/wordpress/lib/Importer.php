@@ -113,7 +113,15 @@ final class Importer
         $fetch = function (string $url, string $alt) use (&$job, &$map, $user): ?string {
             return $job['images'] ? self::image($url, (string) $job['site'], $map, $user) : null;
         };
-        [$blocks, $stats] = Wxr::blocks((string) $wp['html'], $fetch);
+        // [gallery ids="1,2"] : les images de la galerie, retrouvées par leur identifiant parmi les fichiers joints de l'export.
+        $html = (string) preg_replace_callback('~\[gallery\b[^\]]*\bids=["\']([\d,\s]+)["\'][^\]]*\]~i', static function (array $m) use ($job): string {
+            $imgs = '';
+            foreach (array_slice(array_filter(array_map('intval', explode(',', $m[1]))), 0, 60) as $id) {
+                $imgs .= isset($job['attachments'][$id]) ? '<img src="' . e((string) $job['attachments'][$id]) . '" alt="">' : '';
+            }
+            return $imgs !== '' ? "\n\n<figure>" . $imgs . "</figure>\n\n" : $m[0];
+        }, (string) $wp['html']);
+        [$blocks, $stats] = Wxr::blocks($html, $fetch);
         foreach (['images', 'missed', 'shortcodes', 'dropped'] as $k) {
             $job['report'][$k] += (int) $stats[$k];
         }
@@ -138,6 +146,8 @@ final class Importer
                 'summary' => $wp['excerpt'],
                 'category' => $category,
                 'image' => $thumb ?? '',
+                // Titre, description, mot-clé, noindex et canonical saisis dans Yoast SEO, Rank Math ou SEOPress (Wxr::seo).
+                'seo' => (array) ($wp['seo'] ?? []),
             ], $user);
         } catch (\Throwable $e) {
             $job['report']['errors'][] = mb_substr($wp['title'] . ' : ' . $e->getMessage(), 0, 300);

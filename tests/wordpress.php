@@ -53,9 +53,9 @@ use EclairExt\Wordpress\Wxr;
         . '<blockquote><p>Le pain, c’est la vie.</p><cite>Un boulanger</cite></blockquote><script>alert(1)</script><pre>code &lt;b&gt;</pre><hr>'
         . '<table><tr><td>Farine</td><td>500 g</td></tr></table><p><img src="https://cdn.example/b.png" alt="Ailleurs"></p>',
         static fn (string $url): ?string => str_contains($url, 'ancien.example') ? 'media1' : null);
-    check('conversion : titre, paragraphe, liste (sans sous-liste), image légendée, citation, code, séparateur, tableau', array_column($blocks, 'type')
+    check('conversion : titre, paragraphe, liste (sous-liste à la suite de son élément), image légendée, citation, code, séparateur, tableau', array_column($blocks, 'type')
         === ['heading', 'paragraph', 'list', 'image', 'quote', 'code', 'divider', 'table', 'paragraph']
-        && $blocks[2]['items'] === ['Farine', 'Eau'] && $blocks[3]['media'] === 'media1' && $blocks[3]['caption'] === 'La miche' && $blocks[4]['cite'] === 'Un boulanger'
+        && $blocks[2]['items'] === ['Farine', 'Eau', 'tiède'] && $blocks[3]['media'] === 'media1' && $blocks[3]['caption'] === 'La miche' && $blocks[4]['cite'] === 'Un boulanger'
         && $blocks[5]['code'] === 'code <b>' && $blocks[7]['rows'] === [['Farine', '500 g']], json_encode($blocks, JSON_UNESCAPED_UNICODE));
     [$more] = Wxr::blocks('<details><summary>Prix ?</summary><p>Sur devis.</p></details><details><summary>Délai ?</summary><p>Une semaine.</p></details>'
         . '<figure class="wp-block-gallery"><img src="https://ancien.example/a.png" alt="A"><img src="https://ancien.example/b.png" alt="B"></figure>'
@@ -66,6 +66,37 @@ use EclairExt\Wordpress\Wxr;
         && str_contains($blocks[8]['text'], 'href="https://cdn.example/b.png"'), json_encode($stats));
     [$classic] = Wxr::blocks("Première ligne\nsuite.\n\nDeuxième paragraphe.", static fn (): ?string => null);
     check('éditeur classique (sans balises) : paragraphes retrouvés', count($classic) === 2 && str_contains($classic[0]['text'], 'suite.'));
+    // Article classique qui mêle texte libre et balises : mêmes paragraphes que WordPress à l'affichage (wpautop).
+    [$mixed, $mixedStats] = Wxr::blocks("Intro en <strong>gras</strong> et <a href=\"https://ancien.example/x/\">lien</a>.\nMême paragraphe.\n\n"
+        . '[caption id="attachment_7" align="aligncenter" width="300"]<a href="https://ancien.example/a.png"><img src="https://ancien.example/a-300x200.png" alt="Miche" /></a> La <em>miche</em>[/caption]'
+        . "\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ\n\n[embed]https://vimeo.com/123456[/embed]\n<h2>Titre</h2>\nTexte après le titre.\n"
+        . "<ul>\n<li>Un<ul><li>Sous un</li></ul></li>\n<li>Deux</li>\n</ul>\n<pre>a\n\nb</pre>\n[formulaire id=\"5\"]\n\nFin.",
+        static fn (string $url): ?string => str_contains($url, 'ancien.example') ? 'media1' : null);
+    check('éditeur classique avec balises : paragraphes, légende [caption], vidéos (adresse seule, [embed]), sous-liste, <pre> intact',
+        array_column($mixed, 'type') === ['paragraph', 'image', 'video', 'video', 'heading', 'paragraph', 'list', 'code', 'paragraph', 'paragraph']
+        && str_contains($mixed[0]['text'], '<strong>gras</strong>') && str_contains($mixed[0]['text'], 'Même paragraphe.')
+        && $mixed[1]['caption'] === 'La <em>miche</em>' && ($mixed[1]['link'] ?? '') === 'https://ancien.example/a.png'
+        && $mixed[2]['url'] === 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' && $mixed[3]['url'] === 'https://vimeo.com/123456'
+        && $mixed[5]['text'] === 'Texte après le titre.' && $mixed[6]['items'] === ['Un', 'Sous un', 'Deux'] && $mixed[7]['code'] === "a\n\nb"
+        && $mixedStats['shortcodes'] === 1 && $mixed[9]['text'] === 'Fin.', json_encode($mixed, JSON_UNESCAPED_UNICODE));
+    [$embed] = Wxr::blocks("<!-- wp:paragraph -->\n<p>Deux\nlignes.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:embed -->\n<figure class=\"wp-block-embed\"><div class=\"wp-block-embed__wrapper\">\nhttps://youtu.be/abc123XYZ_0\n</div></figure>\n<!-- /wp:embed -->"
+        . '<p><img src="data:image/gif;base64,R0lGOD" data-lazy-src="https://ancien.example/b.png" alt="B"></p>', static fn (string $url): ?string => str_contains($url, 'ancien.example') ? 'media2' : null);
+    check('éditeur de blocs : paragraphes laissés tels quels, bloc Embed en vidéo, image à chargement différé retrouvée', array_column($embed, 'type') === ['paragraph', 'video', 'image']
+        && !str_contains($embed[0]['text'], '<br') && $embed[2]['media'] === 'media2', json_encode($embed, JSON_UNESCAPED_UNICODE));
+    $meta = static fn (array $pairs): string => implode('', array_map(static fn (string $k, string $v): string => '<wp:postmeta><wp:meta_key>' . $k . '</wp:meta_key><wp:meta_value><![CDATA[' . $v . ']]></wp:meta_value></wp:postmeta>', array_keys($pairs), $pairs));
+    $seoExport = Wxr::parse($wxr($site,
+        $item(31, 'post', 'publish', 'Pain au levain', $site . '/pain/', 'pain', '<p>x</p>', $meta(['_yoast_wpseo_title' => 'Recette du pain au levain maison %%sep%% %%sitename%%',
+            '_yoast_wpseo_metadesc' => 'La recette complète, pas à pas.', '_yoast_wpseo_focuskw' => 'pain au levain', '_yoast_wpseo_meta-robots-noindex' => '1',
+            '_yoast_wpseo_canonical' => $site . '/pain/']))
+        . $item(32, 'post', 'publish', 'Brioche', $site . '/brioche/', 'brioche', '<p>x</p>', $meta(['rank_math_title' => '%title% %sep% %sitename%', 'rank_math_description' => '%excerpt%',
+            'rank_math_focus_keyword' => 'brioche,brioche maison', 'rank_math_robots' => 'a:1:{i:0;s:5:"index";}', 'rank_math_canonical_url' => 'https://autre.example/brioche/']))
+        . $item(33, 'page', 'publish', 'Contact', $site . '/contact/', 'contact', '<p>x</p>', $meta(['_seopress_titles_title' => 'Nous écrire', '_seopress_robots_index' => 'yes']))));
+    $seo = is_array($seoExport) ? array_column($seoExport['items'], 'seo', 'wp') : [];
+    check('référencement repris des extensions (Yoast, Rank Math, SEOPress) : titre et description personnalisés, mot-clé, noindex',
+        ($seo[31] ?? []) === ['title' => 'Recette du pain au levain maison · Le Fournil d’Antan', 'description' => 'La recette complète, pas à pas.', 'keyword' => 'pain au levain', 'canonical' => '', 'noindex' => true]
+        && ($seo[33]['title'] ?? '') === 'Nous écrire' && ($seo[33]['noindex'] ?? false) === true, json_encode($seo, JSON_UNESCAPED_UNICODE));
+    check('référencement : simple modèle de l’extension et variable inconnue non repris, canonical vers un autre site gardée',
+        ($seo[32] ?? []) === ['title' => '', 'description' => '', 'keyword' => 'brioche', 'canonical' => 'https://autre.example/brioche/', 'noindex' => false], json_encode($seo[32] ?? null, JSON_UNESCAPED_UNICODE));
 
     if (in_array('--unit', $argv, true)) {
         return;
@@ -80,7 +111,8 @@ use EclairExt\Wordpress\Wxr;
     $file = sys_get_temp_dir() . '/eclair-wxr-' . getmypid() . '.xml';
     file_put_contents($file, $wxr($old, $item(12, 'post', 'publish', 'Pain au levain', $old . '/2024/03/pain-au-levain/', 'pain-au-levain',
             '<h2>Le levain</h2><p>Un <strong>bon</strong> pain.</p><figure><img src="' . $old . '/wp-content/uploads/2024/03/levain-300x200.png" alt="Levain"></figure>',
-            '<category domain="category" nicename="recettes"><![CDATA[Recettes]]></category><wp:postmeta><wp:meta_key>_thumbnail_id</wp:meta_key><wp:meta_value>99</wp:meta_value></wp:postmeta>')
+            '<category domain="category" nicename="recettes"><![CDATA[Recettes]]></category><wp:postmeta><wp:meta_key>_thumbnail_id</wp:meta_key><wp:meta_value>99</wp:meta_value></wp:postmeta>'
+            . $meta(['_yoast_wpseo_title' => 'Le vrai pain au levain', '_yoast_wpseo_metadesc' => 'Notre méthode, du levain à la cuisson.']))
         . $item(13, 'page', 'publish', 'Café crème', $old . '/caf%c3%a9-cr%c3%a8me/', 'caf%c3%a9-cr%c3%a8me', "Notre café.\n\nNotre crème.")
         . $item(14, 'post', 'publish', 'Liens simples', $old . '/?p=14', 'liens-simples', '<p>Ancien lien à paramètre.</p>')
         . $item(99, 'attachment', 'inherit', 'levain', $old . '/levain/', 'levain', '', '<wp:attachment_url>' . $old . '/wp-content/uploads/2024/03/levain.png</wp:attachment_url>')));
@@ -119,6 +151,8 @@ use EclairExt\Wordpress\Wxr;
         $post = $v->req('GET', '/2024/03/pain-au-levain/');
         check('article servi à son adresse WordPress exacte, contenu converti, image locale', $post['status'] === 200 && str_contains($post['body'], '<h2')
             && str_contains($post['body'], 'Un <strong>bon</strong> pain.') && str_contains($post['body'], '/media/') && !str_contains($post['body'], ':' . $wpPort . '/wp-content'));
+        check('titre et description saisis dans Yoast SEO repris sur la page', str_contains($post['body'], '<title>Le vrai pain au levain</title>')
+            && str_contains($post['body'], '<meta name="description" content="Notre méthode, du levain à la cuisson.">'));
         $log = (string) @file_get_contents($wpDir . '/log.jsonl');
         check('image d’origine téléchargée (pas la vignette -300x200), une seule fois pour l’article et sa une', str_contains($log, '/2024/03/levain.png')
             && !str_contains($log, 'levain-300x200') && substr_count($log, 'levain.png') === 1, $log);

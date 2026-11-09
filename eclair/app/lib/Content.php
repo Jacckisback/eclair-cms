@@ -32,6 +32,12 @@ final class Content
     private const MAX_TERMS = 8;
 
     private static ?array $index = null;
+    /**
+     * Vues de l'index calculées une fois par requête (listes publiées triées, table des adresses) : sur un site de 3 000
+     * contenus, chaque page générée refaisait sinon cinq à huit filtrages et tris complets. Oubliées dès que l'index change
+     * (hold) ; leur clé reprend ce dont elles dépendent hors de l'index (seconde courante, boutique, accueil, adresses).
+     */
+    private static array $views = [];
 
     /* ─────────────────────────────── Lecture ─────────────────────────────── */
 
@@ -40,15 +46,32 @@ final class Content
     {
         if (self::$index === null) {
             $index = Store::read('index');
-            self::$index = is_array($index) ? $index : self::reindex();
+            is_array($index) ? self::hold($index) : self::reindex();
         }
         return self::$index;
+    }
+
+    /** Index gardé pour la requête (null : relu au prochain besoin) ; les vues calculées à partir de l'ancien sont oubliées. */
+    private static function hold(?array $index): ?array
+    {
+        self::$views = [];
+        return self::$index = $index;
+    }
+
+    /** Vue de l'index gardée pour la requête, recalculée si ce dont elle dépend a changé. */
+    private static function view(string $name, string $key, callable $make): array
+    {
+        $index = self::index();
+        if ((self::$views[$name][0] ?? null) !== $key) {
+            self::$views[$name] = [$key, $make($index)];
+        }
+        return self::$views[$name][1];
     }
 
     /** Oublie l'index gardé pour la requête : la prochaine lecture repart du disque (changements faits par d'autres requêtes). */
     public static function forget(): void
     {
-        self::$index = null;
+        self::hold(null);
     }
 
     public static function get(string $id): ?array
@@ -69,9 +92,14 @@ final class Content
     /** Contenus visibles d'un type, du plus récent au plus ancien. */
     public static function published(?string $type = null): array
     {
-        $out = array_filter(self::index(), fn (array $e): bool => self::visible($e) && ($type === null || $e['type'] === $type));
-        uasort($out, fn (array $a, array $b): int => $b['date'] <=> $a['date']);
-        return $out;
+        $key = time() . (Settings::get('shop.enabled') ? '+' : '-');
+        $all = self::view('published', $key, static function (array $index): array {
+            $out = array_filter($index, fn (array $e): bool => self::visible($e));
+            uasort($out, fn (array $a, array $b): int => $b['date'] <=> $a['date']);
+            return $out;
+        });
+        // Le tri est stable : filtrer la liste triée par type donne le même ordre que trier la liste filtrée.
+        return $type === null ? $all : self::view('published:' . $type, $key, static fn (): array => array_filter($all, fn (array $e): bool => $e['type'] === $type));
     }
 
     public static function latest(int $count, string $category = '', string $exclude = ''): array
@@ -104,23 +132,33 @@ final class Content
     /** Contenu publié correspondant à un chemin. */
     public static function findByPath(string $path): ?array
     {
-        foreach (self::published() as $entry) {
-            if (self::path($entry) === $path) {
-                return $entry;
+        $published = self::published();
+        // Table adresse → contenu (le plus récent l'emporte, comme le parcours de la liste) : une seule passe par requête.
+        $key = time() . '|' . Settings::get('home') . '|' . self::blogPath() . '|' . (Settings::get('shop.enabled') ? Shop::path() : '');
+        $paths = self::view('paths', $key, static function () use ($published): array {
+            $out = [];
+            foreach ($published as $entry) {
+                $out[self::path($entry)] ??= $entry;
             }
-        }
-        return null;
+            return $out;
+        });
+        return $paths[$path] ?? null;
     }
 
     /** Contenu en ligne dont l'adresse exacte (route) est $path, ou null. */
     public static function byRoute(string $path): ?array
     {
-        foreach (self::index() as $entry) {
-            if (($entry['route'] ?? '') === $path && $entry['id'] !== Settings::get('home') && self::visible($entry)) {
-                return $entry;
+        $home = (string) Settings::get('home');
+        $routes = self::view('routes', time() . '|' . $home . (Settings::get('shop.enabled') ? '+' : '-'), static function (array $index) use ($home): array {
+            $out = [];
+            foreach ($index as $entry) {
+                if (($entry['route'] ?? '') !== '' && $entry['id'] !== $home && self::visible($entry)) {
+                    $out[(string) $entry['route']] ??= $entry;
+                }
             }
-        }
-        return null;
+            return $out;
+        });
+        return $routes[$path] ?? null;
     }
 
     /**
@@ -257,7 +295,7 @@ final class Content
         $written = false;
         try {
             $result = Store::locked(function () use ($data, $user, $expect, &$written): array {
-                self::$index = null;
+                self::hold(null);
                 $index = self::index();
                 $id = preg_replace('/[^a-z0-9]/', '', (string) ($data['id'] ?? '')) ?? '';
                 $old = $id !== '' && isset($index[$id]) ? self::get($id) : null;
@@ -294,7 +332,7 @@ final class Content
                     Store::write('content/' . $id, $item);
                     Store::write('index', $index);
                 }
-                self::$index = $index;
+                self::hold($index);
                 if ($search !== null) {
                     Store::write('search', $search);
                 }
@@ -446,7 +484,7 @@ final class Content
         $written = false;
         try {
             Store::locked(function () use ($id, $redirectTo, &$written): void {
-                self::$index = null;
+                self::hold(null);
                 $index = self::index();
                 if (!isset($index[$id])) {
                     return;
@@ -464,7 +502,7 @@ final class Content
                 }
                 unset($index[$id]);
                 Store::write('index', $index);
-                self::$index = $index;
+                self::hold($index);
                 foreach (Store::names('revisions/' . $id) as $rev) {
                     Store::delete($rev);
                 }
@@ -506,7 +544,7 @@ final class Content
     public static function linkTranslation(string $id, string $otherId): void
     {
         $linked = Store::locked(function () use ($id, $otherId): bool {
-            self::$index = null;
+            self::hold(null);
             $index = self::index();
             $a = isset($index[$id]) ? self::get($id) : null;
             $b = isset($index[$otherId]) ? self::get($otherId) : null;
@@ -520,7 +558,7 @@ final class Content
                 $index[$item['id']] = self::entry($item);
             }
             Store::write('index', $index);
-            self::$index = $index;
+            self::hold($index);
             return true;
         });
         if ($linked) {
@@ -546,13 +584,19 @@ final class Content
                         $item['status'] = 'draft';
                         Store::write($name, $item);
                     }
-                    $index[$item['id']] = self::entry($item);
+                    // Fichier incomplet (écrit à la main ou par un outil, sans les champs qu'un enregistrement normal garantit) :
+                    // laissé de côté et signalé dans le journal, au lieu de faire répondre 500 à toutes les pages du site.
+                    try {
+                        $index[$item['id']] = self::entry($item);
+                    } catch (\Throwable $e) {
+                        Log::error(new \RuntimeException('Contenu ignoré par l’index (fichier incomplet) : ' . $name, 0, $e));
+                    }
                 }
             }
             if (Settings::installed()) {
                 Store::write('index', $index);
             }
-            return self::$index = $index;
+            return self::hold($index);
         });
     }
 

@@ -118,6 +118,17 @@ function eclair_i18n_compile(string $source, string $scope = 'core', ?array $sco
 }
 
 /**
+ * Le fichier livré contient-il exactement ces traductions ? Comparaison du contenu décompressé : les octets d'un .gz dépendent
+ * de la bibliothèque zlib de la machine (zlib, zlib-ng…), si bien qu'un fichier à jour paraissait périmé, et était réécrit
+ * pour rien, dès qu'il avait été compilé ailleurs.
+ */
+function eclair_i18n_same(string $file, string $code): bool
+{
+    $old = @file_get_contents($file);
+    return is_string($old) && ($old === $code || (($a = @gzdecode($old)) !== false && $a === gzdecode($code)));
+}
+
+/**
  * Textes français de l'administration : appels t('…') du code et textes du JavaScript (AdminStrings).
  * Chacun doit figurer dans les sources i18n (vérifié par les tests).
  */
@@ -198,7 +209,7 @@ function eclair_i18n_build(bool $check = false): array
         }
         foreach ($targets as $target => $scope) {
             $code = eclair_i18n_compile($source, $scope, $scopes);
-            if (is_file($target) && file_get_contents($target) === $code) {
+            if (is_file($target) && eclair_i18n_same($target, $code)) {
                 $status[$lang] ??= 'à jour';
             } elseif ($check) {
                 $status[$lang] = 'périmé';

@@ -2,6 +2,33 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+Result of a full review of the code (speed, SEO and GEO, WordPress migration, robustness). Nothing changes in what a page shows: the public rendering stays byte-identical to the reference (same test), and the size, file and memory budgets are met without being raised.
+
+### Fixed
+
+- **SEO title damaged when a title starts with a typographic character.** `Seo::format` removed the separators around a title byte by byte: a title starting with `«`, `“`, `…` or `€` lost the first byte of that character, and the page's `<title>` started with `�`. Separators are now removed character by character. Same correction in `excerpt()` (a cut ending in `œ`, `Ó` or `À`) and in the migration report.
+- **`304 Not Modified` never answered behind most servers.** The browser sends back the validator as the server or CDN transformed it: `W/"…"` (Nginx with gzip, Cloudflare), `"…-gzip"` or `"…-br"` (Apache), `"…;br"` (LiteSpeed). Éclair compared it strictly, so a returning visitor downloaded every page again in full. The fast path of `index.php` and `Site` now recognise these forms; any other value still gets the full page.
+- A content file written by hand or by a tool without the fields a normal save guarantees no longer makes every page answer 500 when the index is rebuilt: it is left out and reported in the error log.
+
+### Changed
+
+- **Large sites: lighter page generation.** `data/index.php` and `data/search.php` are written without indentation: on 3,000 contents the index goes from 2.43 MB to 1.77 MB and is decoded in 8.3 ms instead of 12.9 (existing files are rewritten at the next content save; both forms are read). The published lists and the address table are computed once per request instead of at every lookup (3 to 5 ms each on 3,000 contents; an article page asked for them five to eight times). Measured end to end on a 3,000-content site, a page that is not in the cache is generated about 10 % faster; the gain is negligible on a small site, and pages served from the cache are unchanged (one PHP file, 0.1 ms). Reading the whole index on every generated page remains the limit for very large sites.
+- **WordPress import from a WXR export: closer to what WordPress displays.**
+  - Classic-editor articles that mix free text and tags (a list, a quote, a title) get the paragraphs WordPress adds on display (`wpautop`); they used to arrive as a single paragraph, or cut at every bold word.
+  - `[caption]` becomes an image block with its caption and link; `[embed]`, a YouTube or Vimeo address alone on its line and the Embed block become a video block; `[gallery ids="…"]` becomes the images of the gallery.
+  - The items of a nested list follow their parent item instead of being dropped.
+  - Lazy-loaded images (`data-src`, `data-lazy-src`) are found.
+  - **SEO kept**: title, description, focus keyword, noindex and canonical entered in Yoast SEO, Rank Math, SEOPress or All in One SEO 3 are read from the export. A value that is only the plugin's template (`%%title%% %%sep%% %%sitename%%`) is not taken over; a canonical pointing to the old site is ignored.
+  - The count of shortcodes "left as text" no longer includes those Éclair converts.
+
+### For maintainers
+
+- `php tools/i18n.php` and the translation freshness test compare the decompressed content of the `.json.gz` files, not their bytes: the bytes depend on the machine's zlib (zlib, zlib-ng), so up-to-date files looked stale and were rewritten for nothing when compiled elsewhere.
+- `php tools/measure.php --pages=N` works again: its seeded contents lacked fields the index needs, and the home page of both measured installations answered 500.
+- New checks: validators transformed by the server (served from the cache and not), titles starting with `«`, `“`, `…`, `€`, classic-editor conversion (paragraphs, caption, videos, nested list, `<pre>`), block-editor Embed and lazy image, SEO read from Yoast, Rank Math and SEOPress, end to end on the imported page.
+
 ## 2.1.0 — 2026-11-09
 
 **Move a whole WordPress site to Éclair without losing an address.** The WordPress import now takes the package made by the free [Eclair Export](https://github.com/Jacckisback/eclair-export) WordPress plugin: contents, images, PDF documents, SEO (Yoast, Rank Math, AIOSEO), menus, WooCommerce catalogue and redirections, with a simulation first and a migration report for your client. Tested end to end on a real WordPress of 500 posts with Elementor, Divi, WooCommerce and two languages: 635 old addresses checked, 0 errors 404. Sites on 2.0.x update in one click from Administration › Updates; the WordPress import is in Features › Add.
