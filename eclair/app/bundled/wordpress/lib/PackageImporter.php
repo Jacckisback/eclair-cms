@@ -106,7 +106,8 @@ final class PackageImporter
             'categories' => 0, 'authors' => 0, 'authors_mine' => 0,
             'images' => 0, 'documents' => 0, 'media_skipped' => 0, 'media_missing' => 0,
             'routes' => 0, 'moved' => 0, 'aliases' => 0, 'links' => 0, 'links_left' => 0,
-            'menu_items' => 0, 'menu_flattened' => 0, 'redirects' => 0, 'redirects_skipped' => 0,
+            'menu_items' => 0, 'menu_flattened' => 0, 'redirects' => 0, 'redirects_skipped' => 0, 'media_redirects' => 0, 'media_redirects_skipped' => 0,
+            'verification' => [],
             'seo' => 0, 'seo_partial' => 0, 'shortcodes' => 0, 'dropped' => 0, 'home' => false,
             'not_migrated' => [], 'errors' => [],
         ];
@@ -818,6 +819,7 @@ final class PackageImporter
                 }
             }
         }
+        self::mediaRedirects($job, $map, $mediaIndex, $live);
         if (!$job['dry'] && $aliases) {
             try {
                 $job['report']['aliases'] += Aliases::add($aliases);
@@ -878,6 +880,68 @@ final class PackageImporter
         return preg_match('~^https?://~i', $target) ? $target : null;
     }
 
+    /**
+     * Anciennes adresses des fichiers (/wp-content/uploads/…, miniatures comprises) : une 301 vers le fichier repris, grâce à la
+     * correspondance exacte établie pendant l'import des médias (aucune recherche par nom). Les liens venus d'autres sites, de
+     * Google Images ou d'anciens e-mails (PDF de tarifs, photos) ne tombent pas en 404. Ajoutées en dernier et comme redirections
+     * « du site » : elles ne remplacent jamais une redirection de contenu ; si la liste se remplit, les miniatures passent après
+     * les originaux et ce qui ne tient pas est compté.
+     */
+    private static function mediaRedirects(array &$job, array $map, array $mediaIndex, callable $live): void
+    {
+        $originals = [];
+        $variants = [];
+        foreach ($mediaIndex as $m) {
+            foreach (array_merge([(string) ($m['url'] ?? '')], (array) ($m['variants'] ?? [])) as $i => $u) {
+                $key = self::key((string) $u);
+                if ($key === '' || $key === '/') {
+                    continue;
+                }
+                if ($job['dry']) {
+                    // Simulation : les médias ne sont pas importés, on compte ce qui le serait.
+                    $ok = !empty($m['included']) || ($job['remote'] && (string) ($m['url'] ?? '') !== '');
+                    $ok && $job['report']['media_redirects']++;
+                    continue;
+                }
+                $to = self::mediaPath((string) ($map['urls'][$key] ?? ''));
+                if ($to === '' || Redirects::normalize($key) === Redirects::normalize($to) || $live($key)) {
+                    continue;
+                }
+                if ($i === 0) {
+                    $originals[$key] = $to;
+                } else {
+                    $variants[$key] = $to;
+                }
+            }
+        }
+        if ($job['dry']) {
+            return;
+        }
+        $pairs = [];
+        foreach ($originals + $variants as $from => $to) {
+            $pairs[] = [(string) $from, $to];
+        }
+        foreach ($pairs as [$from, $to]) {
+            self::log('redirects', [Redirects::normalize($from), $to, 'migration', 301], 5000);
+        }
+        // Une marge reste libre pour les redirections ajoutées à la main.
+        $room = max(0, Redirects::MAX - 250 - count(Redirects::all()));
+        $kept = array_slice($pairs, 0, $room);
+        $added = $kept ? Redirects::addMany($kept, false, 301, false) : 0;
+        $job['report']['media_redirects'] += $added;
+        $job['report']['media_redirects_skipped'] += count($pairs) - count($kept);
+    }
+
+    /** Adresse publique d'un média repris : « m:<id> » (médiathèque) ou « f:/media/files/… » (document). */
+    private static function mediaPath(string $target): string
+    {
+        if (str_starts_with($target, 'f:')) {
+            return substr($target, 2);
+        }
+        $media = str_starts_with($target, 'm:') ? Media::get(substr($target, 2)) : null;
+        return $media ? Media::url($media) : '';
+    }
+
     private static function finish(array &$job, array &$map, array $user): void
     {
         if (!$job['dry'] && $job['site']) {
@@ -886,6 +950,16 @@ final class PackageImporter
             if (Settings::get('name') === 'Mon site' && (string) ($settings['name'] ?? '') !== '') {
                 $patch['name'] = (string) $settings['name'];
                 $patch['tagline'] = (string) ($settings['description'] ?? '');
+            }
+            // Balises de vérification Google Search Console et Bing (Yoast, Rank Math, AIOSEO) : sans elles, la propriété
+            // Search Console vérifiée par balise serait perdue à la bascule. Une balise déjà réglée dans Éclair n'est jamais remplacée.
+            $global = (array) (((array) Package::data('seo.json'))['global'] ?? []);
+            foreach (['google', 'bing'] as $engine) {
+                $token = (string) preg_replace('/[^A-Za-z0-9_\-]/', '', (string) ($global['verification'][$engine] ?? ''));
+                if ($token !== '' && (string) Settings::get('seo.' . $engine) === '') {
+                    $patch['seo'][$engine] = $token;
+                    $job['report']['verification'][] = $engine;
+                }
             }
             if ($patch) {
                 Settings::save($patch);
