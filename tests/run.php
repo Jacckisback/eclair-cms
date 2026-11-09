@@ -681,6 +681,13 @@ if (!in_array('--unit', $argv, true)) {
         check("« $type » : identiques à l’octet avec l’index léger", $diff === [] && count($lite[$type]['visitor'] ?? []) === count($site['visitor']) && ($lite[$type]['lite'] ?? false) === true,
             implode(' ', $diff));
     }
+    // Plan du site, llms.txt, llms-full.txt et flux : identiques à ce qu'ils étaient avant l'index léger, par les deux chemins.
+    $outputs = json_decode((string) file_get_contents($fixtures . '/outputs-2.1.0.json'), true)['sites'];
+    foreach ($outputs as $type => $expected) {
+        check("« $type » : plan du site, llms.txt et flux identiques à l’octet (index complet, puis index léger)", ($now[$type]['outputs'] ?? null) === $expected
+            && ($lite[$type]['outputs'] ?? null) === $expected, implode(' ', array_keys(array_filter($expected, fn ($v, $u) => ($now[$type]['outputs'][$u] ?? null) !== $v
+                || ($lite[$type]['outputs'][$u] ?? null) !== $v, ARRAY_FILTER_USE_BOTH))));
+    }
     check('HTML de chaque type de bloc identique', capture_blocks(dirname(__DIR__), $fixtures . '/sites/business') === $ref['blocks']);
     check('CSS et JS publics inchangés (sha256)', capture_public_files(dirname(__DIR__)) === $ref['public_files']);
 

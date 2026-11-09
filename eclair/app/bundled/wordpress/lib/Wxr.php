@@ -14,13 +14,14 @@ defined('ECLAIR') || exit;
  */
 final class Wxr
 {
-    public const MAX = 3000;
-    public const MAX_BYTES = 40 * 1048576;
-
+    /** Contenus d'un export au plus : le plafond de contenus d'un site (Content::MAX_ITEMS). */
+    public const MAX = 10_000;
     /**
-     * Export lu : ['site' => adresse de l'ancien site, 'title', 'categories' => [nicename => nom], 'attachments' => [id => url],
-     * 'items' => [contenu…]] ; ou un message d'erreur.
+     * Taille d'un export au plus. Le fichier est lu en flux, contenu par contenu (jamais chargé en entier) : sa taille ne
+     * compte plus pour la mémoire, seulement pour l'envoi (limité par l'hébergeur ; au-delà, dépôt par FTP ou ligne de commande).
      */
+    public const MAX_BYTES = 512 * 1048576;
+
     /** Champs personnalisés de référencement lus dans l'export (Yoast SEO, Rank Math, SEOPress, All in One SEO 3). */
     private const SEO_KEYS = [
         '_yoast_wpseo_title' => 1, '_yoast_wpseo_metadesc' => 1, '_yoast_wpseo_focuskw' => 1, '_yoast_wpseo_canonical' => 1, '_yoast_wpseo_meta-robots-noindex' => 1,
@@ -31,91 +32,190 @@ final class Wxr
     /** Balises de bloc : jamais enveloppées dans un paragraphe par autop(). */
     private const BLOCK_TAGS = 'address|article|aside|audio|blockquote|details|div|dl|dd|dt|embed|fieldset|figcaption|figure|footer|form|h[1-6]|header|hr|iframe|li|main|nav|noscript|object|ol|p|pre|script|section|style|summary|svg|table|tbody|td|tfoot|th|thead|tr|ul|video';
 
+    /**
+     * Export lu : ['site' => adresse de l'ancien site, 'title', 'categories' => [nicename => nom], 'attachments' => [id => url],
+     * 'items' => [contenu…]] ; ou un message d'erreur. Pour un texte déjà en mémoire (petits exports, tests) ; un fichier se
+     * lit avec parseFile(), qui ne garde rien en mémoire.
+     */
     public static function parse(string $xml): array|string
     {
-        if (!function_exists('simplexml_load_string') || !class_exists(\DOMDocument::class)) {
-            return t('L’import demande les extensions PHP SimpleXML et DOM, absentes de ton hébergement.');
-        }
         if (strlen($xml) > self::MAX_BYTES) {
             return t('Fichier trop volumineux ({n} Mo au plus).', ['n' => self::MAX_BYTES / 1048576]);
         }
         if (stripos($xml, '<!DOCTYPE') !== false || stripos($xml, '<!ENTITY') !== false) {
             return t('Fichier refusé : un export WordPress ne contient pas de déclaration DOCTYPE.');
         }
+        if (!class_exists(\XMLReader::class)) {
+            return t('L’import demande les extensions PHP SimpleXML et DOM, absentes de ton hébergement.');
+        }
+        $items = [];
+        $reader = new \XMLReader();
         $previous = libxml_use_internal_errors(true);
         try {
-            $doc = simplexml_load_string($xml, \SimpleXMLElement::class, LIBXML_NONET | LIBXML_COMPACT | LIBXML_NOCDATA);
+            $head = @$reader->XML($xml, null, LIBXML_NONET | LIBXML_COMPACT) ? self::scan($reader, static function (array $item) use (&$items): void {
+                $items[] = $item;
+            }) : t('Ce fichier n’est pas un export WordPress (Outils › Exporter, « Tout le contenu »).');
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors($previous);
         }
-        $ns = $doc instanceof \SimpleXMLElement ? $doc->getDocNamespaces(true) : [];
-        if (!$doc instanceof \SimpleXMLElement || !isset($doc->channel, $ns['wp'])) {
-            return t('Ce fichier n’est pas un export WordPress (Outils › Exporter, « Tout le contenu »).');
+        return is_string($head) ? $head : $head + ['items' => $items];
+    }
+
+    /**
+     * Lit un fichier d'export en flux : $item reçoit chaque contenu (article ou page) dès qu'il est lu. Renvoie l'en-tête
+     * (['site', 'title', 'categories', 'attachments', 'count']) ou un message d'erreur. La mémoire ne dépend pas de la taille
+     * du fichier : un export de 10 000 articles se lit comme un export de 10.
+     */
+    public static function parseFile(string $file, callable $item): array|string
+    {
+        if (!class_exists(\XMLReader::class) || !function_exists('simplexml_import_dom') || !class_exists(\DOMDocument::class)) {
+            return t('L’import demande les extensions PHP SimpleXML et DOM, absentes de ton hébergement.');
         }
-        $wpNs = (string) $ns['wp'];
-        $contentNs = (string) ($ns['content'] ?? 'http://purl.org/rss/1.0/modules/content/');
-        $excerptNs = (string) ($ns['excerpt'] ?? 'http://wordpress.org/export/1.2/excerpt/');
-        $channel = $doc->channel;
-        $cw = $channel->children($wpNs);
-        $site = rtrim((string) ($cw->base_blog_url ?: $cw->base_site_url ?: $channel->link), '/');
-        $out = ['site' => $site, 'title' => trim((string) $channel->title), 'categories' => [], 'attachments' => [], 'items' => []];
-        foreach ($cw->category as $cat) {
-            $c = $cat->children($wpNs);
-            $slug = rawurldecode(trim((string) $c->category_nicename));
-            if ($slug !== '') {
-                $out['categories'][$slug] = trim((string) $c->cat_name) ?: $slug;
+        if (!is_file($file) || (int) filesize($file) > self::MAX_BYTES) {
+            return t('Fichier trop volumineux ({n} Mo au plus).', ['n' => self::MAX_BYTES / 1048576]);
+        }
+        // Aucune déclaration DOCTYPE ni entité, où que ce soit dans le fichier : cherché par morceaux, avant toute lecture XML.
+        $h = fopen($file, 'rb');
+        $tail = '';
+        while ($h !== false && !feof($h)) {
+            $chunk = $tail . (string) fread($h, 1048576);
+            if (stripos($chunk, '<!DOCTYPE') !== false || stripos($chunk, '<!ENTITY') !== false) {
+                fclose($h);
+                return t('Fichier refusé : un export WordPress ne contient pas de déclaration DOCTYPE.');
+            }
+            $tail = substr($chunk, -16);
+        }
+        $h !== false && fclose($h);
+        $reader = new \XMLReader();
+        $previous = libxml_use_internal_errors(true);
+        try {
+            return @$reader->open($file, null, LIBXML_NONET | LIBXML_COMPACT) ? self::scan($reader, $item)
+                : t('Ce fichier n’est pas un export WordPress (Outils › Exporter, « Tout le contenu »).');
+        } finally {
+            $reader->close();
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
+    }
+
+    /** Parcours de l'export : en-tête du canal, catégories, fichiers joints, et chaque contenu remis à $sink. */
+    private static function scan(\XMLReader $r, callable $sink): array|string
+    {
+        if (!function_exists('simplexml_import_dom') || !class_exists(\DOMDocument::class)) {
+            return t('L’import demande les extensions PHP SimpleXML et DOM, absentes de ton hébergement.');
+        }
+        $not = t('Ce fichier n’est pas un export WordPress (Outils › Exporter, « Tout le contenu »).');
+        // Jusqu'à <channel> : la racine doit déclarer l'espace de noms de WordPress.
+        $wpNs = null;
+        while (@$r->read()) {
+            if ($r->nodeType === \XMLReader::DOC_TYPE) {
+                return t('Fichier refusé : un export WordPress ne contient pas de déclaration DOCTYPE.');
+            }
+            if ($r->nodeType === \XMLReader::ELEMENT && $r->depth === 0) {
+                $wpNs = $r->lookupNamespace('wp');
+                $contentNs = $r->lookupNamespace('content') ?: 'http://purl.org/rss/1.0/modules/content/';
+                $excerptNs = $r->lookupNamespace('excerpt') ?: 'http://wordpress.org/export/1.2/excerpt/';
+            }
+            if ($r->nodeType === \XMLReader::ELEMENT && $r->depth === 1 && $r->localName === 'channel') {
+                break;
             }
         }
-        foreach ($channel->item as $item) {
-            $w = $item->children($wpNs);
-            $type = (string) $w->post_type;
-            $id = (int) $w->post_id;
-            if ($type === 'attachment' && $id > 0) {
-                $out['attachments'][$id] = trim((string) $w->attachment_url);
+        if (!$wpNs || $r->localName !== 'channel') {
+            return $not;
+        }
+        $wpNs = (string) $wpNs;
+        $doc = new \DOMDocument();
+        $element = static function () use ($r, $doc): ?\SimpleXMLElement {
+            $node = @$r->expand();
+            $sx = $node instanceof \DOMNode ? simplexml_import_dom($doc->importNode($node, true)) : null;
+            return $sx instanceof \SimpleXMLElement ? $sx : null;
+        };
+        $out = ['site' => '', 'title' => '', 'categories' => [], 'attachments' => [], 'count' => 0];
+        $link = $blog = $base = '';
+        $ok = @$r->read();
+        while ($ok && $r->depth >= 2) {
+            if ($r->nodeType !== \XMLReader::ELEMENT || $r->depth !== 2) {
+                $ok = @$r->read();
                 continue;
             }
-            $status = (string) $w->status;
-            if (!in_array($type, ['post', 'page'], true) || $id < 1 || !in_array($status, ['publish', 'future', 'draft', 'pending', 'private'], true)) {
-                continue;
-            }
-            if (count($out['items']) >= self::MAX) {
-                return t('Plus de {n} contenus dans ce fichier : exporte-les en plusieurs fois (par type ou par période).', ['n' => self::MAX]);
-            }
-            $cats = [];
-            foreach ($item->category as $c) {
-                $attrs = $c->attributes();
-                if ((string) ($attrs['domain'] ?? '') === 'category') {
-                    $cats[rawurldecode((string) ($attrs['nicename'] ?? ''))] = trim((string) $c);
+            $name = $r->name;
+            if ($name === 'title' || $name === 'link' || $name === 'wp:base_blog_url' || $name === 'wp:base_site_url') {
+                $value = trim($r->readString());
+                match ($name) {
+                    'title' => $out['title'] = $value,
+                    'link' => $link = $value,
+                    'wp:base_blog_url' => $blog = $value,
+                    default => $base = $value,
+                };
+            } elseif ($name === 'wp:category' && ($cat = $element()) !== null) {
+                $c = $cat->children($wpNs);
+                $slug = rawurldecode(trim((string) $c->category_nicename));
+                if ($slug !== '') {
+                    $out['categories'][$slug] = trim((string) $c->cat_name) ?: $slug;
+                }
+            } elseif ($name === 'item' && ($item = $element()) !== null) {
+                $out['site'] = rtrim($blog ?: $base ?: $link, '/');
+                $w = $item->children($wpNs);
+                $type = (string) $w->post_type;
+                $id = (int) $w->post_id;
+                $status = (string) $w->status;
+                if ($type === 'attachment' && $id > 0) {
+                    $out['attachments'][$id] = trim((string) $w->attachment_url);
+                } elseif (in_array($type, ['post', 'page'], true) && $id >= 1 && in_array($status, ['publish', 'future', 'draft', 'pending', 'private'], true)) {
+                    if ($out['count'] >= self::MAX) {
+                        return t('Plus de {n} contenus dans ce fichier : exporte-les en plusieurs fois (par type ou par période).', ['n' => self::MAX]);
+                    }
+                    $out['count']++;
+                    $sink(self::item($item, $w, $id, $type, $status, $contentNs, $excerptNs, $wpNs, $out['title'], $out['site']));
                 }
             }
-            $thumb = 0;
-            $meta = [];
-            foreach ($w->postmeta as $row) {
-                $m = $row->children($wpNs);
-                $key = (string) $m->meta_key;
-                if ($key === '_thumbnail_id') {
-                    $thumb = (int) $m->meta_value;
-                } elseif (isset(self::SEO_KEYS[$key])) {
-                    $meta[$key] = mb_substr(trim((string) $m->meta_value), 0, 1000);
-                }
-            }
-            $out['items'][] = [
-                'wp' => $id,
-                'type' => $type,
-                'status' => in_array($status, ['publish', 'future'], true) ? 'published' : 'draft',
-                'title' => trim((string) $item->title),
-                'slug' => rawurldecode(trim((string) $w->post_name)),
-                'route' => self::route(trim((string) $item->link), $site),
-                'date' => trim((string) ($w->post_date_gmt && (string) $w->post_date_gmt !== '0000-00-00 00:00:00' ? $w->post_date_gmt . ' UTC' : $w->post_date)),
-                'html' => (string) $item->children($contentNs)->encoded,
-                'excerpt' => trim(strip_tags((string) $item->children($excerptNs)->encoded)),
-                'cats' => array_filter($cats, static fn (string $name, string $slug): bool => $slug !== '', ARRAY_FILTER_USE_BOTH),
-                'thumb' => $thumb,
-                'seo' => self::seo($meta, trim((string) $item->title), $out['title'], $site),
-            ];
+            $ok = @$r->next();
         }
+        // Fichier tronqué ou mal formé : rien n'est importé à moitié sans le dire.
+        if (libxml_get_last_error() !== false) {
+            return $out['count'] === 0 && $out['attachments'] === [] ? $not : t('Fichier d’export incomplet ou abîmé : exporte-le de nouveau depuis WordPress.');
+        }
+        $out['site'] = rtrim($blog ?: $base ?: $link, '/');
         return $out;
+    }
+
+    /** Un contenu de l'export, prêt pour l'import. */
+    private static function item(\SimpleXMLElement $item, \SimpleXMLElement $w, int $id, string $type, string $status, string $contentNs, string $excerptNs,
+        string $wpNs, string $siteName, string $site): array
+    {
+        $cats = [];
+        foreach ($item->category as $c) {
+            $attrs = $c->attributes();
+            if ((string) ($attrs['domain'] ?? '') === 'category') {
+                $cats[rawurldecode((string) ($attrs['nicename'] ?? ''))] = trim((string) $c);
+            }
+        }
+        $thumb = 0;
+        $meta = [];
+        foreach ($w->postmeta as $row) {
+            $m = $row->children($wpNs);
+            $key = (string) $m->meta_key;
+            if ($key === '_thumbnail_id') {
+                $thumb = (int) $m->meta_value;
+            } elseif (isset(self::SEO_KEYS[$key])) {
+                $meta[$key] = mb_substr(trim((string) $m->meta_value), 0, 1000);
+            }
+        }
+        return [
+            'wp' => $id,
+            'type' => $type,
+            'status' => in_array($status, ['publish', 'future'], true) ? 'published' : 'draft',
+            'title' => trim((string) $item->title),
+            'slug' => rawurldecode(trim((string) $w->post_name)),
+            'route' => self::route(trim((string) $item->link), $site),
+            'date' => trim((string) ($w->post_date_gmt && (string) $w->post_date_gmt !== '0000-00-00 00:00:00' ? $w->post_date_gmt . ' UTC' : $w->post_date)),
+            'html' => (string) $item->children($contentNs)->encoded,
+            'excerpt' => trim(strip_tags((string) $item->children($excerptNs)->encoded)),
+            'cats' => array_filter($cats, static fn (string $name, string $slug): bool => $slug !== '', ARRAY_FILTER_USE_BOTH),
+            'thumb' => $thumb,
+            'seo' => self::seo($meta, trim((string) $item->title), $siteName, $site),
+        ];
     }
 
     /**

@@ -10,6 +10,46 @@
 declare(strict_types=1);
 
 (static function (array $argv): void {
+    // Liste JSON d'un paquet lue élément par élément (content/posts.json d'un gros site) : mêmes valeurs que json_decode.
+    require_once ECLAIR_ROOT . '/app/bundled/wordpress/lib/Package.php';
+    section('Import WordPress : fichiers de données d’un gros paquet lus élément par élément');
+    $dir = EclairExt\Wordpress\Package::dir() . '/data/content';
+    @mkdir($dir, 0700, true);
+    $each = static fn (string $name): array => iterator_to_array(EclairExt\Wordpress\Package::each($name), false);
+    mt_srand(20261109);
+    $pool = ['a', '"', '\\', '[', ']', '{', '}', ',', "\n", 'é', '€', '\\"', ' ', 'x\\\\', '"}]', "\u{1F600}", "\t", '/'];
+    $text = static function () use ($pool): string {
+        $out = '';
+        for ($i = 0, $n = mt_rand(0, 40); $i < $n; $i++) {
+            $out .= $pool[array_rand($pool)];
+        }
+        return $out;
+    };
+    $bad = [];
+    for ($t = 0; $t < 120 && !$bad; $t++) {
+        $list = [];
+        for ($i = 0, $n = mt_rand(0, 12); $i < $n; $i++) {
+            $list[] = match (mt_rand(0, 5)) {
+                0 => ['wp_id' => $i, 'html' => $text(), 'terms' => ['category' => [$text(), $text()]], 'meta' => [], 'n' => mt_rand() / 3, 'b' => true, 'z' => null],
+                1 => $text(), 2 => mt_rand(), 3 => [$text(), [$text(), ['k' => $text()]]], 4 => null,
+                // Élément plus long qu'un morceau lu (256 Kio) : repris d'un morceau à l'autre.
+                default => ['deep' => ['a' => ['b' => [['c' => $text()]]]], 'long' => str_repeat($text() . 'x', 9000)],
+            };
+        }
+        $flags = [0, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES, JSON_PRETTY_PRINT, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE][$t % 4];
+        file_put_contents($dir . '/posts.json', ($t % 7 === 0 ? "  \n" : '') . json_encode($list, $flags) . ($t % 5 === 0 ? "\n" : ''));
+        if ($each('content/posts.json') !== json_decode((string) file_get_contents($dir . '/posts.json'), true)) {
+            $bad[] = 'essai ' . $t;
+        }
+    }
+    check('120 listes (guillemets, antislashs, crochets dans les textes, éléments de plus de 256 Kio) : identiques à json_decode', $bad === [], implode(' ', $bad));
+    file_put_contents($dir . '/posts.json', '{"pas":"une liste"}');
+    $notList = $each('content/posts.json');
+    file_put_contents($dir . '/posts.json', '[{"a":1},{"b":"tronqu');
+    check('fichier qui n’est pas une liste : rien ; fichier tronqué : les éléments complets ; nom hors du paquet : rien', $notList === []
+        && $each('content/posts.json') === [['a' => 1]] && $each('content/absent.json') === [] && $each('../site.json') === []);
+    EclairExt\Wordpress\Package::clear();
+
     if (in_array('--unit', $argv, true)) {
         return;
     }

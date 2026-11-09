@@ -116,6 +116,108 @@ use Eclair\Store;
     check('index complet déjà en mémoire : mêmes réponses', Content::findByPath('/services-lite') === $index[$services['id']] && Content::latest(5) === array_slice($refPosts, 0, 5)
         && Content::page('post', [], 5, 5) === [array_slice($refPosts, 5, 5), count($refPosts)] && Categories::counts() === [$cat['id'] => count($inCat)]);
 
+    section('Gros sites : plan du site, llms.txt et recherche sans lire l’index complet');
+    $outputs = static fn (): array => ['sitemap' => Eclair\Seo::sitemap(), 'llms' => Eclair\Seo::llms(false), 'full' => Eclair\Seo::llms(true), 'feed' => Eclair\Seo::feed()];
+    $fresh();
+    $light = $outputs();
+    check('plan du site, llms.txt, llms-full.txt et flux RSS produits sans lire l’index complet', $loaded() === false && str_contains($light['sitemap'], '/blog/article-lite-3')
+        && str_contains($light['sitemap'], '/2019/ancienne-page/') && !str_contains($light['sitemap'], 'article-programme') && !str_contains($light['sitemap'], 'article-lite-5<')
+        && str_contains($light['llms'], 'Article lite 3') && !str_contains($light['llms'], 'Article lite 5]') && str_contains($light['full'], 'Article lite 3'));
+    check('plan du site : traductions reliées (hreflang), accueil en premier', substr_count($light['sitemap'], 'hreflang="en"') === 2 && substr_count($light['sitemap'], 'hreflang="fr"') === 2
+        && preg_match('~<urlset[^>]*>\s*<url><loc>[^<]*/</loc>~', $light['sitemap']) === 1, substr($light['sitemap'], 0, 400));
+    $fresh();
+    Content::index();
+    check('mêmes sorties, à l’octet, avec l’index complet en mémoire', $outputs() === $light);
+    $memo = new ReflectionProperty(Store::class, 'memo');
+    $memo->setAccessible(true);
+    $fresh();
+    Eclair\Seo::sitemap();
+    Eclair\Seo::llms(true);
+    check('…et aucun fichier de contenu gardé en mémoire après le parcours', array_filter(array_keys($memo->getValue()), static fn (string $k): bool => str_starts_with($k, 'content/')) === []);
+
+    // Recherche : data/search.php porte l'extrait et le résumé de chaque contenu publié, en minuscules.
+    $search = (array) $read('search');
+    check('index de recherche : marque de version, texte, extrait et résumé en minuscules pour chaque contenu publié', ($search['~'] ?? null) === 2
+        && isset($search[$posts[3]['id']], $search['~' . $posts[3]['id']]) && str_contains($search['~' . $posts[3]['id']], 'résumé 3')
+        && $search[$posts[3]['id']] === mb_strtolower($search[$posts[3]['id']]) && count(array_filter(array_keys($search), static fn ($k): bool => str_starts_with((string) $k, '~') && $k !== '~'))
+            === count(array_filter($index, static fn (array $e): bool => $e['status'] === 'published')), (string) count($search));
+    $queries = ['article lite', 'RÉSUMÉ 3', 'accueil', 'assez long', 'hello', 'programmé', 'brouillon', 'article lite 5', 'services détail', 'zzzz'];
+    $fresh();
+    $fast = array_map(static fn (string $q): array => Content::search($q), $queries);
+    check('recherche sans lire l’index complet', $loaded() === false && count($fast[0]) === 11 && $fast[5] === [] && $fast[6] === [] && $fast[9] === [] && count($fast[1]) >= 1);
+    // Mêmes résultats que la recherche d'avant (index complet), retrouvée en retirant la marque de version.
+    $legacy = $search;
+    unset($legacy['~']);
+    $raw('search', $legacy);
+    $fresh();
+    $slow = array_map(static fn (string $q): array => Content::search($q), $queries);
+    check('mêmes résultats, dans le même ordre, que la recherche par l’index complet', $slow === $fast && $loaded() === true);
+    // Fichier d'une version précédente (textes tels quels, ni extrait ni marque) : mis à niveau au premier enregistrement.
+    $old1 = [];
+    foreach ($index as $oid => $e) {
+        if ($e['status'] === 'published') {
+            $old1[$oid] = 'Texte du Contenu « ' . $e['title'] . ' », assez long pour donner un extrait.';
+        }
+    }
+    $raw('search', $old1);
+    $fresh();
+    $tmp = $save(['title' => 'Mise à niveau', 'status' => 'draft']);
+    Content::delete($tmp['id']);
+    $fresh();
+    $upgraded = (array) $read('search');
+    check('index de recherche d’une version précédente : mis à niveau au premier enregistrement, mêmes résultats', ($upgraded['~'] ?? null) === 2
+        && $upgraded[$posts[3]['id']] === mb_strtolower($old1[$posts[3]['id']]) && isset($upgraded['~' . $posts[3]['id']])
+        && array_map(static fn (string $q): array => Content::search($q), $queries) === $fast && $loaded() === false);
+    $un = $save(['id' => $posts[4]['id'], 'status' => 'draft'] + $posts[4]);
+    $fresh();
+    $after = (array) $read('search');
+    check('contenu dépublié : texte, extrait et résumé retirés de la recherche', !isset($after[$posts[4]['id']]) && !isset($after['~' . $posts[4]['id']])
+        && !in_array($posts[4]['id'], array_column(Content::search('article lite'), 'id'), true));
+    $save(['id' => $posts[4]['id'], 'status' => 'published'] + $posts[4]);
+
+    section('Enregistrements groupés (import) : index de recherche écrit une fois');
+    $fresh();
+    $before = filemtime(ECLAIR_DATA . '/search.php') . '.' . fileinode(ECLAIR_DATA . '/search.php');
+    $seen = [];
+    $made = Content::batch(static function () use ($save, &$seen, $before): array {
+        $out = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $out[] = $save(['title' => 'Groupé ' . $i, 'summary' => 'lot numéro ' . $i]);
+            clearstatcache();
+            $seen[] = filemtime(ECLAIR_DATA . '/search.php') . '.' . fileinode(ECLAIR_DATA . '/search.php') === $before;
+        }
+        Content::delete($out[4]['id']);
+        return $out;
+    });
+    $fresh();
+    clearstatcache();
+    $grouped = (array) $read('search');
+    check('groupe : fichier de recherche intact pendant le groupe, écrit à la fin', !in_array(false, $seen, true)
+        && filemtime(ECLAIR_DATA . '/search.php') . '.' . fileinode(ECLAIR_DATA . '/search.php') !== $before);
+    check('groupe : chaque contenu publié y est (texte, extrait, résumé), le contenu supprimé n’y est pas', isset($grouped[$made[0]['id']], $grouped['~' . $made[3]['id']])
+        && !isset($grouped[$made[4]['id']]) && !isset($grouped['~' . $made[4]['id']]) && str_contains($grouped['~' . $made[2]['id']], 'lot numéro 3')
+        && array_column(Content::search('groupé'), 'id') !== [] && count(Content::search('groupé')) === 4 && Content::findByPath('/blog/groupe-2') !== null);
+    // Une autre requête publie pendant le groupe : son texte est gardé à la fin.
+    $other = null;
+    Content::batch(static function () use ($save, $raw, $read, &$other): void {
+        $save(['title' => 'Groupé bis']);
+        $disk = (array) $read('search');
+        $disk['autrerequete'] = 'texte venu d’ailleurs';
+        unset($disk['~' . array_key_first(array_filter($disk, static fn ($v, $k): bool => is_string($k) && str_starts_with($k, '~') && $k !== '~', ARRAY_FILTER_USE_BOTH))]);
+        sleep(1);
+        $raw('search', $disk);
+        $other = $disk;
+        $save(['title' => 'Groupé ter']);
+    });
+    $fresh();
+    $merged = (array) $read('search');
+    check('groupe : un changement fait entre-temps par une autre requête est conservé', ($merged['autrerequete'] ?? '') === 'texte venu d’ailleurs'
+        && count(Content::search('groupé')) === 6 && ($merged['~'] ?? null) === 2);
+    foreach (array_merge(array_slice($made, 0, 4), array_filter([Content::findByPath('/blog/groupe-bis'), Content::findByPath('/blog/groupe-ter')])) as $gone) {
+        Content::delete($gone['id']);
+    }
+    $fresh();
+
     section('Index léger : refait seul quand l’index a changé sans lui');
     @unlink(ECLAIR_DATA . '/index-lite.php');
     $fresh();
@@ -171,8 +273,6 @@ use Eclair\Store;
 
     section('Gros sites : plafond de contenus et mémoire des parcours complets');
     check('plafond de contenus : 10 000', Content::MAX_ITEMS === 10000);
-    $memo = new ReflectionProperty(Store::class, 'memo');
-    $memo->setAccessible(true);
     $fresh();
     foreach (array_keys((array) $read('index')) as $id) {
         Content::peek((string) $id);

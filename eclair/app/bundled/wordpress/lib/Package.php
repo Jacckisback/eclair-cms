@@ -181,6 +181,108 @@ final class Package
     }
 
     /** Données copiées par open() : JSON décodé (ou texte brut pour un .csv), null si absent. */
+    /**
+     * Éléments d'un fichier de données qui est une liste JSON (content/posts.json : tous les articles du site), lus un par
+     * un sans charger le fichier : seul l'élément en cours est décodé. Un fichier de 10 000 articles (plusieurs dizaines de
+     * Mo) dépasserait sinon, une fois décodé d'un bloc, la mémoire de PHP. Un fichier qui n'est pas une liste ne donne rien.
+     *
+     * @return \Generator<int, mixed>
+     */
+    public static function each(string $name): \Generator
+    {
+        if (!in_array($name, self::DATA, true) && !preg_match('~^content/[a-z0-9_-]{1,50}\.json$~', $name)) {
+            return;
+        }
+        $h = @fopen(self::dir() . '/data/' . $name, 'rb');
+        if ($h === false) {
+            return;
+        }
+        try {
+            $buffer = '';
+            $pos = 0;       // prochain octet à examiner dans $buffer
+            $start = 0;     // début de l'élément en cours (après « [ » ou la dernière virgule)
+            $depth = 0;     // 0 : avant la liste ; 1 : au niveau de ses éléments
+            $string = false;
+            while (true) {
+                if ($pos >= strlen($buffer)) {
+                    // Ce qui précède l'élément en cours est lâché ; la suite du fichier est ajoutée.
+                    if ($depth >= 1) {
+                        $buffer = substr($buffer, $start);
+                        $pos -= $start;
+                        $start = 0;
+                    } else {
+                        $buffer = '';
+                        $pos = 0;
+                    }
+                    $more = fread($h, 262144);
+                    if ($more === false || $more === '') {
+                        return;
+                    }
+                    $buffer .= $more;
+                    continue;
+                }
+                if ($string) {
+                    // Jusqu'au guillemet fermant, en sautant les caractères échappés.
+                    $pos += strcspn($buffer, '"\\', $pos);
+                    if ($pos >= strlen($buffer)) {
+                        continue;
+                    }
+                    if ($buffer[$pos] === '\\') {
+                        if ($pos + 1 >= strlen($buffer)) {
+                            // L'échappement est coupé par la fin du morceau lu : repris avec la suite.
+                            $more = fread($h, 262144);
+                            if ($more === false || $more === '') {
+                                return;
+                            }
+                            $buffer .= $more;
+                        }
+                        $pos += 2;
+                        continue;
+                    }
+                    $string = false;
+                    $pos++;
+                    continue;
+                }
+                $pos += strcspn($buffer, '"[]{},', $pos);
+                if ($pos >= strlen($buffer)) {
+                    continue;
+                }
+                $c = $buffer[$pos];
+                if ($c === '"') {
+                    if ($depth === 0) {
+                        return; // pas une liste
+                    }
+                    $string = true;
+                } elseif ($c === '[' || $c === '{') {
+                    if ($depth === 0) {
+                        if ($c !== '[' || trim(substr($buffer, 0, $pos)) !== '') {
+                            return; // pas une liste
+                        }
+                        $start = $pos + 1;
+                    }
+                    $depth++;
+                } elseif ($depth === 0) {
+                    return;
+                } elseif ($c === ',' ? $depth === 1 : --$depth <= 1) {
+                    // Fin d'un élément : la virgule qui le suit, ou le « ] » qui ferme la liste.
+                    if ($c === ',' || $depth === 0) {
+                        $text = trim(substr($buffer, $start, $pos - $start));
+                        if ($text !== '') {
+                            yield json_decode($text, true);
+                        }
+                        if ($depth === 0) {
+                            return;
+                        }
+                        $start = $pos + 1;
+                    }
+                }
+                $pos++;
+            }
+        } finally {
+            fclose($h);
+        }
+    }
+
     public static function data(string $name): mixed
     {
         if (!in_array($name, self::DATA, true) && !preg_match('~^content/[a-z0-9_-]{1,50}\.json$~', $name)) {

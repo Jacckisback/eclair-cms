@@ -35,6 +35,17 @@ final class Content
     private const SEARCH_TEXT = 30000;
     /** Texte cherchable gardé par contenu quand l'index de recherche est plein (caractères). */
     private const SEARCH_SHORT = 1500;
+    /**
+     * data/search.php : « id » → texte du contenu, « ~id » → son extrait et son résumé, « ~ » → version du format. Tout y est
+     * en minuscules, prêt à être comparé : une recherche ne lit ainsi ni l'index complet ni ne remet 16 Mo en minuscules.
+     */
+    private const SEARCH_MARK = '~';
+    private const SEARCH_HEAD = '~';
+    private const SEARCH_VERSION = 2;
+    /** Enregistrements groupés en cours (batch) : index de recherche gardé en mémoire, écrit une fois à la fin. */
+    private static int $batch = 0;
+    /** [index de recherche à écrire, taille et date du fichier lu au début, taille estimée, clés touchées par le groupe] */
+    private static ?array $pending = null;
     /** Termes d'une recherche pris en compte : chacun parcourt tout l'index de recherche. */
     private const MAX_TERMS = 8;
 
@@ -60,8 +71,14 @@ final class Content
      */
     private const LITE_FROM = 300_000;
     private const L_ID = 0, L_TYPE = 1, L_STATUS = 2, L_SLUG = 3, L_ROUTE = 4, L_LANG = 5, L_TGROUP = 6, L_DATE = 7, L_CATEGORY = 8,
-        L_AUTHOR = 9, L_NOINDEX = 10, L_TITLE = 11;
+        L_AUTHOR = 9, L_NOINDEX = 10, L_TITLE = 11, L_UPDATED = 12;
+    /** Version du format de l'index léger : un fichier d'une autre version est refait. */
+    private const LITE_VERSION = 2;
     private static ?array $rows = null;
+    /** Contenus relus dont le fichier reste en mémoire pour la requête (une page en affiche rarement plus). */
+    private const KEEP = 48;
+    /** Nombre de contenus relus depuis le début de la requête. */
+    private static int $reread = 0;
     /** Résumés complets relus pour la requête (id → résumé, ou false si le fichier manque). */
     private static array $full = [];
 
@@ -113,7 +130,7 @@ final class Content
     /** L'index léger lu correspond-il à l'index présent sur le disque ? Un numéro de fichier noté 0 n'est pas comparé. */
     private static function fresh(mixed $lite, array $stamp): bool
     {
-        return is_array($lite) && $stamp !== [] && ($lite['of'] ?? null) === $stamp['of'] && is_array($lite['rows'] ?? null)
+        return is_array($lite) && $stamp !== [] && ($lite['v'] ?? 0) === self::LITE_VERSION && ($lite['of'] ?? null) === $stamp['of'] && is_array($lite['rows'] ?? null)
             && (($lite['ino'] ?? 0) === 0 || $lite['ino'] === $stamp['ino']);
     }
 
@@ -122,7 +139,8 @@ final class Content
         $rows = [];
         foreach ($index as $e) {
             $rows[] = [(string) $e['id'], (string) $e['type'], (string) $e['status'], (string) $e['slug'], (string) ($e['route'] ?? ''), (string) ($e['lang'] ?? ''),
-                (string) ($e['tgroup'] ?? ''), $e['date'], (string) ($e['category'] ?? ''), (string) ($e['author'] ?? ''), empty($e['noindex']) ? 0 : 1, (string) $e['title']];
+                (string) ($e['tgroup'] ?? ''), $e['date'], (string) ($e['category'] ?? ''), (string) ($e['author'] ?? ''), empty($e['noindex']) ? 0 : 1, (string) $e['title'],
+                $e['updated'] ?? $e['date']];
         }
         return $rows;
     }
@@ -140,7 +158,7 @@ final class Content
         try {
             $stamp = self::stamp();
             if ($stamp !== []) {
-                Store::write(self::LITE, ['of' => $stamp['of'], 'ino' => $inode ? $stamp['ino'] : 0, 'rows' => $rows]);
+                Store::write(self::LITE, ['v' => self::LITE_VERSION, 'of' => $stamp['of'], 'ino' => $inode ? $stamp['ino'] : 0, 'rows' => $rows]);
             }
         } catch (\Throwable $e) {
             Log::error($e);
@@ -182,7 +200,7 @@ final class Content
                     // Même taille et même date mais un autre numéro de fichier : soit l'index a été remplacé dans la seconde,
                     // soit l'hébergement ne donne pas de numéros stables (certains disques réseau). Dans le doute, le numéro
                     // n'est plus comparé jusqu'au prochain enregistrement, pour ne jamais refaire l'index léger à chaque page.
-                    $unstable = is_array($lite) && $stamp !== [] && ($lite['of'] ?? null) === $stamp['of'];
+                    $unstable = is_array($lite) && $stamp !== [] && ($lite['v'] ?? 0) === self::LITE_VERSION && ($lite['of'] ?? null) === $stamp['of'];
                     self::writeLite($rows, !$unstable);
                 }
                 return $rows;
@@ -249,6 +267,14 @@ final class Content
                     $entry = false;
                 }
             }
+            // Parcours de nombreux contenus (llms.txt, résultats, traductions du plan du site) : la mémoire de la requête reste
+            // bornée. Au-delà de quelques dizaines, le fichier lu n'est plus gardé, et les résumés gardés repartent de zéro.
+            if (++self::$reread > self::KEEP) {
+                Store::drop('content/' . $id);
+                if (count(self::$full) >= 8 * self::KEEP) {
+                    self::$full = [];
+                }
+            }
             self::$full[$id] = $entry;
         }
         return self::$full[$id] ?: null;
@@ -266,18 +292,65 @@ final class Content
 
     /**
      * L'essentiel d'un contenu par son identifiant, sans lire son fichier : id, type, status, title, slug, lang, tgroup,
-     * date, category, author, noindex (et route). Assez pour visible() et path() : menus, liens vers une page.
+     * date, updated, category, author, noindex (et route). Assez pour visible() et path() : menus, liens vers une page.
      */
     public static function brief(string $id): ?array
     {
         $i = self::ids()[$id] ?? null;
-        if ($i === null) {
-            return null;
-        }
-        $r = self::rows()[$i];
+        return $i === null ? null : self::briefOf(self::rows()[$i]);
+    }
+
+    private static function briefOf(array $r): array
+    {
         return ['id' => $r[self::L_ID], 'type' => $r[self::L_TYPE], 'status' => $r[self::L_STATUS], 'title' => $r[self::L_TITLE], 'slug' => $r[self::L_SLUG],
-            'lang' => $r[self::L_LANG], 'tgroup' => $r[self::L_TGROUP], 'date' => $r[self::L_DATE], 'category' => $r[self::L_CATEGORY], 'author' => $r[self::L_AUTHOR],
-            'noindex' => (bool) $r[self::L_NOINDEX]] + ($r[self::L_ROUTE] !== '' ? ['route' => $r[self::L_ROUTE]] : []);
+            'lang' => $r[self::L_LANG], 'tgroup' => $r[self::L_TGROUP], 'date' => $r[self::L_DATE], 'updated' => $r[self::L_UPDATED], 'category' => $r[self::L_CATEGORY],
+            'author' => $r[self::L_AUTHOR], 'noindex' => (bool) $r[self::L_NOINDEX]] + ($r[self::L_ROUTE] !== '' ? ['route' => $r[self::L_ROUTE]] : []);
+    }
+
+    /**
+     * Les contenus en ligne un par un, du plus récent au plus ancien (l'ordre de published()), sans lire l'index complet ni
+     * rien garder en mémoire : l'essentiel de chacun (voir brief()). Pour les sorties qui parcourent tout le site (plan du
+     * site, llms.txt) ; le détail d'un contenu se lit ensuite avec peek() ou find().
+     *
+     * @return \Generator<int, array>
+     */
+    public static function online(?string $type = null): \Generator
+    {
+        $rows = self::rows();
+        foreach (self::order() as $i) {
+            if ($type === null || $rows[$i][self::L_TYPE] === $type) {
+                yield self::briefOf($rows[$i]);
+            }
+        }
+    }
+
+    /** Adresses des traductions en ligne d'un contenu (langue → chemin), sans lire leurs fichiers ; [] s'il n'en a pas d'autre. */
+    public static function alternates(array $entry): array
+    {
+        if (($entry['tgroup'] ?? '') === '') {
+            return [];
+        }
+        $rows = self::rows();
+        $out = [];
+        foreach (self::tgroups()[(string) $entry['tgroup']] ?? [] as $i) {
+            $out[$rows[$i][self::L_LANG]] = self::path(self::briefOf($rows[$i]));
+        }
+        return count($out) > 1 ? $out : [];
+    }
+
+    /** Lignes en ligne de chaque groupe de traductions (hors noindex), dans l'ordre de published() : une passe par requête. */
+    private static function tgroups(): array
+    {
+        $rows = self::rows();
+        return self::view('tgroups', time() . (Settings::get('shop.enabled') ? '+' : '-'), static function () use ($rows): array {
+            $out = [];
+            foreach (self::order() as $i) {
+                if ($rows[$i][self::L_TGROUP] !== '' && !$rows[$i][self::L_NOINDEX]) {
+                    $out[$rows[$i][self::L_TGROUP]][] = $i;
+                }
+            }
+            return $out;
+        });
     }
 
     /**
@@ -506,19 +579,8 @@ final class Content
             return [];
         }
         $rows = self::rows();
-        // Lignes en ligne de chaque groupe de traductions, dans l'ordre de published() : une passe par requête, pas une par contenu
-        // (le plan du site demande les traductions de chaque contenu).
-        $groups = self::view('tgroups', time() . (Settings::get('shop.enabled') ? '+' : '-'), static function () use ($rows): array {
-            $out = [];
-            foreach (self::order() as $i) {
-                if ($rows[$i][self::L_TGROUP] !== '' && !$rows[$i][self::L_NOINDEX]) {
-                    $out[$rows[$i][self::L_TGROUP]][] = $i;
-                }
-            }
-            return $out;
-        });
         $out = [];
-        foreach ($groups[(string) $entry['tgroup']] ?? [] as $i) {
+        foreach (self::tgroups()[(string) $entry['tgroup']] ?? [] as $i) {
             if (($other = self::hydrate($rows[$i])) !== null) {
                 $out[$other['lang']] = $other;
             }
@@ -553,6 +615,135 @@ final class Content
             return [];
         }
         $texts = Store::read('search', []);
+        $texts = is_array($texts) ? $texts : [];
+        if (($texts[self::SEARCH_MARK] ?? null) !== self::SEARCH_VERSION) {
+            return self::searchByIndex($terms, $texts, $limit);
+        }
+        // Index de recherche complet (voir searchTexts) : titre lu dans l'index léger, extrait, résumé et texte déjà en
+        // minuscules dans data/search.php. L'index complet n'est pas lu ; seuls les résultats affichés sont relus.
+        $rows = self::rows();
+        $results = [];
+        foreach (self::order() as $i) {
+            $r = $rows[$i];
+            if ($r[self::L_NOINDEX]) {
+                continue;
+            }
+            $id = $r[self::L_ID];
+            $title = mb_strtolower($r[self::L_TITLE]);
+            $summary = (string) ($texts[self::SEARCH_HEAD . $id] ?? '');
+            $body = (string) ($texts[$id] ?? '');
+            $score = 0;
+            foreach ($terms as $term) {
+                $hit = (str_contains($title, $term) ? 6 : 0) + (str_contains($summary, $term) ? 3 : 0) + min(5, substr_count($body, $term));
+                if ($hit === 0) {
+                    continue 2;
+                }
+                $score += $hit;
+            }
+            $results[] = [$score, $r[self::L_DATE], $i];
+        }
+        usort($results, static fn (array $a, array $b): int => $b[0] <=> $a[0] ?: $b[1] <=> $a[1]);
+        $out = [];
+        foreach ($results as [, , $i]) {
+            if (count($out) >= $limit) {
+                break;
+            }
+            $entry = self::hydrate($rows[$i]);
+            if ($entry !== null) {
+                $out[] = $entry;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Plusieurs enregistrements à la suite (import d'un site) : l'index de recherche (jusqu'à 16 Mo), relu et réécrit en
+     * entier à chaque contenu publié, ne l'est plus qu'une fois pour tout le groupe. L'index des contenus, lui, reste écrit à
+     * chaque enregistrement : ce qui est en ligne ne dépend jamais de la fin du groupe. Si le groupe est interrompu, les
+     * contenus déjà enregistrés le restent ; seul leur texte manque à la recherche (ils se trouvent par leur titre) jusqu'à
+     * leur prochain enregistrement. Un enregistrement fait entre-temps par une autre requête est conservé (fusion à la fin).
+     */
+    public static function batch(callable $fn): mixed
+    {
+        self::$batch++;
+        try {
+            return $fn();
+        } finally {
+            if (--self::$batch === 0 && self::$pending !== null) {
+                [$search, $stamp, , $touched] = self::$pending;
+                self::$pending = null;
+                if ($touched !== []) {
+                    // L'index des contenus n'est plus utile au groupe : lâché avant d'écrire l'index de recherche (16 Mo au plus,
+                    // et autant pour son texte), pour que la fin d'un lot d'import ne soit pas son pic de mémoire.
+                    self::hold(null);
+                    try {
+                        Store::locked(static function () use ($search, $stamp, $touched): void {
+                            $file = Store::file('search');
+                            clearstatcache(true, $file);
+                            if ((@filesize($file) ?: 0) . '.' . (@filemtime($file) ?: 0) !== $stamp) {
+                                // Fichier changé par une autre requête pendant le groupe : on repart du sien, et seules les clés
+                                // que le groupe a touchées (textes ajoutés, changés ou retirés) y sont reportées. L'index des
+                                // contenus est déjà lâché : deux index de recherche tiennent alors en mémoire sans lui.
+                                $now = Store::read('search', []);
+                                $now = is_array($now) ? $now : [];
+                                foreach ($touched as $key => $unused) {
+                                    if (array_key_exists($key, $search)) {
+                                        $now[$key] = $search[$key];
+                                    } else {
+                                        unset($now[$key]);
+                                    }
+                                }
+                                $search = $now;
+                            }
+                            Store::write('search', $search);
+                            // Pas gardé pour la suite de la requête (l'import en ligne de commande enchaîne les lots).
+                            Store::drop('search');
+                        });
+                    } catch (\Throwable $e) {
+                        Log::error($e);
+                    }
+                }
+            }
+        }
+    }
+
+    /** Index de recherche courant et sa taille : le fichier, ou celui du groupe d'enregistrements en cours. */
+    private static function searchNow(): array
+    {
+        $file = Store::file('search');
+        if (self::$batch === 0) {
+            $current = Store::read('search', []);
+            return [is_array($current) ? $current : [], (int) @filesize($file)];
+        }
+        if (self::$pending === null) {
+            clearstatcache(true, $file);
+            $stamp = (@filesize($file) ?: 0) . '.' . (@filemtime($file) ?: 0);
+            $current = Store::read('search', []);
+            // Gardé par le groupe seulement : pas une seconde fois dans la mémoire des données lues.
+            Store::drop('search');
+            self::$pending = [is_array($current) ? $current : [], $stamp, (int) @filesize($file), []];
+        }
+        return [self::$pending[0], self::$pending[2]];
+    }
+
+    /** Écrit l'index de recherche, ou le garde pour la fin du groupe d'enregistrements ($touched : clés ajoutées, changées ou retirées). */
+    private static function putSearch(array $search, int $size, array $touched): void
+    {
+        if (self::$batch > 0 && self::$pending !== null) {
+            self::$pending[0] = $search;
+            self::$pending[2] = $size;
+            self::$pending[3] += $touched;
+            return;
+        }
+        Store::write('search', $search);
+    }
+
+    /**
+     * Recherche à partir de l'index complet : tant que data/search.php vient d'une version sans extraits (avant le premier
+     * enregistrement fait par cette version), mêmes résultats qu'avant.
+     */
+    private static function searchByIndex(array $terms, array $texts, int $limit): array
+    {
         $results = [];
         foreach (self::published() as $id => $entry) {
             if ($entry['noindex'] ?? false) {
@@ -630,7 +821,7 @@ final class Content
                 }
                 self::hold($index);
                 if ($search !== null) {
-                    Store::write('search', $search);
+                    self::putSearch($search[0], $search[1], $search[2]);
                 }
                 if ($item['status'] !== 'draft') {
                     Redirects::remove(self::path($entry));
@@ -731,11 +922,21 @@ final class Content
         return $item;
     }
 
+    /**
+     * Extrait d'un contenu, tel que l'index le garde : sa description SEO, sinon le début de son premier paragraphe, sinon
+     * de son texte. Sans calculer tout le résumé (nombre de mots…) : pour les sorties qui parcourent tout le site.
+     */
+    public static function excerptOf(array $item, ?string $text = null): string
+    {
+        return $item['seo']['description'] !== '' ? $item['seo']['description']
+            : excerpt(Blocks::intro($item['blocks']) ?: ($text ?? Blocks::text($item['blocks'])), 220);
+    }
+
     /** Résumé d'un contenu pour l'index. */
     public static function entry(array $item): array
     {
         $text = Blocks::text($item['blocks']);
-        $excerpt = $item['seo']['description'] !== '' ? $item['seo']['description'] : excerpt(Blocks::intro($item['blocks']) ?: $text, 220);
+        $excerpt = self::excerptOf($item, $text);
         return [
             'id' => $item['id'],
             'type' => $item['type'],
@@ -805,7 +1006,7 @@ final class Content
                 @rmdir(ECLAIR_DATA . '/revisions/' . $id);
                 $search = self::searchTexts($index, $id, null);
                 if ($search !== null) {
-                    Store::write('search', $search);
+                    self::putSearch($search[0], $search[1], $search[2]);
                 }
                 if (Settings::get('home') === $id) {
                     Settings::save(['home' => '']);
@@ -966,7 +1167,7 @@ final class Content
     }
 
     /**
-     * Index de recherche (data/search.php) après l'écriture d'un contenu, ou null s'il ne change pas. Seul le texte des
+     * [Index de recherche (data/search.php) après l'écriture d'un contenu, sa taille estimée, clés touchées], ou null s'il ne change pas. Seul le texte des
      * contenus publiés (programmés compris) y figure : la recherche publique ne lit jamais celui d'un brouillon, et l'assistant
      * retrouve les brouillons par leur titre, leur adresse et leur extrait. Les textes que d'anciennes versions gardaient pour
      * les brouillons partent au passage. L'index ne dépasse jamais MAX_SEARCH_BYTES : quand un texte le ferait déborder, seul
@@ -975,17 +1176,26 @@ final class Content
      */
     private static function searchTexts(array $index, string $id, ?string $text): ?array
     {
-        $current = Store::read('search', []);
-        $current = is_array($current) ? $current : [];
-        $all = array_intersect_key($current, array_filter($index, fn (array $e): bool => $e['status'] === 'published'));
+        [$current, $bytes] = self::searchNow();
+        $published = array_filter($index, fn (array $e): bool => $e['status'] === 'published');
+        $all = array_intersect_key($current, $published);
+        // Fichier d'une version précédente : textes mis en minuscules, une fois.
+        $upgrade = ($current[self::SEARCH_MARK] ?? null) !== self::SEARCH_VERSION;
+        if ($upgrade) {
+            $all = array_map(static fn (mixed $t): string => mb_strtolower((string) $t), $all);
+        }
+        $size = static fn (string $s): int => strlen((string) json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            | JSON_INVALID_UTF8_SUBSTITUTE | JSON_HEX_TAG | JSON_HEX_AMP));
+        $head = static fn (array $e): string => mb_strtolower(($e['excerpt'] ?? '') . ' ' . ($e['summary'] ?? ''));
+        // Place restante, d'après la taille du fichier actuel (majorant : un fichier d'avant la 2.2 est indenté).
+        $room = self::MAX_SEARCH_BYTES - $bytes - 64;
+        $touched = [$id => true, self::SEARCH_HEAD . $id => true, self::SEARCH_MARK => true];
         if ($text === null) {
             unset($all[$id]);
         } else {
-            $size = static fn (string $s): int => strlen((string) json_encode($s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-                | JSON_INVALID_UTF8_SUBSTITUTE | JSON_HEX_TAG | JSON_HEX_AMP));
-            $had = isset($current[$id]) ? $size((string) $current[$id]) : 0;
-            // Place restante, d'après la taille du fichier actuel (majorant : un fichier d'avant la 2.2 est indenté).
-            $room = self::MAX_SEARCH_BYTES - (int) @filesize(Store::file('search')) - strlen($id) - 8;
+            // Un texte nouveau prend aussi la place de sa clé (« "id": », virgule).
+            $had = isset($current[$id]) ? $size((string) $current[$id]) : -(strlen($id) + 4);
+            $text = mb_strtolower($text);
             foreach ([self::SEARCH_TEXT, self::SEARCH_SHORT, 0] as $keep) {
                 $kept = mb_substr($text, 0, $keep);
                 if ($keep === 0 || $size($kept) - $had <= $room) {
@@ -996,13 +1206,37 @@ final class Content
                 unset($all[$id]);
             } else {
                 $all[$id] = $kept;
+                $room -= $size($kept) - $had;
             }
             if ($keep !== self::SEARCH_TEXT && mb_strlen($text) > $keep) {
                 Log::alert('search-full', 'Index de recherche plein (' . self::MAX_SEARCH_BYTES . ' octets) : les contenus publiés depuis n’y entrent plus en entier ; '
                     . 'ils restent trouvables par leur titre, leur extrait et leur résumé.');
             }
         }
-        return $all === $current ? null : $all;
+        // Extrait et résumé de chaque contenu publié : repris tels quels, refaits pour le contenu enregistré et pour ceux qui
+        // n'en ont pas encore (fichier d'une version précédente, contenus arrivés autrement). S'il n'y a plus de place, un
+        // contenu reste trouvable par son titre.
+        foreach ($published as $pid => $entry) {
+            $key = self::SEARCH_HEAD . $pid;
+            if ((string) $pid !== $id && isset($current[$key]) && !$upgrade) {
+                $all[$key] = $current[$key];
+                continue;
+            }
+            $value = $head($entry);
+            $grows = $size($value) + strlen($key) + 4 - (isset($current[$key]) ? $size((string) $current[$key]) + strlen($key) + 4 : 0);
+            if ($grows <= $room) {
+                $all[$key] = $value;
+                $room -= $grows;
+                $touched[$key] = true;
+            }
+        }
+        $all[self::SEARCH_MARK] = self::SEARCH_VERSION;
+        if ($all === $current) {
+            return null;
+        }
+        // Clés retirées (contenus qui ne sont plus publiés) ou, à la mise à niveau, toutes : pour la fusion de fin de groupe.
+        $touched += array_fill_keys(array_keys($upgrade ? $all + $current : array_diff_key($current, $all)), true);
+        return [$all, self::MAX_SEARCH_BYTES - 64 - $room, $touched];
     }
 
     /** Durée de lecture en minutes. */

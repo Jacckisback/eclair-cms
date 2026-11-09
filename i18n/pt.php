@@ -2163,4 +2163,5 @@ return [
     'Adresse à mesurer invalide : elle doit être publique (https://…).' => 'Endereço a medir inválido: tem de ser público (https://…).',
     'Google PageSpeed est saturé pour le moment : réessaie dans quelques minutes.' => 'O Google PageSpeed está saturado de momento: tenta de novo dentro de alguns minutos.',
     'Mesure impossible : Google PageSpeed n’a pas pu charger cette adresse (site hors ligne ou bloqué ?).' => 'Medição impossível: o Google PageSpeed não conseguiu carregar este endereço (site offline ou bloqueado?).',
+    'Fichier d’export incomplet ou abîmé : exporte-le de nouveau depuis WordPress.' => 'Arquivo de exportação incompleto ou danificado: exporte-o novamente do WordPress.',
 ];

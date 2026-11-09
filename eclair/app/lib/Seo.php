@@ -343,8 +343,26 @@ final class Seo
         $out = ['<?xml version="1.0" encoding="UTF-8"?>',
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:xhtml="http://www.w3.org/1999/xhtml">'];
         if (Settings::get('seo.index')) {
-            $published = Content::published();
-            $latest = $published ? max(array_map(fn ($e) => max($e['date'], $e['updated']), $published)) : time();
+            // Tout le site sans lire l'index complet : l'essentiel de chaque contenu vient de l'index léger (Content::online),
+            // ses images de son propre fichier, lu au passage et aussitôt oublié. La mémoire ne dépend plus du nombre de contenus.
+            $home = (string) Settings::get('home');
+            $latest = 0;
+            $newest = 0;
+            $authors = [];
+            $front = null;
+            foreach (Content::online() as $e) {
+                $changed = max($e['date'], $e['updated']);
+                $latest = max($latest, $changed);
+                if ($e['type'] === 'product') {
+                    $newest = max($newest, $changed);
+                } elseif ($e['type'] === 'post') {
+                    $authors[$e['author']] = true;
+                } elseif ($e['id'] === $home) {
+                    $front = $e;
+                }
+            }
+            $any = $latest > 0;
+            $latest = $any ? $latest : time();
             $seen = [];
             $add = static function (string $path, int $lastmod, array $images = [], array $alternates = []) use (&$out, &$seen): void {
                 if (isset($seen[$path])) {
@@ -360,32 +378,36 @@ final class Seo
                 }
                 $out[] = $x . '</url>';
             };
-            if (Settings::get('home') === '' || !isset($published[Settings::get('home')])) {
-                $add('/', $latest);
-            }
-            uasort($published, fn ($a, $b) => (Content::path($b) === '/') <=> (Content::path($a) === '/') ?: $b['date'] <=> $a['date']);
-            foreach ($published as $entry) {
+            $one = static function (array $entry) use ($add): void {
                 if ($entry['noindex']) {
-                    continue;
+                    return;
                 }
                 $images = [];
                 $item = Content::peek($entry['id']);
                 // L'index n'est qu'un résumé : un contenu dont la version enregistrée n'est pas en ligne n'est jamais listé.
                 if (!$item || !Content::visible($item)) {
-                    continue;
+                    return;
                 }
-                foreach (array_merge([$entry['image']], $item['product']['gallery'] ?? [], $item ? Blocks::media($item['blocks']) : []) as $mid) {
+                foreach (array_merge([$item['image'] ?? ''], $item['product']['gallery'] ?? [], Blocks::media($item['blocks'])) as $mid) {
                     $m = Media::get((string) $mid);
                     if ($m) {
                         $images[] = Media::url($m);
                     }
                 }
-                $alternates = array_map(fn ($t) => Content::path($t), Content::translations($entry));
-                $add(Content::path($entry), max($entry['date'], $entry['updated']), array_values(array_unique($images)), $alternates);
+                $add(Content::path($entry), (int) max($entry['date'], $entry['updated']), array_values(array_unique($images)), Content::alternates($entry));
+            };
+            // La page d'accueil d'abord, puis les contenus du plus récent au plus ancien.
+            if ($front === null) {
+                $add('/', $latest);
+            } else {
+                $one($front);
             }
-            $products = Content::published('product');
-            if ($products) {
-                $newest = max(array_map(fn ($e) => max($e['date'], $e['updated']), $products));
+            foreach (Content::online() as $entry) {
+                if ($front === null || $entry['id'] !== $front['id']) {
+                    $one($entry);
+                }
+            }
+            if ($newest > 0) {
                 $add(Shop::path(), $newest);
                 $counts = Categories::counts('product');
                 foreach (Categories::of('product') as $cat) {
@@ -395,15 +417,14 @@ final class Seo
                 }
             }
             if (Settings::get('blog.enabled')) {
-                $add(Settings::get('home') === '' ? '/' : Content::blogPath(), $latest);
+                $add($home === '' ? '/' : Content::blogPath(), $latest);
                 $counts = Categories::counts();
                 foreach (Categories::of('post') as $cat) {
                     if (!empty($counts[$cat['id']])) {
                         $add(Categories::path($cat), $latest);
                     }
                 }
-                $authors = array_unique(array_column(Content::published('post'), 'author'));
-                foreach ($authors as $uid) {
+                foreach (array_keys($authors) as $uid) {
                     $profile = Users::profile(Users::find((string) $uid));
                     if ($profile) {
                         $add(Theme::authorPath($profile), $latest);
@@ -462,10 +483,11 @@ final class Seo
         }
         $out .= implode("\n", $facts) . "\n\n";
 
-        $published = array_filter(Content::published(), fn ($e) => !$e['noindex']);
+        // Tout le site sans lire l'index complet (Content::online) : chaque contenu est relu dans son fichier, puis oublié.
+        $home = (string) Settings::get('home');
         if ($full) {
-            foreach ($published as $entry) {
-                $item = Content::peek($entry['id']);
+            foreach (Content::online() as $entry) {
+                $item = $entry['noindex'] ? null : Content::peek($entry['id']);
                 if ($item && Content::visible($item)) {
                     $out .= "---\n\n" . self::markdown($item, false) . "\n";
                 }
@@ -473,21 +495,35 @@ final class Seo
             return $out;
         }
         foreach (['page' => Theme::t('pages', $lang), 'product' => Theme::t('products', $lang), 'post' => Theme::t('posts', $lang)] as $type => $label) {
-            $list = array_filter($published, fn ($e) => $e['type'] === $type);
-            uasort($list, fn ($a, $b) => (Content::path($b) === '/') <=> (Content::path($a) === '/'));
-            if (!$list) {
-                continue;
-            }
-            $out .= '## ' . $label . "\n\n";
-            foreach ($list as $e) {
-                $note = $e['summary'] !== '' ? $e['summary'] : $e['excerpt'];
-                if ($type === 'product') {
-                    $note = Shop::summary($e, $lang) . ($note !== '' ? ' — ' . $note : '');
+            $lines = '';
+            $line = static function (array $brief) use (&$lines, $type, $lang, $link): void {
+                $item = $brief['noindex'] ? null : Content::peek($brief['id']);
+                if (!$item || !Content::visible($item)) {
+                    return;
                 }
-                $out .= '- [' . Blocks::mdText(str_replace(['[', ']'], '', $e['title'])) . '](' . $link($e) . ')'
+                // Résumé du contenu, sinon son extrait : les valeurs de l'index, sans calculer le reste (nombre de mots…).
+                $note = excerpt((string) ($item['summary'] ?? ''), 300);
+                $note = $note !== '' ? $note : Content::excerptOf($item);
+                if ($type === 'product') {
+                    $note = Shop::summary(Content::entry($item), $lang) . ($note !== '' ? ' — ' . $note : '');
+                }
+                $lines .= '- [' . Blocks::mdText(str_replace(['[', ']'], '', $brief['title'])) . '](' . $link($brief) . ')'
                     . ($note !== '' ? ': ' . Blocks::mdText(str_replace("\n", ' ', $note)) : '') . "\n";
+            };
+            // La page d'accueil d'abord, puis du plus récent au plus ancien.
+            $front = $type === 'page' && $home !== '' ? Content::brief($home) : null;
+            $front = $front !== null && $front['type'] === 'page' && Content::visible($front) ? $front : null;
+            if ($front !== null) {
+                $line($front);
             }
-            $out .= "\n";
+            foreach (Content::online($type) as $brief) {
+                if ($front === null || $brief['id'] !== $front['id']) {
+                    $line($brief);
+                }
+            }
+            if ($lines !== '') {
+                $out .= '## ' . $label . "\n\n" . $lines . "\n";
+            }
         }
         $counts = Categories::counts();
         $cats = array_filter(Categories::of('post'), fn ($c) => !empty($counts[$c['id']]));
@@ -507,7 +543,7 @@ final class Seo
         if (Settings::get('blog.enabled')) {
             $out .= '- [RSS](' . absolute_url('/feed.xml') . ")\n";
         }
-        if (Shop::enabled() && Content::published('product')) {
+        if (Shop::enabled() && Content::page('product')[1] > 0) {
             $out .= '- [' . Theme::t('products', $lang) . ' (Google Merchant RSS)](' . absolute_url('/products.xml') . ")\n";
         }
         return $out;

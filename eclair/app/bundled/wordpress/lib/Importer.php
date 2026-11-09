@@ -31,26 +31,86 @@ final class Importer
     /** Durée d'un lot, en secondes : bien en dessous des limites d'exécution des hébergements mutualisés. */
     private const SLICE = 12;
 
+    /** Contenus de l'export par fichier de file d'attente (data/ext/wordpress/queue/<n>). */
+    private const CHUNK = 50;
+    private const QUEUE = 'ext/wordpress/queue';
+    private const ATTACHMENTS = 'ext/wordpress/attachments';
+
     public static function job(): ?array
     {
         $job = Store::read(self::JOB, null);
         return is_array($job) ? $job : null;
     }
 
-    /** Prépare l'import d'un export lu par Wxr::parse ; rien n'est encore créé. */
+    /** Prépare l'import d'un export lu par Wxr::parse (déjà en mémoire : petits exports) ; rien n'est encore créé. */
     public static function start(array $export, bool $keepStatus, bool $images): array
     {
+        self::clear();
+        foreach (array_chunk($export['items'], self::CHUNK) as $n => $chunk) {
+            self::queue($n, $chunk);
+        }
+        return self::open($export, count($export['items']), $keepStatus, $images);
+    }
+
+    /**
+     * Prépare l'import d'un fichier d'export, lu en flux : ses contenus sont rangés par paquets de CHUNK dans une file
+     * d'attente sur le disque, si bien que ni la lecture ni l'import ne gardent tout l'export en mémoire, et que le fichier
+     * de travail relu à chaque lot reste petit (il contenait tout l'export). Renvoie le travail, ou un message d'erreur.
+     */
+    public static function startFile(string $file, bool $keepStatus, bool $images): array|string
+    {
+        self::clear();
+        $chunk = [];
+        $n = 0;
+        $head = Wxr::parseFile($file, static function (array $item) use (&$chunk, &$n): void {
+            $chunk[] = $item;
+            if (count($chunk) === self::CHUNK) {
+                self::queue($n++, $chunk);
+                $chunk = [];
+            }
+        });
+        if (is_string($head) || $head['count'] === 0) {
+            self::clear();
+            return is_string($head) ? $head : t('Aucun article ni page dans cet export.');
+        }
+        if ($chunk) {
+            self::queue($n, $chunk);
+        }
+        return self::open($head, $head['count'], $keepStatus, $images);
+    }
+
+    /** Écrit un paquet de la file d'attente, sans le garder en mémoire (la file d'un gros export y tiendrait tout entière). */
+    private static function queue(int $n, array $chunk): void
+    {
+        Store::write(self::QUEUE . '/' . $n, $chunk);
+        Store::drop(self::QUEUE . '/' . $n);
+    }
+
+    private static function open(array $head, int $total, bool $keepStatus, bool $images): array
+    {
+        Store::write(self::ATTACHMENTS, $head['attachments']);
         $job = [
-            'site' => $export['site'], 'title' => $export['title'], 'categories' => $export['categories'], 'attachments' => $export['attachments'],
-            'items' => $export['items'], 'total' => count($export['items']), 'next' => 0, 'keep' => $keepStatus, 'images' => $images, 'started' => time(), 'done' => false,
+            'site' => $head['site'], 'title' => $head['title'], 'categories' => $head['categories'], 'chunk' => self::CHUNK,
+            'total' => $total, 'next' => 0, 'keep' => $keepStatus, 'images' => $images, 'started' => time(), 'done' => false,
             'report' => ['posts' => 0, 'pages' => 0, 'skipped' => 0, 'routes' => 0, 'aliases' => 0, 'images' => 0, 'missed' => 0, 'shortcodes' => 0, 'dropped' => 0, 'errors' => []],
         ];
         Store::write(self::JOB, $job);
         return $job;
     }
 
+    /** Retire la file d'attente et les fichiers joints d'un import (terminé, abandonné ou remplacé). */
+    private static function clear(): void
+    {
+        foreach (Store::names(self::QUEUE) as $name) {
+            Store::delete($name);
+        }
+        @rmdir(ECLAIR_DATA . '/' . self::QUEUE);
+        Store::delete(self::ATTACHMENTS);
+    }
+
     public static function cancel(): void
     {
+        self::clear();
         Store::delete(self::JOB);
     }
 
@@ -61,23 +121,52 @@ final class Importer
         if ($job === null || $job['done']) {
             return $job ?? [];
         }
+        // Import commencé par une version précédente (tout l'export dans le fichier de travail) : passé en file d'attente.
+        if (!isset($job['chunk'])) {
+            foreach (array_chunk((array) ($job['items'] ?? []), self::CHUNK) as $n => $chunk) {
+                self::queue($n, $chunk);
+            }
+            Store::write(self::ATTACHMENTS, (array) ($job['attachments'] ?? []));
+            $job['chunk'] = self::CHUNK;
+            unset($job['items'], $job['attachments']);
+        }
         $map = Store::read(self::MAP, []);
         $map = (is_array($map) ? $map : []) + ['items' => [], 'images' => [], 'cats' => []];
         $until = microtime(true) + self::SLICE;
         $cats = self::categories($job['categories'], $map);
-        $n = count($job['items']);
+        $attachments = (array) Store::read(self::ATTACHMENTS, []);
+        $n = (int) $job['total'];
+        $size = (int) $job['chunk'];
         try {
-            while ($job['next'] < $n && microtime(true) < $until) {
-                $wp = $job['items'][$job['next']];
-                $job['next']++;
-                self::one($wp, $job, $map, $cats, $user);
-            }
+            // Enregistrements groupés : l'index de recherche n'est réécrit qu'une fois par lot (Content::batch).
+            Content::batch(static function () use (&$job, &$map, $cats, $user, $attachments, $n, $size, $until): void {
+                $loaded = -1;
+                $chunk = [];
+                while ($job['next'] < $n && microtime(true) < $until) {
+                    $at = intdiv($job['next'], $size);
+                    // Un paquet de la file lu une fois pour ses contenus (chaque enregistrement vide la mémoire des données lues).
+                    if ($at !== $loaded) {
+                        $chunk = (array) Store::read(self::QUEUE . '/' . $at, []);
+                        $loaded = $at;
+                    }
+                    $wp = $chunk[$job['next'] % $size] ?? null;
+                    $job['next']++;
+                    if (is_array($wp)) {
+                        self::one($wp, $job, $map, $cats, $user, $attachments);
+                    }
+                    // Paquet terminé : retiré du disque (et de la mémoire de la requête).
+                    if ($job['next'] % $size === 0 || $job['next'] >= $n) {
+                        Store::delete(self::QUEUE . '/' . $at);
+                    }
+                }
+            });
         } finally {
             Store::write(self::MAP, $map);
             $job['done'] = $job['next'] >= $n;
             if ($job['done']) {
                 // Bilan seul : le contenu de l'export n'est plus gardé.
-                $job['items'] = $job['attachments'] = $job['categories'] = [];
+                $job['categories'] = [];
+                self::clear();
             }
             Store::write(self::JOB, $job);
         }
@@ -102,7 +191,7 @@ final class Importer
         return $out;
     }
 
-    private static function one(array $wp, array &$job, array &$map, array $cats, array $user): void
+    private static function one(array $wp, array &$job, array &$map, array $cats, array $user, array $attachments): void
     {
         $key = $wp['type'] . ':' . $wp['wp'];
         $done = isset($map['items'][$key]) ? (Content::index()[$map['items'][$key]] ?? null) : null;
@@ -114,10 +203,10 @@ final class Importer
             return $job['images'] ? self::image($url, (string) $job['site'], $map, $user) : null;
         };
         // [gallery ids="1,2"] : les images de la galerie, retrouvées par leur identifiant parmi les fichiers joints de l'export.
-        $html = (string) preg_replace_callback('~\[gallery\b[^\]]*\bids=["\']([\d,\s]+)["\'][^\]]*\]~i', static function (array $m) use ($job): string {
+        $html = (string) preg_replace_callback('~\[gallery\b[^\]]*\bids=["\']([\d,\s]+)["\'][^\]]*\]~i', static function (array $m) use ($attachments): string {
             $imgs = '';
             foreach (array_slice(array_filter(array_map('intval', explode(',', $m[1]))), 0, 60) as $id) {
-                $imgs .= isset($job['attachments'][$id]) ? '<img src="' . e((string) $job['attachments'][$id]) . '" alt="">' : '';
+                $imgs .= isset($attachments[$id]) ? '<img src="' . e((string) $attachments[$id]) . '" alt="">' : '';
             }
             return $imgs !== '' ? "\n\n<figure>" . $imgs . "</figure>\n\n" : $m[0];
         }, (string) $wp['html']);
@@ -125,8 +214,8 @@ final class Importer
         foreach (['images', 'missed', 'shortcodes', 'dropped'] as $k) {
             $job['report'][$k] += (int) $stats[$k];
         }
-        $thumb = $wp['thumb'] && isset($job['attachments'][$wp['thumb']]) && $job['images']
-            ? self::image((string) $job['attachments'][$wp['thumb']], (string) $job['site'], $map, $user) : null;
+        $thumb = $wp['thumb'] && isset($attachments[$wp['thumb']]) && $job['images']
+            ? self::image((string) $attachments[$wp['thumb']], (string) $job['site'], $map, $user) : null;
         $category = '';
         foreach (array_keys((array) $wp['cats']) as $slug) {
             if (isset($cats[$slug])) {

@@ -50,6 +50,9 @@ final class PackageImporter
     private static ?array $ledger = null;
 
     /** Journal du dernier import (vide s'il n'y en a pas). */
+    /** SEO des contenus du paquet (identifiant WordPress → réglages), gardé le temps d'un lot. */
+    private static ?array $seo = null;
+
     public static function ledger(): array
     {
         $l = Store::read(self::LEDGER, []);
@@ -142,6 +145,7 @@ final class PackageImporter
         if ($job === null || $job['done']) {
             return $job ?? [];
         }
+        self::$seo = null;
         $until = microtime(true) + self::SLICE;
         $map = self::map($job['dry']);
         try {
@@ -151,8 +155,13 @@ final class PackageImporter
                     'prepare' => self::prepare($job),
                     'terms' => self::terms($job, $map, $user),
                     'media' => self::media($job, $map, $user, $until),
-                    'content' => self::content($job, $map, $user, $until),
-                    'links' => self::links($job, $map, $user, $until),
+                    // Enregistrements groupés : l'index de recherche n'est réécrit qu'une fois par lot (Content::batch).
+                    'content' => Content::batch(static function () use (&$job, &$map, $user, $until): void {
+                        self::content($job, $map, $user, $until);
+                    }),
+                    'links' => Content::batch(static function () use (&$job, &$map, $user, $until): void {
+                        self::links($job, $map, $user, $until);
+                    }),
                     'menus' => self::menus($job, $map),
                     'redirects' => self::redirects($job, $map),
                     default => null,
@@ -201,12 +210,20 @@ final class PackageImporter
         $chunk = [];
         $settings = (array) Package::data('content/settings.json');
         $skip = (int) ($settings['page_for_posts'] ?? 0);
+        // Le SEO de chaque contenu voyage avec lui dans la file d'attente : le SEO de tout le site (plusieurs Mo pour 10 000
+        // articles) n'a plus à être relu, ni gardé en mémoire, pendant tout l'import.
+        $seo = (array) Package::data('seo.json');
+        $seoPosts = (array) ($seo['posts'] ?? []);
+        Store::write('ext/wordpress/pseo', ['posts' => [], 'terms' => (array) ($seo['terms'] ?? [])]);
+        unset($seo);
         foreach ($job['files'] as $file) {
-            foreach ((array) Package::data($file) as $item) {
+            // Un contenu à la fois : le fichier de tous les articles n'est jamais décodé d'un bloc (Package::each).
+            foreach (Package::each($file) as $item) {
                 if (!is_array($item) || (int) ($item['wp_id'] ?? 0) < 1) {
                     continue;
                 }
                 $item['_front'] = ($settings['show_on_front'] ?? '') === 'page' && (int) $item['wp_id'] === (int) ($settings['page_on_front'] ?? 0);
+                $item['_seo'] = (array) ($seoPosts[(int) $item['wp_id']] ?? []);
                 if ($skip && (int) $item['wp_id'] === $skip) {
                     // Page « Articles » de WordPress : le blog d'Éclair la remplace ; son adresse y mène.
                     $job['posts_page'] = (string) ($item['path'] ?? '');
@@ -215,18 +232,22 @@ final class PackageImporter
                 $chunk[] = $item;
                 $job['total']++;
                 if (count($chunk) === self::CHUNK) {
-                    Store::write('ext/wordpress/pqueue/' . $n++, $chunk);
+                    // Écrit puis oublié : gardée en mémoire, la file d'attente d'un gros site y tiendrait tout entière.
+                    Store::write('ext/wordpress/pqueue/' . $n, $chunk);
+                    Store::drop('ext/wordpress/pqueue/' . $n++);
                     $chunk = [];
                 }
             }
         }
         if ($chunk) {
-            Store::write('ext/wordpress/pqueue/' . $n++, $chunk);
+            Store::write('ext/wordpress/pqueue/' . $n, $chunk);
+            Store::drop('ext/wordpress/pqueue/' . $n++);
         }
         $job['chunks'] = $n;
         $m = 0;
         foreach (array_chunk(array_values(array_filter((array) Package::data('media/index.json'), 'is_array')), self::CHUNK) as $part) {
-            Store::write('ext/wordpress/pmedia/' . $m++, $part);
+            Store::write('ext/wordpress/pmedia/' . $m, $part);
+            Store::drop('ext/wordpress/pmedia/' . $m++);
             $job['media_total'] += count($part);
         }
         $job['mchunks'] = $m;
@@ -235,8 +256,7 @@ final class PackageImporter
                 self::log('urls', [(string) $row[0], (string) ($row[1] ?? '')], 20000);
             }
         }
-        $seo = (array) Package::data('seo.json');
-        Store::write('ext/wordpress/pseo', ['posts' => (array) ($seo['posts'] ?? []), 'terms' => (array) ($seo['terms'] ?? [])]);
+        unset($seoPosts);
         $report = (array) Package::data('report.json');
         foreach ((array) ($report['shortcodes'] ?? []) as $tag => $row) {
             $job['report']['shortcodes'] += (int) ($row['count'] ?? 0);
@@ -428,7 +448,7 @@ final class PackageImporter
     {
         $wpId = (int) $wp['wp_id'];
         $r = &$job['report'];
-        if (isset($map['items'][$wpId]) && Content::get((string) $map['items'][$wpId])) {
+        if (isset($map['items'][$wpId]) && Content::peek((string) $map['items'][$wpId])) {
             $r['skipped']++;
             return;
         }
@@ -438,8 +458,8 @@ final class PackageImporter
         $front = !empty($wp['_front']);
         // Chemin d'origine gardé à l'identique, sauf l'accueil et les adresses à paramètres (?p=, brouillons) : un alias les reprend.
         $route = $front || $oldPath === '' || $oldPath === '/' || str_contains($oldPath, '?') ? '' : Content::cleanRoute($oldPath);
-        $index = Content::index();
-        if ($route !== '' && (Content::routeTaken($route, '', $index) || isset($map['paths'][$route]))) {
+        // Sans garder l'index dans une variable : l'enregistrement qui suit le relit, et les deux tiendraient en mémoire à la fois.
+        if ($route !== '' && (Content::routeTaken($route, '') || isset($map['paths'][$route]))) {
             $route = '';
         }
         $status = in_array($wp['status'] ?? '', ['publish', 'future'], true) && empty($wp['protected']) && $job['keep'] ? 'published' : 'draft';
@@ -451,7 +471,14 @@ final class PackageImporter
         };
         [$blocks, $stats] = Wxr::blocks((string) ($wp['html'] ?? ''), $media);
         $r['dropped'] += (int) $stats['dropped'];
-        $seo = (array) ((Store::read('ext/wordpress/pseo', [])['posts'] ?? [])[$wpId] ?? []);
+        // SEO du contenu : avec lui dans la file d'attente. Import commencé par une version précédente : dans le fichier commun,
+        // lu une fois par lot (chaque enregistrement vide la mémoire des données lues).
+        if (array_key_exists('_seo', $wp)) {
+            $seo = (array) $wp['_seo'];
+        } else {
+            self::$seo ??= (array) (Store::read('ext/wordpress/pseo', [])['posts'] ?? []);
+            $seo = (array) (self::$seo[$wpId] ?? []);
+        }
         $canonical = (string) ($seo['canonical'] ?? '');
         if ($canonical !== '' && self::key($canonical) !== '' ) {
             $canonical = ''; // canonical vers l'ancien site : Éclair calcule la sienne
@@ -573,7 +600,7 @@ final class PackageImporter
         }
         $ids = array_values($map['items']);
         for (; $job['pos'] < count($ids) && microtime(true) < $until; $job['pos']++) {
-            $item = Content::get((string) $ids[$job['pos']]);
+            $item = Content::peek((string) $ids[$job['pos']]);
             if ($item === null) {
                 continue;
             }

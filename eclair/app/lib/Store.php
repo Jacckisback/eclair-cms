@@ -48,11 +48,24 @@ final class Store
         if (array_key_exists($name, self::$memo)) {
             return self::$memo[$name];
         }
-        $raw = @file_get_contents(self::file($name));
+        // La ligne de protection est sautée à la lecture : jamais deux copies du texte en mémoire (l'index de recherche d'un
+        // gros site pèse 16 Mo, et le retirer après coup en faisait une seconde le temps du décodage).
+        $h = @fopen(self::file($name), 'rb');
+        if ($h === false) {
+            return $default;
+        }
+        $first = (string) fgets($h);
+        $raw = stream_get_contents($h);
+        fclose($h);
         if ($raw === false) {
             return $default;
         }
-        $data = json_decode(self::strip($raw), true);
+        if (!str_starts_with($first, '<?php')) {
+            $raw = $first . $raw; // fichier sans ligne de protection
+        }
+        unset($first);
+        $data = json_decode($raw, true);
+        unset($raw);
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
             Log::error(new \RuntimeException('Fichier de données illisible : ' . $name));
             return $default;
@@ -70,7 +83,8 @@ final class Store
             (isset(self::COMPACT[$name]) ? 0 : JSON_PRETTY_PRINT) | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION
                 | JSON_INVALID_UTF8_SUBSTITUTE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR
         );
-        self::atomic($file, self::GUARD . $json);
+        // Ligne de protection et données écrites l'une après l'autre : jamais une seconde copie d'un fichier de 16 Mo en mémoire.
+        self::atomic($file, $json, self::GUARD);
         self::$memo[$name] = $data;
     }
 
@@ -185,16 +199,24 @@ final class Store
      * Le fichier temporaire ne porte l'extension .php que s'il commence par la ligne de protection. Il est créé privé
      * (masque 0077 le temps de l'écriture) : jamais lisible par un autre compte, même un instant, avant ses droits définitifs.
      */
-    public static function atomic(string $file, string $content): void
+    public static function atomic(string $file, string $content, string $prefix = ''): void
     {
-        $tmp = $file . '.' . bin2hex(random_bytes(4)) . (str_starts_with($content, self::GUARD) ? '.tmp.php' : '.tmp');
+        $tmp = $file . '.' . bin2hex(random_bytes(4)) . (str_starts_with($prefix . substr($content, 0, 32), self::GUARD) ? '.tmp.php' : '.tmp');
         $mask = umask(0077);
         try {
-            $written = @file_put_contents($tmp, $content, LOCK_EX);
+            if ($prefix === '') {
+                $written = @file_put_contents($tmp, $content, LOCK_EX);
+            } else {
+                // En deux écritures (la seconde à la suite) : réunir les deux textes, ou les passer en tableau, en ferait une
+                // copie entière en mémoire.
+                $head = @file_put_contents($tmp, $prefix, LOCK_EX);
+                $body = $head === strlen($prefix) ? @file_put_contents($tmp, $content, FILE_APPEND | LOCK_EX) : false;
+                $written = $body === false ? false : $head + $body;
+            }
         } finally {
             umask($mask);
         }
-        if ($written !== strlen($content)) {
+        if ($written !== strlen($prefix) + strlen($content)) {
             @unlink($tmp);
             throw new \RuntimeException("Impossible d'écrire « " . basename($file) . ' » : vérifie les droits du dossier.');
         }

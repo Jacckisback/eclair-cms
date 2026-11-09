@@ -315,13 +315,21 @@ function capture_all(string $root, string $fixtures, bool $lite = false): array
         try {
             $urls = capture_urls($port, $type === 'business' ? ['/', '/tous-les-blocs'] : ['/']);
             $visitor = capture_pages($port, $urls);
+            // Sorties « tout le site » (plan du site, llms.txt, flux) : code HTTP puis corps, pour celles qui existent.
+            $outputs = [];
+            foreach (['/sitemap.xml', '/llms.txt', '/llms-full.txt', '/feed.xml', '/products.xml'] as $u) {
+                $r = capture_req($port, 'GET', $u);
+                if ($r['status'] === 200) {
+                    $outputs[$u] = $r['status'] . "\n" . $r['body'];
+                }
+            }
             if ($lite) {
-                $sites[$type] = ['visitor' => $visitor, 'lite' => is_file($copy . '/data/index-lite.php')];
+                $sites[$type] = ['visitor' => $visitor, 'outputs' => $outputs, 'lite' => is_file($copy . '/data/index-lite.php')];
                 continue;
             }
             capture_login($port, $jar);
             $admin = capture_pages($port, $urls, $jar);
-            $sites[$type] = ['visitor' => $visitor, 'admin_same' => $visitor === $admin];
+            $sites[$type] = ['visitor' => $visitor, 'outputs' => $outputs, 'admin_same' => $visitor === $admin];
         } finally {
             proc_terminate($server);
             @unlink($jar);
