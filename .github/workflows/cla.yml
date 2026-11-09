@@ -35,8 +35,8 @@ jobs:
           path-to-signatures: signatures/cla.json
           # This branch must exist and must not be protected: the bot commits each new signature to it.
           branch: cla-signatures
-          # The maintainer, the assistant that commits on his behalf (author "Claude") and bots do not sign.
-          allowlist: Jacckisback,Claude,dependabot[bot],renovate[bot],github-actions[bot]
+          # The maintainer, the assistant that commits on his behalf (commits linked to the GitHub account "claude", author name "Claude") and bots do not sign.
+          allowlist: Jacckisback,claude,Claude,dependabot[bot],renovate[bot],github-actions[bot]
           create-file-commit-message: "chore(cla): create the CLA signatures file"
           signed-commit-message: "chore(cla): $contributorName signed the CLA in $owner/$repo#$pullRequestNo"
           custom-notsigned-prcomment: >-
