@@ -891,6 +891,12 @@ final class PackageImporter
                 Settings::save($patch);
             }
         }
+        // Produits importés : la boutique d'Éclair (fermée par défaut) est ouverte, sinon leurs pages répondraient 404.
+        if (!$job['dry'] && $job['report']['products'] > 0 && !Shop::enabled()) {
+            $currency = strtoupper((string) (((array) Package::data('content/settings.json'))['woocommerce']['currency'] ?? ''));
+            Settings::save(['shop' => ['enabled' => true] + (preg_match('~^[A-Z]{3}$~', $currency) ? ['currency' => $currency] : [])]);
+            $job['report']['shop'] = true;
+        }
         $job['done'] = true;
         $job['finished'] = time();
         self::cleanup();

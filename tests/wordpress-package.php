@@ -45,8 +45,13 @@ declare(strict_types=1);
         $content(['wp_id' => 22, 'type' => 'page', 'title' => 'Contact', 'slug' => 'contact', 'url' => $old . '/contact(1)/', 'path' => '/contact(1)/', 'html' => '<p>Écrivez-nous.</p>']),
         $content(['wp_id' => 23, 'type' => 'page', 'title' => 'Actualités', 'slug' => 'actualites', 'url' => $old . '/actualites/', 'path' => '/actualites/', 'html' => '']),
     ];
+    $products = [$content(['wp_id' => 30, 'type' => 'product', 'title' => 'Miche de campagne', 'slug' => 'miche-de-campagne', 'url' => $old . '/produit/miche-de-campagne/',
+        'path' => '/produit/miche-de-campagne/', 'html' => '<p>Une grosse miche.</p>', 'featured_media' => 50,
+        'product' => ['kind' => 'simple', 'price' => '4.50', 'regular_price' => '5.00', 'sale_price' => '4.50', 'currency' => 'EUR', 'sku' => 'MICHE-1', 'gtin' => '',
+            'stock_status' => 'instock', 'virtual' => false, 'downloadable' => false, 'gallery' => [], 'brand' => '', 'external_url' => '', 'variations' => []]])];
     $data = [
         'content/posts.json' => json_encode($posts),
+        'content/products.json' => json_encode($products),
         'content/pages.json' => json_encode($pages),
         'content/taxonomies.json' => json_encode([
             ['wp_id' => 3, 'taxonomy' => 'category', 'slug' => 'recettes', 'name' => 'Recettes', 'description' => '', 'parent' => 0, 'count' => 1, 'url' => $old . '/category/recettes/', 'path' => '/category/recettes/'],
@@ -57,7 +62,7 @@ declare(strict_types=1);
             ['wp_id' => 90, 'parent' => 0, 'order' => 1, 'title' => 'Notre histoire', 'type' => 'post_type', 'object' => 'page', 'object_id' => 21, 'url' => $old . '/notre-histoire/', 'new_tab' => false],
             ['wp_id' => 91, 'parent' => 90, 'order' => 2, 'title' => 'Recettes', 'type' => 'taxonomy', 'object' => 'category', 'object_id' => 3, 'url' => $old . '/category/recettes/', 'new_tab' => false],
         ]]]),
-        'content/settings.json' => json_encode(['name' => 'Le Fournil', 'description' => 'Pain au levain', 'show_on_front' => 'page', 'page_on_front' => 20, 'page_for_posts' => 23]),
+        'content/settings.json' => json_encode(['woocommerce' => ['shop_page' => 0, 'currency' => 'EUR'], 'name' => 'Le Fournil', 'description' => 'Pain au levain', 'show_on_front' => 'page', 'page_on_front' => 20, 'page_for_posts' => 23]),
         'media/index.json' => json_encode([
             ['wp_id' => 50, 'url' => $uploads . 'miche.png', 'variants' => [$uploads . 'miche-300x188.png'], 'file' => 'media/uploads/2024/03/miche.png', 'mime' => 'image/png',
                 'alt' => 'Une miche', 'parent' => 12, 'date_gmt' => '2024-03-12T08:30:00+00:00', 'missing' => false, 'included' => true, 'sha256' => hash('sha256', $png)],
@@ -145,7 +150,7 @@ declare(strict_types=1);
         check('simulation menée à son terme', $run($c));
         $page = $c->req('GET', '/gestion/x/wordpress');
         check('simulation : bilan annoncé, aucun contenu, média ni redirection créés', str_contains($page['body'], 'Simulation : voici ce que l’import ferait')
-            && str_contains($page['body'], '2 articles, 3 pages') && count(glob($copy . '/data/content/*.php') ?: []) === $before
+            && str_contains($page['body'], '2 articles, 3 pages, 1 produits') && count(glob($copy . '/data/content/*.php') ?: []) === $before
             && !is_dir($copy . '/media/files') && !glob($copy . '/media/20*') && !str_contains((string) @file_get_contents($copy . '/data/redirects.php'), 'ancienne-boutique'),
             strip_tags((string) preg_replace('~.*<section class="card" aria-labelledby="wp-pdone">(.*?)</section>.*~s', '$1', $page['body'])));
         check('simulation : bouton pour importer pour de vrai', str_contains($page['body'], 'Importer pour de vrai'));
@@ -155,7 +160,7 @@ declare(strict_types=1);
         check('import mené à son terme', $run($c));
         $page = $c->req('GET', '/gestion/x/wordpress');
         $report = strip_tags((string) preg_replace('~.*<section class="card" aria-labelledby="wp-pdone">(.*?)</section>.*~s', '$1', $page['body']));
-        check('bilan : contenus, adresses, médias, SEO, éléments non migrés listés', str_contains($report, '2 articles, 3 pages') && str_contains($report, '1 images et 1 documents')
+        check('bilan : contenus, adresses, médias, SEO, éléments non migrés listés', str_contains($report, '2 articles, 3 pages, 1 produits') && str_contains($report, '1 images et 1 documents')
             && str_contains($report, 'clip.mp4') && str_contains($report, '[contact-form-7]') && str_contains($report, 'expression régulière'), $report);
         $v = client($port);
         $post = $v->req('GET', '/2024/03/pain-au-levain/');
@@ -170,6 +175,9 @@ declare(strict_types=1);
         check('PDF copié tel quel dans media/files', is_file($copy . '/media/files/2024/03/tarifs.pdf') && file_get_contents($copy . '/media/files/2024/03/tarifs.pdf') === $pdf);
         check('questions-réponses et tableau convertis en blocs', str_contains($post['body'], 'Combien de temps ?') && str_contains($post['body'], '<table') && str_contains($post['body'], '350 g'));
         check('code court inconnu resté en texte', str_contains($post['body'], '[contact-form-7 id=&quot;1&quot;]'));
+        $prod = $v->req('GET', '/produit/miche-de-campagne/');
+        check('produit WooCommerce : boutique ouverte, servi à son adresse, prix et prix barré', $prod['status'] === 200 && str_contains($prod['body'], 'Miche de campagne')
+            && str_contains($prod['body'], '4,50') && str_contains($prod['body'], 'Prix habituel'), (string) $prod['status']);
         check('page d’accueil reprise', str_contains($v->req('GET', '/')['body'], 'Bienvenue au fournil.'));
         check('nom du site repris', str_contains($v->req('GET', '/')['body'], 'Le Fournil'));
         $moved = $v->req('GET', '/contact(1)/');
@@ -221,13 +229,13 @@ declare(strict_types=1);
         $c->req('POST', '/gestion/x/wordpress', $c->token($page['body']) + ['action' => 'import', 'keep' => '1', 'site' => '1', 'menus' => '1']);
         $run($c);
         check('réimport du même paquet : aucun doublon', count(glob($copy . '/data/content/*.php') ?: []) === $count
-            && str_contains($c->req('GET', '/gestion/x/wordpress')['body'], '5 déjà présents'));
+            && str_contains($c->req('GET', '/gestion/x/wordpress')['body'], '6 déjà présents'));
 
         // Ligne de commande : simulation en JSON.
         exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($copy . '/app/bundled/wordpress/lib/cli.php') . ' import ' . escapeshellarg($tmp . '/eclair-export-fournil-test.zip')
             . ' ' . escapeshellarg($tmp . '/eclair-export-fournil-test-part2.zip') . ' --dry-run --json 2>&1', $out, $code);
         $json = json_decode(implode("\n", $out), true);
-        check('ligne de commande : simulation, bilan JSON', $code === 0 && ($json['dry'] ?? false) === true && ($json['report']['skipped'] ?? 0) === 5, implode("\n", array_slice($out, -5)));
+        check('ligne de commande : simulation, bilan JSON', $code === 0 && ($json['dry'] ?? false) === true && ($json['report']['skipped'] ?? 0) === 6, implode("\n", array_slice($out, -5)));
         $web = $v->req('GET', '/app/bundled/wordpress/lib/cli.php');
         check('ligne de commande : jamais exécutée depuis le web', $web['status'] === 404 || $web['status'] === 403);
     } finally {
