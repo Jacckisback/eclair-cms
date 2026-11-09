@@ -42,6 +42,16 @@ final class Redirects
     }
 
     /**
+     * Cible interne d'une redirection : comme normalize(), mais le « / » final est gardé quand il fait partie de l'adresse
+     * exacte d'un contenu repris d'un ancien site (/notre-histoire/) : la redirection y mène en une fois, sans second saut.
+     */
+    private static function target(string $path): string
+    {
+        $clean = self::normalize($path);
+        return $clean !== '/' && str_ends_with(trim($path), '/') && Content::byRoute($clean . '/') !== null ? $clean . '/' : $clean;
+    }
+
+    /**
      * Adresses que seuls l'hébergement et Éclair servent, jamais une redirection enregistrée : /.well-known/*
      * (RFC 8615 : validations de domaine ACME et pki-validation, découverte OAuth), /_eclair/* et /__eclair/*.
      * Les anciennes adresses d'autres outils (« /_files/… ») restent redirigeables.
@@ -150,11 +160,11 @@ final class Redirects
                     }
                     // Évite les chaînes : A→B puis B→C devient A→C, sauf pour une adresse que l'appelant n'a pas le droit de
                     // rediriger (adresse /.well-known/ posée par un administrateur) : sa cible ne change pas.
-                    if ($r['to'] === $row['from'] && self::allowed((string) $r['from'], $admin)) {
+                    if (self::normalize((string) $r['to']) === $row['from'] && !preg_match('~^https?://~i', (string) $r['to']) && self::allowed((string) $r['from'], $admin)) {
                         $r['to'] = $row['to'];
                         $moved[] = $r['from'];
                     }
-                    if ($r['from'] !== $r['to']) {
+                    if ($r['from'] !== self::normalize((string) $r['to'])) {
                         $next[] = $r;
                     } else {
                         $gone[] = $r['from'];
@@ -256,8 +266,8 @@ final class Redirects
     {
         $from = self::normalize($from);
         $to = trim($to);
-        $to = preg_match('~^https?://~i', $to) ? Sanitize::url($to) : self::normalize($to);
-        if ($from === '/' || $to === '' || $from === $to || !self::allowed($from, $admin)
+        $to = preg_match('~^https?://~i', $to) ? Sanitize::url($to) : self::target($to);
+        if ($from === '/' || $to === '' || $from === self::normalize($to) || !self::allowed($from, $admin)
             || mb_strlen($from) > self::MAX_LENGTH || (str_starts_with($to, '/') && mb_strlen($to) > self::MAX_LENGTH)) {
             return null;
         }

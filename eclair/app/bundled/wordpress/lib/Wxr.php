@@ -216,10 +216,15 @@ final class Wxr
                     self::image($node, '', $blocks, $stats, $image);
                     break;
                 case 'figure':
-                    $img = $node->getElementsByTagName('img')->item(0);
-                    if ($img instanceof \DOMElement) {
+                    $imgs = iterator_to_array($node->getElementsByTagName('img'), false);
+                    if ($imgs) {
+                        // Une galerie (plusieurs images) donne une image par bloc ; la légende va à la dernière.
                         $cap = $node->getElementsByTagName('figcaption')->item(0);
-                        self::image($img, $cap ? trim(self::inner($cap)) : '', $blocks, $stats, $image);
+                        foreach ($imgs as $i => $img) {
+                            self::image($img, $cap && $i === count($imgs) - 1 ? trim(self::inner($cap)) : '', $blocks, $stats, $image, self::link($img));
+                        }
+                    } elseif ($node->getElementsByTagName('iframe')->length) {
+                        self::walk($node, $blocks, $stats, $image);
                     } else {
                         self::walk($node, $blocks, $stats, $image);
                     }
@@ -233,11 +238,60 @@ final class Wxr
                     }
                     break;
                 case 'table':
-                    foreach (iterator_to_array($node->getElementsByTagName('tr')) as $tr) {
-                        $cells = array_filter(array_map(static fn (\DOMNode $td): string => trim($td->textContent), iterator_to_array($tr->childNodes)), 'strlen');
-                        if ($cells) {
-                            $blocks[] = ['type' => 'paragraph', 'text' => e(implode(' · ', $cells))];
+                    // Vrai tableau (12 colonnes au plus, comme le bloc d'Éclair) ; au-delà, une ligne de texte par rangée.
+                    $rows = [];
+                    $head = false;
+                    $wide = false;
+                    foreach (iterator_to_array($node->getElementsByTagName('tr')) as $r => $tr) {
+                        $cells = [];
+                        foreach ($tr->childNodes as $td) {
+                            if ($td instanceof \DOMElement && in_array(strtolower($td->tagName), ['td', 'th'], true)) {
+                                $cells[] = trim(self::inner($td));
+                                $head = $head || ($r === 0 && strtolower($td->tagName) === 'th');
+                            }
                         }
+                        $wide = $wide || count($cells) > 12;
+                        if (array_filter($cells, 'strlen')) {
+                            $rows[] = $cells;
+                        }
+                    }
+                    if ($wide || !$rows) {
+                        foreach ($rows as $cells) {
+                            $blocks[] = ['type' => 'paragraph', 'text' => e(implode(' · ', array_map(static fn (string $c): string => trim(strip_tags($c)), array_filter($cells, 'strlen'))))];
+                        }
+                    } else {
+                        $cap = $node->getElementsByTagName('caption')->item(0);
+                        $blocks[] = ['type' => 'table', 'head' => $head, 'caption' => $cap ? trim($cap->textContent) : '', 'rows' => $rows];
+                    }
+                    break;
+                case 'details':
+                    // Questions-réponses (accordéons Elementor, bascules Divi, bloc Détails) : un bloc FAQ, les suivantes ajoutées.
+                    $summary = $node->getElementsByTagName('summary')->item(0);
+                    $q = $summary ? trim($summary->textContent) : '';
+                    $summary?->parentNode?->removeChild($summary);
+                    $a = trim(self::inner($node));
+                    if ($q !== '' && trim(strip_tags($a)) !== '') {
+                        $last = count($blocks) - 1;
+                        if ($last >= 0 && $blocks[$last]['type'] === 'faq' && count($blocks[$last]['items']) < 50) {
+                            $blocks[$last]['items'][] = ['q' => $q, 'a' => $a];
+                        } else {
+                            $blocks[] = ['type' => 'faq', 'title' => '', 'items' => [['q' => $q, 'a' => $a]]];
+                        }
+                    } else {
+                        self::walk($node, $blocks, $stats, $image);
+                    }
+                    break;
+                case 'video':
+                case 'audio':
+                    // Fichier vidéo ou son : un lien (Éclair intègre YouTube et Vimeo, pas les fichiers lourds).
+                    $src = (string) $node->getAttribute('src');
+                    foreach ($src === '' ? $node->getElementsByTagName('source') : [] as $source) {
+                        $src = $src !== '' ? $src : (string) $source->getAttribute('src');
+                    }
+                    if (preg_match('~^https?://~i', $src)) {
+                        $blocks[] = ['type' => 'paragraph', 'text' => '<a href="' . e($src) . '">' . e(basename((string) parse_url($src, PHP_URL_PATH)) ?: $src) . '</a>'];
+                    } else {
+                        $stats['dropped']++;
                     }
                     break;
                 case 'script': case 'style': case 'form': case 'noscript': case 'object': case 'embed': case 'svg':
@@ -250,14 +304,21 @@ final class Wxr
         }
     }
 
-    private static function image(\DOMElement $img, string $caption, array &$blocks, array &$stats, callable $image): void
+    /** Lien qui entoure une image (<a href><img></a>), ou ''. */
+    private static function link(\DOMElement $img): string
+    {
+        $a = $img->parentNode;
+        return $a instanceof \DOMElement && strtolower($a->tagName) === 'a' ? (string) $a->getAttribute('href') : '';
+    }
+
+    private static function image(\DOMElement $img, string $caption, array &$blocks, array &$stats, callable $image, string $link = ''): void
     {
         $src = trim((string) $img->getAttribute('src'));
         $alt = trim((string) $img->getAttribute('alt'));
         $media = $src !== '' ? $image($src, $alt) : null;
         if (is_string($media) && $media !== '') {
             $stats['images']++;
-            $blocks[] = ['type' => 'image', 'media' => $media, 'alt' => $alt, 'caption' => $caption, 'size' => 'normal'];
+            $blocks[] = ['type' => 'image', 'media' => $media, 'alt' => $alt, 'caption' => $caption, 'size' => 'normal'] + ($link !== '' ? ['link' => $link] : []);
             return;
         }
         $stats['missed']++;

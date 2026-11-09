@@ -3,7 +3,7 @@
   "id": "wordpress",
   "name": "Import WordPress",
   "version": "2.0.0",
-  "description": "Reprends un site WordPress à partir de son export (.xml) : articles, pages, catégories et images, avec leurs adresses exactes et les anciennes adresses ?p= redirigées, pour garder les liens et le référencement.",
+  "description": "Reprends un site WordPress à partir de son export (.xml) ou d’un paquet Eclair Export : contenus, images, SEO, menus et redirections, avec leurs adresses exactes, pour garder les liens et le référencement ; rapport de migration pour le client.",
   "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
   "provides": ["import", "wordpress"],
   "entry": "extension.php",
@@ -12,7 +12,8 @@
     "admin": [
       { "method": "GET", "path": "", "handler": "page", "right": "settings" },
       { "method": "POST", "path": "", "handler": "action", "right": "settings" },
-      { "method": "POST", "path": "/step", "handler": "step", "right": "settings" }
+      { "method": "POST", "path": "/step", "handler": "step", "right": "settings" },
+      { "method": "GET", "path": "/report", "handler": "report", "right": "settings" }
     ]
   },
   "nav": [{ "label": "Import WordPress", "path": "", "icon": "upload", "right": "settings" }],
