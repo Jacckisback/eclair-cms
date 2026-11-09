@@ -2,7 +2,9 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 2.1.0 — 2026-11-09
+
+**Move a whole WordPress site to Éclair without losing an address.** The WordPress import now takes the package made by the free [Eclair Export](https://github.com/Jacckisback/eclair-export) WordPress plugin: contents, images, PDF documents, SEO (Yoast, Rank Math, AIOSEO), menus, WooCommerce catalogue and redirections, with a simulation first and a migration report for your client. Tested end to end on a real WordPress of 500 posts with Elementor, Divi, WooCommerce and two languages: 635 old addresses checked, 0 errors 404. Sites on 2.0.x update in one click from Administration › Updates; the WordPress import is in Features › Add.
 
 ### Added
 
