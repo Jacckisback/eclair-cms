@@ -70,7 +70,7 @@ declare(strict_types=1);
                 'alt' => '', 'parent' => 0, 'date_gmt' => '2024-03-12T08:30:00+00:00', 'missing' => false, 'included' => true, 'sha256' => hash('sha256', $pdf)],
             ['wp_id' => 52, 'url' => $uploads . 'clip.mp4', 'variants' => [], 'file' => 'media/uploads/2024/03/clip.mp4', 'mime' => 'video/mp4', 'parent' => 0, 'included' => false, 'sha256' => ''],
         ]),
-        'seo.json' => json_encode(['global' => [], 'posts' => [
+        'seo.json' => json_encode(['global' => ['source' => 'yoast', 'verification' => ['google' => 'GoogleJeton_42-ab', 'bing' => '<meta content="x">BING9']], 'posts' => [
             '12' => ['title' => 'Le vrai pain au levain', 'description' => 'Notre recette de pain au levain.', 'keyword' => 'levain', 'canonical' => '', 'noindex' => false, 'nofollow' => false,
                 'og' => ['title' => 'Partage', 'description' => '', 'image' => ''], 'twitter' => [], 'schema' => ''],
             '22' => ['title' => '', 'description' => '', 'keyword' => '', 'canonical' => '', 'noindex' => true, 'nofollow' => false, 'og' => [], 'twitter' => [], 'schema' => ''],
@@ -193,6 +193,17 @@ declare(strict_types=1);
         $r = $v->req('GET', '/actualites/');
         check('page « Articles » de WordPress : 301 vers le blog', $r['status'] === 301 && str_ends_with($r['headers']['location'] ?? '', '/blog'));
         check('flux : 301 vers le flux d’Éclair', str_ends_with($v->req('GET', '/feed/')['headers']['location'] ?? '', '/feed.xml'));
+        $r = $v->req('GET', '/wp-content/uploads/2024/03/miche.png');
+        check('ancienne adresse d’une image : 301 vers l’image reprise', $r['status'] === 301 && (bool) preg_match('~/media/.+\.png$~', $r['headers']['location'] ?? ''), (string) ($r['headers']['location'] ?? $r['status']));
+        $r2 = $v->req('GET', '/wp-content/uploads/2024/03/miche-300x188.png');
+        check('ancienne adresse d’une miniature : 301 vers la même image (correspondance exacte, une seule redirection)', $r2['status'] === 301
+            && ($r2['headers']['location'] ?? '') === ($r['headers']['location'] ?? '-'), (string) ($r2['headers']['location'] ?? $r2['status']));
+        $r = $v->req('GET', '/wp-content/uploads/2024/03/tarifs.pdf');
+        check('ancienne adresse d’un PDF : 301 vers le PDF repris', $r['status'] === 301 && str_ends_with($r['headers']['location'] ?? '', '/media/files/2024/03/tarifs.pdf'), (string) ($r['headers']['location'] ?? $r['status']));
+        check('fichier non repris (vidéo) : pas de redirection inventée', $v->req('GET', '/wp-content/uploads/2024/03/clip.mp4')['status'] === 404);
+        $home = $v->req('GET', '/')['body'];
+        check('balises de vérification Google et Bing reprises (nettoyées)', str_contains($home, 'name="google-site-verification" content="GoogleJeton_42-ab"')
+            && str_contains($home, 'name="msvalidate.01" content="metacontentxBING9"'));
         check('/?p=12 : 301 vers l’adresse exacte', str_ends_with($v->req('GET', '/?p=12')['headers']['location'] ?? '', '/2024/03/pain-au-levain/'));
         check('brouillon importé en brouillon (non publié)', $v->req('GET', '/blog/brouillon')['status'] === 404);
         check('menu repris (sous-menu mis à plat)', str_contains($v->req('GET', '/notre-histoire/')['body'], '>Recettes<'));

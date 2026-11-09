@@ -2,6 +2,14 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Added
+
+- **WordPress import: old file addresses redirected.** Every old address of an imported file — `/wp-content/uploads/…`, the original and each thumbnail size, PDF and office documents — now answers with one 301 to the file taken over in Éclair. The import uses the exact match it already builds while importing media (no guessing by file name), so links from other sites, Google Images or old e-mails no longer end on a 404. These redirections are added last as site redirections: they never push out a content redirection; if the redirection list (5,000) would fill up, originals go before thumbnails, a margin of 250 stays free for manual redirections, and what does not fit is counted (`media_redirects_skipped`). The simulation counts them too.
+- **WordPress import: Search Console and Bing verification tags taken over** from the SEO plugin (`seo.json` › `global.verification`, Yoast, Rank Math, AIOSEO), cleaned like the Settings › SEO field. A tag already set in Éclair is never replaced. Without this, a Google Search Console property verified by meta tag was lost on the day of the switch.
+- Command line: the summary shows the redirected file addresses and the verification tags taken over.
+
 ## 2.1.0 — 2026-11-09
 
 **Move a whole WordPress site to Éclair without losing an address.** The WordPress import now takes the package made by the free [Eclair Export](https://github.com/Jacckisback/eclair-export) WordPress plugin: contents, images, PDF documents, SEO (Yoast, Rank Math, AIOSEO), menus, WooCommerce catalogue and redirections, with a simulation first and a migration report for your client. Tested end to end on a real WordPress of 500 posts with Elementor, Divi, WooCommerce and two languages: 635 old addresses checked, 0 errors 404. Sites on 2.0.x update in one click from Administration › Updates; the WordPress import is in Features › Add.

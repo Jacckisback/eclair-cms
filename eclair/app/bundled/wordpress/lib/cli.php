@@ -115,6 +115,10 @@ printf("  Contenus : %d articles, %d pages, %d produits, %d autres (%d déjà pr
 printf("  Adresses : %d gardées, %d changées (redirigées en 301), %d alias ?p=\n", $r['routes'], $r['moved'], $r['aliases']);
 printf("  Médias : %d images, %d documents, %d non repris, %d introuvables\n", $r['images'], $r['documents'], $r['media_skipped'], $r['media_missing']);
 printf("  SEO : %d pages ; redirections : %d (%d écartées) ; liens réécrits : %d ; menus : %d liens\n", $r['seo'], $r['redirects'], $r['redirects_skipped'], $r['links'], $r['menu_items']);
+printf("  Anciennes adresses des fichiers (/wp-content/uploads/…) : %d redirigées%s\n", $r['media_redirects'] ?? 0, ($r['media_redirects_skipped'] ?? 0) ? sprintf(' (%d miniatures au-delà de la limite des redirections)', $r['media_redirects_skipped']) : '');
+if (!empty($r['verification'])) {
+    echo '  Balise de vérification reprise : ' . implode(', ', array_map(static fn ($e) => $e === 'google' ? 'Google Search Console' : 'Bing Webmaster Tools', $r['verification'])) . "\n";
+}
 foreach ($r['not_migrated'] as [$what, $name, $why]) {
     echo "  ! $name — $why\n";
 }
