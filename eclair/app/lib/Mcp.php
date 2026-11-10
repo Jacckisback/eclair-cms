@@ -170,7 +170,7 @@ final class Mcp
         // Sans generate_image : les images coûtent sur la clé du site, ce connecteur ne dépense jamais rien.
         foreach (array_merge([['name' => 'get_site', 'schema' => ['type' => 'object', 'properties' => new \stdClass()],
             'description' => 'Start here: the site\'s content and categories with their ids, its editorial profile and the writing rules (SEO, GEO, Markdown) to follow.']], AiTools::definitions()) as $d) {
-            $read = in_array($d['name'], ['get_site', 'search_content', 'get_content', 'find_media'], true);
+            $read = in_array($d['name'], ['get_site', 'search_content', 'get_content', 'find_media', 'get_migration'], true);
             if ($d['name'] !== 'generate_image') {
                 $out[] = ['name' => $d['name'], 'description' => $d['description'], 'inputSchema' => $d['schema'],
                     'annotations' => ['readOnlyHint' => $read, 'destructiveHint' => false, 'idempotentHint' => $read, 'openWorldHint' => false]];

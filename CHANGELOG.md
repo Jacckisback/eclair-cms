@@ -2,6 +2,22 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Added
+
+- **WordPress migration in one transfer.** The Import WordPress screen creates a link key; pasted in the Eclair Export plugin (1.1.0), it lets WordPress send its package straight to the site (`/_eclair/import`), in pieces, whatever its size: no download, no upload limit, no FTP. A transfer that was cut resumes where it stopped. The address only exists while a key is active (two hours, one transfer); only the fingerprint of the key is kept. The key gives one right: dropping ZIP archives named `eclair-export-*.zip` into the private folder of the package. It reads nothing and imports nothing: the import is still started by a signed-in person, after the manifest and every SHA-256 are checked. Wrong keys are rate-limited (10 in ten minutes per address), each archive is checked against its SHA-256 before it is accepted, and the transfer is recorded in the security log.
+- **Site SEO settings taken over from WordPress** (package import, option "home page and site name"): Google Search Console and Bing verification codes, organisation name, X account, social profiles (LinkedIn, Facebook, Instagram, YouTube, TikTok, GitHub, X), logo, site icon and default sharing image, from Yoast or Rank Math. Never in place of a value already set in Éclair. The site stays verified in Search Console after the move.
+- **Original modification dates kept.** An imported content keeps its WordPress "last modified" date (`dateModified`, `article:modified_time`, `lastmod` of the sitemap) instead of the day of the migration: search engines do not see the whole site as rewritten that day.
+- A content without featured image takes the sharing image chosen in the SEO plugin (Open Graph), so that previews on social networks stay the same.
+- **`get_migration` tool for the assistant and the MCP connector (Claude, ChatGPT)**, offered once a WordPress package has been imported: what was imported, the old addresses that no longer answer, the contents imported as drafts and what is left to finish by hand, with the reason for each. "Finish my WordPress migration" then works content by content, as proposals to accept. Read only.
+
+### For maintainers
+
+- Archive budget raised from 910,000 to 920,000 bytes (measured 904,009 → 910,660, +6.7 KB compressed): direct reception, site SEO settings, `get_migration` and their texts in 6 languages. Loaded only by the import screen and by `/_eclair/import` while a key is active; public pages unchanged (same 26 files).
+- `Content::save` accepts `modified` (a date, from imports only) for the last modification date; never later than now, never earlier than the publication date.
+- `tests/wordpress-package.php`: second part sent through `/_eclair/import` (address absent without a key, wrong key, names outside the package, content that is not an archive, resend of a piece, wrong fingerprint, key used once), site SEO settings, modification dates, `get_migration`.
+
 ## 2.2.0 — 2026-11-09
 
 Result of a full review of the code (speed, SEO and GEO, WordPress migration, robustness), then of the work needed to host large sites. Nothing changes in what a page shows: the public rendering stays byte-identical to the reference (same test, now run a second time through the light index).

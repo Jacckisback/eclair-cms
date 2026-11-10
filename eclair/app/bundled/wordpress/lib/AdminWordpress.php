@@ -17,7 +17,8 @@ final class AdminWordpress
     public static function page(array $user): never
     {
         Admin::extensionPage('wordpress', __DIR__ . '/page.php', ['job' => Importer::job(), 'limit' => self::limit(), 'pjob' => PackageImporter::job(),
-            'parts' => array_map('filesize', Package::parts()), 'branding' => Report::branding(), 'speed' => Report::speed()], t('Import WordPress'));
+            'parts' => array_map('filesize', Package::parts()), 'branding' => Report::branding(), 'speed' => Report::speed(),
+            'link' => Receiver::link(), 'key' => Receiver::matches((string) ($_SESSION['wp_link'] ?? '')) ? (string) $_SESSION['wp_link'] : ''], t('Import WordPress'));
     }
 
     public static function action(array $user): never
@@ -27,6 +28,16 @@ final class AdminWordpress
             Report::saveBranding(['name' => Req::input('name'), 'company' => Req::input('company'), 'email' => Req::input('email'),
                 'phone' => Req::input('phone'), 'website' => Req::input('website'), 'note' => Req::input('note')]);
             Admin::back('x/wordpress', t('Enregistré.'));
+        }
+        if ($action === 'link') {
+            // Montrée tant que la session dure : seule son empreinte est gardée sur le serveur.
+            $_SESSION['wp_link'] = Receiver::issue($user);
+            Admin::back('x/wordpress', t('Clé de liaison créée : colle-la dans WordPress (Outils › Exporter vers Éclair).'));
+        }
+        if ($action === 'unlink') {
+            Receiver::revoke();
+            unset($_SESSION['wp_link']);
+            Admin::back('x/wordpress', t('Clé de liaison supprimée.'));
         }
         if ($action === 'speed') {
             session_write_close();

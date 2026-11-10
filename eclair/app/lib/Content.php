@@ -898,7 +898,9 @@ final class Content
             'author' => Users::find($author) ? $author : (string) ($old['author'] ?? $user['id']),
             'created' => (int) ($old['created'] ?? $now),
             'date' => $date,
-            'updated' => $now,
+            // Reprise d'un ancien site : la date de dernière modification d'origine est gardée (clé « modified », que seuls
+            // les imports envoient), sinon tout le site paraîtrait modifié le jour de la migration (sitemap, dateModified).
+            'updated' => ($m = is_string($data['modified'] ?? null) ? (int) strtotime($data['modified']) : 0) >= $date && $m > 0 && $m <= $now ? $m : $now,
             'seo' => [
                 'title' => Sanitize::text($seo['title'] ?? '', 120),
                 'description' => Sanitize::text($seo['description'] ?? '', 320),

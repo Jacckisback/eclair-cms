@@ -66,6 +66,10 @@ final class App
         if (preg_match('~^/_eclair/tasks/([a-f0-9]{32})$~', $path, $m)) {
             Extensions::tick($m[1]);
         }
+        // Paquet envoyé par l'extension WordPress « Eclair Export » : l'adresse n'existe que pendant qu'une clé de liaison est active.
+        if ($path === '/_eclair/import') {
+            Extensions::invoke('wordpress', 'receive');
+        }
         // Connecteur MCP (Claude, ChatGPT) et sa découverte OAuth : rien ne répond tant qu'il est désactivé.
         if (str_starts_with($path, '/_eclair/') || str_starts_with($path, '/.well-known/')) {
             Mcp::handle($path);
