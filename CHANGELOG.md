@@ -2,7 +2,9 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 2.3.0 — 2026-11-10
+
+**A WordPress site moves to Éclair in one transfer.** Create a link key in Import WordPress, paste it in the Eclair Export plugin (1.1.0) and click "Start the migration": the package is sent straight to the site, whatever its size, with no download, no upload limit and no FTP. The site keeps its Search Console verification, its logo, its social profiles and the original modification dates of its contents. Sites on 2.x update in one click from Administration › Updates.
 
 ### Added
 
