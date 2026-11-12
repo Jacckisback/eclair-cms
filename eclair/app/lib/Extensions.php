@@ -221,6 +221,9 @@ final class Extensions
             }
         }
         foreach ($m['routes']['public'] as $r) {
+            if (!in_array($r['method'], ['GET', 'POST'], true) || ($r['method'] === 'POST' && $r['cache'])) {
+                $errors[] = 'Public POST routes must be non-cacheable.';
+            }
             if (!preg_match('~^/[a-z0-9][a-z0-9/-]{0,99}$~', $r['path']) || preg_match('~(^|/)(app|data|cache|site|media|assets|_eclair|\.well-known)(/|$)~', $r['path'])
                 || !preg_match('~^[a-zA-Z][a-zA-Z0-9]{0,40}$~', $r['handler'])) {
                 $errors[] = t('Route publique refusée : {p}.', ['p' => $r['path']]);
@@ -599,12 +602,64 @@ final class Extensions
         return self::call($id, $method, $args);
     }
 
-    /** Route publique d'une capacité active : page rendue dans le thème, en-têtes SEO et de sécurité du noyau. */
+    /**
+     * Routes publiques : GET/HEAD restent inchangés ; POST est opt-in et jamais mis en cache.
+     * Seuls les paquets validés / activés peuvent déclarer un handler POST.
+     * Les comptes publics n'obtiennent ici aucun droit d'administration.
+     */
     public static function route(string $path): void
     {
         foreach (self::active() as $id => $m) {
             foreach ($m['routes']['public'] as $r) {
-                if ($r['path'] === $path && in_array(Req::method(), ['GET', 'HEAD'], true)) {
+                if ($r['path'] !== $path) {
+                    continue;
+                }
+                $method = Req::method();
+                if ($r['method'] === 'POST' && $method === 'POST') {
+                    // Pas de confiance implicite dans un X-Forwarded-Proto transmis par le navigateur.
+                    $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+                    $directTls = in_array($https, ['on', '1', 'true'], true)
+                        || (string) ($_SERVER['SERVER_PORT'] ?? '') === '443';
+                    $trustedProxy = defined('ECLAIR_MEMBER_TRUSTED_PROXY_IP') ? ECLAIR_MEMBER_TRUSTED_PROXY_IP : '';
+                    $remoteIp = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+                    $proxyTls = is_string($trustedProxy) && filter_var($trustedProxy, FILTER_VALIDATE_IP) !== false
+                        && filter_var($remoteIp, FILTER_VALIDATE_IP) !== false
+                        && inet_pton($trustedProxy) === inet_pton($remoteIp)
+                        && strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+                    $headers = array_merge([
+                        'Content-Type: text/plain; charset=utf-8',
+                        'Cache-Control: private, no-store',
+                        'X-Robots-Tag: noindex, nofollow',
+                    ], Security::headers('text'));
+                    if (!$directTls && !$proxyTls) {
+                        Http::send('HTTPS required', 403, $headers);
+                    }
+                    // Bornage préalable, avant validation du jeton et exécution du handler.
+                    $length = (string) ($_SERVER['CONTENT_LENGTH'] ?? '');
+                    if ($length !== '' && (!ctype_digit($length) || (float) $length > 65536)) {
+                        Http::send('Request too large', 413, $headers);
+                    }
+                    if (!Security::checkFormToken()) {
+                        Http::send('Form proof expired', 419, $headers);
+                    }
+                    $response = self::call($id, $r['handler'], [self::context($id)]);
+                    if (is_array($response) && isset($response['redirect'])) {
+                        $to = (string) $response['redirect'];
+                        if (!preg_match('~^/[a-z0-9][a-z0-9/-]{0,99}$~D', $to)) {
+                            Http::send('Invalid redirect', 500, $headers);
+                        }
+                        Http::redirect(path_to($to), 303);
+                    }
+                    if (!is_array($response)) {
+                        Http::send('Request failed', 500, $headers);
+                    }
+                    $status = (int) ($response['status'] ?? 500);
+                    if (!in_array($status, [200, 400, 401, 403, 409, 422, 429, 500, 503], true)) {
+                        $status = 500;
+                    }
+                    Http::send(mb_substr((string) ($response['body'] ?? 'Request failed'), 0, 4096), $status, $headers);
+                }
+                if ($r['method'] === 'GET' && in_array($method, ['GET', 'HEAD'], true)) {
                     $page = self::call($id, $r['handler'], [self::context($id)]);
                     if (is_array($page) && is_string($page['content'] ?? null)) {
                         Site::extension($path, $page, $r['cache']);
