@@ -184,7 +184,9 @@ final class Installer
             'admin_path' => Req::input('admin_path'),
             'seo' => ['index' => Req::bool('index'), 'email' => ''],
             'geo' => ['ai' => in_array(Req::input('ai'), ['open', 'search', 'closed'], true) ? Req::input('ai') : 'open'],
-            'security' => ['https' => $https, 'hsts' => false],
+            // HSTS (les navigateurs gardent l'obligation de HTTPS un an) : activé d'emblée seulement pour un site installé en HTTPS.
+            // Les sites déjà installés gardent leur réglage ; Réglages › Avancé permet de le couper.
+            'security' => ['https' => $https, 'hsts' => $https],
             'indexnow' => Req::bool('index') && $https,
             'usage' => $type,
             'installed' => time(),

@@ -1,0 +1,10 @@
+# Garde à jour les actions GitHub figées par commit (workflows de .github/workflows) : une pull request par mise à jour,
+# jamais fusionnée sans relecture. Le code d'Éclair n'a aucune dépendance (ni Composer, ni npm).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
