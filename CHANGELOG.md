@@ -2,7 +2,10 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 2.3.1 — 2026-11-13
+
+**Security hardening after a first audit of 2.3.0 (no critical or high-severity finding).** A save with no valid data no longer creates an empty draft, new sites installed over HTTPS get HSTS from the start, and the project now has a vulnerability-reporting policy (`SECURITY.md`). Nothing changes in what your pages show. Sites on 2.x update in one click from Administration › Updates, after a backup.
+
 
 ### Added
 
