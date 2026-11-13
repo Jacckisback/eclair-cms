@@ -1,0 +1,47 @@
+/* Squelette de thème Éclair du skill thierry-skill (voir references/12-theme-eclair.md).
+   Chaque valeur « à régler » vient de la fiche DA. Ne jamais livrer tel quel.
+   Interdit dans ce fichier : @import, ressources externes, et le caractère « inférieur à » (retiré par Éclair). */
+
+:root {
+  /* ---------- Couleur (à régler) : rôles de la fiche DA branchés sur les variables du contrat ---------- */
+  --bg: oklch(0.98 0.004 250);        /* --fond */
+  --bg-soft: oklch(0.955 0.005 250);  /* --surface */
+  --card: oklch(0.995 0.002 250);     /* --surface-2 */
+  --text: oklch(0.21 0.01 250);       /* --encre */
+  --muted: oklch(0.42 0.01 250);      /* --encre-2, au moins 4,5:1 sur --bg */
+  --line: color-mix(in oklch, var(--text) 14%, var(--bg)); /* --filet */
+  --accent: oklch(0.5 0.01 250);      /* une seule couleur d'accent, venue du sujet */
+  --on-accent: oklch(0.985 0.003 250);/* au moins 4,5:1 sur --accent */
+
+  /* ---------- Polices (à régler) : piles complètes avec repli ---------- */
+  --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-head: Georgia, "Times New Roman", serif;
+
+  /* ---------- Forme et mesure (à régler) ---------- */
+  --radius: 10px;
+  --shadow: 0 1px 2px color-mix(in oklch, var(--text) 8%, transparent);
+  --text-w: 68ch;
+  --wide-w: 72rem;
+}
+
+/* Mode sombre propre au thème : retiré par Éclair quand le site est réglé sur « Toujours clair ». */
+/*dark*/@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: oklch(0.18 0.01 250);
+    --bg-soft: oklch(0.22 0.01 250);
+    --card: oklch(0.24 0.01 250);
+    --text: oklch(0.93 0.005 250);
+    --muted: oklch(0.75 0.008 250);
+    --line: color-mix(in oklch, var(--text) 16%, var(--bg));
+  }
+}/*/dark*/
+
+/* ---------- Signature (à écrire) : le seul geste fort de la fiche DA, sur les classes du contrat ---------- */
+.site-header { border-bottom: 1px solid var(--line); }
+.entry-header h1 { letter-spacing: -0.02em; }
+
+/* ---------- Mouvement : seulement si l'idée le demande, toujours sous cette condition ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .btn { transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1); }
+  .btn:active { transform: translateY(1px); }
+}

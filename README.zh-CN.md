@@ -196,6 +196,16 @@ WordPress 无所不能，但它需要数据库，需要插件来做 SEO、安全
 
 这套方法和防护规则改编自 Paul Bakaus 的 [Impeccable](https://github.com/pbakaus/impeccable)（Apache 2.0 许可证）。使用说明请见[指南中的艺术风格章节](docs/GUIDE.zh-CN.md#艺术风格)。
 
+### 借助 Claude 更进一步：Thierry Skill
+
+想要真正量身定制的网站？Éclair 自带 **Thierry Skill**，一位为 Claude Code 准备的艺术总监。它先找出属于你业务的核心创意，由此推导出完整的体系（字体、色彩、构图、动效），优先尝试 Éclair 自带的设置，再构建符合约定的**网站主题**：经 `tools/validate.php` 校验，可直接在“主题”中导入。它会在三种宽度下查看效果并打分，确认无误后才交付。未经你同意，不会激活任何内容。
+
+```bash
+npx skills@latest add Jacckisback/eclair-cms
+```
+
+方法与规则：[`skills/thierry-skill`](skills/thierry-skill/SKILL.md)（法语）；在 Éclair 上交付：[参考 12](skills/thierry-skill/references/12-theme-eclair.md)。
+
 ## 主题与商店
 
 <p align="center">

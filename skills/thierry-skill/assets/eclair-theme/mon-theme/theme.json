@@ -1,0 +1,14 @@
+{
+  "schema": "eclair-theme/1",
+  "id": "mon-theme",
+  "name": "Mon thème (à renommer)",
+  "version": "1.0.0",
+  "contract": 1,
+  "parent": "eclair",
+  "requires": { "eclair": ">=2.0.0", "php": ">=8.1" },
+  "description": "Squelette du skill thierry-skill : renomme le dossier et l'id, puis remplace chaque valeur « à régler » par celles de la fiche DA.",
+  "templates": [],
+  "styles": ["styles/site.css"],
+  "overrides": {},
+  "assets": []
+}

@@ -1,0 +1,172 @@
+/*
+ * thierry-skill — socle de variables.
+ * Point de départ à ADAPTER pour chaque site : chaque valeur marquée « à régler »
+ * découle de la fiche DA (curseurs de personnalité). Ne jamais livrer tel quel.
+ * Les valeurs par défaut sont volontairement neutres : elles ne proposent aucune
+ * direction. Polices et couleurs se choisissent d'après le sujet.
+ */
+
+:root {
+  /* ---------- Polices (à régler) ---------- */
+  --police-titre: "POLICE DE TITRE À CHOISIR", Georgia, serif;
+  --police-texte: "POLICE DE TEXTE À CHOISIR", system-ui, sans-serif;
+  --police-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ---------- Échelle typographique fluide, de 375 à 1440 px (à régler) ---------- */
+  --t-legende: clamp(0.75rem, 0.73rem + 0.09vw, 0.8125rem);    /* 12 → 13 */
+  --t-petit:   clamp(0.875rem, 0.85rem + 0.09vw, 0.9375rem);   /* 14 → 15 */
+  --t-texte:   clamp(1rem, 0.965rem + 0.15vw, 1.125rem);       /* 16 → 18 */
+  --t-chapo:   clamp(1.1875rem, 1.1rem + 0.38vw, 1.4375rem);   /* 19 → 23 */
+  --t-h3:      clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem);     /* 22 → 30 */
+  --t-h2:      clamp(1.875rem, 1.43rem + 1.88vw, 3.125rem);    /* 30 → 50 */
+  --t-h1:      clamp(2.5rem, 1.44rem + 4.5vw, 5.5rem);         /* 40 → 88 */
+  --t-geant:   clamp(3.25rem, 0.87rem + 10.1vw, 10rem);        /* 52 → 160 */
+
+  /* ---------- Couleur, par rôle (à régler) ---------- */
+  /* Remplacer la teinte (dernier nombre) et la chroma par celles du sujet. */
+  --fond:        oklch(0.98 0.004 250);
+  --surface:     oklch(0.955 0.005 250);
+  --surface-2:   oklch(0.995 0.002 250);
+  --encre:       oklch(0.21 0.01 250);
+  --encre-2:     oklch(0.42 0.01 250);   /* texte secondaire, ≥ 4,5:1 sur --fond */
+  --encre-3:     oklch(0.55 0.01 250);   /* texte discret, à vérifier : limite du 4,5:1 */
+  --accent:      oklch(0.5 0.01 250);    /* neutre exprès : l'accent vient du sujet */
+  --sur-accent:  oklch(0.985 0.003 250);
+
+  /* dérivées : ne pas modifier, elles suivent les valeurs ci-dessus */
+  --filet:        color-mix(in oklch, var(--encre) 14%, var(--fond));
+  --filet-fort:   color-mix(in oklch, var(--encre) 32%, var(--fond));
+  --accent-doux:  color-mix(in oklch, var(--accent) 13%, var(--fond));
+  --accent-survol: oklch(from var(--accent) calc(l - 0.04) c h);
+  --accent-appui:  oklch(from var(--accent) calc(l - 0.08) c h);
+
+  --succes: oklch(0.55 0.13 150);
+  --alerte: oklch(0.72 0.14 78);
+  --erreur: oklch(0.55 0.19 27);   /* à déplacer si l'accent est rouge */
+
+  /* ---------- Espace ---------- */
+  --e-1: 0.25rem;  --e-2: 0.5rem;  --e-3: 0.75rem; --e-4: 1rem;
+  --e-5: 1.5rem;   --e-6: 2rem;    --e-7: 3rem;    --e-8: 4rem;
+  --e-9: 6rem;     --e-10: 8rem;   --e-11: 12rem;
+  --section:   clamp(4rem, 2.6rem + 6vw, 9rem);        /* à régler : densité */
+  --gouttiere: clamp(1rem, 0.65rem + 1.5vw, 2rem);
+  --marge:     clamp(1.375rem, 0.2rem + 4.5vw, 5rem);
+  --conteneur: 85rem;
+  --mesure:    65ch;
+
+  /* ---------- Forme (à régler : une seule logique) ---------- */
+  --r-1: 4px;
+  --r-2: 10px;
+  --r-3: 20px;
+  --r-pilule: 999px;
+  --ombre-1: 0 1px 2px oklch(from var(--encre) l c h / 0.06), 0 2px 6px oklch(from var(--encre) l c h / 0.05);
+  --ombre-2: 0 1px 2px oklch(from var(--encre) l c h / 0.05), 0 6px 16px oklch(from var(--encre) l c h / 0.07),
+             0 18px 40px oklch(from var(--encre) l c h / 0.06);
+
+  /* ---------- Mouvement (à régler : tempérament) ---------- */
+  --d-1: 120ms;
+  --d-2: 220ms;
+  --d-3: 360ms;
+  --d-4: 600ms;
+  --c-sortie: cubic-bezier(0.22, 1, 0.36, 1);
+  --c-douce:  cubic-bezier(0.33, 1, 0.68, 1);
+  --c-longue: cubic-bezier(0.16, 1, 0.3, 1);
+  --c-trajet: cubic-bezier(0.76, 0, 0.24, 1);
+  --c-depart: cubic-bezier(0.5, 0, 0.75, 0);
+
+  color-scheme: light;
+}
+
+/* ---------- Thème sombre : seulement si le site en a besoin ---------- */
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    --fond:       oklch(0.17 0.006 250);
+    --surface:    oklch(0.21 0.006 250);
+    --surface-2:  oklch(0.25 0.006 250);
+    --encre:      oklch(0.93 0.004 250);
+    --encre-2:    oklch(0.74 0.006 250);
+    --encre-3:    oklch(0.62 0.006 250);
+    --accent:     oklch(0.72 0.01 250);
+    --sur-accent: oklch(0.17 0.006 250);
+    color-scheme: dark;
+  }
+}
+
+/* ---------- Socle ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  font-synthesis: none;
+  scrollbar-color: var(--filet-fort) transparent;
+  -webkit-tap-highlight-color: transparent;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--police-texte);
+  font-size: var(--t-texte);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  accent-color: var(--accent);
+  caret-color: var(--accent);
+}
+
+img, picture, video, canvas, svg { display: block; max-width: 100%; height: auto; }
+input, button, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; touch-action: manipulation; }
+
+h1, h2, h3 {
+  margin: 0;
+  font-family: var(--police-titre);
+  font-weight: 500;                 /* à régler */
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+h1 { font-size: var(--t-h1); line-height: 0.98; letter-spacing: -0.03em; }
+h2 { font-size: var(--t-h2); line-height: 1.08; letter-spacing: -0.02em; }
+h3 { font-size: var(--t-h3); line-height: 1.22; letter-spacing: -0.01em; }
+
+p, li, blockquote { text-wrap: pretty; overflow-wrap: break-word; }
+p { margin: 0; max-width: var(--mesure); }
+
+a { color: inherit; text-decoration-thickness: 0.06em; text-underline-offset: 0.18em; }
+
+::selection { background: var(--accent); color: var(--sur-accent); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+
+.grille {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gouttiere);
+  width: min(100% - 2 * var(--marge), var(--conteneur));
+  margin-inline: auto;
+}
+
+.etiquette {
+  font-size: var(--t-legende);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chiffres { font-variant-numeric: tabular-nums lining-nums; }
+
+/* ---------- Mouvement réduit : filet de sécurité ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

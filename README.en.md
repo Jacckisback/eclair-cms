@@ -196,6 +196,16 @@ A theme changes colors; an **art direction** changes the entire visual world: pa
 
 The method and its safeguards are adapted from [Impeccable](https://github.com/pbakaus/impeccable), by Paul Bakaus (Apache 2.0 license). How to use it: [guide, Art directions section](docs/GUIDE.en.md#art-directions).
 
+### Go further with Claude: Thierry Skill
+
+For a truly bespoke site, Éclair ships with **Thierry Skill**, an art director for Claude Code. It finds the idea specific to your business, derives a complete system from it (typography, colour, layout, motion), tries Éclair's own settings first, then builds a **site theme** that follows the contract, is checked by `tools/validate.php` and is ready to import in Themes. It looks at the result at three widths and scores it before calling it done. Nothing is activated without you.
+
+```bash
+npx skills@latest add Jacckisback/eclair-cms
+```
+
+Method and rules: [`skills/thierry-skill`](skills/thierry-skill/SKILL.md) (written in French); delivering on Éclair: [reference 12](skills/thierry-skill/references/12-theme-eclair.md).
+
 ## Themes and shop
 
 <p align="center">

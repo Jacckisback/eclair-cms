@@ -2,6 +2,16 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Added
+
+- **Thierry Skill ships with Éclair** (`skills/thierry-skill/`, formerly the separate `thierry-skills` repository): an art director for Claude Code that finds the idea specific to a business, derives a complete visual system from it, then reviews the rendering at three widths and scores it. Install: `npx skills@latest add Jacckisback/eclair-cms`. New mode **Deliver on Éclair** and reference `references/12-theme-eclair.md`: Éclair's own appearance settings first, then a site theme that follows contract 1 (variables of the contract, the theme's own dark mode between `/*dark*/` markers, Éclair's self-hosted fonts, no external resource), validated by `tools/validate.php`, packaged as a .zip and activated by a person. Starter theme `assets/eclair-theme/mon-theme`. The skill keeps its MIT licence (`skills/thierry-skill/LICENSE`); nothing in the CMS archive changes.
+
+### For maintainers
+
+- New test `tests/skills.php`: every shipped skill has a `SKILL.md` header readable by skill tools and every file it cites exists; the starter theme passes the theme validator, installs, activates, renders the contract variables and its dark mode, and that dark mode is removed when the site is set to "Always light".
+
 ## 2.3.0 — 2026-11-10
 
 **A WordPress site moves to Éclair in one transfer.** Create a link key in Import WordPress, paste it in the Eclair Export plugin (1.1.0) and click "Start the migration": the package is sent straight to the site, whatever its size, with no download, no upload limit and no FTP. The site keeps its Search Console verification, its logo, its social profiles and the original modification dates of its contents. Sites on 2.x update in one click from Administration › Updates.

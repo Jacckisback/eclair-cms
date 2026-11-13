@@ -196,6 +196,16 @@ Um tema muda as cores; uma **direção de arte** muda o universo inteiro: paleta
 
 O método e as salvaguardas foram adaptados do [Impeccable](https://github.com/pbakaus/impeccable), de Paul Bakaus (licença Apache 2.0). Como usar: [guia, seção Direções de arte](docs/GUIDE.pt-BR.md#direções-de-arte).
 
+### Ir mais longe com o Claude: Thierry Skill
+
+Para um site realmente sob medida, o Éclair inclui o **Thierry Skill**, um diretor de arte para o Claude Code. Ele encontra a ideia própria do seu negócio, deduz dela um sistema completo (tipografia, cor, composição, movimento), testa primeiro as configurações do Éclair e depois constrói um **tema do site** conforme o contrato, verificado pelo `tools/validate.php` e pronto para importar em Temas. Ele olha o resultado em três larguras e dá uma nota antes de dizer que terminou. Nada é ativado sem você.
+
+```bash
+npx skills@latest add Jacckisback/eclair-cms
+```
+
+Método e regras: [`skills/thierry-skill`](skills/thierry-skill/SKILL.md) (em francês); entrega no Éclair: [referência 12](skills/thierry-skill/references/12-theme-eclair.md).
+
 ## Temas e loja
 
 <p align="center">
