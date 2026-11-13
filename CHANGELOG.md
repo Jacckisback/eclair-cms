@@ -8,8 +8,19 @@ All notable changes to Éclair CMS are recorded here. Release notes for each ver
 
 - **Thierry Skill ships with Éclair** (`skills/thierry-skill/`, formerly the separate `thierry-skills` repository): an art director for Claude Code that finds the idea specific to a business, derives a complete visual system from it, then reviews the rendering at three widths and scores it. Install: `npx skills@latest add Jacckisback/eclair-cms`. New mode **Deliver on Éclair** and reference `references/12-theme-eclair.md`: Éclair's own appearance settings first, then a site theme that follows contract 1 (variables of the contract, the theme's own dark mode between `/*dark*/` markers, Éclair's self-hosted fonts, no external resource), validated by `tools/validate.php`, packaged as a .zip and activated by a person. Starter theme `assets/eclair-theme/mon-theme`. The skill keeps its MIT licence (`skills/thierry-skill/LICENSE`); nothing in the CMS archive changes.
 
+### Security
+
+First light security audit (November 2026: code review of the risky areas, then hostile requests against a fresh install; no critical or high-severity finding). Fixes:
+
+- **A save without valid data no longer creates an empty draft.** `api/save` answered 200 and created an empty "Untitled" draft when the request body was invalid JSON, empty, an empty object or a JSON list (a truncated upload, a buggy client). It now answers 400 and creates nothing. The request still needed a signed-in account, a valid CSRF token and the Content right: no privilege was gained, but drafts could pile up.
+- **HSTS is on from the start for a site installed over HTTPS** (it was always off by default). Browsers then never fall back to `http://` for the site, one year. **Existing sites keep their setting** (browsers remember HSTS for a year, so it is never switched on by an update); it can be changed in Settings › Advanced.
+- **`SECURITY.md`**: how to report a vulnerability privately, supported versions, scope and response targets (7 days to acknowledge, 30 days for a fix plan).
+- **CI**: `actions/checkout` and `shivammathur/setup-php` are pinned to the exact commit they resolved to (v4.4.0, v2.40.0) instead of a movable tag, and Dependabot proposes updates to pinned actions weekly (`.github/dependabot.yml`).
+
 ### For maintainers
 
+- New test `tests/hardening.php`: four kinds of invalid save bodies answer 400 and create no content, a normal save still works; HSTS is off for an HTTP install and on (setting and `Strict-Transport-Security` header) for an install behind HTTPS. It fails on 2.3.0 (4 empty drafts created, HSTS off).
+- One new interface text ("Invalid data: nothing to save."), translated in the six languages.
 - New test `tests/skills.php`: every shipped skill has a `SKILL.md` header readable by skill tools and every file it cites exists; the starter theme passes the theme validator, installs, activates, renders the contract variables and its dark mode, and that dark mode is removed when the site is set to "Always light".
 
 ## 2.3.0 — 2026-11-10

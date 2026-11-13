@@ -2175,4 +2175,5 @@ return [
     'Google PageSpeed est saturé pour le moment : réessaie dans quelques minutes.' => 'Google PageSpeed è sovraccarico in questo momento: riprova tra qualche minuto.',
     'Mesure impossible : Google PageSpeed n’a pas pu charger cette adresse (site hors ligne ou bloqué ?).' => 'Misurazione impossibile: Google PageSpeed non è riuscito a caricare questo indirizzo (sito offline o bloccato?).',
     'Fichier d’export incomplet ou abîmé : exporte-le de nouveau depuis WordPress.' => 'File di esportazione incompleto o danneggiato: esportalo di nuovo da WordPress.',
+    'Données invalides : rien à enregistrer.' => 'Dati non validi: niente da salvare.',
 ];

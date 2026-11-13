@@ -135,6 +135,10 @@ final class AdminContent
     public static function save(array $user): never
     {
         $data = Req::json();
+        // Corps absent, tronqué ou qui n'est pas un objet JSON : refusé, au lieu de créer un brouillon vide « Sans titre ».
+        if ($data === [] || array_is_list($data)) {
+            Http::json(['ok' => false, 'error' => t('Données invalides : rien à enregistrer.')], 400);
+        }
         $id = (string) ($data['id'] ?? '');
         if ($id !== '' && !Content::get($id)) {
             Http::json(['ok' => false, 'error' => t('Ce contenu n’existe plus.')], 404);
