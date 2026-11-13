@@ -755,6 +755,7 @@ require __DIR__ . '/usage.php';
 require __DIR__ . '/update.php';
 require __DIR__ . '/transition.php';
 require __DIR__ . '/themes.php';
+require __DIR__ . '/skills.php';
 require __DIR__ . '/extensions.php';
 require __DIR__ . '/routing.php';
 require __DIR__ . '/wordpress.php';

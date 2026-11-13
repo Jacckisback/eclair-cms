@@ -2,6 +2,8 @@
 
 Ce guide fixe les règles pour les skills (Claude ou autres agents) qui personnaliseront des sites Éclair. Il s’appuie sur les contrats livrés avec la 2.0 : [contrat de thème](THEME-CONTRACT.md), [contrat des fonctions](EXTENSION-CONTRACT.md), [schémas](schemas/), validateur `tools/validate.php`, exemples dans [`examples/`](../examples/).
 
+**Skill livré avec Éclair** : [`skills/thierry-skill`](../skills/thierry-skill/SKILL.md), directeur artistique pour Claude Code (`npx skills@latest add Jacckisback/eclair-cms`). Il suit ce guide : réglages d’Éclair d’abord, puis paquet de thème validé (sa [référence 12](../skills/thierry-skill/references/12-theme-eclair.md) et son squelette `assets/eclair-theme/mon-theme`, testé par `tests/skills.php`).
+
 ## 1. Règle d’or
 
 Un skill **ne modifie jamais** `app/`, `assets/`, `index.php`, l’authentification ou l’updater. Tout ce qu’il produit appartient au site : réglages et contenus (`data/`, via l’administration ou le connecteur MCP), thème (`site/themes/`), fonction (`site/extensions/`). Ces emplacements survivent à toutes les mises à jour et font partie des sauvegardes.

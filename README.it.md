@@ -196,6 +196,16 @@ Un tema cambia i colori; una **direzione artistica** cambia l’intero universo:
 
 Il metodo e le salvaguardie sono adattati da [Impeccable](https://github.com/pbakaus/impeccable), di Paul Bakaus (licenza Apache 2.0). Istruzioni: [guida, sezione Direzioni artistiche](docs/GUIDE.it.md#direzioni-artistiche).
 
+### Andare oltre con Claude: Thierry Skill
+
+Per un sito davvero su misura, Éclair include **Thierry Skill**, un direttore artistico per Claude Code. Trova l'idea propria della tua attività, ne ricava un sistema completo (tipografia, colore, composizione, movimento), prova prima le impostazioni di Éclair, poi costruisce un **tema del sito** conforme al contratto, verificato da `tools/validate.php` e pronto da importare in Temi. Guarda il risultato a tre larghezze e lo valuta prima di dichiararlo finito. Niente si attiva senza di te.
+
+```bash
+npx skills@latest add Jacckisback/eclair-cms
+```
+
+Metodo e regole: [`skills/thierry-skill`](skills/thierry-skill/SKILL.md) (in francese); consegna su Éclair: [riferimento 12](skills/thierry-skill/references/12-theme-eclair.md).
+
 ## Temi e negozio
 
 <p align="center">
