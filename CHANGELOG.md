@@ -2,7 +2,7 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## 2.4.0 — unreleased
+## 2.4.0 — 2026-11-14
 
 **Modern navigation for every Éclair site, following [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) (Chrome, Edge, Firefox and MDN teams).** Pages now change with a short cross-fade while the header stays in place, the next page loads before the click, and web fonts no longer shift the text while they load. This is the first intentional change to the public HTML since 1.6.0: the byte-for-byte reference moves to `tests/fixtures/public-2.4.0.json`.
 
