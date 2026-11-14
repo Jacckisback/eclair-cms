@@ -311,6 +311,35 @@ final class Theme
         return $d ? Design::preload($d) : '';
     }
 
+    /**
+     * Règles de chargement anticipé (Speculation Rules) : la page suivante est préchargée quand le visiteur survole un lien
+     * du site, et préparée quand il commence à cliquer ; la navigation paraît instantanée. Liens du site seulement, jamais
+     * l'administration, les adresses techniques, les fichiers ni les liens marqués nofollow, download ou data-no-prefetch.
+     * Chrome et Edge ; les autres navigateurs ignorent la balise. Désactivable : define('ECLAIR_NO_SPECULATION', true).
+     */
+    public static function speculationRules(): string
+    {
+        if (defined('ECLAIR_NO_SPECULATION') && ECLAIR_NO_SPECULATION) {
+            return '';
+        }
+        $b = rtrim(Req::base(), '/');
+        $admin = $b . '/' . trim((string) Settings::get('admin_path', 'admin'), '/');
+        $where = ['and' => [
+            ['href_matches' => $b . '/*'],
+            ['not' => ['href_matches' => [$admin, $admin . '/*', $b . '/_eclair/*', $b . '/*.xml', $b . '/*.txt', $b . '/*.pdf', $b . '/*.zip', $b . '/*.md']]],
+            ['not' => ['selector_matches' => '[rel~=nofollow],[download],[data-no-prefetch]']],
+        ]];
+        return (string) json_encode(['prefetch' => [['where' => $where, 'eagerness' => 'moderate']], 'prerender' => [['where' => $where, 'eagerness' => 'conservative']]],
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+    }
+
+    /** Balise des règles de chargement anticipé (autorisée par son empreinte dans la politique de sécurité de la page). */
+    public static function speculation(string $nonce = ''): string
+    {
+        $rules = self::speculationRules();
+        return $rules === '' ? '' : '<script type="speculationrules"' . ($nonce !== '' ? ' nonce="' . e($nonce) . '"' : '') . '>' . $rules . '</script>';
+    }
+
     /** Essaie une apparence pour l'aperçu en direct (valeurs déjà vérifiées par l'appelant). */
     public static function preview(array $look): void
     {

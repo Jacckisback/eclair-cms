@@ -2,6 +2,21 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## 2.4.0 — unreleased
+
+**Modern navigation for every Éclair site, following [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) (Chrome, Edge, Firefox and MDN teams).** Pages now change with a short cross-fade while the header stays in place, the next page loads before the click, and web fonts no longer shift the text while they load. This is the first intentional change to the public HTML since 1.6.0: the byte-for-byte reference moves to `tests/fixtures/public-2.4.0.json`.
+
+### Added
+
+- **Transitions between pages**: `@view-transition { navigation: auto }` with a 0.2 s cross-fade, the site header named `site-header` so it stays put. Only when the visitor accepts motion (`prefers-reduced-motion: no-preference`). Chrome and Edge 126, Safari 18.2; other browsers keep instant navigation.
+- **Pages that open instantly**: speculation rules prefetch a same-site page when the visitor hovers a link (`moderate`) and prerender it when they start to click (`conservative`). Never the administration, `/_eclair/` addresses, files (`.xml`, `.txt`, `.pdf`, `.zip`, `.md`) or links marked `rel="nofollow"`, `download` or `data-no-prefetch`. The rules are the only script written in the page and are allowed by their exact SHA-256 in the Content-Security-Policy (no `unsafe-inline`); on pages with ads they carry the page nonce. Chrome and Edge; other browsers ignore them. Opt out: `define('ECLAIR_NO_SPECULATION', true);` in `eclair-config.php`.
+- **Stable web fonts**: `body { font-size-adjust: from-font }`, so the fallback text takes the x-height of the site font while it loads (no layout shift). Chrome and Edge 127, Firefox 118, Safari 17.
+- **Thierry Skill, reference 13 « Le web moderne au service de la direction »**: what an art director needs from the current web platform (page transitions, scroll-driven and entry animations, intrinsic-size disclosure, text wrapping, `contrast-color()`, container queries, `:has()`), each with browser support and a progressive-enhancement rule. Adapted from Modern Web Guidance (Apache 2.0).
+
+### Changed
+
+- Theme templates that replace `layout.php` can print the same rules with `<?= Theme::speculation((string) ($v['nonce'] ?? '')) ?>` before `</head>`; the policy already allows them.
+
 ## 2.3.1 — 2026-11-13
 
 **Security hardening after a first audit of 2.3.0 (no critical or high-severity finding).** A save with no valid data no longer creates an empty draft, new sites installed over HTTPS get HSTS from the start, and the project now has a vulnerability-reporting policy (`SECURITY.md`). Nothing changes in what your pages show. Sites on 2.x update in one click from Administration › Updates, after a backup.

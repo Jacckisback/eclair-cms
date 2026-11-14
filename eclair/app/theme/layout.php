@@ -32,6 +32,7 @@ $hasIcon = is_file(ECLAIR_ROOT . '/media/site/icon-32.png');
 <?php endif ?>
 <?= Theme::preload() ?><style><?= $v['css'] ?></style>
 <script src="<?= e(asset('site/site.js')) ?>" defer<?= !empty($v['nonce']) ? ' nonce="' . e($v['nonce']) . '"' : '' ?>></script>
+<?= Theme::speculation((string) ($v['nonce'] ?? '')) ?>
 </head>
 <body class="<?= e(trim(($v['class'] ?? '') . ' ' . Theme::bodyClass())) ?>"<?= !empty($v['id']) ? ' data-id="' . e($v['id']) . '"' : '' ?> data-edit="<?= e(Theme::t('edit', $lang)) ?>">
 <a class="skip" href="#main"><?= e(Theme::t('skip', $lang)) ?></a>

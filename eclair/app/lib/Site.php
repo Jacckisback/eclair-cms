@@ -742,7 +742,7 @@ final class Site
         }
         $headers = array_merge(
             ['Content-Type: text/html; charset=utf-8', 'Cache-Control: ' . ($cachePath !== null ? 'public, max-age=0, must-revalidate' : 'no-store')],
-            Security::headers('site', Theme::hash(Theme::css()), $nonce),
+            Security::headers('site', Theme::hash(Theme::css()), $nonce, ($rules = Theme::speculationRules()) !== '' ? Theme::hash($rules) : ''),
             self::$edit ? ['X-Robots-Tag: noindex, nofollow'] : []
         );
         if ($status === 200 && $cachePath !== null) {

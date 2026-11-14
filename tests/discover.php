@@ -144,8 +144,8 @@ try {
         && str_contains($ad['body'], '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456" crossorigin="anonymous" nonce="')
         && (bool) preg_match('~Paragraphe 2[^<]*</p>\n<aside class="ad"~u', $ad['body']) && (bool) preg_match('~Paragraphe 5[^<]*</p>\n<aside class="ad"~u', $ad['body'])
         && (bool) preg_match('~Paragraphe 9[^<]*</p>\n<aside class="ad"~u', $ad['body']), $ad['body']);
-    check('nonce : le même dans la politique de sécurité et sur chaque script (code AdSense, blocs, site.js)', $hNonce !== '' && $bNonces === [$hNonce]
-        && substr_count($ad['body'], 'nonce="' . $hNonce . '"') === 5 && (bool) preg_match('~/assets/site/site\.js\?v=[a-f0-9]+" defer nonce="~', $ad['body']));
+    check('nonce : le même dans la politique de sécurité et sur chaque script (code AdSense, blocs, site.js, chargement anticipé)', $hNonce !== '' && $bNonces === [$hNonce]
+        && substr_count($ad['body'], 'nonce="' . $hNonce . '"') === 6 && str_contains($ad['body'], '<script type="speculationrules" nonce="' . $hNonce . '">') && (bool) preg_match('~/assets/site/site\.js\?v=[a-f0-9]+" defer nonce="~', $ad['body']));
     check('styles des blocs ajoutés, place réservée', str_contains($ad['body'], '.ad{margin:2.5rem 0;') && str_contains($ad['body'], 'min-height:19rem'));
     $again = $visitor->req('GET', $longUrl);
     check('page en cache : même nonce dans l’en-tête et dans la page', $nonceOf($again) === [$hNonce, [$hNonce]] && $again['body'] === $ad['body']);
