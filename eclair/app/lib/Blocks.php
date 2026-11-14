@@ -15,7 +15,7 @@ final class Blocks
 {
     public const TYPES = [
         'paragraph', 'heading', 'list', 'quote', 'image', 'callout', 'faq', 'table',
-        'button', 'video', 'code', 'divider', 'hero', 'features', 'team', 'posts', 'products', 'contact',
+        'button', 'video', 'code', 'divider', 'hero', 'features', 'team', 'posts', 'products', 'contact', 'html',
     ];
     public const CALLOUTS = ['info' => 'ℹ️', 'tip' => '💡', 'warning' => '⚠️', 'success' => '✅', 'note' => '📝'];
     private const RESERVED_IDS = ['main', 'top', 'toc', 'menu', 'contenu', 'content', 'search', 'site-nav'];
@@ -174,6 +174,11 @@ final class Blocks
             case 'divider':
                 return ['type' => 'divider'];
 
+            case 'html':
+                // Section libre : HTML sur mesure passé par la liste blanche (Sanitize::section), jamais exécutable.
+                $html = Sanitize::section($b['html'] ?? '');
+                return $html === '' ? null : ['type' => 'html', 'html' => $html];
+
             case 'hero':
                 $title = $s('title', 200);
                 return $title === '' ? null : [
@@ -283,6 +288,7 @@ final class Blocks
                 'code' => '<pre class="code"><code' . ($b['lang'] !== '' ? ' class="lang-' . e($b['lang']) . '"' : '') . self::ef('code') . '>'
                     . e($b['code']) . "</code></pre>\n",
                 'divider' => "<hr>\n",
+                'html' => '<div class="free">' . self::free($b['html']) . "</div>\n",
                 'hero' => self::hero($b, $h1 && $i === 0, $lang),
                 'features' => self::features($b, $anchors[$i] ?? ''),
                 'team' => self::team($b, $anchors[$i] ?? '', $lang),
@@ -338,6 +344,36 @@ final class Blocks
     {
         $base = Req::base();
         return $base === '' ? $html : (string) preg_replace('~ href="/(?!/)~', ' href="' . e($base) . '/', $html);
+    }
+
+    /** Section libre : liens et images internes ramenés sous l'adresse du site (installation dans un sous-dossier). */
+    private static function free(string $html): string
+    {
+        $base = Req::base();
+        return $base === '' ? $html : (string) preg_replace('~ (href|src)="/(?!/)~', ' $1="' . e($base) . '/', $html);
+    }
+
+    /** Section libre en Markdown : titres, paragraphes et listes ; le dessin vectoriel est ignoré. */
+    private static function mdFree(string $html): string
+    {
+        $html = (string) preg_replace('~<svg\b.*?</svg>~s', '', $html);
+        $html = (string) preg_replace_callback('~<h([2-4])\b[^>]*>(.*?)</h\1>~s', static fn (array $m): string => "\x01" . str_repeat('#', (int) $m[1]) . ' ' . $m[2] . "\x01", $html);
+        $html = (string) preg_replace('~<li\b[^>]*>~', "\x01- ", $html);
+        $html = (string) preg_replace('~</t[hd]>~', ' · ', $html);
+        $html = (string) preg_replace('~<br>|<hr>|</?(?:p|div|section|article|aside|header|footer|figure|figcaption|ul|ol|li|dl|dt|dd|blockquote|table|thead|tbody|tfoot|tr|caption|details|summary|address)\b[^>]*>~', "\x01", $html);
+        $out = [];
+        foreach (explode("\x01", $html) as $chunk) {
+            $chunk = trim($chunk);
+            if ($chunk === '') {
+                continue;
+            }
+            $prefix = preg_match('~^(#{2,4} |- )~', $chunk, $m) ? $m[1] : '';
+            $text = trim(self::md(strip_tags(substr($chunk, strlen($prefix)), '<a><strong><em><b><i>')));
+            if ($text !== '') {
+                $out[] = $prefix . $text;
+            }
+        }
+        return implode("\n\n", $out);
     }
 
     public static function href(string $url): string
@@ -598,6 +634,7 @@ final class Blocks
                 'features' => $b['title'] . ' ' . implode(' ', array_map(fn ($i) => $i['title'] . ' ' . plain($i['text']), $b['items'])),
                 'team' => $b['title'] . ' ' . implode(' ', array_map(fn ($p) => $p['name'] . ' ' . $p['role'] . ' ' . plain($p['bio']), $b['items'])),
                 'image' => plain($b['caption']),
+                'html' => plain((string) preg_replace('~<svg\b.*?</svg>~s', ' ', $b['html'])),
                 default => '',
             };
         }
@@ -699,6 +736,7 @@ final class Blocks
                 'video' => ($v = self::video($b['url'])) ? self::mdLink('▶ ' . ($b['caption'] !== '' ? $b['caption'] : Theme::t('video', $lang)), $v['watch']) : '',
                 'code' => ($f = self::fence($b['code'])) . $b['lang'] . "\n" . rtrim($b['code']) . "\n" . $f,
                 'divider' => '---',
+                'html' => self::mdFree($b['html']),
                 'hero' => '## ' . self::mdText($b['title']) . ($b['text'] !== '' ? "\n\n" . self::md($b['text']) : '')
                     . ($b['button'] !== '' && $b['url'] !== '' ? "\n\n" . self::mdLink($b['button'], $b['url']) : ''),
                 'features' => ($b['title'] !== '' ? '## ' . self::mdText($b['title']) . "\n\n" : '')

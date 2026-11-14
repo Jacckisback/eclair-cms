@@ -176,6 +176,38 @@ check('markdown : code intact, lien valide encodé', str_contains($evil, '`<b>`'
 check('sommaire', count(Blocks::toc($blocks)) === 3);
 check('URL vidéo inconnue refusée', Blocks::video('https://evil.example/x') === null);
 
+// 2.5.0 : section libre (bloc « html »). HTML sur mesure, passé par une liste blanche : jamais exécutable.
+$freeIn = '<section class="carnet mnav-screen skip" id="main" style="position:fixed" onclick="alert(1)"><h1>Titre libre</h1><script>alert(1)</script><style>*{display:none}</style>'
+    . '<p onmouseover="x()">Texte <a class="lien" href="javascript:alert(1)">piège</a> <a href="/contact" target="_blank" class="cta" onclick="x">ok</a> <a href="https://exemple.org" rel="nofollow">ext</a></p>'
+    . '<iframe src="https://evil.example"></iframe><form action="/x"><input name="a"><button>Go</button></form><img src="https://evil.example/t.gif" alt="pisteur">'
+    . '<img src="/media/2026/a.webp" alt="Atelier" width="800" height="600" onerror="x()"><img src="/media/../data/users.php" alt="">'
+    . '<svg viewBox="0 0 24 24" onload="alert(1)" fill="none" stroke="var(--accent)"><script>alert(2)</script><path d="M3 12h18" stroke-width="2"/><use href="#x"/>'
+    . '<foreignObject><div>x</div></foreignObject><a href="javascript:1"><circle cx="5" cy="5" r="2" fill="url(#g)"/></a><image href="https://evil.example/i.png"/></svg>'
+    . '<ol class="frise"><li data-n="1" data-eb="x">Un</li><li>Deux &lt;b&gt;</li></ol><math><mi>x</mi></math><object data="x"></object><base href="https://evil.example"></section>';
+$free = Sanitize::section($freeIn);
+$freeBad = array_values(array_filter(['<script', 'alert', 'onclick', 'onload', 'onerror', 'onmouseover', 'style', 'javascript', 'iframe', '<form', '<input', '<button', 'evil', 'mnav', ' skip',
+    'id="main"', '<h1', '<use', 'foreign', 'url(', '<image', 'data-eb', '<object', '<base', '<math', 'users.php'], fn ($k) => str_contains($free, $k)));
+check('section libre : rien d’exécutable, d’externe ni de réservé ne passe', $freeBad === [], implode(' ', $freeBad));
+$freeKeep = array_values(array_filter(['<section class="carnet"><h2>Titre libre</h2>', '<a href="/contact" target="_blank" rel="noopener" class="cta">ok</a>', 'rel="nofollow"',
+    '<img src="/media/2026/a.webp" alt="Atelier" width="800" height="600" loading="lazy" decoding="async">', '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)">',
+    '<path d="M3 12h18" stroke-width="2">', '<li data-n="1">Un</li>', 'Deux &lt;b&gt;'], fn ($k) => !str_contains($free, $k)));
+check('section libre : structure, liens sûrs, image du site et dessin au trait gardés ; h1 ramené à h2', $freeKeep === [], implode(' | ', $freeKeep) . ' ← ' . $free);
+check('section libre : texte nu mis en paragraphe, vide refusé, taille et nombre d’éléments bornés', Sanitize::section('Bonjour <monde') === '<p>Bonjour</p>' && Sanitize::section("  \n ") === ''
+    && Sanitize::section(str_repeat('x', 200001)) === '' && substr_count(Sanitize::section(str_repeat('<p>a</p>', 3000)), '<p>') === 1500
+    && Sanitize::section(str_repeat('<p>' . str_repeat('mot ', 40) . '</p>', 400)) === '');
+check('section libre : filtrage stable (le résultat repasse sans changer)', Sanitize::section($free) === $free);
+$freeBlocks = Blocks::normalize([['type' => 'html', 'html' => $freeIn], ['type' => 'html', 'html' => '<script>x</script>'], ['type' => 'html', 'html' => ['x']]]);
+check('bloc html : gardé filtré, refusé s’il ne reste rien', count($freeBlocks) === 1 && $freeBlocks[0] === ['type' => 'html', 'html' => $free]);
+// Liens et images internes suivent l'adresse du site (ici servi dans un sous-dossier) ; rien d'autre n'est ajouté.
+$freeBase = \Eclair\Req::base();
+check('bloc html : rendu dans un conteneur, liens et images internes sous l’adresse du site', Blocks::html($freeBlocks, ['lang' => 'fr'])
+    === '<div class="free">' . str_replace([' href="/', ' src="/'], [' href="' . $freeBase . '/', ' src="' . $freeBase . '/'], $free) . "</div>\n", Blocks::html($freeBlocks, ['lang' => 'fr']));
+check('bloc html : texte indexé (recherche, notes SEO et GEO), sans le dessin', Blocks::text($freeBlocks) === 'Titre libre Texte piège ok ext Un Deux <b>', Blocks::text($freeBlocks));
+$freeMd = Blocks::markdown($freeBlocks, 'fr');
+check('bloc html : Markdown lisible par les moteurs de réponse (titre, lien, liste)', str_contains($freeMd, '## Titre libre') && str_contains($freeMd, '[ok](') && str_contains($freeMd, '- Un')
+    && !preg_match('~<(svg|path|section|script)~', $freeMd), $freeMd);
+check('bloc html : ses liens sont vus par le contrôle des liens', in_array('/contact', Blocks::links($freeBlocks), true) && in_array('https://exemple.org', Blocks::links($freeBlocks), true));
+
 /* ─────────────────────────────── Divers ─────────────────────────────── */
 section('Utilitaires');
 // Séparateurs retirés par caractère, jamais par octet : un titre qui commence par «, “, … ou € reste intact.
@@ -676,12 +708,12 @@ if (!in_array('--unit', $argv, true)) {
     }
 }
 
-/* ──────────── Rendu public inchangé (référence 2.4.0 : transitions, chargement anticipé, polices) et mode Visuel jamais public ──────────── */
+/* ──────────── Rendu public inchangé (référence 2.5.0 : transitions, chargement anticipé, polices, section libre) et mode Visuel jamais public ──────────── */
 if (!in_array('--unit', $argv, true)) {
     require_once dirname(__DIR__) . '/tools/capture.php';
-    section('Rendu public identique à la référence 2.4.0 (4 sites de départ)');
+    section('Rendu public identique à la référence 2.5.0 (4 sites de départ)');
     $fixtures = __DIR__ . '/fixtures';
-    $ref = json_decode((string) file_get_contents($fixtures . '/public-2.4.0.json'), true);
+    $ref = json_decode((string) file_get_contents($fixtures . '/public-2.5.0.json'), true);
     $now = capture_all(dirname(__DIR__), $fixtures);
     foreach ($ref['sites'] as $type => $site) {
         $diff = array_keys(array_filter($site['visitor'], fn ($v, $u) => ($now[$type]['visitor'][$u] ?? null) !== $v, ARRAY_FILTER_USE_BOTH));

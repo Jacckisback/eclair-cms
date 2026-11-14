@@ -2,6 +2,20 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## 2.5.0 — unreleased
+
+**A “free section” block: made-to-measure HTML, never executable.** Until now a page could only be composed from Éclair's blocks. A new `html` block accepts custom markup (a timeline, an order book, an asymmetric grid, a line drawing) written by hand or by an assistant, and passes it through a strict allowlist before saving. Speed, security and SEO/GEO are unchanged: the result is static HTML, cached like the rest, indexed and exported like any other block.
+
+### Added
+
+- **Block `html` (“Free section”)**, in the editor and for assistants (`{"type":"html","html":"…"}`), rendered inside `<div class="free">` at the wide width.
+- **`Sanitize::section()`**: allowlist of structure and text tags (`section`, `div`, `figure`, `h2`–`h4`, lists, tables, `details`, `blockquote`…), links checked like everywhere else, images from the site's `/media/` only (lazy-loaded), and line drawings in SVG (shapes only). Removed with their content: `script`, `style`, `iframe`, forms and fields, `object`, `embed`, `video`, `audio`, `foreignObject`, `use`, external images. No `style` attribute, no event handler, no `javascript:` address; classes reserved by the core (`skip`, `mnav…`, `eb-…`) and reserved identifiers are dropped; `h1` becomes `h2` (the page keeps a single main title). Bounded: 40,000 characters, 1,500 elements, 14 levels. The strict Content-Security-Policy remains a second barrier.
+- **SEO and GEO**: the text of a free section feeds search, the SEO and GEO scores, `llms-full.txt` and the Markdown version of the page (headings, paragraphs, lists, links); its links are seen by the link checker.
+
+### Changed
+
+- The byte-for-byte reference of the public site moves to `tests/fixtures/public-2.5.0.json` (one more selector in `theme.css`: `.content>.free`).
+
 ## 2.4.0 — 2026-11-14
 
 **Modern navigation for every Éclair site, following [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) (Chrome, Edge, Firefox and MDN teams).** Pages now change with a short cross-fade while the header stays in place, the next page loads before the click, and web fonts no longer shift the text while they load. This is the first intentional change to the public HTML since 1.6.0: the byte-for-byte reference moves to `tests/fixtures/public-2.4.0.json`.
