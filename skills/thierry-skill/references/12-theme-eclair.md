@@ -112,7 +112,7 @@ La feuille est nettoyée comme le CSS personnalisé avant d'être insérée dans
 - 256 Ko au plus pour l'ensemble des feuilles ;
 - le CSS personnalisé du site (Réglages › Apparence) passe après le thème et garde le dernier mot : c'est le bon endroit pour les retouches de la personne, pas pour la direction.
 
-Mouvement : CSS seulement, `transform` et `opacity`, toujours sous `@media (prefers-reduced-motion: no-preference)` (`06-mouvement.md`). Un thème n'ajoute pas de JavaScript sans gabarit pour le charger ; ne le fais que si l'idée l'exige vraiment.
+Mouvement : CSS seulement, `transform` et `opacity`, toujours sous `@media (prefers-reduced-motion: no-preference)` (`06-mouvement.md`). Depuis Éclair 2.4.0, le noyau pose déjà les transitions entre les pages, les polices sans saut et le chargement anticipé : compose avec, sans les réécrire (`13-web-moderne.md`). Un thème n'ajoute pas de JavaScript sans gabarit pour le charger ; ne le fais que si l'idée l'exige vraiment.
 
 ## 8. Gabarits : seulement si la composition l'exige
 

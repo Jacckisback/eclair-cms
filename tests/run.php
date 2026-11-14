@@ -523,6 +523,20 @@ if (!in_array('--unit', $argv, true)) {
             check('empreinte CSP = style réel', str_contains($home['headers']['content-security-policy'], base64_encode(hash('sha256', $st[1], true))));
         }
         check('aucun style en ligne', !preg_match('~\sstyle="~', $home['body']));
+        // 2.4.0 : transitions entre les pages, polices sans saut, chargement anticipé autorisé par son empreinte exacte.
+        check('transitions entre les pages (mouvement accepté seulement) et polices sans saut', str_contains($st[1] ?? '', '@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}')
+            && str_contains($st[1] ?? '', 'body{font-size-adjust:from-font}'));
+        preg_match('~<script type="speculationrules">(.*?)</script>~s', $home['body'], $sp);
+        $rules = json_decode($sp[1] ?? '', true);
+        check('chargement anticipé : préchargé au survol, préparé au clic', ($rules['prefetch'][0]['eagerness'] ?? '') === 'moderate' && ($rules['prerender'][0]['eagerness'] ?? '') === 'conservative'
+            && ($rules['prefetch'][0]['where'] ?? 0) === ($rules['prerender'][0]['where'] ?? 1));
+        $never = (array) ($rules['prefetch'][0]['where']['and'][1]['not']['href_matches'] ?? []);
+        check('chargement anticipé : jamais l’administration, les adresses techniques ni les fichiers', in_array('/_eclair/*', $never, true) && in_array('/*.xml', $never, true)
+            && count(array_filter($never, fn ($p) => !str_starts_with($p, '/_eclair') && !str_starts_with($p, '/*.'))) === 2
+            && str_contains((string) ($rules['prefetch'][0]['where']['and'][2]['not']['selector_matches'] ?? ''), '[download]'), $sp[1] ?? '');
+        check('chargement anticipé : empreinte exacte dans la politique de sécurité', ($sp[1] ?? '') !== ''
+            && str_contains($home['headers']['content-security-policy'] ?? '', "script-src 'self' 'sha256-" . base64_encode(hash('sha256', $sp[1], true)) . "';"));
+        check('aucun autre script écrit dans la page', preg_match_all('~<script(?![^>]*\bsrc=)(?![^>]*type="(?:application/ld\+json|speculationrules)")~', $home['body']) === 0);
         $again = $v->req('GET', '/');
         check('page servie depuis le cache', ($again['headers']['x-cache'] ?? '') === 'HIT');
         $etag = $again['headers']['etag'] ?? '';
@@ -662,12 +676,12 @@ if (!in_array('--unit', $argv, true)) {
     }
 }
 
-/* ──────────── Rendu public inchangé (référence 1.6.0) et mode Visuel jamais public ──────────── */
+/* ──────────── Rendu public inchangé (référence 2.4.0 : transitions, chargement anticipé, polices) et mode Visuel jamais public ──────────── */
 if (!in_array('--unit', $argv, true)) {
     require_once dirname(__DIR__) . '/tools/capture.php';
-    section('Rendu public identique à la référence 1.6.0 (4 sites de départ)');
+    section('Rendu public identique à la référence 2.4.0 (4 sites de départ)');
     $fixtures = __DIR__ . '/fixtures';
-    $ref = json_decode((string) file_get_contents($fixtures . '/public-1.6.0.json'), true);
+    $ref = json_decode((string) file_get_contents($fixtures . '/public-2.4.0.json'), true);
     $now = capture_all(dirname(__DIR__), $fixtures);
     foreach ($ref['sites'] as $type => $site) {
         $diff = array_keys(array_filter($site['visitor'], fn ($v, $u) => ($now[$type]['visitor'][$u] ?? null) !== $v, ARRAY_FILTER_USE_BOTH));

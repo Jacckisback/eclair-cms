@@ -1,0 +1,346 @@
+{
+    "version": "2.4.0",
+    "normalized": [
+        "?v= des URL d’assets",
+        "année du pied de page"
+    ],
+    "sites": {
+        "blog": {
+            "visitor": {
+                "/": [
+                    200,
+                    21511,
+                    "fd59680a4e1474f0d18cd9dd51df5e9dfb261d4eb20e98a23d582259f905d73d"
+                ],
+                "/a-propos": [
+                    200,
+                    22638,
+                    "fd0ac6ac713c5867fef81acaf6bd15c5aa0d97eb3020d43b50d6fa2fd0d0cd84"
+                ],
+                "/blog/auteur/camille-martin": [
+                    200,
+                    22241,
+                    "0c1a69f87ae50fd6d70044580e8f2c6f36d5e285bf42a6c1fbc2fa0ad3541984"
+                ],
+                "/blog/guides": [
+                    200,
+                    22337,
+                    "279bd7c479959613ad1bfee8cd17f60fbcb150ad649f490a357c17fa77bfa0a2"
+                ],
+                "/blog/premiers-pas-avec-eclair": [
+                    200,
+                    29453,
+                    "29c848adf0a522dfb17bfb86a38a32a5ac19b2b651ac104ebc7f8ad84ee4f015"
+                ],
+                "/contact": [
+                    200,
+                    23265,
+                    "84ae57b1089da81e6b0d03fbbef59788d4037413f813204fb6d8a9b6413d2a92"
+                ],
+                "/mentions-legales": [
+                    200,
+                    22562,
+                    "96bd94ba36ecab6f7b926e01e7e0bf2fb9fd9339f7ee6c5c145946eb5d891f43"
+                ],
+                "/page-introuvable-capture": [
+                    404,
+                    21279,
+                    "b6c140694df1d9c72bcfc929aff0f239a45f8ff739946f574fa1ec7835555703"
+                ],
+                "/politique-de-confidentialite": [
+                    200,
+                    23021,
+                    "e14106e03db487743814ebb0820e77b9b3e5c85e55be9dd8ce6974d9101a239b"
+                ],
+                "/recherche": [
+                    200,
+                    21047,
+                    "17c8ce4978c151a1e4e6c4cfe48c401b6fb4adde4167cbdfcd3952abe2229f68"
+                ]
+            },
+            "outputs": {
+                "/sitemap.xml": "200\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n<url><loc>https://eclair.test/</loc><lastmod>2026-10-31T19:25:03+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/premiers-pas-avec-eclair</loc><lastmod>2026-10-31T19:25:03+01:00</lastmod></url>\n<url><loc>https://eclair.test/contact</loc><lastmod>2026-10-31T19:25:03+01:00</lastmod></url>\n<url><loc>https://eclair.test/a-propos</loc><lastmod>2026-10-31T19:25:03+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/guides</loc><lastmod>2026-10-31T19:25:03+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/auteur/camille-martin</loc><lastmod>2026-10-31T19:25:03+01:00</lastmod></url>\n</urlset>\n",
+                "/llms.txt": "200\n# Site blog\n\n> Référence blog\n\n- Site : https://eclair.test/\n\n## Pages\n\n- [Contact](https://eclair.test/contact.md): Une question, un projet ? Écrivez-nous via ce formulaire : nous répondons en général sous 24 heures ouvrées.\n- [À propos](https://eclair.test/a-propos.md): Présente-toi ici : qui tu es, ce que tu fais et pour qui. Une page « À propos » sincère renforce la confiance des visiteurs… et celle des moteurs de recherche, qui évaluent l’expertise et la fiabilité des auteurs.\n\n## Articles\n\n- [Premiers pas avec Éclair : le guide en 5 minutes](https://eclair.test/blog/premiers-pas-avec-eclair.md): Éclair est un CMS ultra léger : pas de base de données, pas d’extensions, des pages servies en quelques millisecondes et un référencement SEO et GEO automatique. Ce guide montre comment écrire, structurer et publier un contenu efficace.\n\n## Catégories\n\n- [Guides](https://eclair.test/blog/guides): Des guides pratiques, clairs et à jour pour passer à l’action.\n\n## Optional\n\n- [Tout le contenu en Markdown](https://eclair.test/llms-full.txt)\n- [Sitemap](https://eclair.test/sitemap.xml)\n- [RSS](https://eclair.test/feed.xml)\n",
+                "/llms-full.txt": "200\n# Site blog\n\n> Référence blog\n\n- Site : https://eclair.test/\n\n---\n\n# Premiers pas avec Éclair : le guide en 5 minutes\n\nURL : https://eclair.test/blog/premiers-pas-avec-eclair\n\n> **L’essentiel** — Éclair est un CMS ultra léger : pas de base de données, pas d’extensions, des pages servies en quelques millisecondes et un référencement SEO et GEO automatique. Ce guide montre comment écrire, structurer et publier un contenu efficace.\n\nTu viens d’installer **Éclair**, un CMS ultra léger. Cet article de démonstration présente les blocs disponibles : modifie-le ou supprime-le quand tu veux depuis l’administration.\n\n## Comment écrire un article qui plaît à Google et aux IA ?\n\nCommence par une réponse directe en deux ou trois phrases, puis développe. Les moteurs de réponse comme ChatGPT, Perplexity ou les AI Overviews de Google citent plus volontiers les contenus clairs, structurés et sourcés.\n\n- Un titre précis qui contient ton expression-clé\n- Une méta-description de 110 à 160 caractères\n- Des intertitres, idéalement sous forme de questions\n- Des listes, des tableaux et des chiffres concrets\n- Un bloc FAQ en fin d’article\n\n> **Astuce** — Le panneau **Analyse** de l’éditeur te donne une note SEO et une note GEO en temps réel, avec des conseils concrets pour progresser.\n\n## Combien de temps faut-il pour publier une page ?\n\nMoins d’une minute : écris ton texte, ajoute des blocs avec le bouton + (ou en tapant « / » sur une ligne vide), puis clique sur Publier. Éclair génère automatiquement le sitemap, les données structurées, le fichier llms.txt et la version Markdown de la page.\n\n| Fonction | CMS classique | Éclair |\n| --- | --- | --- |\n| Base de données | Obligatoire | Aucune |\n| Référencement SEO et GEO | Extensions à installer | Intégré |\n| Pages publiques | Générées à chaque visite | Servies depuis un cache statique |\n| Cookies sur le site public | Souvent nombreux | Aucun |\n\n> La simplicité est la sophistication suprême.\n>\n> — Attribué à Léonard de Vinci\n\n## Et la sécurité ?\n\nSans base de données, pas d’injection SQL. Les mots de passe sont protégés par Argon2id, les tentatives de connexion sont limitées et tu peux activer la double authentification depuis ton profil.\n\n## Questions fréquentes\n\n### Faut-il installer des extensions ?\n\nNon. L’essentiel est intégré : SEO, GEO, sitemap, formulaire de contact, redirections et sauvegardes.\n\n### Mon site sera-t-il rapide sur un hébergement mutualisé ?\n\nOui. Chaque page est générée une seule fois puis servie depuis un cache statique, sans base de données.\n\n### Comment les IA trouvent-elles mon contenu ?\n\nÉclair publie un fichier llms.txt, une version Markdown de chaque page et des règles adaptées aux robots IA dans le fichier robots.txt.\n\n— Camille Martin · 31 octobre 2026\n\n---\n\n# Contact\n\nURL : https://eclair.test/contact\n\nUne question, un projet ? Écrivez-nous via ce formulaire : nous répondons en général sous 24 heures ouvrées.\n\n---\n\n# À propos\n\nURL : https://eclair.test/a-propos\n\nPrésente-toi ici : qui tu es, ce que tu fais et pour qui. Une page « À propos » sincère renforce la confiance des visiteurs… et celle des moteurs de recherche, qui évaluent l’expertise et la fiabilité des auteurs.\n\n## Notre histoire\n\nRaconte en quelques lignes comment l’aventure a commencé, ce qui te rend unique et les résultats obtenus pour tes clients. Les chiffres concrets (années d’expérience, clients accompagnés) sont très appréciés.\n\n",
+                "/feed.xml": "200\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n<channel><title>Site blog</title><link>https://eclair.test/</link><description>Référence blog</description><language>fr</language><lastBuildDate>Sat, 31 Oct 2026 19:25:03 +0100</lastBuildDate><atom:link href=\"https://eclair.test/feed.xml\" rel=\"self\" type=\"application/rss+xml\"/>\n<item><title>Premiers pas avec Éclair : le guide en 5 minutes</title><link>https://eclair.test/blog/premiers-pas-avec-eclair</link><guid isPermaLink=\"true\">https://eclair.test/blog/premiers-pas-avec-eclair</guid><pubDate>Sat, 31 Oct 2026 19:25:03 +0100</pubDate><dc:creator>Camille Martin</dc:creator><category>Guides</category><description>Découvre comment écrire, structurer et publier un contenu optimisé pour Google et les IA avec Éclair, le CMS ultra léger sans base de données.</description><content:encoded><![CDATA[<p>Tu viens d’installer <strong>Éclair</strong>, un CMS ultra léger. Cet article de démonstration présente les blocs disponibles : modifie-le ou supprime-le quand tu veux depuis l’administration.</p>\n<h2 id=\"comment-ecrire-un-article-qui-plait-a-google-et-aux-ia\">Comment écrire un article qui plaît à Google et aux IA ?</h2>\n<p>Commence par une réponse directe en deux ou trois phrases, puis développe. Les moteurs de réponse comme ChatGPT, Perplexity ou les AI Overviews de Google citent plus volontiers les contenus clairs, structurés et sourcés.</p>\n<ul><li>Un titre précis qui contient ton expression-clé</li><li>Une méta-description de 110 à 160 caractères</li><li>Des intertitres, idéalement sous forme de questions</li><li>Des listes, des tableaux et des chiffres concrets</li><li>Un bloc FAQ en fin d’article</li></ul>\n<aside class=\"callout callout-tip\"><p class=\"callout-title\"><span aria-hidden=\"true\">💡</span> Astuce</p><p>Le panneau <strong>Analyse</strong> de l’éditeur te donne une note SEO et une note GEO en temps réel, avec des conseils concrets pour progresser.</p></aside>\n<h2 id=\"combien-de-temps-faut-il-pour-publier-une-page\">Combien de temps faut-il pour publier une page ?</h2>\n<p>Moins d’une minute : écris ton texte, ajoute des blocs avec le bouton + (ou en tapant « / » sur une ligne vide), puis clique sur Publier. Éclair génère automatiquement le sitemap, les données structurées, le fichier llms.txt et la version Markdown de la page.</p>\n<div class=\"table\"><table><thead><tr><th>Fonction</th><th>CMS classique</th><th>Éclair</th></tr></thead><tbody><tr><td>Base de données</td><td>Obligatoire</td><td>Aucune</td></tr><tr><td>Référencement SEO et GEO</td><td>Extensions à installer</td><td>Intégré</td></tr><tr><td>Pages publiques</td><td>Générées à chaque visite</td><td>Servies depuis un cache statique</td></tr><tr><td>Cookies sur le site public</td><td>Souvent nombreux</td><td>Aucun</td></tr></tbody></table></div>\n<blockquote><p>La simplicité est la sophistication suprême.</p><p class=\"cite\">— Attribué à Léonard de Vinci</p></blockquote>\n<h2 id=\"et-la-securite\">Et la sécurité ?</h2>\n<p>Sans base de données, pas d’injection SQL. Les mots de passe sont protégés par Argon2id, les tentatives de connexion sont limitées et tu peux activer la double authentification depuis ton profil.</p>\n<section class=\"faq\"><h2 id=\"faq\">Questions fréquentes</h2><details><summary>Faut-il installer des extensions ?</summary><div><p>Non. L’essentiel est intégré : SEO, GEO, sitemap, formulaire de contact, redirections et sauvegardes.</p></div></details><details><summary>Mon site sera-t-il rapide sur un hébergement mutualisé ?</summary><div><p>Oui. Chaque page est générée une seule fois puis servie depuis un cache statique, sans base de données.</p></div></details><details><summary>Comment les IA trouvent-elles mon contenu ?</summary><div><p>Éclair publie un fichier llms.txt, une version Markdown de chaque page et des règles adaptées aux robots IA dans le fichier robots.txt.</p></div></details></section>\n]]></content:encoded></item>\n</channel></rss>\n"
+            },
+            "admin_same": true
+        },
+        "business": {
+            "visitor": {
+                "/": [
+                    200,
+                    27337,
+                    "670e1d2fb8d5aa04820302af88389c9a7d2e864f03bbcdf9feca5bac791009f3"
+                ],
+                "/a-propos": [
+                    200,
+                    26712,
+                    "2c82865ad18419b8746f86a2bef146d9365199361b9b418a6743adbb4294b12a"
+                ],
+                "/blog": [
+                    200,
+                    26302,
+                    "8764e7b0d54ec4b0f50c962e70a9ebff8c6da4cf0ecf0adca6e27229fd2d7fc0"
+                ],
+                "/blog/auteur/camille-martin": [
+                    200,
+                    26499,
+                    "929ca4c0a5c2ea292cdbf0d75cc9c0afd04c7cfccec47836517c76cbe8a2e651"
+                ],
+                "/blog/guides": [
+                    200,
+                    26595,
+                    "649bc7948b65dba659b60b0124bda87d8c15ab84452601d28bc48989bfe8cd5b"
+                ],
+                "/blog/premiers-pas-avec-eclair": [
+                    200,
+                    33711,
+                    "9954a784d8a9f09c35ceddf6d2d8e439621ed80795b5af5ce9d44dbd3c294c10"
+                ],
+                "/boutique": [
+                    200,
+                    27130,
+                    "30cb10aba9cc80382566d5ece962bc5d8ad4b50277d534ce26dbf47dd38fa866"
+                ],
+                "/boutique/bol-en-gres-emaille": [
+                    200,
+                    29969,
+                    "655255e3ae10d561c50faf6e2f0a93390bdb362d9db0075387f7c6271d7f287c"
+                ],
+                "/boutique/tasse-a-cafe": [
+                    200,
+                    30591,
+                    "c1394693f3575b8af3a132d7a09d9e44bc8756de74a5033e726e102cfb4af53d"
+                ],
+                "/conditions-generales-de-vente": [
+                    200,
+                    26053,
+                    "9149cc1f340af3e77f0de0b4c418c5a06008e63536b71aab6353889e620c8a55"
+                ],
+                "/contact": [
+                    200,
+                    27339,
+                    "d671350e4c2b2e3377d6791ecaa9111087ffe363b7c95a7a50bdbd6b4ecbac3f"
+                ],
+                "/mentions-legales": [
+                    200,
+                    26636,
+                    "d45f105a0c98b84189480cdad8539e3a50af71329ce2d988d8a4ba63c8ceabaf"
+                ],
+                "/page-introuvable-capture": [
+                    404,
+                    25353,
+                    "0a38fa8a4dcd36fe21c125da5df92bbfc10e3181b01c17acae182cac1caea4ef"
+                ],
+                "/politique-de-confidentialite": [
+                    200,
+                    27095,
+                    "dc43fe2ef59c2c241ad837e438516526a252c073fa064f1ce5914271fc854cb1"
+                ],
+                "/recherche": [
+                    200,
+                    25121,
+                    "23f7682e56bcfe00b6c6fd94ee7024f6d13c131f2ef7057ea44e23b3c6c7f5bd"
+                ],
+                "/services": [
+                    200,
+                    28176,
+                    "b1049c9c7c8f689d1a9774e18dd4d099c434a2b07ff7b64a10b9ff9b595af8cc"
+                ],
+                "/tous-les-blocs": [
+                    200,
+                    33955,
+                    "448b0b6aa65eeb06799cbba40a93b01fa24449c982c409df9d6768270b843d22"
+                ]
+            },
+            "outputs": {
+                "/sitemap.xml": "200\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n<url><loc>https://eclair.test/</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/premiers-pas-avec-eclair</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/contact</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/a-propos</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/services</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/conditions-generales-de-vente</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/boutique/bol-en-gres-emaille</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod><image:image><image:loc>https://eclair.test/media/2026/10/capture.jpg</image:loc></image:image></url>\n<url><loc>https://eclair.test/boutique/tasse-a-cafe</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/tous-les-blocs</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod><image:image><image:loc>https://eclair.test/media/2026/10/capture.jpg</image:loc></image:image></url>\n<url><loc>https://eclair.test/boutique</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/guides</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/auteur/camille-martin</loc><lastmod>2026-10-31T19:25:04+01:00</lastmod></url>\n</urlset>\n",
+                "/llms.txt": "200\n# Site business\n\n> Référence business\n\n- Site : https://eclair.test/\n\n## Pages\n\n- [Accueil](https://eclair.test/index.md): Présente ici ton offre en une phrase claire : ce que tu proposes, pour qui, et pourquoi c’est le meilleur choix.\n- [Contact](https://eclair.test/contact.md): Une question, un projet ? Écrivez-nous via ce formulaire : nous répondons en général sous 24 heures ouvrées.\n- [À propos](https://eclair.test/a-propos.md): Présente-toi ici : qui tu es, ce que tu fais et pour qui. Une page « À propos » sincère renforce la confiance des visiteurs… et celle des moteurs de recherche, qui évaluent l’expertise et la fiabilité des auteurs.\n- [Services](https://eclair.test/services.md): Détaille ici chacun de tes services : à qui il s’adresse, ce qu’il comprend et le résultat attendu. Une page par service importante est encore mieux pour le référencement.\n- [Conditions générales de vente](https://eclair.test/conditions-generales-de-vente.md): Prix TTC.\n- [Tous les blocs](https://eclair.test/tous-les-blocs.md): Une page qui contient chaque type de bloc d’Éclair.\n\n## Produits\n\n- [Bol en grès émaillé](https://eclair.test/boutique/bol-en-gres-emaille.md): 29,90 € · En stock — Un bol tourné à la main, émaillé bleu.\n- [Tasse à café](https://eclair.test/boutique/tasse-a-cafe.md): 18 € · En stock — Tasse de 12 cl.\n\n## Articles\n\n- [Premiers pas avec Éclair : le guide en 5 minutes](https://eclair.test/blog/premiers-pas-avec-eclair.md): Éclair est un CMS ultra léger : pas de base de données, pas d’extensions, des pages servies en quelques millisecondes et un référencement SEO et GEO automatique. Ce guide montre comment écrire, structurer et publier un contenu efficace.\n\n## Catégories\n\n- [Guides](https://eclair.test/blog/guides): Des guides pratiques, clairs et à jour pour passer à l’action.\n\n## Optional\n\n- [Tout le contenu en Markdown](https://eclair.test/llms-full.txt)\n- [Sitemap](https://eclair.test/sitemap.xml)\n- [RSS](https://eclair.test/feed.xml)\n- [Produits (Google Merchant RSS)](https://eclair.test/products.xml)\n",
+                "/llms-full.txt": "200\n# Site business\n\n> Référence business\n\n- Site : https://eclair.test/\n\n---\n\n# Premiers pas avec Éclair : le guide en 5 minutes\n\nURL : https://eclair.test/blog/premiers-pas-avec-eclair\n\n> **L’essentiel** — Éclair est un CMS ultra léger : pas de base de données, pas d’extensions, des pages servies en quelques millisecondes et un référencement SEO et GEO automatique. Ce guide montre comment écrire, structurer et publier un contenu efficace.\n\nTu viens d’installer **Éclair**, un CMS ultra léger. Cet article de démonstration présente les blocs disponibles : modifie-le ou supprime-le quand tu veux depuis l’administration.\n\n## Comment écrire un article qui plaît à Google et aux IA ?\n\nCommence par une réponse directe en deux ou trois phrases, puis développe. Les moteurs de réponse comme ChatGPT, Perplexity ou les AI Overviews de Google citent plus volontiers les contenus clairs, structurés et sourcés.\n\n- Un titre précis qui contient ton expression-clé\n- Une méta-description de 110 à 160 caractères\n- Des intertitres, idéalement sous forme de questions\n- Des listes, des tableaux et des chiffres concrets\n- Un bloc FAQ en fin d’article\n\n> **Astuce** — Le panneau **Analyse** de l’éditeur te donne une note SEO et une note GEO en temps réel, avec des conseils concrets pour progresser.\n\n## Combien de temps faut-il pour publier une page ?\n\nMoins d’une minute : écris ton texte, ajoute des blocs avec le bouton + (ou en tapant « / » sur une ligne vide), puis clique sur Publier. Éclair génère automatiquement le sitemap, les données structurées, le fichier llms.txt et la version Markdown de la page.\n\n| Fonction | CMS classique | Éclair |\n| --- | --- | --- |\n| Base de données | Obligatoire | Aucune |\n| Référencement SEO et GEO | Extensions à installer | Intégré |\n| Pages publiques | Générées à chaque visite | Servies depuis un cache statique |\n| Cookies sur le site public | Souvent nombreux | Aucun |\n\n> La simplicité est la sophistication suprême.\n>\n> — Attribué à Léonard de Vinci\n\n## Et la sécurité ?\n\nSans base de données, pas d’injection SQL. Les mots de passe sont protégés par Argon2id, les tentatives de connexion sont limitées et tu peux activer la double authentification depuis ton profil.\n\n## Questions fréquentes\n\n### Faut-il installer des extensions ?\n\nNon. L’essentiel est intégré : SEO, GEO, sitemap, formulaire de contact, redirections et sauvegardes.\n\n### Mon site sera-t-il rapide sur un hébergement mutualisé ?\n\nOui. Chaque page est générée une seule fois puis servie depuis un cache statique, sans base de données.\n\n### Comment les IA trouvent-elles mon contenu ?\n\nÉclair publie un fichier llms.txt, une version Markdown de chaque page et des règles adaptées aux robots IA dans le fichier robots.txt.\n\n— Camille Martin · 31 octobre 2026\n\n---\n\n# Contact\n\nURL : https://eclair.test/contact\n\nUne question, un projet ? Écrivez-nous via ce formulaire : nous répondons en général sous 24 heures ouvrées.\n\n---\n\n# À propos\n\nURL : https://eclair.test/a-propos\n\nPrésente-toi ici : qui tu es, ce que tu fais et pour qui. Une page « À propos » sincère renforce la confiance des visiteurs… et celle des moteurs de recherche, qui évaluent l’expertise et la fiabilité des auteurs.\n\n## Notre histoire\n\nRaconte en quelques lignes comment l’aventure a commencé, ce qui te rend unique et les résultats obtenus pour tes clients. Les chiffres concrets (années d’expérience, clients accompagnés) sont très appréciés.\n\n---\n\n# Services\n\nURL : https://eclair.test/services\n\nDétaille ici chacun de tes services : à qui il s’adresse, ce qu’il comprend et le résultat attendu. Une page par service importante est encore mieux pour le référencement.\n\n## Pourquoi nous choisir ?\n\n### 🚀 Rapide\n\nDécris un premier atout concret de ton offre.\n\n### 🤝 Proche de vous\n\nUn deuxième atout : accompagnement, disponibilité, écoute…\n\n### ✅ Des résultats\n\nUn troisième atout, idéalement chiffré (ex. : 98 % de clients satisfaits).\n\n## Questions fréquentes\n\n### Combien coûtent vos services ?\n\nIndique une fourchette de prix ou ta façon de construire un devis : les IA reprennent volontiers ce type d’information.\n\n### Quels sont vos délais ?\n\nDonne un délai moyen concret, par exemple « deux semaines entre la commande et la livraison ».\n\n[Demander un devis gratuit](https://eclair.test/contact)\n\n---\n\n# Accueil\n\nURL : https://eclair.test/\n\n## Bienvenue chez Site business\n\nPrésente ici ton offre en une phrase claire : ce que tu proposes, pour qui, et pourquoi c’est le meilleur choix.\n\n[Nous contacter](https://eclair.test/contact)\n\n## Pourquoi nous choisir ?\n\n### 🚀 Rapide\n\nDécris un premier atout concret de ton offre.\n\n### 🤝 Proche de vous\n\nUn deuxième atout : accompagnement, disponibilité, écoute…\n\n### ✅ Des résultats\n\nUn troisième atout, idéalement chiffré (ex. : 98 % de clients satisfaits).\n\n## Nos derniers conseils\n\n- [Premiers pas avec Éclair : le guide en 5 minutes](https://eclair.test/blog/premiers-pas-avec-eclair)\n\n[Demander un devis gratuit](https://eclair.test/contact)\n\n---\n\n# Conditions générales de vente\n\nURL : https://eclair.test/conditions-generales-de-vente\n\nPrix TTC.\n\n---\n\n# Bol en grès émaillé\n\nURL : https://eclair.test/boutique/bol-en-gres-emaille\n\n> **L’essentiel** — Un bol tourné à la main, émaillé bleu.\n\n- Prix : 29,90 € · En stock\n- Prix habituel : 39 €\n- Brand : Atelier\n- SKU : BOL-01\n- Acheter : https://eclair.test/boutique/bol-en-gres-emaille\n\nBol de 14 cm.\n\n---\n\n# Tasse à café\n\nURL : https://eclair.test/boutique/tasse-a-cafe\n\n- Prix : 18 € · En stock\n- Choisissez une option :\n  - Blanche — 18 € · En stock\n  - Bleue — 18 € · Épuisé\n- Acheter : https://eclair.test/boutique/tasse-a-cafe\n\nTasse de 12 cl.\n\n---\n\n# Tous les blocs\n\nURL : https://eclair.test/tous-les-blocs\n\n> **L’essentiel** — Une page qui contient chaque type de bloc d’Éclair.\n\n## Bandeau de démonstration\n\nUn **texte** d’accroche avec [un lien](https://eclair.test/contact).\n\n[Nous écrire](https://eclair.test/contact)\n\nUn paragraphe avec du *style*, `du code` et [un lien externe](https://example.com).\n\n## Intertitre de niveau deux\n\n### Intertitre de niveau trois\n\n- Premier point\n- Deuxième **point**\n\n1. Étape une\n2. Étape deux\n\n> Une citation marquante.\n>\n> — Quelqu’un\n\n![Texte alternatif](https://eclair.test/media/2026/10/capture.jpg)\n*Une *légende**\n\n> **Astuce** — Une astuce utile.\n\n> **Attention** — Un avertissement.\n\n## Questions fréquentes\n\n### Première question ?\n\nPremière réponse.\n\n### Deuxième question ?\n\nDeuxième **réponse**.\n\n**Un tableau**\n\n| Offre | Prix |\n| --- | --- |\n| Essentiel | \\[À confirmer\\] |\n\n[Réserver](https://eclair.test/contact)\n\n[▶ Une vidéo](https://www.youtube.com/watch?v=dQw4w9WgXcQ)\n\n```php\necho '<b>bonjour</b>';\n```\n\n---\n\n## Nos atouts\n\n### 🚀 Rapide\n\nTrès *rapide*.\n\n### Simple\n\n## Notre équipe\n\n### Léa Martin — Fondatrice\n\nUne **bio**.\n\n[https://www.linkedin.com/in/lea](https://www.linkedin.com/in/lea)\n\n### Jean Dupont\n\n## Derniers articles\n\n- [Premiers pas avec Éclair : le guide en 5 minutes](https://eclair.test/blog/premiers-pas-avec-eclair)\n\n## Boutique\n\n- [Bol en grès émaillé](https://eclair.test/boutique/bol-en-gres-emaille) — 29,90 € · En stock\n- [Tasse à café](https://eclair.test/boutique/tasse-a-cafe) — 18 € · En stock\n\n",
+                "/feed.xml": "200\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n<channel><title>Site business</title><link>https://eclair.test/</link><description>Référence business</description><language>fr</language><lastBuildDate>Sat, 31 Oct 2026 19:25:04 +0100</lastBuildDate><atom:link href=\"https://eclair.test/feed.xml\" rel=\"self\" type=\"application/rss+xml\"/>\n<item><title>Premiers pas avec Éclair : le guide en 5 minutes</title><link>https://eclair.test/blog/premiers-pas-avec-eclair</link><guid isPermaLink=\"true\">https://eclair.test/blog/premiers-pas-avec-eclair</guid><pubDate>Sat, 31 Oct 2026 19:25:04 +0100</pubDate><dc:creator>Camille Martin</dc:creator><category>Guides</category><description>Découvre comment écrire, structurer et publier un contenu optimisé pour Google et les IA avec Éclair, le CMS ultra léger sans base de données.</description><content:encoded><![CDATA[<p>Tu viens d’installer <strong>Éclair</strong>, un CMS ultra léger. Cet article de démonstration présente les blocs disponibles : modifie-le ou supprime-le quand tu veux depuis l’administration.</p>\n<h2 id=\"comment-ecrire-un-article-qui-plait-a-google-et-aux-ia\">Comment écrire un article qui plaît à Google et aux IA ?</h2>\n<p>Commence par une réponse directe en deux ou trois phrases, puis développe. Les moteurs de réponse comme ChatGPT, Perplexity ou les AI Overviews de Google citent plus volontiers les contenus clairs, structurés et sourcés.</p>\n<ul><li>Un titre précis qui contient ton expression-clé</li><li>Une méta-description de 110 à 160 caractères</li><li>Des intertitres, idéalement sous forme de questions</li><li>Des listes, des tableaux et des chiffres concrets</li><li>Un bloc FAQ en fin d’article</li></ul>\n<aside class=\"callout callout-tip\"><p class=\"callout-title\"><span aria-hidden=\"true\">💡</span> Astuce</p><p>Le panneau <strong>Analyse</strong> de l’éditeur te donne une note SEO et une note GEO en temps réel, avec des conseils concrets pour progresser.</p></aside>\n<h2 id=\"combien-de-temps-faut-il-pour-publier-une-page\">Combien de temps faut-il pour publier une page ?</h2>\n<p>Moins d’une minute : écris ton texte, ajoute des blocs avec le bouton + (ou en tapant « / » sur une ligne vide), puis clique sur Publier. Éclair génère automatiquement le sitemap, les données structurées, le fichier llms.txt et la version Markdown de la page.</p>\n<div class=\"table\"><table><thead><tr><th>Fonction</th><th>CMS classique</th><th>Éclair</th></tr></thead><tbody><tr><td>Base de données</td><td>Obligatoire</td><td>Aucune</td></tr><tr><td>Référencement SEO et GEO</td><td>Extensions à installer</td><td>Intégré</td></tr><tr><td>Pages publiques</td><td>Générées à chaque visite</td><td>Servies depuis un cache statique</td></tr><tr><td>Cookies sur le site public</td><td>Souvent nombreux</td><td>Aucun</td></tr></tbody></table></div>\n<blockquote><p>La simplicité est la sophistication suprême.</p><p class=\"cite\">— Attribué à Léonard de Vinci</p></blockquote>\n<h2 id=\"et-la-securite\">Et la sécurité ?</h2>\n<p>Sans base de données, pas d’injection SQL. Les mots de passe sont protégés par Argon2id, les tentatives de connexion sont limitées et tu peux activer la double authentification depuis ton profil.</p>\n<section class=\"faq\"><h2 id=\"faq\">Questions fréquentes</h2><details><summary>Faut-il installer des extensions ?</summary><div><p>Non. L’essentiel est intégré : SEO, GEO, sitemap, formulaire de contact, redirections et sauvegardes.</p></div></details><details><summary>Mon site sera-t-il rapide sur un hébergement mutualisé ?</summary><div><p>Oui. Chaque page est générée une seule fois puis servie depuis un cache statique, sans base de données.</p></div></details><details><summary>Comment les IA trouvent-elles mon contenu ?</summary><div><p>Éclair publie un fichier llms.txt, une version Markdown de chaque page et des règles adaptées aux robots IA dans le fichier robots.txt.</p></div></details></section>\n]]></content:encoded></item>\n</channel></rss>\n",
+                "/products.xml": "200\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:g=\"http://base.google.com/ns/1.0\">\n<channel><title>Site business</title><link>https://eclair.test/boutique</link><description>Boutique</description>\n<item><g:id>149e362466</g:id><title>Bol en grès émaillé</title><link>https://eclair.test/boutique/bol-en-gres-emaille</link><description>Un bol tourné à la main, émaillé bleu.</description><g:image_link>https://eclair.test/media/2026/10/capture.jpg</g:image_link><g:availability>in_stock</g:availability><g:price>39.00 EUR</g:price><g:sale_price>29.90 EUR</g:sale_price><g:condition>new</g:condition><g:brand>Atelier</g:brand><g:mpn>BOL-01</g:mpn><g:shipping><g:country>FR</g:country><g:price>4.90 EUR</g:price></g:shipping><g:shipping><g:country>BE</g:country><g:price>4.90 EUR</g:price></g:shipping></item>\n<item><g:id>73d0ed9a6b-1</g:id><g:item_group_id>73d0ed9a6b</g:item_group_id><title>Tasse à café — Blanche</title><link>https://eclair.test/boutique/tasse-a-cafe</link><description>Tasse de 12 cl.</description><g:availability>in_stock</g:availability><g:price>18.00 EUR</g:price><g:condition>new</g:condition><g:identifier_exists>no</g:identifier_exists><g:shipping><g:country>FR</g:country><g:price>4.90 EUR</g:price></g:shipping><g:shipping><g:country>BE</g:country><g:price>4.90 EUR</g:price></g:shipping></item>\n<item><g:id>73d0ed9a6b-2</g:id><g:item_group_id>73d0ed9a6b</g:item_group_id><title>Tasse à café — Bleue</title><link>https://eclair.test/boutique/tasse-a-cafe</link><description>Tasse de 12 cl.</description><g:availability>out_of_stock</g:availability><g:price>18.00 EUR</g:price><g:condition>new</g:condition><g:identifier_exists>no</g:identifier_exists><g:shipping><g:country>FR</g:country><g:price>4.90 EUR</g:price></g:shipping><g:shipping><g:country>BE</g:country><g:price>4.90 EUR</g:price></g:shipping></item>\n</channel></rss>\n"
+            },
+            "admin_same": true
+        },
+        "freelance": {
+            "visitor": {
+                "/": [
+                    200,
+                    23367,
+                    "43529b5d152b9941912ab38bff6e251a7cc9a4a0d6746aa4d5c5a3e69b081811"
+                ],
+                "/a-propos": [
+                    200,
+                    22732,
+                    "0e90b6b2fb55e1e81e49f3a243587d9fca63f56ee725dc920e92a162e73c6042"
+                ],
+                "/blog": [
+                    200,
+                    22326,
+                    "16dd2f5d174e782cf8c2486b64272859373d420a06d72866b66c16be68b76909"
+                ],
+                "/blog/auteur/camille-martin": [
+                    200,
+                    22519,
+                    "311d5d40b90da97c6e021993b93cd2c184e933b0239f9ca78849dcf6b9661f62"
+                ],
+                "/blog/guides": [
+                    200,
+                    22615,
+                    "978e4bd316861e3e5c0c0fbee974d689d43bf3762f385eed31f3d8f27467bb8f"
+                ],
+                "/blog/premiers-pas-avec-eclair": [
+                    200,
+                    29725,
+                    "715489d231875be429db36b96aa4269781ef7fa69eca52305a341439366e3237"
+                ],
+                "/contact": [
+                    200,
+                    23359,
+                    "423e88104b8b8d19d7b6e69f0aead2f1df06cca6eafb890994f1c219ecf6e5b2"
+                ],
+                "/mentions-legales": [
+                    200,
+                    22656,
+                    "d9a11b4f7b70512d756d2cb439e01b1f17d724d2b3ddfad8cfbc57e19865c842"
+                ],
+                "/page-introuvable-capture": [
+                    404,
+                    21373,
+                    "256de5dbacd8691da6b9746959763c8d2d3ef8393c655ddd9a7f4cc0313167db"
+                ],
+                "/politique-de-confidentialite": [
+                    200,
+                    23115,
+                    "fdd6e26ee175c69e8934d4effb93ddfee27ae2f37b6b9acbabad639bdba52d40"
+                ],
+                "/recherche": [
+                    200,
+                    21141,
+                    "bfc4660501ebf65f085ae283bf7fac2a84157594f32943b1387e08b5750dbf47"
+                ]
+            },
+            "outputs": {
+                "/sitemap.xml": "200\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n<url><loc>https://eclair.test/</loc><lastmod>2026-10-31T19:25:05+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/premiers-pas-avec-eclair</loc><lastmod>2026-10-31T19:25:05+01:00</lastmod></url>\n<url><loc>https://eclair.test/contact</loc><lastmod>2026-10-31T19:25:05+01:00</lastmod></url>\n<url><loc>https://eclair.test/a-propos</loc><lastmod>2026-10-31T19:25:05+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog</loc><lastmod>2026-10-31T19:25:05+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/guides</loc><lastmod>2026-10-31T19:25:05+01:00</lastmod></url>\n<url><loc>https://eclair.test/blog/auteur/camille-martin</loc><lastmod>2026-10-31T19:25:05+01:00</lastmod></url>\n</urlset>\n",
+                "/llms.txt": "200\n# Site freelance\n\n> Référence freelance\n\n- Site : https://eclair.test/\n\n## Pages\n\n- [Accueil](https://eclair.test/index.md): Décris en une phrase ce que tu fais et pour qui. Exemple : « Consultant indépendant, j’aide les PME à gagner des clients grâce au web. »\n- [Contact](https://eclair.test/contact.md): Une question, un projet ? Écrivez-nous via ce formulaire : nous répondons en général sous 24 heures ouvrées.\n- [À propos](https://eclair.test/a-propos.md): Présente-toi ici : qui tu es, ce que tu fais et pour qui. Une page « À propos » sincère renforce la confiance des visiteurs… et celle des moteurs de recherche, qui évaluent l’expertise et la fiabilité des auteurs.\n\n## Articles\n\n- [Premiers pas avec Éclair : le guide en 5 minutes](https://eclair.test/blog/premiers-pas-avec-eclair.md): Éclair est un CMS ultra léger : pas de base de données, pas d’extensions, des pages servies en quelques millisecondes et un référencement SEO et GEO automatique. Ce guide montre comment écrire, structurer et publier un contenu efficace.\n\n## Catégories\n\n- [Guides](https://eclair.test/blog/guides): Des guides pratiques, clairs et à jour pour passer à l’action.\n\n## Optional\n\n- [Tout le contenu en Markdown](https://eclair.test/llms-full.txt)\n- [Sitemap](https://eclair.test/sitemap.xml)\n- [RSS](https://eclair.test/feed.xml)\n",
+                "/llms-full.txt": "200\n# Site freelance\n\n> Référence freelance\n\n- Site : https://eclair.test/\n\n---\n\n# Premiers pas avec Éclair : le guide en 5 minutes\n\nURL : https://eclair.test/blog/premiers-pas-avec-eclair\n\n> **L’essentiel** — Éclair est un CMS ultra léger : pas de base de données, pas d’extensions, des pages servies en quelques millisecondes et un référencement SEO et GEO automatique. Ce guide montre comment écrire, structurer et publier un contenu efficace.\n\nTu viens d’installer **Éclair**, un CMS ultra léger. Cet article de démonstration présente les blocs disponibles : modifie-le ou supprime-le quand tu veux depuis l’administration.\n\n## Comment écrire un article qui plaît à Google et aux IA ?\n\nCommence par une réponse directe en deux ou trois phrases, puis développe. Les moteurs de réponse comme ChatGPT, Perplexity ou les AI Overviews de Google citent plus volontiers les contenus clairs, structurés et sourcés.\n\n- Un titre précis qui contient ton expression-clé\n- Une méta-description de 110 à 160 caractères\n- Des intertitres, idéalement sous forme de questions\n- Des listes, des tableaux et des chiffres concrets\n- Un bloc FAQ en fin d’article\n\n> **Astuce** — Le panneau **Analyse** de l’éditeur te donne une note SEO et une note GEO en temps réel, avec des conseils concrets pour progresser.\n\n## Combien de temps faut-il pour publier une page ?\n\nMoins d’une minute : écris ton texte, ajoute des blocs avec le bouton + (ou en tapant « / » sur une ligne vide), puis clique sur Publier. Éclair génère automatiquement le sitemap, les données structurées, le fichier llms.txt et la version Markdown de la page.\n\n| Fonction | CMS classique | Éclair |\n| --- | --- | --- |\n| Base de données | Obligatoire | Aucune |\n| Référencement SEO et GEO | Extensions à installer | Intégré |\n| Pages publiques | Générées à chaque visite | Servies depuis un cache statique |\n| Cookies sur le site public | Souvent nombreux | Aucun |\n\n> La simplicité est la sophistication suprême.\n>\n> — Attribué à Léonard de Vinci\n\n## Et la sécurité ?\n\nSans base de données, pas d’injection SQL. Les mots de passe sont protégés par Argon2id, les tentatives de connexion sont limitées et tu peux activer la double authentification depuis ton profil.\n\n## Questions fréquentes\n\n### Faut-il installer des extensions ?\n\nNon. L’essentiel est intégré : SEO, GEO, sitemap, formulaire de contact, redirections et sauvegardes.\n\n### Mon site sera-t-il rapide sur un hébergement mutualisé ?\n\nOui. Chaque page est générée une seule fois puis servie depuis un cache statique, sans base de données.\n\n### Comment les IA trouvent-elles mon contenu ?\n\nÉclair publie un fichier llms.txt, une version Markdown de chaque page et des règles adaptées aux robots IA dans le fichier robots.txt.\n\n— Camille Martin · 31 octobre 2026\n\n---\n\n# Contact\n\nURL : https://eclair.test/contact\n\nUne question, un projet ? Écrivez-nous via ce formulaire : nous répondons en général sous 24 heures ouvrées.\n\n---\n\n# À propos\n\nURL : https://eclair.test/a-propos\n\nPrésente-toi ici : qui tu es, ce que tu fais et pour qui. Une page « À propos » sincère renforce la confiance des visiteurs… et celle des moteurs de recherche, qui évaluent l’expertise et la fiabilité des auteurs.\n\n## Notre histoire\n\nRaconte en quelques lignes comment l’aventure a commencé, ce qui te rend unique et les résultats obtenus pour tes clients. Les chiffres concrets (années d’expérience, clients accompagnés) sont très appréciés.\n\n---\n\n# Accueil\n\nURL : https://eclair.test/\n\n## Camille Martin\n\nDécris en une phrase ce que tu fais et pour qui. Exemple : « Consultant indépendant, j’aide les PME à gagner des clients grâce au web. »\n\n[Travaillons ensemble](https://eclair.test/contact)\n\n## Ce que je peux faire pour vous\n\n### 🚀 Rapide\n\nDécris un premier atout concret de ton offre.\n\n### 🤝 Proche de vous\n\nUn deuxième atout : accompagnement, disponibilité, écoute…\n\n### ✅ Des résultats\n\nUn troisième atout, idéalement chiffré (ex. : 98 % de clients satisfaits).\n\n## Nos derniers conseils\n\n- [Premiers pas avec Éclair : le guide en 5 minutes](https://eclair.test/blog/premiers-pas-avec-eclair)\n\n",
+                "/feed.xml": "200\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n<channel><title>Site freelance</title><link>https://eclair.test/</link><description>Référence freelance</description><language>fr</language><lastBuildDate>Sat, 31 Oct 2026 19:25:05 +0100</lastBuildDate><atom:link href=\"https://eclair.test/feed.xml\" rel=\"self\" type=\"application/rss+xml\"/>\n<item><title>Premiers pas avec Éclair : le guide en 5 minutes</title><link>https://eclair.test/blog/premiers-pas-avec-eclair</link><guid isPermaLink=\"true\">https://eclair.test/blog/premiers-pas-avec-eclair</guid><pubDate>Sat, 31 Oct 2026 19:25:05 +0100</pubDate><dc:creator>Camille Martin</dc:creator><category>Guides</category><description>Découvre comment écrire, structurer et publier un contenu optimisé pour Google et les IA avec Éclair, le CMS ultra léger sans base de données.</description><content:encoded><![CDATA[<p>Tu viens d’installer <strong>Éclair</strong>, un CMS ultra léger. Cet article de démonstration présente les blocs disponibles : modifie-le ou supprime-le quand tu veux depuis l’administration.</p>\n<h2 id=\"comment-ecrire-un-article-qui-plait-a-google-et-aux-ia\">Comment écrire un article qui plaît à Google et aux IA ?</h2>\n<p>Commence par une réponse directe en deux ou trois phrases, puis développe. Les moteurs de réponse comme ChatGPT, Perplexity ou les AI Overviews de Google citent plus volontiers les contenus clairs, structurés et sourcés.</p>\n<ul><li>Un titre précis qui contient ton expression-clé</li><li>Une méta-description de 110 à 160 caractères</li><li>Des intertitres, idéalement sous forme de questions</li><li>Des listes, des tableaux et des chiffres concrets</li><li>Un bloc FAQ en fin d’article</li></ul>\n<aside class=\"callout callout-tip\"><p class=\"callout-title\"><span aria-hidden=\"true\">💡</span> Astuce</p><p>Le panneau <strong>Analyse</strong> de l’éditeur te donne une note SEO et une note GEO en temps réel, avec des conseils concrets pour progresser.</p></aside>\n<h2 id=\"combien-de-temps-faut-il-pour-publier-une-page\">Combien de temps faut-il pour publier une page ?</h2>\n<p>Moins d’une minute : écris ton texte, ajoute des blocs avec le bouton + (ou en tapant « / » sur une ligne vide), puis clique sur Publier. Éclair génère automatiquement le sitemap, les données structurées, le fichier llms.txt et la version Markdown de la page.</p>\n<div class=\"table\"><table><thead><tr><th>Fonction</th><th>CMS classique</th><th>Éclair</th></tr></thead><tbody><tr><td>Base de données</td><td>Obligatoire</td><td>Aucune</td></tr><tr><td>Référencement SEO et GEO</td><td>Extensions à installer</td><td>Intégré</td></tr><tr><td>Pages publiques</td><td>Générées à chaque visite</td><td>Servies depuis un cache statique</td></tr><tr><td>Cookies sur le site public</td><td>Souvent nombreux</td><td>Aucun</td></tr></tbody></table></div>\n<blockquote><p>La simplicité est la sophistication suprême.</p><p class=\"cite\">— Attribué à Léonard de Vinci</p></blockquote>\n<h2 id=\"et-la-securite\">Et la sécurité ?</h2>\n<p>Sans base de données, pas d’injection SQL. Les mots de passe sont protégés par Argon2id, les tentatives de connexion sont limitées et tu peux activer la double authentification depuis ton profil.</p>\n<section class=\"faq\"><h2 id=\"faq\">Questions fréquentes</h2><details><summary>Faut-il installer des extensions ?</summary><div><p>Non. L’essentiel est intégré : SEO, GEO, sitemap, formulaire de contact, redirections et sauvegardes.</p></div></details><details><summary>Mon site sera-t-il rapide sur un hébergement mutualisé ?</summary><div><p>Oui. Chaque page est générée une seule fois puis servie depuis un cache statique, sans base de données.</p></div></details><details><summary>Comment les IA trouvent-elles mon contenu ?</summary><div><p>Éclair publie un fichier llms.txt, une version Markdown de chaque page et des règles adaptées aux robots IA dans le fichier robots.txt.</p></div></details></section>\n]]></content:encoded></item>\n</channel></rss>\n"
+            },
+            "admin_same": true
+        },
+        "landing": {
+            "visitor": {
+                "/": [
+                    200,
+                    24330,
+                    "f60d36b857c4b34c9da2a2f9600156dede71a9151642ce060fd70399a03f7f98"
+                ],
+                "/mentions-legales": [
+                    200,
+                    22391,
+                    "cb80dd079665dafb2bfe8102ed954178ad97883ef4b9025f7d0f2257b3b89c56"
+                ],
+                "/page-introuvable-capture": [
+                    404,
+                    21108,
+                    "e22dca3dae4555f28b483f43ba4e1f0a95a3319390034a3a8fe1db62616417b6"
+                ],
+                "/politique-de-confidentialite": [
+                    200,
+                    22850,
+                    "d6abf6391e5e4026d4994305acc0d6c6ddf79f1e6b7d5fc881aecad1811e67be"
+                ],
+                "/recherche": [
+                    200,
+                    20876,
+                    "874a3a23f11ad5ad7656c223fc0cd584c1ffe6535950408c0a7756950bd3b847"
+                ]
+            },
+            "outputs": {
+                "/sitemap.xml": "200\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n<url><loc>https://eclair.test/</loc><lastmod>2026-10-31T19:25:06+01:00</lastmod></url>\n<url><loc>https://eclair.test/contact</loc><lastmod>2026-10-31T19:25:06+01:00</lastmod></url>\n</urlset>\n",
+                "/llms.txt": "200\n# Site landing\n\n> Référence landing\n\n- Site : https://eclair.test/\n\n## Pages\n\n- [Accueil](https://eclair.test/index.md): Présente ici ton offre en une phrase claire : ce que tu proposes, pour qui, et pourquoi c’est le meilleur choix.\n- [Contact](https://eclair.test/contact.md): Une question, un projet ? Écrivez-nous via ce formulaire : nous répondons en général sous 24 heures ouvrées.\n\n## Optional\n\n- [Tout le contenu en Markdown](https://eclair.test/llms-full.txt)\n- [Sitemap](https://eclair.test/sitemap.xml)\n",
+                "/llms-full.txt": "200\n# Site landing\n\n> Référence landing\n\n- Site : https://eclair.test/\n\n---\n\n# Contact\n\nURL : https://eclair.test/contact\n\nUne question, un projet ? Écrivez-nous via ce formulaire : nous répondons en général sous 24 heures ouvrées.\n\n---\n\n# Accueil\n\nURL : https://eclair.test/\n\n## Bienvenue chez Site landing\n\nPrésente ici ton offre en une phrase claire : ce que tu proposes, pour qui, et pourquoi c’est le meilleur choix.\n\n[Nous contacter](#contact)\n\n## Pourquoi nous choisir ?\n\n### 🚀 Rapide\n\nDécris un premier atout concret de ton offre.\n\n### 🤝 Proche de vous\n\nUn deuxième atout : accompagnement, disponibilité, écoute…\n\n### ✅ Des résultats\n\nUn troisième atout, idéalement chiffré (ex. : 98 % de clients satisfaits).\n\n## Vos questions\n\n### Combien coûtent vos services ?\n\nIndique une fourchette de prix ou ta façon de construire un devis : les IA reprennent volontiers ce type d’information.\n\n### Quels sont vos délais ?\n\nDonne un délai moyen concret, par exemple « deux semaines entre la commande et la livraison ».\n\n## Envoyez-nous un message\n\n"
+            },
+            "admin_same": true
+        }
+    },
+    "blocks": {
+        "0-hero": "<section class=\"hero hero-media\"><div class=\"hero-text\"><h2 class=\"hero-title\">Bandeau de démonstration</h2><p class=\"hero-lead\">Un <strong>texte</strong> d’accroche avec <a href=\"/contact\">un lien</a>.</p><p class=\"btns\"><a class=\"btn btn-primary btn-lg\" href=\"/contact\">Nous écrire</a><a class=\"btn btn-secondary btn-lg\" href=\"/a-propos\">En savoir plus</a></p></div><div class=\"hero-img\"><picture><source type=\"image/webp\" srcset=\"/media/2026/10/capture-480.webp 480w, /media/2026/10/capture-800.webp 800w, /media/2026/10/capture-1200.webp 1200w\" sizes=\"(min-width: 60rem) 34rem, 100vw\"><img src=\"/media/2026/10/capture.jpg\" alt=\"Image de démonstration\" width=\"1200\" height=\"800\" fetchpriority=\"high\" decoding=\"async\"></picture></div></section>\n",
+        "1-paragraph": "<p>Un paragraphe avec du <em>style</em>, <code>du code</code> et <a href=\"https://example.com\">un lien externe</a>.</p>\n",
+        "2-heading": "<h2 id=\"intertitre-de-niveau-deux\">Intertitre de niveau deux</h2>\n",
+        "3-heading": "<h3 id=\"ancre-perso\">Intertitre de niveau trois</h3>\n",
+        "4-list": "<ul><li>Premier point</li><li>Deuxième <strong>point</strong></li></ul>\n",
+        "5-list": "<ol><li>Étape une</li><li>Étape deux</li></ol>\n",
+        "6-quote": "<blockquote><p>Une citation marquante.</p><p class=\"cite\">— Quelqu’un</p></blockquote>\n",
+        "7-image": "<figure class=\"img img-wide\"><picture><source type=\"image/webp\" srcset=\"/media/2026/10/capture-480.webp 480w, /media/2026/10/capture-800.webp 800w, /media/2026/10/capture-1200.webp 1200w\" sizes=\"(min-width: 72rem) 68rem, 100vw\"><img src=\"/media/2026/10/capture.jpg\" alt=\"Texte alternatif\" width=\"1200\" height=\"800\" loading=\"lazy\" decoding=\"async\"></picture><figcaption>Une <em>légende</em></figcaption></figure>\n",
+        "8-callout": "<aside class=\"callout callout-tip\"><p class=\"callout-title\"><span aria-hidden=\"true\">💡</span> Astuce</p><p>Une astuce utile.</p></aside>\n",
+        "9-callout": "<aside class=\"callout callout-warning\"><p class=\"callout-title\"><span aria-hidden=\"true\">⚠️</span> Attention</p><p>Un avertissement.</p></aside>\n",
+        "10-faq": "<section class=\"faq\"><h2 id=\"faq\">Questions fréquentes</h2><details><summary>Première question ?</summary><div><p>Première réponse.</p></div></details><details><summary>Deuxième question ?</summary><div><p>Deuxième <strong>réponse</strong>.</p></div></details></section>\n",
+        "11-table": "<div class=\"table\"><table><caption>Un tableau</caption><thead><tr><th>Offre</th><th>Prix</th></tr></thead><tbody><tr><td>Essentiel</td><td>[À confirmer]</td></tr></tbody></table></div>\n",
+        "12-button": "<p class=\"btns center\"><a class=\"btn btn-secondary\" href=\"/contact\">Réserver</a></p>\n",
+        "13-video": "<figure class=\"video\"><a class=\"video-lite\" href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" data-embed=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&amp;rel=0\" target=\"_blank\" rel=\"noopener\"><span class=\"video-play\" aria-hidden=\"true\"></span><span class=\"video-label\">Lire la vidéo · Une vidéo</span></a><figcaption>Une vidéo</figcaption></figure>\n",
+        "14-code": "<pre class=\"code\"><code class=\"lang-php\">echo &apos;&lt;b&gt;bonjour&lt;/b&gt;&apos;;</code></pre>\n",
+        "15-divider": "<hr>\n",
+        "16-features": "<section class=\"features\"><h2 id=\"nos-atouts\">Nos atouts</h2><div class=\"grid\"><div class=\"feature\"><span class=\"feature-icon\" aria-hidden=\"true\">🚀</span><h3>Rapide</h3><p>Très <em>rapide</em>.</p></div><div class=\"feature\"><h3>Simple</h3></div></div></section>\n",
+        "17-team": "<section class=\"team\"><h2 id=\"team\">Notre équipe</h2><div class=\"grid\"><div class=\"feature member\"><picture><source type=\"image/webp\" srcset=\"/media/2026/10/capture-480.webp 480w, /media/2026/10/capture-800.webp 800w, /media/2026/10/capture-1200.webp 1200w\" sizes=\"8rem\"><img src=\"/media/2026/10/capture.jpg\" alt=\"Image de démonstration\" width=\"1200\" height=\"800\" loading=\"lazy\" decoding=\"async\"></picture><h3>Léa Martin</h3><p class=\"member-role\">Fondatrice</p><p>Une <strong>bio</strong>.</p><p class=\"member-link\"><a href=\"https://www.linkedin.com/in/lea\">linkedin.com ↗</a></p></div><div class=\"feature member\"><span class=\"member-initials\" aria-hidden=\"true\">JD</span><h3>Jean Dupont</h3></div></div></section>\n",
+        "18-posts": "<section class=\"posts-block\"><h2>Derniers articles</h2><div class=\"cards\">\n    <article class=\"card\">\n        <div class=\"card-body\">\n      <p class=\"card-meta\">\n        <a class=\"chip\" href=\"/blog/guides\">Guides</a>                  <time datetime=\"2026-10-31T18:25:04+00:00\">31 octobre 2026</time>\n              </p>\n      <h3 class=\"card-title\"><a href=\"/blog/premiers-pas-avec-eclair\">Premiers pas avec Éclair : le guide en 5 minutes</a></h3>\n      <p class=\"card-excerpt\">Découvre comment écrire, structurer et publier un contenu optimisé pour Google et les IA avec Éclair, le CMS ultra léger sans base de données.</p>    </div>\n  </article>\n</div>\n<p class=\"more\"><a href=\"/blog\">Voir tous les articles →</a></p></section>\n",
+        "19-products": "<section class=\"posts-block products-block\"><h2 id=\"boutique\">Boutique</h2><div class=\"cards products\">\n    <article class=\"card product-card\">\n          <div class=\"card-img\"><picture><source type=\"image/webp\" srcset=\"/media/2026/10/capture-480.webp 480w, /media/2026/10/capture-800.webp 800w, /media/2026/10/capture-1200.webp 1200w\" sizes=\"(min-width: 72rem) 17rem, (min-width: 40rem) 30vw, 50vw\"><img src=\"/media/2026/10/capture.jpg\" alt=\"\" width=\"1200\" height=\"800\" loading=\"lazy\" decoding=\"async\"></picture></div>\n        <div class=\"card-body\">\n      <h3 class=\"card-title\"><a href=\"/boutique/bol-en-gres-emaille\">Bol en grès émaillé</a></h3>\n      <p class=\"card-price\">\n        <span class=\"price-now\">29,90 €</span>        <s class=\"price-was\"><span class=\"sr-only\">Prix habituel : </span>39 €</s>        <span class=\"badge badge-sale\">Promo</span>      </p>\n    </div>\n  </article>\n    <article class=\"card product-card\">\n        <div class=\"card-body\">\n      <h3 class=\"card-title\"><a href=\"/boutique/tasse-a-cafe\">Tasse à café</a></h3>\n      <p class=\"card-price\">\n        <span class=\"price-now\">18 €</span>                      </p>\n    </div>\n  </article>\n</div>\n<p class=\"more\"><a href=\"/boutique\">Voir toute la boutique →</a></p></section>\n",
+        "20-contact": "<section class=\"contact-block\"><h2>Écrivez-nous</h2><form class=\"contact\" method=\"post\" action=\"/_eclair/contact\" data-k=\"0659ae02df80fd5fcb9b7a2d\" data-sending=\"Envoi…\" data-error=\"L’envoi a échoué. Vérifiez les champs et réessayez.\"><input type=\"hidden\" name=\"page\" value=\"583575f4d2\"><input type=\"hidden\" name=\"k\" value=\"\"><div class=\"hp\" aria-hidden=\"true\"><label>Website <input name=\"website\" tabindex=\"-1\" autocomplete=\"off\"></label></div><p><label for=\"cf-name\">Nom</label><input id=\"cf-name\" name=\"name\" required maxlength=\"100\" autocomplete=\"name\"></p><p><label for=\"cf-email\">E-mail</label><input id=\"cf-email\" type=\"email\" name=\"email\" required maxlength=\"190\" autocomplete=\"email\"></p><p><label for=\"cf-msg\">Message</label><textarea id=\"cf-msg\" name=\"message\" required rows=\"6\" maxlength=\"5000\"></textarea></p><p class=\"form-foot\"><button class=\"btn btn-primary\" type=\"submit\">Envoyer</button><span class=\"form-status\" role=\"status\" aria-live=\"polite\"></span></p><p class=\"form-notice\">Vos données servent uniquement à vous répondre. <a href=\"/politique-de-confidentialite\">Politique de confidentialité</a>.</p></form></section>\n"
+    },
+    "public_files": {
+        "eclair/app/theme/theme.css": "0e04653a83d43ea2c7cc1815d6f612e464e35b8cba0b7b8703bed6947a0a7d2a",
+        "eclair/app/theme/themes/atelier.css": "84c43bac2e8fb3e3cf466680790c2b6cfa4254540d03db034c426d5fac9a8d50",
+        "eclair/app/theme/themes/boutique.css": "e4d767752a63b1fa05e26c00b089555d064f341e3c6eaf97c5456b3e9df5c88b",
+        "eclair/app/theme/themes/contraste.css": "dd2034f3a2781eae45dd52c4c9686c9f1e77e76d8b031d40b6d894018ef7040d",
+        "eclair/app/theme/themes/editorial.css": "4f412a69801798712b3490cacb33c2398f48091701797d9d84b4101c18ac1332",
+        "eclair/app/theme/themes/studio.css": "6bf1f5bc881392b7c3938b14dd7f4e5e03ecf98b3e363c51b79c4223bb1f94fb",
+        "eclair/assets/site/site.js": "a0c255dc887afba38091dbccf98a855f7455afc57ab06d370554227e38609aed"
+    },
+    "admin_weights": {
+        "admin.css": {
+            "raw": 84542,
+            "gzip": 18350
+        },
+        "admin.js": {
+            "raw": 52960,
+            "gzip": 16332
+        },
+        "assistant.js": {
+            "raw": 26178,
+            "gzip": 8646
+        },
+        "compose.js": {
+            "raw": 1403,
+            "gzip": 789
+        },
+        "consent.js": {
+            "raw": 2854,
+            "gzip": 1309
+        },
+        "editor.js": {
+            "raw": 94649,
+            "gzip": 27019
+        },
+        "install.js": {
+            "raw": 7992,
+            "gzip": 2813
+        },
+        "theme-preview.js": {
+            "raw": 1351,
+            "gzip": 721
+        },
+        "visual.css": {
+            "raw": 1786,
+            "gzip": 894
+        },
+        "visual.js": {
+            "raw": 10541,
+            "gzip": 4032
+        }
+    },
+    "archive": {
+        "zip": 0,
+        "unpacked": 0
+    }
+}

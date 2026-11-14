@@ -23,7 +23,7 @@ final class Security
      * En-têtes communs + politique adaptée au contexte (site public, admin, texte brut).
      * Ils dépendent des réglages, jamais de la requête : une page mise en cache sert les mêmes à tous.
      */
-    public static function headers(string $mode, string $styleHash = '', string $nonce = ''): array
+    public static function headers(string $mode, string $styleHash = '', string $nonce = '', string $scriptHash = ''): array
     {
         $https = self::httpsOnly();
         $ads = $mode === 'site' && $nonce !== '';
@@ -53,7 +53,9 @@ final class Security
             $h[] = 'X-Frame-Options: SAMEORIGIN';
         } elseif ($mode === 'site') {
             $style = $styleHash !== '' ? " 'sha256-" . $styleHash . "'" : '';
-            $h[] = "Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'" . $style . '; '
+            // Seul script écrit dans la page : les règles de chargement anticipé, autorisées par leur empreinte exacte.
+            $script = $scriptHash !== '' ? " 'sha256-" . $scriptHash . "'" : '';
+            $h[] = "Content-Security-Policy: default-src 'self'; script-src 'self'" . $script . "; style-src 'self'" . $style . '; '
                 . "img-src 'self' data: https:; media-src 'self' https:; "
                 . 'frame-src https://www.youtube-nocookie.com https://player.vimeo.com; '
                 . "connect-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'"

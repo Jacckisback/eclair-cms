@@ -219,7 +219,7 @@ Trois directions qui diffèrent par le **concept**, pas par la couleur. Pour cha
 
 ## Carte des références
 
-Charge seulement ce dont tu as besoin, et dans un fichier seulement les sections utiles (chacun commence par un sommaire). Pour créer un site vitrine : `01` en entier, **ta seule rubrique** de `02`, `03` à `05`, les sections 1 à 4, 7 à 9, 14 et 17 de `06`, puis `08` et `09`. `07` et `10` au moment de finir.
+Charge seulement ce dont tu as besoin, et dans un fichier seulement les sections utiles (chacun commence par un sommaire). Pour créer un site vitrine : `01` en entier, **ta seule rubrique** de `02`, `03` à `05`, les sections 1 à 4, 7 à 9, 14 et 17 de `06`, puis `08` et `09`. `13` avant d'écrire le CSS, `07` et `10` au moment de finir.
 
 | Fichier | Quand le lire |
 | --- | --- |
@@ -235,6 +235,7 @@ Charge seulement ce dont tu as besoin, et dans un fichier seulement les sections
 | `references/10-revue.md` | Noter et critiquer un rendu |
 | `references/11-brief-lovable.md` | Écrire un prompt pour Lovable ou un autre générateur |
 | `references/12-theme-eclair.md` | Le site tourne sur Éclair CMS : réglages d'abord, puis thème du site, validation, import, activation |
+| `references/13-web-moderne.md` | Avant d'écrire le CSS : transitions entre pages, animations au défilement, apparitions, typographie et couleur avec ce que les navigateurs savent faire aujourd'hui |
 
 ## Ton
 

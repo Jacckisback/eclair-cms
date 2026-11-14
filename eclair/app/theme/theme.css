@@ -268,5 +268,11 @@ tr:last-child td{border-bottom:0}
 .cards-list .card-img img{height:100%;min-height:9rem;aspect-ratio:auto}
 @media (max-width:40rem){.cards-list .card{flex-direction:column}.cards-list .card-img{flex:none}.cards-list .card-img img{aspect-ratio:16/9;min-height:0}}
 
+/* Polices : pendant le chargement d'une police du site, le texte de secours prend sa hauteur d'x (pas de saut de mise en page). */
+body{font-size-adjust:from-font}
+/* Transitions entre les pages : fondu court, l'en-tête reste en place. Chrome, Edge et Safari récents ; ailleurs la navigation
+   reste instantanée. Coupées quand le visiteur demande moins d'animations. */
+@media (prefers-reduced-motion:no-preference){@view-transition{navigation:auto}.site-header{view-transition-name:site-header}::view-transition-old(root),::view-transition-new(root){animation-duration:.2s}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media print{.site-header,.site-footer,.toc,.related,.edit-fab,.buy{display:none}body{font-size:12pt}}
