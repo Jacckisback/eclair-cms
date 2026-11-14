@@ -127,6 +127,8 @@ Une erreur dans un gabarit n'abîme pas le site : Éclair rend la page avec son 
 
 ## 9. Le contenu n'est pas dans le thème
 
+**Section libre (Éclair 2.5.0).** Quand la signature demande une composition que les blocs ne savent pas faire (frise, carnet de commandes, grille asymétrique, schéma au trait), écris un bloc `{"type":"html","html":"…"}` : du HTML sur mesure, rendu dans `<div class="free">`. Il est filtré à l'enregistrement : structure et texte (`section`, `div`, `figure`, `h2`–`h4`, listes, tableaux, `details`, `blockquote`), liens, images du site (`/media/…`), SVG de formes simples (`path`, `circle`, `rect`, `line`… avec `stroke="currentColor"` ou `var(--accent)`). Sont retirés : `script`, `style`, attribut `style`, formulaires, cadres, vidéo, images externes, `h1` (ramené à `h2`). Donne des classes à tes éléments (préfixe court propre au site) et style-les dans la feuille du thème. Une section libre par page suffit presque toujours : c'est le geste signature, pas la page entière. Le texte y reste du vrai texte, lu par les moteurs de recherche et de réponse.
+
 Textes, sections et images vivent dans les **contenus** (blocs : bannière, atouts, équipe, FAQ, contact…), créés dans l'éditeur ou proposés en brouillon par le connecteur MCP d'Éclair. Le thème les met en forme ; il ne les contient pas. Les emplacements `[À fournir : …]` et `[Exemple à confirmer]` de ta méthode vont dans ces brouillons, jamais dans le CSS. Rien n'est publié sans une personne.
 
 ## 10. Valider, livrer, faire activer

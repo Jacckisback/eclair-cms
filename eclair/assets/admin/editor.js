@@ -93,6 +93,7 @@
     video: ['video', t('Vidéo'), t('YouTube ou Vimeo, sans cookies'), () => ({ type: 'video', url: '', caption: '' })],
     code: ['code', t('Code'), t('Extrait de code source'), () => ({ type: 'code', code: '', lang: '' })],
     divider: ['divider', t('Séparateur'), t('Ligne de séparation'), () => ({ type: 'divider' })],
+    html: ['code', t('Section libre'), t('HTML sur mesure, filtré'), () => ({ type: 'html', html: '' })],
     hero: ['hero', t('Bannière'), t('Grand titre d’accueil avec boutons'), () => ({ type: 'hero', title: '', text: '', button: '', url: '', button2: '', url2: '', media: '' })],
     features: ['grid', t('Atouts'), t('Grille de services ou d’avantages'), () => ({ type: 'features', title: '', items: [{ icon: '🚀', title: '', text: '' }, { icon: '🤝', title: '', text: '' }, { icon: '✅', title: '', text: '' }] })],
     team: ['users', t('Équipe'), t('Portraits, fonctions et présentations'), () => ({ type: 'team', title: '', items: [{ name: '', role: '', bio: '', media: '', link: '' }] })],
@@ -331,6 +332,14 @@
       });
       body.append(area, h('div', { class: 'sub-fields' }, lang));
       el._read = () => ({ type: 'code', code: area.value, lang: lang.value.trim() });
+      el._focus = () => area.focus();
+    },
+    html(el, body, d) {
+      // Section libre : HTML sur mesure. Le serveur le filtre à l'enregistrement (aucun script, style ni formulaire).
+      const area = h('textarea', { spellcheck: 'false', rows: '10', 'aria-label': t('Section libre') });
+      area.value = d.html || '';
+      body.append(area, h('p', { class: 'hint' }, t('HTML filtré à l’enregistrement : structure, texte, liens, images du site et dessin au trait. Ni script, ni style, ni formulaire.')));
+      el._read = () => ({ type: 'html', html: area.value });
       el._focus = () => area.focus();
     },
     divider(el, body) {

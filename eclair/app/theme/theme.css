@@ -52,7 +52,7 @@ hr{border:0;height:1px;background:var(--line);margin:2.5rem 0}
 /* Mise en page « breakout » : texte étroit et lisible, blocs riches en pleine largeur */
 .content{display:grid;grid-template-columns:[full-start] minmax(1.25rem,1fr) [wide-start] minmax(0,15rem) [text-start] min(var(--text-w), 100% - 2.5rem) [text-end] minmax(0,15rem) [wide-end] minmax(1.25rem,1fr) [full-end];padding-bottom:3rem}
 .content>*{grid-column:text;min-width:0}
-.content>.hero,.content>.features,.content>.team,.content>.posts-block,.content>.img-wide,.content>.featured,.content>.related{grid-column:wide}
+.content>.hero,.content>.features,.content>.team,.content>.posts-block,.content>.img-wide,.content>.featured,.content>.related,.content>.free{grid-column:wide}
 .is-wide .content>*{grid-column:wide}
 
 /* Article / page */

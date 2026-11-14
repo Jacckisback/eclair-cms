@@ -1,5 +1,5 @@
 {
-    "version": "2.4.0",
+    "version": "2.5.0",
     "normalized": [
         "?v= des URL d’assets",
         "année du pied de page"
@@ -9,53 +9,53 @@
             "visitor": {
                 "/": [
                     200,
-                    21511,
-                    "fd59680a4e1474f0d18cd9dd51df5e9dfb261d4eb20e98a23d582259f905d73d"
+                    21526,
+                    "79568fe4b3425e9f006e7b90aa5ca078acde2367384dfe2a3b3ae396c6aa0e2c"
                 ],
                 "/a-propos": [
                     200,
-                    22638,
-                    "fd0ac6ac713c5867fef81acaf6bd15c5aa0d97eb3020d43b50d6fa2fd0d0cd84"
+                    22653,
+                    "9a9d9eb816bf89a335197a1715ce20e7e53e736c9dc2b0f40dd7863311cf7565"
                 ],
                 "/blog/auteur/camille-martin": [
                     200,
-                    22241,
-                    "0c1a69f87ae50fd6d70044580e8f2c6f36d5e285bf42a6c1fbc2fa0ad3541984"
+                    22256,
+                    "3e4831ea48956ab5730ae49715588bb9d2d17fbc375c200cb36d584346245d66"
                 ],
                 "/blog/guides": [
                     200,
-                    22337,
-                    "279bd7c479959613ad1bfee8cd17f60fbcb150ad649f490a357c17fa77bfa0a2"
+                    22352,
+                    "ecc83448f6d6c21a8a6bc8e32e8ac2c945d6a082aaf26c59bcbbe4535f26401e"
                 ],
                 "/blog/premiers-pas-avec-eclair": [
                     200,
-                    29453,
-                    "29c848adf0a522dfb17bfb86a38a32a5ac19b2b651ac104ebc7f8ad84ee4f015"
+                    29468,
+                    "b9843e8e0323caeeb190ba6bd6367038640715d48ea5b3d334fe079f04883abc"
                 ],
                 "/contact": [
                     200,
-                    23265,
-                    "84ae57b1089da81e6b0d03fbbef59788d4037413f813204fb6d8a9b6413d2a92"
+                    23280,
+                    "59c04bb140e55f972628793d9c4317bda6b26c2b73728a52779a6eb73fee1e59"
                 ],
                 "/mentions-legales": [
                     200,
-                    22562,
-                    "96bd94ba36ecab6f7b926e01e7e0bf2fb9fd9339f7ee6c5c145946eb5d891f43"
+                    22577,
+                    "4661a4055c4a4f3f3f2539dc89a7c7496573ac55a3d83087aa8113046892f6d8"
                 ],
                 "/page-introuvable-capture": [
                     404,
-                    21279,
-                    "b6c140694df1d9c72bcfc929aff0f239a45f8ff739946f574fa1ec7835555703"
+                    21294,
+                    "4bc375d4cca0c8992f5221640a91130404ae0ed437f5d6acdcd62584b8ec4158"
                 ],
                 "/politique-de-confidentialite": [
                     200,
-                    23021,
-                    "e14106e03db487743814ebb0820e77b9b3e5c85e55be9dd8ce6974d9101a239b"
+                    23036,
+                    "d31f0904b1beadb29fbeefde350eb5310bb72d147ceed5ba755d6cb267aea373"
                 ],
                 "/recherche": [
                     200,
-                    21047,
-                    "17c8ce4978c151a1e4e6c4cfe48c401b6fb4adde4167cbdfcd3952abe2229f68"
+                    21062,
+                    "7628bd7123c7791b5db42866ffad190adc04eaa26e4a309dd6c1286a419ab12a"
                 ]
             },
             "outputs": {
@@ -70,88 +70,88 @@
             "visitor": {
                 "/": [
                     200,
-                    27337,
-                    "670e1d2fb8d5aa04820302af88389c9a7d2e864f03bbcdf9feca5bac791009f3"
+                    27352,
+                    "f3b694fb10e950074c4f794ef2d33705053abf88b894ba90d0fa384971aeb728"
                 ],
                 "/a-propos": [
                     200,
-                    26712,
-                    "2c82865ad18419b8746f86a2bef146d9365199361b9b418a6743adbb4294b12a"
+                    26727,
+                    "5917d045fef9956d456ea94f970d9ab092adb1cc0b2ef387581a0ec249f63c1d"
                 ],
                 "/blog": [
                     200,
-                    26302,
-                    "8764e7b0d54ec4b0f50c962e70a9ebff8c6da4cf0ecf0adca6e27229fd2d7fc0"
+                    26317,
+                    "44f89fd5a4f6752fc258e03c6cb7412679a7fd94307bb9fdb50b06370d4df864"
                 ],
                 "/blog/auteur/camille-martin": [
                     200,
-                    26499,
-                    "929ca4c0a5c2ea292cdbf0d75cc9c0afd04c7cfccec47836517c76cbe8a2e651"
+                    26514,
+                    "4c003a145ebab41ad1b8c476deae6746d0cca7873cd10a9bd45c78893748e0ec"
                 ],
                 "/blog/guides": [
                     200,
-                    26595,
-                    "649bc7948b65dba659b60b0124bda87d8c15ab84452601d28bc48989bfe8cd5b"
+                    26610,
+                    "bf785de3767cbe271f645db9ca7ddcf340bb9102af6444412858e66b8244021c"
                 ],
                 "/blog/premiers-pas-avec-eclair": [
                     200,
-                    33711,
-                    "9954a784d8a9f09c35ceddf6d2d8e439621ed80795b5af5ce9d44dbd3c294c10"
+                    33726,
+                    "267a9c4b4a67c8faa268394eaa96af1a086e58e3d347fe08321cc1e4f2c829de"
                 ],
                 "/boutique": [
                     200,
-                    27130,
-                    "30cb10aba9cc80382566d5ece962bc5d8ad4b50277d534ce26dbf47dd38fa866"
+                    27145,
+                    "d3ae8475789fdab5b625a4fc87c6495bdd533ffe6d620581ce023b5467f6c215"
                 ],
                 "/boutique/bol-en-gres-emaille": [
                     200,
-                    29969,
-                    "655255e3ae10d561c50faf6e2f0a93390bdb362d9db0075387f7c6271d7f287c"
+                    29984,
+                    "99e8ac29b2966e7c3b1d348ae8757c059ffbb91e26e0bb3f2c0af1d03733eceb"
                 ],
                 "/boutique/tasse-a-cafe": [
                     200,
-                    30591,
-                    "c1394693f3575b8af3a132d7a09d9e44bc8756de74a5033e726e102cfb4af53d"
+                    30606,
+                    "9525a50b716446765e4fc7600ad7831dbd9ef3732894fd60796614c706a7855a"
                 ],
                 "/conditions-generales-de-vente": [
                     200,
-                    26053,
-                    "9149cc1f340af3e77f0de0b4c418c5a06008e63536b71aab6353889e620c8a55"
+                    26068,
+                    "2687b174b42af3050c2b8b8901709758635b370ff37889ed6d58756f429097de"
                 ],
                 "/contact": [
                     200,
-                    27339,
-                    "d671350e4c2b2e3377d6791ecaa9111087ffe363b7c95a7a50bdbd6b4ecbac3f"
+                    27354,
+                    "6645cb7618c06b53943894c6e32a1c1e7553dd4bf69b8abce28e227481d3e5a6"
                 ],
                 "/mentions-legales": [
                     200,
-                    26636,
-                    "d45f105a0c98b84189480cdad8539e3a50af71329ce2d988d8a4ba63c8ceabaf"
+                    26651,
+                    "17373c93272c2d0ff37d6936033a7eb8f1cf8b31ea2a689cffe656e90c3ec876"
                 ],
                 "/page-introuvable-capture": [
                     404,
-                    25353,
-                    "0a38fa8a4dcd36fe21c125da5df92bbfc10e3181b01c17acae182cac1caea4ef"
+                    25368,
+                    "905d190238298c3d9c12c2a556ee8e70f5b0289d163eee7e665a1d334f80d725"
                 ],
                 "/politique-de-confidentialite": [
                     200,
-                    27095,
-                    "dc43fe2ef59c2c241ad837e438516526a252c073fa064f1ce5914271fc854cb1"
+                    27110,
+                    "faa2a7bee098601ebc454a1d114cfa5c4ef2aad3ddec74f39fee2c89bb37575d"
                 ],
                 "/recherche": [
                     200,
-                    25121,
-                    "23f7682e56bcfe00b6c6fd94ee7024f6d13c131f2ef7057ea44e23b3c6c7f5bd"
+                    25136,
+                    "8833ef6b67c2dab55860112dd8a1a494b764eb2688ec6275f0a70b2ff2725666"
                 ],
                 "/services": [
                     200,
-                    28176,
-                    "b1049c9c7c8f689d1a9774e18dd4d099c434a2b07ff7b64a10b9ff9b595af8cc"
+                    28191,
+                    "49e66ef209ff1f28453068f24629a9edba33f21d7977d671819afa278bbd6621"
                 ],
                 "/tous-les-blocs": [
                     200,
-                    33955,
-                    "448b0b6aa65eeb06799cbba40a93b01fa24449c982c409df9d6768270b843d22"
+                    33970,
+                    "8e040670d1a109f3dfb1fe8e0c3287633af17f2c58de4d4ddd15c7be863c1ddb"
                 ]
             },
             "outputs": {
@@ -167,58 +167,58 @@
             "visitor": {
                 "/": [
                     200,
-                    23367,
-                    "43529b5d152b9941912ab38bff6e251a7cc9a4a0d6746aa4d5c5a3e69b081811"
+                    23382,
+                    "c79469b64ff56ee4092e7a2f9f29bc02545fb48ee60e28bdf714aab4c95ddc29"
                 ],
                 "/a-propos": [
                     200,
-                    22732,
-                    "0e90b6b2fb55e1e81e49f3a243587d9fca63f56ee725dc920e92a162e73c6042"
+                    22747,
+                    "8374b074f1247c74a16293c3a84be45fe62a6522c849cbfcc134e0f35af02c23"
                 ],
                 "/blog": [
                     200,
-                    22326,
-                    "16dd2f5d174e782cf8c2486b64272859373d420a06d72866b66c16be68b76909"
+                    22341,
+                    "1bc77d32e0812f0d4ed06bed2b267cb465c16ead72642da973bf5be596fffc0f"
                 ],
                 "/blog/auteur/camille-martin": [
                     200,
-                    22519,
-                    "311d5d40b90da97c6e021993b93cd2c184e933b0239f9ca78849dcf6b9661f62"
+                    22534,
+                    "8ca52cc9afd197f05e263a91f88b238ee7b91098aca6d28292d628028e24bb05"
                 ],
                 "/blog/guides": [
                     200,
-                    22615,
-                    "978e4bd316861e3e5c0c0fbee974d689d43bf3762f385eed31f3d8f27467bb8f"
+                    22630,
+                    "7600ac81e8e7e6fa04fee71d866156591c049b5953bd498819e0c3cf8fa511f2"
                 ],
                 "/blog/premiers-pas-avec-eclair": [
                     200,
-                    29725,
-                    "715489d231875be429db36b96aa4269781ef7fa69eca52305a341439366e3237"
+                    29740,
+                    "66057e59d18f4fb2ba85d143743c582b6884c475f9fd222801eba9df8d65ed44"
                 ],
                 "/contact": [
                     200,
-                    23359,
-                    "423e88104b8b8d19d7b6e69f0aead2f1df06cca6eafb890994f1c219ecf6e5b2"
+                    23374,
+                    "411e6c65284df82c356cf1809e7b4239a68a500eba3e09bfb741ef51f6933c67"
                 ],
                 "/mentions-legales": [
                     200,
-                    22656,
-                    "d9a11b4f7b70512d756d2cb439e01b1f17d724d2b3ddfad8cfbc57e19865c842"
+                    22671,
+                    "b1f4f90b67bebc4b5a999aab8cb2502e802fcb77b99cec3888bde7f4c12badb9"
                 ],
                 "/page-introuvable-capture": [
                     404,
-                    21373,
-                    "256de5dbacd8691da6b9746959763c8d2d3ef8393c655ddd9a7f4cc0313167db"
+                    21388,
+                    "0aaa1c3021af8d3ac70a86747def99f27730148c4b3089e79de05c2930153738"
                 ],
                 "/politique-de-confidentialite": [
                     200,
-                    23115,
-                    "fdd6e26ee175c69e8934d4effb93ddfee27ae2f37b6b9acbabad639bdba52d40"
+                    23130,
+                    "f54ea5c186853dcdc6161ab4e775ebe515e128e680777996fec02b90c8e52cd0"
                 ],
                 "/recherche": [
                     200,
-                    21141,
-                    "bfc4660501ebf65f085ae283bf7fac2a84157594f32943b1387e08b5750dbf47"
+                    21156,
+                    "6a0c0e8734b4dfac34a9c0b65b1cd9e8ec8475beec627dcb2e8742dfdc5dee81"
                 ]
             },
             "outputs": {
@@ -233,28 +233,28 @@
             "visitor": {
                 "/": [
                     200,
-                    24330,
-                    "f60d36b857c4b34c9da2a2f9600156dede71a9151642ce060fd70399a03f7f98"
+                    24345,
+                    "18dffb7a29733214af1aba2917ec686a8ae4ad67b5a185744476c5be28a22eb9"
                 ],
                 "/mentions-legales": [
                     200,
-                    22391,
-                    "cb80dd079665dafb2bfe8102ed954178ad97883ef4b9025f7d0f2257b3b89c56"
+                    22406,
+                    "b119ee403354e5e1ba1ebb62a706b31973f435bfaa7d6e8b2edf01af61195855"
                 ],
                 "/page-introuvable-capture": [
                     404,
-                    21108,
-                    "e22dca3dae4555f28b483f43ba4e1f0a95a3319390034a3a8fe1db62616417b6"
+                    21123,
+                    "b9f89b057a340eb56c678a7ce6d921a76b4456ba12f1317b7b9bb694de25f829"
                 ],
                 "/politique-de-confidentialite": [
                     200,
-                    22850,
-                    "d6abf6391e5e4026d4994305acc0d6c6ddf79f1e6b7d5fc881aecad1811e67be"
+                    22865,
+                    "d02543471eca05b0e4c7830eb83365509bdda052c2e75b1a6199da77a914c6bd"
                 ],
                 "/recherche": [
                     200,
-                    20876,
-                    "874a3a23f11ad5ad7656c223fc0cd584c1ffe6535950408c0a7756950bd3b847"
+                    20891,
+                    "7f4fbacf82d447434e52e4c2ff8c42a7c9128d89382483ffafe1d48d219f903c"
                 ]
             },
             "outputs": {
@@ -289,7 +289,7 @@
         "20-contact": "<section class=\"contact-block\"><h2>Écrivez-nous</h2><form class=\"contact\" method=\"post\" action=\"/_eclair/contact\" data-k=\"0659ae02df80fd5fcb9b7a2d\" data-sending=\"Envoi…\" data-error=\"L’envoi a échoué. Vérifiez les champs et réessayez.\"><input type=\"hidden\" name=\"page\" value=\"583575f4d2\"><input type=\"hidden\" name=\"k\" value=\"\"><div class=\"hp\" aria-hidden=\"true\"><label>Website <input name=\"website\" tabindex=\"-1\" autocomplete=\"off\"></label></div><p><label for=\"cf-name\">Nom</label><input id=\"cf-name\" name=\"name\" required maxlength=\"100\" autocomplete=\"name\"></p><p><label for=\"cf-email\">E-mail</label><input id=\"cf-email\" type=\"email\" name=\"email\" required maxlength=\"190\" autocomplete=\"email\"></p><p><label for=\"cf-msg\">Message</label><textarea id=\"cf-msg\" name=\"message\" required rows=\"6\" maxlength=\"5000\"></textarea></p><p class=\"form-foot\"><button class=\"btn btn-primary\" type=\"submit\">Envoyer</button><span class=\"form-status\" role=\"status\" aria-live=\"polite\"></span></p><p class=\"form-notice\">Vos données servent uniquement à vous répondre. <a href=\"/politique-de-confidentialite\">Politique de confidentialité</a>.</p></form></section>\n"
     },
     "public_files": {
-        "eclair/app/theme/theme.css": "0e04653a83d43ea2c7cc1815d6f612e464e35b8cba0b7b8703bed6947a0a7d2a",
+        "eclair/app/theme/theme.css": "de72bdf715ceec2dcd64f378db6b13819150a5035c4dcfc01f977a6a5f90b616",
         "eclair/app/theme/themes/atelier.css": "84c43bac2e8fb3e3cf466680790c2b6cfa4254540d03db034c426d5fac9a8d50",
         "eclair/app/theme/themes/boutique.css": "e4d767752a63b1fa05e26c00b089555d064f341e3c6eaf97c5456b3e9df5c88b",
         "eclair/app/theme/themes/contraste.css": "dd2034f3a2781eae45dd52c4c9686c9f1e77e76d8b031d40b6d894018ef7040d",
@@ -319,8 +319,8 @@
             "gzip": 1309
         },
         "editor.js": {
-            "raw": 94649,
-            "gzip": 27019
+            "raw": 95335,
+            "gzip": 27201
         },
         "install.js": {
             "raw": 7992,

@@ -213,4 +213,170 @@ final class Sanitize
     {
         return mb_check_encoding($s, 'UTF-8') ? $s : mb_convert_encoding($s, 'UTF-8', 'UTF-8');
     }
+
+    /* ─────────────────────────────── Section libre ─────────────────────────────── */
+
+    /** Balises de structure et de texte permises dans une section libre (bloc « html »). */
+    private const SECTION_TAGS = [
+        'section', 'div', 'article', 'aside', 'header', 'footer', 'figure', 'figcaption', 'h2', 'h3', 'h4', 'p', 'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+        'blockquote', 'cite', 'q', 'span', 'strong', 'em', 'b', 'i', 'small', 'mark', 'sup', 'sub', 'abbr', 'time', 'address', 'br', 'hr', 'a', 'img',
+        'table', 'caption', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'details', 'summary',
+    ];
+    /** Dessin vectoriel : formes seulement (ni script, ni style, ni image, ni lien, ni contenu étranger). */
+    private const SECTION_SVG = ['svg', 'g', 'path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon', 'title', 'desc'];
+    private const SECTION_SVG_ATTRS = [
+        'viewbox', 'd', 'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'width', 'height', 'points', 'fill', 'stroke', 'stroke-width',
+        'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'fill-rule', 'clip-rule', 'opacity', 'fill-opacity', 'stroke-opacity', 'transform',
+        'preserveaspectratio',
+    ];
+    /** Supprimés avec tout leur contenu. */
+    private const SECTION_DROP = ['script', 'style', 'iframe', 'object', 'embed', 'template', 'noscript', 'form', 'input', 'button', 'select', 'textarea',
+        'link', 'meta', 'base', 'head', 'title', 'video', 'audio', 'source', 'canvas', 'math', 'foreignobject', 'use', 'image', 'animate', 'set', 'animatetransform'];
+    /** Classes du noyau qui portent un comportement ou une signification : jamais reprises. */
+    private const SECTION_CLASS_DENY = '~^(?:skip|hp|sr-only|edit-fab|site-header|site-footer|site-nav|mnav.*|eb-.*|ad|ad-label)$~';
+    private const SECTION_ROLES = ['img', 'list', 'listitem', 'presentation', 'none', 'group', 'figure', 'note', 'separator'];
+    private const SECTION_MAX_NODES = 1500;
+    private const SECTION_MAX_DEPTH = 14;
+
+    /**
+     * HTML d'une section libre : composition sur mesure (frise, grille, carnet, illustration au trait) écrite à la main ou
+     * par un assistant, jamais exécutable. Liste blanche de balises et d'attributs ; aucun script, style, formulaire, cadre,
+     * média externe ni gestionnaire d'événement ; liens vérifiés comme partout ; images du site seulement ; « h1 » ramené à
+     * « h2 » (le titre principal reste celui de la page). Borné en taille, en nombre d'éléments et en profondeur.
+     */
+    public static function section(mixed $html, int $max = 40000): string
+    {
+        $html = is_string($html) ? self::utf8($html) : '';
+        if (trim($html) === '' || strlen($html) > 200000) {
+            return '';
+        }
+        if (!str_contains($html, '<')) {
+            return '<p>' . e(trim($html)) . '</p>';
+        }
+        $doc = new \DOMDocument();
+        $previous = libxml_use_internal_errors(true);
+        $doc->loadHTML('<?xml encoding="UTF-8"?><!DOCTYPE html><html><body><div id="eclair-root">' . $html . '</div></body></html>', LIBXML_NONET);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+        $root = $doc->getElementById('eclair-root');
+        if (!$root) {
+            return '';
+        }
+        $count = 0;
+        $out = trim(self::sectionWalk($root, 0, false, $count));
+        if ($out !== '' && !str_contains($out, '<')) {
+            $out = '<p>' . $out . '</p>';           // il ne reste que du texte : un paragraphe
+        }
+        return strlen($out) > $max ? '' : $out;
+    }
+
+    private static function sectionWalk(\DOMNode $node, int $depth, bool $svg, int &$count): string
+    {
+        $out = '';
+        foreach ($node->childNodes as $child) {
+            if ($child instanceof \DOMText) {
+                // Entre deux balises de structure, les blancs ne portent rien ; dans le texte, ils sont gardés.
+                $out .= trim($child->nodeValue) === '' ? (str_contains($child->nodeValue, "\n") ? "\n" : ' ') : e($child->nodeValue);
+                continue;
+            }
+            if (!$child instanceof \DOMElement || ++$count > self::SECTION_MAX_NODES) {
+                continue;
+            }
+            $tag = strtolower($child->nodeName);
+            if (in_array($tag, self::SECTION_DROP, true) && !($svg && $tag === 'title')) {
+                continue;
+            }
+            if ($tag === 'h1') {
+                $tag = 'h2';
+            }
+            $inSvg = $svg || $tag === 'svg';
+            $allowed = $inSvg ? in_array($tag, self::SECTION_SVG, true) : in_array($tag, self::SECTION_TAGS, true);
+            $inner = $depth >= self::SECTION_MAX_DEPTH ? e($child->textContent) : self::sectionWalk($child, $depth + 1, $inSvg, $count);
+            if (!$allowed) {
+                $out .= $inner;                     // balise inconnue : son texte est gardé, pas elle
+                continue;
+            }
+            if ($tag === 'br' || $tag === 'hr') {
+                $out .= '<' . $tag . '>';
+                continue;
+            }
+            if ($tag === 'img') {
+                $out .= self::sectionImg($child);
+                continue;
+            }
+            if ($tag === 'a') {
+                // L'adresse reste le premier attribut (« <a href= »), comme dans tout le contenu : les autres suivent.
+                $link = self::link($child, $inner);
+                $out .= str_starts_with($link, '<a ') ? substr_replace($link, self::sectionAttrs($child, false), (int) strpos($link, '>'), 0) : $link;
+                continue;
+            }
+            $out .= '<' . $tag . self::sectionAttrs($child, $inSvg) . '>' . $inner . '</' . $tag . '>';
+        }
+        return $out;
+    }
+
+    /** Attributs gardés : classes, identifiant, accessibilité, données simples ; pour le dessin, géométrie et couleurs. */
+    private static function sectionAttrs(\DOMElement $el, bool $svg): string
+    {
+        $out = '';
+        $classes = [];
+        foreach (preg_split('/\s+/', trim($el->getAttribute('class'))) ?: [] as $c) {
+            if (preg_match('~^[a-zA-Z][\w-]{0,40}$~', $c) && !preg_match(self::SECTION_CLASS_DENY, $c) && count($classes) < 12) {
+                $classes[] = $c;
+            }
+        }
+        if ($classes) {
+            $out .= ' class="' . e(implode(' ', array_unique($classes))) . '"';
+        }
+        $id = $el->getAttribute('id');
+        if (!$svg && preg_match('~^[a-z][a-z0-9-]{1,40}$~', $id) && !in_array($id, ['main', 'top', 'toc', 'menu', 'contenu', 'content', 'search', 'site-nav'], true)) {
+            $out .= ' id="' . e($id) . '"';
+        }
+        foreach ($el->attributes ?? [] as $attr) {
+            $name = strtolower($attr->nodeName);
+            $value = self::utf8((string) $attr->nodeValue);
+            if ($svg && in_array($name, self::SECTION_SVG_ATTRS, true)) {
+                // Géométrie et couleurs : chiffres, lettres et ponctuation simple (ni adresse, ni fonction autre qu'une couleur).
+                if (strlen($value) <= ($name === 'd' || $name === 'points' ? 4000 : 120) && preg_match('~^[\w\s.,#%()+\-/]*$~', $value) && !preg_match('~url|expression|javascript~i', $value)) {
+                    $out .= ' ' . ($name === 'viewbox' ? 'viewBox' : ($name === 'preserveaspectratio' ? 'preserveAspectRatio' : $name)) . '="' . e($value) . '"';
+                }
+                continue;
+            }
+            if (in_array($name, ['aria-label', 'aria-hidden', 'aria-labelledby', 'aria-describedby', 'lang', 'datetime', 'cite'], true) || preg_match('~^data-[a-z][a-z0-9-]{0,30}$~', $name)) {
+                if ($name === 'cite' && self::url($value) === '') {
+                    continue;
+                }
+                if (mb_strlen($value) <= 200 && !preg_match('~^data-e[bf]~', $name)) {
+                    $out .= ' ' . $name . '="' . e($value) . '"';
+                }
+            } elseif ($name === 'role' && in_array(strtolower($value), self::SECTION_ROLES, true)) {
+                $out .= ' role="' . strtolower($value) . '"';
+            } elseif (in_array($name, ['colspan', 'rowspan'], true) && ctype_digit($value) && (int) $value >= 1 && (int) $value <= 20) {
+                $out .= ' ' . $name . '="' . (int) $value . '"';
+            } elseif ($name === 'scope' && in_array($value, ['col', 'row', 'colgroup', 'rowgroup'], true)) {
+                $out .= ' scope="' . $value . '"';
+            } elseif ($name === 'open' && strtolower($el->nodeName) === 'details') {
+                $out .= ' open';
+            } elseif ($svg && in_array($name, ['role', 'focusable'], true) && in_array($value, ['img', 'presentation', 'none', 'false'], true)) {
+                $out .= ' ' . $name . '="' . $value . '"';
+            }
+        }
+        return $out;
+    }
+
+    /** Image d'une section libre : un fichier du site seulement (/media/…), dimensions entières, chargement différé. */
+    private static function sectionImg(\DOMElement $img): string
+    {
+        $src = trim($img->getAttribute('src'));
+        if (!preg_match('~^/media/[\w./-]{1,200}\.(?:jpe?g|png|webp|avif|gif|svg)$~i', $src) || str_contains($src, '..')) {
+            return '';
+        }
+        $out = '<img src="' . e($src) . '" alt="' . e(mb_substr(self::utf8($img->getAttribute('alt')), 0, 300)) . '"';
+        foreach (['width', 'height'] as $k) {
+            if (ctype_digit($img->getAttribute($k)) && (int) $img->getAttribute($k) > 0 && (int) $img->getAttribute($k) <= 8000) {
+                $out .= ' ' . $k . '="' . (int) $img->getAttribute($k) . '"';
+            }
+        }
+        return $out . self::sectionAttrs($img, false) . ' loading="lazy" decoding="async">';
+    }
 }
