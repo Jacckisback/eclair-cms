@@ -406,11 +406,16 @@ $media = static fn (string $name, string $value, string $label, string $hint = '
         <span class="hint"><?= e(t('Claude : Personnaliser › Connecteurs › Ajouter un connecteur personnalisé, colle l’adresse et garde les réglages détectés. ChatGPT (sur le web) : Plugins › + › Ajouter un serveur MCP personnalisé, colle l’adresse et choisis l’authentification OAuth.')) ?></span></div>
       <?php if (!str_starts_with($state['mcp_url'], 'https://')): ?><div class="notice bad"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Claude et ChatGPT n’acceptent que les adresses en https:// : active d’abord le HTTPS de ton site.')) ?></p></div><?php endif ?>
       <?php if (\Eclair\Req::base() !== ''): ?><div class="notice warn"><span><?= Icons::svg('alert') ?></span><p><?= e(t('Éclair est installé dans un sous-dossier : certaines applications cherchent l’autorisation à la racine du domaine. Si la connexion échoue, installe Éclair sur un sous-domaine.')) ?></p></div><?php endif ?>
+      <h3><?= e(t('Publication automatique')) ?></h3>
+      <?= $sw('mcp_publish', !empty($ai['mcp_publish']), t('Laisser le connecteur publier les articles qu’il a rédigés'), t('Pour un site alimenté par des tâches planifiées. Articles seulement, rédigés par le connecteur avec un compte administrateur, et seulement s’ils ont une note SEO et GEO d’au moins 70, 300 mots, un résumé, une image et une source externe. Chaque application doit être reconnectée pour l’accepter.')) ?>
+      <?php if (empty($ai['mcp_publish'])): ?><?= Admin::partial('partials/confirm', ['required' => false, 'hint' => t('Nécessaire seulement pour activer la publication automatique.')]) ?><?php endif ?>
+      <label class="field"><span class="label"><?= e(t('Articles publiés par le connecteur, par 24 heures au plus')) ?></span><input type="number" name="mcp_daily" min="1" max="<?= \Eclair\Mcp::MAX_DAILY ?>" step="1" value="<?= (int) ($ai['mcp_daily'] ?? 5) ?>"></label>
+      <?= $sw('mcp_images', !empty($ai['mcp_images']), t('Laisser le connecteur créer des images'), t('Avec le générateur d’images et la clé du site : chaque image est payée par le site, dans la limite du budget du mois (obligatoire) et de 30 images par 24 heures.')) ?>
       <h3><?= e(t('Applications connectées')) ?></h3>
       <?php if (!$state['mcp']): ?><p class="muted small"><?= e(t('Aucune application connectée pour l’instant.')) ?></p><?php endif ?>
       <ul class="mcp-list">
         <?php foreach ($state['mcp'] as $g): ?>
-          <li><span><b><?= e($g['client']) ?></b> <small class="muted"><?= e($g['host'] . ' · ' . $g['user'] . ' · ' . t('dernière utilisation : {when}', ['when' => ago($g['used'])])) ?></small></span>
+          <li><span><b><?= e($g['client']) ?></b> <small class="muted"><?= e($g['host'] . ' · ' . $g['user'] . ' · ' . t('dernière utilisation : {when}', ['when' => ago($g['used'])]) . ($g['publish'] ? ' · ' . t('peut publier') : '')) ?></small></span>
             <button class="btn btn-sm" type="submit" name="mcp_revoke" value="<?= e($g['id']) ?>"><?= e(t('Couper l’accès')) ?></button></li>
         <?php endforeach ?>
       </ul>

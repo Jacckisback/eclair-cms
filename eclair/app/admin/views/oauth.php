@@ -62,12 +62,17 @@ $mode = $v['mode'];
         <li><?= Icons::svg('check') ?><?= e(t('Lire tes pages, articles, produits et ta médiathèque')) ?></li>
         <li><?= Icons::svg('check') ?><?= e(t('Créer des brouillons et modifier tes brouillons')) ?></li>
         <li><?= Icons::svg('check') ?><?= e(t('Proposer des modifications de tes contenus publiés, que tu vérifies et enregistres')) ?></li>
+        <?php if (!empty($v['publish'])): ?>
+        <li><?= Icons::svg('alert') ?><strong><?= e(t('Publier sans toi les articles qu’elle rédige : {n} par 24 heures au plus', ['n' => (int) $v['publish']])) ?></strong></li>
+        <li class="no"><?= Icons::svg('ban') ?><?= e(t('Jamais publier une page ou un produit, supprimer, ni toucher aux réglages et aux comptes')) ?></li>
+        <?php else: ?>
         <li class="no"><?= Icons::svg('ban') ?><?= e(t('Jamais publier, supprimer, ni toucher aux réglages et aux comptes')) ?></li>
+        <?php endif ?>
       </ul>
       <p class="small muted"><?= e(t('Retour vers {host}. Tu peux couper cet accès à tout moment dans Réglages › Assistant IA.', ['host' => $v['host']])) ?></p>
       <?= Security::csrfField() ?>
       <?php // Application inconnue : mot de passe toujours demandé ; application reconnue : seulement si la connexion date de plus de 15 minutes. ?>
-      <?php if (!$v['known'] || !Auth::fresh()): ?>
+      <?php if (!$v['known'] || !empty($v['publish']) || !Auth::fresh()): ?>
         <label class="field"><span class="label"><?= e(t('Confirme ton mot de passe pour autoriser cette application.')) ?></span>
           <input type="password" name="confirm_password" autocomplete="current-password" required></label>
       <?php endif ?>

@@ -2,6 +2,13 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Added
+
+- **Automatic publishing through the MCP connector (optional, off by default)**: for news sites fed by scheduled tasks in Claude or ChatGPT. Settings › AI assistant › Automatic publishing (password asked again), then each app must be reconnected: the consent screen announces the right to publish and always asks for the password. The new `publish_content` tool publishes or schedules (up to 30 days ahead) only an article, created through the connector by the same administrator account, with SEO and GEO scores of at least 70, 300 words, a summary, a featured image, an external source link and no placeholder left, within a number of articles per 24 hours (5 by default, 50 at most). Never a page or a product, never a deletion; published content is still changed by proposal only. Each publication is written to the security log (`mcp_published`) and announced to IndexNow.
+- **Images through the MCP connector (optional, off by default)**: `generate_image` with the site's image key, only when a monthly AI budget is set, at most 30 images per 24 hours.
+
 ## 2.4.0 — 2026-11-14
 
 **Modern navigation for every Éclair site, following [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) (Chrome, Edge, Firefox and MDN teams).** Pages now change with a short cross-fade while the header stays in place, the next page loads before the click, and web fonts no longer shift the text while they load. This is the first intentional change to the public HTML since 1.6.0: the byte-for-byte reference moves to `tests/fixtures/public-2.4.0.json`.

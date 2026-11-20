@@ -270,8 +270,18 @@ final class AdminSettings
                     'daily' => max(0, min(100000, (int) Req::input('daily'))),
                     'editors' => Req::bool('editors'),
                     'mcp' => Req::bool('mcp'),
+                    'mcp_publish' => Req::bool('mcp') && Req::bool('mcp_publish'),
+                    'mcp_daily' => max(1, min(Mcp::MAX_DAILY, (int) (Req::input('mcp_daily') ?: 5))),
+                    'mcp_images' => Req::bool('mcp') && Req::bool('mcp_images'),
                     'profile' => $profile,
                 ]];
+                // Laisser une IA publier seule engage le site public : action sensible, mot de passe récent ou redemandé.
+                if ($patch['ai']['mcp_publish'] && empty($s['ai']['mcp_publish'])) {
+                    if (!Auth::confirmed($user)) {
+                        Admin::back($redirect, t('Mot de passe incorrect.'), 'bad');
+                    }
+                    Log::security('mcp_publish_on');
+                }
                 // Connecteur MCP : couper une application, ou toutes quand il est désactivé.
                 $revoke = preg_replace('/[^a-z0-9]/', '', Req::input('mcp_revoke')) ?? '';
                 if ($s['ai']['mcp'] && !$patch['ai']['mcp']) {
