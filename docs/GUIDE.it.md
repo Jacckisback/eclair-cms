@@ -37,7 +37,7 @@ La procedura guidata controlla tutto questo per te e spiega cosa correggere.
 
 ### Passaggi
 
-1. Scarica l’archivio [`eclair-cms-2.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.4.0.zip) (890 KB) ed estrailo.
+1. Scarica l’archivio [`eclair-cms-2.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.5.0.zip) (895 KB) ed estrailo.
 2. Carica **il contenuto della cartella `eclair`** nella cartella pubblica del tuo hosting (`public_html`, `www`…) con il tuo programma FTP (FileZilla…) o con il file manager del tuo provider.
    > ⚠️ I file `.htaccess` sono nascosti: attiva «Mostra file nascosti» per essere sicuro di caricarli.
 3. Apri l’indirizzo del tuo sito: **parte la procedura guidata di installazione** (in 7 lingue, italiano compreso).
@@ -503,7 +503,7 @@ Un’immagine costa circa 0,05 $ (FLUX 3 a 1 megapixel: 0,048 $). Prezzi pubblic
 
 ## Connettore MCP (Claude e ChatGPT)
 
-Preferisci lavorare in **Claude** o **ChatGPT**, con l’abbonamento che hai già? Il connettore MCP (*Model Context Protocol*, lo standard aperto che collega le IA agli strumenti) dà loro accesso al tuo sito: leggono i tuoi contenuti, scrivono bozze con il tuo tono e preparano modifiche. **Nessuna chiave API, nessun costo per il sito**: è il tuo abbonamento a lavorare. Come con l’assistente integrato, **nulla viene pubblicato né eliminato** senza di te.
+Preferisci lavorare in **Claude** o **ChatGPT**, con l’abbonamento che hai già? Il connettore MCP (*Model Context Protocol*, lo standard aperto che collega le IA agli strumenti) dà loro accesso al tuo sito: leggono i tuoi contenuti, scrivono bozze con il tuo tono e preparano modifiche. **Nessuna chiave API, nessun costo per il sito**: è il tuo abbonamento a lavorare. Come con l’assistente integrato, **nulla viene pubblicato né eliminato** senza di te. L’unica eccezione è la pubblicazione automatica (più sotto), che attivi tu e che è disattivata per impostazione predefinita.
 
 ### Attivare il connettore (3 minuti)
 
@@ -515,6 +515,27 @@ Preferisci lavorare in **Claude** o **ChatGPT**, con l’abbonamento che hai gi�
 4. Si apre una pagina del tuo sito: accedi se serve (autenticazione a due fattori compresa), controlla l’app e il suo indirizzo di ritorno (`claude.ai` o `chatgpt.com`), poi **Consenti**. Questo pulsante è inizialmente grigio: si attiva dopo un istante, quando muovi il mouse, tocchi lo schermo o usi la tastiera (su uno schermo touch, il primo tocco lo attiva e il secondo autorizza).
 
 Tutto pronto. Chiedi per esempio: «Guarda il mio sito e proponimi 5 idee di articoli», «Scrivi la bozza di un articolo sulla manutenzione di una bici elettrica» o «Rileggi la mia home page e proponi un’apertura più diretta».
+
+### Pubblicazione automatica (facoltativa)
+
+Per un sito di attualità alimentato da **attività pianificate** di Claude o ChatGPT, puoi lasciare che il connettore pubblichi da solo gli articoli che scrive. È **disattivata per impostazione predefinita**: senza questa impostazione non cambia nulla.
+
+1. In **Impostazioni › Assistente IA › Pubblicazione automatica**, attiva **Lascia che il connettore pubblichi gli articoli che ha scritto** (la password viene richiesta di nuovo) e scegli il numero di articoli ogni 24 ore (5 per impostazione predefinita, 50 al massimo).
+2. **Ricollega l’applicazione** (Claude o ChatGPT): questa volta la schermata di consenso annuncia che potrà pubblicare e richiede di nuovo la password. Una connessione fatta prima dell’impostazione non pubblica mai.
+3. L’IA dispone allora dello strumento `publish_content`, con una data facoltativa per programmare l’articolo.
+
+Ciò che il sito verifica da sé a ogni pubblicazione, qualunque cosa dica l’IA:
+
+- **solo un articolo**, mai una pagina né un prodotto, e solo una bozza **creata dal connettore con il tuo account amministratore** (mai la bozza di qualcun altro);
+- punteggi **SEO e GEO di almeno 70**, almeno **300 parole**, un riassunto, un’**immagine in evidenza**, almeno **un link a una fonte esterna**, nessun segnaposto «[Da completare: …]»;
+- la **quota ogni 24 ore**; oltre, l’articolo resta in bozza;
+- la bozza non è cambiata tra il controllo e la pubblicazione.
+
+Ogni pubblicazione è annotata nel registro di sicurezza (`mcp_published`) e IndexNow viene avvisato come per una pubblicazione manuale. Un contenuto già online viene sempre modificato solo tramite proposta, e non viene mai eliminato nulla. Per fermarti: disattiva l’impostazione o revoca l’accesso dell’applicazione.
+
+**Lascia che il connettore crei immagini** (stessa schermata) aggiunge lo strumento `generate_image`: le immagini sono pagate dalla chiave del sito, solo se è fissato un **budget del mese**, ed entro 30 immagini ogni 24 ore.
+
+> Questi controlli verificano la forma, non la verità dei fatti. Google penalizza le pagine prodotte in massa «senza valore aggiunto per gli utenti», qualunque sia lo strumento ([regole di Google sui contenuti su larga scala](https://developers.google.com/search/docs/essentials/spam-policies#scaled-content)): tieni una quota bassa, una linea editoriale precisa nel tuo profilo editoriale e rileggi regolarmente ciò che va online.
 
 **Piani compatibili** (verificati il 30 ottobre 2026):
 
@@ -813,7 +834,7 @@ Una versione firmata si costruisce solo in un checkout Git e include solo i file
 
 `PHP_CLI_SERVER_WORKERS` permette al sito di chiamare se stesso (verifica del suo indirizzo): con un solo processo, la verifica semplicemente fallisce e i reindirizzamenti all’indirizzo ufficiale restano disattivati.
 
-Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, crea un tema del sito in `site/themes/<id>/` (vedi [il contratto dei temi](THEME-CONTRACT.md)) o importalo in **Temi**: gli aggiornamenti non lo toccano mai. Non modificare più `app/theme/`, che un aggiornamento sostituisce. Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 890 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
+Per un cambiamento di stile, preferisci il **CSS personalizzato** (Impostazioni › Aspetto): sopravvive agli aggiornamenti. Per andare oltre, crea un tema del sito in `site/themes/<id>/` (vedi [il contratto dei temi](THEME-CONTRACT.md)) o importalo in **Temi**: gli aggiornamenti non lo toccano mai. Non modificare più `app/theme/`, che un aggiornamento sostituisce. Nell’archivio, il PHP è compattato (`php -w`, senza commenti), le viste del pannello sono compresse (lette tramite zlib) e il JavaScript e il CSS del pannello sono alleggeriti (l’archivio pesa circa 895 KB): i sorgenti commentati sono su GitHub. I file del sito pubblico (temi, `site.js`) vengono distribuiti così come sono.
 
 ---
 
