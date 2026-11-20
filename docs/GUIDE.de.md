@@ -37,7 +37,7 @@ Der Assistent prüft all das für dich und erklärt, was zu tun ist.
 
 ### Schritte
 
-1. Lade das Archiv [`eclair-cms-2.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.4.0.zip) (890 KB) herunter und entpacke es.
+1. Lade das Archiv [`eclair-cms-2.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.5.0.zip) (895 KB) herunter und entpacke es.
 2. Lade **den Inhalt des Ordners `eclair`** in den öffentlichen Ordner deines Webspace hoch (`public_html`, `www` …), mit deinem FTP-Programm (FileZilla …) oder dem Dateimanager deines Hosters.
    > ⚠️ `.htaccess`-Dateien sind versteckt: Aktiviere „Versteckte Dateien anzeigen“, damit sie sicher mit hochgeladen werden.
 3. Öffne die Adresse deiner Website: **Der Installationsassistent startet** (in 7 Sprachen, darunter Deutsch).
@@ -503,7 +503,7 @@ Ein Bild kostet etwa 0,05 $ (FLUX 3 mit 1 Megapixel: 0,048 $). Öffentliche Prei
 
 ## MCP-Connector (Claude und ChatGPT)
 
-Du arbeitest lieber in **Claude** oder **ChatGPT**, mit dem Abo, das du schon hast? Der MCP-Connector (*Model Context Protocol*, der offene Standard, der KI mit Werkzeugen verbindet) öffnet ihnen deine Website: Sie lesen deine Inhalte, schreiben Entwürfe in deinem Ton und bereiten Änderungen vor. **Kein API-Schlüssel, keine Kosten für die Website**: Die Arbeit erledigt dein Abo. Wie beim integrierten Assistenten wird ohne dich **nichts veröffentlicht oder gelöscht**.
+Du arbeitest lieber in **Claude** oder **ChatGPT**, mit dem Abo, das du schon hast? Der MCP-Connector (*Model Context Protocol*, der offene Standard, der KI mit Werkzeugen verbindet) öffnet ihnen deine Website: Sie lesen deine Inhalte, schreiben Entwürfe in deinem Ton und bereiten Änderungen vor. **Kein API-Schlüssel, keine Kosten für die Website**: Die Arbeit erledigt dein Abo. Wie beim integrierten Assistenten wird ohne dich **nichts veröffentlicht oder gelöscht**. Die einzige Ausnahme ist die automatische Veröffentlichung (siehe unten), die du selbst aktivierst und die standardmäßig ausgeschaltet ist.
 
 ### Den Connector aktivieren (3 Minuten)
 
@@ -515,6 +515,27 @@ Du arbeitest lieber in **Claude** oder **ChatGPT**, mit dem Abo, das du schon ha
 4. Eine Seite deiner Website öffnet sich: Melde dich bei Bedarf an (Zwei-Faktor-Authentifizierung inklusive), prüfe die App und ihre Rücksprungadresse (`claude.ai` oder `chatgpt.com`) und klicke dann auf **Erlauben**. Diese Schaltfläche ist zunächst ausgegraut: Sie wird nach einem Moment aktiv, sobald du die Maus bewegst, den Bildschirm berührst oder die Tastatur benutzt (auf einem Touchscreen aktiviert das erste Tippen sie, das zweite erteilt die Erlaubnis).
 
 Fertig. Frag zum Beispiel: „Sieh dir meine Website an und schlag mir 5 Artikelideen vor“, „Schreib als Entwurf einen Artikel über die Wartung eines E-Bikes“ oder „Lies meine Startseite durch und schlag einen direkteren Aufhänger vor“.
+
+### Automatische Veröffentlichung (optional)
+
+Für eine Nachrichten-Website, die durch **geplante Aufgaben** von Claude oder ChatGPT befüllt wird, kannst du den Connector die Artikel, die er schreibt, selbst veröffentlichen lassen. Das ist **standardmäßig ausgeschaltet**: Ohne diese Einstellung ändert sich nichts.
+
+1. Aktiviere unter **Einstellungen › KI-Assistent › Automatische Veröffentlichung** die Option **Den Connector die Artikel veröffentlichen lassen, die er geschrieben hat** (dein Passwort wird erneut abgefragt) und wähle die Anzahl der Artikel pro 24 Stunden (standardmäßig 5, höchstens 50).
+2. **Verbinde die App neu** (Claude oder ChatGPT): Diesmal kündigt der Zustimmungsbildschirm an, dass sie veröffentlichen darf, und fragt erneut nach deinem Passwort. Eine Verbindung, die vor der Einstellung hergestellt wurde, veröffentlicht nie.
+3. Die KI verfügt dann über das Werkzeug `publish_content`, mit einem optionalen Datum, um den Artikel zu planen.
+
+Was die Website bei jeder Veröffentlichung selbst prüft, egal was die KI sagt:
+
+- **nur ein Artikel**, nie eine Seite oder ein Produkt, und nur ein Entwurf, der **vom Connector mit deinem Administratorkonto erstellt** wurde (nie der Entwurf einer anderen Person);
+- **SEO- und GEO-Note von mindestens 70**, mindestens **300 Wörter**, eine Zusammenfassung, ein **Beitragsbild**, mindestens **ein Link zu einer externen Quelle**, kein Platzhalter „[Zu ergänzen: …]“;
+- das **Kontingent pro 24 Stunden**; darüber hinaus bleibt der Artikel ein Entwurf;
+- der Entwurf hat sich zwischen Prüfung und Veröffentlichung nicht geändert.
+
+Jede Veröffentlichung wird im Sicherheitsprotokoll vermerkt (`mcp_published`), und IndexNow wird wie bei einer manuellen Veröffentlichung benachrichtigt. Bereits veröffentlichte Inhalte werden weiterhin nur per Vorschlag geändert, und es wird nie etwas gelöscht. Zum Beenden: Schalte die Einstellung aus oder trenne den Zugriff der App.
+
+**Den Connector Bilder erstellen lassen** (derselbe Bildschirm) fügt das Werkzeug `generate_image` hinzu: Die Bilder werden über den Schlüssel der Website bezahlt, nur wenn ein **Monatsbudget** festgelegt ist, und höchstens 30 Bilder pro 24 Stunden.
+
+> Diese Prüfungen kontrollieren die Form, nicht die Richtigkeit der Fakten. Google bestraft massenhaft erzeugte Seiten „ohne Mehrwert für die Nutzer“, unabhängig vom Werkzeug ([Googles Regeln zu skalierten Inhalten](https://developers.google.com/search/docs/essentials/spam-policies#scaled-content)): Halte das Kontingent niedrig, beschreibe in deinem redaktionellen Profil eine klare redaktionelle Linie und lies regelmäßig nach, was online geht.
 
 **Kompatible Tarife** (geprüft am 30. Oktober 2026):
 
@@ -813,7 +834,7 @@ Eine signierte Version lässt sich nur in einem Git-Checkout bauen und enthält 
 
 `PHP_CLI_SERVER_WORKERS` erlaubt der Website, sich selbst aufzurufen (zur Prüfung ihrer Adresse): Mit nur einem Prozess schlägt die Prüfung einfach fehl, und Weiterleitungen auf die offizielle Adresse bleiben deaktiviert.
 
-Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr lege ein Theme der Website in `site/themes/<id>/` an (siehe [Theme-Vertrag](THEME-CONTRACT.md)) oder importiere es unter **Themes**: Updates verändern es nie. Bearbeite `app/theme/` nicht mehr, ein Update ersetzt es. Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 890 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
+Für reine Stiländerungen nimm lieber **Eigenes CSS** (Einstellungen › Design): Es übersteht Updates. Für mehr lege ein Theme der Website in `site/themes/<id>/` an (siehe [Theme-Vertrag](THEME-CONTRACT.md)) oder importiere es unter **Themes**: Updates verändern es nie. Bearbeite `app/theme/` nicht mehr, ein Update ersetzt es. Im Archiv ist der PHP-Code kompaktiert (`php -w`, ohne Kommentare), die Views der Verwaltung sind komprimiert (per zlib gelesen), und JavaScript und CSS der Verwaltung sind verschlankt (das Archiv kommt auf etwa 895 KB): Die kommentierten Quellen liegen auf GitHub. Die Dateien der öffentlichen Website (Themes, `site.js`) werden unverändert ausgeliefert.
 
 ---
 

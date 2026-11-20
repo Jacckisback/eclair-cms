@@ -37,7 +37,7 @@ The wizard checks all of this for you and explains what to fix.
 
 ### Steps
 
-1. Download the [`eclair-cms-2.4.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.4.0.zip) archive (890 KB) and unzip it.
+1. Download the [`eclair-cms-2.5.0.zip`](https://github.com/Jacckisback/eclair-cms/raw/main/dist/eclair-cms-2.5.0.zip) archive (895 KB) and unzip it.
 2. Upload **the contents of the `eclair` folder** to your hosting's public folder (`public_html`, `www`…) with your FTP client (FileZilla…) or your host's file manager.
    > ⚠️ `.htaccess` files are hidden: turn on “Show hidden files” to make sure they get uploaded.
 3. Open your site's URL: **the setup wizard starts** (in 7 languages).
@@ -503,7 +503,7 @@ An image costs about $0.05 (FLUX 3 at 1 megapixel: $0.048). Public prices taken 
 
 ## MCP connector (Claude and ChatGPT)
 
-Would you rather work in **Claude** or **ChatGPT**, with the subscription you already have? The MCP connector (*Model Context Protocol*, the open standard that connects AI assistants to tools) opens your site to them: they read your content, write drafts in your voice and prepare changes. **No API key, no cost for the site**: your subscription does the work. Just like with the built-in assistant, **nothing is published or deleted** without you.
+Would you rather work in **Claude** or **ChatGPT**, with the subscription you already have? The MCP connector (*Model Context Protocol*, the open standard that connects AI assistants to tools) opens your site to them: they read your content, write drafts in your voice and prepare changes. **No API key, no cost for the site**: your subscription does the work. Just like with the built-in assistant, **nothing is published or deleted** without you. The only exception is automatic publishing (below), which you turn on yourself and which is off by default.
 
 ### Turn on the connector (3 minutes)
 
@@ -515,6 +515,27 @@ Would you rather work in **Claude** or **ChatGPT**, with the subscription you al
 4. A page on your site opens: log in if needed (two-factor authentication included), check the app and its return URL (`claude.ai` or `chatgpt.com`), then click **Allow**. This button starts out grayed out: it turns on after a moment, when you move the mouse, touch the screen or use the keyboard (on a touch screen, the first tap turns it on and the second one authorizes).
 
 You're all set. Ask, for example: “Look at my site and give me 5 article ideas”, “Write a draft article about servicing an e-bike” or “Review my home page and suggest a more direct tagline”.
+
+### Automatic publishing (optional)
+
+For a news site fed by **scheduled tasks** in Claude or ChatGPT, you can let the connector publish the articles it writes on its own. It is **off by default**: without this setting, nothing changes.
+
+1. In **Settings › AI assistant › Automatic publishing**, turn on **Let the connector publish the articles it wrote** (your password is asked again) and choose the number of articles per 24 hours (5 by default, 50 at most).
+2. **Reconnect the app** (Claude or ChatGPT): this time the consent screen says it will be able to publish, and asks for your password again. A connection made before the setting never publishes.
+3. The AI then has the `publish_content` tool, with an optional date to schedule the article.
+
+What the site checks itself at each publication, whatever the AI says:
+
+- **an article only**, never a page or a product, and only a draft **created by the connector with your administrator account** (never someone else's draft);
+- **SEO and GEO scores of at least 70**, at least **300 words**, a summary, a **featured image**, at least **one link to an external source**, no “[To complete: …]” placeholder;
+- the **quota per 24 hours**; beyond it, the article stays a draft;
+- the draft has not changed between the check and the publication.
+
+Each publication is written to the security log (`mcp_published`), and IndexNow is notified as for a manual publication. Content already online is still changed by proposal only, and nothing is ever deleted. To stop: turn the setting off, or cut the app's access.
+
+**Let the connector create images** (same screen) adds the `generate_image` tool: images are paid by the site's key, only if a **monthly budget** is set, and within 30 images per 24 hours.
+
+> These checks verify the form, not the truth of the facts. Google penalizes pages produced at scale “without adding value for users”, whatever the tool ([Google's rules on scaled content](https://developers.google.com/search/docs/essentials/spam-policies#scaled-content)): keep the quota low, write a precise editorial line in your editorial profile, and regularly reread what goes online.
 
 **Compatible plans** (checked on October 30, 2026):
 
@@ -813,7 +834,7 @@ A signed release can only be built in a Git checkout and only includes tracked f
 
 `PHP_CLI_SERVER_WORKERS` lets the site call itself (to verify its address): with a single process, the check simply fails and redirects to the official address stay disabled.
 
-For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, create a site theme in `site/themes/<id>/` (see [the theme contract](THEME-CONTRACT.md)) or import it in **Themes**: updates never touch it. Do not edit `app/theme/` any more, an update replaces it. In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 890 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
+For a style change, prefer **Custom CSS** (Settings › Appearance): it survives updates. To go further, create a site theme in `site/themes/<id>/` (see [the theme contract](THEME-CONTRACT.md)) or import it in **Themes**: updates never touch it. Do not edit `app/theme/` any more, an update replaces it. In the archive, the PHP is compacted (`php -w`, comments removed), the admin views are compressed (read through zlib) and the admin JavaScript and CSS are minified (the archive comes to about 895 KB): the commented sources are on GitHub. The public site's files (themes, `site.js`) ship as is.
 
 ---
 

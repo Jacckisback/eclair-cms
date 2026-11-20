@@ -2,12 +2,15 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
-## Unreleased
+## 2.5.0 — 2026-11-20
+
+**News sites can now be fed without you: the MCP connector can publish the articles it writes, if you allow it.** Scheduled tasks in Claude or ChatGPT research, write, illustrate and publish, while the site itself checks each article before it goes online. Off by default: a site that does not turn the option on behaves exactly as in 2.4.0.
 
 ### Added
 
 - **Automatic publishing through the MCP connector (optional, off by default)**: for news sites fed by scheduled tasks in Claude or ChatGPT. Settings › AI assistant › Automatic publishing (password asked again), then each app must be reconnected: the consent screen announces the right to publish and always asks for the password. The new `publish_content` tool publishes or schedules (up to 30 days ahead) only an article, created through the connector by the same administrator account, with SEO and GEO scores of at least 70, 300 words, a summary, a featured image, an external source link and no placeholder left, within a number of articles per 24 hours (5 by default, 50 at most). Never a page or a product, never a deletion; published content is still changed by proposal only. Each publication is written to the security log (`mcp_published`) and announced to IndexNow.
 - **Images through the MCP connector (optional, off by default)**: `generate_image` with the site's image key, only when a monthly AI budget is set, at most 30 images per 24 hours.
+- **Guide**: the automatic publishing section, in the seven languages.
 
 ## 2.4.0 — 2026-11-14
 
