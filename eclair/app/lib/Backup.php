@@ -133,7 +133,7 @@ final class Backup
 
     /**
      * Restaure une sauvegarde sur cette installation (la même, ou une autre). Tout est vérifié avant d'écrire quoi que ce
-     * soit : seules des entrées data/, media/ et site/ ; chemins sûrs, aucun lien symbolique ; données au format d'Éclair ;
+     * soit : seules des entrées data/, media/ et site/ ; chemins sûrs (restorable()), aucun lien symbolique ; données au format d'Éclair ;
      * aucun script dans les médias ; jamais de secret, de session, de compteur ni d'état de service (ceux de l'installation
      * restent : une restauration ne réveille aucune session et ne remet aucune clé périmée). Les fichiers sont décompressés
      * dans cache/, puis mis en place un par un (renommage atomique) : une interruption laisse chaque fichier entier, et une
@@ -164,9 +164,13 @@ final class Backup
                 $zip->getExternalAttributesIndex($i, $os, $attr);
                 $prefix = explode('/', $name, 2)[0];
                 $rel = (string) (explode('/', $name, 2)[1] ?? '');
-                if (!isset($targets[$prefix]) || !Themes::safePath($rel) && !preg_match('~^([a-z0-9._-]+/)*\.htaccess$~', $rel) || str_contains($name, '..')
+                if (!isset($targets[$prefix]) || !self::restorable($prefix, $rel) || str_contains($name, '..')
                     || ($os === \ZipArchive::OPSYS_UNIX && (($attr >> 16) & 0170000) === 0120000)) {
-                    return ['ok' => false, 'error' => t('Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié.', ['f' => mb_substr($name, 0, 120)])];
+                    // Dossier caché inconnu dans site/ (outil tiers, copie à la main) : la personne sait quoi retirer.
+                    $hidden = $prefix === 'site' && preg_match('~(^|/)\.[^/]~', $rel) && !str_contains($name, '..');
+                    return ['ok' => false, 'error' => $hidden
+                        ? t('Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié. Ce fichier caché n’est pas nécessaire au site : retire-le de l’archive ZIP, puis relance la restauration.', ['f' => mb_substr($name, 0, 120)])
+                        : t('Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié.', ['f' => mb_substr($name, 0, 120)])];
                 }
                 // Protections des dossiers (.htaccess, index.html) : celles de l'installation cible restent, jamais celles de l'archive.
                 if (in_array(basename($rel), ['.htaccess', 'index.html'], true)) {
@@ -250,6 +254,26 @@ final class Backup
         Cache::purge();
         Log::security('backup_restored', ['files' => $done]);
         return ['ok' => true, 'files' => $done, 'skipped' => $skipped];
+    }
+
+    /**
+     * Chemin d'une entrée accepté à la restauration (sous data/, media/ ou site/) : segments sûrs (Themes::safePath), ou
+     * .htaccess d'un dossier (écarté ensuite, ceux de l'installation restent). Dans site/themes/, deux dossiers cachés tenus
+     * par Éclair lui-même sont aussi acceptés : les versions gardées d'un thème mis à jour (.versions/<id>/<version>-<date>/…,
+     * nécessaires à « Rétablir le thème précédent » après la restauration) et la copie brute des personnalisations d'un site
+     * 1.x (.legacy-originals/<dossier>/…). Sous eux, le reste du chemin obéit aux mêmes règles : aucun autre segment caché,
+     * aucun « .. ». Une version gardée n'est jamais activée telle quelle : Themes::install la valide avant de la remettre.
+     */
+    private static function restorable(string $prefix, string $rel): bool
+    {
+        $htaccess = '~^([A-Za-z0-9_-][A-Za-z0-9_.-]*/)*\.htaccess$~';
+        if (Themes::safePath($rel) || preg_match('~^([a-z0-9._-]+/)*\.htaccess$~', $rel)) {
+            return true;
+        }
+        if ($prefix !== 'site' || !preg_match('~^themes/\.(?:versions/[a-z0-9][a-z0-9-]{0,39}|legacy-originals)/([^/]+/.+)$~', $rel, $m)) {
+            return false;
+        }
+        return Themes::safePath($m[1]) || (bool) preg_match($htaccess, $m[1]);
     }
 
     /** Suppression récursive d'un dossier de travail de la restauration (dans cache/ seulement). */

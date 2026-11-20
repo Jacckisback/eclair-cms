@@ -1986,6 +1986,7 @@ return [
     'Choisis d’abord le fichier .zip du thème.' => 'Elige primero el archivo .zip del tema.',
     'Thème « {n} » {v} installé. Essaie-le avec l’aperçu, puis active-le.' => 'Tema «{n}» {v} instalado. Pruébalo con la vista previa y luego actívalo.',
     'Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié.' => 'Copia de seguridad rechazada: entrada inesperada ({f}). No se ha modificado nada.',
+    'Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié. Ce fichier caché n’est pas nécessaire au site : retire-le de l’archive ZIP, puis relance la restauration.' => 'Copia de seguridad rechazada: entrada inesperada ({f}). No se ha modificado nada. Este archivo oculto no es necesario para el sitio: elimínalo del archivo ZIP y vuelve a lanzar la restauración.',
     'Sauvegarde trop volumineuse pour une restauration en ligne : copie les dossiers par FTP.' => 'Copia de seguridad demasiado grande para restaurarla en línea: copia las carpetas por FTP.',
     'Ce fichier n’est pas une sauvegarde d’Éclair (aucune donnée).' => 'Este archivo no es una copia de seguridad de Éclair (sin datos).',
     'Restauration interrompue ({f}) : {n} fichiers remis en place. Vérifie l’espace disque et les droits, puis relance la même restauration pour terminer.' => 'Restauración interrumpida ({f}): {n} archivos recuperados. Comprueba el espacio en disco y los permisos y vuelve a lanzar la misma restauración para terminar.',

@@ -1986,6 +1986,7 @@ return [
     'Choisis d’abord le fichier .zip du thème.' => 'Wähle zuerst die .zip-Datei des Themes.',
     'Thème « {n} » {v} installé. Essaie-le avec l’aperçu, puis active-le.' => 'Theme „{n}“ {v} installiert. Probiere es in der Vorschau aus und aktiviere es dann.',
     'Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié.' => 'Sicherung abgelehnt: unerwarteter Eintrag ({f}). Es wurde nichts geändert.',
+    'Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié. Ce fichier caché n’est pas nécessaire au site : retire-le de l’archive ZIP, puis relance la restauration.' => 'Sicherung abgelehnt: unerwarteter Eintrag ({f}). Es wurde nichts geändert. Diese versteckte Datei wird für die Website nicht benötigt: Entferne sie aus dem ZIP-Archiv und starte die Wiederherstellung erneut.',
     'Sauvegarde trop volumineuse pour une restauration en ligne : copie les dossiers par FTP.' => 'Sicherung zu groß für eine Online-Wiederherstellung: Kopiere die Ordner per FTP.',
     'Ce fichier n’est pas une sauvegarde d’Éclair (aucune donnée).' => 'Diese Datei ist keine Éclair-Sicherung (keine Daten).',
     'Restauration interrompue ({f}) : {n} fichiers remis en place. Vérifie l’espace disque et les droits, puis relance la même restauration pour terminer.' => 'Wiederherstellung unterbrochen ({f}): {n} Dateien zurückgespielt. Prüfe Speicherplatz und Rechte und starte dieselbe Wiederherstellung erneut, um sie abzuschließen.',

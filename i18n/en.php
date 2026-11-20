@@ -1986,6 +1986,7 @@ return [
     'Choisis d’abord le fichier .zip du thème.' => 'First choose the theme\'s .zip file.',
     'Thème « {n} » {v} installé. Essaie-le avec l’aperçu, puis active-le.' => 'Theme “{n}” {v} installed. Try it with the preview, then activate it.',
     'Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié.' => 'Backup refused: unexpected entry ({f}). Nothing was changed.',
+    'Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié. Ce fichier caché n’est pas nécessaire au site : retire-le de l’archive ZIP, puis relance la restauration.' => 'Backup refused: unexpected entry ({f}). Nothing was changed. This hidden file is not needed by the site: remove it from the ZIP archive, then start the restore again.',
     'Sauvegarde trop volumineuse pour une restauration en ligne : copie les dossiers par FTP.' => 'Backup too large for an online restore: copy the folders by FTP.',
     'Ce fichier n’est pas une sauvegarde d’Éclair (aucune donnée).' => 'This file is not an Éclair backup (no data).',
     'Restauration interrompue ({f}) : {n} fichiers remis en place. Vérifie l’espace disque et les droits, puis relance la même restauration pour terminer.' => 'Restore interrupted ({f}): {n} files put back in place. Check the disk space and permissions, then run the same restore again to finish.',

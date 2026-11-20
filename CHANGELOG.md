@@ -2,6 +2,22 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased (2.4.1)
+
+**A backup of a site whose theme was updated can be restored again.** Importing a new version of a site theme keeps the previous one in `site/themes/.versions/<id>/` (so that "Restore the previous theme" works). Backups include that folder, but Security › Restore a backup refused it ("Backup refused: unexpected entry (site/themes/.versions/…). Nothing was changed."): any backup of a site that had updated its theme at least once could not be restored from the administration.
+
+### Fixed
+
+- **Restore accepts the folders Éclair keeps in `site/themes/`**: the kept theme versions (`.versions/<id>/<version>-<date>/…`) and the raw copy of 1.x customisations (`.legacy-originals/<folder>/…`). They are restored with the rest, so "Restore the previous theme" still works after a restore, on the same installation or another one. **Backups already made with 2.4.0 or earlier restore as they are**: the archive format does not change, nothing needs to be removed from them any more.
+- Every other protection stays: below these two folders the path follows the same rules (no other hidden segment, no `..`, a valid theme id, no symbolic link), and a kept version is validated again (`Themes::install`) before it is ever put back in place. Any other hidden entry under `site/` is still refused, now with a message that says what to do: remove it from the ZIP archive, then start the restore again.
+
+Why restore and not exclude at backup time: excluding `.versions/` from backups would have been simpler, but a restored site would have lost its way back to the previous version of its theme, and backups already made would still have been refused. Accepting these folders at restore fixes both.
+
+### For maintainers
+
+- New test `tests/backup-versions.php`: a site whose theme is installed, activated, then updated twice (two kept versions) is backed up from the administration and restored on a fresh installation: restore accepted, same active theme (id, version, fingerprint), kept versions identical. An archive with the entry of the reported case (`site/themes/.versions/weekinfo/1.0.0-…/assets/boot.js`) is restored. Six hostile entries (unknown hidden folder, hidden segment under a kept version, invalid theme id, kept version without a version folder, `..`, `.versions` outside `site/themes`) are refused and change nothing. It fails on 2.4.0.
+- One new interface text (refusal of a hidden entry, with what to do), translated in the six languages.
+
 ## 2.4.0 — 2026-11-14
 
 **Modern navigation for every Éclair site, following [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) (Chrome, Edge, Firefox and MDN teams).** Pages now change with a short cross-fade while the header stays in place, the next page loads before the click, and web fonts no longer shift the text while they load. This is the first intentional change to the public HTML since 1.6.0: the byte-for-byte reference moves to `tests/fixtures/public-2.4.0.json`.

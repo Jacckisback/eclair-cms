@@ -97,7 +97,7 @@ Préférez les réglages déclaratifs quand ils suffisent : un thème sans `temp
 | Erreur dans un gabarit | Automatique | La page est rendue avec le gabarit du noyau, l’erreur est journalisée, le thème est signalé |
 | Secours | `define('ECLAIR_SAFE_THEME', true);` dans `eclair-config.php` | Le site s’affiche avec le thème de base, l’administration n’utilise jamais le thème du site |
 
-Sauvegarde : `site/` (thèmes, actifs publiés, versions gardées) fait partie de chaque sauvegarde ; la restauration sur une autre installation est testée par empreinte (`tests/themes.php`).
+Sauvegarde : `site/` (thèmes, actifs publiés, versions gardées) fait partie de chaque sauvegarde ; la restauration sur une autre installation est testée par empreinte (`tests/themes.php`). Les versions gardées (`site/themes/.versions/`) et la copie des personnalisations 1.x (`site/themes/.legacy-originals/`) sont restaurées aussi, pour que « Rétablir le thème précédent » marche encore après une restauration (`tests/backup-versions.php`) ; tout autre dossier caché de `site/` est refusé. Une version gardée est toujours revalidée avant d’être remise en place.
 
 ## 6. Compatibilité et maintenance
 

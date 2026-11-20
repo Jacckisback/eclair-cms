@@ -1986,6 +1986,7 @@ return [
     'Choisis d’abord le fichier .zip du thème.' => '请先选择主题的 .zip 文件。',
     'Thème « {n} » {v} installé. Essaie-le avec l’aperçu, puis active-le.' => '主题“{n}”{v} 已安装。先用预览试用，然后再启用。',
     'Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié.' => '备份被拒绝：意外的条目（{f}）。未做任何更改。',
+    'Sauvegarde refusée : entrée inattendue ({f}). Rien n’a été modifié. Ce fichier caché n’est pas nécessaire au site : retire-le de l’archive ZIP, puis relance la restauration.' => '备份被拒绝：意外的条目（{f}）。未做任何更改。该隐藏文件不是网站所需的：请将其从 ZIP 压缩包中删除，然后重新开始恢复。',
     'Sauvegarde trop volumineuse pour une restauration en ligne : copie les dossiers par FTP.' => '备份过大，无法在线恢复：请通过 FTP 复制文件夹。',
     'Ce fichier n’est pas une sauvegarde d’Éclair (aucune donnée).' => '此文件不是 Éclair 备份（没有数据）。',
     'Restauration interrompue ({f}) : {n} fichiers remis en place. Vérifie l’espace disque et les droits, puis relance la même restauration pour terminer.' => '恢复中断（{f}）：已还原 {n} 个文件。请检查磁盘空间和权限，然后重新运行同一恢复以完成。',
