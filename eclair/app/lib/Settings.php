@@ -117,6 +117,10 @@ final class Settings
             'daily' => 60,
             'editors' => true,
             'mcp' => false,
+            // Publication automatique par le connecteur MCP (voir Mcp) : désactivée par défaut, articles par 24 heures, images.
+            'mcp_publish' => false,
+            'mcp_daily' => 5,
+            'mcp_images' => false,
             'profile' => ['about' => '', 'audience' => '', 'tone' => '', 'values' => '', 'rules' => '', 'visual' => ''],
         ],
         // Publicité Google AdSense (menu Publicité, voir Ads) : rien n'est chargé tant qu'elle n'est pas activée, avec le message

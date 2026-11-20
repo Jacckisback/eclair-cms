@@ -503,7 +503,7 @@ Une image coûte environ 0,05 $ (FLUX 3 en 1 mégapixel : 0,048 $). Tarifs publi
 
 ## Connecteur MCP (Claude et ChatGPT)
 
-Tu préfères travailler dans **Claude** ou **ChatGPT**, avec l'abonnement que tu as déjà ? Le connecteur MCP (*Model Context Protocol*, le standard ouvert qui relie les IA à des outils) leur ouvre ton site : ils lisent tes contenus, rédigent des brouillons dans ton ton et préparent des modifications. **Aucune clé d'API, aucun coût pour le site** : c'est ton abonnement qui travaille. Comme avec l'assistant intégré, **rien n'est publié ni supprimé** sans toi.
+Tu préfères travailler dans **Claude** ou **ChatGPT**, avec l'abonnement que tu as déjà ? Le connecteur MCP (*Model Context Protocol*, le standard ouvert qui relie les IA à des outils) leur ouvre ton site : ils lisent tes contenus, rédigent des brouillons dans ton ton et préparent des modifications. **Aucune clé d'API, aucun coût pour le site** : c'est ton abonnement qui travaille. Comme avec l'assistant intégré, **rien n'est publié ni supprimé** sans toi (sauf si tu actives toi-même la [publication automatique](#publication-automatique-facultative), désactivée par défaut).
 
 ### Activer le connecteur (3 minutes)
 
@@ -515,6 +515,27 @@ Tu préfères travailler dans **Claude** ou **ChatGPT**, avec l'abonnement que t
 4. Une page de ton site s'ouvre : connecte-toi si besoin (double authentification comprise), vérifie l'application et son adresse de retour (`claude.ai` ou `chatgpt.com`), puis **Autoriser**. Ce bouton est d'abord grisé : il s'active au bout d'un instant, quand tu bouges la souris, touches l'écran ou utilises le clavier (sur écran tactile, un premier appui l'active, le second autorise).
 
 C'est prêt. Demande par exemple : « Regarde mon site et propose-moi 5 idées d'articles », « Écris en brouillon un article sur l'entretien d'un vélo électrique » ou « Relis ma page d'accueil et propose une accroche plus directe ».
+
+### Publication automatique (facultative)
+
+Pour un site d'actualité alimenté par des **tâches planifiées** de Claude ou de ChatGPT, tu peux laisser le connecteur publier seul les articles qu'il rédige. C'est **désactivé par défaut** : sans ce réglage, rien ne change.
+
+1. Dans **Réglages › Assistant IA › Publication automatique**, active **Laisser le connecteur publier les articles qu'il a rédigés** (ton mot de passe est redemandé) et choisis le nombre d'articles par 24 heures (5 par défaut, 50 au plus).
+2. **Reconnecte l'application** (Claude ou ChatGPT) : l'écran d'accord annonce cette fois qu'elle pourra publier, et redemande ton mot de passe. Une connexion faite avant le réglage ne publie jamais.
+3. L'IA dispose alors de l'outil `publish_content`, avec une date facultative pour programmer l'article.
+
+Ce que le site vérifie lui-même à chaque publication, quoi que dise l'IA :
+
+- **un article seulement**, jamais une page ni un produit, et seulement un brouillon **créé par le connecteur avec ton compte administrateur** (jamais le brouillon de quelqu'un d'autre) ;
+- notes **SEO et GEO d'au moins 70**, au moins **300 mots**, un résumé « L'essentiel », une **image à la une**, au moins **un lien vers une source externe**, aucun repère « [À compléter : …] » ;
+- le **quota par 24 heures** ; au-delà, l'article reste en brouillon ;
+- le brouillon n'a pas changé entre le contrôle et la publication.
+
+Chaque publication est notée dans le journal de sécurité (`mcp_published`), et IndexNow est prévenu comme pour une publication à la main. Un contenu déjà en ligne reste modifié par proposition seulement, et rien n'est jamais supprimé. Pour arrêter : décoche le réglage, ou coupe l'accès de l'application.
+
+**Laisser le connecteur créer des images** (même écran) ajoute l'outil `generate_image` : les images sont payées par la clé du site, seulement si un **budget du mois** est fixé, et dans la limite de 30 images par 24 heures.
+
+> Ces contrôles vérifient la forme, pas la vérité des faits. Google sanctionne les pages produites en masse « sans valeur ajoutée pour les utilisateurs », quel que soit l'outil ([règles de Google sur le contenu à grande échelle](https://developers.google.com/search/docs/essentials/spam-policies#scaled-content)) : garde un quota bas, une ligne éditoriale précise dans ton profil éditorial, et relis régulièrement ce qui part en ligne.
 
 **Offres compatibles** (vérifiées le 30 octobre 2026) :
 

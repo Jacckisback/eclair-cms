@@ -235,6 +235,73 @@ try {
     check('lot de plus de 20 messages : refusé', $big['status'] === 400);
     check('JSON illisible : erreur de syntaxe', $v->req('POST', '/_eclair/mcp', '{oops', ['Authorization: Bearer ' . $tok['access_token']])['status'] === 400);
 
+    // Publication automatique : désactivée par défaut, puis activée pour le site et acceptée par une nouvelle connexion.
+    check('publication automatique désactivée : outil absent, appel refusé', !isset($tools['publish_content'])
+        && ($json($rpc('tools/call', ['name' => 'publish_content', 'arguments' => ['id' => $did]]))['error']['code'] ?? 0) === -32602);
+    $mediaFile = $copy . '/data/media.php';
+    $library = is_file($mediaFile) ? (array) json_decode(substr((string) file_get_contents($mediaFile), strlen(Store::GUARD)), true) : [];
+    $library['imgtest1'] = ['id' => 'imgtest1', 'file' => '2026/11/bol-gres', 'ext' => 'jpg', 'w' => 1600, 'h' => 900, 'webp' => [], 'alt' => 'Bol en grès émaillé',
+        'name' => 'bol-gres.jpg', 'created' => time(), 'user' => ''];
+    file_put_contents($mediaFile, Store::GUARD . json_encode($library));
+    $settingsAi(['mcp' => '1', 'mcp_publish' => '1', 'mcp_daily' => '2']);
+    $page = $c->req('GET', '/gestion/settings?tab=ai');
+    check('réglages : publication automatique activée, 2 articles par 24 heures', (bool) preg_match('/name="mcp_publish" value="1" checked/', $page['body'])
+        && str_contains($page['body'], 'name="mcp_daily" min="1" max="50" step="1" value="2"'));
+    check('connexion faite avant le réglage : ne publie pas', !in_array('publish_content', array_column($json($rpc('tools/list'))['result']['tools'] ?? [], 'name'), true)
+        && ($json($rpc('tools/call', ['name' => 'publish_content', 'arguments' => ['id' => $did]]))['error']['code'] ?? 0) === -32602);
+    $consent2 = $c->req('GET', $auth());
+    check('accord : la publication est annoncée, mot de passe demandé', str_contains($consent2['body'], 'Publier sans toi les articles qu’elle rédige : 2 par 24 heures au plus')
+        && str_contains($consent2['body'], 'name="confirm_password"') && !str_contains($consent2['body'], 'Jamais publier, supprimer'));
+    $noPass = $c->req('POST', $auth(), $c->token($consent2['body']) + ['step' => 'allow']);
+    check('accord pour publier sans mot de passe : refusé', $noPass['status'] === 401 && !isset($noPass['headers']['location']));
+    $allow = $c->req('POST', $auth(), $c->token($consent2['body']) + ['step' => 'allow', 'confirm_password' => 'Un-mot-de-passe-solide']);
+    parse_str((string) parse_url($allow['headers']['location'] ?? '', PHP_URL_QUERY), $back);
+    $tok = $json($token(['code' => $back['code'] ?? ''] + $exchange));
+    $tools2 = array_column($json($rpc('tools/list'))['result']['tools'] ?? [], null, 'name');
+    check('nouvelle connexion : outil publish_content, images toujours absentes', isset($tools2['publish_content']) && !isset($tools2['generate_image'])
+        && $tools2['publish_content']['annotations']['readOnlyHint'] === false && str_contains($json($rpc('initialize'))['result']['instructions'] ?? '', 'publish_content'));
+    check('réglages : la connexion qui peut publier est signalée', str_contains($c->req('GET', '/gestion/settings?tab=ai')['body'], 'peut publier'));
+    $weak = $call('publish_content', ['id' => $did]);
+    check('brouillon trop faible : refusé, avec la liste de ce qui manque', $weak['error'] === true && count((array) ($weak['data']['to_fix'] ?? [])) >= 4
+        && $v->req('GET', '/blog/bien-choisir-son-bol-en-gres')['status'] === 404, $weak['text']);
+    check('page : jamais publiée par le connecteur', $call('publish_content', ['id' => $lid])['error'] === true && str_contains($call('publish_content', ['id' => $lid])['text'], 'Only articles'));
+    check('contenu qui ne vient pas du connecteur : refusé', str_contains($call('publish_content', ['id' => $home])['text'], 'Only a draft you created'));
+    $article = static fn (string $title, string $slug): array => ['type' => 'post', 'title' => $title, 'slug' => $slug, 'keyword' => 'bol en grès', 'image' => 'imgtest1',
+        'seo_title' => $title, 'seo_description' => 'Comment choisir un bol en grès : épaisseur, émail, cuisson et entretien. Les repères d’un atelier de céramique pour acheter une pièce qui dure.',
+        'summary' => 'Un bol en grès se choisit à son épaisseur, à son émail et à sa température de cuisson. Cuit au-dessus de 1 200 °C, il ne boit plus l’eau, passe au lave-vaisselle et garde la chaleur d’un plat pendant de longues minutes.',
+        'body' => "Choisir un bol en grès demande de regarder trois choses : la terre, l’émail et la cuisson. Voici les repères que nous donnons à l’atelier.\n\n"
+            . "## Pourquoi choisir un bol en grès ?\n\nLe grès est une argile cuite entre 1 200 et 1 300 °C. À cette température, la terre se vitrifie : elle devient dure et presque étanche, "
+            . "comme l’explique [l’article de Wikipédia sur le grès](https://fr.wikipedia.org/wiki/Gr%C3%A8s_(c%C3%A9ramique)). Un bol en grès résiste donc mieux aux chocs qu’une faïence.\n\n"
+            . "- Il passe au lave-vaisselle sans se ternir.\n- Il supporte le four à micro-ondes.\n- Il garde la chaleur d’une soupe ou d’un thé.\n\n"
+            . "## Comment reconnaître un bon émail ?\n\nUn émail réussi est lisse au toucher, sans bulle ni manque. Passe le doigt à l’intérieur du bol : la surface ne doit pas accrocher. "
+            . "Vérifie aussi le pied, laissé sans émail : il doit être poncé pour ne pas rayer la table. Un émail alimentaire ne contient ni plomb ni cadmium, ce que le potier doit pouvoir confirmer.\n\n"
+            . "## Quelle épaisseur pour un usage quotidien ?\n\nPour un bol de tous les jours, vise une paroi de quatre à six millimètres. Plus fine, elle s’ébrèche vite ; plus épaisse, le bol devient lourd. "
+            . "Soulève la pièce : le poids doit sembler bien réparti entre le fond et le bord. Un bol équilibré se tient d’une seule main sans effort, même rempli.\n\n"
+            . "## Comment entretenir son bol en grès ?\n\nLave-le à l’eau chaude, avec une éponge douce. Évite les chocs thermiques brutaux : ne passe pas un bol du congélateur au four. "
+            . "Si des traces grises de couverts apparaissent, un peu de pierre d’argile les efface. Rangé sans être empilé trop haut, un bol en grès dure des dizaines d’années.\n\n"
+            . "## Combien coûte un bol fait main ?\n\nDans un atelier, compte entre vingt et quarante-cinq euros selon la taille et l’émail. Ce prix couvre le tournage, deux cuissons et le temps de séchage. "
+            . "Consulte aussi [notre page de contact](/contact) pour commander une série assortie.",
+        'faq' => [['question' => 'Un bol en grès passe-t-il au lave-vaisselle ?', 'answer' => 'Oui : cuit au-dessus de 1 200 °C, le grès est vitrifié et son émail ne se ternit pas au lavage.'],
+            ['question' => 'Le grès est-il plus solide que la faïence ?', 'answer' => 'Oui, sa cuisson plus chaude le rend plus dur et moins poreux que la faïence.']]];
+    $good = $call('create_draft', $article('Bien choisir un bol en grès : nos repères', 'choisir-bol-en-gres'));
+    $gid = (string) ($good['data']['id'] ?? '');
+    $pub = $call('publish_content', ['id' => $gid]);
+    check('article complet et sourcé : publié, adresse rendue', $pub['error'] === false && ($pub['data']['status'] ?? '') === 'published'
+        && ($pub['data']['url'] ?? '') === $base . '/blog/choisir-bol-en-gres' && $v->req('GET', '/blog/choisir-bol-en-gres')['status'] === 200, $good['text'] . ' ' . $pub['text']);
+    check('déjà publié : pas une seconde fois', str_contains($call('publish_content', ['id' => $gid])['text'], 'already published'));
+    check('publication notée au journal de sécurité', str_contains(implode('', array_map('file_get_contents', glob($copy . '/data/logs/security*') ?: [])), 'mcp_published'));
+    $later = $call('create_draft', $article('Entretenir un bol en grès au quotidien', 'entretenir-bol-en-gres'));
+    check('date passée ou trop lointaine : refusée', str_contains($call('publish_content', ['id' => (string) ($later['data']['id'] ?? ''), 'date' => '2020-01-01T10:00:00Z'])['text'], 'Invalid date')
+        && str_contains($call('publish_content', ['id' => (string) ($later['data']['id'] ?? ''), 'date' => date('c', time() + 90 * 86400)])['text'], 'Invalid date'));
+    $sched = $call('publish_content', ['id' => (string) ($later['data']['id'] ?? ''), 'date' => date('c', time() + 86400)]);
+    check('date future : article programmé, pas encore en ligne', ($sched['data']['status'] ?? '') === 'scheduled' && $v->req('GET', '/blog/entretenir-bol-en-gres')['status'] === 404, $sched['text']);
+    $third = $call('create_draft', $article('Offrir un bol en grès fait main', 'offrir-bol-en-gres'));
+    $over = $call('publish_content', ['id' => (string) ($third['data']['id'] ?? '')]);
+    check('quota du jour atteint : refusé, le brouillon reste', $over['error'] === true && str_contains($over['text'], 'Daily limit') && $v->req('GET', '/blog/offrir-bol-en-gres')['status'] === 404, $over['text']);
+    $settingsAi(['mcp' => '1']);
+    check('réglage désactivé : la connexion ne publie plus', !in_array('publish_content', array_column($json($rpc('tools/list'))['result']['tools'] ?? [], 'name'), true)
+        && ($json($rpc('tools/call', ['name' => 'publish_content', 'arguments' => ['id' => (string) ($third['data']['id'] ?? '')]]))['error']['code'] ?? 0) === -32602);
+
     // Renouvellement : le nouveau jeton remplace l'ancien.
     $old = $tok;
     $ref = $token(['grant_type' => 'refresh_token', 'refresh_token' => $old['refresh_token'], 'client_id' => $cid]);
