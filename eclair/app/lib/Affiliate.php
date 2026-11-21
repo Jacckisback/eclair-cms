@@ -12,7 +12,8 @@ defined('ECLAIR') || exit;
  * Éclair place la mention publicitaire en tête du contenu (une publicité doit être clairement identifiable comme telle :
  * LCEN, art. 20, en France ; LSSI, art. 20, en Espagne), y ajoute pour un lien Amazon la phrase exigée par le Partenariat
  * Amazon (article 5 du contrat, dans la langue de la boutique) et marque ces liens rel="sponsored nofollow" (Google).
- * Tant qu'aucun lien n'est enregistré, rien ne change ; une page sans lien affilié reste identique à l'octet près.
+ * Un lien Amazon avec identifiant de partenaire (?tag=) ou un lien court amzn.to est affilié par lui-même, même si aucun
+ * lien n'est enregistré ; une page sans lien affilié reste identique à l'octet près.
  *
  * Depuis la 2.0, la gestion des liens et la rédaction par l'IA sont la fonction optionnelle « Affiliation »
  * (app/bundled/affiliate) ; ce marquage reste au noyau : retirer la fonction ne retire jamais une mention légalement
@@ -86,11 +87,9 @@ final class Affiliate
      */
     public static function mark(string $html, array $blocks, string $lang): string
     {
-        $links = self::data()['links'];
-        if (!$links) {
-            return $html;
-        }
-        $known = array_column($links, 'program', 'url');
+        // Pas de sortie anticipée sans lien enregistré : un lien Amazon avec identifiant de partenaire, ou un lien court
+        // amzn.to, reste un lien affilié, même sans la fonction « Affiliation » (voir affiliate()).
+        $known = array_column(self::data()['links'], 'program', 'url');
         $found = [];
         foreach (Blocks::links($blocks) as $url) {
             if (($program = self::affiliate($url, $known)) !== null) {

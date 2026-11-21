@@ -2,6 +2,12 @@
 
 All notable changes to Éclair CMS are recorded here. Release notes for each version, with screenshots and upgrade instructions, are published on [GitHub Releases](https://github.com/Jacckisback/eclair-cms/releases).
 
+## Unreleased
+
+### Fixed
+
+- **Affiliate links marked even when no link is saved**: an Amazon link carrying a partner tag (`?tag=…`) or an amzn.to short link is now marked `rel="sponsored nofollow"` and gets the advertising notice with the Amazon Associates statement of its store, even when the Affiliation extension has no saved link or is not enabled, as its description promised. Before, `Affiliate::mark()` returned the page untouched as long as no link was saved. An Amazon link without a partner tag is still left unchanged.
+
 ## 2.5.0 — 2026-11-20
 
 **News sites can now be fed without you: the MCP connector can publish the articles it writes, if you allow it.** Scheduled tasks in Claude or ChatGPT research, write, illustrate and publish, while the site itself checks each article before it goes online. Off by default: a site that does not turn the option on behaves exactly as in 2.4.0.

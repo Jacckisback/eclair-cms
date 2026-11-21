@@ -31,7 +31,20 @@ try {
         ['type' => 'button', 'text' => 'Fnac', 'url' => 'https://www.fnac.com/a1?awc=123', 'style' => 'primary', 'align' => 'left']];
     $affHtml = '<p>Voir <a href="https://www.amazon.fr/dp/B01?tag=moi-21&amp;th=1" target="_blank" rel="noopener">ici</a>.</p>'
         . '<p class="btns"><a class="btn btn-primary" href="https://www.fnac.com/a1?awc=123">Fnac</a></p>';
-    check('aucun lien enregistré : HTML inchangé, même avec un lien Amazon', Affiliate::mark($affHtml, $affBlocks, 'fr') === $affHtml);
+    // Aucun lien enregistré (fonction « Affiliation » absente ou vide) : un lien Amazon avec identifiant de partenaire est
+    // marqué quand même, mention et phrase de la boutique comprises ; un lien Amazon sans identifiant reste tel quel.
+    Affiliate::forget();
+    $affTagged = '<p><a href="https://www.amazon.es/s?k=test&amp;tag=abc-21">x</a></p>';
+    $affTaggedOut = Affiliate::mark($affTagged, [['type' => 'paragraph', 'text' => '<a href="https://www.amazon.es/s?k=test&amp;tag=abc-21">x</a>']], 'es');
+    check('aucun lien enregistré : lien Amazon avec tag= marqué, mention et phrase Amazon de la boutique',
+        str_starts_with($affTaggedOut, '<aside class="callout callout-info">')
+        && str_contains($affTaggedOut, 'En calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables.')
+        && str_contains($affTaggedOut, 'href="https://www.amazon.es/s?k=test&amp;tag=abc-21" rel="sponsored nofollow">x</a>'), $affTaggedOut);
+    $affShort = Affiliate::mark('<p><a href="https://amzn.to/3abc">y</a></p>', [['type' => 'paragraph', 'text' => '<a href="https://amzn.to/3abc">y</a>']], 'fr');
+    check('aucun lien enregistré : lien court amzn.to marqué', str_contains($affShort, 'rel="sponsored nofollow"') && str_contains($affShort, 'En tant que Partenaire Amazon'), $affShort);
+    $affPlain = '<p><a href="https://www.amazon.es/dp/B01">z</a></p>';
+    check('aucun lien enregistré : lien Amazon sans tag= inchangé', Affiliate::mark($affPlain, [['type' => 'paragraph', 'text' => '<a href="https://www.amazon.es/dp/B01">z</a>']], 'es') === $affPlain);
+    check('aucun lien enregistré : lien non Amazon inchangé', Affiliate::mark('<p>x</p>', [['type' => 'paragraph', 'text' => '<a href="https://www.fnac.com/a1?awc=123">f</a>']], 'fr') === '<p>x</p>');
     check('lien refusé : adresse incomplète ou dangereuse, nom manquant', is_string(Links::put(['name' => 'X', 'url' => 'javascript:alert(1)']))
         && is_string(Links::put(['name' => 'X', 'url' => 'fnac.com/a1'])) && is_string(Links::put(['name' => ' ', 'url' => 'https://www.fnac.com/a1'])));
     $affLink = Links::put(['name' => 'Machine Fnac', 'url' => 'https://www.fnac.com/a1?awc=123', 'notes' => "Pour débuter\n12 programmes"]);
