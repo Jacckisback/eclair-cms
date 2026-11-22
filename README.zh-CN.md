@@ -444,6 +444,8 @@ php tools/build.php                                                         # �
 
 <p align="center"><sub>⚡ Éclair，献给想要一个快速、易被搜索到、省心网站的自由职业者和小企业。</sub></p>
 
+<p align="center"><sub>作者：<a href="https://thierrygustin.com/">Thierry Gustin</a></sub></p>
+
 [^stripe]: 针对欧洲经济区标准卡。Revolut Business：1% + €0.20，欧洲经济区以外的卡为 2.8% + €0.20（[Revolut 帮助中心](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/)，2026 年 10 月 31 日核实）。Stripe 在法国：1.5% + €0.25，高级卡为 2.8% + €0.25，欧洲经济区以外的卡为 3.15% + €0.25（[stripe.com/fr/pricing](https://stripe.com/fr/pricing)，2026 年 10 月 30 日核实）。PayPal 在法国：刷卡 1.2% + €0.35，使用 PayPal 账户 2.9% + €0.35（[PayPal 收费标准](https://www.paypal.com/fr/business/paypal-business-fees)，2026 年 10 月 31 日核实）。Stripe 和 Revolut 的付款链接已包含在内，不另收费。
 
 [^wp]: WordPress 7.1.4 官方安装包：37,239,942 字节，即 35.5 MB（[下载链接](https://downloads.wordpress.org/release/wordpress-7.1.4.zip)，2026 年 10 月 29 日核实）。

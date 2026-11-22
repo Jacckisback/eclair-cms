@@ -444,6 +444,8 @@ Une partie des icônes est dérivée de [Lucide](https://lucide.dev) (licence IS
 
 <p align="center"><sub>⚡ Éclair, pour les indépendants et les petites entreprises qui veulent un site rapide, bien référencé et tranquille.</sub></p>
 
+<p align="center"><sub>Réalisé par <a href="https://thierrygustin.com/">Thierry Gustin</a></sub></p>
+
 [^stripe]: Pour une carte standard de l'Espace économique européen. Revolut Business : 1 % + 0,20 €, 2,8 % + 0,20 € hors EEE ([aide Revolut](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), vérifié le 31 octobre 2026). Stripe en France : 1,5 % + 0,25 €, 2,8 % + 0,25 € pour une carte premium, 3,15 % + 0,25 € hors EEE ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), vérifié le 30 octobre 2026). PayPal en France : 1,2 % + 0,35 € par carte, 2,9 % + 0,35 € avec un compte PayPal ([grille PayPal](https://www.paypal.com/fr/business/paypal-business-fees), vérifié le 31 octobre 2026). Chez Stripe et Revolut, les liens de paiement sont inclus sans frais supplémentaires.
 
 [^wp]: Archive officielle de WordPress 7.1.4 : 37 239 942 octets, soit 35,5 Mo ([lien de téléchargement](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), vérifié le 29 octobre 2026).

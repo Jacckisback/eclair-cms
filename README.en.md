@@ -444,6 +444,8 @@ Some icons are derived from [Lucide](https://lucide.dev) (ISC license) and the a
 
 <p align="center"><sub>⚡ Éclair, for freelancers and small businesses who want a fast, well-ranked, hassle-free website.</sub></p>
 
+<p align="center"><sub>Made by <a href="https://thierrygustin.com/">Thierry Gustin</a></sub></p>
+
 [^stripe]: For a standard card from the European Economic Area (EEA). Revolut Business: 1% + €0.20, 2.8% + €0.20 for a card from outside the EEA ([Revolut help](https://help.revolut.com/en-ES/business/help/merchant-accounts/fees/how-much-does-it-cost-to-accept-card-payments/), checked on October 31, 2026). Stripe in France: 1.5% + €0.25, 2.8% + €0.25 for a premium card, 3.15% + €0.25 for a card from outside the EEA ([stripe.com/fr/pricing](https://stripe.com/fr/pricing), checked on October 30, 2026). PayPal in France: 1.2% + €0.35 by card, 2.9% + €0.35 with a PayPal account ([PayPal fees](https://www.paypal.com/fr/business/paypal-business-fees), checked on October 31, 2026). With Stripe and Revolut, payment links are included at no extra cost.
 
 [^wp]: Official WordPress 7.1.4 archive: 37,239,942 bytes, i.e. 35.5 MB ([download link](https://downloads.wordpress.org/release/wordpress-7.1.4.zip), checked on October 29, 2026).
